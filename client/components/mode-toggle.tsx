@@ -15,12 +15,12 @@ export default function ModeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <div className="w-[45px] h-[45px] outline-none rounded-md flex justify-center items-center hover:bg-icon">
+                <div className="w-[45px] h-[45px] outline-none rounded-md flex justify-center items-center">
                     <span className="material-symbols-outlined rotate-0  scale-100 dark:scale-0 dark:-rotate-90 bg-transparent">light_mode</span>
                     <span className="material-symbols-outlined absolute rotate-90 scale-0 dark:scale-100 dark:rotate-0 bg-transparent">dark_mode</span>
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="mt-[8.5px]" align="end">
+            <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setTheme("light")}>
                     Light
                 </DropdownMenuItem>
