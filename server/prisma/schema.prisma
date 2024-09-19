@@ -9,6 +9,189 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = "mysql://root:verypassword@dekdee2"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  email      String   @unique
+  password   String
+  role       Roles
+  department String?
+  created_at DateTime @default(now())
+
+  preset       Presets[]
+  checklist    Checklists[]        @relation("user")
+  inspector    Checklists[]        @relation("inspector")
+  comment      Comments[]
+  patrol       Users_Has_Patrols[]
+  profile      Profiles[]
+  notification Notifications[]
+  defect       Defects[]
+}
+
+model Defects {
+  id        Int      @id @default(autoincrement())
+  title     String
+  note      String
+  type      String
+  status    String
+  timestamp DateTime @default(now())
+
+  users_id      Int
+  user          Users            @relation(fields: [users_id], references: [id])
+  patrol_result Patrol_Results[]
+  image         Images[]
+}
+
+model Notifications {
+  id        Int      @id @default(autoincrement())
+  message   String
+  status    Boolean
+  timestamp DateTime @default(now())
+
+  users_id Int
+  user     Users @relation(fields: [users_id], references: [id])
+}
+
+model Profiles {
+  id      Int     @id @default(autoincrement())
+  name    String?
+  age     Int?
+  tel     String?
+  address String?
+
+  users_id Int
+  user     Users @relation(fields: [users_id], references: [id])
+}
+
+model Users_Has_Patrols {
+  users_id   Int
+  user       Users   @relation(fields: [users_id], references: [id])
+  patrols_id Int
+  patrol     Patrols @relation(fields: [patrols_id], references: [id])
+
+  @@id([users_id, patrols_id])
+}
+
+model Patrols {
+  id         Int      @id @default(autoincrement())
+  date       DateTime
+  start_time DateTime?
+  end_time   DateTime?
+  duration   String?
+  status     String
+
+  user          Users_Has_Patrols[]
+  presets_id    Int
+  preset        Presets             @relation(fields: [presets_id], references: [id])
+  patrol_result Patrol_Results[]
+}
+
+model Presets {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  version     Int
+  lastest     Boolean
+  updateAt    DateTime
+
+  updateBy  Int
+  user      Users                    @relation(fields: [updateBy], references: [id])
+  checklist Presets_Has_Checklists[]
+  patrol    Patrols[]
+}
+
+model Presets_Has_Checklists {
+  presets_id    Int
+  preset        Presets    @relation(fields: [presets_id], references: [id])
+  checklists_id Int
+  checklist     Checklists @relation(fields: [checklists_id], references: [id])
+
+  @@id([presets_id, checklists_id])
+}
+
+model Checklists {
+  id       Int      @id @default(autoincrement())
+  title    String
+  version  Int
+  lastest  Boolean
+  updateAt DateTime @default(now())
+
+  updateBy    Int
+  user        Users                    @relation("user", fields: [updateBy], references: [id])
+  inspectorId Int
+  inspector   Users                    @relation("inspector", fields: [inspectorId], references: [id])
+  preset      Presets_Has_Checklists[]
+  item        Items[]
+}
+
+model Items {
+  id   Int    @id @default(autoincrement())
+  name String
+  type String
+
+  checklists_id Int
+  checklist     Checklists       @relation(fields: [checklists_id], references: [id])
+  zones_id      Int
+  zone          Zones            @relation(fields: [zones_id], references: [id])
+  patrol_result Patrol_Results[]
+}
+
+model Patrol_Results {
+  id     Int     @id @default(autoincrement())
+  status Boolean
+
+  items_id   Int
+  item       Items      @relation(fields: [items_id], references: [id])
+  comment    Comments[]
+  defects_id Int
+  defect     Defects    @relation(fields: [defects_id], references: [id])
+  patrols_id Int
+  patrol     Patrols    @relation(fields: [patrols_id], references: [id])
+}
+
+model Zones {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  item         Items[]
+  locations_id Int
+  location     Locations @relation(fields: [locations_id], references: [id])
+}
+
+model Locations {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  zone Zones[]
+}
+
+model Comments {
+  id        Int      @id @default(autoincrement())
+  message   String
+  timestamp DateTime @default(now())
+
+  users_id          Int
+  user              Users          @relation(fields: [users_id], references: [id])
+  patrol_results_id Int
+  patrol_result     Patrol_Results @relation(fields: [patrol_results_id], references: [id])
+}
+
+model Images {
+  id        Int      @id @default(autoincrement())
+  path      String
+  timestamp DateTime @default(now())
+
+  defects_id Int
+  defect     Defects @relation(fields: [defects_id], references: [id])
+}
+
+enum Roles {
+  ADMIN
+  INSPECTOR
+  RESPONSIBLEMAN
+  OFFICER
 }
