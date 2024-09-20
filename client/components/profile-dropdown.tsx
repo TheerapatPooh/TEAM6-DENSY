@@ -9,12 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import ModeToggle from "@/components/mode-toggle";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 
 export default function ProfileDropdown() {
   const [isFlipped, setIsFlipped] = useState(false);
-  const buttonRef = useRef(null);
+  
+  // Explicitly typing buttonRef as a RefObject of HTMLButtonElement
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleIconClick = () => {
     setIsFlipped((prev) => !prev);
@@ -22,8 +25,9 @@ export default function ProfileDropdown() {
 
   // Effect to handle clicks outside the button
   useEffect(() => {
-    const handleClickOutside = (event: { target: any }) => {
-      if (buttonRef.current && !buttonRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Ensure buttonRef is defined and has a 'contains' method
+      if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         setIsFlipped(false);
       }
     };
