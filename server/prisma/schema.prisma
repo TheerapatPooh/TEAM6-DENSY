@@ -30,6 +30,7 @@ model Users {
   profile      Profiles[]
   notification Notifications[]
   defect       Defects[]
+  @@map("users")
 }
 
 model Defects {
@@ -44,6 +45,7 @@ model Defects {
   user          Users            @relation(fields: [users_id], references: [id])
   patrol_result Patrol_Results[]
   image         Images[]
+  @@map("defects")
 }
 
 model Notifications {
@@ -54,6 +56,7 @@ model Notifications {
 
   users_id Int
   user     Users @relation(fields: [users_id], references: [id])
+  @@map("notifications")
 }
 
 model Profiles {
@@ -65,6 +68,7 @@ model Profiles {
 
   users_id Int
   user     Users @relation(fields: [users_id], references: [id])
+  @@map("profiles")
 }
 
 model Users_Has_Patrols {
@@ -74,6 +78,7 @@ model Users_Has_Patrols {
   patrol     Patrols @relation(fields: [patrols_id], references: [id])
 
   @@id([users_id, patrols_id])
+  @@map("users_has_patrols")
 }
 
 model Patrols {
@@ -88,6 +93,7 @@ model Patrols {
   presets_id    Int
   preset        Presets             @relation(fields: [presets_id], references: [id])
   patrol_result Patrol_Results[]
+  @@map("patrols")
 }
 
 model Presets {
@@ -102,6 +108,7 @@ model Presets {
   user      Users                    @relation(fields: [updateBy], references: [id])
   checklist Presets_Has_Checklists[]
   patrol    Patrols[]
+  @@map("presets")
 }
 
 model Presets_Has_Checklists {
@@ -111,6 +118,7 @@ model Presets_Has_Checklists {
   checklist     Checklists @relation(fields: [checklists_id], references: [id])
 
   @@id([presets_id, checklists_id])
+  @@map("presets_has_checklists")
 }
 
 model Checklists {
@@ -126,6 +134,7 @@ model Checklists {
   inspector   Users                    @relation("inspector", fields: [inspectorId], references: [id])
   preset      Presets_Has_Checklists[]
   item        Items[]
+  @@map("checklists")
 }
 
 model Items {
@@ -138,6 +147,7 @@ model Items {
   zones_id      Int
   zone          Zones            @relation(fields: [zones_id], references: [id])
   patrol_result Patrol_Results[]
+  @@map("items")
 }
 
 model Patrol_Results {
@@ -151,6 +161,7 @@ model Patrol_Results {
   defect     Defects    @relation(fields: [defects_id], references: [id])
   patrols_id Int
   patrol     Patrols    @relation(fields: [patrols_id], references: [id])
+  @@map("patrol_results")
 }
 
 model Zones {
@@ -160,6 +171,7 @@ model Zones {
   item         Items[]
   locations_id Int
   location     Locations @relation(fields: [locations_id], references: [id])
+  @@map("zones")
 }
 
 model Locations {
@@ -167,6 +179,7 @@ model Locations {
   name String
 
   zone Zones[]
+  @@map("locations")
 }
 
 model Comments {
@@ -178,6 +191,7 @@ model Comments {
   user              Users          @relation(fields: [users_id], references: [id])
   patrol_results_id Int
   patrol_result     Patrol_Results @relation(fields: [patrol_results_id], references: [id])
+  @@map("comments")
 }
 
 model Images {
@@ -187,6 +201,7 @@ model Images {
 
   defects_id Int
   defect     Defects @relation(fields: [defects_id], references: [id])
+  @@map("images")
 }
 
 enum Roles {
