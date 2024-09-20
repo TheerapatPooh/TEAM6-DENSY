@@ -1,6 +1,5 @@
 'use client'
-import { useTheme } from 'next-themes'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState }  from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,18 +8,26 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 
 
-export default function ModeToggle() {
+export default function LanguageSelect() {
     const t = useTranslations('PatrolPage');
-    const { setTheme, theme, resolvedTheme } = useTheme()
+
+    const router = useRouter()
     const [mounted, setMounted] = useState(false)
-    
+
     useEffect(() => {
         setMounted(true)
     }, [])
 
-    if (!mounted) {
+    const changeLanguage = (locale: string) => {
+        if(mounted) {
+            router.replace(`/${locale}`);
+        }
+    }
+
+    if(!mounted) {
         return null
     }
 
@@ -28,19 +35,15 @@ export default function ModeToggle() {
         <DropdownMenu>
             <DropdownMenuTrigger>
                 <Button variant='ghost' className="w-[45px] h-[45px]">
-                    <span className="material-symbols-outlined rotate-0  scale-100 dark:scale-0 dark:-rotate-90">light_mode</span>
-                    <span className="material-symbols-outlined absolute rotate-90 scale-0 dark:scale-100 dark:rotate-0">dark_mode</span>
+                    <span className="material-symbols-outlined">language</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className='p-0'>
-                <DropdownMenuItem onClick={() => setTheme("light")}>
-                    {t('Light')}
+                <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                    {t('English')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    {t('Dark')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                    {t('System')}
+                <DropdownMenuItem onClick={() => changeLanguage('th')}>
+                    {t('Thai')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
