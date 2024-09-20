@@ -1,0 +1,10 @@
+{
+    "PatrolPage": {
+      "greeting": "สวัสดีชาวโลก!",
+      "English": "อังกฤษ",
+      "Thai": "ไทย",
+      "Light": "สว่าง",
+      "Dark": "มืด",
+      "System": "ระบบ"
+    }
+  }
