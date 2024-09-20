@@ -3,6 +3,14 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+interface props {
+  patrolStatus: patrolStatus,
+  patrolDate: Date,
+  patrolTitle: string,
+  patrolPreset : string,
+  patrolorName : string
+}
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -86,32 +94,52 @@ const CardAdd = React.forwardRef<
     {...props}
   />
 ))
-export function CardShowExample() {
+export function CardShowExample( { patrolStatus ,patrolDate , patrolTitle, patrolPreset, patrolorName }: props ) {
+  const formattedDate = patrolDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
   return (
     <div className="flex">
       <Card>
         <CardHeader>
           <div className="flex justify-between flex items-center justify-center">
-            <CardDescription>24/07/2024</CardDescription>
-            <div className="flex items-center justify-center border border-1 rounded-full bg-amber-200 w-10 h-10">
-              <span className="material-symbols-outlined text-amber-600">event_available</span>
-            </div>
+            <CardDescription>{ formattedDate }</CardDescription>
+            {patrolStatus === "Scheduled" ? (
+              <div className="flex items-center justify-center border border-1 rounded-full bg-amber-200 w-10 h-10">
+                <span className="material-symbols-outlined text-amber-600">event_available</span>
+              </div>
+            ) : patrolStatus === "On Going" ? (
+              <div className="flex items-center justify-center border border-1 rounded-full bg-green-200 w-10 h-10">
+                <span className="material-symbols-outlined text-green-600">check_circle</span>
+              </div>
+            ) : patrolStatus === "Completed" ? (
+              <div className="flex items-center justify-center border border-1 rounded-full bg-blue-200 w-10 h-10">
+                <span className="material-symbols-outlined text-blue-600">check_circle</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center border border-1 rounded-full bg-red-200 w-10 h-10">
+                <span className="material-symbols-outlined text-red-600">error</span>
+              </div>
+            )}
           </div>
-          <CardTitle>General Inspection</CardTitle>
+          <CardTitle>{ patrolTitle }</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2.5 text-gray-500 items-center">
             <span className="material-symbols-outlined">description</span>
-            <p>P08001</p>
+            <p>{ patrolPreset }</p>
           </div>
           <div className="flex gap-2.5 text-gray-500 items-center">
             <span className="material-symbols-outlined">description</span>
-            <p>John Doe</p>
+            <p>{ patrolorName }</p>
             <span className="material-symbols-outlined">account_circle</span>
           </div>
         </CardContent>
         <CardFooter>
-          <div className="flex gap-2.5 items-center">
+          <div className="flex gap-2.5 items-center w-full">
             <div className="flex gap-2.5 text-sky-500">
               <span className="material-symbols-outlined">checklist</span>
               <p>0</p>
@@ -124,6 +152,7 @@ export function CardShowExample() {
               <span className="material-symbols-outlined">checklist</span>
               <p>0</p>
             </div>
+            <button className="ml-auto items-center"><span className="material-symbols-outlined items-center">more_vert</span></button>
           </div>
         </CardFooter>
       </Card>
