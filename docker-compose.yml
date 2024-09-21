@@ -34,7 +34,7 @@ services:
     image: mysql:8.0
     container_name: db
     environment:
-      MYSQL_DATABASE: densy_proto
+      MYSQL_DATABASE: densy_data
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: verysecret
