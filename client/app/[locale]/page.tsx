@@ -4,7 +4,6 @@ import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card';
 import {useTranslations} from 'next-intl';
 import ProfileDropdown from '../../components/profile-dropdown';
  
-
 enum patrolStatus {
   scheduled = "Scheduled",
   onGoing = "On Going",
