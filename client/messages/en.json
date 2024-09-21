@@ -5,6 +5,8 @@
       "Thai": "Thai",
       "Light": "Light",
       "Dark": "Dark",
-      "System": "System"
+      "System": "System",
+      "PatrolDetails" : "Details",
+      "PatrolDelete" : "Delete"
     }
   }

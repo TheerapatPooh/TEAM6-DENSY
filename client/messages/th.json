@@ -5,6 +5,8 @@
       "Thai": "ไทย",
       "Light": "สว่าง",
       "Dark": "มืด",
-      "System": "ระบบ"
+      "System": "ระบบ",
+      "PatrolDetails" : "รายละเอียด",
+      "PatrolDelete" : "ลบ"
     }
   }
