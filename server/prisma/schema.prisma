@@ -38,7 +38,7 @@ model Defects {
   title     String
   note      String
   type      String
-  status    String
+  status    Defects_Status
   timestamp DateTime @default(now())
 
   users_id      Int
@@ -87,7 +87,7 @@ model Patrols {
   start_time DateTime?
   end_time   DateTime?
   duration   String?
-  status     String
+  status     Patrols_Status
 
   user          Users_Has_Patrols[]
   presets_id    Int
@@ -209,4 +209,19 @@ enum Roles {
   INSPECTOR
   RESPONSIBLEMAN
   OFFICER
+}
+
+enum Patrols_Status {
+  Pending
+  Scheduled
+  OnGoing
+  Completed
+}
+
+enum Defects_Status {
+  Reported 
+  InProgress
+  PendingInspection
+  Resolved
+  Completed
 }
