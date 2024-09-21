@@ -8,5 +8,9 @@
       "System": "ระบบ",
       "PatrolDetails" : "รายละเอียด",
       "PatrolDelete" : "ลบ"
+      "System": "ระบบ",
+      "Profile": "โปรไฟล์",
+      "Logout": "ออกจากระบบ",
+      "My Account":"บัญชีของฉัน"
     }
   }

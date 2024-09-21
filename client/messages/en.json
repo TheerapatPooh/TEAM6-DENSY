@@ -8,5 +8,9 @@
       "System": "System",
       "PatrolDetails" : "Details",
       "PatrolDelete" : "Delete"
+      "System": "System",
+      "Profile": "Profile",
+      "Logout": "Logout",
+      "My Account":"MyAccount"
     }
   }
