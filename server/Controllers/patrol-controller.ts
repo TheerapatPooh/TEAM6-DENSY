@@ -1,6 +1,7 @@
 import  { prisma } from '../Utils/database'
 import  { Request, Response } from 'express'
 
+
 export async function getPatrol(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id, 10); 
@@ -77,6 +78,28 @@ export async function getAllPatrols(req: Request, res: Response) {
         } else {
             res.status(404).send('All Patrol not found')
         }
+    } catch (err) {
+        res.status(500).send(err)
+    }
+}
+
+export async function createPatrols(req: Request, res: Response) {
+    try {
+         const { date, presets_id } = req.body;
+
+         if (!date || !presets_id) {
+             return res.status(400).json({ error: 'Missing required fields' });
+         }
+
+         const newPatrol = await prisma.patrols.create({
+             data: {
+                 date: new Date(date), 
+                 status: "Pending",
+                 presets_id: parseInt(presets_id, 10),
+             }
+         });
+         res.status(201).json(newPatrol);
+       
     } catch (err) {
         res.status(500).send(err)
     }
