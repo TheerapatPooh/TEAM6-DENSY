@@ -3,6 +3,7 @@ import ModeToggle from '@/components/mode-toggle';
 import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card';
 import {useTranslations} from 'next-intl';
 import ProfileDropdown from '../../components/profile-dropdown';
+import Header from '../../components/header';
  
 enum patrolStatus {
   scheduled = "Scheduled",
@@ -14,6 +15,7 @@ export default function HomePage() {
   const t = useTranslations('PatrolPage');
   return (
     <div>
+      <Header/>
       <ModeToggle />
       <LanguageSelect />
       <ProfileDropdown/>
