@@ -1,9 +1,9 @@
-import LanguageSelect from '@/components/language-select';
-import ModeToggle from '@/components/mode-toggle';
-import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card';
-import {useTranslations} from 'next-intl';
-import ProfileDropdown from '../../components/profile-dropdown';
-import Header from '../../components/header';
+import LanguageSelect from '@/components/language-select'
+import ModeToggle from '@/components/mode-toggle'
+import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card'
+import {useTranslations} from 'next-intl'
+import ProfileDropdown from '../../components/profile-dropdown'
+import Header from '../../components/header'
  
 enum patrolStatus {
   scheduled = "Scheduled",
@@ -12,13 +12,10 @@ enum patrolStatus {
 }
 
 export default function HomePage() {
-  const t = useTranslations('PatrolPage');
+  const t = useTranslations('PatrolPage')
   return (
     <div>
       <Header/>
-      <ModeToggle />
-      <LanguageSelect />
-      <ProfileDropdown/>
       <h1>{t('greeting')}</h1>
       <div className="flex p-2 gap-4">
       <CreatePatrolCard />
