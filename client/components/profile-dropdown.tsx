@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import ModeToggle from "@/components/mode-toggle";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { useTranslations } from 'next-intl'
@@ -17,7 +16,12 @@ import { useTranslations } from 'next-intl'
 export default function ProfileDropdown() {
   const t = useTranslations('PatrolPage');
   const [isFlipped, setIsFlipped] = useState(false);
-  
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Explicitly typing buttonRef as a RefObject of HTMLButtonElement
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -42,7 +46,10 @@ export default function ProfileDropdown() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  
+  if (!mounted) {
+    return null
+  }
   return (
     <div>
       <DropdownMenu>
@@ -50,34 +57,32 @@ export default function ProfileDropdown() {
           <Button
             ref={buttonRef}
             variant="ghost"
-            className="text-input w-[226px] h-[65px] bg-card flex gap-[10px] justify-start items-center py-[10px] px-[20px]"
+            className="text-input w-[226px] h-[50px] bg-card flex gap-[10px] justify-start items-center py-[10px] px-[20px]"
             onPointerDown={handleIconClick}
           >
             <Avatar>
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="w-[97px] h-[27px]">John Doe</div>
+            <div className="w-[97px] h-[27px] font-medium">John Doe</div>
 
             <span
-              className={`material-symbols-outlined inline-block transition-transform duration-300 ${
-                isFlipped ? "rotate-180" : "rotate-0"
-              }`}
+              className={`material-symbols-outlined inline-block transition-transform duration-300 ${isFlipped ? "rotate-180" : "rotate-0"
+                }`}
             >
               stat_minus_1
             </span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-card p-0">
-          <DropdownMenuLabel className=" w-[226px] text-lg font-semibold">
+          <DropdownMenuLabel className=" w-[226px] text-lg font-medium">
             {t('My Account')}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-secondary h-[2px]"/>
+          <DropdownMenuSeparator className="bg-secondary h-[2px]" />
           <DropdownMenuItem className="p-0">
             <Link className="flex p-2 gap-1" href="/profile" replace>
               <span className="material-symbols-outlined">account_circle</span>
               <div>{t('Profile')}</div>
-              
 
             </Link>
           </DropdownMenuItem>
@@ -89,7 +94,7 @@ export default function ProfileDropdown() {
             >
               <span className="material-symbols-outlined">logout</span>
               <div>{t('Logout')}</div>
-              
+
 
             </Link>
           </DropdownMenuItem>

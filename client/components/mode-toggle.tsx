@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 
 export default function ModeToggle() {
     const t = useTranslations('PatrolPage');
-    const { setTheme, theme, resolvedTheme } = useTheme()
+    const { setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     
     useEffect(() => {
