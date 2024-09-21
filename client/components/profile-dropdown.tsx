@@ -57,7 +57,7 @@ export default function ProfileDropdown() {
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="w-[97px] h-[27px]">John Doe</div>
+            <div className="w-[97px] h-[27px] font-medium">John Doe</div>
 
             <span
               className={`material-symbols-outlined inline-block transition-transform duration-300 ${
@@ -69,7 +69,7 @@ export default function ProfileDropdown() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-card p-0">
-          <DropdownMenuLabel className=" w-[226px] text-lg font-semibold">
+          <DropdownMenuLabel className=" w-[226px] text-lg font-medium">
             {t('My Account')}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-secondary h-[2px]"/>

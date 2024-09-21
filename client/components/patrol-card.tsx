@@ -25,7 +25,7 @@ export function PatrolCard( { patrolStatus ,patrolDate , patrolTitle, patrolPres
     const t = useTranslations('PatrolPage');
 
     return (
-        <Card className="shadow-md border-none w-full h-[225px]">
+        <Card className="shadow-md border-none w-full h-[225px] hover:bg-secondary cursor-pointer">
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between flex items-center justify-center">
                 <CardDescription className="text-[20px] font-semibold">{ formattedDate }</CardDescription>
@@ -87,7 +87,7 @@ export function PatrolCard( { patrolStatus ,patrolDate , patrolTitle, patrolPres
                             <DropdownMenuItem>
                                 {t('PatrolDetails')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-500">
                                 {t('PatrolDelete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -101,7 +101,7 @@ export function PatrolCard( { patrolStatus ,patrolDate , patrolTitle, patrolPres
   
   export function CreatePatrolCard() {
     return ( 
-        <Card className="bg-accent-gradient flex justify-center items-center w-full h-[225px]">
+        <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer">
             <span className="material-symbols-outlined text-card text-9xl">note_add</span>
         </Card>
     );
