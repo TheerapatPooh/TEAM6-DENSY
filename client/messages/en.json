@@ -1,0 +1,15 @@
+{
+    "PatrolPage": {
+      "greeting": "Hello world!",
+      "English": "English",
+      "Thai": "Thai",
+      "Light": "Light",
+      "Dark": "Dark",
+      "System": "System",
+      "PatrolDetails" : "Details",
+      "PatrolDelete" : "Delete",
+      "Profile": "Profile",
+      "Logout": "Logout",
+      "My Account":"MyAccount"
+    }
+  }
