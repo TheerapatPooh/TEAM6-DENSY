@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import ModeToggle from "@/components/mode-toggle";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { useTranslations } from 'next-intl'
 
 export default function ProfileDropdown() {
+  const t = useTranslations('PatrolPage');
   const [isFlipped, setIsFlipped] = useState(false);
   
   // Explicitly typing buttonRef as a RefObject of HTMLButtonElement
@@ -67,14 +69,16 @@ export default function ProfileDropdown() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-card p-0">
-          <DropdownMenuLabel className=" w-[226px] text-xl">
-            My Account
+          <DropdownMenuLabel className=" w-[226px] text-lg font-semibold">
+            {t('My Account')}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-secondary h-[2px]"/>
           <DropdownMenuItem className="p-0">
             <Link className="flex p-2 gap-1" href="/profile" replace>
               <span className="material-symbols-outlined">account_circle</span>
-              <div>Profile</div>
+              <div>{t('Profile')}</div>
+              
+
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="p-0">
@@ -84,7 +88,9 @@ export default function ProfileDropdown() {
               replace
             >
               <span className="material-symbols-outlined">logout</span>
-              <div>Logout</div>
+              <div>{t('Logout')}</div>
+              
+
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>

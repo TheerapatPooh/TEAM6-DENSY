@@ -5,6 +5,9 @@
       "Thai": "Thai",
       "Light": "Light",
       "Dark": "Dark",
-      "System": "System"
+      "System": "System",
+      "Profile": "Profile",
+      "Logout": "Logout",
+      "My Account":"MyAccount"
     }
   }
