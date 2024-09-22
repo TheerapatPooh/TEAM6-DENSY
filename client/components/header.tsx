@@ -12,7 +12,7 @@ export default function Header() {
   const { theme } = useTheme()
 
   return (
-    <header className="bg-white-100 h-[70px] flex justify-between items-center p-4 custom-shadow">
+    <header className="bg-card h-[70px] flex justify-between items-center p-4 custom-shadow">
       <div className="flex items-center">
         <Image
           className="flex items-center"

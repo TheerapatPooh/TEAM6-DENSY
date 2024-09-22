@@ -1,4 +1,5 @@
 import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card'
+import Textfield from '@/components/textfield';
 import {useTranslations} from 'next-intl'
 
  
@@ -11,9 +12,10 @@ enum patrolStatus {
 export default function HomePage() {
   const t = useTranslations('PatrolPage')
   return (
-    <div>
+    <div className='flex flex-col p-5 gap-y-5'>
       <h1>{t('greeting')}</h1>
-      <div className="flex p-2 gap-4">
+      <Textfield iconName='search' showIcon={true} placeholder='Search...'/>
+      <div className="flex gap-4">
       <CreatePatrolCard />
       <PatrolCard 
         patrolStatus= { patrolStatus.scheduled }

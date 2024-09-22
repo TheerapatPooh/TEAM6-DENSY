@@ -1,4 +1,5 @@
 import React from 'react';
+import { Input } from './ui/input';
 
 interface TextfieldProps {
   placeholder?: string;  
@@ -8,17 +9,19 @@ interface TextfieldProps {
 
 export default function Textfield({ placeholder, iconName, showIcon = false }: TextfieldProps) {
   return (
-    <div className="flex items-center bg-secondary p-2 rounded-md" >
-      {showIcon && iconName && (
-        <span className="material-symbols-outlined mr-2 text-input">
+    <div className="relative flex items-center" >
+      <Input 
+        type="text"
+        placeholder={placeholder}
+        className="ps-10 outline-none border-none bg-card flex-1 text-card-foreground text-base placeholder-gray-400"/>
+          {showIcon && iconName && (
+          <span
+            className={`material-symbols-outlined absolute left-2 text-input transition-opacity duration-300 ${showIcon ? 'opacity-100' : 'opacity-0'}`}
+            style={{ visibility: showIcon ? 'visible' : 'hidden' }}
+          >
           {iconName}
         </span>
       )}
-      <input 
-        type="text"
-        placeholder={placeholder}
-        className="bg-transparent outline-none flex-1 text-gray-700 placeholder-gray-400"
-      />
     </div>
   );
 }
