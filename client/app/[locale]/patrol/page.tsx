@@ -1,4 +1,6 @@
+import BadgeCustom from '@/components/badge-custom';
 import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card'
+import Textfield from '@/components/textfield';
 import {useTranslations} from 'next-intl'
 
  
@@ -11,9 +13,10 @@ enum patrolStatus {
 export default function HomePage() {
   const t = useTranslations('PatrolPage')
   return (
-    <div>
+    <div className='flex flex-col p-5 gap-y-5'>
       <h1>{t('greeting')}</h1>
-      <div className="flex p-2 gap-4">
+      <Textfield iconName='search' showIcon={true} placeholder='Search...'/>
+      <div className="flex gap-4">
       <CreatePatrolCard />
       <PatrolCard 
         patrolStatus= { patrolStatus.scheduled }
@@ -46,6 +49,86 @@ export default function HomePage() {
         patrolAllDefects={ 3 }
       />
       </div>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="mint" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="blue" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+  
+        variant="yellow" 
+      >
+        In Progress
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="red" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="orange" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="purple" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="cyan" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="green" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="secondary" 
+      >
+        Hello
+      </BadgeCustom>
     </div>
   );
 }

@@ -41,19 +41,19 @@ export function PatrolCard({ patrolStatus, patrolDate, patrolTitle, patrolPreset
                 <div className="flex justify-between flex items-center justify-center">
                     <CardDescription className="text-[20px] font-semibold">{formattedDate}</CardDescription>
                     {patrolStatus === "Scheduled" ? (
-                        <div className="flex items-center justify-center rounded-full bg-yellow-100 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-yellow-500">event_available</span>
                         </div>
                     ) : patrolStatus === "On Going" ? (
-                        <div className="flex items-center justify-center rounded-full bg-blue-100 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
                         </div>
                     ) : patrolStatus === "Completed" ? (
-                        <div className="flex items-center justify-center rounded-full bg-green-100 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-green-500">check_circle</span>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center rounded-full bg-red-100 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-red-500">error</span>
                         </div>
                     )}
@@ -96,10 +96,10 @@ export function PatrolCard({ patrolStatus, patrolDate, patrolTitle, patrolPreset
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className='p-0'>
                                 <DropdownMenuItem>
-                                    {t('PatrolDetails')}
+                                    <h1>{t('PatrolDetails')}</h1>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-500">
-                                    {t('PatrolDelete')}
+                                <DropdownMenuItem>
+                                    <h1 className="text-destructive hover:text-destructive">{t('PatrolDelete')}</h1>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
