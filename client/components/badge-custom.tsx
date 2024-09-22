@@ -1,4 +1,3 @@
-import React from 'react'
 import { Badge } from './ui/badge'
 import { cn } from "@/lib/utils"
 
@@ -33,7 +32,7 @@ export default function BadgeCustom({
     children
 }: BadgeCustomProps) {
     const badgeClass = badgeVariants[variant] || badgeVariants.default;
-
+   
     return (
         <Badge className={cn(`${badgeClass} cursor-pointer flex align-center justify-between gap-2 h-[30px] p-2`,
             showTime ? "w-[180px]"  : "w-[150px]"
