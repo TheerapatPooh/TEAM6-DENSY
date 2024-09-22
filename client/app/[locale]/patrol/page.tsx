@@ -1,3 +1,4 @@
+import BadgeCustom from '@/components/badge-custom';
 import { CreatePatrolCard, PatrolCard } from '@/components/patrol-card'
 import Textfield from '@/components/textfield';
 import {useTranslations} from 'next-intl'
@@ -48,6 +49,86 @@ export default function HomePage() {
         patrolAllDefects={ 3 }
       />
       </div>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="mint" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="blue" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+  
+        variant="yellow" 
+      >
+        In Progress
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="red" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="orange" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="purple" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="cyan" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="green" 
+      >
+        Hello
+      </BadgeCustom>
+      <BadgeCustom 
+        iconName="check_circle" 
+        showIcon={true}   
+        showTime={true}   
+        timeStamp="22:38"
+        variant="secondary" 
+      >
+        Hello
+      </BadgeCustom>
     </div>
   );
 }

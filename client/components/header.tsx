@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import light_logo from "../app/img/system logo light.png"
 import dark_logo from "../app/img/system logo dark.png"
 import Image from 'next/image'
@@ -9,7 +9,15 @@ import ModeToggle from '@/components/mode-toggle'
 import { useTheme } from 'next-themes'
 
 export default function Header() {
+  const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  },[])
+  if (!mounted) {
+    return null
+  }
 
   return (
     <header className="bg-card h-[70px] flex justify-between items-center p-4 custom-shadow">
