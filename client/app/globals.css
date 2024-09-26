@@ -4,7 +4,7 @@
 
 
 body {
-  color: var(--foreground);
+  color: var(--card-foreground);
   background: var(--background);
 }
 
@@ -92,4 +92,8 @@ body {
 
 .custom-shadow {
   box-shadow: 4px 4px 7px 0px var(--shadow-color);
+}
+
+.rounded-md {
+  border-radius: 10px;
 }
