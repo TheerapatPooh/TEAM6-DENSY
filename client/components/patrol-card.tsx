@@ -3,22 +3,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "./ui/button"
 import { useTranslations } from "next-intl"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { Avatar, AvatarImage } from "./ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { useEffect, useState } from "react"
 
 interface props {
-    patrolStatus: patrolStatus,
-    patrolDate: Date,
-    patrolTitle: string,
-    patrolPreset: string,
-    patrolorName: string,
-    patrolAllItems: number,
-    patrolAllComments: number,
-    patrolAllDefects: number
+    patrolSheetStatus: patrolSheetStatus,
+    patrolSheetDate: Date,
+    patrolSheetTitle: string,
+    presetNumber: string,
+    inspectorNames: string[],
+    detectedItems: number,
+    detectedComments: number,
+    detectedDefects: number
 }
 
-export function PatrolCard({ patrolStatus, patrolDate, patrolTitle, patrolPreset, patrolorName, patrolAllItems, patrolAllComments, patrolAllDefects }: props) {
-    const formattedDate = patrolDate.toLocaleDateString("en-GB", {
+export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitle, presetNumber, inspectorNames, detectedItems, detectedComments, detectedDefects }: props) {
+    const formattedDate = patrolSheetDate.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -40,15 +40,20 @@ export function PatrolCard({ patrolStatus, patrolDate, patrolTitle, patrolPreset
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between flex items-center justify-center">
                     <CardDescription className="text-[20px] font-semibold">{formattedDate}</CardDescription>
-                    {patrolStatus === "Scheduled" ? (
-                        <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 shadow-md">
-                            <span className="material-symbols-outlined text-yellow-500">event_available</span>
-                        </div>
-                    ) : patrolStatus === "On Going" ? (
+                    {patrolSheetStatus === "Pending" ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
                         </div>
-                    ) : patrolStatus === "Completed" ? (
+                    ) : patrolSheetStatus === "Scheduled" ? (
+                        <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 shadow-md">
+                            <span className="material-symbols-outlined text-yellow-500">event_available</span>
+                        </div>
+                    )
+                     : patrolSheetStatus === "On Going" ? (
+                        <div className="flex items-center justify-center rounded-full bg-orange-300/40 w-10 h-10 shadow-md">
+                            <span className="material-symbols-outlined text-orange-500">autorenew</span>
+                        </div>
+                    ) : patrolSheetStatus === "Completed" ? (
                         <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-green-500">check_circle</span>
                         </div>
@@ -58,34 +63,58 @@ export function PatrolCard({ patrolStatus, patrolDate, patrolTitle, patrolPreset
                         </div>
                     )}
                 </div>
-                <CardTitle className="card-foreground text-[24px]">{patrolTitle}</CardTitle>
+                <CardTitle className="card-foreground text-[24px]">{patrolSheetTitle}</CardTitle>
             </CardHeader>
             <CardContent className="gap-0 px-[10px] py-0">
                 <div className="flex gap-2.5 text-muted-foreground items-center">
                     <span className="material-symbols-outlined">description</span>
-                    <p className="text-[20px]">{patrolPreset}</p>
+                    <p className="text-[20px]">{presetNumber}</p>
                 </div>
-                <div className="flex gap-2.5 text-muted-foreground items-center">
-                    <span className="material-symbols-outlined">badge</span>
-                    <p className="text-[20px]">{patrolorName}</p>
-                    <Avatar>
-                        <AvatarImage src="https://github.com/shadcn.png"></AvatarImage>
-                    </Avatar>
+                <div className="flex text-muted-foreground items-center">
+                    <span className="material-symbols-outlined me-2.5">engineering</span>
+                    {inspectorNames.length > 0 && (
+                        <div className="flex items-center me-2.5">
+                            <p className="text-[20px] me-2.5">
+                                {inspectorNames[0].length > 12 
+                                    ? `${inspectorNames[0].slice(0, 9)}...` 
+                                    : inspectorNames[0]}
+                            </p>
+                        </div>
+                    )}
+                    {inspectorNames.slice(0, 4).map((inspectorName) => (
+                        <Avatar className="custom-shadow ms-[-10px]">
+                            <AvatarImage src=""/>
+                            <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
+                        </Avatar>
+                    ))}
+                    {inspectorNames.length === 5 && (
+                        <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
+                            <AvatarImage src="https://github.com/shadcn.png"/> 
+                            <AvatarFallback>{inspectorNames[4].slice(0, 2)}.</AvatarFallback> 
+                        </Avatar>
+                    )}
+                    {inspectorNames.length > 5 && (
+                        <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
+                            <AvatarImage src=""/> 
+                            <span className="absolute text-card-foreground text-[16px]">+{inspectorNames.length - 5}</span>
+                            <AvatarFallback></AvatarFallback>
+                        </Avatar>
+                    )}
                 </div>
             </CardContent>
             <CardFooter className="gap-0 px-[10px]">
                 <div className="flex gap-2.5 items-center w-full">
                     <div className="flex gap-2.5 text-blue-500 items-center">
                         <span className="material-symbols-outlined">checklist</span>
-                        <p className="text-[20px]">{patrolAllItems}</p>
+                        <p className="text-[20px]">{detectedItems}</p>
                     </div>
                     <div className="flex gap-2.5 text-yellow-500 items-center">
-                        <span className="material-symbols-outlined">checklist</span>
-                        <p className="text-[20px]">{patrolAllComments}</p>
+                        <span className="material-symbols-outlined">close</span>
+                        <p className="text-[20px]">{detectedComments}</p>
                     </div>
                     <div className="flex gap-2.5 text-red-500 items-center">
-                        <span className="material-symbols-outlined">checklist</span>
-                        <p className="text-[20px]">{patrolAllDefects}</p>
+                        <span className="material-symbols-outlined">error</span>
+                        <p className="text-[20px]">{detectedDefects}</p>
                     </div>
                     <div className="ml-auto items-center">
                         <DropdownMenu>
