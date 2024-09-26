@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useTranslations } from 'next-intl'
 
 export default function ProfileDropdown() {
-  const t = useTranslations('PatrolPage');
+  const t = useTranslations('General');
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false)
 
@@ -76,7 +76,7 @@ export default function ProfileDropdown() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-card p-0">
           <DropdownMenuLabel className=" w-[226px] text-lg font-medium">
-            {t('My Account')}
+            {t('MyAccount')}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-secondary h-[2px]" />
           <DropdownMenuItem className="p-0">
