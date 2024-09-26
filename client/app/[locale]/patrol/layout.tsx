@@ -6,12 +6,9 @@ export default function PatrolLayout({
     children: React.ReactNode;
   }>) {
     return (
-      <html lang="en">
-        <body
-          className=''>
-            <Header />
-          {children}
-        </body>
-      </html>
+    <>
+      <Header />
+      {children}
+    </>
     );
   }
