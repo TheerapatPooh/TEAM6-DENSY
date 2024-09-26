@@ -12,7 +12,7 @@ import { useRouter, usePathname, useParams } from 'next/navigation'
 
 
 export default function LanguageSelect() {
-    const t = useTranslations('PatrolPage')
+    const t = useTranslations('General')
     const router = useRouter()
     const pathname = usePathname()
 
@@ -26,7 +26,7 @@ export default function LanguageSelect() {
     const changeLanguage = (locale: string) => {
         if(mounted) {
             const newPath = `/${locale}${pathname.slice(3)}`
-            router.push(newPath)
+            router.replace(newPath)
             router.refresh()
         }
     }
@@ -38,7 +38,7 @@ export default function LanguageSelect() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <Button variant='ghost' className="w-[45px] h-[45px]">
+                <Button variant='ghost' className="w-[45px] h-[45px] text-input">
                     <span className="material-symbols-outlined">language</span>
                 </Button>
             </DropdownMenuTrigger>

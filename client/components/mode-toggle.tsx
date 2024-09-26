@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl'
 
 
 export default function ModeToggle() {
-    const t = useTranslations('PatrolPage');
+    const t = useTranslations('General');
     const { setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     
@@ -27,7 +27,7 @@ export default function ModeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <Button variant='ghost' className="w-[45px] h-[45px]">
+                <Button variant='ghost' className="w-[45px] h-[45px] text-input">
                     <span className="material-symbols-outlined rotate-0  scale-100 dark:scale-0 dark:-rotate-90">light_mode</span>
                     <span className="material-symbols-outlined absolute rotate-90 scale-0 dark:scale-100 dark:rotate-0">dark_mode</span>
                 </Button>

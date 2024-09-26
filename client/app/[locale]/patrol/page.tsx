@@ -12,7 +12,7 @@ enum patrolSheetStatus {
 }
 
 export default function HomePage() {
-  const t = useTranslations('PatrolPage')
+  const t = useTranslations('General')
   return (
     <div className='flex flex-col p-5 gap-y-5'>
       <h1>{t('greeting')}</h1>

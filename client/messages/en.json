@@ -1,15 +1,19 @@
 {
-    "PatrolPage": {
+    "General": {
       "greeting": "Hello world!",
       "English": "English",
       "Thai": "Thai",
       "Light": "Light",
       "Dark": "Dark",
       "System": "System",
-      "PatrolDetails" : "Details",
-      "PatrolDelete" : "Delete",
+      "Details" : "Details",
+      "Delete" : "Delete",
       "Profile": "Profile",
       "Logout": "Logout",
-      "My Account":"MyAccount"
+      "MyAccount": "MyAccount",
+      "Login": "Login",
+      "EnterCredentials": "Enter your username and password to login to your account",
+      "Username": "Username",
+      "Password": "Password"
     }
   }

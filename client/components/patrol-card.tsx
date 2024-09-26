@@ -29,7 +29,7 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
         setMounted(true)
     }, [])
 
-    const t = useTranslations('PatrolPage');
+    const t = useTranslations('General');
 
     if (!mounted) {
         return null
@@ -125,10 +125,10 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className='p-0'>
                                 <DropdownMenuItem>
-                                    <h1>{t('PatrolDetails')}</h1>
+                                    <h1>{t('Details')}</h1>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
-                                    <h1 className="text-destructive hover:text-destructive">{t('PatrolDelete')}</h1>
+                                    <h1 className="text-destructive hover:text-destructive">{t('Delete')}</h1>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

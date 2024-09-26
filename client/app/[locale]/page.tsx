@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 
 export default function HomePage() {
-  const t = useTranslations('PatrolPage')
+  const t = useTranslations('General')
   const locale = useLocale()
   return (
     <div>
