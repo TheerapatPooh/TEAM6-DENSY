@@ -96,7 +96,7 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                     {inspectorNames.length > 5 && (
                         <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                             <AvatarImage src=""/> 
-                            <span className="absolute text-card-foreground text-[16px]">+{inspectorNames.length - 5}</span>
+                            <span className="absolute text-card-foreground text-[16px] font-semibold">+{inspectorNames.length - 5}</span>
                             <AvatarFallback></AvatarFallback>
                         </Avatar>
                     )}
@@ -106,15 +106,15 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                 <div className="flex gap-2.5 items-center w-full">
                     <div className="flex gap-2.5 text-blue-500 items-center">
                         <span className="material-symbols-outlined">checklist</span>
-                        <p className="text-[20px]">{detectedItems}</p>
+                        <p className="text-[20px] font-semibold">{detectedItems}</p>
                     </div>
                     <div className="flex gap-2.5 text-yellow-500 items-center">
                         <span className="material-symbols-outlined">close</span>
-                        <p className="text-[20px]">{detectedComments}</p>
+                        <p className="text-[20px] font-semibold">{detectedComments}</p>
                     </div>
                     <div className="flex gap-2.5 text-red-500 items-center">
-                        <span className="material-symbols-outlined">error</span>
-                        <p className="text-[20px]">{detectedDefects}</p>
+                        <span className="material-symbols-outlined text-red-500">error</span>
+                        <p className="text-[20px] font-semibold">{detectedDefects}</p>
                     </div>
                     <div className="ml-auto items-center">
                         <DropdownMenu>
