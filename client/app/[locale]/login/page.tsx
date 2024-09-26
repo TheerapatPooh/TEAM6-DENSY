@@ -1,6 +1,5 @@
-// app/login/page.tsx
 'use client'
-import { useEffect, useState } from 'react';
+import { useTransition, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import lightLogo from "/app/img/system_logo_light.png"
 import darkLogo from "/app/img/system_logo_dark.png"
@@ -12,16 +11,43 @@ import ModeToggle from '@/components/mode-toggle';
 import Textfield from '@/components/textfield';
 import { Button } from '@/components/ui/button';
 import { useLocale, useTranslations } from "next-intl";
+import { Checkbox } from '@/components/ui/checkbox';
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormMessage,
+} from "@/components/ui/form"
+import FormError from '@/components/form-error'
+import FormSuccess from '@/components/form-success'
+import { login } from '@/lib/utils';
 
+export const LoginSchema = z.object({
+    username: z.string(),
+    password: z.string()
+})
 
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | undefined>('')
+    const [success, setSuccess] = useState<string | undefined>('')
     const router = useRouter();
     const { theme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
+    const [isPending, startTransition] = useTransition()
+
+    const form = useForm<z.infer<typeof LoginSchema>>({
+        resolver: zodResolver(LoginSchema),
+        defaultValues: {
+            username: "",
+            password: ""
+        },
+    })
 
     useEffect(() => {
         setMounted(true)
@@ -29,22 +55,35 @@ export default function LoginPage() {
     if (!mounted) {
         return null
     }
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
 
-        if (res.ok) {
-            router.push('/patrol')
-        } else {
-            alert('Login failed')
-        }
-    };
+
+    function onSubmit(values: z.infer<typeof LoginSchema>) {
+        setError('')
+        setSuccess('')
+        startTransition(() => {
+            login(values)
+            .then((data) => {
+                setError(data.error)
+                setSuccess(data.success)
+            })
+        })
+    }
+    // const handleSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     const res = await fetch('/api/login', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ username, password }),
+    //     });
+
+    //     if (res.ok) {
+    //         router.push('/patrol')
+    //     } else {
+    //         alert('Login failed')
+    //     }
+    // };
 
     return (
         <section className="bg-card flex justify-between h-screen p-2">
@@ -73,38 +112,62 @@ export default function LoginPage() {
                     <ModeToggle />
                     <LanguageSelect />
                 </div>
+                <FormError message={error} />
+                <FormSuccess message={success} />
                 <div className='gap-2 flex flex-col justify-center items-start w-[450px] h-full'>
                     <h1 className='text-5xl font-semibold'>{t('Login')}</h1>
                     <p>{t('EnterCredentials')}</p>
-                    <label className='text-xl font-semibold mt-6'>{t('Username')}</label>
-                    <Textfield className='bg-secondary' showIcon={true} iconName='person' placeholder='johnDoe' />
-                    <label className='text-xl font-semibold mt-6'>{t('Password')}</label>
-                    <Textfield className='bg-secondary' type='password' showIcon={true} iconName='lock' placeholder='verySecure' />
-                    <Button size="lg" className='mt-6'>
-                    {t('Login')}
-                        <span className="material-symbols-outlined">
-                            login
-                        </span>
-                    </Button>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className='w-full'>
+                            <FormField
+                                control={form.control}
+                                name="username"
+                                render={({ field }) => (
+                                    <FormItem className='mt-6'>
+                                        <label className='text-xl font-semibold'>{t('Username')}</label>
+                                        <FormControl>
+                                            <Textfield className='bg-secondary' showIcon={true} iconName='person' placeholder='johnDoe' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem className='mt-6'>
+                                        <label className='text-xl font-semibold mt-6'>{t('Password')}</label>
+                                        <FormControl>
+                                            <Textfield className='bg-secondary' type='password' showIcon={true} iconName='lock' placeholder='verySecure' {...field}/>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <div className="flex justify-between items-center w-full">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox id="terms1" />
+                                    <label
+                                        htmlFor="terms1"
+                                        className="text-sm font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:cursor-pointer"
+                                    >
+                                        {t('RememberMe')}
+                                    </label>
+                                </div>
+                                <Button variant='link'>{t('ForgotPassword')}</Button>
+                            </div>
+                            <Button size="lg" className='mt-6' disabled={isPending}>
+                                {t('Login')}
+                                <span className="material-symbols-outlined">
+                                    login
+                                </span>
+                            </Button>
+                        </form>
+
+                    </Form>
                 </div>
             </div>
-        </section>
-        // <form onSubmit={handleSubmit}>
-        //   <input
-        //     type="text"
-        //     value={username}
-        //     onChange={(e) => setUsername(e.target.value)}
-        //     placeholder="Username"
-        //     required
-        //   />
-        //   <input
-        //     type="password"
-        //     value={password}
-        //     onChange={(e) => setPassword(e.target.value)}
-        //     placeholder="Password"
-        //     required
-        //   />
-        //   <button type="submit">Login</button>
-        // </form>
+        </section >
     );
 }

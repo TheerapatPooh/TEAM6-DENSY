@@ -20,9 +20,9 @@ export async function getUser(req: Request, res: Response) {
 
 export async function getAllUsers(req: Request, res: Response) {
     try {
-        const all_users = await prisma.users.findMany()
-        if (all_users) {
-            res.send(all_users)
+        const allUsers = await prisma.users.findMany()
+        if (allUsers) {
+            res.send(allUsers)
         } else {
             res.status(404).send('All Users not found')
         }
@@ -35,16 +35,16 @@ export async function createUsers(req: Request, res: Response) {
     try {
          const { username, email, password, role, department } = req.body;
 
-         const new_user = await prisma.users.create({
+         const newUser = await prisma.users.create({
              data: {
                 username, 
                 email, 
                 password, 
                 role, 
-                department
+                department: department || null,
              }
          });
-         res.status(201).json(new_user);
+         res.status(201).json(newUser);
        
     } catch (err) {
         res.status(500).send(err)

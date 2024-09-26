@@ -2,8 +2,8 @@ import { getUser, getAllUsers, createUsers } from "../Controllers/user-controlle
 import { Router } from 'express'
 const router = Router()
 
-router.get('/users/:id', getUser)
 router.get('/users', getAllUsers)
-router.post('/users', createUsers)
+router.get('/user/:id', getUser)
+router.post('/user', createUsers)
 
 module.exports = router

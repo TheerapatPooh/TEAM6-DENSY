@@ -14,6 +14,8 @@
       "Login": "Login",
       "EnterCredentials": "Enter your username and password to login to your account",
       "Username": "Username",
-      "Password": "Password"
+      "Password": "Password",
+      "RememberMe": "Remeber Me",
+      "ForgotPassword": "Forgot Password?"
     }
   }
