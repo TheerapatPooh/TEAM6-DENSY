@@ -26,7 +26,7 @@ export default function LanguageSelect() {
     const changeLanguage = (locale: string) => {
         if(mounted) {
             const newPath = `/${locale}${pathname.slice(3)}`
-            router.push(newPath)
+            router.replace(newPath)
             router.refresh()
         }
     }
