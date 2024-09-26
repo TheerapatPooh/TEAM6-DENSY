@@ -4,7 +4,8 @@ import Textfield from '@/components/textfield';
 import {useTranslations} from 'next-intl'
 
  
-enum patrolStatus {
+enum patrolSheetStatus {
+  pending = "Pending",
   scheduled = "Scheduled",
   onGoing = "On Going",
   completed = "Completed",
@@ -19,34 +20,44 @@ export default function HomePage() {
       <div className="flex gap-4">
       <CreatePatrolCard />
       <PatrolCard 
-        patrolStatus= { patrolStatus.scheduled }
-        patrolDate={ new Date('2024-06-21') } 
-        patrolTitle="General Inspection" 
-        patrolPreset="P08001"  
-        patrolorName="John Doe" 
-        patrolAllItems={ 0 }
-        patrolAllComments={ 0 }
-        patrolAllDefects={ 0 }
+        patrolSheetStatus= { patrolSheetStatus.pending }
+        patrolSheetDate={ new Date('2024-06-19') } 
+        patrolSheetTitle="General Inspection" 
+        presetNumber="P08001"  
+        inspectorNames={["John Doe", "Jane Smith"]}
+        detectedItems={ 0 }
+        detectedComments={ 0 }
+        detectedDefects={ 0 }
+      />
+      <PatrolCard 
+        patrolSheetStatus= { patrolSheetStatus.scheduled }
+        patrolSheetDate={ new Date('2024-06-21') } 
+        patrolSheetTitle="General Inspection" 
+        presetNumber="P08001"  
+        inspectorNames={["John Doe"]}  
+        detectedItems={ 0 }
+        detectedComments={ 0 }
+        detectedDefects={ 0 }
       />
        <PatrolCard 
-        patrolStatus= { patrolStatus.onGoing }
-        patrolDate={ new Date('2024-05-20') } 
-        patrolTitle="General Inspection" 
-        patrolPreset="P08001"  
-        patrolorName="John Doe" 
-        patrolAllItems={ 3 }
-        patrolAllComments={ 1 }
-        patrolAllDefects={ 0 }
+        patrolSheetStatus= { patrolSheetStatus.onGoing }
+        patrolSheetDate={ new Date('2024-06-21') } 
+        patrolSheetTitle="General Inspection" 
+        presetNumber="P08001"  
+        inspectorNames={["Ethan Blake", "Mia Johnson", "Lucas Harper", "Ava Mitchell", "Noah Carter"]}
+        detectedItems={ 3 }
+        detectedComments={ 1 }
+        detectedDefects={ 0 }
       />
        <PatrolCard 
-        patrolStatus= { patrolStatus.completed } 
-        patrolDate={ new Date('2024-04-21') } 
-        patrolTitle="General Inspection" 
-        patrolPreset="P08001"  
-        patrolorName="John Doe" 
-        patrolAllItems={ 15 }
-        patrolAllComments={ 2 }
-        patrolAllDefects={ 3 }
+        patrolSheetStatus= { patrolSheetStatus.completed } 
+        patrolSheetDate={ new Date('2024-5-21') } 
+        patrolSheetTitle="General Inspection" 
+        presetNumber="P08001"  
+        inspectorNames={["Ethan Blake", "Mia Johnson", "Lucas Harper", "Ava Mitchell", "Noah Carter", "Sophia Davis", "Liam Thompson"]}
+        detectedItems={ 15 }
+        detectedComments={ 2 }
+        detectedDefects={ 3 }
       />
       </div>
       <BadgeCustom 
