@@ -15,7 +15,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import jwtDecode from 'jwt-decode'
 
 import {
     Form,
@@ -39,7 +38,6 @@ export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')
     const [success, setSuccess] = useState<string | undefined>('')
     const router = useRouter()
-    const locale = useLocale()
     const { theme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
@@ -65,23 +63,13 @@ export default function LoginPage() {
     function onSubmit(values: z.infer<typeof LoginSchema>) {
         setError('')
         setSuccess('')
-         startTransition(async () => {
+        startTransition(async () => {
             const result = await login(values)
             router.refresh()
             if (result.error) {
                 setError(result.error)
             } else if (result.token) {
                 setSuccess('Login successfully!')
-                // const decodedToken = jwtDecode(result.token);
-                // const userRole = decodedToken.role
-                // console.log(userRole)
-                // if (result.role === 'patrol') {
-                //     router.push(`/${locale}/patrol`);
-                // } else if (result.role === 'admin') {
-                //     router.push(`/${locale}/admin`);
-                // } else {
-                //     router.push(`/${locale}`);
-                // }
             }
         });
     }
@@ -139,22 +127,32 @@ export default function LoginPage() {
                                     <FormItem className='mt-6'>
                                         <label className='text-xl font-semibold mt-6'>{t('Password')}</label>
                                         <FormControl>
-                                            <Textfield className='bg-secondary' type='password' showIcon={true} iconName='lock' placeholder='verySecure' {...field}/>
+                                            <Textfield className='bg-secondary' type='password' showIcon={true} iconName='lock' placeholder='verySecure' {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
                             <div className="flex justify-between items-center w-full">
-                                <div className="flex items-center gap-2">
-                                    <Checkbox id="terms1" />
-                                    <label
-                                        htmlFor="terms1"
-                                        className="text-sm font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:cursor-pointer"
-                                    >
-                                        {t('RememberMe')}
-                                    </label>
-                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="rememberMe"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <div className="w-full h-full flex gap-2 items-center ">
+                                                <FormControl>
+                                                    <Checkbox id="terms1" checked={field.value} onCheckedChange={field.onChange} />
+                                                </FormControl>
+                                                <label
+                                                    htmlFor="terms1"
+                                                    className="text-sm font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:cursor-pointer"
+                                                >
+                                                    {t('RememberMe')}
+                                                </label>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
                                 <Button variant='link'>{t('ForgotPassword')}</Button>
                             </div>
                             <Button size="lg" className='mt-6' disabled={isPending}>

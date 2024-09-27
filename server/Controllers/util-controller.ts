@@ -19,13 +19,15 @@ export async function login(req: Request, res: Response) {
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid username or password" })
     }
-    const token = jwt.sign({ userId: user.id, role: user.role }, 'secret', { expiresIn: "1h" })
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" })
     // Set HttpOnly cookie with the token
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
+    console.log('Setting maxAge:', maxAge)
     res.cookie("authToken", token, {
       httpOnly: true,
       secure: true,  
       sameSite: "none",
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000, // 30 วันหรือ 1 ชั่วโมง
+      maxAge: maxAge
     })
     
     res.status(200).json({ message: "Login Success", token })
