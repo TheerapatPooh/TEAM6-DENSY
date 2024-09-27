@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import axios from 'axios'
 import {
     Form,
     FormControl,
@@ -28,7 +29,8 @@ import { login } from '@/lib/utils';
 
 export const LoginSchema = z.object({
     username: z.string(),
-    password: z.string()
+    password: z.string(),
+    rememberMe: z.boolean().optional()
 })
 
 
@@ -45,7 +47,8 @@ export default function LoginPage() {
         resolver: zodResolver(LoginSchema),
         defaultValues: {
             username: "",
-            password: ""
+            password: "",
+            rememberMe: false
         },
     })
 
@@ -60,31 +63,21 @@ export default function LoginPage() {
     function onSubmit(values: z.infer<typeof LoginSchema>) {
         setError('')
         setSuccess('')
-        startTransition(() => {
-            login(values)
-            .then((data) => {
-                setError(data.error)
-                setSuccess(data.success)
-            })
-        })
+         startTransition(async () => {
+            try {
+                const response = await axios.post('http://localhost:4000/login', values);
+
+                if (response.data.token) {
+                    setSuccess("Login Success");
+                    // Store the token in local storage or cookie
+                    localStorage.setItem('authToken', response.data.token);
+                    router.push('/patrol'); // Redirect to patrol page
+                }
+            } catch (err: any) {
+                setError(err.response?.data?.message || "Login failed");
+            }
+        });
     }
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     const res = await fetch('/api/login', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({ username, password }),
-    //     });
-
-    //     if (res.ok) {
-    //         router.push('/patrol')
-    //     } else {
-    //         alert('Login failed')
-    //     }
-    // };
-
     return (
         <section className="bg-card flex justify-between h-screen p-2">
             <div className="bg-background w-full rounded-md grid grid-rows-5 p-4">
