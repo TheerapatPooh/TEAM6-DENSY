@@ -10,14 +10,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
 import { useTranslations } from 'next-intl'
+import { logout } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function ProfileDropdown() {
   const t = useTranslations('General');
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false)
 
+  const router = useRouter()
+  const hadleLogout = async () => {
+    await logout()
+    router.refresh()
+  }
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -46,7 +52,7 @@ export default function ProfileDropdown() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   if (!mounted) {
     return null
   }
@@ -79,24 +85,17 @@ export default function ProfileDropdown() {
             {t('MyAccount')}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-secondary h-[2px]" />
-          <DropdownMenuItem className="p-0">
-            <Link className="flex p-2 gap-1" href="/profile" replace>
+          <DropdownMenuItem className="w-[226px] h-[full]">
+            <div className="flex gap-1 w-full items-center">
               <span className="material-symbols-outlined">account_circle</span>
               <div>{t('Profile')}</div>
-
-            </Link>
+            </div>
           </DropdownMenuItem>
-          <DropdownMenuItem className="p-0">
-            <Link
-              className="flex hover:text-destructive p-2 gap-1 w-[226px] h-[full]"
-              href="/logout"
-              replace
-            >
+          <DropdownMenuItem className="w-[226px] h-[full]" onClick={hadleLogout}>
+            <div className="flex gap-1 w-full h-full items-center hover:text-destructive">
               <span className="material-symbols-outlined">logout</span>
               <div>{t('Logout')}</div>
-
-
-            </Link>
+            </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -11,18 +11,42 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "Invalid username or password" })
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(password, user.password)
 
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "Invalid username or password" })
     }
-    const token = jwt.sign({userId: user.id, role: user.role},'secret',{ expiresIn: "1h"})
-
-      res.status(200).json({ message: "Login Success", token });
+    const token = jwt.sign({ userId: user.id, role: user.role }, 'secret', { expiresIn: "1h" })
+    // Set HttpOnly cookie with the token
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: true,  
+      sameSite: "none",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000, // 30 วันหรือ 1 ชั่วโมง
+    })
+    
+    res.status(200).json({ message: "Login Success", token })
   } catch (error) {
-    res.status(500).json({ message: "Login failed", error });
+    res.status(500).json({ message: "Login failed", error })
+  }
+}
+
+
+export async function logout(req: Request, res: Response) {
+  try {
+    // ลบ cookie authToken
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+
+    // ส่ง response กลับไปหาผู้ใช้เพื่อแจ้งว่า logout สำเร็จ
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Logout failed", error });
   }
 }

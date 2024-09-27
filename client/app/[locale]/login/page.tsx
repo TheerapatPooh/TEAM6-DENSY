@@ -15,7 +15,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import axios from 'axios'
+import jwtDecode from 'jwt-decode'
+
 import {
     Form,
     FormControl,
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/form"
 import FormError from '@/components/form-error'
 import FormSuccess from '@/components/form-success'
-import { login } from '@/lib/utils';
+import { login } from '@/lib/api';
 
 export const LoginSchema = z.object({
     username: z.string(),
@@ -37,7 +38,8 @@ export const LoginSchema = z.object({
 export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')
     const [success, setSuccess] = useState<string | undefined>('')
-    const router = useRouter();
+    const router = useRouter()
+    const locale = useLocale()
     const { theme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
@@ -64,17 +66,22 @@ export default function LoginPage() {
         setError('')
         setSuccess('')
          startTransition(async () => {
-            try {
-                const response = await axios.post('http://localhost:4000/login', values);
-
-                if (response.data.token) {
-                    setSuccess("Login Success");
-                    // Store the token in local storage or cookie
-                    localStorage.setItem('authToken', response.data.token);
-                    router.push('/patrol'); // Redirect to patrol page
-                }
-            } catch (err: any) {
-                setError(err.response?.data?.message || "Login failed");
+            const result = await login(values)
+            router.refresh()
+            if (result.error) {
+                setError(result.error)
+            } else if (result.token) {
+                setSuccess('Login successfully!')
+                // const decodedToken = jwtDecode(result.token);
+                // const userRole = decodedToken.role
+                // console.log(userRole)
+                // if (result.role === 'patrol') {
+                //     router.push(`/${locale}/patrol`);
+                // } else if (result.role === 'admin') {
+                //     router.push(`/${locale}/admin`);
+                // } else {
+                //     router.push(`/${locale}`);
+                // }
             }
         });
     }
