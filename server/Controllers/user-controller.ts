@@ -1,10 +1,11 @@
 import  { prisma } from '../Utils/database'
 import  { Request, Response } from 'express'
+import bcrypt from 'bcrypt'
 
 export async function getUser(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id, 10); 
-        const user = await prisma.users.findUnique({
+        const user = await prisma.user.findUnique({
         where: { id },
       });
   
@@ -20,7 +21,7 @@ export async function getUser(req: Request, res: Response) {
 
 export async function getAllUsers(req: Request, res: Response) {
     try {
-        const allUsers = await prisma.users.findMany()
+        const allUsers = await prisma.user.findMany()
         if (allUsers) {
             res.send(allUsers)
         } else {
@@ -33,17 +34,17 @@ export async function getAllUsers(req: Request, res: Response) {
 
 export async function createUsers(req: Request, res: Response) {
     try {
-         const { username, email, password, role, department } = req.body;
-
-         const newUser = await prisma.users.create({
-             data: {
-                username, 
-                email, 
-                password, 
-                role, 
-                department: department || null,
-             }
-         });
+        const { username, email, password, role, department } = req.body;
+        const hashPassword = await bcrypt.hash(password, 10)
+        const newUser = await prisma.user.create({
+          data: {
+            username,
+            email,
+            password: hashPassword,
+            role,
+            department: department || null,
+          },
+        });
          res.status(201).json(newUser);
        
     } catch (err) {
