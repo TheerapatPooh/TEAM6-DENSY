@@ -30,17 +30,7 @@ model User {
   profile      Profile[]
   notification Notification[]
   defect       Defect[]
-  session    Session[]
   @@map("users")
-}
-
-model Session {
-  id           Int       @id @default(autoincrement())
-  sessionToken String    @unique
-  userId       Int
-  expires      DateTime  
-  rememberMe   Boolean   
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Defect {
