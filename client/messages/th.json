@@ -16,6 +16,7 @@
       "Username": "ชื่อผู้ใช้",
       "Password": "รหัสผ่าน",
       "RememberMe": "จดจำการเข้าใช้งาน",
-      "ForgotPassword": "ลืมรหัสผ่าน?"
+      "ForgotPassword": "ลืมรหัสผ่าน?",
+      "InspectorListNames" : "รายชื่อผู้ตรวจ Patrol"
     }
   }

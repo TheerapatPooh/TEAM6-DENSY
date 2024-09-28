@@ -16,6 +16,7 @@
       "Username": "Username",
       "Password": "Password",
       "RememberMe": "Remeber Me",
-      "ForgotPassword": "Forgot Password?"
+      "ForgotPassword": "Forgot Password?",
+      "InspectorListNames" : "List of inspector names"
     }
   }

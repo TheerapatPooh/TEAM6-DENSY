@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { useEffect, useState } from "react"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
 
 interface props {
     patrolSheetStatus: patrolSheetStatus,
@@ -24,6 +25,8 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
         year: "numeric",
     });
     const [mounted, setMounted] = useState(false)
+    const [isClicked, setIsClicked] = useState(false)
+    const [isHovered, setIsHovered] = useState(false)
 
     useEffect(() => {
         setMounted(true)
@@ -35,10 +38,22 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
         return null
     }
 
+    const handleClick = () => {
+        setIsClicked(prev => !prev);
+    }
+
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+    };
+    
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+    };
+    
     return (
         <Card className="custom-shadow border-none w-full h-[225px] hover:bg-secondary cursor-pointer">
             <CardHeader className="gap-0 p-[10px]">
-                <div className="flex justify-between flex items-center justify-center">
+                <div className="flex justify-between items-center">
                     <CardDescription className="text-[20px] font-semibold">{formattedDate}</CardDescription>
                     {patrolSheetStatus === "Pending" ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 shadow-md">
@@ -50,12 +65,12 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                         </div>
                     )
                      : patrolSheetStatus === "On Going" ? (
-                        <div className="flex items-center justify-center rounded-full bg-orange-300/40 w-10 h-10 shadow-md">
-                            <span className="material-symbols-outlined text-orange-500">autorenew</span>
+                        <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 shadow-md">
+                            <span className="material-symbols-outlined text-purple-500">cached</span>
                         </div>
                     ) : patrolSheetStatus === "Completed" ? (
                         <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 shadow-md">
-                            <span className="material-symbols-outlined text-green-500">check_circle</span>
+                            <span className="material-symbols-outlined text-green-500">check</span>
                         </div>
                     ) : (
                         <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 shadow-md">
@@ -70,37 +85,56 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                     <span className="material-symbols-outlined">description</span>
                     <p className="text-[20px]">{presetNumber}</p>
                 </div>
-                <div className="flex text-muted-foreground items-center">
-                    <span className="material-symbols-outlined me-2.5">engineering</span>
-                    {inspectorNames.length > 0 && (
-                        <div className="flex items-center me-2.5">
-                            <p className="text-[20px] me-2.5">
-                                {inspectorNames[0].length > 12 
-                                    ? `${inspectorNames[0].slice(0, 9)}...` 
-                                    : inspectorNames[0]}
-                            </p>
+                <HoverCard open={isClicked || isHovered}>
+                    <HoverCardTrigger onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} asChild>
+                        <div className="flex text-muted-foreground items-center overflow-hidden">
+                            <span className="material-symbols-outlined me-2.5">engineering</span>
+                            {inspectorNames.length > 0 && (
+                                <div className="flex items-center me-2.5 truncate max-w-[190px]">
+                                    <p className="text-[20px] me-2.5 truncate"> 
+                                        {inspectorNames[0]}
+                                    </p>
+                                </div>
+                            )}
+                            {inspectorNames.slice(0, 4).map((inspectorName) => (
+                                <Avatar className="custom-shadow ms-[-10px]">
+                                    <AvatarImage src=""/>
+                                    <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
+                                </Avatar>
+                            ))}
+                            {inspectorNames.length === 5 && (
+                                <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
+                                    <AvatarImage src="https://github.com/shadcn.png"/> 
+                                    <AvatarFallback>{inspectorNames[4].slice(0, 2)}.</AvatarFallback> 
+                                </Avatar>
+                            )}
+                            {inspectorNames.length > 5 && (
+                                <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
+                                    <AvatarImage src=""/> 
+                                    <span className="absolute text-card-foreground text-[16px] font-semibold">+{inspectorNames.length - 5}</span>
+                                    <AvatarFallback></AvatarFallback>
+                                </Avatar>
+                            )}
                         </div>
-                    )}
-                    {inspectorNames.slice(0, 4).map((inspectorName) => (
-                        <Avatar className="custom-shadow ms-[-10px]">
-                            <AvatarImage src=""/>
-                            <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
-                        </Avatar>
-                    ))}
-                    {inspectorNames.length === 5 && (
-                        <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
-                            <AvatarImage src="https://github.com/shadcn.png"/> 
-                            <AvatarFallback>{inspectorNames[4].slice(0, 2)}.</AvatarFallback> 
-                        </Avatar>
-                    )}
-                    {inspectorNames.length > 5 && (
-                        <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
-                            <AvatarImage src=""/> 
-                            <span className="absolute text-card-foreground text-[16px] font-semibold">+{inspectorNames.length - 5}</span>
-                            <AvatarFallback></AvatarFallback>
-                        </Avatar>
-                    )}
-                </div>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-full border-none custom-shadow">
+                        <div className="flex items-center justify-center">
+                            <span className="material-symbols-outlined me-2.5">engineering</span>
+                        </div>
+                        <p className="text-[24px] text-center">{t('InspectorListNames')}</p>
+                        {inspectorNames.map((inspectorName) =>
+                            <div className="flex items-center">
+                                <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                                    <AvatarImage src=""/>
+                                    <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
+                                </Avatar>
+                                <p className="text-[20px]"> 
+                                    {inspectorName}
+                                </p>
+                            </div>
+                        )}
+                    </HoverCardContent>
+                    </HoverCard>
             </CardContent>
             <CardFooter className="gap-0 px-[10px]">
                 <div className="flex gap-2.5 items-center w-full">
