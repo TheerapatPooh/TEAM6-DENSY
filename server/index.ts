@@ -2,11 +2,19 @@ import { readdirSync } from 'fs'
 import bodyParse from 'body-parser'
 import express from 'express'
 import cors from 'cors'
+import dotenv from 'dotenv'
+import cookieParser from 'cookie-parser';
+
+dotenv.config()
+
 
 const app = express()
 const PORT = 4000
-
-app.use(cors())
+app.use(cookieParser());
+app.use(cors({
+    origin: `${process.env.CLIENT_URL}`,
+    credentials: true
+}))
 
 app.use(bodyParse.json({limit: '10mb'}))
 

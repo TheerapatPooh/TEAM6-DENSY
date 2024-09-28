@@ -5,7 +5,7 @@ import  { Request, Response } from 'express'
 export async function getPatrol(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id, 10); 
-        const patrol = await prisma.patrols.findUnique
+        const patrol = await prisma.patrol.findUnique
         ({ 
             where: {id},
             include: {
@@ -72,7 +72,7 @@ export async function getPatrol(req: Request, res: Response) {
 
 export async function getAllPatrols(req: Request, res: Response) {
     try {
-        const all_patrols = await prisma.patrols.findMany()
+        const all_patrols = await prisma.patrol.findMany()
         if (all_patrols) {
             res.send(all_patrols)
         } else {
@@ -91,7 +91,7 @@ export async function createPatrols(req: Request, res: Response) {
              return res.status(400).json({ error: 'Missing required fields' });
          }
 
-         const newPatrol = await prisma.patrols.create({
+         const newPatrol = await prisma.patrol.create({
              data: {
                  date: new Date(date), 
                  status: "Pending",
