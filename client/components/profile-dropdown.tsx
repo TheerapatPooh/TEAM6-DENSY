@@ -11,22 +11,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslations } from 'next-intl'
-import { logout } from "@/lib/api";
+import { fetchProfile, logout } from "@/lib/api";
 import { useRouter } from "next/navigation";
+
+interface Profile {
+  name: string
+  age: number
+  tel: string
+  address: string
+}
 
 export default function ProfileDropdown() {
   const t = useTranslations('General');
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false)
-
+  const [profile, setProfile] = useState<Profile>()
   const router = useRouter()
   const hadleLogout = async () => {
     await logout()
     router.refresh()
   }
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Explicitly typing buttonRef as a RefObject of HTMLButtonElement
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -45,12 +49,21 @@ export default function ProfileDropdown() {
     };
 
     // Add event listener
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
+
+    async function loadProfile() {
+      const userProfile = await fetchProfile()
+      if (userProfile && userProfile.profile && userProfile.profile.length > 0) {
+        setProfile(userProfile.profile[0])
+      }
+    }
+    loadProfile()
+    setMounted(true)
 
     // Cleanup on unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-    };
+    }
   }, []);
 
   if (!mounted) {
@@ -70,7 +83,7 @@ export default function ProfileDropdown() {
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="w-[97px] h-[27px] font-medium">John Doe</div>
+            <div className="w-[97px] h-[27px] font-medium">{profile ? profile.name : 'Loading...'}</div>
 
             <span
               className={`material-symbols-outlined inline-block transition-transform duration-300 ${isFlipped ? "rotate-180" : "rotate-0"

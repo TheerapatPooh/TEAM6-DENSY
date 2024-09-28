@@ -1,7 +1,17 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../Utils/database";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { JwtPayload } from 'jsonwebtoken'
 const jwt = require('jsonwebtoken')
+
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: string | JwtPayload;
+    }
+  }
+}
 
 export async function login(req: Request, res: Response) {
   const { username, password, rememberMe } = req.body;
@@ -22,7 +32,6 @@ export async function login(req: Request, res: Response) {
     const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" })
     // Set HttpOnly cookie with the token
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
-    console.log('Setting maxAge:', maxAge)
     res.cookie("authToken", token, {
       httpOnly: true,
       secure: true,  
@@ -50,5 +59,21 @@ export async function logout(req: Request, res: Response) {
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: "Logout failed", error });
+  }
+}
+
+export function authenticateUser(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies.authToken
+
+  if(!token) {
+    return res.status(401).json({ message: "Access Denied, No Token Provided"})
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    req.user = decoded
+    next();
+  } catch (error) {
+    return  res.status(400).json({ message: "Invalid Token"})
   }
 }
