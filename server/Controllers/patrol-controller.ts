@@ -5,7 +5,7 @@ import  { Request, Response } from 'express'
 export async function getPatrol(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id, 10); 
-        const patrol = await prisma.patrols.findUnique
+        const patrol = await prisma.patrol.findUnique
         ({ 
             where: {id},
             include: {
@@ -15,7 +15,7 @@ export async function getPatrol(req: Request, res: Response) {
                             include: {
                                 checklist: {
                                     include: {
-                                        item: true
+                                        item:true
                                     }
                                 }
                             }
@@ -24,9 +24,8 @@ export async function getPatrol(req: Request, res: Response) {
                 }
             }
         })
-        
         if (patrol){
-            const patrolDetails = {
+            const patrolDetail = {
                 id: patrol.id,
                 date: patrol.date,
                 start_time: patrol.start_time,
@@ -38,7 +37,7 @@ export async function getPatrol(req: Request, res: Response) {
                     title: patrol.preset.title,
                     description: patrol.preset.description,
                     version: patrol.preset.version,
-                    lastest: patrol.preset.lastest,
+                    lasted: patrol.preset.lasted,
                     updateAt: patrol.preset.updateAt,
                     updateBy: patrol.preset.updateBy,
 
@@ -59,11 +58,12 @@ export async function getPatrol(req: Request, res: Response) {
                     }))
                 }
             };
-            res.send(patrolDetails)
+            res.send(patrolDetail)
 
         } else {
             res.status(404).send('Patrol not found')
         }
+       
 
     } catch (err) {
         res.status(500).send(err)
@@ -72,9 +72,9 @@ export async function getPatrol(req: Request, res: Response) {
 
 export async function getAllPatrols(req: Request, res: Response) {
     try {
-        const all_patrols = await prisma.patrols.findMany()
-        if (all_patrols) {
-            res.send(all_patrols)
+        const allPatrols = await prisma.patrol.findMany()
+        if (allPatrols) {
+            res.send(allPatrols)
         } else {
             res.status(404).send('All Patrol not found')
         }
@@ -83,7 +83,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     }
 }
 
-export async function createPatrols(req: Request, res: Response) {
+export async function createPatrol(req: Request, res: Response) {
     try {
          const { date, presets_id } = req.body;
 
@@ -91,7 +91,7 @@ export async function createPatrols(req: Request, res: Response) {
              return res.status(400).json({ error: 'Missing required fields' });
          }
 
-         const newPatrol = await prisma.patrols.create({
+         const newPatrol = await prisma.patrol.create({
              data: {
                  date: new Date(date), 
                  status: "Pending",
