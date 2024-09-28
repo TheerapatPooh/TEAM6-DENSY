@@ -30,9 +30,8 @@ model User {
   profile      Profile[]
   notification Notification[]
   defect       Defect[]
-  Zones        Zone[]
+  zone        Zone[]
   @@map("users")
-  
 }
 
 model Defect {
@@ -73,6 +72,7 @@ model Profile {
   @@map("profiles")
 }
 
+
 model User_Has_Patrol {
   users_id   Int
   user       User   @relation(fields: [users_id], references: [id])
@@ -108,13 +108,13 @@ model Preset {
 
   updateBy  Int
   user      User                    @relation(fields: [updateBy], references: [id])
-  checklist Presets_Has_Checklist[]
+  checklist Preset_Has_Checklist[]
   patrol    Patrol[]
   @@map("presets")
-
 }
 
-model Presets_Has_Checklist {
+
+model Preset_Has_Checklist {
   presets_id    Int
   preset        Preset    @relation(fields: [presets_id], references: [id])
   checklists_id Int
@@ -132,14 +132,13 @@ model Checklist {
   updateAt DateTime @default(now())
 
   updateBy    Int
-  user       User                    @relation("user", fields: [updateBy], references: [id])
+  user        User                    @relation("user", fields: [updateBy], references: [id])
   inspectorId Int
   inspector   User                    @relation("inspector", fields: [inspectorId], references: [id])
-  preset      Presets_Has_Checklist[]
+  preset      Preset_Has_Checklist[]
   item        Item[]
   @@map("checklists")
 }
-
 
 model Patrol_Result {
   id     Int     @id @default(autoincrement())
@@ -177,7 +176,6 @@ model Zone {
   location     Location @relation(fields: [locations_id], references: [id])
   responsible_man_id  Int
   user         User   @relation(fields: [responsible_man_id], references: [id])
-
   @@map("zones")
 }
 
