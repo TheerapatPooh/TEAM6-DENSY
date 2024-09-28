@@ -34,3 +34,15 @@ export async function fetchProfile() {
         return null
     }
 }
+
+export async function getAllPatrols() {
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}/patrol`,{
+            withCredentials: true
+        })
+        return response.data
+    } catch (error) {
+        console.error("Failed to fetch profile:", error)
+        return null
+    }
+}

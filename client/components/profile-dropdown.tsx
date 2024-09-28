@@ -13,6 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslations } from 'next-intl'
 import { fetchProfile, logout } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "./ui/skeleton";
 
 interface Profile {
   name: string
@@ -25,7 +26,7 @@ export default function ProfileDropdown() {
   const t = useTranslations('General');
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false)
-  const [profile, setProfile] = useState<Profile>()
+  const [profile, setProfile] = useState<Profile | null>(null)
   const router = useRouter()
   const hadleLogout = async () => {
     await logout()
@@ -78,13 +79,14 @@ export default function ProfileDropdown() {
             variant="ghost"
             className="text-input w-[226px] h-[50px] bg-card flex gap-[10px] justify-start items-center py-[10px] px-[20px]"
             onPointerDown={handleIconClick}
-          >
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <div className="w-[97px] h-[27px] font-medium">{profile ? profile.name : 'Loading...'}</div>
+          >{
+            profile ? <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar> : <Skeleton className="h-12 w-12 rounded-full" />
 
+            }
+            <div className="w-[97px] h-[27px] font-medium">{profile ? profile.name : <Skeleton className="h-full w-full" />}</div>
             <span
               className={`material-symbols-outlined inline-block transition-transform duration-300 ${isFlipped ? "rotate-180" : "rotate-0"
                 }`}

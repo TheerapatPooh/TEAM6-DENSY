@@ -16,7 +16,7 @@ export default function HomePage() {
   return (
     <div className='flex flex-col p-5 gap-y-5'>
       <h1>{t('greeting')}</h1>
-      <Textfield iconName='search' showIcon={true} placeholder='Search...'/>
+      <Textfield iconName='search' showIcon={true} placeholder={t('Search')}/>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <CreatePatrolCard />
         <PatrolCard 
