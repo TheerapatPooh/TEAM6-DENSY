@@ -32,9 +32,9 @@ export async function getAllUsers(req: Request, res: Response) {
     }
 }
 
-export async function createUsers(req: Request, res: Response) {
+export async function createUser(req: Request, res: Response) {
     try {
-        const { username, email, password, role, department } = req.body;
+        const { username, email, password, role, department } = req.body
         const hashPassword = await bcrypt.hash(password, 10)
         const newUser = await prisma.user.create({
           data: {
@@ -44,9 +44,8 @@ export async function createUsers(req: Request, res: Response) {
             role,
             department: department || null,
           },
-        });
-         res.status(201).json(newUser);
-       
+        })
+         res.status(201).json(newUser) 
     } catch (err) {
         res.status(500).send(err)
     }
@@ -60,12 +59,11 @@ export async function getProfile(req: Request, res: Response) {
           include: {
               profile: true
           },
-      });
+      })
 
       if (!userWithProfile) {
-          return res.status(404).json({ error: 'User or Profile not found' });
+          return res.status(404).json({ error: 'User or Profile not found' })
       }
-
       res.status(200).json(userWithProfile)
   } catch (error) {
       console.error(error)

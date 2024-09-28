@@ -26,10 +26,11 @@ model User {
   checklist    Checklist[]        @relation("user")
   inspector    Checklist[]        @relation("inspector")
   comment      Comment[]
-  patrol       Users_Has_Patrol[]
+  patrol       User_Has_Patrol[]
   profile      Profile[]
   notification Notification[]
   defect       Defect[]
+  zone        Zone[]
   @@map("users")
 }
 
@@ -71,7 +72,8 @@ model Profile {
   @@map("profiles")
 }
 
-model Users_Has_Patrol {
+
+model User_Has_Patrol {
   users_id   Int
   user       User   @relation(fields: [users_id], references: [id])
   patrols_id Int
@@ -89,7 +91,7 @@ model Patrol {
   duration   String?
   status     Patrol_Status
 
-  user          Users_Has_Patrol[]
+  user          User_Has_Patrol[]
   presets_id    Int
   preset        Preset             @relation(fields: [presets_id], references: [id])
   patrol_result Patrol_Result[]
@@ -101,7 +103,7 @@ model Preset {
   title       String
   description String
   version     Int
-  lastest     Boolean
+  lasted     Boolean
   updateAt    DateTime
 
   updateBy  Int
@@ -110,6 +112,7 @@ model Preset {
   patrol    Patrol[]
   @@map("presets")
 }
+
 
 model Preset_Has_Checklist {
   presets_id    Int
@@ -125,7 +128,7 @@ model Checklist {
   id       Int      @id @default(autoincrement())
   title    String
   version  Int
-  lastest  Boolean
+  lasted  Boolean
   updateAt DateTime @default(now())
 
   updateBy    Int
@@ -135,19 +138,6 @@ model Checklist {
   preset      Preset_Has_Checklist[]
   item        Item[]
   @@map("checklists")
-}
-
-model Item {
-  id   Int    @id @default(autoincrement())
-  name String
-  type String
-
-  checklists_id Int
-  checklist     Checklist       @relation(fields: [checklists_id], references: [id])
-  zones_id      Int
-  zone          Zone           @relation(fields: [zones_id], references: [id])
-  patrol_result Patrol_Result[]
-  @@map("items")
 }
 
 model Patrol_Result {
@@ -164,17 +154,32 @@ model Patrol_Result {
   @@map("patrol_results")
 }
 
+model Item {
+  id   Int    @id @default(autoincrement())
+  name String
+  type Item_Status
+
+  checklists_id Int
+  checklist     Checklist       @relation(fields: [checklists_id], references: [id])
+  zones_id      Int
+  zone          Zone            @relation(fields: [zones_id], references: [id])
+  patrol_result Patrol_Result[]
+  @@map("items")
+}
+
 model Zone {
   id   Int    @id @default(autoincrement())
   name String
 
   item         Item[]
   locations_id Int
-  location     Locations @relation(fields: [locations_id], references: [id])
+  location     Location @relation(fields: [locations_id], references: [id])
+  responsible_man_id  Int
+  user         User   @relation(fields: [responsible_man_id], references: [id])
   @@map("zones")
 }
 
-model Locations {
+model Location {
   id   Int    @id @default(autoincrement())
   name String
 
@@ -224,4 +229,10 @@ enum Defect_Status {
   PendingInspection
   Resolved
   Completed
+}
+
+enum Item_Status {
+  Safety
+  Environment
+  Maintenance
 }
