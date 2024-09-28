@@ -14,6 +14,7 @@
       "Login": "เข้าสู่ระบบ",
       "EnterCredentials": "กรุณากรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าสู่บัญชีของคุณ",
       "Username": "ชื่อผู้ใช้",
-      "Password": "รหัสผ่าน"
+      "Password": "รหัสผ่าน",
+      "InspectorListNames" : "รายชื่อผู้ตรวจ Patrol"
     }
   }
