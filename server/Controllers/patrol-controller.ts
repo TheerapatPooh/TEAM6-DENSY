@@ -72,16 +72,40 @@ export async function getPatrol(req: Request, res: Response) {
 
 export async function getAllPatrols(req: Request, res: Response) {
     try {
-        const all_patrols = await prisma.patrols.findMany()
-        if (all_patrols) {
-            res.send(all_patrols)
+        const all_patrols = await prisma.patrols.findMany({
+            include: {
+                preset: true,
+                user: { // Include Users_Has_Patrols relation
+                    include: {
+                        user: { // Include the Users table data
+                            select: { // Select only the fields you need
+                                id: true,
+                                username: true,
+                                email: true,
+                                password: true,
+                                role: true,
+                                department: true,
+                                created_at: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (all_patrols.length > 0) {
+            res.send(all_patrols);
         } else {
-            res.status(404).send('All Patrol not found')
+            res.status(404).send('No patrols found');
         }
     } catch (err) {
-        res.status(500).send(err)
+        console.error(err); // Log the error for debugging
+        res.status(500).send('Internal Server Error');
     }
 }
+
+
+
 
 export async function createPatrols(req: Request, res: Response) {
     try {
