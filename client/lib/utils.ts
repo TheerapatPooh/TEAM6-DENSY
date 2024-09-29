@@ -26,3 +26,23 @@ export const fetchData = async (url: string, options: AxiosRequestConfig = {}) =
     throw new Error('Could not get data');
   }
 };
+
+// Define an interface for Defect data
+export interface DefectData {
+  title: string;
+  note: string;
+  type: string;
+  status: string;
+  users_id: number;
+}
+
+// Create the defect function that accepts DefectData type
+export const createDefect = async (defectData: DefectData) => {
+  try {
+    const response = await axiosInstance.post('/defect', defectData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating defect:', error);
+    throw new Error('Could not create defect');
+  }
+};

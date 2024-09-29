@@ -10,17 +10,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
 import { useTranslations } from 'next-intl'
+import { fetchProfile, logout } from "@/lib/api";
+import { useRouter } from "next/navigation";
+
+interface Profile {
+  name: string
+  age: number
+  tel: string
+  address: string
+}
 
 export default function ProfileDropdown() {
   const t = useTranslations('General');
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const [profile, setProfile] = useState<Profile>()
+  const router = useRouter()
+  const hadleLogout = async () => {
+    await logout()
+    router.refresh()
+  }
 
   // Explicitly typing buttonRef as a RefObject of HTMLButtonElement
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -39,14 +49,23 @@ export default function ProfileDropdown() {
     };
 
     // Add event listener
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
+
+    async function loadProfile() {
+      const userProfile = await fetchProfile()
+      if (userProfile && userProfile.profile && userProfile.profile.length > 0) {
+        setProfile(userProfile.profile[0])
+      }
+    }
+    loadProfile()
+    setMounted(true)
 
     // Cleanup on unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-    };
+    }
   }, []);
-  
+
   if (!mounted) {
     return null
   }
@@ -64,7 +83,7 @@ export default function ProfileDropdown() {
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="w-[97px] h-[27px] font-medium">John Doe</div>
+            <div className="w-[97px] h-[27px] font-medium">{profile ? profile.name : 'Loading...'}</div>
 
             <span
               className={`material-symbols-outlined inline-block transition-transform duration-300 ${isFlipped ? "rotate-180" : "rotate-0"
@@ -79,24 +98,17 @@ export default function ProfileDropdown() {
             {t('MyAccount')}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-secondary h-[2px]" />
-          <DropdownMenuItem className="p-0">
-            <Link className="flex p-2 gap-1" href="/profile" replace>
+          <DropdownMenuItem className="w-[226px] h-[full]">
+            <div className="flex gap-1 w-full items-center">
               <span className="material-symbols-outlined">account_circle</span>
               <div>{t('Profile')}</div>
-
-            </Link>
+            </div>
           </DropdownMenuItem>
-          <DropdownMenuItem className="p-0">
-            <Link
-              className="flex hover:text-destructive p-2 gap-1 w-[226px] h-[full]"
-              href="/logout"
-              replace
-            >
+          <DropdownMenuItem className="w-[226px] h-[full]" onClick={hadleLogout}>
+            <div className="flex gap-1 w-full h-full items-center hover:text-destructive">
               <span className="material-symbols-outlined">logout</span>
               <div>{t('Logout')}</div>
-
-
-            </Link>
+            </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

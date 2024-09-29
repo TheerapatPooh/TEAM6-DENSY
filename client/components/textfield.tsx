@@ -10,6 +10,9 @@ interface TextfieldProps {
   type?: string;
   showIcon?: boolean;    
   className?: string; 
+  value?: string; 
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  ref?: React.Ref<HTMLInputElement>; 
 }
 
 export default function Textfield({
@@ -17,7 +20,10 @@ export default function Textfield({
   iconName, 
   showIcon = false,
   type = 'text',
-  className  }: TextfieldProps) {
+  className,
+  value,
+  onChange,
+  ref }: TextfieldProps) {
     const [visible, setVisible] = useState(false);
     const toggleVisibility = () => setVisible(!visible);
   return (
@@ -25,7 +31,11 @@ export default function Textfield({
       <Input 
         type={type === 'password' ? (visible ? 'text' : 'password') : type}
         placeholder={placeholder}
-        className={cn("ps-10 outline-none border-none bg-card flex-1 text-card-foreground text-base placeholder:text-input", className)}/>
+        className={cn("ps-10 outline-none border-none bg-card flex-1 text-card-foreground text-base placeholder:text-input", className)}
+        value={value}
+        onChange={onChange}
+        ref={ref} 
+        />
           {showIcon && iconName && (
           <span
             className={`material-symbols-outlined absolute left-2 text-input transition-opacity duration-300 ${showIcon ? 'opacity-100' : 'opacity-0'}`}

@@ -13,53 +13,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
+model User {
   id         Int      @id @default(autoincrement())
   username   String   @unique
   email      String   @unique
   password   String
-  role       Roles
+  role       Role
   department String?
   created_at DateTime @default(now())
 
-  preset       Presets[]
-  checklist    Checklists[]        @relation("user")
-  inspector    Checklists[]        @relation("inspector")
-  comment      Comments[]
-  patrol       Users_Has_Patrols[]
-  profile      Profiles[]
-  notification Notifications[]
-  defect       Defects[]
+  preset       Preset[]
+  checklist    Checklist[]        @relation("user")
+  inspector    Checklist[]        @relation("inspector")
+  comment      Comment[]
+  patrol       User_Has_Patrol[]
+  profile      Profile[]
+  notification Notification[]
+  defect       Defect[]
+  zone        Zone[]
   @@map("users")
 }
 
-model Defects {
+model Defect {
   id        Int      @id @default(autoincrement())
   title     String
   note      String
   type      String
-  status    Defects_Status
+  status    Defect_Status
   timestamp DateTime @default(now())
 
   users_id      Int
-  user          Users            @relation(fields: [users_id], references: [id])
-  patrol_result Patrol_Results[]
-  image         Images[]
+  user          User            @relation(fields: [users_id], references: [id])
+  patrol_result Patrol_Result[]
+  image         Image[]
   @@map("defects")
 }
 
-model Notifications {
+model Notification {
   id        Int      @id @default(autoincrement())
   message   String
   status    Boolean
   timestamp DateTime @default(now())
 
   users_id Int
-  user     Users @relation(fields: [users_id], references: [id])
+  user     User @relation(fields: [users_id], references: [id])
   @@map("notifications")
 }
 
-model Profiles {
+model Profile {
   id      Int     @id @default(autoincrement())
   name    String?
   age     Int?
@@ -67,161 +68,171 @@ model Profiles {
   address String?
 
   users_id Int
-  user     Users @relation(fields: [users_id], references: [id])
+  user     User @relation(fields: [users_id], references: [id])
   @@map("profiles")
 }
 
-model Users_Has_Patrols {
+
+model User_Has_Patrol {
   users_id   Int
-  user       Users   @relation(fields: [users_id], references: [id])
+  user       User   @relation(fields: [users_id], references: [id])
   patrols_id Int
-  patrol     Patrols @relation(fields: [patrols_id], references: [id])
+  patrol     Patrol @relation(fields: [patrols_id], references: [id])
 
   @@id([users_id, patrols_id])
   @@map("users_has_patrols")
 }
 
-model Patrols {
+model Patrol {
   id         Int      @id @default(autoincrement())
   date       DateTime
   start_time DateTime?
   end_time   DateTime?
   duration   String?
-  status     Patrols_Status
+  status     Patrol_Status
 
-  user          Users_Has_Patrols[]
+  user          User_Has_Patrol[]
   presets_id    Int
-  preset        Presets             @relation(fields: [presets_id], references: [id])
-  patrol_result Patrol_Results[]
+  preset        Preset             @relation(fields: [presets_id], references: [id])
+  patrol_result Patrol_Result[]
   @@map("patrols")
 }
 
-model Presets {
+model Preset {
   id          Int      @id @default(autoincrement())
   title       String
   description String
   version     Int
-  lastest     Boolean
+  lasted     Boolean
   updateAt    DateTime
 
   updateBy  Int
-  user      Users                    @relation(fields: [updateBy], references: [id])
-  checklist Presets_Has_Checklists[]
-  patrol    Patrols[]
+  user      User                    @relation(fields: [updateBy], references: [id])
+  checklist Preset_Has_Checklist[]
+  patrol    Patrol[]
   @@map("presets")
 }
 
-model Presets_Has_Checklists {
+
+model Preset_Has_Checklist {
   presets_id    Int
-  preset        Presets    @relation(fields: [presets_id], references: [id])
+  preset        Preset    @relation(fields: [presets_id], references: [id])
   checklists_id Int
-  checklist     Checklists @relation(fields: [checklists_id], references: [id])
+  checklist     Checklist @relation(fields: [checklists_id], references: [id])
 
   @@id([presets_id, checklists_id])
   @@map("presets_has_checklists")
 }
 
-model Checklists {
+model Checklist {
   id       Int      @id @default(autoincrement())
   title    String
   version  Int
-  lastest  Boolean
+  lasted  Boolean
   updateAt DateTime @default(now())
 
   updateBy    Int
-  user        Users                    @relation("user", fields: [updateBy], references: [id])
+  user        User                    @relation("user", fields: [updateBy], references: [id])
   inspectorId Int
-  inspector   Users                    @relation("inspector", fields: [inspectorId], references: [id])
-  preset      Presets_Has_Checklists[]
-  item        Items[]
+  inspector   User                    @relation("inspector", fields: [inspectorId], references: [id])
+  preset      Preset_Has_Checklist[]
+  item        Item[]
   @@map("checklists")
 }
 
-model Items {
-  id   Int    @id @default(autoincrement())
-  name String
-  type String
-
-  checklists_id Int
-  checklist     Checklists       @relation(fields: [checklists_id], references: [id])
-  zones_id      Int
-  zone          Zones            @relation(fields: [zones_id], references: [id])
-  patrol_result Patrol_Results[]
-  @@map("items")
-}
-
-model Patrol_Results {
+model Patrol_Result {
   id     Int     @id @default(autoincrement())
   status Boolean
 
   items_id   Int
-  item       Items      @relation(fields: [items_id], references: [id])
-  comment    Comments[]
+  item       Item      @relation(fields: [items_id], references: [id])
+  comment    Comment[]
   defects_id Int
-  defect     Defects    @relation(fields: [defects_id], references: [id])
+  defect     Defect    @relation(fields: [defects_id], references: [id])
   patrols_id Int
-  patrol     Patrols    @relation(fields: [patrols_id], references: [id])
+  patrol     Patrol    @relation(fields: [patrols_id], references: [id])
   @@map("patrol_results")
 }
 
-model Zones {
+model Item {
+  id   Int    @id @default(autoincrement())
+  name String
+  type Item_Status
+
+  checklists_id Int
+  checklist     Checklist       @relation(fields: [checklists_id], references: [id])
+  zones_id      Int
+  zone          Zone            @relation(fields: [zones_id], references: [id])
+  patrol_result Patrol_Result[]
+  @@map("items")
+}
+
+model Zone {
   id   Int    @id @default(autoincrement())
   name String
 
-  item         Items[]
+  item         Item[]
   locations_id Int
-  location     Locations @relation(fields: [locations_id], references: [id])
+  location     Location @relation(fields: [locations_id], references: [id])
+  responsible_man_id  Int
+  user         User   @relation(fields: [responsible_man_id], references: [id])
   @@map("zones")
 }
 
-model Locations {
+model Location {
   id   Int    @id @default(autoincrement())
   name String
 
-  zone Zones[]
+  zone Zone[]
   @@map("locations")
 }
 
-model Comments {
+model Comment {
   id        Int      @id @default(autoincrement())
   message   String
   timestamp DateTime @default(now())
 
   users_id          Int
-  user              Users          @relation(fields: [users_id], references: [id])
+  user              User         @relation(fields: [users_id], references: [id])
   patrol_results_id Int
-  patrol_result     Patrol_Results @relation(fields: [patrol_results_id], references: [id])
+  patrol_result     Patrol_Result @relation(fields: [patrol_results_id], references: [id])
   @@map("comments")
 }
 
-model Images {
+model Image {
   id        Int      @id @default(autoincrement())
   path      String
   timestamp DateTime @default(now())
 
   defects_id Int
-  defect     Defects @relation(fields: [defects_id], references: [id])
+  defect     Defect @relation(fields: [defects_id], references: [id])
   @@map("images")
 }
 
-enum Roles {
+enum Role {
   ADMIN
   INSPECTOR
   RESPONSIBLEMAN
   OFFICER
 }
 
-enum Patrols_Status {
+enum Patrol_Status {
   Pending
   Scheduled
   OnGoing
   Completed
 }
 
-enum Defects_Status {
+enum Defect_Status {
   Reported 
   InProgress
   PendingInspection
   Resolved
   Completed
+}
+
+enum Item_Status {
+  Safety
+  Environment
+  Maintenance
 }
