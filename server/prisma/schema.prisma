@@ -23,14 +23,14 @@ model User {
   created_at DateTime @default(now())
 
   preset       Preset[]
-  checklist    Checklist[]        @relation("user")
-  inspector    Checklist[]        @relation("inspector")
+  updateChecklist    Checklist[]        @relation("user")
   comment      Comment[]
   patrol       User_Has_Patrol[]
   profile      Profile[]
   notification Notification[]
   defect       Defect[]
   zone        Zone[]
+  checklist   Patrol_Has_Checklist [] 
   @@map("users")
 }
 
@@ -90,12 +90,26 @@ model Patrol {
   end_time   DateTime?
   duration   String?
   status     Patrol_Status
-
+  checklist   Patrol_Has_Checklist[]
   user          User_Has_Patrol[]
   presets_id    Int
   preset        Preset             @relation(fields: [presets_id], references: [id])
   patrol_result Patrol_Result[]
   @@map("patrols")
+}
+
+model Patrol_Has_Checklist {
+  id           Int      @id @default(autoincrement())
+  patrolId     Int
+  checklistId  Int
+  inspectorId  Int
+
+  patrol       Patrol    @relation(fields: [patrolId], references: [id])
+  checklist    Checklist @relation(fields: [checklistId], references: [id])
+  inspector    User      @relation(fields: [inspectorId], references: [id])
+
+  @@map("patrol_has_checklist")
+  @@index([patrolId, checklistId, inspectorId])
 }
 
 model Preset {
@@ -130,11 +144,9 @@ model Checklist {
   version  Int
   lasted  Boolean
   updateAt DateTime @default(now())
-
-  updateBy    Int
-  user        User                    @relation("user", fields: [updateBy], references: [id])
-  inspectorId Int
-  inspector   User                    @relation("inspector", fields: [inspectorId], references: [id])
+  patrol  Patrol_Has_Checklist[]
+  updateByUserId    Int
+  updateBy        User                    @relation("user", fields: [updateByUserId], references: [id])
   preset      Preset_Has_Checklist[]
   item        Item[]
   @@map("checklists")
