@@ -7,14 +7,16 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 
 
 export default function LanguageSelect() {
-    const t = useTranslations('PatrolPage');
-
+    const t = useTranslations('General')
     const router = useRouter()
+    const pathname = usePathname()
+
+
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -23,7 +25,9 @@ export default function LanguageSelect() {
 
     const changeLanguage = (locale: string) => {
         if(mounted) {
-            router.replace(`/${locale}`);
+            const newPath = `/${locale}${pathname.slice(3)}`
+            router.replace(newPath)
+            router.refresh()
         }
     }
 
@@ -34,7 +38,7 @@ export default function LanguageSelect() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
-                <Button variant='ghost' className="w-[45px] h-[45px]">
+                <Button variant='ghost' className="w-[45px] h-[45px] text-input">
                     <span className="material-symbols-outlined">language</span>
                 </Button>
             </DropdownMenuTrigger>
