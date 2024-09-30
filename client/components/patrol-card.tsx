@@ -56,24 +56,24 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                 <div className="flex justify-between items-center">
                     <CardDescription className="text-[20px] font-semibold">{formattedDate}</CardDescription>
                     {patrolSheetStatus === "Pending" ? (
-                        <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
                         </div>
                     ) : patrolSheetStatus === "Scheduled" ? (
-                        <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-yellow-500">event_available</span>
                         </div>
                     )
                      : patrolSheetStatus === "On Going" ? (
-                        <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-purple-500">cached</span>
                         </div>
                     ) : patrolSheetStatus === "Completed" ? (
-                        <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-green-500">check</span>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 shadow-md">
+                        <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-red-500">error</span>
                         </div>
                     )}
@@ -87,7 +87,7 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                 </div>
                 <HoverCard open={isClicked || isHovered}>
                     <HoverCardTrigger onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} asChild>
-                        <div className="flex text-muted-foreground items-center overflow-hidden">
+                        <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
                             {inspectorNames.length > 0 && (
                                 <div className="flex items-center me-2.5 truncate max-w-[190px]">
@@ -120,10 +120,10 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                     <HoverCardContent className="w-full border-none custom-shadow">
                         <div className="flex items-center justify-center">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
+                            <p className="text-lg font-medium text-center">{t('InspectorListNames')}</p>
                         </div>
-                        <p className="text-[24px] text-center">{t('InspectorListNames')}</p>
                         {inspectorNames.map((inspectorName) =>
-                            <div className="flex items-center">
+                            <div className="flex items-center p-2">
                                 <Avatar className="custom-shadow ms-[-10px] me-2.5">
                                     <AvatarImage src=""/>
                                     <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
