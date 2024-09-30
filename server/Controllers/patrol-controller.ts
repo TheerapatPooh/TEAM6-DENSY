@@ -111,6 +111,11 @@ export async function getAllPatrols(req: Request, res: Response) {
                     }
                 },
                 include: {
+                    user:{
+                        include:{
+                            user:true
+                        }
+                    },
                     preset: true, 
                     checklist: {
                         include: {
@@ -118,6 +123,7 @@ export async function getAllPatrols(req: Request, res: Response) {
                             checklist: true
                         }
                     }
+                    
                 }
             });
 
