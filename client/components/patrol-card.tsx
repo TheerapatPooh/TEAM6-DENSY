@@ -54,7 +54,7 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
         <Card className="custom-shadow border-none w-full h-[225px] hover:bg-secondary cursor-pointer">
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between items-center">
-                    <CardDescription className="text-[20px] font-semibold">{formattedDate}</CardDescription>
+                    <CardDescription className="text-lg font-semibold">{formattedDate}</CardDescription>
                     {patrolSheetStatus === "Pending" ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
@@ -78,20 +78,20 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                         </div>
                     )}
                 </div>
-                <CardTitle className="card-foreground text-[24px]">{patrolSheetTitle}</CardTitle>
+                <CardTitle className="card-foreground text-2xl">{patrolSheetTitle}</CardTitle>
             </CardHeader>
             <CardContent className="gap-0 px-[10px] py-0">
                 <div className="flex gap-2.5 text-muted-foreground items-center">
                     <span className="material-symbols-outlined">description</span>
-                    <p className="text-[20px]">{presetNumber}</p>
+                    <p className="text-xl">{presetNumber}</p>
                 </div>
                 <HoverCard open={isClicked || isHovered}>
                     <HoverCardTrigger onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} asChild>
-                        <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
+                        <div className="flex text-muted-foreground items-center overflow-hidden pb-1">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
                             {inspectorNames.length > 0 && (
                                 <div className="flex items-center me-2.5 truncate max-w-[190px]">
-                                    <p className="text-[20px] me-2.5 truncate"> 
+                                    <p className="text-xl me-2.5 truncate"> 
                                         {inspectorNames[0]}
                                     </p>
                                 </div>
