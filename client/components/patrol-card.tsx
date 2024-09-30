@@ -7,7 +7,7 @@ import { Avatar, AvatarImage } from "./ui/avatar"
 import { useEffect, useState } from "react"
 
 interface props {
-    patrolStatus: patrolStatus,
+    patrolStatus: string, //เปลี่ยนเป็น string ให้หาย error
     patrolDate: Date,
     patrolTitle: string,
     patrolPreset: string,
