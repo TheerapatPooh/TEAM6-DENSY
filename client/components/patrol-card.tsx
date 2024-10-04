@@ -8,7 +8,7 @@ import { useEffect, useState } from "react"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
 
 interface props {
-    patrolSheetStatus: patrolSheetStatus,
+    patrolSheetStatus: string,
     patrolSheetDate: Date,
     patrolSheetTitle: string,
     presetNumber: string,
