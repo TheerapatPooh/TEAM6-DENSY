@@ -1,108 +1,157 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "./ui/scroll-area";
+import { fetchData } from "@/lib/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import CustomDropdown from "./custom-drop-down-with-image";
 
-// interface Props {
-//   inspectorNames: string[];
-// }
+interface PatrolHasChecklist {
+  checklistId: number;
+  inspectorId: number;
+}
 
-export function BlankDropdown(
-//   {
-//   inspectorNames = []
-// }: Props
-)
- {
+interface ChecklistItem {
+  id: number;
+  title: string;
+  description: string;
+  lasted: boolean;
+  updateAt: string;
+  updateBy: number;
+  version: number;
+}
+
+interface Props {
+  checklist: ChecklistItem;
+  handleSelectedUser: (user: PatrolHasChecklist) => void;
+}
+
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+  department: string | null;
+  created_at: string;
+  profile: Profile[];
+}
+
+interface Profile {
+  address: string;
+  age: number;
+  id: number;
+  name: string;
+  tel: string;
+  users_id: number;
+}
+
+export function BlankDropdown({ checklist, handleSelectedUser }: Props) {
   const [isOuterFlipped, setIsOuterFlipped] = useState(false);
-  const [isInnerFlipped, setIsInnerFlipped] = useState(false); // State to manage inner flip
-  const [selectedValue, setSelectedValue] = useState<string>(""); // State to manage selected value
+  const [isInnerFlipped, setIsInnerFlipped] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [alluserdata, setUser] = useState<User[]>([]);
+
   const outerButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleOuterClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event propagation to avoid interfering with the inner Select
-    setIsOuterFlipped((prev) => !prev); // Toggle outer dropdown
-    if (isOuterFlipped) {
-      setIsInnerFlipped(false); // Reset inner flip state when closing outer dropdown
-    }
+    e.stopPropagation();
+    setIsOuterFlipped((prev) => !prev);
   };
 
   const handleInnerClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent click from closing the outer dropdown
-    setIsInnerFlipped((prev) => !prev); // Toggle inner dropdown
+    e.stopPropagation();
+    setIsInnerFlipped((prev) => !prev);
   };
 
   const handleSelectChange = (value: string) => {
-    setSelectedValue(value); // Update selected value
-    setIsOuterFlipped(false); // Close outer dropdown after selection
-    setIsInnerFlipped(false); // Close inner dropdown after selection
+    setSelectedUser(value);
+
+    const selectedInspector = alluserdata
+      .flatMap((user) => user.profile)
+      .find((profile) => profile.name === value);
+
+    if (selectedInspector) {
+      const patrolHasChecklist: PatrolHasChecklist = {
+        checklistId: checklist.id,
+        inspectorId: selectedInspector.users_id, // Ensure you're using the correct ID
+      };
+      handleSelectedUser(patrolHasChecklist); // Pass a single user object
+    }
+
+    setIsOuterFlipped(false);
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        outerButtonRef.current &&
-        !outerButtonRef.current.contains(event.target as Node)
-      ) {
-        setIsOuterFlipped(false); // Close the outer dropdown if clicked outside
-        setIsInnerFlipped(false); // Close the inner dropdown if clicked outside
+    const getData = async () => {
+      try {
+        const dataAllUser = await fetchData("get", "/users", true);
+        setUser(dataAllUser);
+        console.log(dataAllUser);
+
+        const handleClickOutside = (event: MouseEvent) => {
+          if (
+            outerButtonRef.current &&
+            !outerButtonRef.current.contains(event.target as Node)
+          ) {
+            setIsOuterFlipped(false);
+            setIsInnerFlipped(false);
+          }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      } catch (error) {
+        console.error("Failed to fetch patrol data:", error);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside); // Cleanup on unmount
-    };
+    getData();
   }, []);
 
   return (
     <div>
-      <ScrollArea>
-        <div>
-          <Button
-            ref={outerButtonRef}
-            variant="ghost"
-            className={`text-input w-[226px] ${
-              isOuterFlipped ? "h-[200px]" : "h-[50px]"
-            } w-full bg-card gap-[10px] space-x-4 py-[10px] px-[20px] transition-all duration-300`}
-            onClick={handleOuterClick} // Outer button click handler
-          >
-            <div className="flex items-center gap-2">
-              <div>
-                {/* Checklist name here */}
-                Overall Facility Check
-                {selectedValue ? `Selected: ${selectedValue}` : "Select Theme"}
-              </div>
-              <span
-                className={`material-symbols-outlined inline-block transition-transform duration-300 ${
-                  isOuterFlipped ? "rotate-180" : "rotate-0"
-                }`}
-              >
-                expand_more
-              </span>
-            </div>
+      <div>
+        <Button
+          ref={outerButtonRef}
+          variant="outline"
+          className={`text-black ${
+            isOuterFlipped ? "h-[160px]" : "h-[80px]"
+          } grid grid-cols-1 w-full gap-[10px] px-[20px] transition-all duration-100 bg-secondary`}
+          onClick={handleOuterClick}
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-[20px]">{checklist.title}</div>
+            {selectedUser && <div>Selected User: {selectedUser}</div>}
+            <span
+              className={`material-symbols-outlined inline-block transition-transform duration-300 ${
+                isOuterFlipped ? "rotate-180" : "rotate-0"
+              }`}
+            >
+              expand_more
+            </span>
+          </div>
 
-            {isOuterFlipped && (
-              <div onClick={handleInnerClick}>
-                {/* Prevent click from closing the outer dropdown */}
-                <select
-                  name="theme"
-                  id="theme"
-                  onChange={(e) => handleSelectChange(e.target.value)}
-                  className={`w-full p-2 border border-gray-300 rounded-md transition-all duration-300`}
-                >
-                  <option value="">Select a Patrol</option>
-                  {/* Iterate over inspectorNames and display each as an option */}
-                  {/* {inspectorNames.map((name, index) => (
-                    <option key={index} value={name}>
-                      {name}
-                    </option>
-                  ))} */}
-                </select>
+          {isOuterFlipped && (
+            <div
+              className="grid grid-cols-1 gap-2 transition-all duration-300 mb-10"
+              onClick={handleInnerClick}
+            >
+              <div className="flex text-muted-foreground gap-2">
+                <span className="material-symbols-outlined">engineering</span>
+                <div className="text-muted-foreground">Inspector</div>
               </div>
-            )}
-          </Button>
-        </div>
-      </ScrollArea>
+
+              <CustomDropdown
+                alluserdata={alluserdata}
+                selectedUser={selectedUser}
+                handleSelectChange={handleSelectChange}
+                src="https://github.com/shadcn.png"
+              />
+            </div>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
