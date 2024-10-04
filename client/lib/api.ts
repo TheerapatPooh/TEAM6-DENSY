@@ -43,23 +43,23 @@ export async function fetchData(
   value?: any 
 ) {
   try {
-    const config = {
-      withCredentials: credential, 
-      headers: {
-        'Content-Type': 'application/json', 
+      const config = {
+          withCredentials: credential, 
+          headers: {
+              'Content-Type': 'application/json', 
+          }
+      };
+
+      let response;      
+      if (type === "get" || type === "delete") {
+          response = await axios[type](`${process.env.NEXT_PUBLIC_SERVER_URL}${endpoint}`, config);
+      } else if (type === "post" || type === "put") {
+          response = await axios[type](`${process.env.NEXT_PUBLIC_SERVER_URL}${endpoint}`, value, config);
       }
-    };
 
-    let response;      
-    if (type === "get" || type === "delete") {
-      response = await axios[type](`${process.env.NEXT_PUBLIC_SERVER_URL}${endpoint}`, config);
-    } else if (type === "post" || type === "put") {
-      response = await axios[type](`${process.env.NEXT_PUBLIC_SERVER_URL}${endpoint}`, value, config);
-    }
-
-    return response?.data;
+      return response?.data; // response.data will contain the response body
   } catch (error) {
-    console.error("Failed to fetch data:", error);
-    return null;
+      console.error("Failed to fetch data:", error);
+      return null; // Returning null on error
   }
 }
