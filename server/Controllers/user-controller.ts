@@ -21,7 +21,11 @@ export async function getUser(req: Request, res: Response) {
 
 export async function getAllUsers(req: Request, res: Response) {
     try {
-        const allUsers = await prisma.user.findMany()
+        const allUsers = await prisma.user.findMany({
+            include: {
+                profile:true
+            }
+        })
         if (allUsers) {
             res.send(allUsers)
         } else {
