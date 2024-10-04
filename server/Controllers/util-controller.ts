@@ -17,19 +17,19 @@ export async function login(req: Request, res: Response) {
   const { username, password, rememberMe } = req.body;
   try {
     const user = await prisma.user.findUnique({
-      where: { us_username: username },
+      where: { username },
     });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid username or password" })
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.us_password)
+    const passwordMatch = await bcrypt.compare(password, user.password)
 
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid username or password" })
     }
-    const token = jwt.sign({ userId: user.us_id, role: user.us_role }, process.env.JWT_SECRET, { expiresIn: "1h" })
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" })
     // Set HttpOnly cookie with the token
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
     res.cookie("authToken", token, {

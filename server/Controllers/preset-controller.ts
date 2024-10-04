@@ -3,9 +3,9 @@ import  { Request, Response } from 'express'
 
 export async function getPreset(req: Request, res: Response) {
     try {
-        const presetId = parseInt(req.params.id, 10); 
+        const id = parseInt(req.params.id, 10); 
         const preset = await prisma.preset.findUnique({
-            where: { ps_id: presetId },
+            where: { id },
         })
         if (preset) {
             res.send(preset);
