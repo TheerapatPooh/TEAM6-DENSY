@@ -51,7 +51,7 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
     };
     
     return (
-        <Card className="custom-shadow border-none w-full h-[225px] hover:bg-secondary cursor-pointer">
+        <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer">
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between items-center">
                     <CardDescription className="text-lg font-semibold">{formattedDate}</CardDescription>
@@ -87,7 +87,7 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
                 </div>
                 <HoverCard open={isClicked || isHovered}>
                     <HoverCardTrigger onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} asChild>
-                        <div className="flex text-muted-foreground items-center overflow-hidden pb-1">
+                        <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
                             {inspectorNames.length > 0 && (
                                 <div className="flex items-center me-2.5 truncate max-w-[190px]">
