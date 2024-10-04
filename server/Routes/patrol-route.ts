@@ -6,7 +6,6 @@ const router = Router()
 
 router.get('/patrols', authenticateUser, getAllPatrols)
 router.get('/patrol/:id', authenticateUser, getPatrol)
-router.get('/preset', authenticateUser, getAllPresets)
 
 router.post('/patrols', createPatrol)
 
