@@ -28,6 +28,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import LinesEllipsis from "react-lines-ellipsis";
 import { BlankDropdown } from "@/components/patrol-select-user-dropdown";
+import { DatePicker } from "../../../components/date-picker";
+import { log } from "console";
 
 // Define User and PatrolCard interfaces
 interface User {
@@ -56,31 +58,6 @@ interface PatrolUser {
   user: User;
 }
 
-interface PatrolPreset {
-  id: number;
-  title: string;
-  description: string;
-  version: number;
-  latest: boolean;
-  updateAt: string;
-  updateBy: number;
-  checklist: Checklist;
-}
-
-interface PresetHaveChecklist {
-  presets_id: number;
-  checklists_id: number;
-}
-
-interface Checklist {
-  id: number;
-  title: string;
-  version: number;
-  latest: boolean;
-  updateAt: string;
-  updateByUserId: number;
-}
-
 interface PatrolCardData {
   id: number;
   date: string; // or Date if you're parsing it later
@@ -100,6 +77,36 @@ enum PatrolStatus {
   onGoing = "OnGoing",
   completed = "Completed",
 }
+interface PatrolPreset {
+  checklist: PresetHaveChecklist[];
+  description: string;
+  id: number;
+  latest: boolean;
+  title: string;
+  updateAt: string;
+  updateBy: number;
+  version: number;
+}
+interface PresetHaveChecklist {
+  presets_id: number;
+  checklists_id: number;
+  checklist: ChecklistItem;
+}
+
+interface ChecklistItem {
+  id: number;
+  title: string;
+  description: string;
+  lasted: boolean;
+  updateAt: string;
+  updateBy: number;
+  version: number;
+}
+
+interface PatrolHasChecklist {
+  checklistId: number;
+  inspectorId: number;
+}
 
 export default function HomePage() {
   const patrols = fetchData("get", "/patrols", true);
@@ -107,30 +114,33 @@ export default function HomePage() {
 
   const [isFirstDialogOpen, setIsFirstDialogOpen] = useState(true);
   const [isSecondDialogOpen, setIsSecondDialogOpen] = useState(false);
-  const [isThirdDialogOpen, setIsThirdDialogOpen] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<PatrolPreset | null>(
-    null
-  );
-  const [checklists, setChecklists] = useState<Checklist[]>([]);
 
   const openSecondDialog = () => {
     setIsSecondDialogOpen(true);
   };
 
-  const openThirdDialog = () => {
-    setIsSecondDialogOpen(false);
-    setIsThirdDialogOpen(true);
-  };
-
   const t = useTranslations("PatrolPage");
-  const isNextButtonDisabled = !selectedPreset; // Disable Next if no preset is selected
 
-  // State to keep track of patrol cards
   const [patrolCards, setPatrolCards] = useState<PatrolCardData[]>([]);
   const [alluserdata, setUser] = useState<User[]>([]);
   const [allpreset, setPatrolPreset] = useState<PatrolPreset[]>([]);
+
+  const [selectedPreset, setSelectedPreset] = useState<PatrolPreset>();
+  const isNextButtonDisabled = !selectedPreset; // Disable Next if no preset is selected
+
+  const [selectedTime, setSelectedTime] = useState<string>("");
+
+  const [selectedUser, setSelectedUser] = useState<PatrolHasChecklist[]>([]);
+
+  const isChecklistAllSelected: boolean =
+    selectedPreset?.checklist?.length === selectedUser.length;
+  const isDateSelectedYet: boolean = selectedTime !== "";
+
+  const isAddPatrolEnabled: boolean =
+    isChecklistAllSelected && isDateSelectedYet;
+
   useEffect(() => {
-    const getPatrolData = async () => {
+    const getData = async () => {
       try {
         const data = await fetchData("get", "/patrols", true);
         const dataAllUser = await fetchData("get", "/users", true);
@@ -143,56 +153,76 @@ export default function HomePage() {
         console.error("Failed to fetch patrol data:", error);
       }
     };
-
-    getPatrolData();
+    getData();
   }, []);
 
   const handlePresetSelect = (preset: PatrolPreset) => {
-    setSelectedPreset(preset);
-
-    // Directly set the checklist since it appears to be a single Checklist
-    setChecklists([preset.checklist]); // Wrap it in an array if you want to keep the state as an array
+    setSelectedPreset(preset); // Set preset directly
   };
 
-  // Function to add a new PatrolCard
-  // const addPatrolCard = () => {
-  //   setPatrolCards([
-  //     ...patrolCards,
-  //     {
-  //       id: patrolCards.length + 1, // Dummy ID, adjust as necessary
-  //       date: new Date().toISOString(), // Set current date
-  //       start_time: null,
-  //       end_time: null,
-  //       duration: "New Patrol Duration",
-  //       status: PatrolStatus.completed, // Use enum here
-  //       presets_id: 1, // Dummy preset ID, adjust as necessary
-  //       preset: {
-  //         id: 1,
-  //         title: "New Inspection",
-  //         description: "Description of new inspection",
-  //         version: 1,
-  //         latest: true,
-  //         updateAt: new Date().toISOString(),
-  //         updateBy: 1,
-  //       },
-  //       user: [
-  //         {
-  //           users_id: 1,
-  //           patrols_id: patrolCards.length + 1,
-  //           user: {
-  //             id: 1,
-  //             username: "John Doe",
-  //             email: "johndoe@example.com",
-  //             password: "1234",
-  //             role: "ADMIN",
-  //             department: "SE",
-  //             created_at: new Date().toISOString(),
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   ]);
-  // };
+  const handleTimeSelect = (time: string) => {
+    setSelectedTime(time);
+    console.log("Selected Time:", time);
+  };
+
+  const handleUserSelect = (user: PatrolHasChecklist) => {
+    const existingUserIndex = selectedUser.findIndex(
+      (selected) => selected.checklistId === user.checklistId
+    );
+
+    if (existingUserIndex !== -1) {
+      const oldUser = selectedUser[existingUserIndex];
+      setSelectedUser((prevSelectedUsers) => {
+        const updatedUsers = [...prevSelectedUsers];
+        updatedUsers.splice(existingUserIndex, 1); // Remove the old user
+        console.log(
+          `User ${oldUser.inspectorId} removed from checklist ${oldUser.checklistId}.`
+        );
+        return updatedUsers;
+      });
+    }
+
+    // Add the new user for the checklist
+    setSelectedUser((prevSelectedUsers) => [
+      ...prevSelectedUsers,
+      user, // Add the selected user to the array
+    ]);
+    console.log(
+      `User ${user.inspectorId} added with checklist ${user.checklistId}.`
+    );
+
+    console.log(
+      `Current number of selected users: ${
+        selectedUser.length + (existingUserIndex === -1 ? 1 : 0)
+      }`
+    );
+    console.log(isAddPatrolEnabled);
+  };
+
+  const handleUserSelectCancel = () => {
+    setSelectedUser([]);
+  };
+  const addPatrol = async () => {
+    const presets_id = selectedPreset?.id;
+
+    const data = {
+      date: selectedTime,
+      presets_id,
+      patrol_has_Checklist: selectedUser,
+    };
+
+    try {
+      const response = await fetchData("post", "/patrols", true, data);
+      if (response) {
+        console.log("Patrol added successfully", response);
+        window.location.reload();
+      } else {
+        console.error("Error adding patrol:", response);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col p-5 gap-y-5">
@@ -236,13 +266,15 @@ export default function HomePage() {
             <AlertDialogTrigger className="w-full">
               <CreatePatrolCard />
             </AlertDialogTrigger>
-            <AlertDialogContent className="w-[620px] h-[703px] mb-[1000px]">
+            <AlertDialogContent className="w-[620px] h-[715px] mb-[1000px]">
               <AlertDialogHeader>
                 <div className="flex items-start justify-start">
-                  <AlertDialogTitle>Patrol Preset</AlertDialogTitle>
+                  <AlertDialogTitle className="text-[20px]">
+                    Patrol Preset
+                  </AlertDialogTitle>
                 </div>
                 <div>
-                  <AlertDialogDescription className="flex items-start justify-start">
+                  <AlertDialogDescription className="flex items-start justify-start text-[18px]">
                     Please select a preset for the patrol
                   </AlertDialogDescription>
                 </div>
@@ -253,23 +285,34 @@ export default function HomePage() {
                       {allpreset.map((preset) => (
                         <Button
                           key={preset.id}
-                          className={`grid grid-cols-1 sm:grid-cols-1 h-[300px] ${
+                          variant={"outline"}
+                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${
                             selectedPreset === preset
-                              ? "bg-accent"
-                              : "bg-secondary"
-                          } border-secondary hover:border-red-500 p-2`}
+                              ? "border-red-600"
+                              : "border-transparent" // Use border-transparent instead of border-none
+                          } border p-2`} // Ensure there's a border class to maintain layout
                           onClick={() => handlePresetSelect(preset)}
                         >
+                          {/* Title */}
                           <div className="w-full flex items-start justify-start">
-                            <p className="font-bold">{preset.title}</p>
+                            <p className="font-bold text-black">
+                              {preset.title}
+                            </p>
                           </div>
-                          <div className="flex items-center justify-center">
+                          {/* Map */}
+                          <div className="flex items-center justify-center mb-1">
                             <div className="h-[175px] w-[185px] bg-card rounded"></div>
                           </div>
-                          <div className="relative text-muted-foreground">
+                          {/* Description */}
+                          <div className="relative w-full">
+                            {/* Positioned Icon */}
+                            <span className="material-symbols-outlined text-[20px] text-muted-foreground absolute left-0 top-0">
+                              data_info_alert
+                            </span>
+                            {/* Positioned Textarea */}
                             <Textarea
                               disabled
-                              className="pl-8 text-[10px] resize-none leading-tight border-none"
+                              className="pl-6 pointer-events-none border-none shadow-none text-[12px] overflow-hidden text-left resize-none leading-tight w-full"
                               placeholder={preset.description}
                             />
                           </div>
@@ -279,17 +322,21 @@ export default function HomePage() {
                   </ScrollArea>
                 </div>
               </AlertDialogHeader>
-              <AlertDialogFooter className="flex items-end justify-start ">
-                <div className="flex gap-[10px]">
+              <AlertDialogFooter>
+                <div className="flex items-end justify-end gap-[10px]">
                   <AlertDialogCancel className="bg-secondary text-[20px]">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className="flex items-center justify-start w-[100px]"
+                    className="flex items-center justify-between gap-4 w-[100px]"
                     onClick={openSecondDialog}
                     disabled={isNextButtonDisabled} // Disable button based on selection
                   >
-                    Next
+                    {" "}
+                    <p className="text-[20px]">Next</p>
+                    <span className="material-symbols-outlined text-[20px]">
+                      chevron_right
+                    </span>
                   </AlertDialogAction>
                 </div>
               </AlertDialogFooter>
@@ -302,78 +349,96 @@ export default function HomePage() {
             open={isSecondDialogOpen}
             onOpenChange={setIsSecondDialogOpen}
           >
-            <AlertDialogContent className="max-w-[995px] h-[571px] mb-[1000px]">
+            <AlertDialogContent className="max-w-[995px] h-[700px] mb-[1000px]">
               <AlertDialogHeader>
                 <div className="flex items-start justify-start">
-                  <AlertDialogTitle>Patrol Preset</AlertDialogTitle>
+                  <AlertDialogTitle className="text-[20px] pl-[10px]">
+                    Patrol Preset
+                  </AlertDialogTitle>
                 </div>
                 <div>
-                  <AlertDialogDescription className="flex items-start justify-start">
+                  <AlertDialogDescription className="flex items-start justify-start text-input text-[18px]  pl-[10px]">
                     Please select a preset for the patrol
                   </AlertDialogDescription>
                 </div>
+                <div className="pl-[10px] grid grid-cols-1 text-muted-foreground gap-2">
+                  <div className="flex font-bold">Date</div>
+                  <div>
+                    {" "}
+                    {/* Date input */}{" "}
+                    <DatePicker handleSelectedTime={handleTimeSelect} />
+                  </div>
+                </div>
+
+                {/* <div>Selected Date: {selectedTime}</div> */}
               </AlertDialogHeader>
-              <div className="flex items-center justify-center">
-                <ScrollArea className="p-[10px] h-[400px] w-full rounded-md border pr-[15px] overflow-visible overflow-y-clip">
+              <div className="grid grid-cols-1">
+                <div className=" pl-[10px] font-bold text-muted-foreground">
+                  Checklist
+                </div>
+                <ScrollArea className="p-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
-                    {allpreset.map((checklist, index) => (
-                      <BlankDropdown key={index} />
+                    {selectedPreset?.checklist.map((presetChecklist) => (
+                      <BlankDropdown
+                        key={presetChecklist.checklist.id}
+                        checklist={presetChecklist.checklist}
+                        handleSelectedUser={handleUserSelect}
+                      />
                     ))}
                   </div>
                 </ScrollArea>
               </div>
-              <AlertDialogFooter className="flex items-end justify-start">
-                <AlertDialogCancel className="bg-secondary text-[20px]">
-                  Close
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="flex items-center justify-start w-[100px]"
-                  onClick={openThirdDialog}
-                  disabled={!selectedPreset} // Disable based on selection
-                >
-                  Next
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-        {isThirdDialogOpen && (
-          <AlertDialog
-            open={isThirdDialogOpen}
-            onOpenChange={setIsThirdDialogOpen}
-          >
-            <AlertDialogContent className="w-[620px] h-[303px] mb-[1000px]">
-              <AlertDialogHeader>
-                <div className="flex items-start justify-start">
-                  <AlertDialogTitle>Third Dialog</AlertDialogTitle>
+              <AlertDialogFooter>
+                <div className="flex items-end justify-end gap-[10px]">
+                  <AlertDialogCancel
+                    className="bg-secondary text-[20px]"
+                    onClick={handleUserSelectCancel}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="flex items-center justify-between gap-2 w-[150px]"
+                    onClick={addPatrol}
+                    disabled={!isAddPatrolEnabled} // Disable button based on selection
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      note_add
+                    </span>
+                    <p className="text-[20px]">New Patrol</p>
+                  </AlertDialogAction>
                 </div>
-                <AlertDialogDescription>
-                  This is the second AlertDialog.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex items-end justify-start">
-                <AlertDialogCancel className="bg-secondary text-[20px]">
-                  Close
-                </AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         )}
-        {patrolCards.map((card, index) => (
-          <PatrolCard
-            key={index}
-            patrolStatus={card.status as PatrolStatus} // Ensure it's cast to PatrolStatus if necessary
-            patrolSheetDate={new Date(card.date)} // Parse the date from string to Date object
-            patrolSheetTitle={card.preset ? card.preset.title : "No Title"} // Check if preset is defined
-            presetNumber={
-              card.preset.id !== undefined ? String(card.preset.id) : "N/A"
-            } // Convert number to string
-            inspectorNames={card.user.map((u: PatrolUser) => u.user.username)} // Explicitly typing 'u'
-            detectedItems={0} // Update this based on your logic
-            detectedComments={0} // Update this based on your logic
-            detectedDefects={0} // Update this based on your logic
-          />
-        ))}
+
+        {patrolCards &&
+          Array.isArray(patrolCards) &&
+          patrolCards.length > 0 &&
+          patrolCards.map((card) => {
+            const { status, date, preset, user } = card; // Destructure properties for readability
+            const inspectorNames =
+              user.map((u: PatrolUser) => u.user.username).join(", ") ||
+              "No Inspectors"; // Joining names for display
+
+            return (
+              <PatrolCard
+                key={card.id || date} // Use a unique identifier if available
+                patrolStatus={status as PatrolStatus} // Cast to PatrolStatus if necessary
+                patrolSheetDate={new Date(date)} // Parse the date from string to Date object
+                patrolSheetTitle={preset ? preset.title : "No Title"} // Use optional chaining
+                presetNumber={
+                  preset?.id !== undefined ? String(preset.id) : "N/A"
+                } // Simplify with optional chaining
+                inspectorNames={card.user.map(
+                  (u: PatrolUser) => u.user.username
+                )} // Explicitly typing 'u'
+                detectedItems={0} // Update based on your logic
+                detectedComments={0} // Update based on your logic
+                detectedDefects={0} // Update based on your logic
+              />
+            );
+          })}
       </div>
     </div>
   );
