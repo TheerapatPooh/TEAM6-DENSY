@@ -4,9 +4,9 @@ import bcrypt from 'bcrypt'
 
 export async function getUser(req: Request, res: Response) {
     try {
-        const id = parseInt(req.params.id, 10); 
+        const userId = parseInt(req.params.id, 10); 
         const user = await prisma.user.findUnique({
-        where: { id },
+        where: { us_id: userId },
       });
   
       if (!user) {
@@ -42,11 +42,11 @@ export async function createUser(req: Request, res: Response) {
         const hashPassword = await bcrypt.hash(password, 10)
         const newUser = await prisma.user.create({
           data: {
-            username,
-            email,
-            password: hashPassword,
-            role,
-            department: department || null,
+            us_username: username,
+            us_email: email,
+            us_password: hashPassword,
+            us_role: role,
+            us_department: department || null,
           },
         })
          res.status(201).json(newUser) 
@@ -57,9 +57,9 @@ export async function createUser(req: Request, res: Response) {
 
 export async function getProfile(req: Request, res: Response) {
   try {
-      const id = (req as any).user.userId
+      const userId = (req as any).user.userId
       const userWithProfile = await prisma.user.findUnique({
-          where: { id }, 
+          where: { us_id: userId }, 
           include: {
               profile: true
           },
