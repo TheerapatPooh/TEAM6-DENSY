@@ -86,7 +86,7 @@ export async function getPatrol(req: Request, res: Response) {
                 }))
             }
         };
-        res.send(patrolDetail)
+        res.status(200).send(patrolDetail)
 
     } catch (err) {
         res.status(500).send(err)
@@ -124,7 +124,7 @@ export async function getAllPatrols(req: Request, res: Response) {
             });
 
             if (inspectorPatrols.length > 0) {
-                return res.json(inspectorPatrols);
+                return res.status(200).json(inspectorPatrols);
             } else {
                 return res.status(404).json({ message: 'No patrols found for you' });
             }
@@ -160,7 +160,7 @@ export async function getAllPatrols(req: Request, res: Response) {
                     }))
                 }))
             };
-            return res.json(newAllPatrols);
+            return res.status(200).json(newAllPatrols);
         } else {
             return res.status(403).json({ message: "Access Denied" });
         }
