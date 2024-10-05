@@ -52,11 +52,11 @@ export async function createUser(req: Request, res: Response) {
 
         await prisma.profile.create({
             data: {
-              users_id: newUser.id,
-              name: null,
-              age: null,
-              tel: null,
-              address: null
+              pf_us_id: newUser.us_id,
+              pf_name: null,
+              pf_age: null,
+              pf_tel: null,
+              pf_address: null
             }
           });
   
@@ -76,26 +76,26 @@ export async function updateProfile(req: Request, res: Response) {
         let image = null;
         if (imagePath) {
             image = await prisma.image.upsert({
-                where: { profile_id: userId }, 
+                where: { im_pf_id: userId }, 
                 update: {
-                    path: imagePath, 
+                    im_path: imagePath, 
                 },
                 create: {
-                    path: imagePath,  
+                    im_path: imagePath,  
                     profile: {
-                        connect: { users_id: userId } 
+                        connect: { pf_us_id: userId } 
                     }
                 }
             });
         }
         const updatedProfile = await prisma.profile.update({
-            where: { users_id: userId },
+            where: { pf_us_id: userId },
             data: {
-                name: name, 
-                age: age,
-                tel: tel,
-                address: address,
-                image: image ? { connect: { id: image.id } } : undefined
+                pf_name: name, 
+                pf_age: age,
+                pf_tel: tel,
+                pf_address: address,
+                pf_image: image ? { connect: { im_id: image.im_id } } : undefined
             },
         });
 
@@ -110,9 +110,9 @@ export async function updateProfile(req: Request, res: Response) {
 
 export async function getProfile(req: Request, res: Response) {
   try {
-      const userId = (req as any).user.userId
+      const id = (req as any).user.userId
       const userWithProfile = await prisma.user.findUnique({
-          where: { us_id: userId }, 
+          where: { us_id:id }, 
           include: {
               profile: true
           },
