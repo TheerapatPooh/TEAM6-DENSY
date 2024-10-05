@@ -65,20 +65,20 @@ export function PatrolCard({
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between items-center">
                     <CardDescription className="text-lg font-semibold">{formattedDate}</CardDescription>
-                    {patrolSheetStatus === "Pending" ? (
+                    {patrolStatus === "Pending" ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
                         </div>
-                    ) : patrolSheetStatus === "Scheduled" ? (
+                    ) : patrolStatus === "Scheduled" ? (
                         <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-yellow-500">event_available</span>
                         </div>
                     )
-                     : patrolSheetStatus === "On Going" ? (
+                     : patrolStatus === "OnGoing" ? (
                         <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-purple-500">cached</span>
                         </div>
-                    ) : patrolSheetStatus === "Completed" ? (
+                    ) : patrolStatus === "Completed" ? (
                         <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-green-500">check</span>
                         </div>

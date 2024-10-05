@@ -7,7 +7,9 @@ interface BadgeCustomProps {
     showIcon?: boolean,
     timeStamp?: string,
     showTime?: boolean,
-    children: React.ReactNode
+    className?: string, 
+    width?: string,
+    children?: React.ReactNode
 }
 
 const badgeVariants = {
@@ -29,15 +31,17 @@ export default function BadgeCustom({
     showIcon = false,
     timeStamp,
     showTime = false,
+    width, 
     children
 }: BadgeCustomProps) {
     const badgeClass = badgeVariants[variant] || badgeVariants.default;
    
     return (
-        <Badge className={cn(`${badgeClass} cursor-pointer flex align-center justify-between gap-2 h-[30px] p-2`,
-            showTime ? "w-[180px]"  : "w-[150px]"
+        <Badge className={cn(
+            `${badgeClass} cursor-pointer align-center justify-between gap-2 h-[30px] p-2`,
+            width ? width : (showTime ? "w-[180px]" : "w-[150px]"),
         )}>
-            <div className='flex gap-2 align-center'>
+            <div className='flex gap-2 items-center'>
                 {showIcon && iconName && (
                     <span className="material-symbols-outlined text-[22px]">
                         {iconName}

@@ -99,7 +99,6 @@ export default function ProfileDropdown() {
           <DropdownMenuLabel className=" w-[226px] text-lg font-medium">
             {t('MyAccount')}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-secondary h-[2px]" />
           <DropdownMenuItem className="w-[226px] h-[full]">
             <div className="flex gap-1 w-full items-center">
               <span className="material-symbols-outlined">account_circle</span>
