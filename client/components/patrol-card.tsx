@@ -6,37 +6,47 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { useEffect, useState } from "react"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
+import { patrolStatus } from "@/app/type";
 
 interface props {
-    patrolSheetStatus: string,
-    patrolSheetDate: Date,
-    patrolSheetTitle: string,
-    presetNumber: string,
-    inspectorNames: string[],
-    detectedItems: number,
-    detectedComments: number,
-    detectedDefects: number
+  patrolStatus: patrolStatus;
+  patrolSheetDate: Date;
+  patrolSheetTitle: string;
+  presetNumber: string;
+  inspectorNames: string[];
+  detectedItems: number;
+  detectedComments: number;
+  detectedDefects: number;
 }
 
-export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitle, presetNumber, inspectorNames, detectedItems, detectedComments, detectedDefects }: props) {
-    const formattedDate = patrolSheetDate.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
-    const [mounted, setMounted] = useState(false)
+export function PatrolCard({
+  patrolStatus,
+  patrolSheetDate,
+  patrolSheetTitle,
+  presetNumber,
+  inspectorNames = [],
+  detectedItems,
+  detectedComments,
+  detectedDefects,
+}: props) {
+  const formattedDate =
+    patrolSheetDate instanceof Date
+      ? patrolSheetDate.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      : "N/A"; // Fallback if patrolSheetDate is not valid
     const [isClicked, setIsClicked] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+  const [mounted, setMounted] = useState(false);
 
-    const t = useTranslations('General');
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    if (!mounted) {
-        return null
-    }
+  const t = useTranslations("General");
 
     const handleClick = () => {
         setIsClicked(prev => !prev);
@@ -55,20 +65,20 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between items-center">
                     <CardDescription className="text-[20px] font-semibold">{formattedDate}</CardDescription>
-                    {patrolSheetStatus === "Pending" ? (
+                    {patrolStatus === "Pending" ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
                         </div>
-                    ) : patrolSheetStatus === "Scheduled" ? (
+                    ) : patrolStatus === "Scheduled" ? (
                         <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-yellow-500">event_available</span>
                         </div>
                     )
-                     : patrolSheetStatus === "On Going" ? (
+                     : patrolStatus === "OnGoing" ? (
                         <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-purple-500">cached</span>
                         </div>
-                    ) : patrolSheetStatus === "Completed" ? (
+                    ) : patrolStatus === "Completed" ? (
                         <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 shadow-md">
                             <span className="material-symbols-outlined text-green-500">check</span>
                         </div>
@@ -174,9 +184,11 @@ export function PatrolCard({ patrolSheetStatus, patrolSheetDate, patrolSheetTitl
 }
 
 export function CreatePatrolCard() {
-    return (
-        <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
-            <span className="material-symbols-outlined text-card text-9xl">note_add</span>
-        </Card>
-    );
+  return (
+    <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
+      <span className="material-symbols-outlined text-card text-9xl">
+        note_add
+      </span>
+    </Card>
+  );
 }
