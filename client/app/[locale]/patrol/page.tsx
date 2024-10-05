@@ -8,7 +8,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -29,7 +28,7 @@ import { useTranslations } from "next-intl";
 import { fetchData } from "@/lib/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { BlankDropdown } from "@/components/patrol-select-user-dropdown";
+import { ChecklistDropdown } from "@/components/checklist-dropdown";
 import { DatePicker, DatePickerWithRange } from "../../../components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -300,19 +299,14 @@ export default function HomePage() {
             <AlertDialogTrigger className="w-full">
               <CreatePatrolCard />
             </AlertDialogTrigger>
-            <AlertDialogContent className="w-[620px] h-[715px] mb-[1000px]">
+            <AlertDialogContent className="w-[620px] h-[715px]">
               <AlertDialogHeader>
-                <div className="flex items-start justify-start">
-                  <AlertDialogTitle className="text-[20px]">
-                    Patrol Preset
-                  </AlertDialogTitle>
-                </div>
-                <div>
-                  <AlertDialogDescription className="flex items-start justify-start text-[18px]">
-                    Please select a preset for the patrol
-                  </AlertDialogDescription>
-                </div>
-
+                <AlertDialogTitle className="text-2xl font-semibold">
+                  Patrol Preset
+                </AlertDialogTitle>
+                <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                  Please select a preset for the patrol
+                </AlertDialogDescription>
                 <div className="flex items-center justify-center">
                   <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
@@ -329,7 +323,7 @@ export default function HomePage() {
                           >
                             {/* Title */}
                             <div className="w-full flex items-start justify-start">
-                              <p className="font-bold text-black">
+                              <p className="font-bold text-xl text-card-foreground">
                                 {preset.title}
                               </p>
                             </div>
@@ -340,13 +334,13 @@ export default function HomePage() {
                             {/* Description */}
                             <div className="relative w-full">
                               {/* Positioned Icon */}
-                              <span className="material-symbols-outlined text-[20px] text-muted-foreground absolute left-0 top-0">
+                              <span className="material-symbols-outlined text-2xl text-muted-foreground absolute left-0 top-0">
                                 data_info_alert
                               </span>
                               {/* Positioned Textarea */}
                               <Textarea
                                 disabled
-                                className="pl-6 pointer-events-none border-none shadow-none text-[12px] overflow-hidden text-left resize-none leading-tight w-full"
+                                className="pl-6 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight w-full"
                                 placeholder={preset.description}
                               />
                             </div>
@@ -364,17 +358,15 @@ export default function HomePage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <div className="flex items-end justify-end gap-[10px]">
-                  <AlertDialogCancel className="bg-secondary text-[20px]">
+                  <AlertDialogCancel>
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className="flex items-center justify-between gap-4 w-[100px]"
                     onClick={openSecondDialog}
-                    disabled={isNextButtonDisabled} // Disable button based on selection
+                    disabled={isNextButtonDisabled}
                   >
-                    {" "}
-                    <p className="text-[20px]">Next</p>
-                    <span className="material-symbols-outlined text-[20px]">
+                    Next
+                    <span className="material-symbols-outlined text-2xl">
                       chevron_right
                     </span>
                   </AlertDialogAction>
@@ -389,40 +381,30 @@ export default function HomePage() {
             open={isSecondDialogOpen}
             onOpenChange={setIsSecondDialogOpen}
           >
-            <AlertDialogContent className="max-w-[995px] h-[700px] mb-[1000px]">
+            <AlertDialogContent className="max-w-[995px] h-[700px]">
               <AlertDialogHeader>
-                <div className="flex items-start justify-start">
-                  <AlertDialogTitle className="text-[20px] pl-[10px]">
-                    Patrol Preset
-                  </AlertDialogTitle>
-                </div>
-                <div>
-                  <AlertDialogDescription className="flex items-start justify-start text-input text-[18px]  pl-[10px]">
-                    Please select a preset for the patrol
-                  </AlertDialogDescription>
-                </div>
-                <div className="pl-[10px] grid grid-cols-1 text-muted-foreground gap-2">
-                  <div className="flex font-bold">Date</div>
-                  <div>
-                    {" "}
-                    {/* Date input */}{" "}
-                    <DatePicker handleSelectedTime={handleTimeSelect} />
-                  </div>
-                </div>
+                <AlertDialogTitle className="text-2xl font-semibold">
+                  Patrol Preset
+                </AlertDialogTitle>
+                <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                  Please select a preset for the patrol
+                </AlertDialogDescription>
+                <p className="font-semibold text-muted-foreground">Date</p>
+                <DatePicker handleSelectedTime={handleTimeSelect} />
+
 
                 {/* <div>Selected Date: {selectedTime}</div> */}
               </AlertDialogHeader>
               <div className="grid grid-cols-1">
-                <div className=" pl-[10px] font-bold text-muted-foreground">
+                <p className="font-semibold text-muted-foreground">
                   Checklist
-                </div>
-                <ScrollArea className="p-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
+                </p>
+                <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
                     {selectedPreset?.checklist.map((presetChecklist) => (
-                      <BlankDropdown
+                      <ChecklistDropdown
                         key={presetChecklist.checklist.id}
                         checklist={presetChecklist.checklist}
-                        handleSelectedUser={handleUserSelect}
                       />
                     ))}
                   </div>
@@ -431,20 +413,19 @@ export default function HomePage() {
               <AlertDialogFooter>
                 <div className="flex items-end justify-end gap-[10px]">
                   <AlertDialogCancel
-                    className="bg-secondary text-[20px]"
                     onClick={handleUserSelectCancel}
                   >
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className="flex items-center justify-between gap-2 w-[150px]"
+                    className="gap-2"
                     onClick={addPatrol}
                     disabled={!isAddPatrolEnabled} // Disable button based on selection
                   >
-                    <span className="material-symbols-outlined text-[20px]">
+                    <span className="material-symbols-outlined text-2xl">
                       note_add
                     </span>
-                    <p className="text-[20px]">New Patrol</p>
+                    New Patrol
                   </AlertDialogAction>
                 </div>
               </AlertDialogFooter>

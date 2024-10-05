@@ -8,7 +8,7 @@ import { useEffect, useState } from "react"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
 import { patrolStatus } from "@/app/type";
 
-interface props {
+export interface patrolCardProps {
   patrolStatus: patrolStatus;
   patrolDate: Date;
   patrolPreset: string;
@@ -28,7 +28,7 @@ export function PatrolCard({
   items,
   fails,
   defects,
-}: props) {
+}: patrolCardProps) {
   const formattedDate =
     patrolDate instanceof Date
       ? patrolDate.toLocaleDateString("en-GB", {
