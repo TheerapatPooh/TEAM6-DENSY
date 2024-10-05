@@ -1,3 +1,4 @@
+
 import { prisma } from '../Utils/database'
 import { Request, Response } from 'express'
 
@@ -5,9 +6,7 @@ import { Request, Response } from 'express'
 export async function getPatrol(req: Request, res: Response) {
     try {
         const userId = (req as any).user.userId
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        })
+        const role = (req as any).user.role
         const id = parseInt(req.params.id, 10);
         const patrol = await prisma.patrol.findUnique
             ({
@@ -47,7 +46,7 @@ export async function getPatrol(req: Request, res: Response) {
         }
 
         const isUserInPatrol = patrol.user.some((userPatrol) => userPatrol.users_id === userId)
-        if (!isUserInPatrol && user?.role !== 'ADMIN') {
+        if (!isUserInPatrol && role !== 'ADMIN') {
             return res.status(403).json({ message: "Access Denied" })
         }
 
@@ -94,14 +93,9 @@ export async function getPatrol(req: Request, res: Response) {
 export async function getAllPatrols(req: Request, res: Response) {
     try {
         const userId = (req as any).user.userId
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        })
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (user.role === 'INSPECTOR') {
+        const role = (req as any).user.role
+        
+        if (role === 'INSPECTOR') {
             const inspectorPatrols = await prisma.patrol.findMany({
                 where: {
                     checklist: {
@@ -126,7 +120,7 @@ export async function getAllPatrols(req: Request, res: Response) {
             } else {
                 return res.status(404).json({ message: 'No patrols found for you' });
             }
-        } else if (user.role === 'ADMIN') {
+        } else if (role === 'ADMIN') {
             const allPatrols = await prisma.patrol.findMany({
                 include: {
                     preset: true, 

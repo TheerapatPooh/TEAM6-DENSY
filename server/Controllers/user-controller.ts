@@ -45,11 +45,64 @@ export async function createUser(req: Request, res: Response) {
             department: department || null,
           },
         })
+
+        await prisma.profile.create({
+            data: {
+              users_id: newUser.id,
+              name: null,
+              age: null,
+              tel: null,
+              address: null
+            }
+          });
+  
          res.status(201).json(newUser) 
     } catch (err) {
         res.status(500).send(err)
     }
 }
+
+
+export async function updateProfile(req: Request, res: Response) {
+    try {
+        const userId = (req as any).user.userId
+        const { name, age, tel, address } = req.body
+        const imagePath = req.file?.filename || '';
+
+        let image = null;
+        if (imagePath) {
+            image = await prisma.image.upsert({
+                where: { profile_id: userId }, 
+                update: {
+                    path: imagePath, 
+                },
+                create: {
+                    path: imagePath,  
+                    profile: {
+                        connect: { users_id: userId } 
+                    }
+                }
+            });
+        }
+        const updatedProfile = await prisma.profile.update({
+            where: { users_id: userId },
+            data: {
+                name: name, 
+                age: age,
+                tel: tel,
+                address: address,
+                image: image ? { connect: { id: image.id } } : undefined
+            },
+        });
+
+        res.status(200).json(updatedProfile);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update user profile' });
+    }
+}
+
+
 
 export async function getProfile(req: Request, res: Response) {
   try {
