@@ -465,17 +465,17 @@ export default function HomePage() {
               <PatrolCard
                 key={card.id || date} // Use a unique identifier if available
                 patrolStatus={status as PatrolStatus} // Cast to PatrolStatus if necessary
-                patrolSheetDate={new Date(date)} // Parse the date from string to Date object
-                patrolSheetTitle={preset ? preset.title : "No Title"} // Use optional chaining
-                presetNumber={
+                patrolDate={new Date(date)} // Parse the date from string to Date object
+                patrolPreset={preset ? preset.title : "No Title"} // Use optional chaining
+                patrolId={
                   preset?.id !== undefined ? String(preset.id) : "N/A"
                 } // Simplify with optional chaining
-                inspectorNames={card.user.map(
+                inspector={card.user.map(
                   (u: PatrolUser) => u.user.username
                 )} // Explicitly typing 'u'
-                detectedItems={0} // Update based on your logic
-                detectedComments={0} // Update based on your logic
-                detectedDefects={0} // Update based on your logic
+                items={0} // Update based on your logic
+                fails={0} // Update based on your logic
+                defects={0} // Update based on your logic
               />
             );
           })}

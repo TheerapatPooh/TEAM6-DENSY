@@ -10,33 +10,33 @@ import { patrolStatus } from "@/app/type";
 
 interface props {
   patrolStatus: patrolStatus;
-  patrolSheetDate: Date;
-  patrolSheetTitle: string;
-  presetNumber: string;
-  inspectorNames: string[];
-  detectedItems: number;
-  detectedComments: number;
-  detectedDefects: number;
+  patrolDate: Date;
+  patrolPreset: string;
+  patrolId: string;
+  inspector: string[];
+  items: number;
+  fails: number;
+  defects: number;
 }
 
 export function PatrolCard({
   patrolStatus,
-  patrolSheetDate,
-  patrolSheetTitle,
-  presetNumber,
-  inspectorNames = [],
-  detectedItems,
-  detectedComments,
-  detectedDefects,
+  patrolDate,
+  patrolPreset,
+  patrolId,
+  inspector = [],
+  items,
+  fails,
+  defects,
 }: props) {
   const formattedDate =
-    patrolSheetDate instanceof Date
-      ? patrolSheetDate.toLocaleDateString("en-GB", {
+    patrolDate instanceof Date
+      ? patrolDate.toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
         })
-      : "N/A"; // Fallback if patrolSheetDate is not valid
+      : "N/A"; // Fallback if patrolDate is not valid
     const [isClicked, setIsClicked] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
 
@@ -88,40 +88,40 @@ export function PatrolCard({
                         </div>
                     )}
                 </div>
-                <CardTitle className="card-foreground text-2xl">{patrolSheetTitle}</CardTitle>
+                <CardTitle className="card-foreground text-2xl">{patrolPreset}</CardTitle>
             </CardHeader>
             <CardContent className="gap-0 px-[10px] py-0">
                 <div className="flex gap-2.5 text-muted-foreground items-center">
                     <span className="material-symbols-outlined">description</span>
-                    <p className="text-xl">{presetNumber}</p>
+                    <p className="text-xl">{patrolId}</p>
                 </div>
                 <HoverCard open={isClicked || isHovered}>
                     <HoverCardTrigger onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} asChild>
                         <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
-                            {inspectorNames.length > 0 && (
+                            {inspector.length > 0 && (
                                 <div className="flex items-center me-2.5 truncate max-w-[190px]">
                                     <p className="text-xl me-2.5 truncate"> 
-                                        {inspectorNames[0]}
+                                        {inspector[0]}
                                     </p>
                                 </div>
                             )}
-                            {inspectorNames.slice(0, 4).map((inspectorName) => (
+                            {inspector.slice(0, 4).map((inspectorName) => (
                                 <Avatar className="custom-shadow ms-[-10px]">
                                     <AvatarImage src=""/>
                                     <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
                                 </Avatar>
                             ))}
-                            {inspectorNames.length === 5 && (
+                            {inspector.length === 5 && (
                                 <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                                     <AvatarImage src="https://github.com/shadcn.png"/> 
-                                    <AvatarFallback>{inspectorNames[4].slice(0, 2)}.</AvatarFallback> 
+                                    <AvatarFallback>{inspector[4].slice(0, 2)}.</AvatarFallback> 
                                 </Avatar>
                             )}
-                            {inspectorNames.length > 5 && (
+                            {inspector.length > 5 && (
                                 <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                                     <AvatarImage src=""/> 
-                                    <span className="absolute text-card-foreground text-[16px] font-semibold">+{inspectorNames.length - 5}</span>
+                                    <span className="absolute text-card-foreground text-[16px] font-semibold">+{inspector.length - 5}</span>
                                     <AvatarFallback></AvatarFallback>
                                 </Avatar>
                             )}
@@ -132,7 +132,7 @@ export function PatrolCard({
                             <span className="material-symbols-outlined me-2.5">engineering</span>
                             <p className="text-lg font-medium text-center">{t('InspectorListNames')}</p>
                         </div>
-                        {inspectorNames.map((inspectorName) =>
+                        {inspector.map((inspectorName) =>
                             <div className="flex items-center p-2">
                                 <Avatar className="custom-shadow ms-[-10px] me-2.5">
                                     <AvatarImage src=""/>
@@ -150,15 +150,15 @@ export function PatrolCard({
                 <div className="flex gap-2.5 items-center w-full">
                     <div className="flex gap-2.5 text-blue-500 items-center">
                         <span className="material-symbols-outlined">checklist</span>
-                        <p className="text-[20px] font-semibold">{detectedItems}</p>
+                        <p className="text-[20px] font-semibold">{items}</p>
                     </div>
                     <div className="flex gap-2.5 text-yellow-500 items-center">
                         <span className="material-symbols-outlined">close</span>
-                        <p className="text-[20px] font-semibold">{detectedComments}</p>
+                        <p className="text-[20px] font-semibold">{fails}</p>
                     </div>
                     <div className="flex gap-2.5 text-red-500 items-center">
                         <span className="material-symbols-outlined text-red-500">error</span>
-                        <p className="text-[20px] font-semibold">{detectedDefects}</p>
+                        <p className="text-[20px] font-semibold">{defects}</p>
                     </div>
                     <div className="ml-auto items-center">
                         <DropdownMenu>
