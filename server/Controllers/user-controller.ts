@@ -123,7 +123,6 @@ export async function getProfile(req: Request, res: Response) {
       }
       res.status(200).json(userWithProfile)
   } catch (error) {
-      console.error(error)
       res.status(500).json({ error: 'Failed to fetch user profile' })
   }
 }
