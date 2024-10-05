@@ -238,13 +238,13 @@ export default function HomePage() {
           <DropdownMenuContent className="p-2">
             <DropdownMenuLabel>Sort By</DropdownMenuLabel>
             <DropdownMenuRadioGroup value='Doc No.' >
-              <DropdownMenuRadioItem value="Doc No.">Doc No.</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date">Date</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Doc No." className="text-base">Doc No.</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Date" className="text-base">Date</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
             <DropdownMenuLabel>Order</DropdownMenuLabel>
             <DropdownMenuRadioGroup value='Order' >
-              <DropdownMenuRadioItem value="Order">Ascending</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date">Descending</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Order" className="text-base">Ascending</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Date" className="text-base">Descending</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
