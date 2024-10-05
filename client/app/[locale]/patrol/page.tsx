@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import BadgeCustom from "@/components/badge-custom";
 import { CreatePatrolCard, PatrolCard } from "@/components/patrol-card";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -26,10 +29,10 @@ import { useTranslations } from "next-intl";
 import { fetchData } from "@/lib/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import LinesEllipsis from "react-lines-ellipsis";
 import { BlankDropdown } from "@/components/patrol-select-user-dropdown";
-import { DatePicker } from "../../../components/date-picker";
-import { log } from "console";
+import { DatePicker, DatePickerWithRange } from "../../../components/date-picker";
+import BadgeCustom from "@/components/badge-custom";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Define User and PatrolCard interfaces
 interface User {
@@ -119,7 +122,7 @@ export default function HomePage() {
     setIsSecondDialogOpen(true);
   };
 
-  const t = useTranslations("PatrolPage");
+  const t = useTranslations("General");
 
   const [patrolCards, setPatrolCards] = useState<PatrolCardData[]>([]);
   const [alluserdata, setUser] = useState<User[]>([]);
@@ -192,8 +195,7 @@ export default function HomePage() {
     );
 
     console.log(
-      `Current number of selected users: ${
-        selectedUser.length + (existingUserIndex === -1 ? 1 : 0)
+      `Current number of selected users: ${selectedUser.length + (existingUserIndex === -1 ? 1 : 0)
       }`
     );
     console.log(isAddPatrolEnabled);
@@ -227,33 +229,62 @@ export default function HomePage() {
   return (
     <div className="flex flex-col p-5 gap-y-5">
       <div className="flex items-center gap-2">
-        <Textfield iconName="search" showIcon={true} placeholder="Search..." />
-
+        <Textfield iconName="search" showIcon={true} placeholder={t('Search')} />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="p-[10px] bg-card w-[100px] h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium cursor-pointer border border-secondary hover:bg-secondary hover:text-accent-foreground">
-              <span className="material-symbols-outlined">swap_vert</span>
-              <div className="text-lg	">Sort</div>
-            </div>
+          <DropdownMenuTrigger className="custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium">
+            <span className="material-symbols-outlined">swap_vert</span>
+            <div className="text-lg	">Sort</div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>A-Z</DropdownMenuItem>
-            <DropdownMenuItem>Date</DropdownMenuItem>
-            <DropdownMenuItem>Zone</DropdownMenuItem>
+          <DropdownMenuContent className="p-2">
+            <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value='Doc No.' >
+              <DropdownMenuRadioItem value="Doc No.">Doc No.</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Date">Date</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuLabel>Order</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value='Order' >
+              <DropdownMenuRadioItem value="Order">Ascending</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Date">Descending</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="p-[10px] bg-card w-[100px] h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium cursor-pointer border border-secondary hover:bg-secondary hover:text-accent-foreground">
-              <span className="material-symbols-outlined">page_info</span>
-              <div className="text-lg	">Filter</div>
-            </div>
+          <DropdownMenuTrigger className="custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium">
+            <span className="material-symbols-outlined">page_info</span>
+            <div className="text-lg	">Filter</div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>A-Z</DropdownMenuItem>
-            <DropdownMenuItem>Date</DropdownMenuItem>
-            <DropdownMenuItem>Zone</DropdownMenuItem>
+          <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
+            <div>
+              <DropdownMenuLabel>Date</DropdownMenuLabel>
+              <DatePickerWithRange />
+            </div>
+            <div>
+              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem checked><BadgeCustom width="w-full" variant="blue" showIcon={true} iconName="hourglass_top" children='Pending'></BadgeCustom></DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem><BadgeCustom width="w-full" variant="yellow" showIcon={true} iconName="event_available" children='Scheduled'></BadgeCustom></DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem><BadgeCustom width="w-full" variant="purple" showIcon={true} iconName="cached" children='On Going'></BadgeCustom></DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem><BadgeCustom width="w-full" variant="green" showIcon={true} iconName="check" children='Complete'></BadgeCustom></DropdownMenuCheckboxItem>
+            </div>
+            <div>
+              <DropdownMenuLabel>Preset</DropdownMenuLabel>
+              <Select>
+                <SelectTrigger className="">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Preset</SelectLabel>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="Weather And Toilet">Weather And Toilet</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-full justify-end gap-2">
+              <Button size='sm' variant='secondary'>Reset</Button>
+              <Button size='sm'>Apply</Button>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -286,11 +317,10 @@ export default function HomePage() {
                         <Button
                           key={preset.id}
                           variant={"outline"}
-                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${
-                            selectedPreset === preset
-                              ? "border-red-600"
-                              : "border-transparent" // Use border-transparent instead of border-none
-                          } border p-2`} // Ensure there's a border class to maintain layout
+                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${selectedPreset === preset
+                            ? "border-red-600"
+                            : "border-transparent" // Use border-transparent instead of border-none
+                            } border p-2`} // Ensure there's a border class to maintain layout
                           onClick={() => handlePresetSelect(preset)}
                         >
                           {/* Title */}
