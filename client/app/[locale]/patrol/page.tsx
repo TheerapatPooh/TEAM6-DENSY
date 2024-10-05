@@ -33,6 +33,7 @@ import { BlankDropdown } from "@/components/patrol-select-user-dropdown";
 import { DatePicker, DatePickerWithRange } from "../../../components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Define User and PatrolCard interfaces
 interface User {
@@ -132,8 +133,10 @@ export default function HomePage() {
   const isNextButtonDisabled = !selectedPreset; // Disable Next if no preset is selected
 
   const [selectedTime, setSelectedTime] = useState<string>("");
-
   const [selectedUser, setSelectedUser] = useState<PatrolHasChecklist[]>([]);
+
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const isChecklistAllSelected: boolean =
     selectedPreset?.checklist?.length === selectedUser.length;
@@ -230,8 +233,9 @@ export default function HomePage() {
     <div className="flex flex-col p-5 gap-y-5">
       <div className="flex items-center gap-2">
         <Textfield iconName="search" showIcon={true} placeholder={t('Search')} />
-        <DropdownMenu>
-          <DropdownMenuTrigger className="custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium">
+        <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
+          <DropdownMenuTrigger className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
+            ${isSortOpen ? "border border-destructive" : "border-none"}`}>
             <span className="material-symbols-outlined">swap_vert</span>
             <div className="text-lg	">Sort</div>
           </DropdownMenuTrigger>
@@ -248,10 +252,9 @@ export default function HomePage() {
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger className="custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium">
-            <span className="material-symbols-outlined">page_info</span>
+        <DropdownMenu onOpenChange={(open) => setIsFilterOpen(open)}>
+          <DropdownMenuTrigger className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
+            ${isFilterOpen ? "border border-destructive" : "border-none"}`}>            <span className="material-symbols-outlined">page_info</span>
             <div className="text-lg	">Filter</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
@@ -313,44 +316,51 @@ export default function HomePage() {
                 <div className="flex items-center justify-center">
                   <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
-                      {allpreset.map((preset) => (
-                        <Button
-                          key={preset.id}
-                          variant={"outline"}
-                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${selectedPreset === preset
-                            ? "border-red-600"
-                            : "border-transparent" // Use border-transparent instead of border-none
-                            } border p-2`} // Ensure there's a border class to maintain layout
-                          onClick={() => handlePresetSelect(preset)}
-                        >
-                          {/* Title */}
-                          <div className="w-full flex items-start justify-start">
-                            <p className="font-bold text-black">
-                              {preset.title}
-                            </p>
-                          </div>
-                          {/* Map */}
-                          <div className="flex items-center justify-center mb-1">
-                            <div className="h-[175px] w-[185px] bg-card rounded"></div>
-                          </div>
-                          {/* Description */}
-                          <div className="relative w-full">
-                            {/* Positioned Icon */}
-                            <span className="material-symbols-outlined text-[20px] text-muted-foreground absolute left-0 top-0">
-                              data_info_alert
-                            </span>
-                            {/* Positioned Textarea */}
-                            <Textarea
-                              disabled
-                              className="pl-6 pointer-events-none border-none shadow-none text-[12px] overflow-hidden text-left resize-none leading-tight w-full"
-                              placeholder={preset.description}
-                            />
-                          </div>
-                        </Button>
-                      ))}
+                      {allpreset !== null ? (
+                        allpreset.map((preset) => (
+                          <Button
+                            key={preset.id}
+                            variant={"outline"}
+                            className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${selectedPreset === preset
+                              ? "border-red-600"
+                              : "border-transparent"
+                              } border p-2`}
+                            onClick={() => handlePresetSelect(preset)}
+                          >
+                            {/* Title */}
+                            <div className="w-full flex items-start justify-start">
+                              <p className="font-bold text-black">
+                                {preset.title}
+                              </p>
+                            </div>
+                            {/* Map */}
+                            <div className="flex items-center justify-center mb-1">
+                              <div className="h-[175px] w-[185px] bg-card rounded"></div>
+                            </div>
+                            {/* Description */}
+                            <div className="relative w-full">
+                              {/* Positioned Icon */}
+                              <span className="material-symbols-outlined text-[20px] text-muted-foreground absolute left-0 top-0">
+                                data_info_alert
+                              </span>
+                              {/* Positioned Textarea */}
+                              <Textarea
+                                disabled
+                                className="pl-6 pointer-events-none border-none shadow-none text-[12px] overflow-hidden text-left resize-none leading-tight w-full"
+                                placeholder={preset.description}
+                              />
+                            </div>
+                          </Button>
+                        ))
+                      ) : (
+                        Array.from({ length: 4 }).map((_, index) => (
+                          <Skeleton key={index} className="h-[300px] w-full rounded-md" />
+                        ))
+                      )}
                     </div>
                   </ScrollArea>
                 </div>
+
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <div className="flex items-end justify-end gap-[10px]">
