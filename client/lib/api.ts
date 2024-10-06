@@ -23,17 +23,6 @@ export async function logout() {
     }
 }
 
-export async function fetchProfile() {
-    try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}/profile`,{
-            withCredentials: true
-        })
-        return response.data
-    } catch (error) {
-        console.error("Failed to fetch profile:", error)
-        return null
-    }
-}
 
 
 export async function fetchData(
