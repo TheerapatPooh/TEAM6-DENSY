@@ -111,7 +111,7 @@ model Preset {
   ps_title       String
   ps_description String
   ps_version     Int
-  ps_lasted      Boolean
+  ps_latest      Boolean
   ps_update_at   DateTime
   ps_us_id       Int
 
@@ -137,7 +137,7 @@ model Checklist {
   cl_id        Int      @id @default(autoincrement())
   cl_title     String
   cl_version   Int
-  cl_lasted    Boolean
+  cl_latest    Boolean
   cl_update_at DateTime @default(now())
   cl_us_id     Int
 
