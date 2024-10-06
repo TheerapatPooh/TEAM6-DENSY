@@ -5,6 +5,18 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
+function getRandomChartColor() {
+  const chartColors = [
+    "bg-chart-1",
+    "bg-chart-2",
+    "bg-chart-3",
+    "bg-chart-4",
+    "bg-chart-5",
+  ];
+  const randomIndex = Math.floor(Math.random() * chartColors.length);
+  return chartColors[randomIndex];
+}
+
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
@@ -39,7 +51,8 @@ const AvatarFallback = React.forwardRef<
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      "flex h-full text-card w-full items-center justify-center rounded-full",
+      getRandomChartColor(), 
       className
     )}
     {...props}

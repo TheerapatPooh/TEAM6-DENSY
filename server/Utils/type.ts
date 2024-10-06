@@ -1,7 +1,9 @@
 
 
 export type patrolStatus ="Pending"|"Scheduled"| "OnGoing"|"Completed"
+
 export type Role = "ADMIN"|"INSPECTOR"|"RESPONSIBLEMAN"|"OFFICER"
+  
 
 export interface Zone {
     id: number;
@@ -28,10 +30,8 @@ export interface Checklist {
     id: number;
     title: string;
     version: number;
-    latest: boolean;
-    updatedAt: string;
-    updateBy: Inspector;
-    items: Item[];
+    inspector: Inspector;
+    item: Item[]; 
 }
 
 export interface Preset {
@@ -39,10 +39,6 @@ export interface Preset {
     title: string;
     description: string;
     version: number;
-    latest: boolean;
-    updatedAt: string;
-    updateBy: Inspector; 
-    checklist: Checklist[]; 
 }
 
 export interface PatrolResult {
@@ -66,7 +62,7 @@ export interface Patrol {
 
 export interface Profile {
     id: number;
-    name: string;
+    name?: string;
     age?: number;
     tel?: string;
     address?: string;
@@ -75,23 +71,18 @@ export interface Profile {
 }
 
 export interface User {
-    createdAt?: string;
-    department?: string | null;
-    email?: string;
     id: number;
-    profile: Profile;
-    role: Role;
     username?: string;
+    email?: string | null;
     password?: any;
+    role: Role;
+    department?: string | null;
+    createdAt?: string;
+    profile?: Profile;
 }
 
 
 export interface Image {
     id: number;
     path: string;
-}
-
-export interface PatrolChecklist {
-    checklistId: number;
-    inspectorId: number;
 }

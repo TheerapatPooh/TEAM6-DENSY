@@ -1,5 +1,4 @@
-import { createPatrol, getAllPatrols, getPatrol } from "../Controllers/patrol-controller";
-import { getAllPresets } from "../Controllers/preset-controller";
+import { getAllPatrols, getPatrol, createPatrol } from "../Controllers/patrol-controller";
 import { Router } from 'express'
 import { authenticateUser } from "../Controllers/util-controller";
 const router = Router()
@@ -7,6 +6,6 @@ const router = Router()
 router.get('/patrols', authenticateUser, getAllPatrols)
 router.get('/patrol/:id', authenticateUser, getPatrol)
 
-router.post('/patrols', createPatrol)
+router.post('/patrol', authenticateUser, createPatrol)
 
 module.exports = router

@@ -14,37 +14,39 @@ datasource db {
 }
 
 model User {
-  us_id      Int      @id @default(autoincrement())
+  us_id         Int      @id @default(autoincrement())
   us_username   String   @unique
-  us_email      String   @unique
+  us_email      String?   @unique
   us_password   String
   us_role       Role
   us_department String?
   us_created_at DateTime @default(now())
 
-  preset       Preset[]
-  update_checklist    Checklist[]        @relation("user")
-  comment      Comment[]
-  profile      Profile[]
-  notification Notification[]
-  defect       Defect[]
-  zone        Zone[]
-  checklist   Patrol_Has_Checklist [] 
+  preset           Preset[]
+  update_checklist Checklist[]            @relation("user")
+  comment          Comment[]
+  profile          Profile[] 
+  notification     Notification[]
+  defect           Defect[]
+  zone             Zone[]
+  checklist        PatrolChecklist[]
+
   @@map("users")
 }
 
 model Defect {
-  df_id        Int      @id @default(autoincrement())
+  df_id        Int           @id @default(autoincrement())
   df_title     String
   df_note      String
   df_type      String
-  df_status    Defect_Status
-  df_timestamp DateTime @default(now())
-  df_us_id      Int
+  df_status    DefectStatus
+  df_timestamp DateTime      @default(now())
+  df_us_id     Int
 
-  user          User            @relation(fields: [df_us_id], references: [us_id])
-  patrol_result Patrol_Result[]
-  image         Defect_Has_Image[] 
+  user          User               @relation(fields: [df_us_id], references: [us_id])
+  patrol_result PatrolResult[]
+  image         DefectImage[]
+
   @@map("defects")
 }
 
@@ -53,51 +55,55 @@ model Notification {
   nt_message   String
   nt_status    Boolean
   nt_timestamp DateTime @default(now())
-  nt_us_id Int
+  nt_us_id     Int
 
-  user     User @relation(fields: [nt_us_id], references: [us_id])
+  user User @relation(fields: [nt_us_id], references: [us_id])
+
   @@map("notifications")
 }
 
 model Profile {
-  pf_id        Int     @id @default(autoincrement())
-  pf_name      String?
-  pf_age       Int?
-  pf_tel       String?
-  pf_address   String?
-  pf_image     Image? 
-  pf_us_id  Int      @unique
+  pf_id      Int     @id @default(autoincrement())
+  pf_name    String?
+  pf_age     Int?
+  pf_tel     String?
+  pf_address String?
+  pf_image   Image?
+  pf_us_id   Int     @unique
 
-  user      User     @relation(fields: [pf_us_id], references: [us_id])
+  user User @relation(fields: [pf_us_id], references: [us_id])
+
   @@map("profiles")
 }
 
 model Patrol {
-  pt_id         Int      @id @default(autoincrement())
+  pt_id         Int           @id @default(autoincrement())
   pt_date       DateTime
   pt_start_time DateTime?
   pt_end_time   DateTime?
   pt_duration   String?
   pt_status     Patrol_Status
-  pt_ps_id    Int
+  pt_ps_id      Int
 
-  checklist     Patrol_Has_Checklist[]
-  preset        Preset             @relation(fields: [pt_ps_id], references: [ps_id])
-  patrol_result Patrol_Result[]
+  checklist     PatrolChecklist[]
+  preset        Preset                 @relation(fields: [pt_ps_id], references: [ps_id])
+  patrol_result PatrolResult[]
+
   @@map("patrols")
 }
 
-model Patrol_Has_Checklist {
-  pthc_id       Int      @id @default(autoincrement())
-  pthc_pt_id    Int
-  pthc_cl_id    Int
-  pthc_us_id    Int
+model PatrolChecklist {
+  ptcl_id    Int @id @default(autoincrement())
+  ptcl_pt_id Int
+  ptcl_cl_id Int
+  ptcl_us_id Int
 
-  patrol       Patrol    @relation(fields: [pthc_pt_id], references: [pt_id])
-  checklist    Checklist @relation(fields: [pthc_cl_id], references: [cl_id])
-  inspector    User      @relation(fields: [pthc_us_id], references: [us_id])
-  @@map("patrol_has_checklist")
-  @@index([pthc_pt_id, pthc_cl_id, pthc_us_id])
+  patrol    Patrol    @relation(fields: [ptcl_pt_id], references: [pt_id])
+  checklist Checklist @relation(fields: [ptcl_cl_id], references: [cl_id])
+  inspector User      @relation(fields: [ptcl_us_id], references: [us_id])
+
+  @@index([ptcl_pt_id, ptcl_cl_id, ptcl_us_id])
+  @@map("patrol_checklists")
 }
 
 model Preset {
@@ -105,85 +111,103 @@ model Preset {
   ps_title       String
   ps_description String
   ps_version     Int
-  ps_lasted      Boolean
+  ps_latest      Boolean
   ps_update_at   DateTime
-  ps_us_id  Int
+  ps_us_id       Int
 
-  user      User                    @relation(fields: [ps_us_id], references: [us_id])
-  checklist Preset_Has_Checklist[]
+  user      User                   @relation(fields: [ps_us_id], references: [us_id])
+  checklist PresetChecklist[]
   patrol    Patrol[]
+
   @@map("presets")
 }
 
-model Preset_Has_Checklist {
-  pshc_ps_id    Int
-  pshc_cl_id Int
+model PresetChecklist {
+  pscl_ps_id Int
+  pscl_cl_id Int
 
-  preset        Preset    @relation(fields: [pshc_ps_id], references: [ps_id])
-  checklist     Checklist @relation(fields: [pshc_cl_id], references: [cl_id])
-  @@id([pshc_ps_id, pshc_cl_id])
-  @@map("presets_has_checklists")
+  preset    Preset    @relation(fields: [pscl_ps_id], references: [ps_id])
+  checklist Checklist @relation(fields: [pscl_cl_id], references: [cl_id])
+
+  @@id([pscl_ps_id, pscl_cl_id])
+  @@map("preset_checklists")
 }
 
 model Checklist {
-  cl_id       Int      @id @default(autoincrement())
-  cl_title    String
-  cl_version  Int
-  cl_lasted   Boolean
+  cl_id        Int      @id @default(autoincrement())
+  cl_title     String
+  cl_version   Int
+  cl_latest    Boolean
   cl_update_at DateTime @default(now())
-  cl_us_id Int
+  cl_us_id     Int
 
-  patrol      Patrol_Has_Checklist[]  
-  user        User                    @relation("user", fields: [cl_us_id], references: [us_id])
-  preset      Preset_Has_Checklist[]
-  item        Item[]
+  patrol PatrolChecklist[]
+  user   User                   @relation("user", fields: [cl_us_id], references: [us_id])
+  preset PresetChecklist[]
+  item   Item[]
+
   @@map("checklists")
 }
 
-model Patrol_Result {
+model PatrolResult {
   pr_id     Int     @id @default(autoincrement())
   pr_status Boolean
-  pr_it_id   Int
-  pr_df_id Int
-  pr_pt_id Int
+  pr_it_id  Int
+  pr_df_id  Int
+  pr_pt_id  Int
 
-  item       Item      @relation(fields: [pr_it_id], references: [it_id])
-  comment    Comment[]
-  defect     Defect    @relation(fields: [pr_df_id], references: [df_id])
-  patrol     Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
+  item    Item      @relation(fields: [pr_it_id], references: [it_id])
+  comment Comment[]
+  defect  Defect    @relation(fields: [pr_df_id], references: [df_id])
+  patrol  Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
+
   @@map("patrol_results")
 }
 
 model Item {
-  it_id   Int    @id @default(autoincrement())
-  it_name String
-  it_type Item_Status
+  it_id    Int         @id @default(autoincrement())
+  it_name  String
+  it_type  Item_Status
   it_cl_id Int
-  it_ze_id      Int
 
+  item_zone     ItemZone[]
   checklist     Checklist       @relation(fields: [it_cl_id], references: [cl_id])
-  zone          Zone            @relation(fields: [it_ze_id], references: [ze_id])
-  patrol_result Patrol_Result[]
+  patrol_result PatrolResult[]
+
   @@map("items")
 }
 
 model Zone {
-  ze_id   Int    @id @default(autoincrement())
-  ze_name String
+  ze_id    Int    @id @default(autoincrement())
+  ze_name  String
   ze_lt_id Int
-  ze_us_id  Int
+  ze_us_id Int
 
-  item         Item[]
-  location     Location @relation(fields: [ze_lt_id], references: [lt_id])
-  user         User   @relation(fields: [ze_us_id], references: [us_id])
+  zone_items ItemZone[]
+  location   Location   @relation(fields: [ze_lt_id], references: [lt_id])
+  user       User       @relation(fields: [ze_us_id], references: [us_id])
+
   @@map("zones")
 }
+
+model ItemZone {
+  iz_it_id  Int
+  iz_ze_id  Int
+
+  item  Item @relation(fields: [iz_it_id], references: [it_id], onDelete: Cascade)
+  zone  Zone @relation(fields: [iz_ze_id], references: [ze_id], onDelete: Cascade)
+
+  @@id([iz_it_id, iz_ze_id])
+  @@map("item_zones")
+}
+
 
 model Location {
   lt_id   Int    @id @default(autoincrement())
   lt_name String
 
   zone Zone[]
+
   @@map("locations")
 }
 
@@ -191,11 +215,12 @@ model Comment {
   cm_id        Int      @id @default(autoincrement())
   cm_message   String
   cm_timestamp DateTime @default(now())
-  cm_us_id          Int
-  cm_pr_id Int
+  cm_us_id     Int
+  cm_pr_id     Int
 
-  user              User         @relation(fields: [cm_us_id], references: [us_id])
-  patrol_result     Patrol_Result @relation(fields: [cm_pr_id], references: [pr_id])
+  user          User          @relation(fields: [cm_us_id], references: [us_id])
+  patrol_result PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
+
   @@map("comments")
 }
 
@@ -203,21 +228,23 @@ model Image {
   im_id        Int      @id @default(autoincrement())
   im_path      String
   im_timestamp DateTime @default(now())
-  im_pf_id  Int @unique
+  im_pf_id     Int      @unique
 
-  defect   Defect_Has_Image[]
-  profile   Profile? @relation(fields: [im_pf_id], references: [pf_id])
+  defect  DefectImage[]
+  profile Profile?           @relation(fields: [im_pf_id], references: [pf_id])
+
   @@map("images")
 }
 
-model Defect_Has_Image {
-  dhi_df_id Int
-  dhi_im_id  Int
+model DefectImage {
+  dfim_df_id Int
+  dfim_im_id Int
 
-  defect   Defect  @relation(fields: [dhi_df_id], references: [df_id])  
-  image    Image   @relation(fields: [dhi_im_id], references: [im_id])
-  @@id([dhi_df_id, dhi_im_id])
-  @@map("defect_has_images")
+  defect Defect @relation(fields: [dfim_df_id], references: [df_id])
+  image  Image  @relation(fields: [dfim_im_id], references: [im_id])
+
+  @@id([dfim_df_id, dfim_im_id])
+  @@map("defect_images")
 }
 
 enum Role {
@@ -234,8 +261,8 @@ enum Patrol_Status {
   Completed
 }
 
-enum Defect_Status {
-  Reported 
+enum DefectStatus {
+  Reported
   InProgress
   PendingInspection
   Resolved

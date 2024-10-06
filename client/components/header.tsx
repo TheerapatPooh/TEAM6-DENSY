@@ -20,7 +20,7 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-card h-[70px] flex justify-between items-center p-4 custom-shadow">
+    <header className="bg-card h-[70px] flex justify-between items-center p-4 custom-shadow sticky top-0 z-50">
       <div className="flex items-center">
         <Image
           className="flex items-center"

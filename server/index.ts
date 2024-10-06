@@ -4,6 +4,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser';
+import path from 'path'
 
 dotenv.config()
 
@@ -15,6 +16,9 @@ app.use(cors({
     origin: `${process.env.CLIENT_URL}`,
     credentials: true
 }))
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 app.use(bodyParse.json({limit: '10mb'}))
 
