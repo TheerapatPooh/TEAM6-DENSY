@@ -6,47 +6,48 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { useEffect, useState } from "react"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card"
-import { patrolStatus } from "@/app/type";
+import { Inspector, patrolStatus } from "@/app/type";
+import { getInitials } from "@/lib/utils"
 
 export interface patrolCardProps {
-  patrolStatus: patrolStatus;
-  patrolDate: Date;
-  patrolPreset: string;
-  patrolId: string;
-  inspector: string[];
-  items: number;
-  fails: number;
-  defects: number;
+    patrolStatus: patrolStatus;
+    patrolDate: Date;
+    patrolPreset: string;
+    patrolId: string;
+    inspector: Inspector[];
+    items: number;
+    fails: number;
+    defects: number;
 }
 
 export function PatrolCard({
-  patrolStatus,
-  patrolDate,
-  patrolPreset,
-  patrolId,
-  inspector = [],
-  items,
-  fails,
-  defects,
+    patrolStatus,
+    patrolDate,
+    patrolPreset,
+    patrolId,
+    inspector = [],
+    items,
+    fails,
+    defects,
 }: patrolCardProps) {
-  const formattedDate =
-    patrolDate instanceof Date
-      ? patrolDate.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      : "N/A"; // Fallback if patrolDate is not valid
+    const formattedDate =
+        patrolDate instanceof Date
+            ? patrolDate.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+            })
+            : "N/A"; // Fallback if patrolDate is not valid
     const [isClicked, setIsClicked] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
 
-  const [mounted, setMounted] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
-  const t = useTranslations("General");
+    const t = useTranslations("General");
 
     const handleClick = () => {
         setIsClicked(prev => !prev);
@@ -55,32 +56,43 @@ export function PatrolCard({
     const handleMouseEnter = () => {
         setIsHovered(true);
     };
-    
+
     const handleMouseLeave = () => {
         setIsHovered(false);
     };
-    
+
+    const inspectorNames = inspector.map((insp) => insp.name).filter(Boolean);
+
     return (
         <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer">
             <CardHeader className="gap-0 p-[10px]">
                 <div className="flex justify-between items-center">
-                    <CardDescription className="text-lg font-semibold">{formattedDate}</CardDescription>
+                    <CardDescription className="text-lg font-semibold">
+                        {formattedDate}
+                    </CardDescription>
                     {patrolStatus === "Pending" ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
-                            <span className="material-symbols-outlined text-blue-500">hourglass_top</span>
+                            <span className="material-symbols-outlined text-blue-500">
+                                hourglass_top
+                            </span>
                         </div>
                     ) : patrolStatus === "Scheduled" ? (
                         <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
-                            <span className="material-symbols-outlined text-yellow-500">event_available</span>
+                            <span className="material-symbols-outlined text-yellow-500">
+                                event_available
+                            </span>
                         </div>
-                    )
-                     : patrolStatus === "OnGoing" ? (
+                    ) : patrolStatus === "OnGoing" ? (
                         <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
-                            <span className="material-symbols-outlined text-purple-500">cached</span>
+                            <span className="material-symbols-outlined text-purple-500">
+                                cached
+                            </span>
                         </div>
                     ) : patrolStatus === "Completed" ? (
                         <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
-                            <span className="material-symbols-outlined text-green-500">check</span>
+                            <span className="material-symbols-outlined text-green-500">
+                                check
+                            </span>
                         </div>
                     ) : (
                         <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
@@ -96,32 +108,31 @@ export function PatrolCard({
                     <p className="text-xl">{patrolId}</p>
                 </div>
                 <HoverCard open={isClicked || isHovered}>
-                    <HoverCardTrigger onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} asChild>
+                    <HoverCardTrigger
+                        onClick={handleClick}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        asChild
+                    >
                         <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
-                            {inspector.length > 0 && (
+                            {inspectorNames.length > 0 && (
                                 <div className="flex items-center me-2.5 truncate max-w-[190px]">
-                                    <p className="text-xl me-2.5 truncate"> 
-                                        {inspector[0]}
-                                    </p>
+                                    <p className="text-xl me-2.5 truncate">{inspectorNames[0]}</p>
                                 </div>
                             )}
-                            {inspector.slice(0, 4).map((inspectorName) => (
-                                <Avatar className="custom-shadow ms-[-10px]">
-                                    <AvatarImage src=""/>
-                                    <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
+                            {inspectorNames.slice(0, 4).map((inspectorName, idx) => (
+                                <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                                    <AvatarImage src="" />
+                                    <AvatarFallback>{getInitials(inspectorName)}</AvatarFallback>
                                 </Avatar>
                             ))}
-                            {inspector.length === 5 && (
+                            {inspectorNames.length > 5 && (
                                 <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
-                                    <AvatarImage src="https://github.com/shadcn.png"/> 
-                                    <AvatarFallback>{inspector[4].slice(0, 2)}.</AvatarFallback> 
-                                </Avatar>
-                            )}
-                            {inspector.length > 5 && (
-                                <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
-                                    <AvatarImage src=""/> 
-                                    <span className="absolute text-card-foreground text-[16px] font-semibold">+{inspector.length - 5}</span>
+                                    <AvatarImage src="" />
+                                    <span className="absolute text-card-foreground text-[16px] font-semibold">
+                                        +{inspectorNames.length - 5}
+                                    </span>
                                     <AvatarFallback></AvatarFallback>
                                 </Avatar>
                             )}
@@ -130,21 +141,19 @@ export function PatrolCard({
                     <HoverCardContent className="w-full border-none custom-shadow">
                         <div className="flex items-center justify-center">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
-                            <p className="text-lg font-medium text-center">{t('InspectorListNames')}</p>
+                            <p className="text-lg font-medium text-center">Inspector List</p>
                         </div>
-                        {inspector.map((inspectorName) =>
-                            <div className="flex items-center p-2">
+                        {inspectorNames.map((inspectorName, idx) => (
+                            <div key={idx} className="flex items-center p-2">
                                 <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                                    <AvatarImage src=""/>
-                                    <AvatarFallback>{inspectorName.slice(0, 2)}.</AvatarFallback>
+                                    <AvatarImage src="" />
+                                    <AvatarFallback>{getInitials(inspectorName)}</AvatarFallback>
                                 </Avatar>
-                                <p className="text-[20px]"> 
-                                    {inspectorName}
-                                </p>
+                                <p className="text-[20px]">{inspectorName}</p>
                             </div>
-                        )}
+                        ))}
                     </HoverCardContent>
-                    </HoverCard>
+                </HoverCard>
             </CardContent>
             <CardFooter className="gap-0 px-[10px]">
                 <div className="flex gap-2.5 items-center w-full">
@@ -163,16 +172,18 @@ export function PatrolCard({
                     <div className="ml-auto items-center">
                         <DropdownMenu>
                             <DropdownMenuTrigger>
-                                <Button variant='ghost' className="w-[45px] h-[45px]">
-                                    <span className="material-symbols-outlined items-center text-muted-foreground">more_vert</span>
+                                <Button variant="ghost" className="w-[45px] h-[45px]">
+                                    <span className="material-symbols-outlined items-center text-muted-foreground">
+                                        more_vert
+                                    </span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className='p-0'>
+                            <DropdownMenuContent align="end" className="p-0">
                                 <DropdownMenuItem>
-                                    <h1>{t('Details')}</h1>
+                                    <h1>Details</h1>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
-                                    <h1 className="text-destructive hover:text-destructive">{t('Delete')}</h1>
+                                    <h1 className="text-destructive hover:text-destructive">Delete</h1>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -184,11 +195,11 @@ export function PatrolCard({
 }
 
 export function CreatePatrolCard() {
-  return (
-    <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
-      <span className="material-symbols-outlined text-card text-9xl">
-        note_add
-      </span>
-    </Card>
-  );
+    return (
+        <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
+            <span className="material-symbols-outlined text-card text-9xl">
+                note_add
+            </span>
+        </Card>
+    );
 }

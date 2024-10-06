@@ -4,60 +4,25 @@ import { fetchData } from "@/lib/api";
 import UserDropdown from "./user-dropdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Checklist, User } from "@/app/type";
+import { getInitials } from "@/lib/utils";
 
-interface PatrolHasChecklist {
-  checklistId: number;
-  inspectorId: number;
-}
-
-interface ChecklistItem {
-  id: number;
-  title: string;
-  description: string;
-  lasted: boolean;
-  updateAt: string;
-  updateBy: number;
-  version: number;
-}
 
 interface Props {
-  checklist: ChecklistItem;
-  handleselectUser: (user: PatrolHasChecklist) => void;
-}
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-  role: string;
-  department: string | null;
-  created_at: string;
-  profile: Profile[];
-}
-
-interface Profile {
-  address: string;
-  age: number;
-  id: number;
-  name: string;
-  tel: string;
-  users_id: number;
+  checklist: Checklist;
+  handleselectUser: (user: User) => void;
 }
 
 export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
-  const [selectUser, setselectUser] = useState<string>("");
-  const [userData, setUser] = useState<User[]>([]);
+  const [userData, setUserData] = useState<User[]>([]);
+  const [selectUser, setSelectUser] = useState<User | null>(null);
 
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const dataAllUser = await fetchData("get", "/users", true);
-        setUser(dataAllUser);
-        console.log(dataAllUser);
-
-
+        const users = await fetchData("get", "/profiles", true);
+        setUserData(users);
 
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -66,6 +31,11 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
     getData();
   }, []);
 
+  const handleUserSelect = (dropdownUser: User) => {
+    setSelectUser(dropdownUser)
+    handleselectUser(dropdownUser); 
+  }
+
   return (
     <div>
       <Accordion type="single" collapsible className="w-full">
@@ -73,20 +43,24 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
           <AccordionTrigger className="hover:no-underline">
             <p className="text-2xl">{checklist.title}</p>
             <div className="flex items-center w-[300px] gap-2">
-              <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <p className="font-semibold text-lg text-muted-foreground">Jame Smith</p>
+              {selectUser ? (
+                <Avatar>
+                  <AvatarImage src={selectUser.profile[0].imagePath || ""} />
+                  <AvatarFallback>{getInitials(selectUser.profile[0].name)}</AvatarFallback>
+                </Avatar>
+              ) : null}
+              <p className="font-semibold text-lg text-muted-foreground">
+                {selectUser ? selectUser.profile[0].name : "Select an Inspector"}
+              </p>
             </div>
-
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-muted-foreground">engineering</span>
               <p className="font-semibold text-lg text-muted-foreground">Inspector</p>
             </div>
-            <UserDropdown />
+            <UserDropdown userData={userData} onUserSelect={handleUserSelect} />
+
           </AccordionContent>
         </AccordionItem>
       </Accordion>
