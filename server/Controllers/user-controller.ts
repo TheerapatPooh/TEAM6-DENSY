@@ -1,9 +1,9 @@
 import { prisma } from '../Utils/database'
 import { Request, response, Response } from 'express'
 import bcrypt from 'bcrypt'
-import { Profile, User } from '../Utils/type';
-import { faker, tr } from '@faker-js/faker';
-import fs from 'fs';
+import { Profile, User } from '../Utils/type'
+import { faker } from '@faker-js/faker'
+import fs from 'fs'
 import path from 'path'
 
 
@@ -16,7 +16,7 @@ export async function getUser(req: Request, res: Response) {
             include: {
                 profile: true
             }
-        });
+        })
 
         if (role !== 'ADMIN') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
@@ -54,15 +54,14 @@ export async function getUser(req: Request, res: Response) {
 export async function getAllUsers(req: Request, res: Response) {
     try {
         const role = (req as any).user.role
+        if (role !== 'ADMIN') {
+            return res.status(403).json({ message: "Access Denied: Admins only" })
+        }
         const allUsers = await prisma.user.findMany({
             include: {
                 profile: true
             }
         })
-
-        if (role !== 'ADMIN') {
-            return res.status(403).json({ message: "Access Denied: Admins only" })
-        }
 
         if (allUsers) {
             const result: User[] = allUsers.map((user: any) => ({
@@ -86,7 +85,7 @@ export async function getAllUsers(req: Request, res: Response) {
         } else {
             res.status(404)
         }
-    } catch (err) {
+    } catch (error) {
         res.status(500)
     }
 }
@@ -94,8 +93,8 @@ export async function getAllUsers(req: Request, res: Response) {
 export async function createUser(req: Request, res: Response) {
     try {
 
-        const userRole = (req as any).user.role
-        if (userRole !== 'ADMIN') {
+        const userrorole = (req as any).user.role
+        if (userrorole !== 'ADMIN') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const { email, password, role, department }: User = req.body
@@ -105,17 +104,17 @@ export async function createUser(req: Request, res: Response) {
             orderBy: {
                 us_id: 'desc',
             },
-        });
+        })
 
         const nextId = (latestUser?.us_id ?? 0) + 1
 
         const randomWord = faker.word.noun()
-        const username = `${randomWord}${nextId}`;
+        const username = `${randomWord}${nextId}`
 
         const newUser = await prisma.user.create({
             data: {
                 us_username: username,
-                us_email: email ?? "",
+                us_email: email ?? null,
                 us_password: hashPassword,
                 us_role: role ?? "INSPECTOR",
                 us_department: department || null,
@@ -130,7 +129,7 @@ export async function createUser(req: Request, res: Response) {
                 pf_tel: null,
                 pf_address: null
             }
-        });
+        })
         const result = {
             id: newUser.us_id,
             username: newUser.us_username,
@@ -138,11 +137,11 @@ export async function createUser(req: Request, res: Response) {
             role: newUser.us_role,
             department: newUser.us_department,
             createdAt: newUser.us_created_at.toISOString(),
-        };
+        }
 
-        res.status(201).json(result);
-    } catch (err) {
-        res.status(500).send(err)
+        res.status(201).json(result)
+    } catch (error) {
+        res.status(500).send(error)
     }
 }
 
@@ -151,7 +150,7 @@ export async function updateProfile(req: Request, res: Response) {
     try {
         const userId = (req as any).user.userId
         const { name, age, tel, address } = req.body
-        const imagePath = req.file?.filename || '';
+        const imagePath = req.file?.filename || ''
         const user = await prisma.user.findUnique({
             where: { us_id: userId },
             include: {
@@ -164,16 +163,16 @@ export async function updateProfile(req: Request, res: Response) {
         })
 
         if (!user) {
-            return res.status(404);
+            return res.status(404)
         }
 
         if (imagePath && user.profile[0].pf_image) {
-            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile[0].pf_image.im_path);
+            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile[0].pf_image.im_path)
             if (fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
+                fs.unlinkSync(oldImagePath)
             }
         }
-        let image = null;
+        let image = null
         if (imagePath) {
             image = await prisma.image.upsert({
                 where: { im_pf_id: user.profile[0].pf_id },
@@ -186,7 +185,7 @@ export async function updateProfile(req: Request, res: Response) {
                         connect: { pf_id: user.profile[0].pf_id }
                     }
                 }
-            });
+            })
         }
 
         const updatedProfile = await prisma.profile.update({
@@ -198,7 +197,7 @@ export async function updateProfile(req: Request, res: Response) {
                 pf_address: address,
                 pf_image: image ? { connect: { im_id: image.im_id } } : undefined
             },
-        });
+        })
 
         const result = {
             id: updatedProfile.pf_id,
@@ -208,12 +207,12 @@ export async function updateProfile(req: Request, res: Response) {
             address: updatedProfile.pf_address,
             userId: updatedProfile.pf_us_id,
             imagePath: image ? image.im_path : null
-        };
+        }
 
-        res.status(200).json(result);
+        res.status(200).json(result)
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to update user profile' });
+        console.error(error)
+        res.status(500).json({ error: 'Failed to update user profile' })
     }
 }
 
@@ -221,21 +220,29 @@ export async function updateProfile(req: Request, res: Response) {
 export async function getProfile(req: Request, res: Response) {
     try {
         const userId = (req as any).user.userId
-        const id = parseInt(req.params.id, 10);
+        const id = parseInt(req.params.id, 10)
         let userWithProfile = null
         if (!id) {
             userWithProfile = await prisma.user.findUnique({
                 where: { us_id: userId },
                 include: {
-                    profile: true,
+                    profile: {
+                        include: {
+                            pf_image: true
+                        }
+                    },
                 },
-            });
+            })
         }
         else {
             userWithProfile = await prisma.user.findUnique({
                 where: { us_id: id },
                 include: {
-                    profile: true,
+                    profile: {
+                        include: {
+                            pf_image: true
+                        }
+                    },
                 },
             })
         }
@@ -244,7 +251,7 @@ export async function getProfile(req: Request, res: Response) {
             return res.status(404)
         }
 
-        const result: Omit<User, 'password'> = {
+        const result: User = {
             id: userWithProfile.us_id,
             username: userWithProfile.us_username,
             email: userWithProfile.us_email,
@@ -258,13 +265,14 @@ export async function getProfile(req: Request, res: Response) {
                 tel: profile.pf_tel,
                 address: profile.pf_address,
                 userId: profile.pf_us_id,
+                imagePath: profile.pf_image?.im_path || null, 
             })),
-        };
+        }
 
-        res.status(200).json(result);
+        res.status(200).json(result)
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch user profile' });
+        console.error(error)
+        res.status(500).json({ error: 'Failed to fetch user profile' })
     }
 }
 
@@ -278,7 +286,7 @@ export async function getAllProfile(req: Request, res: Response) {
                     }
                 },
             },
-        });
+        })
 
         if (allProfiles) {
             const result: User[] = allProfiles.map((user: any) => ({
@@ -287,21 +295,22 @@ export async function getAllProfile(req: Request, res: Response) {
                 email: user.us_email,
                 role: user.us_role,
                 department: user.us_department,
-                profile: user.profile.map((profile: any): Profile => ({
+                profile: user.profile.map((profile: any) => ({
                     id: profile.pf_id,
                     name: profile.pf_name,
                     age: profile.pf_age,
                     tel: profile.pf_tel,
                     address: profile.pf_address,
                     userId: profile.pf_us_id,
+                    imagePath: profile.pf_image?.im_path || null,
                 })),
-            }));
-            res.status(200).json(result);
+            }))
+            res.status(200).json(result)
         } else {
             response.status(404)
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch user profile' });
+        console.error(error)
+        res.status(500).json({ error: 'Failed to fetch user profile' })
     }
 }
