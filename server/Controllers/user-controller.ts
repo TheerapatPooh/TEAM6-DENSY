@@ -9,18 +9,16 @@ import path from 'path'
 
 export async function getUser(req: Request, res: Response) {
     try {
-        const role = (req as any).user.role
-        const Id = parseInt(req.params.id, 10)
+        const role = (req as any).user.role;
+        const Id = parseInt(req.params.id, 10);
         const user = await prisma.user.findUnique({
             where: { us_id: Id },
-            include: {
-                profile: true
-            }
-        })
+        });
 
         if (role !== 'ADMIN') {
-            return res.status(403).json({ message: "Access Denied: Admins only" })
+            return res.status(403).json({ message: "Access Denied: Admins only" });
         }
+
         if (user) {
             const result: User = {
                 id: user.us_id,
@@ -30,24 +28,15 @@ export async function getUser(req: Request, res: Response) {
                 role: user.us_role,
                 department: user.us_department,
                 createdAt: user.us_created_at.toISOString(),
-                profile: user.profile.map((profile: any): Profile => ({
-                    id: profile.pf_id,
-                    name: profile.pf_name,
-                    age: profile.pf_age,
-                    tel: profile.pf_tel,
-                    address: profile.pf_address,
-                    userId: profile.pf_us_id,
-                })),
+            };
 
-
-            }
-            res.status(200).json(result)
+            return res.status(200).json(result);
         } else {
-            return res.status(404)
-
+            return res.status(404).json({ message: "User not found" });
         }
     } catch (error) {
-        res.status(500)
+        console.error(error); 
+        return res.status(500).json({ message: "Internal Server Error", error });
     }
 }
 
@@ -57,11 +46,7 @@ export async function getAllUsers(req: Request, res: Response) {
         if (role !== 'ADMIN') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
-        const allUsers = await prisma.user.findMany({
-            include: {
-                profile: true
-            }
-        })
+        const allUsers = await prisma.user.findMany()
 
         if (allUsers) {
             const result: User[] = allUsers.map((user: any) => ({
@@ -72,14 +57,6 @@ export async function getAllUsers(req: Request, res: Response) {
                 role: user.us_role,
                 department: user.us_department,
                 createdAt: user.us_created_at,
-                profile: user.profile.map((profile: any): Profile => ({
-                    id: profile.pf_id,
-                    name: profile.pf_name,
-                    age: profile.pf_age,
-                    tel: profile.pf_tel,
-                    address: profile.pf_address,
-                    userId: profile.pf_us_id,
-                })),
             }))
             res.status(200).send(result)
         } else {
@@ -93,8 +70,8 @@ export async function getAllUsers(req: Request, res: Response) {
 export async function createUser(req: Request, res: Response) {
     try {
 
-        const userrorole = (req as any).user.role
-        if (userrorole !== 'ADMIN') {
+        const userRole = (req as any).user.role
+        if (userRole !== 'ADMIN') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const { email, password, role, department }: User = req.body
@@ -251,6 +228,8 @@ export async function getProfile(req: Request, res: Response) {
             return res.status(404)
         }
 
+        const profile = userWithProfile.profile.length > 0 ? userWithProfile.profile[0]: null
+
         const result: User = {
             id: userWithProfile.us_id,
             username: userWithProfile.us_username,
@@ -258,15 +237,18 @@ export async function getProfile(req: Request, res: Response) {
             role: userWithProfile.us_role,
             department: userWithProfile.us_department,
             createdAt: userWithProfile.us_created_at.toISOString(),
-            profile: userWithProfile.profile.map((profile: any) => ({
+            profile: profile ? {
                 id: profile.pf_id,
-                name: profile.pf_name,
-                age: profile.pf_age,
-                tel: profile.pf_tel,
-                address: profile.pf_address,
-                userId: profile.pf_us_id,
-                imagePath: profile.pf_image?.im_path || null, 
-            })),
+                name: profile.pf_name || undefined,
+                age: profile.pf_age || undefined,
+                tel: profile.pf_tel || undefined,
+                address: profile.pf_address || undefined,
+                image: profile.pf_image ? {
+                    id: profile.pf_image.im_id, 
+                    path: profile.pf_image.im_path,
+                } : null,
+                userId: profile.pf_us_id
+            } : undefined
         }
 
         res.status(200).json(result)

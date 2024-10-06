@@ -18,11 +18,12 @@ export interface User {
     role: Role;
     department?: string | null;
     createdAt?: string;
-    profile?: Profile[];
+    profile?: Profile;
 }
 
 export interface Image {
     id: number;
     path: string;
-    profileId: number;
 }
+
+
