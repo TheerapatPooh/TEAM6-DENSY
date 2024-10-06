@@ -39,12 +39,12 @@ model Defect {
   df_title     String
   df_note      String
   df_type      String
-  df_status    Defect_Status
+  df_status    DefectStatus
   df_timestamp DateTime      @default(now())
   df_us_id     Int
 
   user          User               @relation(fields: [df_us_id], references: [us_id])
-  patrol_result Patrol_Result[]
+  patrol_result PatrolResult[]
   image         DefectImage[]
 
   @@map("defects")
@@ -87,7 +87,7 @@ model Patrol {
 
   checklist     PatrolChecklist[]
   preset        Preset                 @relation(fields: [pt_ps_id], references: [ps_id])
-  patrol_result Patrol_Result[]
+  patrol_result PatrolResult[]
 
   @@map("patrols")
 }
@@ -149,7 +149,7 @@ model Checklist {
   @@map("checklists")
 }
 
-model Patrol_Result {
+model PatrolResult {
   pr_id     Int     @id @default(autoincrement())
   pr_status Boolean
   pr_it_id  Int
@@ -172,7 +172,7 @@ model Item {
 
   item_zone     ItemZone[]
   checklist     Checklist       @relation(fields: [it_cl_id], references: [cl_id])
-  patrol_result Patrol_Result[]
+  patrol_result PatrolResult[]
 
   @@map("items")
 }
@@ -219,7 +219,7 @@ model Comment {
   cm_pr_id     Int
 
   user          User          @relation(fields: [cm_us_id], references: [us_id])
-  patrol_result Patrol_Result @relation(fields: [cm_pr_id], references: [pr_id])
+  patrol_result PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
 
   @@map("comments")
 }
@@ -261,7 +261,7 @@ enum Patrol_Status {
   Completed
 }
 
-enum Defect_Status {
+enum DefectStatus {
   Reported
   InProgress
   PendingInspection
