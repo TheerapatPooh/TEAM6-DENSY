@@ -395,63 +395,6 @@ export default function Page() {
             );
           })}
       </div>
-      <div className="space-y-2">
-        <Defect
-          date="09-07-2567"
-          title="ตรวจสอบความปลอดภัยของสายไฟและอุปกรณ์ไฟฟ้า"
-          time="20:00"
-          status="Reported"
-          type="Safety"
-          description="ตรวจสอบสายไฟใน Zone C พบว่ามีการชำรุดและต้องแก้ไข"
-          beforeImage=""
-          afterImage=""
-          zone="Zone C"
-        />
-        <Defect
-          date="09-07-2567"
-          title="ตรวจสอบความปลอดภัยของสายไฟและอุปกรณ์ไฟฟ้า"
-          time="20:00"
-          status="Resolved"
-          type="Environmental"
-          description="ตรวจสอบสายไฟใน Zone C พบว่ามีการชำรุดและต้องแก้ไข"
-          beforeImage=""
-          afterImage=""
-          zone="Zone A"
-        />
-        <Defect
-          date="09-07-2567"
-          title="ตรวจสอบความปลอดภัยของสายไฟและอุปกรณ์ไฟฟ้า"
-          time="20:00"
-          status="InProgress"
-          type="Safety"
-          description="ตรวจสอบสายไฟใน Zone C พบว่ามีการชำรุดและต้องแก้ไข"
-          beforeImage=""
-          afterImage=""
-          zone="Zone A"
-        />
-        <Defect
-          date="09-07-2567"
-          title="ตรวจสอบความปลอดภัยของสายไฟและอุปกรณ์ไฟฟ้า"
-          time="20:00"
-          status="Completed"
-          type="Environmental"
-          description="ตรวจสอบสายไฟใน Zone C พบว่ามีการชำรุดและต้องแก้ไข"
-          beforeImage=""
-          afterImage=""
-          zone="Zone A"
-        />
-        <Defect
-          date="09-07-2567"
-          title="ตรวจสอบความปลอดภัยของสายไฟและอุปกรณ์ไฟฟ้า"
-          time="20:00"
-          status="PendingReview"
-          type="Safety"
-          description="ตรวจสอบสายไฟใน Zone C พบว่ามีการชำรุดและต้องแก้ไข"
-          beforeImage=""
-          afterImage=""
-          zone="Zone A"
-        />
-      </div>
     </div>
   );
 }
