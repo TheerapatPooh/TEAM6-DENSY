@@ -37,6 +37,7 @@ import { Patrol, PatrolChecklist, patrolStatus, Preset, Profile } from "@/app/ty
 import { User } from "@/app/type";
 import { useRouter } from "next/navigation";
 
+
 export default function Page() {
   const t = useTranslations("General");
   const [patrolData, setPatrolData] = useState<Patrol[]>([])
@@ -50,7 +51,7 @@ export default function Page() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const isNextButtonDisabled = !selectedPreset; 
+  const isNextButtonDisabled = !selectedPreset;
   const isSubmitDisabled = !selectedDate || !selectedPreset || patrolChecklist.length !== selectedPreset.checklist.length;
   const router = useRouter()
   const onSubmit = async () => {
@@ -67,7 +68,7 @@ export default function Page() {
 
     try {
       const response = await fetchData("post", "/patrol", true, payload);
-      setSecondDialog(false);  
+      setSecondDialog(false);
       router.refresh()
     } catch (error) {
     }
@@ -177,7 +178,7 @@ export default function Page() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        
+
         {/* Create Patrol Card with AlertDialog */}
         <AlertDialog>
           <AlertDialogTrigger className="w-full">
@@ -296,7 +297,7 @@ export default function Page() {
                 <AlertDialogAction
                   className="gap-2"
                   onClick={onSubmit}
-                  disabled={isSubmitDisabled} 
+                  disabled={isSubmitDisabled}
                 >
                   <span className="material-symbols-outlined text-2xl">
                     note_add
