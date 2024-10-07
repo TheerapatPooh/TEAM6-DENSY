@@ -12,7 +12,7 @@ interface BadgeCustomProps {
     children?: React.ReactNode
 }
 
-const badgeVariants = {
+export const badgeVariants = {
     default: "bg-accent-gradient text-card hover:bg-accent-gradient-hover",
     secondary: "bg-secondary text-muted-foreground hover:bg-secondary/50",
     mint: "bg-teal-300/40 text-teal-500 hover:bg-teal-300/20",
