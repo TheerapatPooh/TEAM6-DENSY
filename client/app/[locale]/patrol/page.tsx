@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CreatePatrolCard, PatrolCard } from "@/components/patrol-card";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
+import Defect from "@/components/defect";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -29,30 +30,50 @@ import { fetchData } from "@/lib/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { ChecklistDropdown } from "@/components/checklist-dropdown";
-import { DatePicker, DatePickerWithRange } from "../../../components/date-picker";
+import {
+  DatePicker,
+  DatePickerWithRange,
+} from "../../../components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Patrol, PatrolChecklist, patrolStatus, Preset, Profile } from "@/app/type";
+import {
+  Patrol,
+  PatrolChecklist,
+  patrolStatus,
+  Preset,
+  Profile,
+} from "@/app/type";
 import { User } from "@/app/type";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
   const t = useTranslations("General");
-  const [patrolData, setPatrolData] = useState<Patrol[]>([])
-  const [presetData, setPresetData] = useState<Preset[]>()
+  const [patrolData, setPatrolData] = useState<Patrol[]>([]);
+  const [presetData, setPresetData] = useState<Preset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
 
   const [selectedPreset, setSelectedPreset] = useState<Preset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<PatrolChecklist[]>([])
+  const [patrolChecklist, setPatrolChecklist] = useState<PatrolChecklist[]>([]);
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const isNextButtonDisabled = !selectedPreset; 
-  const isSubmitDisabled = !selectedDate || !selectedPreset || patrolChecklist.length !== selectedPreset.checklist.length;
-  const router = useRouter()
+  const isNextButtonDisabled = !selectedPreset;
+  const isSubmitDisabled =
+    !selectedDate ||
+    !selectedPreset ||
+    patrolChecklist.length !== selectedPreset.checklist.length;
+  const router = useRouter();
   const onSubmit = async () => {
     if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
       console.error("Not Empty Fields");
@@ -67,10 +88,9 @@ export default function Page() {
 
     try {
       const response = await fetchData("post", "/patrol", true, payload);
-      setSecondDialog(false);  
-      router.refresh()
-    } catch (error) {
-    }
+      setSecondDialog(false);
+      router.refresh();
+    } catch (error) {}
   };
 
   const handleSelectUser = (checklistId: number, inspectorId: number) => {
@@ -96,8 +116,8 @@ export default function Page() {
       try {
         const patrol = await fetchData("get", "/patrols", true);
         const preset = await fetchData("get", "/presets", true);
-        setPatrolData(patrol)
-        setPresetData(preset)
+        setPatrolData(patrol);
+        setPresetData(preset);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -106,39 +126,57 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    console.log(selectedPreset)
-  }, [selectedPreset])
+    console.log(selectedPreset);
+  }, [selectedPreset]);
 
   useEffect(() => {
-    console.log(patrolChecklist)
-  }, [patrolChecklist])
+    console.log(patrolChecklist);
+  }, [patrolChecklist]);
 
   return (
     <div className="flex flex-col p-5 gap-y-5">
       <div className="flex items-center gap-2">
-        <Textfield iconName="search" showIcon={true} placeholder={t('Search')} />
+        <Textfield
+          iconName="search"
+          showIcon={true}
+          placeholder={t("Search")}
+        />
         <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
-          <DropdownMenuTrigger className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-            ${isSortOpen ? "border border-destructive" : "border-none"}`}>
+          <DropdownMenuTrigger
+            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
+            ${isSortOpen ? "border border-destructive" : "border-none"}`}
+          >
             <span className="material-symbols-outlined">swap_vert</span>
             <div className="text-lg	">Sort</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-2">
             <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-            <DropdownMenuRadioGroup value='Doc No.' >
-              <DropdownMenuRadioItem value="Doc No." className="text-base">Doc No.</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date" className="text-base">Date</DropdownMenuRadioItem>
+            <DropdownMenuRadioGroup value="Doc No.">
+              <DropdownMenuRadioItem value="Doc No." className="text-base">
+                Doc No.
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Date" className="text-base">
+                Date
+              </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
             <DropdownMenuLabel>Order</DropdownMenuLabel>
-            <DropdownMenuRadioGroup value='Order' >
-              <DropdownMenuRadioItem value="Order" className="text-base">Ascending</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date" className="text-base">Descending</DropdownMenuRadioItem>
+            <DropdownMenuRadioGroup value="Order">
+              <DropdownMenuRadioItem value="Order" className="text-base">
+                Ascending
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="Date" className="text-base">
+                Descending
+              </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu onOpenChange={(open) => setIsFilterOpen(open)}>
-          <DropdownMenuTrigger className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-            ${isFilterOpen ? "border border-destructive" : "border-none"}`}>            <span className="material-symbols-outlined">page_info</span>
+          <DropdownMenuTrigger
+            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
+            ${isFilterOpen ? "border border-destructive" : "border-none"}`}
+          >
+            {" "}
+            <span className="material-symbols-outlined">page_info</span>
             <div className="text-lg	">Filter</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
@@ -148,10 +186,42 @@ export default function Page() {
             </div>
             <div>
               <DropdownMenuLabel>Status</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem checked><BadgeCustom width="w-full" variant="blue" showIcon={true} iconName="hourglass_top" children='Pending'></BadgeCustom></DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem><BadgeCustom width="w-full" variant="yellow" showIcon={true} iconName="event_available" children='Scheduled'></BadgeCustom></DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem><BadgeCustom width="w-full" variant="purple" showIcon={true} iconName="cached" children='On Going'></BadgeCustom></DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem><BadgeCustom width="w-full" variant="green" showIcon={true} iconName="check" children='Complete'></BadgeCustom></DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked>
+                <BadgeCustom
+                  width="w-full"
+                  variant="blue"
+                  showIcon={true}
+                  iconName="hourglass_top"
+                  children="Pending"
+                ></BadgeCustom>
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>
+                <BadgeCustom
+                  width="w-full"
+                  variant="yellow"
+                  showIcon={true}
+                  iconName="event_available"
+                  children="Scheduled"
+                ></BadgeCustom>
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>
+                <BadgeCustom
+                  width="w-full"
+                  variant="purple"
+                  showIcon={true}
+                  iconName="cached"
+                  children="On Going"
+                ></BadgeCustom>
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>
+                <BadgeCustom
+                  width="w-full"
+                  variant="green"
+                  showIcon={true}
+                  iconName="check"
+                  children="Complete"
+                ></BadgeCustom>
+              </DropdownMenuCheckboxItem>
             </div>
             <div>
               <DropdownMenuLabel>Preset</DropdownMenuLabel>
@@ -163,21 +233,24 @@ export default function Page() {
                   <SelectGroup>
                     <SelectLabel>Preset</SelectLabel>
                     <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="Weather And Toilet">Weather And Toilet</SelectItem>
+                    <SelectItem value="Weather And Toilet">
+                      Weather And Toilet
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex w-full justify-end gap-2">
-              <Button size='sm' variant='secondary'>Reset</Button>
-              <Button size='sm'>Apply</Button>
+              <Button size="sm" variant="secondary">
+                Reset
+              </Button>
+              <Button size="sm">Apply</Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        
         {/* Create Patrol Card with AlertDialog */}
         <AlertDialog>
           <AlertDialogTrigger className="w-full">
@@ -194,15 +267,16 @@ export default function Page() {
               <div className="flex items-center justify-center">
                 <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
-                    {presetData && (
+                    {presetData &&
                       presetData.map((preset, index) => (
                         <Button
                           key={index} // ใช้ index เป็น key
                           variant={"outline"}
-                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${selectedPreset === preset
-                            ? "border-red-600"
-                            : "border-transparent"
-                            } border p-2`}
+                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${
+                            selectedPreset === preset
+                              ? "border-red-600"
+                              : "border-transparent"
+                          } border p-2`}
                           onClick={() => setSelectedPreset(preset)}
                         >
                           {/* Title */}
@@ -229,9 +303,7 @@ export default function Page() {
                             />
                           </div>
                         </Button>
-                      ))
-                    )}
-
+                      ))}
                   </div>
                 </ScrollArea>
               </div>
@@ -254,9 +326,7 @@ export default function Page() {
         </AlertDialog>
 
         {/* Second AlertDialog */}
-        <AlertDialog
-          open={secondDialog}
-        >
+        <AlertDialog open={secondDialog}>
           <AlertDialogContent className="max-w-[995px] h-[700px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
@@ -266,12 +336,12 @@ export default function Page() {
                 Please select a preset for the patrol
               </AlertDialogDescription>
               <p className="font-semibold text-muted-foreground">Date</p>
-              <DatePicker handleSelectedTime={(time: string) => setSelectedDate(time)} />
+              <DatePicker
+                handleSelectedTime={(time: string) => setSelectedDate(time)}
+              />
             </AlertDialogHeader>
             <div className="grid grid-cols-1">
-              <p className="font-semibold text-muted-foreground">
-                Checklist
-              </p>
+              <p className="font-semibold text-muted-foreground">Checklist</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
                   {selectedPreset?.checklist.map((presetChecklist) => (
@@ -279,7 +349,7 @@ export default function Page() {
                       key={presetChecklist.id}
                       checklist={presetChecklist}
                       handleselectUser={(selectedUser: User) => {
-                        handleSelectUser(presetChecklist.id, selectedUser.id)
+                        handleSelectUser(presetChecklist.id, selectedUser.id);
                       }}
                     />
                   ))}
@@ -288,15 +358,13 @@ export default function Page() {
             </div>
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
-                <AlertDialogCancel
-                  onClick={() => setSecondDialog(false)}
-                >
+                <AlertDialogCancel onClick={() => setSecondDialog(false)}>
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className="gap-2"
                   onClick={onSubmit}
-                  disabled={isSubmitDisabled} 
+                  disabled={isSubmitDisabled}
                 >
                   <span className="material-symbols-outlined text-2xl">
                     note_add
@@ -308,23 +376,24 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {patrolData && patrolData.map((card) => {
-          const { status, date, preset, checklist } = card;
-          const inspectors = checklist.map((cl: any) => cl.inspector);
-          return (
-            <PatrolCard
-              key={card.id || date}
-              patrolStatus={status as patrolStatus}
-              patrolDate={new Date(date)}
-              patrolPreset={preset ? preset.title : "No Title"}
-              patrolId={preset?.id !== undefined ? String(preset.id) : "N/A"}
-              inspector={inspectors}
-              items={0}
-              fails={0}
-              defects={0}
-            />
-          );
-        })}
+        {patrolData &&
+          patrolData.map((card) => {
+            const { status, date, preset, checklist } = card;
+            const inspectors = checklist.map((cl: any) => cl.inspector);
+            return (
+              <PatrolCard
+                key={card.id || date}
+                patrolStatus={status as patrolStatus}
+                patrolDate={new Date(date)}
+                patrolPreset={preset ? preset.title : "No Title"}
+                patrolId={preset?.id !== undefined ? String(preset.id) : "N/A"}
+                inspector={inspectors}
+                items={0}
+                fails={0}
+                defects={0}
+              />
+            );
+          })}
       </div>
     </div>
   );

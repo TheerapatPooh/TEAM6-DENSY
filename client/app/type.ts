@@ -2,7 +2,8 @@
 
 export type patrolStatus ="Pending"|"Scheduled"| "OnGoing"|"Completed"
 export type Role = "ADMIN"|"INSPECTOR"|"RESPONSIBLEMAN"|"OFFICER"
-
+export type DefectStatus = "Reported" | "Completed" | "PendingReview" | "InProgress" | "Resolved";
+export type DefectType = "Safety" | "Environmental";
 export interface Zone {
     id: number;
     name: string;
