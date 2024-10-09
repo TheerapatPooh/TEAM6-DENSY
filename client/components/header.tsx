@@ -6,6 +6,7 @@ import Image from 'next/image'
 import ProfileDropdown from './profile-dropdown'
 import LanguageSelect from '@/components/language-select'
 import ModeToggle from '@/components/mode-toggle'
+import Notification from '@/components/notification'
 import { useTheme } from 'next-themes'
 
 export default function Header() {
@@ -35,6 +36,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <ModeToggle />
         <LanguageSelect />
+        <Notification />
         <ProfileDropdown />
       </div>
     </header>
