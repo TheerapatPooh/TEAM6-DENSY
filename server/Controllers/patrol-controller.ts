@@ -326,3 +326,66 @@ export async function createPatrol(req: Request, res: Response) {
         res.status(500)
     }
 }
+
+export async function startPatrol(req: Request, res: Response) {
+    try {
+        const role = (req as any).user.role
+        const userId = (req as any).user.userId
+        const patrolId = parseInt(req.params.id, 10)
+        if (role !== 'admin' && role !== 'inspector') {
+            return res.status(403).json({ message: "Access Denied" })
+        }
+        const { date, checklist } = req.body
+
+        if (!date || !checklist) {
+            return res.status(400)
+        }
+
+        const isUserInspector = checklist.some((checklistObj: any) => {
+            return checklistObj.inspector.id === userId;
+        });
+
+        if (!isUserInspector) {
+            return res.status(403).json({ message: "You are not authorized to start this patrol. Only assigned inspectors can start the patrol." });
+        }
+
+        const updatePatrol = await prisma.patrol.update({
+            where: {
+                pt_id: patrolId,
+            },
+            data: {
+                pt_date: new Date(date),
+                pt_status: 'on_going',
+            },
+        });
+
+        for (const checklistObj of checklist) {
+            const { id, item } = checklistObj;
+
+            
+            for (const itemObj of item) {
+                const { id: itemId, zone } = itemObj;
+
+              
+                for (const zoneObj of zone) {
+                    const { id: zoneId } = zoneObj;
+
+               
+                    await prisma.patrolResult.create({
+                        data: {
+                            pr_status: null,
+                            pr_iz_it_id: itemId, 
+                            pr_iz_ze_id: zoneId, 
+                            pr_pt_id: updatePatrol.pt_id, 
+                        },
+                    });
+                }
+            }
+        }
+
+        res.status(201).json(updatePatrol)
+
+    } catch (err) {
+        res.status(500)
+    }
+}
