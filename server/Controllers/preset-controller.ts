@@ -57,11 +57,11 @@ export async function getPreset(req: Request, res: Response) {
             updatedAt: preset.ps_update_at.toISOString(),
             updateBy: {
                 id: preset.user.us_id,
-                name: preset.user.profile[0]?.pf_name,
-                age: preset.user.profile[0]?.pf_age,
-                tel: preset.user.profile[0]?.pf_tel,
-                address: preset.user.profile[0]?.pf_address,
-                imagePath: preset.user.profile[0]?.pf_image?.im_path ?? null 
+                name: preset.user.profile?.pf_name,
+                age: preset.user.profile?.pf_age,
+                tel: preset.user.profile?.pf_tel,
+                address: preset.user.profile?.pf_address,
+                imagePath: preset.user.profile?.pf_image?.im_path ?? null 
             },
             checklist: preset.checklist.map((cl: any) => ({
                 id: cl.pscl_cl_id,
@@ -71,11 +71,11 @@ export async function getPreset(req: Request, res: Response) {
                 updatedAt: cl.checklist.cl_update_at.toISOString(),
                 updateBy: {
                     id: cl.checklist.user.us_id,
-                    name: cl.checklist.user.profile[0]?.pf_name,
-                    age: cl.checklist.user.profile[0]?.pf_age,
-                    tel: cl.checklist.user.profile[0]?.pf_tel,
-                    address: cl.checklist.user.profile[0]?.pf_address,
-                    imagePath: cl.checklist.user.profile[0]?.pf_image?.im_path ?? null 
+                    name: cl.checklist.user.profile?.pf_name,
+                    age: cl.checklist.user.profile?.pf_age,
+                    tel: cl.checklist.user.profile?.pf_tel,
+                    address: cl.checklist.user.profile?.pf_address,
+                    imagePath: cl.checklist.user.profile?.pf_image?.im_path ?? null 
                 },
                 items: cl.checklist.item.map((item: any) => ({
                     id: item.it_id,

@@ -8,13 +8,13 @@ export async function getPatrol(req: Request, res: Response) {
         const userId = (req as any).user.userId
         const patrolId = parseInt(req.params.id, 10)
 
-        if (role !== 'ADMIN' && role !== 'INSPECTOR') {
+        if (role !== 'admin' && role !== 'inspector') {
             return res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
         }
 
         let patrol: any
 
-        if (role === 'ADMIN') {
+        if (role === 'admin') {
             patrol = await prisma.patrol.findUnique({
                 where: {
                     pt_id: patrolId
@@ -52,7 +52,7 @@ export async function getPatrol(req: Request, res: Response) {
             })
         }
 
-        if (role === 'INSPECTOR') {
+        if (role === 'inspector') {
             patrol = await prisma.patrol.findFirst({
                 where: {
                     pt_id: patrolId,
@@ -118,11 +118,11 @@ export async function getPatrol(req: Request, res: Response) {
                 version: checklist.checklist.cl_version,
                 inspector: {
                     id: checklist.inspector.us_id,
-                    name: checklist.inspector.profile[0]?.pf_name,
-                    age: checklist.inspector.profile[0]?.pf_age,
-                    tel: checklist.inspector.profile[0]?.pf_tel,
-                    address: checklist.inspector.profile[0]?.pf_address,
-                    imagePath: checklist.inspector.profile[0]?.pf_image?.im_path ?? null // เพิ่ม imagePath
+                    name: checklist.inspector.profile?.pf_name,
+                    age: checklist.inspector.profile?.pf_age,
+                    tel: checklist.inspector.profile?.pf_tel,
+                    address: checklist.inspector.profile?.pf_address,
+                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null // เพิ่ม imagePath
                 },
                 item: checklist.checklist.item.map((item: any) => ({
                     id: item.it_id,
@@ -154,12 +154,12 @@ export async function getAllPatrols(req: Request, res: Response) {
     try {
         const role = (req as any).user.role
         const userId = (req as any).user.userId
-        if (role !== 'ADMIN' && role !== 'INSPECTOR') {
+        if (role !== 'admin' && role !== 'inspector') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         let allPatrols: any
 
-        if (role === 'ADMIN') {
+        if (role === 'admin') {
             allPatrols = await prisma.patrol.findMany({
                 include: {
                     preset: true,
@@ -193,7 +193,7 @@ export async function getAllPatrols(req: Request, res: Response) {
                 }
             })
         }
-        if (role === 'INSPECTOR') {
+        if (role === 'inspector') {
             allPatrols = await prisma.patrol.findMany({
                 where: {
                     checklist: {
@@ -254,11 +254,11 @@ export async function getAllPatrols(req: Request, res: Response) {
                 version: checklist.checklist.cl_version,
                 inspector: {
                     id: checklist.inspector.us_id,
-                    name: checklist.inspector.profile[0]?.pf_name,
-                    age: checklist.inspector.profile[0]?.pf_age,
-                    tel: checklist.inspector.profile[0]?.pf_tel,
-                    address: checklist.inspector.profile[0]?.pf_address,
-                    imagePath: checklist.inspector.profile[0]?.pf_image?.im_path ?? null // เพิ่ม imagePath
+                    name: checklist.inspector.profile?.pf_name,
+                    age: checklist.inspector.profile?.pf_age,
+                    tel: checklist.inspector.profile?.pf_tel,
+                    address: checklist.inspector.profile?.pf_address,
+                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null // เพิ่ม imagePath
                 },
                 item: checklist.checklist.item.map((item: any) => ({
                     id: item.it_id,
@@ -287,7 +287,7 @@ export async function getAllPatrols(req: Request, res: Response) {
 export async function createPatrol(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role
-        if (userRole !== 'ADMIN' && userRole !== 'INSPECTOR') {
+        if (userRole !== 'admin' && userRole !== 'inspector') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const { date, presetId, checklists } = req.body
@@ -299,7 +299,7 @@ export async function createPatrol(req: Request, res: Response) {
         const newPatrol = await prisma.patrol.create({
             data: {
                 pt_date: new Date(date),
-                pt_status: "Pending",
+                pt_status: "pending",
                 pt_ps_id: parseInt(presetId, 10),
             }
         })
