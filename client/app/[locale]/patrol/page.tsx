@@ -150,7 +150,7 @@ export default function Page() {
             <span className="material-symbols-outlined">swap_vert</span>
             <div className="text-lg	"> {t('Sort')}</div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="p-2">
+          <DropdownMenuContent align="end" className="p-2">
             <DropdownMenuLabel>{t('SortBy')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Doc No.">
               <DropdownMenuRadioItem value="Doc No." className="text-base">
@@ -160,7 +160,7 @@ export default function Page() {
               {t('Date')}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
-            <DropdownMenuLabel>{t('Order')}</DropdownMenuLabel>
+            <DropdownMenuLabel >{t('Order')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Order">
               <DropdownMenuRadioItem value="Order" className="text-base">
                 {t('Ascending')}
@@ -243,9 +243,9 @@ export default function Page() {
             </div>
             <div className="flex w-full justify-end gap-2">
               <Button size="sm" variant="secondary">
-                Reset
+                {t('Reset')}
               </Button>
-              <Button size="sm">Apply</Button>
+              <Button size="sm">{t('Apply')}</Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -260,10 +260,10 @@ export default function Page() {
           <AlertDialogContent className="w-[620px] h-[715px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
-                Patrol Preset
+                {t('PatrolPreset')}
               </AlertDialogTitle>
               <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                Please select a preset for the patrol
+                {t('PleaseSelectAPresetForThePatrol')}
               </AlertDialogDescription>
               <div className="flex items-center justify-center">
                 <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
@@ -311,12 +311,12 @@ export default function Page() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => setSecondDialog(true)}
                   disabled={isNextButtonDisabled}
                 >
-                  Next
+                  {t('Next')}
                   <span className="material-symbols-outlined text-2xl">
                     chevron_right
                   </span>
@@ -331,18 +331,18 @@ export default function Page() {
           <AlertDialogContent className="max-w-[995px] h-[700px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
-                Patrol Preset
+              {t('PatrolPreset')}
               </AlertDialogTitle>
               <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                Please select a preset for the patrol
+              {t('PleaseSelectAPresetForThePatrol')}
               </AlertDialogDescription>
-              <p className="font-semibold text-muted-foreground">Date</p>
+              <p className="font-semibold text-muted-foreground"> {t('Date')}</p>
               <DatePicker
                 handleSelectedTime={(time: string) => setSelectedDate(time)}
               />
             </AlertDialogHeader>
             <div className="grid grid-cols-1">
-              <p className="font-semibold text-muted-foreground">Checklist</p>
+              <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
                   {selectedPreset?.checklist.map((presetChecklist) => (
@@ -360,7 +360,7 @@ export default function Page() {
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
                 <AlertDialogCancel onClick={() => setSecondDialog(false)}>
-                  Cancel
+                {t('Cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className="gap-2"
@@ -370,7 +370,7 @@ export default function Page() {
                   <span className="material-symbols-outlined text-2xl">
                     note_add
                   </span>
-                  New Patrol
+                 {t('NewPatrol')}
                 </AlertDialogAction>
               </div>
             </AlertDialogFooter>

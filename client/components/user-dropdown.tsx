@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User, PatrolChecklist } from "@/app/type";
 import { getInitials } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface UserDropdownProps {
   userData: User[];
@@ -20,6 +21,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
     setIsOpen(false);
 
   };
+  const t = useTranslations("General");
 
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
               </Avatar>
             )}
             <p className="font-normal text-muted-foreground">
-              {selectedUser ? selectedUser.profile.name : "Select a User"}
+              {selectedUser ? selectedUser.profile.name :  t("SelectAUser")}
             </p>
           </div>
           <span
