@@ -30,6 +30,20 @@
       "Status":"Status",
       "Preset":"Preset",
       "All":"All",
+      "Reset":"Reset",
+      "Apply":"Apply",
+      "PatrolPreset":"Patrol Preset",
+      "PleaseSelectAPresetForThePatrol":"Please select a preset for the patrol",
+      "Next":"Next",
+      "Cancel":"Cancel",
+      "Checklist":"Checklist",
+      "NewPatrol":" New Patrol",
+      "PickADate":"Pick a date",
+      "Inspector":"Inspector",
+      "SelectAnInspector":"Select an Inspector",
+      "SelectAUser":"Select a User",
+      "InspectorList":"Inspector List",
+      "":"",
       "":""
     }
   }

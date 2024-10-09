@@ -141,7 +141,8 @@ export function PatrolCard({
                     <HoverCardContent className="w-full border-none custom-shadow">
                         <div className="flex items-center justify-center">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
-                            <p className="text-lg font-medium text-center">Inspector List</p>
+                            <p className="text-lg font-medium text-center">{t('InspectorList')}
+                            </p>
                         </div>
                         {inspectorNames.map((inspectorName, idx) => (
                             <div key={idx} className="flex items-center p-2">
@@ -180,10 +181,10 @@ export function PatrolCard({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="p-0">
                                 <DropdownMenuItem>
-                                    <h1>Details</h1>
+                                    <h1>{t('Details')}</h1>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
-                                    <h1 className="text-destructive hover:text-destructive">Delete</h1>
+                                    <h1 className="text-destructive hover:text-destructive">{t('Delete')}</h1>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
