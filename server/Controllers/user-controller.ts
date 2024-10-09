@@ -15,7 +15,7 @@ export async function getUser(req: Request, res: Response) {
             where: { us_id: Id },
         });
 
-        if (role !== 'ADMIN') {
+        if (role !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" });
         }
 
@@ -43,7 +43,7 @@ export async function getUser(req: Request, res: Response) {
 export async function getAllUsers(req: Request, res: Response) {
     try {
         const role = (req as any).user.role
-        if (role !== 'ADMIN') {
+        if (role !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const allUsers = await prisma.user.findMany()
@@ -71,7 +71,7 @@ export async function createUser(req: Request, res: Response) {
     try {
 
         const userRole = (req as any).user.role
-        if (userRole !== 'ADMIN') {
+        if (userRole !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const { email, password, role, department }: User = req.body
@@ -143,8 +143,8 @@ export async function updateProfile(req: Request, res: Response) {
             return res.status(404)
         }
 
-        if (imagePath && user.profile[0].pf_image) {
-            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile[0].pf_image.im_path)
+        if (imagePath && user.profile?.pf_image) {
+            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile?.pf_image.im_path)
             if (fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath)
             }
@@ -152,14 +152,14 @@ export async function updateProfile(req: Request, res: Response) {
         let image = null
         if (imagePath) {
             image = await prisma.image.upsert({
-                where: { im_pf_id: user.profile[0].pf_id },
+                where: { im_pf_id: user.profile?.pf_id },
                 update: {
                     im_path: imagePath,
                 },
                 create: {
                     im_path: imagePath,
                     profile: {
-                        connect: { pf_id: user.profile[0].pf_id }
+                        connect: { pf_id: user.profile?.pf_id }
                     }
                 }
             })
@@ -228,7 +228,7 @@ export async function getProfile(req: Request, res: Response) {
             return res.status(404)
         }
 
-        const profile = user.profile.length > 0 ? user.profile[0]: null
+        const profile = user.profile || null
         const result: User = {
             id: user.us_id,
             username: user.us_username,
@@ -278,14 +278,14 @@ export async function getAllProfile(req: Request, res: Response) {
                 role: user.us_role,
                 department: user.us_department,
                 profile: {
-                    id: user.profile[0].pf_id,
-                    name: user.profile[0].pf_name,
-                    age: user.profile[0].pf_age,
-                    tel: user.profile[0].pf_tel,
-                    address: user.profile[0].pf_address,
-                    image: user.profile[0].pf_image ? {
-                        id: user.profile[0].pf_image.im_id, 
-                        path: user.profile[0].pf_image.im_path,
+                    id: user.profile.pf_id,
+                    name: user.profile.pf_name,
+                    age: user.profile.pf_age,
+                    tel: user.profile.pf_tel,
+                    address: user.profile.pf_address,
+                    image: user.profile.pf_image ? {
+                        id: user.profile.pf_image.im_id, 
+                        path: user.profile.pf_image.im_path,
                     } : null,
                     userId: user.pf_us_id                
                 },

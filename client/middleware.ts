@@ -27,15 +27,15 @@ export function middleware(req: NextRequest) {
       const userRole = decodedToken.role; // ดึง role จาก token
       console.log(userRole)
 
-      if (userRole === "ADMIN" && !currentPathname.startsWith(`/${locale}/admin`)) {
+      if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
         return NextResponse.redirect(new URL(`/${locale}/admin`, req.url));
       }
 
-      if (userRole === "INSPECTOR" && !currentPathname.startsWith(`/${locale}/patrol`)) {
+      if (userRole === "inspector" && !currentPathname.startsWith(`/${locale}/patrol`)) {
         return NextResponse.redirect(new URL(`/${locale}/patrol`, req.url));
       }
 
-      if (userRole !== "ADMIN" && userRole !== "patrol" && !currentPathname.startsWith(`/${locale}`)) {
+      if (userRole !== "admin" && userRole !== "patrol" && !currentPathname.startsWith(`/${locale}`)) {
         return NextResponse.redirect(new URL(`/${locale}`, req.url));
       }
 
