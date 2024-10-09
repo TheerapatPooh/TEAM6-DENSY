@@ -56,6 +56,7 @@ import { User } from "@/app/type";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
+  
   const t = useTranslations("General");
   const [patrolData, setPatrolData] = useState<Patrol[]>([]);
   const [presetData, setPresetData] = useState<Preset[]>();
@@ -147,25 +148,25 @@ export default function Page() {
             ${isSortOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg	">Sort</div>
+            <div className="text-lg	"> {t('Sort')}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-2">
-            <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('SortBy')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Doc No.">
               <DropdownMenuRadioItem value="Doc No." className="text-base">
-                Doc No.
+              {t('DocNo')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Date" className="text-base">
-                Date
+              {t('Date')}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
-            <DropdownMenuLabel>Order</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('Order')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Order">
               <DropdownMenuRadioItem value="Order" className="text-base">
-                Ascending
+                {t('Ascending')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Date" className="text-base">
-                Descending
+                {t('Descending')}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -177,15 +178,15 @@ export default function Page() {
           >
             {" "}
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg	">Filter</div>
+            <div className="text-lg	"> {t('Filter')}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
             <div>
-              <DropdownMenuLabel>Date</DropdownMenuLabel>
+              <DropdownMenuLabel> {t('Date')}</DropdownMenuLabel>
               <DatePickerWithRange />
             </div>
             <div>
-              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('Status')}</DropdownMenuLabel>
               <DropdownMenuCheckboxItem checked>
                 <BadgeCustom
                   width="w-full"
@@ -224,15 +225,15 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
             </div>
             <div>
-              <DropdownMenuLabel>Preset</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('Preset')}</DropdownMenuLabel>
               <Select>
                 <SelectTrigger className="">
-                  <SelectValue placeholder="All" />
+                  <SelectValue placeholder={t('All')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Preset</SelectLabel>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectLabel>{t('Preset')}</SelectLabel>
+                    <SelectItem value="all">{t('All')}</SelectItem>
                     <SelectItem value="Weather And Toilet">
                       Weather And Toilet
                     </SelectItem>
