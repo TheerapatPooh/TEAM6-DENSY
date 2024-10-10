@@ -137,8 +137,8 @@ export async function getPatrol(req: Request, res: Response) {
             result: patrol.patrol_result.map((result: any) => ({
                 id: result.pr_id,
                 status: result.pr_status,
-                itemId: result.pr_it_id,
-                defectId: result.pr_df_id ?? null,
+                itemId: result.pr_iz_it_id,
+                zoneId: result.pr_iz_ze_id,
             })) ?? [],
         }
 
@@ -321,6 +321,132 @@ export async function createPatrol(req: Request, res: Response) {
         }
 
         res.status(201).json(newPatrol)
+
+    } catch (err) {
+        res.status(500)
+    }
+}
+
+export async function startPatrol(req: Request, res: Response) {
+    try {
+        const role = (req as any).user.role
+        const userId = (req as any).user.userId
+        const patrolId = parseInt(req.params.id, 10)
+        const { status, checklist } = req.body
+
+        const isUserInspector = checklist.some((checklistObj: any) => {
+            return checklistObj.inspector.id === userId;
+        });
+
+        if (!isUserInspector) {
+            return res.status(403).json({ message: "You are not authorized to start this patrol. Only assigned inspectors can start the patrol." });
+        }
+
+        if (role !== 'admin' && role !== 'inspector') {
+            return res.status(403).json({ message: "Access Denied" })
+        }
+
+        if (!status || !checklist) {
+            return res.status(400)
+        }
+
+        if (status !== 'scheduled') {
+            return res.status(403).json({ message: "Cannot start patrol." });
+        }
+
+        const updatePatrol = await prisma.patrol.update({
+            where: {
+                pt_id: patrolId,
+            },
+            data: {
+                pt_status: 'on_going',
+                pt_start_time: new Date(),
+            },
+        });
+
+        for (const checklistObj of checklist) {
+            const { item } = checklistObj;
+
+
+            for (const itemObj of item) {
+                const { id: itemId, zone } = itemObj;
+
+
+                for (const zoneObj of zone) {
+                    const { id: zoneId } = zoneObj;
+
+
+                    await prisma.patrolResult.create({
+                        data: {
+                            pr_status: null,
+                            pr_iz_it_id: itemId,
+                            pr_iz_ze_id: zoneId,
+                            pr_pt_id: updatePatrol.pt_id,
+                        },
+                    });
+                }
+            }
+        }
+
+        res.status(200).json(updatePatrol)
+
+    } catch (err) {
+        res.status(500)
+    }
+}
+
+export async function finishPatrol(req: Request, res: Response) {
+    try {
+        const role = (req as any).user.role
+        const userId = (req as any).user.userId
+        const patrolId = parseInt(req.params.id, 10)
+        const { status, checklist, result } = req.body
+
+        if (role !== 'admin' && role !== 'inspector') {
+            return res.status(403).json({ message: "Access Denied" })
+        }
+
+        const isUserInspector = checklist.some((checklistObj: any) => {
+            return checklistObj.inspector.id === userId;
+        });
+
+        if (!isUserInspector) {
+            return res.status(403).json({ message: "You are not authorized to finish this patrol. Only assigned inspectors can start the patrol." });
+        }
+
+
+        if (!checklist || !result) {
+            return res.status(400).json({ message: "Invalid Data" })
+        }
+
+        if (status !== 'on_going') {
+            return res.status(403).json({ message: "Cannot finish patrol." });
+        }
+
+        const updatePatrol = await prisma.patrol.update({
+            where: {
+                pt_id: patrolId,
+            },
+            data: {
+                pt_status: 'completed',
+                pt_end_time: new Date(),
+            },
+        });
+
+        for (const resultObj of result) {
+            const { id, status } = resultObj;
+        
+            await prisma.patrolResult.update({
+                where: {
+                    pr_id: id,
+                },
+                data: {
+                    pr_status: status,
+                },
+            });
+        }
+        
+        res.status(200).json(updatePatrol)
 
     } catch (err) {
         res.status(500)

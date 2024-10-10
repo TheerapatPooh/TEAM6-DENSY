@@ -152,7 +152,7 @@ model Checklist {
 
 model PatrolResult {
   pr_id       Int     @id @default(autoincrement())
-  pr_status   Boolean
+  pr_status   Boolean?
   pr_iz_it_id Int
   pr_iz_ze_id Int
   pr_pt_id    Int
