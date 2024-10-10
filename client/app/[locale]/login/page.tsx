@@ -3,14 +3,16 @@ import { useTransition, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import lightLogo from "/app/img/system_logo_light.png"
 import darkLogo from "/app/img/system_logo_dark.png"
-import loginCover from "/app/img/login_cover.png"
+import loginCover1 from "/app/img/login_cover_1.png"
+import loginCover2 from "/app/img/login_cover_2.png"
+import loginCover3 from "/app/img/login_cover_3.png"
 import Image from 'next/image'
 import { useTheme } from 'next-themes';
 import LanguageSelect from '@/components/language-select';
 import ModeToggle from '@/components/mode-toggle';
 import Textfield from '@/components/textfield';
 import { Button } from '@/components/ui/button';
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -26,6 +28,8 @@ import {
 import FormError from '@/components/form-error'
 import FormSuccess from '@/components/form-success'
 import { login } from '@/lib/api';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import EmblaAutoplay from 'embla-carousel-autoplay'
 
 export const LoginSchema = z.object({
     username: z.string(),
@@ -84,15 +88,40 @@ export default function LoginPage() {
                     priority
                 />
                 <div className="grid grid-rows-subgrid gap-4 row-span-3 justify-center items-center">
-                    <Image
-                        className="flex items-center row-start-2"
-                        src={loginCover}
-                        alt="Cover"
-                        width={500}
-                        height={500}
-                        priority
-
-                    />
+                    <Carousel className='row-start-2' plugins={[EmblaAutoplay()]} opts={{ loop: true }}>
+                        <CarouselContent>
+                            <CarouselItem>
+                                <Image
+                                    className="flex items-center"
+                                    src={loginCover1}
+                                    alt="Cover"
+                                    width={1000}
+                                    height={1000}
+                                    priority
+                                />
+                            </CarouselItem>
+                            <CarouselItem>
+                                <Image
+                                    className="flex items-center"
+                                    src={loginCover2}
+                                    alt="Cover"
+                                    width={1000}
+                                    height={1000}
+                                    priority
+                                />
+                            </CarouselItem>
+                            <CarouselItem>
+                                <Image
+                                    className="flex items-center"
+                                    src={loginCover3}
+                                    alt="Cover"
+                                    width={1000}
+                                    height={1000}
+                                    priority
+                                />
+                            </CarouselItem>
+                        </CarouselContent>
+                    </Carousel>
                 </div>
             </div>
             <div className="w-full flex flex-col justify-center items-center">
