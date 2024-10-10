@@ -332,7 +332,7 @@ export async function startPatrol(req: Request, res: Response) {
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         const patrolId = parseInt(req.params.id, 10)
-        const { status,checklist } = req.body
+        const { status, checklist } = req.body
 
         const isUserInspector = checklist.some((checklistObj: any) => {
             return checklistObj.inspector.id === userId;
@@ -346,7 +346,7 @@ export async function startPatrol(req: Request, res: Response) {
             return res.status(403).json({ message: "Access Denied" })
         }
 
-        if ( !status || !checklist) {
+        if (!status || !checklist) {
             return res.status(400)
         }
 
@@ -367,21 +367,21 @@ export async function startPatrol(req: Request, res: Response) {
         for (const checklistObj of checklist) {
             const { item } = checklistObj;
 
-            
+
             for (const itemObj of item) {
                 const { id: itemId, zone } = itemObj;
 
-              
+
                 for (const zoneObj of zone) {
                     const { id: zoneId } = zoneObj;
 
-               
+
                     await prisma.patrolResult.create({
                         data: {
                             pr_status: null,
-                            pr_iz_it_id: itemId, 
-                            pr_iz_ze_id: zoneId, 
-                            pr_pt_id: updatePatrol.pt_id, 
+                            pr_iz_it_id: itemId,
+                            pr_iz_ze_id: zoneId,
+                            pr_pt_id: updatePatrol.pt_id,
                         },
                     });
                 }
@@ -416,7 +416,7 @@ export async function finishPatrol(req: Request, res: Response) {
 
 
         if (!checklist || !result) {
-            return res.status(400).json({message: "Invalid Data"})
+            return res.status(400).json({ message: "Invalid Data" })
         }
 
         if (status !== 'on_going') {
@@ -434,20 +434,18 @@ export async function finishPatrol(req: Request, res: Response) {
         });
 
         for (const resultObj of result) {
-            const { id, status, itemId, zoneId } = resultObj;
-
+            const { id, status } = resultObj;
+        
             await prisma.patrolResult.update({
                 where: {
                     pr_id: id,
                 },
                 data: {
                     pr_status: status,
-                    pr_iz_it_id: itemId, 
-                    pr_iz_ze_id: zoneId, 
                 },
             });
         }
-
+        
         res.status(200).json(updatePatrol)
 
     } catch (err) {
