@@ -7,7 +7,6 @@ import loginCover1 from "/app/img/login_cover_1.png"
 import loginCover2 from "/app/img/login_cover_2.png"
 import loginCover3 from "/app/img/login_cover_3.png"
 import Image from 'next/image'
-import { useTheme } from 'next-themes';
 import LanguageSelect from '@/components/language-select';
 import ModeToggle from '@/components/mode-toggle';
 import Textfield from '@/components/textfield';
@@ -30,6 +29,7 @@ import FormSuccess from '@/components/form-success'
 import { login } from '@/lib/api';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import EmblaAutoplay from 'embla-carousel-autoplay'
+import { useTheme } from 'next-themes';
 
 export const LoginSchema = z.object({
     username: z.string(),
@@ -42,7 +42,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')
     const [success, setSuccess] = useState<string | undefined>('')
     const router = useRouter()
-    const { theme } = useTheme()
+    const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
     const [isPending, startTransition] = useTransition()
@@ -78,13 +78,14 @@ export default function LoginPage() {
         });
     }
     return (
-        <section className="bg-card flex justify-between h-screen p-2">
-            <div className="bg-background w-full rounded-md grid grid-rows-5 p-4">
+        <section className="bg-card flex flex-col lg:flex-row justify-between h-screen p-2">
+            <div className="bg-background w-full lg:w-1/2 rounded-md grid grid-rows-5 p-4">
                 <Image
                     className="flex items-center"
-                    src={theme === 'dark' ? darkLogo : lightLogo}
+                    src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
                     alt="Logo"
                     width={250}
+                    height={250}
                     priority
                 />
                 <div className="grid grid-rows-subgrid gap-4 row-span-3 justify-center items-center">
@@ -124,15 +125,15 @@ export default function LoginPage() {
                     </Carousel>
                 </div>
             </div>
-            <div className="w-full flex flex-col justify-center items-center">
+            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4">
                 <div className='flex w-full justify-end gap-4'>
                     <ModeToggle />
                     <LanguageSelect />
                 </div>
                 <FormError message={error} />
                 <FormSuccess message={success} />
-                <div className='gap-2 flex flex-col justify-center items-start w-[450px] h-full'>
-                    <h1 className='text-5xl font-semibold'>{t('Login')}</h1>
+                <div className='gap-2 flex flex-col justify-center items-start w-full lg:w-[450px] h-full'>
+                    <h1 className='text-4xl lg:text-5xl font-semibold'>{t('Login')}</h1>
                     <p>{t('EnterCredentials')}</p>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className='w-full'>
@@ -191,10 +192,10 @@ export default function LoginPage() {
                                 </span>
                             </Button>
                         </form>
-
                     </Form>
                 </div>
             </div>
-        </section >
+        </section>
+
     );
 }
