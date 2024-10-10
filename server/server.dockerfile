@@ -10,6 +10,8 @@ COPY prisma ./prisma
 
 RUN npx prisma generate
 
+RUN npm install && npm install multer
+
 COPY . .
 
 EXPOSE 4000

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from '@/components/theme-provider';
 import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import {getMessages, unstable_setRequestLocale} from 'next-intl/server';
 import localFont from "next/font/local";
 import Head from 'next/head';
 import "./globals.css";
 import "./globalicons.css";
+
+export const dynamic = "force-dynamic";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,6 +36,8 @@ export default async function RootLayout({
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
+  unstable_setRequestLocale(locale);
+
   return (
     <html lang={locale} suppressHydrationWarning>
        <Head>
@@ -43,7 +47,7 @@ export default async function RootLayout({
       </Head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <NextIntlClientProvider messages={messages}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>

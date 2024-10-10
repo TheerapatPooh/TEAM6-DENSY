@@ -26,12 +26,13 @@ import {
 import FormError from '@/components/form-error'
 import FormSuccess from '@/components/form-success'
 import { login } from '@/lib/api';
+import { LoginSchema } from '@/app/type';
 
-export const LoginSchema = z.object({
-    username: z.string(),
-    password: z.string(),
-    rememberMe: z.boolean().optional()
-})
+// export const LoginSchema:any = z.object({
+//     username: z.string(),
+//     password: z.string(),
+//     rememberMe: z.boolean().optional()
+// })
 
 
 export default function LoginPage() {

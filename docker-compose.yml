@@ -12,6 +12,8 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:4000
     depends_on:
       - server
+    networks:
+      - densy-network
 
   server:
     container_name: server
@@ -24,15 +26,16 @@ services:
       - ./server/.env.server
     ports:
       - "4000:4000"
-    # environment:
-    #   # - DATABASE_URL=mysql://user:password@db:3306/densy_proto
-    #   DATABASE_URL: ${DATABASE_URL}
+    environment:
+      - DATABASE_URL=mysql://user:password@db:3306/densy_data
     depends_on:
       - db
+    networks:
+      - densy-network
 
   db:
     image: mysql:8.0
-    container_name: db
+    container_name: database
     environment:
       MYSQL_DATABASE: densy_data
       MYSQL_USER: user
@@ -48,14 +51,18 @@ services:
         "--collation-server=utf8mb4_unicode_ci",
         "--default-authentication-plugin=caching_sha2_password"
       ]
+    networks:
+      - densy-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.2.1
     ports:
-      - "8080:80"
+      - "8028:80"
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: verysecret
+    networks:
+      - densy-network
 
   nginx:
     container_name: nginx
@@ -68,6 +75,12 @@ services:
     depends_on:
       - client
       - server
+    networks:
+      - densy-network
 
 volumes:
   db_data:
+
+networks:
+  densy-network:
+    driver: bridge

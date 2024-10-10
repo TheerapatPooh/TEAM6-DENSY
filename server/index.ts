@@ -8,18 +8,16 @@ import path from 'path'
 
 dotenv.config()
 
-
 const app = express()
 const PORT = 4000
+
 app.use(cookieParser());
 app.use(cors({
     origin: `${process.env.CLIENT_URL}`,
     credentials: true
-}))
+}));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
 app.use(bodyParse.json({limit: '10mb'}))
 
 readdirSync('./Routes').map((r:string) => app.use('/',require('./Routes/' + r)))

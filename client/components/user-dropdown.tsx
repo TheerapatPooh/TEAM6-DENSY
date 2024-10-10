@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -27,12 +27,12 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
           <div className="flex items-center gap-2">
             {selectedUser && (
               <Avatar>
-                <AvatarImage src="" />
-                <AvatarFallback>{getInitials(selectedUser.profile[0].name)}</AvatarFallback>
+                <AvatarImage src={selectedUser.profile.image?.path || ""} />
+                <AvatarFallback>{getInitials(selectedUser.profile.name)}</AvatarFallback>
               </Avatar>
             )}
             <p className="font-normal text-muted-foreground">
-              {selectedUser ? selectedUser.profile[0].name : "Select a User"}
+              {selectedUser ? selectedUser.profile.name : "Select a User"}
             </p>
           </div>
           <span
@@ -46,10 +46,10 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
         {userData.map((user) => (
           <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
             <Avatar>
-              <AvatarImage src="" />
-              <AvatarFallback>{getInitials(user.profile[0].name)}</AvatarFallback>
+              <AvatarImage src={user.profile.image?.path || ""} />
+              <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
             </Avatar>
-            <p className="font-normal text-muted-foreground">{user.profile[0].name}</p>
+            <p className="font-normal text-muted-foreground">{user.profile.name}</p>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

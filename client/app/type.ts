@@ -1,9 +1,10 @@
-
+import { z } from "zod"
 
 export type patrolStatus ="Pending"|"Scheduled"| "OnGoing"|"Completed"
 export type Role = "ADMIN"|"INSPECTOR"|"RESPONSIBLEMAN"|"OFFICER"
 export type DefectStatus = "Reported" | "Completed" | "PendingReview" | "InProgress" | "Resolved";
 export type DefectType = "Safety" | "Environmental";
+
 export interface Zone {
     id: number;
     name: string;
@@ -96,3 +97,9 @@ export interface PatrolChecklist {
     checklistId: number;
     inspectorId: number;
 }
+
+export const LoginSchema = z.object({
+    username: z.string(),
+    password: z.string(),
+    rememberMe: z.boolean().optional()
+})

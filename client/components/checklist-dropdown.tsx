@@ -43,14 +43,15 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
           <AccordionTrigger className="hover:no-underline">
             <p className="text-2xl">{checklist.title}</p>
             <div className="flex items-center w-[300px] gap-2">
-              {selectUser ? (
+              {selectUser && selectUser.profile ? (
                 <Avatar>
-                  <AvatarImage src={selectUser.profile[0].imagePath || ""} />
-                  <AvatarFallback>{getInitials(selectUser.profile[0].name)}</AvatarFallback>
+                  <AvatarImage src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${selectUser.profile.image?.path}`} />
+                  <AvatarFallback>{getInitials(selectUser.profile.name)}</AvatarFallback>
                 </Avatar>
               ) : null}
               <p className="font-semibold text-lg text-muted-foreground">
-                {selectUser ? selectUser.profile[0].name : "Select an Inspector"}
+                {/* {selectUser ? selectUser.profile[0].name : "Select an Inspector"} */}
+                {selectUser ? selectUser.profile.name : "Select an Inspector"}
               </p>
             </div>
           </AccordionTrigger>

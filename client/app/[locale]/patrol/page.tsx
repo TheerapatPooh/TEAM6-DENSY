@@ -55,6 +55,8 @@ import {
 import { User } from "@/app/type";
 import { useRouter } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default function Page() {
   const t = useTranslations("General");
   const [patrolData, setPatrolData] = useState<Patrol[]>([]);
