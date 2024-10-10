@@ -100,7 +100,7 @@ export function PatrolCard({
                         </div>
                     )}
                 </div>
-                <CardTitle className="card-foreground text-2xl">{patrolPreset}</CardTitle>
+                <CardTitle className="card-foreground text-2xl truncate">{patrolPreset}</CardTitle>
             </CardHeader>
             <CardContent className="gap-0 px-[10px] py-0">
                 <div className="flex gap-2.5 text-muted-foreground items-center">
