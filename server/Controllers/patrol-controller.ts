@@ -436,3 +436,38 @@ export async function finishPatrol(req: Request, res: Response) {
         res.status(500)
     }
 }
+
+
+export async function removePatrol(req: Request, res: Response) {
+    try {
+        const patrolId = parseInt(req.params.id, 10);
+
+        await prisma.patrolChecklist.deleteMany({
+            where: {
+                ptcl_pt_id: patrolId,
+            },
+        });
+
+        await prisma.patrolResult.deleteMany({
+            where: {
+                pr_pt_id: patrolId,
+            }
+        });
+
+        await prisma.patrol.delete({
+            where: {
+                pt_id: patrolId,
+            },
+        });
+
+        res.status(200).json({
+            message: 'Patrol and related records successfully deleted',
+        });
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({
+            message: 'Failed to delete patrol',
+        });
+    }
+    
+}
