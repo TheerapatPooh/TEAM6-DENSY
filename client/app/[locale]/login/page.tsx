@@ -70,7 +70,7 @@ export default function LoginPage() {
         setSuccess('')
         startTransition(async () => {
             const result = await login(values)
-            router.refresh()
+            window.location.reload();
             if (result.error) {
                 setError(result.error)
             } else if (result.token) {
