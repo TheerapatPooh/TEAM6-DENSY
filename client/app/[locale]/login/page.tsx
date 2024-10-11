@@ -46,6 +46,7 @@ export default function LoginPage() {
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
     const [isPending, startTransition] = useTransition()
+    const autoplayOptions = EmblaAutoplay({ delay: 3000, stopOnInteraction: false });
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -89,7 +90,7 @@ export default function LoginPage() {
                     priority
                 />
                 <div className="grid grid-rows-subgrid gap-4 row-span-3 justify-center items-center">
-                    <Carousel className='row-start-2' plugins={[EmblaAutoplay()]} opts={{ loop: true }}>
+                    <Carousel className='row-start-2'  plugins={[autoplayOptions]} opts={{ loop: true }}>
                         <CarouselContent>
                             <CarouselItem>
                                 <Image
