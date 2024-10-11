@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User, PatrolChecklist } from "@/app/type";
 import { getInitials } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface UserDropdownProps {
   userData: User[];
@@ -18,8 +19,14 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
     setSelectedUser(user);
     onUserSelect(user);
     setIsOpen(false);
-  };
 
+  };
+  const t = useTranslations("General");
+
+
+  useEffect(() => {
+    console.log(selectedUser)
+  },[selectedUser])
   return (
     <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
       <DropdownMenuTrigger className="w-[300px] h-[65px]">
@@ -28,11 +35,11 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
             {selectedUser && (
               <Avatar>
                 <AvatarImage src="" />
-                <AvatarFallback>{getInitials(selectedUser.profile[0].name)}</AvatarFallback>
+                <AvatarFallback>{getInitials(selectedUser.profile.name)}</AvatarFallback>
               </Avatar>
             )}
             <p className="font-normal text-muted-foreground">
-              {selectedUser ? selectedUser.profile[0].name : "Select a User"}
+              {selectedUser ? selectedUser.profile.name :  t("SelectAUser")}
             </p>
           </div>
           <span
@@ -47,9 +54,9 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
           <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
             <Avatar>
               <AvatarImage src="" />
-              <AvatarFallback>{getInitials(user.profile[0].name)}</AvatarFallback>
+              <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
             </Avatar>
-            <p className="font-normal text-muted-foreground">{user.profile[0].name}</p>
+            <p className="font-normal text-muted-foreground">{user.profile.name}</p>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

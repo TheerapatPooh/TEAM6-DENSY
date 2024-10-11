@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { DateRange } from "react-day-picker"
+import { useTranslations } from "next-intl"
 
 interface Props {
   handleSelectedTime: (time: string) => void;
@@ -21,6 +22,8 @@ interface Props {
 export function DatePicker({
   handleSelectedTime,
 }: Props) {
+  const t = useTranslations("General");
+
   const [date, setDate] = React.useState<Date>()
 
   const handleDateChange = (selectedDate: Date | undefined) => {
@@ -43,7 +46,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {date ? format(date, "PPP") : <span>{t('PickADate')}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">

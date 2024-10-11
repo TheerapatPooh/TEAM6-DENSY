@@ -57,6 +57,7 @@ import { useRouter } from "next/navigation";
 
 
 export default function Page() {
+  
   const t = useTranslations("General");
   const [patrolData, setPatrolData] = useState<Patrol[]>([]);
   const [presetData, setPresetData] = useState<Preset[]>();
@@ -148,25 +149,25 @@ export default function Page() {
             ${isSortOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg	">Sort</div>
+            <div className="text-lg	"> {t('Sort')}</div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="p-2">
-            <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="p-2">
+            <DropdownMenuLabel>{t('SortBy')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Doc No.">
               <DropdownMenuRadioItem value="Doc No." className="text-base">
-                Doc No.
+              {t('DocNo')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Date" className="text-base">
-                Date
+              {t('Date')}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
-            <DropdownMenuLabel>Order</DropdownMenuLabel>
+            <DropdownMenuLabel >{t('Order')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Order">
               <DropdownMenuRadioItem value="Order" className="text-base">
-                Ascending
+                {t('Ascending')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Date" className="text-base">
-                Descending
+                {t('Descending')}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -178,15 +179,15 @@ export default function Page() {
           >
             {" "}
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg	">Filter</div>
+            <div className="text-lg	"> {t('Filter')}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
             <div>
-              <DropdownMenuLabel>Date</DropdownMenuLabel>
+              <DropdownMenuLabel> {t('Date')}</DropdownMenuLabel>
               <DatePickerWithRange />
             </div>
             <div>
-              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('Status')}</DropdownMenuLabel>
               <DropdownMenuCheckboxItem checked>
                 <BadgeCustom
                   width="w-full"
@@ -225,15 +226,15 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
             </div>
             <div>
-              <DropdownMenuLabel>Preset</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('Preset')}</DropdownMenuLabel>
               <Select>
                 <SelectTrigger className="">
-                  <SelectValue placeholder="All" />
+                  <SelectValue placeholder={t('All')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Preset</SelectLabel>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectLabel>{t('Preset')}</SelectLabel>
+                    <SelectItem value="all">{t('All')}</SelectItem>
                     <SelectItem value="Weather And Toilet">
                       Weather And Toilet
                     </SelectItem>
@@ -243,9 +244,9 @@ export default function Page() {
             </div>
             <div className="flex w-full justify-end gap-2">
               <Button size="sm" variant="secondary">
-                Reset
+                {t('Reset')}
               </Button>
-              <Button size="sm">Apply</Button>
+              <Button size="sm">{t('Apply')}</Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -260,10 +261,10 @@ export default function Page() {
           <AlertDialogContent className="w-[620px] h-[715px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
-                Patrol Preset
+                {t('PatrolPreset')}
               </AlertDialogTitle>
               <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                Please select a preset for the patrol
+                {t('PleaseSelectAPresetForThePatrol')}
               </AlertDialogDescription>
               <div className="flex items-center justify-center">
                 <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
@@ -311,12 +312,12 @@ export default function Page() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => setSecondDialog(true)}
                   disabled={isNextButtonDisabled}
                 >
-                  Next
+                  {t('Next')}
                   <span className="material-symbols-outlined text-2xl">
                     chevron_right
                   </span>
@@ -331,18 +332,18 @@ export default function Page() {
           <AlertDialogContent className="max-w-[995px] h-[700px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
-                Patrol Preset
+              {t('PatrolPreset')}
               </AlertDialogTitle>
               <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                Please select a preset for the patrol
+              {t('PleaseSelectAPresetForThePatrol')}
               </AlertDialogDescription>
-              <p className="font-semibold text-muted-foreground">Date</p>
+              <p className="font-semibold text-muted-foreground"> {t('Date')}</p>
               <DatePicker
                 handleSelectedTime={(time: string) => setSelectedDate(time)}
               />
             </AlertDialogHeader>
             <div className="grid grid-cols-1">
-              <p className="font-semibold text-muted-foreground">Checklist</p>
+              <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
                   {selectedPreset?.checklist.map((presetChecklist) => (
@@ -360,7 +361,7 @@ export default function Page() {
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
                 <AlertDialogCancel onClick={() => setSecondDialog(false)}>
-                  Cancel
+                {t('Cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className="gap-2"
@@ -370,7 +371,7 @@ export default function Page() {
                   <span className="material-symbols-outlined text-2xl">
                     note_add
                   </span>
-                  New Patrol
+                 {t('NewPatrol')}
                 </AlertDialogAction>
               </div>
             </AlertDialogFooter>

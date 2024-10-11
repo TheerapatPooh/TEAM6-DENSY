@@ -6,11 +6,13 @@ import Image from 'next/image'
 import ProfileDropdown from './profile-dropdown'
 import LanguageSelect from '@/components/language-select'
 import ModeToggle from '@/components/mode-toggle'
+import Notification from '@/components/notification'
 import { useTheme } from 'next-themes'
 
 export default function Header() {
   const [mounted, setMounted] = useState(false)
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
+
 
   useEffect(() => {
     setMounted(true)
@@ -18,13 +20,13 @@ export default function Header() {
   if (!mounted) {
     return null
   }
-
+  
   return (
     <header className="bg-card h-[70px] flex justify-between items-center p-4 custom-shadow sticky top-0 z-50">
       <div className="flex items-center">
         <Image
           className="flex items-center"
-          src={theme === 'dark' ? darkLogo : lightLogo}
+          src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
           alt="Logo"
           width={130}
           height={112}
@@ -35,6 +37,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <ModeToggle />
         <LanguageSelect />
+        <Notification />
         <ProfileDropdown />
       </div>
     </header>

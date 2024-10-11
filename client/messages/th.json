@@ -18,6 +18,36 @@
       "RememberMe": "จดจำการเข้าใช้งาน",
       "ForgotPassword": "ลืมรหัสผ่าน?",
       "InspectorListNames" : "รายชื่อผู้ตรวจ Patrol",
-      "Search": "ค้นหา..."
+      "Search": "ค้นหา...",
+      "Sort":"เรียง",
+      "Filter":"กรอง",
+      "DocNo":"หมายเลขเอกสาร",
+      "Date":"วันที่",
+      "SortBy":"เรียงโดย",
+      "Order":"เรียงจาก",
+      "Ascending":"เรียงจากน้อยไปมาก",
+      "Descending":"เรียงจากมากไปน้อย",
+      "Status":"สถานะ ",
+      "Preset":"รูปแบบการตรวจ",
+      "All":"ทั้งหมด",
+      "Reset":"รีเซ็ต",
+      "Apply":"ยืนยัน",
+      "PatrolPreset":"เลือก รูปแบบการตรวจ",
+      "PleaseSelectAPresetForThePatrol":"กรุณาเลือก รูปแบบ การตั้งค่าการตรวจ",
+      "Next":"ต่อไป",
+      "Cancel":"ยกเลิก",
+      "Checklist":"รายการตรวจ",
+      "NewPatrol":"สร้าง",
+      "PickADate":"เลือกวันที่",
+      "Inspector":"ผู้ตรวจตรา",
+      "SelectAnInspector":"เลือก ผู้ตรวจตรา",
+      "SelectAUser":"เลือก ผู้ใช้งาน",
+      "InspectorList":"รายชื่อ ผู้ตรวจตรา",
+      "":"",
+      "":"",
+      "":""
+      
+
+
     }
   }

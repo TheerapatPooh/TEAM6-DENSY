@@ -16,35 +16,36 @@ datasource db {
 model User {
   us_id         Int      @id @default(autoincrement())
   us_username   String   @unique
-  us_email      String?   @unique
+  us_email      String?  @unique
   us_password   String
   us_role       Role
   us_department String?
   us_created_at DateTime @default(now())
 
   preset           Preset[]
-  update_checklist Checklist[]            @relation("user")
+  update_checklist Checklist[]       @relation("user")
   comment          Comment[]
-  profile          Profile[] 
+  profile          Profile?
   notification     Notification[]
   defect           Defect[]
-  zone             Zone[]
+  zone             Zone?
   checklist        PatrolChecklist[]
 
   @@map("users")
 }
 
 model Defect {
-  df_id        Int           @id @default(autoincrement())
-  df_title     String
-  df_note      String
-  df_type      String
-  df_status    DefectStatus
-  df_timestamp DateTime      @default(now())
-  df_us_id     Int
+  df_id          Int          @id @default(autoincrement())
+  df_name        String
+  df_description String
+  df_type        String
+  df_status      DefectStatus
+  df_timestamp   DateTime     @default(now())
+  df_us_id       Int
+  df_pr_id       Int
 
-  user          User               @relation(fields: [df_us_id], references: [us_id])
-  patrol_result PatrolResult[]
+  user          User          @relation(fields: [df_us_id], references: [us_id])
+  patrol_result PatrolResult  @relation(fields: [df_pr_id], references: [pr_id])
   image         DefectImage[]
 
   @@map("defects")
@@ -77,16 +78,16 @@ model Profile {
 }
 
 model Patrol {
-  pt_id         Int           @id @default(autoincrement())
+  pt_id         Int          @id @default(autoincrement())
   pt_date       DateTime
   pt_start_time DateTime?
   pt_end_time   DateTime?
   pt_duration   String?
-  pt_status     Patrol_Status
+  pt_status     PatrolStatus
   pt_ps_id      Int
 
   checklist     PatrolChecklist[]
-  preset        Preset                 @relation(fields: [pt_ps_id], references: [ps_id])
+  preset        Preset            @relation(fields: [pt_ps_id], references: [ps_id])
   patrol_result PatrolResult[]
 
   @@map("patrols")
@@ -115,7 +116,7 @@ model Preset {
   ps_update_at   DateTime
   ps_us_id       Int
 
-  user      User                   @relation(fields: [ps_us_id], references: [us_id])
+  user      User              @relation(fields: [ps_us_id], references: [us_id])
   checklist PresetChecklist[]
   patrol    Patrol[]
 
@@ -139,10 +140,10 @@ model Checklist {
   cl_version   Int
   cl_latest    Boolean
   cl_update_at DateTime @default(now())
-  cl_us_id     Int
+  cl_update_by Int
 
   patrol PatrolChecklist[]
-  user   User                   @relation("user", fields: [cl_us_id], references: [us_id])
+  user   User              @relation("user", fields: [cl_update_by], references: [us_id])
   preset PresetChecklist[]
   item   Item[]
 
@@ -150,29 +151,28 @@ model Checklist {
 }
 
 model PatrolResult {
-  pr_id     Int     @id @default(autoincrement())
-  pr_status Boolean
-  pr_it_id  Int
-  pr_df_id  Int
-  pr_pt_id  Int
+  pr_id       Int     @id @default(autoincrement())
+  pr_status   Boolean?
+  pr_iz_it_id Int
+  pr_iz_ze_id Int
+  pr_pt_id    Int
 
-  item    Item      @relation(fields: [pr_it_id], references: [it_id])
-  comment Comment[]
-  defect  Defect    @relation(fields: [pr_df_id], references: [df_id])
-  patrol  Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
+  comment   Comment[]
+  defects   Defect[]
+  item_zone ItemZone  @relation(fields: [pr_iz_it_id, pr_iz_ze_id], references: [itze_it_id, itze_ze_id])
+  patrol    Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
 
   @@map("patrol_results")
 }
 
 model Item {
-  it_id    Int         @id @default(autoincrement())
+  it_id    Int        @id @default(autoincrement())
   it_name  String
-  it_type  Item_Status
+  it_type  ItemStatus
   it_cl_id Int
 
-  item_zone     ItemZone[]
-  checklist     Checklist       @relation(fields: [it_cl_id], references: [cl_id])
-  patrol_result PatrolResult[]
+  item_zone ItemZone[]
+  checklist Checklist  @relation(fields: [it_cl_id], references: [cl_id])
 
   @@map("items")
 }
@@ -181,26 +181,26 @@ model Zone {
   ze_id    Int    @id @default(autoincrement())
   ze_name  String
   ze_lt_id Int
-  ze_us_id Int
+  ze_us_id Int    @unique
 
   zone_items ItemZone[]
   location   Location   @relation(fields: [ze_lt_id], references: [lt_id])
-  user       User       @relation(fields: [ze_us_id], references: [us_id])
+  supervisor User       @relation(fields: [ze_us_id], references: [us_id])
 
   @@map("zones")
 }
 
 model ItemZone {
-  iz_it_id  Int
-  iz_ze_id  Int
+  itze_it_id Int
+  itze_ze_id Int
 
-  item  Item @relation(fields: [iz_it_id], references: [it_id], onDelete: Cascade)
-  zone  Zone @relation(fields: [iz_ze_id], references: [ze_id], onDelete: Cascade)
+  patrol_result PatrolResult[]
+  item          Item           @relation(fields: [itze_it_id], references: [it_id], onDelete: Cascade)
+  zone          Zone           @relation(fields: [itze_ze_id], references: [ze_id], onDelete: Cascade)
 
-  @@id([iz_it_id, iz_ze_id])
+  @@id([itze_it_id, itze_ze_id])
   @@map("item_zones")
 }
-
 
 model Location {
   lt_id   Int    @id @default(autoincrement())
@@ -218,7 +218,7 @@ model Comment {
   cm_us_id     Int
   cm_pr_id     Int
 
-  user          User          @relation(fields: [cm_us_id], references: [us_id])
+  user          User         @relation(fields: [cm_us_id], references: [us_id])
   patrol_result PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
 
   @@map("comments")
@@ -231,7 +231,7 @@ model Image {
   im_pf_id     Int      @unique
 
   defect  DefectImage[]
-  profile Profile?           @relation(fields: [im_pf_id], references: [pf_id])
+  profile Profile?      @relation(fields: [im_pf_id], references: [pf_id])
 
   @@map("images")
 }
@@ -248,29 +248,28 @@ model DefectImage {
 }
 
 enum Role {
-  ADMIN
-  INSPECTOR
-  RESPONSIBLEMAN
-  OFFICER
+  admin
+  inspector
+  supervisor
 }
 
-enum Patrol_Status {
-  Pending
-  Scheduled
-  OnGoing
-  Completed
+enum PatrolStatus {
+  pending
+  scheduled
+  on_going
+  completed
 }
 
 enum DefectStatus {
-  Reported
-  InProgress
-  PendingInspection
-  Resolved
-  Completed
+  reported
+  in_progress
+  pending_inspection
+  resolved
+  completed
 }
 
-enum Item_Status {
-  Safety
-  Environment
-  Maintenance
+enum ItemStatus {
+  safety
+  environment
+  maintenance
 }

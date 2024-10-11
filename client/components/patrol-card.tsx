@@ -70,25 +70,25 @@ export function PatrolCard({
                     <CardDescription className="text-lg font-semibold">
                         {formattedDate}
                     </CardDescription>
-                    {patrolStatus === "Pending" ? (
+                    {patrolStatus === "pending" as patrolStatus ? (
                         <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-blue-500">
                                 hourglass_top
                             </span>
                         </div>
-                    ) : patrolStatus === "Scheduled" ? (
+                    ) : patrolStatus === "scheduled" as patrolStatus ? (
                         <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-yellow-500">
                                 event_available
                             </span>
                         </div>
-                    ) : patrolStatus === "OnGoing" ? (
+                    ) : patrolStatus === "on_going" as patrolStatus ? (
                         <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-purple-500">
                                 cached
                             </span>
                         </div>
-                    ) : patrolStatus === "Completed" ? (
+                    ) : patrolStatus === "completed" as patrolStatus ? (
                         <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
                             <span className="material-symbols-outlined text-green-500">
                                 check
@@ -100,7 +100,7 @@ export function PatrolCard({
                         </div>
                     )}
                 </div>
-                <CardTitle className="card-foreground text-2xl">{patrolPreset}</CardTitle>
+                <CardTitle className="card-foreground text-2xl truncate">{patrolPreset}</CardTitle>
             </CardHeader>
             <CardContent className="gap-0 px-[10px] py-0">
                 <div className="flex gap-2.5 text-muted-foreground items-center">
@@ -141,7 +141,8 @@ export function PatrolCard({
                     <HoverCardContent className="w-full border-none custom-shadow">
                         <div className="flex items-center justify-center">
                             <span className="material-symbols-outlined me-2.5">engineering</span>
-                            <p className="text-lg font-medium text-center">Inspector List</p>
+                            <p className="text-lg font-medium text-center">{t('InspectorList')}
+                            </p>
                         </div>
                         {inspectorNames.map((inspectorName, idx) => (
                             <div key={idx} className="flex items-center p-2">
@@ -180,10 +181,10 @@ export function PatrolCard({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="p-0">
                                 <DropdownMenuItem>
-                                    <h1>Details</h1>
+                                    <h1>{t('Details')}</h1>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
-                                    <h1 className="text-destructive hover:text-destructive">Delete</h1>
+                                    <h1 className="text-destructive hover:text-destructive">{t('Delete')}</h1>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

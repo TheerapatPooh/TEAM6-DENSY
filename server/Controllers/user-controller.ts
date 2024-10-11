@@ -15,7 +15,7 @@ export async function getUser(req: Request, res: Response) {
             where: { us_id: Id },
         });
 
-        if (role !== 'ADMIN') {
+        if (role !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" });
         }
 
@@ -43,7 +43,7 @@ export async function getUser(req: Request, res: Response) {
 export async function getAllUsers(req: Request, res: Response) {
     try {
         const role = (req as any).user.role
-        if (role !== 'ADMIN') {
+        if (role !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const allUsers = await prisma.user.findMany()
@@ -71,7 +71,7 @@ export async function createUser(req: Request, res: Response) {
     try {
 
         const userRole = (req as any).user.role
-        if (userRole !== 'ADMIN') {
+        if (userRole !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const { email, password, role, department }: User = req.body
@@ -143,8 +143,8 @@ export async function updateProfile(req: Request, res: Response) {
             return res.status(404)
         }
 
-        if (imagePath && user.profile[0].pf_image) {
-            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile[0].pf_image.im_path)
+        if (imagePath && user.profile?.pf_image) {
+            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile?.pf_image.im_path)
             if (fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath)
             }
@@ -152,14 +152,14 @@ export async function updateProfile(req: Request, res: Response) {
         let image = null
         if (imagePath) {
             image = await prisma.image.upsert({
-                where: { im_pf_id: user.profile[0].pf_id },
+                where: { im_pf_id: user.profile?.pf_id },
                 update: {
                     im_path: imagePath,
                 },
                 create: {
                     im_path: imagePath,
                     profile: {
-                        connect: { pf_id: user.profile[0].pf_id }
+                        connect: { pf_id: user.profile?.pf_id }
                     }
                 }
             })
@@ -198,9 +198,9 @@ export async function getProfile(req: Request, res: Response) {
     try {
         const userId = (req as any).user.userId
         const id = parseInt(req.params.id, 10)
-        let userWithProfile = null
+        let user = null
         if (!id) {
-            userWithProfile = await prisma.user.findUnique({
+            user = await prisma.user.findUnique({
                 where: { us_id: userId },
                 include: {
                     profile: {
@@ -212,7 +212,7 @@ export async function getProfile(req: Request, res: Response) {
             })
         }
         else {
-            userWithProfile = await prisma.user.findUnique({
+            user = await prisma.user.findUnique({
                 where: { us_id: id },
                 include: {
                     profile: {
@@ -224,19 +224,18 @@ export async function getProfile(req: Request, res: Response) {
             })
         }
 
-        if (!userWithProfile) {
+        if (!user) {
             return res.status(404)
         }
 
-        const profile = userWithProfile.profile.length > 0 ? userWithProfile.profile[0]: null
-
+        const profile = user.profile || null
         const result: User = {
-            id: userWithProfile.us_id,
-            username: userWithProfile.us_username,
-            email: userWithProfile.us_email,
-            role: userWithProfile.us_role,
-            department: userWithProfile.us_department,
-            createdAt: userWithProfile.us_created_at.toISOString(),
+            id: user.us_id,
+            username: user.us_username,
+            email: user.us_email,
+            role: user.us_role,
+            department: user.us_department,
+            createdAt: user.us_created_at.toISOString(),
             profile: profile ? {
                 id: profile.pf_id,
                 name: profile.pf_name || undefined,
@@ -260,7 +259,7 @@ export async function getProfile(req: Request, res: Response) {
 
 export async function getAllProfile(req: Request, res: Response) {
     try {
-        const allProfiles = await prisma.user.findMany({
+        const allUsers = await prisma.user.findMany({
             include: {
                 profile: {
                     include: {
@@ -270,22 +269,26 @@ export async function getAllProfile(req: Request, res: Response) {
             },
         })
 
-        if (allProfiles) {
-            const result: User[] = allProfiles.map((user: any) => ({
+        if (allUsers) {
+            
+            const result: User[] = allUsers.map((user: any) => ({
                 id: user.us_id,
                 username: user.us_username,
                 email: user.us_email,
                 role: user.us_role,
                 department: user.us_department,
-                profile: user.profile.map((profile: any) => ({
-                    id: profile.pf_id,
-                    name: profile.pf_name,
-                    age: profile.pf_age,
-                    tel: profile.pf_tel,
-                    address: profile.pf_address,
-                    userId: profile.pf_us_id,
-                    imagePath: profile.pf_image?.im_path || null,
-                })),
+                profile: {
+                    id: user.profile.pf_id,
+                    name: user.profile.pf_name,
+                    age: user.profile.pf_age,
+                    tel: user.profile.pf_tel,
+                    address: user.profile.pf_address,
+                    image: user.profile.pf_image ? {
+                        id: user.profile.pf_image.im_id, 
+                        path: user.profile.pf_image.im_path,
+                    } : null,
+                    userId: user.pf_us_id                
+                },
             }))
             res.status(200).json(result)
         } else {
