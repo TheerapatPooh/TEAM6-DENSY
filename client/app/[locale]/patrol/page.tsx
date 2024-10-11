@@ -388,7 +388,7 @@ export default function Page() {
                 patrolStatus={status as patrolStatus}
                 patrolDate={new Date(date)}
                 patrolPreset={preset ? preset.title : "No Title"}
-                patrolId={preset?.id !== undefined ? String(preset.id) : "N/A"}
+                patrolId={card.id}
                 inspector={inspectors}
                 items={0}
                 fails={0}

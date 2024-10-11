@@ -76,6 +76,7 @@ export interface Profile {
 }
 
 export interface User {
+    name: string;
     createdAt?: string;
     department?: string | null;
     email?: string;

@@ -50,15 +50,17 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-0">
-        {userData.map((user) => (
+        {userData.map((user) => {
+          return( 
           <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
-            <Avatar>
-              <AvatarImage src="" />
-              <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
-            </Avatar>
-            <p className="font-normal text-muted-foreground">{user.profile.name}</p>
-          </DropdownMenuItem>
-        ))}
+          <Avatar>
+            <AvatarImage src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${user?.profile?.image?.path}`}/>
+            <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
+          </Avatar>
+          <p className="font-normal text-muted-foreground">{user.profile.name}</p>
+        </DropdownMenuItem>)
+         
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

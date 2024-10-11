@@ -21,7 +21,6 @@ export default function ProfileDropdown() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<User>();
-  const [path, setPath] = useState<string>();
   const router = useRouter();
 
   const hadleLogout = async () => {
@@ -73,18 +72,9 @@ export default function ProfileDropdown() {
     };
   }, []);
 
-  useEffect(() => {
-    if (profile) {
-      setPath(profile.profile.image?.path); // Set path here when profile is updated
-    }
-  }, [profile]);
+ 
 
-  useEffect(() => {
-    if (path) {
-      console.log("Path updated:", path); // Log path when it changes
-    }
-  }, [path]);
-
+  
   if (!mounted) {
     return null;
   }
