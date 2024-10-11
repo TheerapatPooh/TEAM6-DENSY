@@ -3,10 +3,11 @@
 export type patrolStatus ="pending"|"scheduled"| "on_going"|"completed"
 export type Role = "admin"|"inspector"|"supervisor"
 export type DefectStatus = "reported" | "completed" | "pending_review" | "in_progress" | "resolved";
-export type DefectType = "safety" | "enviromental";
+export type ItemType = "safety" | "environment" | 'maintenance';
 export interface Zone {
     id: number;
     name: string;
+    supervisor: User;
 }
 
 export interface Item {
@@ -22,11 +23,10 @@ export interface Inspector {
     age: number | null;
     tel: string | null;
     address: string | null;
-    // imagePath: string | null;
+    imagePath: string | null;
 }
 
 export interface Checklist {
-    map(arg0: (checklistItem: Checklist) => import("react").JSX.Element): import("react").ReactNode;
     id: number;
     title: string;
     version: number;
