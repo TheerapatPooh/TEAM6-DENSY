@@ -13,6 +13,8 @@ import BadgeCustom from '@/components/badge-custom';
 import { Checklist, Patrol } from '@/app/type';
 import Defect from '@/components/defect';
 import PatrolChecklist from '@/components/patrol-checklist';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
 
 
 // const defectSchema = z.object({
@@ -67,37 +69,56 @@ import PatrolChecklist from '@/components/patrol-checklist';
 
 export default function Page() {
   const [patrol, setPatrol] = useState<Patrol | null>(null);
+  const [results, setResults] = useState<Array<{ itemId: number, zoneId: number, status: boolean }>>([]);
 
   const getPatrolData = async () => {
     try {
-      const data = await fetchData("get", "/patrol/2", true);
+      const data = await fetchData("get", "/patrol/3", true);
       setPatrol(data)
-      console.log("data : ", data)
-      console.log("patrol", data.checklist)
     } catch (error) {
       console.error('Failed to fetch patrol data:', error);
     }
   };
 
+  const handleResult = (result: { itemId: number, zoneId: number, status: boolean }) => {
+    setResults((prevResults) => {
+        const existingIndex = prevResults.findIndex(
+            (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
+        );
 
+        if (existingIndex !== -1) {
+            const updatedResults = [...prevResults];
+            updatedResults[existingIndex] = result;
+            return updatedResults;
+        } else {
+            return [...prevResults, result];
+        }
+    });
+};
 
   useEffect(() => {
     getPatrolData();
   }, [])
 
+  if (!patrol) {
+    return null
+  }
+
+  // console.log("Results: ", results);
+
+  // console.log("patrol : ", patrol)
   return (
-    <div>
+    <div className='p-4'>
       {patrol ? (
 
-        <div>
-          <div className='flex justify-between'>
-            <div className='flex align-center p-0  border border-indigo-600 justify-center text-center'>
-              <Button className="h-[35px] w-[35px]" variant='ghost'>
-                <span className="material-symbols-outlined">error</span>
+        <div className='flex flex-col gap-4'>
+          <div className='flex justify-between items-center'>
+            <div className='flex align-center p-0 justify-center text-center'>
+              <Button size={'icon'} variant='ghost'>
+                <span className="material-symbols-outlined text-card-foreground">error</span>
               </Button>
-              <p className='text-2xl'>{patrol.preset.title}</p>
+              <p className='text-2xl font-bold'>{patrol.preset.title}</p>
             </div>
-
             <div>
               {(() => {
                 let iconName: string
@@ -127,7 +148,7 @@ export default function Page() {
                     showTime={false}
                     variant={variant}
                   >
-                    {patrol.status}
+                    {patrol.status.charAt(0).toUpperCase() + patrol.status.slice(1)}
                   </BadgeCustom>
                 );
               })()}
@@ -136,24 +157,35 @@ export default function Page() {
             </div>
           </div>
 
-          <div className='flex justify-between'>
-            <div>
-              <button className='border-2 border-indigo-600 gap-5'>details</button>
-              <button className='border-2 border-indigo-600 gap-5'>reports</button>
-            </div>
-            <div>
-              <button className='border-2 border-indigo-600 gap-5'>Back</button>
-              <button className='border-2 border-indigo-600 gap-5'>Finish</button>
-            </div>
+          <div className='flex flex-col p-4 rounded-md bg-card w-full h-full'>
+            <Tabs defaultValue="details">
+              <TabsList className='bg-secondary p-1 h-fit'>
+                <TabsTrigger value="details">
+                  <span className="material-symbols-outlined mr-2">data_info_alert</span>
+                  <p className='font-semibold'>Details</p>
+                </TabsTrigger>
+                <TabsTrigger value="reports">
+                  <span className="material-symbols-outlined mr-2">Campaign</span>
+                  Reports
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="details">
+                <div className='py-2'>
+                  {patrol.checklist.map((c: Checklist) => (
+                    <div className="mb-4">
+                      <PatrolChecklist handleResult={handleResult} results={results} checklist={c} />
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+              <TabsContent value="reports">
+                Test Reports.
+              </TabsContent>
+            </Tabs>
+
+
           </div>
 
-          <div className="relative">
-            {patrol.checklist.map((c: Checklist) => (
-              <div className="mb-4">
-                <PatrolChecklist key={c.id} checklist={c} />
-              </div>
-            ))}
-          </div>
         </div>
       ) : (
         <p>Loading...</p>

@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:bg-border text-card",
   {
     variants: {
       variant: {
@@ -14,7 +14,9 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm hover:bg-destructive/80",
         success:
-          "bg-[#27BC31] text-destructive-foreground font-medium text-lg shadow-sm hover:bg-[#27BC31]/80",
+          "bg-[#27BC31] text-destructive-foreground font-medium text-lg shadow-sm",
+        fail:
+          "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm",
         outline:
           "border border-secondary bg-background font-medium text-lg shadow-sm hover:bg-secondary hover:text-accent-foreground",
         secondary:
