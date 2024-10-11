@@ -34,7 +34,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
           <div className="flex items-center gap-2">
             {selectedUser && (
               <Avatar>
-                <AvatarImage src="" />
+                <AvatarImage src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${selectedUser?.profile?.image?.path}`} />
                 <AvatarFallback>{getInitials(selectedUser.profile.name)}</AvatarFallback>
               </Avatar>
             )}
