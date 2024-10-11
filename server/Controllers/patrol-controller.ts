@@ -14,45 +14,7 @@ export async function getPatrol(req: Request, res: Response) {
 
         let patrol: any
 
-        if (role === 'admin') {
-            patrol = await prisma.patrol.findUnique({
-                where: {
-                    pt_id: patrolId
-                },
-                include: {
-                    preset: true,
-                    checklist: {
-                        include: {
-                            checklist: {
-                                include: {
-                                    item: {
-                                        include: {
-                                            item_zone: {
-                                                include: {
-                                                    zone: true
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            inspector: {
-                                include: {
-                                    profile: {
-                                        include: {
-                                            pf_image: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    patrol_result: true
-                }
-            })
-        }
-
-        if (role === 'inspector') {
+        if (role === 'inspector' || role === 'admin') {
             patrol = await prisma.patrol.findFirst({
                 where: {
                     pt_id: patrolId,
@@ -72,7 +34,19 @@ export async function getPatrol(req: Request, res: Response) {
                                         include: {
                                             item_zone: {
                                                 include: {
-                                                    zone: true
+                                                    zone: {
+                                                        include: {
+                                                            supervisor: {
+                                                                include: {
+                                                                    profile: {
+                                                                        include: {
+                                                                            pf_image: true
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -122,7 +96,7 @@ export async function getPatrol(req: Request, res: Response) {
                     age: checklist.inspector.profile?.pf_age,
                     tel: checklist.inspector.profile?.pf_tel,
                     address: checklist.inspector.profile?.pf_address,
-                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null // เพิ่ม imagePath
+                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null 
                 },
                 item: checklist.checklist.item.map((item: any) => ({
                     id: item.it_id,
@@ -131,6 +105,16 @@ export async function getPatrol(req: Request, res: Response) {
                     zone: item.item_zone.map((zone: any) => ({
                         id: zone.zone.ze_id,
                         name: zone.zone.ze_name,
+                        supervisor: {
+                            id: zone.zone.supervisor.us_id ,
+                            email: zone.zone.supervisor.us_email,
+                            department: zone.zone.supervisor.us_department,
+                            profile: {
+                                name: zone.zone.supervisor.profile.pf_name,
+                                tel: zone.zone.supervisor.profile.pf_tel,
+                                image: zone.zone.supervisor.profile.pf_image
+                            }
+                        }
                     })),
                 })),
             })),

@@ -22,17 +22,16 @@ export interface Inspector {
     age: number | null;
     tel: string | null;
     address: string | null;
-    imagePath: string | null;
+    // imagePath: string | null;
 }
 
 export interface Checklist {
+    map(arg0: (checklistItem: Checklist) => import("react").JSX.Element): import("react").ReactNode;
     id: number;
     title: string;
     version: number;
-    latest: boolean;
-    updatedAt: string;
-    updateBy: Inspector;
-    items: Item[];
+    inspector: Inspector;
+    item: Item[];
 }
 
 export interface Preset {
@@ -96,3 +95,12 @@ export interface PatrolChecklist {
     checklistId: number;
     inspectorId: number;
 }
+
+export interface DefectData {
+    title: string;
+    note: string;
+    type: string;
+    status: string;
+    userId: number;
+  }
+  
