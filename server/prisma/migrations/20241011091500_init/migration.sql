@@ -4,7 +4,7 @@ CREATE TABLE `users` (
     `us_username` VARCHAR(191) NOT NULL,
     `us_email` VARCHAR(191) NULL,
     `us_password` VARCHAR(191) NOT NULL,
-    `us_role` ENUM('ADMIN', 'INSPECTOR', 'RESPONSIBLEMAN', 'OFFICER') NOT NULL,
+    `us_role` ENUM('admin', 'inspector', 'supervisor') NOT NULL,
     `us_department` VARCHAR(191) NULL,
     `us_created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -16,12 +16,13 @@ CREATE TABLE `users` (
 -- CreateTable
 CREATE TABLE `defects` (
     `df_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `df_title` VARCHAR(191) NOT NULL,
-    `df_note` VARCHAR(191) NOT NULL,
+    `df_name` VARCHAR(191) NOT NULL,
+    `df_description` VARCHAR(191) NOT NULL,
     `df_type` VARCHAR(191) NOT NULL,
-    `df_status` ENUM('Reported', 'InProgress', 'PendingInspection', 'Resolved', 'Completed') NOT NULL,
+    `df_status` ENUM('reported', 'in_progress', 'pending_inspection', 'resolved', 'completed') NOT NULL,
     `df_timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `df_us_id` INTEGER NOT NULL,
+    `df_pr_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`df_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -57,7 +58,7 @@ CREATE TABLE `patrols` (
     `pt_start_time` DATETIME(3) NULL,
     `pt_end_time` DATETIME(3) NULL,
     `pt_duration` VARCHAR(191) NULL,
-    `pt_status` ENUM('Pending', 'Scheduled', 'OnGoing', 'Completed') NOT NULL,
+    `pt_status` ENUM('pending', 'scheduled', 'on_going', 'completed') NOT NULL,
     `pt_ps_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`pt_id`)
@@ -102,7 +103,7 @@ CREATE TABLE `checklists` (
     `cl_version` INTEGER NOT NULL,
     `cl_latest` BOOLEAN NOT NULL,
     `cl_update_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `cl_us_id` INTEGER NOT NULL,
+    `cl_update_by` INTEGER NOT NULL,
 
     PRIMARY KEY (`cl_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -110,9 +111,9 @@ CREATE TABLE `checklists` (
 -- CreateTable
 CREATE TABLE `patrol_results` (
     `pr_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `pr_status` BOOLEAN NOT NULL,
-    `pr_it_id` INTEGER NOT NULL,
-    `pr_df_id` INTEGER NOT NULL,
+    `pr_status` BOOLEAN NULL,
+    `pr_iz_it_id` INTEGER NOT NULL,
+    `pr_iz_ze_id` INTEGER NOT NULL,
     `pr_pt_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`pr_id`)
@@ -122,7 +123,7 @@ CREATE TABLE `patrol_results` (
 CREATE TABLE `items` (
     `it_id` INTEGER NOT NULL AUTO_INCREMENT,
     `it_name` VARCHAR(191) NOT NULL,
-    `it_type` ENUM('Safety', 'Environment', 'Maintenance') NOT NULL,
+    `it_type` ENUM('safety', 'environment', 'maintenance') NOT NULL,
     `it_cl_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`it_id`)
@@ -135,15 +136,16 @@ CREATE TABLE `zones` (
     `ze_lt_id` INTEGER NOT NULL,
     `ze_us_id` INTEGER NOT NULL,
 
+    UNIQUE INDEX `zones_ze_us_id_key`(`ze_us_id`),
     PRIMARY KEY (`ze_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `item_zones` (
-    `iz_it_id` INTEGER NOT NULL,
-    `iz_ze_id` INTEGER NOT NULL,
+    `itze_it_id` INTEGER NOT NULL,
+    `itze_ze_id` INTEGER NOT NULL,
 
-    PRIMARY KEY (`iz_it_id`, `iz_ze_id`)
+    PRIMARY KEY (`itze_it_id`, `itze_ze_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -188,6 +190,9 @@ CREATE TABLE `defect_images` (
 ALTER TABLE `defects` ADD CONSTRAINT `defects_df_us_id_fkey` FOREIGN KEY (`df_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `defects` ADD CONSTRAINT `defects_df_pr_id_fkey` FOREIGN KEY (`df_pr_id`) REFERENCES `patrol_results`(`pr_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_nt_us_id_fkey` FOREIGN KEY (`nt_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -215,13 +220,10 @@ ALTER TABLE `preset_checklists` ADD CONSTRAINT `preset_checklists_pscl_ps_id_fke
 ALTER TABLE `preset_checklists` ADD CONSTRAINT `preset_checklists_pscl_cl_id_fkey` FOREIGN KEY (`pscl_cl_id`) REFERENCES `checklists`(`cl_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `checklists` ADD CONSTRAINT `checklists_cl_us_id_fkey` FOREIGN KEY (`cl_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `checklists` ADD CONSTRAINT `checklists_cl_update_by_fkey` FOREIGN KEY (`cl_update_by`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_it_id_fkey` FOREIGN KEY (`pr_it_id`) REFERENCES `items`(`it_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_df_id_fkey` FOREIGN KEY (`pr_df_id`) REFERENCES `defects`(`df_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_iz_it_id_pr_iz_ze_id_fkey` FOREIGN KEY (`pr_iz_it_id`, `pr_iz_ze_id`) REFERENCES `item_zones`(`itze_it_id`, `itze_ze_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_pt_id_fkey` FOREIGN KEY (`pr_pt_id`) REFERENCES `patrols`(`pt_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -236,10 +238,10 @@ ALTER TABLE `zones` ADD CONSTRAINT `zones_ze_lt_id_fkey` FOREIGN KEY (`ze_lt_id`
 ALTER TABLE `zones` ADD CONSTRAINT `zones_ze_us_id_fkey` FOREIGN KEY (`ze_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `item_zones` ADD CONSTRAINT `item_zones_iz_it_id_fkey` FOREIGN KEY (`iz_it_id`) REFERENCES `items`(`it_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `item_zones` ADD CONSTRAINT `item_zones_itze_it_id_fkey` FOREIGN KEY (`itze_it_id`) REFERENCES `items`(`it_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `item_zones` ADD CONSTRAINT `item_zones_iz_ze_id_fkey` FOREIGN KEY (`iz_ze_id`) REFERENCES `zones`(`ze_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `item_zones` ADD CONSTRAINT `item_zones_itze_ze_id_fkey` FOREIGN KEY (`itze_ze_id`) REFERENCES `zones`(`ze_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `comments` ADD CONSTRAINT `comments_cm_us_id_fkey` FOREIGN KEY (`cm_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

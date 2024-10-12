@@ -174,14 +174,16 @@ export default function PatrolChecklist(props: Preset & Checklist & Item & User 
         }
     };
 
+    const [comments, setComments] = useState<{ text: string; time: string }[]>([]);
     const [comment, setComment] = useState("");
     const [submitted_comment, setSubmittedComment] = useState("");
     const [submitted_time, setSubmittedTime] = useState("");
     const handleSendClick = () => {
-        setSubmittedComment(comment);
-        setSubmittedTime(new Date().toLocaleString());
-        setComment("");
+        const newComment = { text: comment, time: new Date().toLocaleString() };
+        setComments((prevComments) => [...prevComments, newComment]);
+        setComment(""); // รีเซ็ตค่า comment
     };
+
 
     return (
         <div className={`relative ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
@@ -323,9 +325,11 @@ export default function PatrolChecklist(props: Preset & Checklist & Item & User 
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="flex flex-col space-y-1.5 ">
-                                                                                <Input className='mt-[20px] h-[121px] bg-secondary' id="Detail" placeholder="Details.." />
+                                                                            <div className="">
+                                                                                <textarea className='mt-[20px] w-full h-full bg-secondary rounded-[10px] pl-[10px] pt-[10px]' name="" id="Detail" placeholder="Details.." ></textarea>
+        
                                                                             </div>
+
                                                                         </div>
                                                                     </div>
                                                                 </form>
@@ -337,12 +341,23 @@ export default function PatrolChecklist(props: Preset & Checklist & Item & User 
                                                         </Card>
                                                     )}
 
-                                                    <Textarea
-                                                        className="h-[94px] mt-3"
-                                                        placeholder="Comment..."
-                                                        value={comment}
-                                                        onChange={(e) => setComment(e.target.value)}
-                                                    />
+                                                    <div className='flex flex-col'>
+                                                        {comments.map((comment, index) => (
+                                                            <h1 key={index} className='mt-[5px] flex'>
+                                                                <small className='text-[17px]'>{comment.time}</small>
+                                                                <div className='text-[15px] ml-[5px]'>
+                                                                    {comment.text}
+                                                                </div>
+                                                            </h1>
+                                                        ))}
+                                                        <Textarea
+                                                            className="h-[94px] mt-3"
+                                                            placeholder="Comment..."
+                                                            value={comment}
+                                                            onChange={(e) => setComment(e.target.value)}
+                                                        />
+                                                    </div>
+
                                                     <div className='flex justify-end'>
                                                         <Button
                                                             className='mt-2 bg-[#698AFF]'
