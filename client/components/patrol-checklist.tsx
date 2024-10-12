@@ -8,28 +8,11 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Textarea } from './ui/textarea';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-
+import { Textarea } from '@/components/ui/textarea';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogFooter } from './ui/alert-dialog';
 import { Checklist, Item, ItemType, Zone } from '@/app/type';
 import React, { useState, useEffect } from 'react';
-
+import { ScrollArea } from './ui/scroll-area';
 
 // TYPE
 
@@ -48,6 +31,29 @@ export default function PatrolChecklist({ checklist, handleResult, results = [] 
         const result = results.find(res => res.itemId === itemId && res.zoneId === zoneId);
         console.log(result)
         return result ? result.status : null;
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setSelectedFile(event.target.files[0]);
+        }
+    };
+
+    const handleButtonClick = (event: React.FormEvent) => {
+        event.preventDefault();
+        document.getElementById('file-input')?.click();
+    };
+
+    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer.files;
+        if (files && files.length > 0) {
+            setSelectedFile(files[0]);
+        }
+    };
+
+    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
     };
 
     const getBadgeVariant = (type: ItemType) => {
@@ -141,75 +147,114 @@ export default function PatrolChecklist({ checklist, handleResult, results = [] 
 
                                                         {resultStatus === false && (
                                                             <div className="mt-4 flex flex-col items-start">
-                                                                <DropdownMenu onOpenChange={(open) => setIsReportOpen(open)}>
-                                                                    <DropdownMenuTrigger
-                                                                        className={`custom-shadow px-[10px] bg-card  w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-            ${isReportOpen ? "border border-destructive" : ""}`}
-                                                                    >
-                                                                        <span className="material-symbols-outlined">campaign</span>
-                                                                        <div className="text-lg	">Report</div>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="start" className='border'>
-                                                                        <CardHeader>
-                                                                            <CardTitle>Select Report Type</CardTitle>
-                                                                        </CardHeader>
-                                                                        <CardContent className='flex'>
-                                                                            <form>
-                                                                                <div className="grid w-full items-center gap-4">
-                                                                                    <div className="flex flex-col">
-                                                                                        <div className='flex gap-2 '>
-                                                                                            <div className='flex w-full max-w-[250px] border-2'>
-                                                                                                Factory A
-                                                                                            </div>
-                                                                                            <div className='flex w-[250px] rounded-md bg-secondary justify-center items-center'>
-                                                                                                <div className='flex p-4 flex-col items-center justify-center'>
-                                                                                                    <span className="material-symbols-outlined text-5xl">upload</span>
-
-                                                                                                    {!selectedFile ? (
-                                                                                                        <>
-                                                                                                            <div className="text-center mt-2">
-                                                                                                                Drag & Drop file
-                                                                                                            </div>
-                                                                                                            <div className="text-center mt-1">
-                                                                                                                Or
-                                                                                                            </div>
-                                                                                                            <div className="mt-2">
-                                                                                                                <input
-                                                                                                                    type="file"
-                                                                                                                    id="file-input"
-                                                                                                                    style={{ display: 'none' }}
-                                                                                                                />
-                                                                                                                <Button variant={'outline'} className='flex items-center justify-center'>
-                                                                                                                    <span className="material-symbols-outlined mr-1">browser_updated</span> Browse
-                                                                                                                </Button>
-                                                                                                            </div>
-                                                                                                        </>
-                                                                                                    ) : (
-                                                                                                        <div className='text-center mt-1'>
-                                                                                                            <p>Selected file: {selectedFile.name}</p>
-                                                                                                        </div>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <Textarea
-                                                                                            className="h-[94px] mt-3 bg-secondary border-none"
-                                                                                            placeholder="Details..."
-
-                                                                                        />
-                                                                                    </div>
+                                                                <AlertDialog>
+                                                                    <AlertDialogTrigger>
+                                                                        <Button variant={'outline'} size={'lg'}>
+                                                                            <span className="material-symbols-outlined">campaign</span>
+                                                                            Report
+                                                                        </Button>
+                                                                    </AlertDialogTrigger>
+                                                                    <AlertDialogContent>
+                                                                        <AlertDialogHeader>
+                                                                            <AlertDialogTitle className="text-2xl font-semibold">
+                                                                                Report Defect
+                                                                            </AlertDialogTitle>
+                                                                            <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                                                                                Please provide details for the defect
+                                                                            </AlertDialogDescription>
+                                                                            <div className="flex flex-col justify-start">
+                                                                                <p className='font-semibold'>{item.name}</p>
+                                                                                <div className='flex items-center'>
+                                                                                    <span className="material-symbols-outlined text-2xl me-2">
+                                                                                        location_on
+                                                                                    </span>
+                                                                                    <p className='font-semibold me-2'>
+                                                                                        Zone
+                                                                                    </p>
+                                                                                    <p>{zone.name}</p>
                                                                                 </div>
-                                                                            </form>
-                                                                        </CardContent>
-                                                                        <CardFooter className="flex justify-end gap-4">
-                                                                            <Button variant="secondary" size={'lg'}>Cancel</Button>
-                                                                            <Button variant={'primary'} size={'lg'}>
-                                                                                <span className="material-symbols-outlined">send</span>
-                                                                                Send
-                                                                            </Button>
-                                                                        </CardFooter>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
+                                                                                <div className='flex items-center'>
+                                                                                    <span className="material-symbols-outlined text-2xl me-2">
+                                                                                        badge
+                                                                                    </span>
+                                                                                    <p className='font-semibold me-2'>
+                                                                                        Supervisor
+                                                                                    </p>
+                                                                                    <p>{zone.supervisor.profile.name}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </AlertDialogHeader>
+                                                                        <Textarea
+                                                                            className="h-[100px] mt-3 bg-secondary border-none"
+                                                                            placeholder="Details..."
+                                                                        />
+                                                                        <div className='flex flex-row justify-between gap-2'>
+                                                                            <div className='flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center' onDragOver={handleDragOver} onDrop={handleDrop}>
+                                                                                <div className='flex p-8 flex-col items-center justify-center'>
+                                                                                    <span className="material-symbols-outlined text-[48px] font-normal">
+                                                                                        upload
+                                                                                    </span>
+                                                                                    {!selectedFile ? (
+                                                                                        <>
+                                                                                            <div className="text-center mt-2">
+                                                                                                Drag & Drop file
+                                                                                            </div>
+                                                                                            <div className="text-center mt-1">
+                                                                                                Or
+                                                                                            </div>
+                                                                                            <div className="mt-2">
+                                                                                                <input
+                                                                                                    type="file"
+                                                                                                    id="file-input"
+                                                                                                    style={{ display: 'none' }}
+                                                                                                    onChange={handleFileChange}
+                                                                                                />
+                                                                                                <Button variant={'outline'} onClick={handleButtonClick}>
+                                                                                                    <span className="material-symbols-outlined mr-1">browser_updated</span>
+                                                                                                    Browse
+                                                                                                </Button>
+                                                                                            </div>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <div className='text-center mt-1'>
+                                                                                            <p>Selected file: {selectedFile.name}</p>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                            <ScrollArea className='flex justify-between w-full'>
+                                                                                <div className='flex justify-between items-center p-2 w-full bg-secondary rounded-md'>
+                                                                                    <div className='flex items-center gap-2'>
+                                                                                        <span className="material-symbols-outlined">
+                                                                                            image
+                                                                                        </span>
+                                                                                        <div className='flex flex-col'>
+                                                                                            <p>Defect-1.jpg</p>
+                                                                                            <p className='text-sm font-semibold text-muted-foreground'>2KB</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Button variant={'ghost'} className='w-[40px] h-[40px]'>
+                                                                                        <span className="material-symbols-outlined text-destructive">
+                                                                                            delete
+                                                                                        </span>
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </ScrollArea>
+                                                                        </div>
+
+                                                                        <AlertDialogFooter>
+                                                                            <div className="flex items-end justify-end gap-[10px]">
+                                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                                <AlertDialogAction className='bg-primary hover:bg-primary/70'>
+                                                                                    <span className="material-symbols-outlined text-2xl me-2">
+                                                                                        send
+                                                                                    </span>
+                                                                                    Send
+                                                                                </AlertDialogAction>
+                                                                            </div>
+                                                                        </AlertDialogFooter>
+                                                                    </AlertDialogContent>
+                                                                </AlertDialog>
                                                                 <Textarea
                                                                     className="h-[94px] mt-3 bg-secondary border-none"
                                                                     placeholder="Comment..."
@@ -217,7 +262,7 @@ export default function PatrolChecklist({ checklist, handleResult, results = [] 
                                                                 />
                                                                 <div className='flex justify-end w-full mt-2'>
                                                                     <Button variant={'primary'} size={'lg'}>
-                                                                        <span className="material-symbols-outlined">send</span> Send
+                                                                        <span className="material-symbols-outlined me-2">send</span> Send
                                                                     </Button>
                                                                 </div>
 
