@@ -77,6 +77,7 @@ export default function Page() {
       try {
         const data = await fetchData('get', `/patrol/${params.id}`, true);
         setPatrol(data);
+        console.log(data)
       } catch (error) {
         console.error('Failed to fetch patrol data:', error);
       }
@@ -116,6 +117,47 @@ export default function Page() {
     }
     window.location.reload()
   }
+
+  const handleFinishPatrol = async () => {
+    if (!patrol) return;
+
+    const updatedResults = results.map((result) => {
+
+      const matchedResult = patrol.result.find(
+        (res) =>
+          res.itemId === result.itemId && res.zoneId === result.zoneId
+      );
+
+
+      if (matchedResult && result.status !== null) {
+        return {
+          id: matchedResult.id,
+          status: result.status,
+        };
+      }
+
+      return null;
+    })
+
+    const data = {
+      status: "on_going",
+      checklist: patrol.checklist,
+      result: updatedResults,
+    };
+
+    if (data.result.length === patrol.result.length) {
+      console.log(data)
+      try {
+        const response = await fetchData("put", `/patrol/${patrol.id}/finish`, true, data);
+        if (response) {
+          console.log("Patrol finished successfully:", response);
+        }
+      } catch (error) {
+        console.error("Error finishing patrol:", error);
+      }
+      window.location.reload();
+    }
+  };
 
   useEffect(() => {
     getPatrolData()
@@ -212,7 +254,7 @@ export default function Page() {
                       text = 'Export'
                       disabled = false
                       handleFunction = () => {
-                        
+
                       };
                       break;
                     case "on_going":
@@ -221,7 +263,7 @@ export default function Page() {
                       text = 'Finish'
                       disabled = false
                       handleFunction = () => {
-                        
+                        handleFinishPatrol()
                       };
                       break;
                     case "scheduled":
@@ -230,7 +272,7 @@ export default function Page() {
                       text = 'Start'
                       disabled = false
                       handleFunction = () => {
-                          handleStartPatrol()
+                        handleStartPatrol()
                       };
                       break;
                     default:
@@ -239,7 +281,7 @@ export default function Page() {
                       text = 'Start'
                       disabled = true
                       handleFunction = () => {
-                        
+
                       };
                       break;
                   }

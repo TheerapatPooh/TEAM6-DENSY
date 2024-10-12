@@ -49,6 +49,7 @@ export interface PatrolResult {
     id: number;
     status: boolean;
     itemId: number;
+    zoneId: number;
     defectId: number | null;
 }
 
