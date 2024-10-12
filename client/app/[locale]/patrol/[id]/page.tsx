@@ -104,9 +104,8 @@ export default function Page() {
     return null
   }
 
-  // console.log("Results: ", results);
+  console.log("Results: ", results);
 
-  // console.log("patrol : ", patrol)
   return (
     <div className='p-4'>
       {patrol ? (
