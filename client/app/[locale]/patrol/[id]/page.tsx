@@ -99,6 +99,24 @@ export default function Page() {
     });
   };
 
+  const handleStartPatrol = async () => {
+    if (!patrol) return;
+    const patrolId = patrol.id
+    const data = {
+      status: patrol?.status,
+      checklist: patrol?.checklist
+    }
+    try {
+      const response = await fetchData('put', `/patrol/${patrolId}/start`, true, data);
+      if (response) {
+        console.log('Patrol started successfully:', response);
+      }
+    } catch (error) {
+      console.error('Error starting patrol:', error);
+    }
+    window.location.reload()
+  }
+
   useEffect(() => {
     getPatrolData()
     setMounted(true);
@@ -186,36 +204,50 @@ export default function Page() {
                   let text: string
                   let variant: "link" | "default" | "secondary" | "destructive" | "success" | "fail" | "outline" | "ghost" | "primary" | null | undefined
                   let disabled: boolean
+                  let handleFunction: any
                   switch (patrol.status as patrolStatus) {
                     case "completed":
                       variant = "outline";
                       iconName = "ios_share";
                       text = 'Export'
                       disabled = false
+                      handleFunction = () => {
+                        
+                      };
                       break;
                     case "on_going":
                       variant = "primary";
                       iconName = "check";
                       text = 'Finish'
                       disabled = false
+                      handleFunction = () => {
+                        
+                      };
                       break;
                     case "scheduled":
                       variant = "primary";
                       iconName = "cached";
                       text = 'Start'
                       disabled = false
+                      handleFunction = () => {
+                          handleStartPatrol()
+                      };
                       break;
                     default:
                       variant = "primary";
                       iconName = "cached";
                       text = 'Start'
                       disabled = true
+                      handleFunction = () => {
+                        
+                      };
                       break;
                   }
                   return (
                     <Button
                       variant={variant}
                       disabled={disabled}
+                      onClick={handleFunction}
                     >
                       <span className="material-symbols-outlined">
                         {iconName}
