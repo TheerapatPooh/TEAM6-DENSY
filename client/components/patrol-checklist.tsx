@@ -19,11 +19,12 @@ import { ScrollArea } from './ui/scroll-area';
 
 interface PatrolChecklistProps {
     checklist: Checklist;
+    disabled: boolean
     handleResult: (result: { itemId: number, zoneId: number, status: boolean }) => void;
     results: Array<{ itemId: number, zoneId: number, status: boolean }>;
 }
 
-export default function PatrolChecklist({ checklist, handleResult, results = [] }: PatrolChecklistProps) {
+export default function PatrolChecklist({ checklist, disabled, handleResult, results = [] }: PatrolChecklistProps) {
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -130,6 +131,7 @@ export default function PatrolChecklist({ checklist, handleResult, results = [] 
                                                                     variant={resultStatus === true ? 'success' : 'secondary'}
                                                                     className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}`}
                                                                     onClick={() => handleResult({ itemId: item.id, zoneId: zone.id, status: true })}
+                                                                    disabled={disabled}
                                                                 >
                                                                     <span className="material-symbols-outlined">check</span>
                                                                     <p>Yes</p>
@@ -138,6 +140,7 @@ export default function PatrolChecklist({ checklist, handleResult, results = [] 
                                                                     variant={resultStatus === false ? 'fail' : 'secondary'}
                                                                     className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}`}
                                                                     onClick={() => handleResult({ itemId: item.id, zoneId: zone.id, status: false })}
+                                                                    disabled={disabled}
                                                                 >
                                                                     <span className="material-symbols-outlined">close</span>
                                                                     <p>No</p>

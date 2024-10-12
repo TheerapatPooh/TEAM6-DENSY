@@ -41,7 +41,6 @@ export const LoginSchema = z.object({
 export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')
     const [success, setSuccess] = useState<string | undefined>('')
-    const router = useRouter()
     const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
