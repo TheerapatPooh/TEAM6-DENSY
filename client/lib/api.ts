@@ -52,3 +52,4 @@ export async function fetchData(
       return null; // Returning null on error
   }
 }
+

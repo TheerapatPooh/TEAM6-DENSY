@@ -50,10 +50,9 @@ import {
   PatrolChecklist,
   patrolStatus,
   Preset,
-  Profile,
 } from "@/app/type";
 import { User } from "@/app/type";
-import { useRouter } from "next/navigation";
+import { exportData } from "@/lib/utils";
 
 
 export default function Page() {
@@ -75,23 +74,22 @@ export default function Page() {
     !selectedDate ||
     !selectedPreset ||
     patrolChecklist.length !== selectedPreset.checklist.length;
-  const router = useRouter();
   const onSubmit = async () => {
     if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
       console.error("Not Empty Fields");
       return;
     }
 
-    const payload = {
+    const data = {
       date: selectedDate,
       presetId: selectedPreset.id,
       checklists: patrolChecklist,
     };
 
     try {
-      const response = await fetchData("post", "/patrol", true, payload);
+      const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
-      router.refresh();
+      window.location.reload();
     } catch (error) {}
   };
 

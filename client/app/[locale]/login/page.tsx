@@ -41,7 +41,6 @@ export const LoginSchema = z.object({
 export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')
     const [success, setSuccess] = useState<string | undefined>('')
-    const router = useRouter()
     const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('General')
@@ -70,7 +69,7 @@ export default function LoginPage() {
         setSuccess('')
         startTransition(async () => {
             const result = await login(values)
-            router.refresh()
+            window.location.reload();
             if (result.error) {
                 setError(result.error)
             } else if (result.token) {
