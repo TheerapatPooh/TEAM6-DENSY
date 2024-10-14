@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Inspector, patrolStatus, User } from "@/app/type";
+import { Inspector, Patrol, patrolStatus, User } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/api";
 import {
@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { useParams } from 'next/navigation'
 
 export interface patrolCardProps {
   patrolStatus: patrolStatus;
@@ -65,6 +66,8 @@ export function PatrolCard({
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [profile, setProfile] = useState<User[]>();
+  const [patrol, setPatrol] = useState<Patrol>();
+  const param = useParams()
 
   const [mounted, setMounted] = useState(false);
   const getData = async () => {
@@ -75,8 +78,27 @@ export function PatrolCard({
       console.error("Failed to fetch profile data:", error);
     }
   };
+
+  const getPatrolData = async () => {
+    try {
+      const patrolfetch = await fetchData("get", `/patrol/${param.id}`, true);
+      setPatrol(patrolfetch);
+
+      // {patrol?.result.map((patrolResult) =>
+      //   {patrolResult.status === (true || false) ? (
+      //     items++
+      //   ) : (patrolResult.status === (false)) ? (
+      //     defects++
+      //   ) : (null)}
+      // )}
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+
   useEffect(() => {
     getData();
+    getPatrolData();
     setMounted(true);
   }, []);
 
