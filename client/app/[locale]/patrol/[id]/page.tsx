@@ -13,6 +13,7 @@ import Defect from '@/components/defect';
 import PatrolChecklist from '@/components/patrol-checklist';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
+import { exportData } from '@/lib/utils';
 
 
 // const defectSchema = z.object({
@@ -234,7 +235,7 @@ export default function Page() {
                 </TabsTrigger>
                 <TabsTrigger value="reports">
                   <span className="material-symbols-outlined mr-2">Campaign</span>
-                  Reports
+                  <p className='font-semibold'>Reports</p>
                 </TabsTrigger>
               </TabsList>
               <div className='flex items-center gap-4'>
@@ -254,7 +255,7 @@ export default function Page() {
                       text = 'Export'
                       disabled = false
                       handleFunction = () => {
-
+                        exportData(patrol)
                       };
                       break;
                     case "on_going":
@@ -304,7 +305,7 @@ export default function Page() {
               <div className='py-2'>
                 {patrol.checklist.map((c: Checklist) => (
                   <div className="mb-4">
-                    <PatrolChecklist handleResult={handleResult} results={results} checklist={c} disabled={patrol.status === 'on_going' ? false : true} />
+                    <PatrolChecklist handleResult={handleResult} results={results} checklist={c} disabled={patrol.status === 'on_going' ? false : true}   patrolResult={patrol.result} />
                   </div>
                 ))}
               </div>

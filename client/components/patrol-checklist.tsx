@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogFooter } from './ui/alert-dialog';
-import { Checklist, Item, ItemType, Zone } from '@/app/type';
+import { Checklist, Item, ItemType, PatrolResult, Zone } from '@/app/type';
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -22,15 +22,16 @@ interface PatrolChecklistProps {
     disabled: boolean
     handleResult: (result: { itemId: number, zoneId: number, status: boolean }) => void;
     results: Array<{ itemId: number, zoneId: number, status: boolean }>;
+    patrolResult: PatrolResult[];
 }
 
-export default function PatrolChecklist({ checklist, disabled, handleResult, results = [] }: PatrolChecklistProps) {
+export default function PatrolChecklist({ checklist, disabled, handleResult, results = [], patrolResult }: PatrolChecklistProps) {
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [resultStatus, setResultStatus] = useState<{ [key: string]: boolean | null }>({});
 
-    const checkResultStatus = (itemId: number, zoneId: number) => {
+    const checkStatus = (itemId: number, zoneId: number) => {
         const result = results.find(res => res.itemId === itemId && res.zoneId === zoneId);
-        console.log(result)
         return result ? result.status : null;
     };
 
@@ -70,6 +71,41 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
         }
     };
 
+    useEffect(() => {
+        if (patrolResult && checklist.item) {
+            console.log("patrolResult:", patrolResult); // ตรวจสอบค่าของ patrolResult
+            console.log("checklist item:", checklist.item); // ตรวจสอบค่าของ checklist.item
+
+            const initialStatus = checklist.item.reduce((acc, item) => {
+                item.zone.forEach((zone) => {
+                    const matchingResult = patrolResult.find(
+                        (result) => {
+                            console.log("result.itemId:", result.itemId, "item.id:", item.id); // Debug ดูค่า itemId
+                            console.log("result.zoneId:", result.zoneId, "zone.id:", zone.id); // Debug ดูค่า zoneId
+                            return result.itemId === item.id && result.zoneId === zone.id;
+                        }
+                    );
+
+                    // ถ้ามี matchingResult และ status ไม่เป็น null ให้เก็บค่า status
+                    if (matchingResult && matchingResult.status !== null) {
+                        acc[`${item.id}-${zone.id}`] = matchingResult.status;
+                    }
+                });
+                return acc;
+            }, {} as { [key: string]: boolean | null });
+
+            setResultStatus(initialStatus); // เก็บค่า resultStatus ที่อัพเดตแล้ว
+            console.log("initialStatus:", initialStatus); // Debug ดูค่า resultStatus ว่าถูกต้องหรือไม่
+        }
+    }, [checklist, patrolResult]);
+
+    const handleClick = (itemId: number, zoneId: number, status: boolean) => {
+        handleResult({ itemId, zoneId, status });
+        setResultStatus((prev) => ({
+            ...prev,
+            [`${itemId}-${zoneId}`]: status,
+        }));
+    };
 
     return (
         <div className='bg-secondary rounded-md px-4 py-2'>
@@ -102,7 +138,7 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                                         </AccordionTrigger>
                                         <AccordionContent className='flex flex-col py-2 gap-2'>
                                             {item?.zone.map((zone: Zone) => {
-                                                const resultStatus = checkResultStatus(item.id, zone.id);
+                                                const status = checkStatus(item.id, zone.id);
                                                 return (
                                                     <div key={zone.id} className='bg-card rounded-md p-2'>
                                                         <div className='flex flex-row justify-between items-center'>
@@ -128,19 +164,20 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                                                             </div>
                                                             <div className='flex gap-2 pe-2'>
                                                                 <Button
-                                                                    variant={resultStatus === true ? 'success' : 'secondary'}
+                                                                    variant={resultStatus[`${item.id}-${zone.id}`] === true ? 'success' : 'secondary'}
                                                                     className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}`}
-                                                                    onClick={() => handleResult({ itemId: item.id, zoneId: zone.id, status: true })}
+                                                                    onClick={() => handleClick(item.id, zone.id, true)}
                                                                     disabled={disabled}
                                                                 >
                                                                     <span className="material-symbols-outlined">check</span>
                                                                     <p>Yes</p>
                                                                 </Button>
                                                                 <Button
-                                                                    variant={resultStatus === false ? 'fail' : 'secondary'}
+                                                                    variant={resultStatus[`${item.id}-${zone.id}`] === false ? 'fail' : 'secondary'}
                                                                     className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}`}
-                                                                    onClick={() => handleResult({ itemId: item.id, zoneId: zone.id, status: false })}
+                                                                    onClick={() => handleClick(item.id, zone.id, false)}
                                                                     disabled={disabled}
+
                                                                 >
                                                                     <span className="material-symbols-outlined">close</span>
                                                                     <p>No</p>
@@ -148,7 +185,7 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                                                             </div>
                                                         </div>
 
-                                                        {resultStatus === false && (
+                                                        {status === false && (
                                                             <div className="mt-4 flex flex-col items-start">
                                                                 <AlertDialog>
                                                                     <AlertDialogTrigger>
