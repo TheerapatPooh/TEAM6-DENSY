@@ -23,6 +23,7 @@ export const badgeVariants = {
     purple: "bg-purple-300/40 text-purple-500 hover:bg-purple-300/20",
     cyan: "bg-cyan-300/40 text-cyan-500 hover:bg-cyan-300/20",
     green: "bg-green-300/40 text-green-500 hover:bg-green-300/20",
+    brown: "bg-[#A2845E33] text-[#A2845E] hover:bg-[#A2845E1A]",
 }
 
 export default function BadgeCustom({
