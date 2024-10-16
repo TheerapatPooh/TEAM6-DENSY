@@ -35,11 +35,12 @@ export default function BadgeCustom({
     children
 }: BadgeCustomProps) {
     const badgeClass = badgeVariants[variant] || badgeVariants.default;
-   
+
     return (
         <Badge className={cn(
-            `${badgeClass} cursor-pointer align-center justify-between gap-2 h-[30px] p-2`,
+            `${badgeClass} cursor-pointer align-center gap-2 h-[30px] p-2`,
             width ? width : (showTime ? "w-[180px]" : "w-[150px]"),
+            showTime ? "justify-between" : showIcon ? "justify-between" : "justify-center"
         )}>
             <div className='flex gap-2 items-center'>
                 {showIcon && iconName && (

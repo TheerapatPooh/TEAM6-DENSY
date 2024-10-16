@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 
 export default function Notification() {
-    const t = useTranslations('General');
+    const t = useTranslations('General'); // ฟังก์ชันแปลข้อความจาก 'General'
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -23,6 +23,7 @@ export default function Notification() {
     if (!mounted) {
         return null
     }
+    
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>
@@ -33,29 +34,28 @@ export default function Notification() {
             <DropdownMenuContent align="end" className='p-0'>
                 <Card className="w-[300px] border-none" >
                     <CardHeader>
-                        <CardTitle>Notifications</CardTitle>
-                        <CardDescription>You have 1 unread messages.</CardDescription>
+                        <CardTitle>{t('Notifications')}</CardTitle>
+                        <CardDescription>{t('YouHaveUnreadMessages', { count: 1 })}</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4">
                                 <Button
                                     variant={'ghost'}
-                                    // key={index}
                                     className="grid flex items-start space-x-2 h-fit"
                                 >
                                     <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium leading-none">
-                                            Your Defect has been update.
+                                            {t('YourDefectHasBeenUpdated')}
                                         </p>
                                         <p className="text-sm text-muted-foreground text-start">
-                                            1 hour ago
+                                            {t('TimeAgo', { time: '1 hour' })}
                                         </p>
                                     </div>
                                 </Button>
                     </CardContent>
                     <CardFooter>
                         <Button variant={'primary'} size={'lg'} className="w-full">
-                             Mark all as read
+                            {t('MarkAllAsRead')}
                         </Button>
                     </CardFooter>
                 </Card>
