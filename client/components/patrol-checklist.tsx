@@ -10,9 +10,11 @@ import {
 } from "@/components/ui/accordion";
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogFooter } from './ui/alert-dialog';
-import { Checklist, Item, ItemType, PatrolResult, Zone } from '@/app/type';
+import { Checklist, Item, ItemType, Patrol,PatrolResult, Zone } from '@/app/type';
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from './ui/scroll-area';
+import { fetchData } from '@/lib/api';
+import { useParams } from 'next/navigation';
 
 // TYPE
 
@@ -29,6 +31,23 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [resultStatus, setResultStatus] = useState<{ [key: string]: boolean | null }>({});
+    const [patrol, setPatrol] = useState<Patrol | null>(null);
+    const params = useParams()
+
+    const getPatrolData = async () => {
+        if (params.id) {
+          try {
+            const data = await fetchData('get', `/patrol/${params.id}`, true);
+            setPatrol(data);
+            console.log(data)
+          } catch (error) {
+            console.error('Failed to fetch patrol data:', error);
+          }
+        }
+      };
+    
+    
+    
 
     const checkStatus = (itemId: number, zoneId: number) => {
         const result = results.find(res => res.itemId === itemId && res.zoneId === zoneId);
@@ -70,8 +89,25 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                 return "red";
         }
     };
+    
+ 
+    const getExistingResult = (itemId: number, zoneId: number) => {
+        if (!patrol) {
+            console.warn("Patrol data is not yet loaded.");
+            return null; // Or handle this case as needed
+        }
+
+        const result = patrol.result.find(
+            (res) => res.itemId === itemId && res.zoneId === zoneId && res.status !== null
+        );
+
+        console.log("Result getExistingResult:", result);
+        return result;
+    };
 
     useEffect(() => {
+        getPatrolData();
+
         if (patrolResult && checklist.item) {
             console.log("patrolResult:", patrolResult); // ตรวจสอบค่าของ patrolResult
             console.log("checklist item:", checklist.item); // ตรวจสอบค่าของ checklist.item
@@ -106,7 +142,7 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
             [`${itemId}-${zoneId}`]: status,
         }));
     };
-
+        
     return (
         <div className='bg-secondary rounded-md px-4 py-2'>
             <Accordion type="single" collapsible>
@@ -122,6 +158,7 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                             </p>
                             <p className='text-card-foreground'>
                                 {checklist.inspector.name}
+
                             </p>
                         </div>
                         <div className='ps-2'>
@@ -139,6 +176,11 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                                         <AccordionContent className='flex flex-col py-2 gap-2'>
                                             {item?.zone.map((zone: Zone) => {
                                                 const status = checkStatus(item.id, zone.id);
+                                                // const resultStatus = checkResultStatus(item.id, zone.id);
+                                                const existingResult = getExistingResult(item.id, zone.id);
+
+                                                const isDisabled = resultStatus !== null && patrol?.status !== "on_going";
+
                                                 return (
                                                     <div key={zone.id} className='bg-card rounded-md p-2'>
                                                         <div className='flex flex-row justify-between items-center'>
@@ -163,25 +205,49 @@ export default function PatrolChecklist({ checklist, disabled, handleResult, res
                                                                 </div>
                                                             </div>
                                                             <div className='flex gap-2 pe-2'>
+                                                            {/* {resultStatus === null ? (
+                                                                <> */}
                                                                 <Button
                                                                     variant={resultStatus[`${item.id}-${zone.id}`] === true ? 'success' : 'secondary'}
-                                                                    className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}`}
-                                                                    onClick={() => handleClick(item.id, zone.id, true)}
-                                                                    disabled={disabled}
+                                                                    className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}
+                                                                    ${existingResult?.status===true ? 'bg-green-500 hover:bg-green-500' : ''}
+                                                                    ${existingResult?.status===false ? 'bg-secondary hover:bg-secondary' : ''}
+                                                                    ${disabled ? ' cursor-not-allowed opacity-50' : ''}
+                                                                    `}
+                                                                    onClick={() => {
+                                                                        if (!disabled) {
+                                                                            handleClick(item.id, zone.id, true)
+                                                                        }
+                                                                    }}
+
                                                                 >
                                                                     <span className="material-symbols-outlined">check</span>
                                                                     <p>Yes</p>
                                                                 </Button>
                                                                 <Button
                                                                     variant={resultStatus[`${item.id}-${zone.id}`] === false ? 'fail' : 'secondary'}
-                                                                    className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}`}
-                                                                    onClick={() => handleClick(item.id, zone.id, false)}
-                                                                    disabled={disabled}
+                                                                    className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}
+                                                                    ${existingResult?.status===false ? 'bg-red-500 hover:bg-red-500' : ''}
+                                                                    ${existingResult?.status===true ? 'bg-secondary hover:bg-secondary' : ''}
+                                                                    ${disabled ? ' cursor-not-allowed opacity-50 ' : ''}
+                                                                    `}
+                                                                    onClick={() => {
+                                                                        if (!disabled) {
+                                                                            handleClick(item.id, zone.id, false);
+                                                                        }
+                                                                    }}
 
                                                                 >
                                                                     <span className="material-symbols-outlined">close</span>
                                                                     <p>No</p>
+                                                                    
                                                                 </Button>
+                                                                {/* </>
+                                                                 ) : (
+                                                                    <p className={`text-lg font-semibold ${resultStatus ? 'text-green-600' : 'text-red-600'}`}>
+                                                                        {resultStatus ? 'Yes' : 'No'}
+                                                                    </p>
+                                                                )} */}
                                                             </div>
                                                         </div>
 
