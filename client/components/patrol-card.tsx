@@ -33,7 +33,6 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import { useParams } from 'next/navigation'
 
 export interface patrolCardProps {
   patrolStatus: patrolStatus;
@@ -41,9 +40,6 @@ export interface patrolCardProps {
   patrolPreset: string;
   patrolId: number;
   inspector: Inspector[];
-  items: number;
-  fails: number;
-  defects: number;
 }
 
 export function PatrolCard({
@@ -52,9 +48,6 @@ export function PatrolCard({
   patrolPreset,
   patrolId,
   inspector = [],
-  items,
-  fails,
-  defects,
 }: patrolCardProps) {
   const formattedDate =
     patrolDate instanceof Date
@@ -67,8 +60,9 @@ export function PatrolCard({
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [profile, setProfile] = useState<User[]>();
-  const [patrol, setPatrol] = useState<Patrol>();
-  const param = useParams()
+  const [itemCount, setItemCount] = useState(0);
+  const [failCount, setFailCount] = useState(0);
+  const [defectCount, setDefectCount] = useState(0);
 
   const [mounted, setMounted] = useState(false);
 
@@ -85,20 +79,39 @@ export function PatrolCard({
 
   const getPatrolData = async () => {
     try {
-      const patrolfetch = await fetchData("get", `/patrol/${param.id}`, true);
-      setPatrol(patrolfetch);
+      const patrolfetch = await fetchData("get", `/patrol/${patrolId}`, true);
+  
+      let countItems = 0;
+      let countFails = 0;
+      let countDefects = 0;
+  
+      if (patrolfetch?.result) {
+        patrolfetch.result.forEach((patrolResult: { status: boolean, defectId: number | null }) => {
+        
+        if (patrolResult.status !== null) {
+          countItems++;
+        }
 
-      // {patrol?.result.map((patrolResult) =>
-      //   {patrolResult.status === (true || false) ? (
-      //     items++
-      //   ) : (patrolResult.status === (false)) ? (
-      //     defects++
-      //   ) : (null)}
-      // )}
+        if (patrolResult.status === false) {
+            countFails++;
+        }
+
+        if (patrolResult.status === false && patrolResult.defectId !== null) {
+            countDefects++;
+            console.log("items : ",  patrolResult.defectId)
+        }
+        
+        });
+      }
+      
+      setItemCount(countItems);
+      setFailCount(countFails);
+      setDefectCount(countDefects);
     } catch (error) {
       console.error("Failed to fetch patrol data:", error);
     }
   };
+  
 
   useEffect(() => {
     getData();
@@ -260,17 +273,17 @@ export function PatrolCard({
         <div className="flex gap-2.5 items-center w-full">
           <div className="flex gap-2.5 text-blue-500 items-center">
             <span className="material-symbols-outlined">checklist</span>
-            <p className="text-[20px] font-semibold">{items}</p>
+            <p className="text-[20px] font-semibold">{itemCount}</p>
           </div>
           <div className="flex gap-2.5 text-yellow-500 items-center">
             <span className="material-symbols-outlined">close</span>
-            <p className="text-[20px] font-semibold">{fails}</p>
+            <p className="text-[20px] font-semibold">{failCount}</p>
           </div>
           <div className="flex gap-2.5 text-red-500 items-center">
             <span className="material-symbols-outlined text-red-500">
               error
             </span>
-            <p className="text-[20px] font-semibold">{defects}</p>
+            <p className="text-[20px] font-semibold">{defectCount}</p>
           </div>
           <div className="ml-auto items-center">
             <DropdownMenu>
