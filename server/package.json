@@ -5,7 +5,8 @@
   "type": "model",
   "scripts": {
     "test": "jest",
-    "start": "ts-node-dev index.ts"
+    "start": "ts-node-dev index.ts",
+    "seed": "ts-node-dev prisma/seed.ts"
   },
   "author": "TEAM-6",
   "license": "ISC",
