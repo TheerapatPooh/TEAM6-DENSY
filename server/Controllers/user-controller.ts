@@ -299,3 +299,117 @@ export async function getAllProfile(req: Request, res: Response) {
         res.status(500).json({ error: 'Failed to fetch user profile' })
     }
 }
+export async function updateUser(req: Request, res: Response) {
+    try {
+        const loggedInUserId = (req as any).user.userId; 
+        const loggedInUserRole = (req as any).user.role; 
+        const id = parseInt(req.params.id, 10); 
+        const { username, email, password, role, department } = req.body;
+
+        // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
+        if (loggedInUserId !== id && loggedInUserRole !== 'admin') {
+            return res.status(403).json({ message: "Access Denied: You must be the owner of this account or an admin" });
+        }
+
+        const updateData: any = {
+            us_email: email,
+            us_password: password ? await bcrypt.hash(password, 10) : undefined,
+            us_department: department,
+        };
+
+        // เฉพาะ admin เท่านั้นที่สามารถเปลี่ยน username และ role ได้
+        if (loggedInUserRole === 'admin') {
+            updateData.us_username = username;
+            updateData.us_role = role;
+        }
+
+        // อัปเดตข้อมูลผู้ใช้
+        const updatedUser = await prisma.user.update({
+            where: { us_id: id },
+            data: updateData,
+        });
+
+        const result = {
+            id: updatedUser.us_id,
+            username: updatedUser.us_username,
+            email: updatedUser.us_email,
+            role: updatedUser.us_role,
+            department: updatedUser.us_department,
+            createdAt: updatedUser.us_created_at.toISOString(),
+        };
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+}
+
+export async function deleteUser(req: Request, res: Response) {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const role = (req as any).user.role;
+
+        if (role !== 'admin') {
+            return res.status(403).json({ message: "Access Denied: Admin only" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { us_id: id },
+            include: { profile: true, zone: true },
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่
+        if (user.zone) {
+            // ลบข้อมูลที่เชื่อมโยงกับ PatrolResult
+            const patrolResults = await prisma.patrolResult.findMany({
+                where: { pr_iz_ze_id: user.zone.ze_id },
+            });
+
+            for (const patrolResult of patrolResults) {
+                // ลบ Comment ที่อ้างถึง PatrolResult นี้
+                await prisma.comment.deleteMany({
+                    where: { cm_pr_id: patrolResult.pr_id },
+                });
+
+                // ลบ Defect ที่อ้างถึง PatrolResult นี้
+                await prisma.defect.deleteMany({
+                    where: { df_pr_id: patrolResult.pr_id },
+                });
+            }
+
+            // ลบข้อมูลใน PatrolResult ที่อ้างถึง Zone
+            await prisma.patrolResult.deleteMany({
+                where: { pr_iz_ze_id: user.zone.ze_id },
+            });
+
+            // ลบ Zone หลังจากจัดการข้อมูลที่เชื่อมโยงเสร็จ
+            await prisma.zone.delete({
+                where: { ze_us_id: id },
+            });
+        }
+
+        // ลบ Profile ถ้ามี
+        if (user.profile) {
+            await prisma.profile.delete({
+                where: { pf_us_id: id },
+            });
+        }
+
+        // ลบ User หลังจากจัดการ Zone และ Profile
+        await prisma.user.delete({
+            where: { us_id: id },
+        });
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+}
+
+

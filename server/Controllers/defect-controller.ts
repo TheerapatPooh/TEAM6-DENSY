@@ -42,7 +42,7 @@ export async function createDefect(req: Request, res: Response) {
             }
         });
 
-        const formattedDefect = {
+        const result = {
             name: newDefect.df_name,
             description: newDefect.df_description,
             type: newDefect.df_type,
@@ -51,7 +51,7 @@ export async function createDefect(req: Request, res: Response) {
             patrolResultId: newDefect.df_pr_id
         };
 
-        res.status(201).json(formattedDefect);
+        res.status(201).json(result);
 
     } catch (err) {
         console.error(err);
@@ -98,8 +98,8 @@ export async function getDefect(req: Request, res: Response) {
         if (!validPatrol) {
             return res.status(404).json({ message: "You are not associated with this Patrol" });
         }
-
-        const formattedDefect = {
+        
+        const result = {
             name: defect.df_name,
             description: defect.df_description,
             type: defect.df_type,
@@ -107,8 +107,8 @@ export async function getDefect(req: Request, res: Response) {
             userId: defect.df_us_id,
             patrolResultId: defect.df_pr_id
         };
-
-        res.status(200).json(formattedDefect);
+        
+        res.status(200).json(result);
     } catch (err) {
         res.status(500).send(err);
     }
@@ -154,7 +154,7 @@ export async function getAllDefect(req: Request, res: Response) {
             return res.status(404).json({ message: "Defect not found" });
         }
 
-        const formattedDefects = defects.map(defect => ({
+        const result = defects.map(defect => ({
             name: defect.df_name,
             description: defect.df_description,
             type: defect.df_type,
@@ -163,7 +163,7 @@ export async function getAllDefect(req: Request, res: Response) {
             patrolResultId: defect.df_pr_id
         }));
 
-        res.status(200).json(formattedDefects);
+        res.status(200).json(result);
     } catch (err) {
         res.status(500).send(err);
     }
@@ -224,7 +224,7 @@ export async function updateDefect(req: Request, res: Response) {
             },
         });
 
-        const formattedDefect = {
+        const result = {
             name: updatedDefect.df_name,
             description: updatedDefect.df_description,
             type: updatedDefect.df_type,
@@ -233,7 +233,7 @@ export async function updateDefect(req: Request, res: Response) {
             patrolResultId: updatedDefect.df_pr_id
         };
 
-        res.status(200).json(formattedDefect);
+        res.status(200).json(result);
     } catch (err) {
         res.status(500).send(err);
     }
@@ -279,22 +279,12 @@ export async function deleteDefect(req: Request, res: Response) {
             return res.status(404).json({ message: "You are not associated with this Patrol" });
         }
 
-        const deletedDefect = await prisma.defect.delete({
+        await prisma.defect.delete({
             where: {
                 df_id: Number(id),
             }
         });
-
-        const formattedDefect = {
-            name: deletedDefect.df_name,
-            description: deletedDefect.df_description,
-            type: deletedDefect.df_type,
-            status: deletedDefect.df_status,
-            userId: deletedDefect.df_us_id,
-            patrolResultId: deletedDefect.df_pr_id
-        };
-
-        res.status(200).json(formattedDefect);
+        res.status(200).json({message: 'Defect deleted successfully',});
     } catch (err) {
         res.status(500).send(err);
     }

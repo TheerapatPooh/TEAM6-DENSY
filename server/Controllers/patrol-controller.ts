@@ -585,7 +585,7 @@ export async function commentPatrol(req: Request, res: Response) {
     }
 }
 
-export async function getComment(req: Request, res: Response) {
+export async function getCommentPatrol(req: Request, res: Response) {
     try {
         const commentId = parseInt(req.params.id, 10);
 
@@ -594,14 +594,14 @@ export async function getComment(req: Request, res: Response) {
                 cm_id: commentId
             }
         });
-        const formattedComment = comments.map(comment => ({
+        const result = comments.map(comment => ({
             id: comment.cm_us_id,
             message: comment.cm_message,
             timestamp: comment.cm_timestamp,
             userId: comment.cm_us_id,
             patrolResultId: comment.cm_pr_id
         }))
-        res.status(200).json(formattedComment);
+        res.status(200).json(result);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
