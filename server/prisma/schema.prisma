@@ -69,8 +69,9 @@ model Profile {
   pf_age     Int?
   pf_tel     String?
   pf_address String?
-  pf_image   Image?
   pf_us_id   Int     @unique
+  pf_im_id   Int?    @unique 
+  pf_image   Image?  @relation("ProfileImage", fields: [pf_im_id], references: [im_id])
 
   user User @relation(fields: [pf_us_id], references: [us_id])
 
@@ -228,10 +229,9 @@ model Image {
   im_id        Int      @id @default(autoincrement())
   im_path      String
   im_timestamp DateTime @default(now())
-  im_pf_id     Int      @unique
-
+  
+  profiles Profile[] @relation("ProfileImage") 
   defect  DefectImage[]
-  profile Profile?      @relation(fields: [im_pf_id], references: [pf_id])
 
   @@map("images")
 }

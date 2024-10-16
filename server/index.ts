@@ -35,7 +35,7 @@ async function updatePatrolStatus(patrolId: number) {
     try {
         await axios.put(`http://localhost:4000/patrol/${patrolId}/status`, {
             patrolId:patrolId,
-            status: "on_going"
+            status: "scheduled"
         });
         console.log(`Patrol ${patrolId} status updated to "on_going".`);
     } catch (error) {
@@ -78,7 +78,6 @@ function schedulePatrolStatusUpdate() {
     const now = new Date();
     const nextMidnight = new Date();
     nextMidnight.setHours(24, 0, 0, 0);
-
     const timeUntilMidnight = nextMidnight.getTime() - now.getTime();
 
     setTimeout(() => {
