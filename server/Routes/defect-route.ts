@@ -1,5 +1,6 @@
 import { createDefect,getDefect, getAllDefect, deleteDefect, updateDefect,} from "../Controllers/defect-controller";
 import { Router } from 'express'
+
 const router = Router()
 
 router.post('/defect', createDefect)
