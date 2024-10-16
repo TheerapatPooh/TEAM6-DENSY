@@ -5,7 +5,7 @@ const router = Router()
 
 router.post('/defect', createDefect)
 router.get('/defect/:id', getDefect)
-router.get('/defect',  getAllDefect)
+router.get('/defects/:id',  getAllDefect)
 router.put('/defect/:id', updateDefect)
 router.delete('/defect/:id', deleteDefect)
 

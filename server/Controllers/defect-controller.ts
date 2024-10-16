@@ -40,7 +40,13 @@ export async function getDefect(req: Request, res: Response) {
 
 export async function getAllDefect(req: Request, res: Response) {
     try {
-        const defects = await prisma.defect.findMany();
+        const patrolId = parseInt(req.params.id, 10);
+
+        const defects = await prisma.defect.findMany({
+            where: { 
+                df_pr_id: patrolId,
+            }
+        });
         res.status(200).json(defects);
     } catch (err) {
         res.status(500).send(err);
