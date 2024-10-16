@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 export interface patrolCardProps {
   patrolStatus: patrolStatus;
@@ -67,6 +68,9 @@ export function PatrolCard({
   const [profile, setProfile] = useState<User[]>();
 
   const [mounted, setMounted] = useState(false);
+
+  const router = useRouter()
+  const locale = useLocale()
   const getData = async () => {
     try {
       const profilefetch = await fetchData("get", "/profiles", true);
@@ -94,10 +98,18 @@ export function PatrolCard({
     setIsHovered(false);
   };
 
-  const inspectorNames = inspector.map((insp) => insp.name).filter(Boolean);
+  const handleDetail = () => {
+    router.push(`/${locale}/patrol/${patrolId}`)
+  }
 
+  const inspectorNames = inspector.map((insp) => insp.name).filter(Boolean);
+  if(!mounted){
+    return (
+      null
+    )
+  }
   return (
-    <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer">
+    <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="gap-0 p-[10px]">
         <div className="flex justify-between items-center">
           <CardDescription className="text-lg font-semibold">
@@ -146,7 +158,10 @@ export function PatrolCard({
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
-            onClick={handleClick}
+             onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             asChild
@@ -237,7 +252,7 @@ export function PatrolCard({
           </div>
           <div className="ml-auto items-center">
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" className="w-[45px] h-[45px]">
                   <span className="material-symbols-outlined items-center text-muted-foreground">
                     more_vert
@@ -246,12 +261,12 @@ export function PatrolCard({
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="p-0">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDetail()}>
                   <h1>{t("Details")}</h1>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="p-0">
                   <AlertDialog>
-                    <AlertDialogTrigger asChild className="pl-2 py-2">
+                    <AlertDialogTrigger asChild className="pl-2 py-2" onClick={(e) => e.stopPropagation()}>
                       <div
                         className=" text-destructive cursor-pointer w-full h-full flex"
                         onClick={(e) => {
@@ -273,16 +288,16 @@ export function PatrolCard({
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={async () => {
+                          onClick={async (e) => {
                             try {
                               await fetchData(
                                 "delete",
                                 `/patrol/${patrolId}`,
                                 true
                               );
-                              console.log(patrolId);
+                              e.stopPropagation()
                               window.location.reload();
                             } catch (error) {
                               console.error("Error deleting patrol:", error);
