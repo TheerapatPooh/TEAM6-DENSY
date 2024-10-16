@@ -41,7 +41,17 @@ export async function createDefect(req: Request, res: Response) {
                 patrol_result: { connect: { pr_id: patrolResultId } }
             }
         });
-        res.status(201).json(newDefect);
+
+        const formattedDefect = {
+            name: newDefect.df_name,
+            description: newDefect.df_description,
+            type: newDefect.df_type,
+            status: newDefect.df_status,
+            userId: newDefect.df_us_id,
+            patrolResultId: newDefect.df_pr_id
+        };
+
+        res.status(201).json(formattedDefect);
 
     } catch (err) {
         console.error(err);
@@ -89,7 +99,16 @@ export async function getDefect(req: Request, res: Response) {
             return res.status(404).json({ message: "You are not associated with this Patrol" });
         }
 
-        res.status(200).json(defect);
+        const formattedDefect = {
+            name: defect.df_name,
+            description: defect.df_description,
+            type: defect.df_type,
+            status: defect.df_status,
+            userId: defect.df_us_id,
+            patrolResultId: defect.df_pr_id
+        };
+
+        res.status(200).json(formattedDefect);
     } catch (err) {
         res.status(500).send(err);
     }
@@ -135,7 +154,16 @@ export async function getAllDefect(req: Request, res: Response) {
             return res.status(404).json({ message: "Defect not found" });
         }
 
-        res.status(200).json(defects);
+        const formattedDefects = defects.map(defect => ({
+            name: defect.df_name,
+            description: defect.df_description,
+            type: defect.df_type,
+            status: defect.df_status,
+            userId: defect.df_us_id,
+            patrolResultId: defect.df_pr_id
+        }));
+
+        res.status(200).json(formattedDefects);
     } catch (err) {
         res.status(500).send(err);
     }
@@ -196,7 +224,16 @@ export async function updateDefect(req: Request, res: Response) {
             },
         });
 
-        res.status(200).json(updatedDefect);
+        const formattedDefect = {
+            name: updatedDefect.df_name,
+            description: updatedDefect.df_description,
+            type: updatedDefect.df_type,
+            status: updatedDefect.df_status,
+            userId: updatedDefect.df_us_id,
+            patrolResultId: updatedDefect.df_pr_id
+        };
+
+        res.status(200).json(formattedDefect);
     } catch (err) {
         res.status(500).send(err);
     }
@@ -248,7 +285,16 @@ export async function deleteDefect(req: Request, res: Response) {
             }
         });
 
-        res.status(200).json(deletedDefect);
+        const formattedDefect = {
+            name: deletedDefect.df_name,
+            description: deletedDefect.df_description,
+            type: deletedDefect.df_type,
+            status: deletedDefect.df_status,
+            userId: deletedDefect.df_us_id,
+            patrolResultId: deletedDefect.df_pr_id
+        };
+
+        res.status(200).json(formattedDefect);
     } catch (err) {
         res.status(500).send(err);
     }
