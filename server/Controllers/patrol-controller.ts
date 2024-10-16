@@ -505,7 +505,6 @@ export async function updatePatrolStatus(req: Request, res: Response) {
 
 export async function getPendingPatrols(req: Request, res: Response) {
     try {
-
         const pendingPatrols = await prisma.patrol.findMany({
             where: {
                 pt_status: 'pending'
@@ -527,6 +526,77 @@ export async function getPendingPatrols(req: Request, res: Response) {
 
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export async function commentPatrol(req: Request, res: Response) {
+    try {
+        const role = (req as any).user.role;
+        const userId = (req as any).user.userId;
+
+        // ตรวจสอบสิทธิ์ว่าเป็น Inspector หรือไม่
+        if (role !== 'inspector') {
+            return res.status(403).json({ message: "Access Denied: Inspectors only" });
+        }
+
+        // รับข้อมูลจาก request body
+        const { patrolId, message, checklist, patrolResultId} = req.body;
+
+        // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
+        if (!patrolId  ||  !message || !checklist || !patrolResultId) {
+            return res.status(400).json({ message: "Bad Request: Missing required fields" });
+        }
+
+        // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
+        const validPatrol = await prisma.patrol.findUnique({
+            where: {
+                pt_id: parseInt(patrolId, 10),
+                checklist: {
+                    some: {
+                        ptcl_us_id: userId,
+                    }
+                }
+            }
+        }); 
+        if (!validPatrol) {
+            return res.status(404).json({ message: "Patrol or checklist not found" });
+        }
+    
+        // รับ message เข้ามา และเชื่อมกับ PatrolResult
+        const newComment = await prisma.comment.create({
+            data: {
+                cm_message: message,               
+                cm_us_id: userId,                  
+                cm_pr_id: patrolResultId,     
+                cm_timestamp: new Date()           
+            }
+        });
+
+        // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
+        res.status(201).json({
+            userId: newComment.cm_us_id,
+            comment: newComment.cm_message,
+            timestamp: newComment.cm_timestamp
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export async function getComments(req: Request, res: Response) {
+    try {
+        const commentId = parseInt(req.params.id, 10);
+        
+        const comments = await prisma.comment.findMany({
+            where: {
+                cm_id: commentId
+            }
+        });
+        res.status(200).json(comments);
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ message: "Internal server error" });
     }
 }
