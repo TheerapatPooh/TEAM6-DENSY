@@ -1,5 +1,5 @@
 import { LoginSchema } from "@/app/[locale]/login/page";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
 
 export async function login(values: z.infer<typeof LoginSchema>) {
@@ -53,3 +53,25 @@ export async function fetchData(
   }
 }
 
+
+export async function fetchDataFormFormat(
+    type: "get" | "delete" | "post" | "put",
+    endpoint: string,
+    credential: boolean,
+    value?: any 
+) {
+    try {
+        const config: AxiosRequestConfig = {
+            withCredentials: credential,
+            headers: {}, // Leave headers empty for FormData
+        };
+
+        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}${endpoint}`;
+        const response = await axios[type](url, type === "get" || type === "delete" ? config : value, config);
+
+        return response.data; // response.data will contain the response body
+    } catch (error) {
+        console.error("Failed to fetch data:", error);
+        return null; // You could also throw an error or return more detailed error information
+    }
+}

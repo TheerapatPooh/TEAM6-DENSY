@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
 import { exportData } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 // const defectSchema = z.object({
@@ -102,7 +103,7 @@ export default function Page() {
       }
     });
   };
-
+  
   const handleStartPatrol = async () => {
     if (!patrol) return;
     const patrolId = patrol.id
@@ -311,6 +312,7 @@ export default function Page() {
                   </div>
                 ))}
               </div>
+              
             </TabsContent>
             <TabsContent value="report">
               Test Reports.
