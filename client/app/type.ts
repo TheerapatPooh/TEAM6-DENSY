@@ -7,7 +7,11 @@ export type ItemType = "safety" | "environment" | 'maintenance';
 export interface Zone {
     id: number;
     name: string;
-    supervisor: User;
+    supervisor: Supervisor;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
 }
 
 export interface Item {
@@ -23,6 +27,17 @@ export interface Inspector {
     age: number | null;
     tel: string | null;
     address: string | null;
+    imagePath: string | null;
+}
+
+export interface Supervisor {
+    userId: number;
+    name: string;
+    email: string | null;
+    department: string | null;
+    age: number;
+    tel: string;
+    address: string;
     imagePath: string | null;
 }
 

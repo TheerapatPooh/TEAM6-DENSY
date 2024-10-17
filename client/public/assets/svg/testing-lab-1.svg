@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 193.28 173.18">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3 {
+        isolation: isolate;
+      }
+
+      .cls-4 {
+        fill: url(#New_Gradient_Swatch);
+      }
+
+      .cls-2, .cls-3 {
+        fill: #fff;
+        font-family: Manrope-Bold, Manrope;
+        font-size: 27.38px;
+        font-weight: 700;
+      }
+
+      .cls-3 {
+        letter-spacing: -.03em;
+      }
+    </style>
+    <linearGradient id="New_Gradient_Swatch" data-name="New Gradient Swatch" x1="96.64" y1="173.18" x2="96.64" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="0" stop-color="#fb0023"/>
+      <stop offset=".16" stop-color="#f70628"/>
+      <stop offset=".39" stop-color="#ed1836"/>
+      <stop offset=".65" stop-color="#dd364d"/>
+      <stop offset=".94" stop-color="#c65f6d"/>
+      <stop offset="1" stop-color="#c16975"/>
+    </linearGradient>
+  </defs>
+  <path class="cls-4" d="M193.28,63.36v81.72c0,15.52-12.13,28.1-27.1,28.1H27.1c-14.96,0-27.1-12.58-27.1-28.1V28.51C0,13.46,11.44,1.11,25.93.42c63.91-3.06,117.65,10.53,156.24,40.25,6.94,5.34,11.09,13.73,11.09,22.69h.02Z"/>
+  <g class="cls-1">
+    <text class="cls-3" transform="translate(35.74 94.94) scale(1.06 1)"><tspan x="0" y="0">T</tspan></text>
+    <text class="cls-2" transform="translate(53.35 94.94) scale(1.06 1)"><tspan x="0" y="0">E</tspan></text>
+    <text class="cls-2" transform="translate(70.14 94.94) scale(1.06 1)"><tspan x="0" y="0">STING</tspan></text>
+    <text class="cls-2" transform="translate(69.77 127.8) scale(1.06 1)"><tspan x="0" y="0">LAB</tspan></text>
+  </g>
+</svg>

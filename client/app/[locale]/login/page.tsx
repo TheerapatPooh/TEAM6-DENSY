@@ -1,10 +1,10 @@
 'use client'
 import { useTransition, useEffect, useState } from 'react';
-import lightLogo from "@/app/assets/img/system_logo_light.png"
-import darkLogo from "@/app/assets/img/system_logo_dark.png"
-import loginCover1 from "@/app/assets/img/login_cover_1.png"
-import loginCover2 from "@/app/assets/img/login_cover_2.png"
-import loginCover3 from "@/app/assets/img/login_cover_3.png"
+import lightLogo from "@/public/assets/img/system_logo_light.png"
+import darkLogo from "@/public/assets/img/system_logo_dark.png"
+import loginCover1 from "@/public/assets/img/login_cover_1.png"
+import loginCover2 from "@/public/assets/img/login_cover_2.png"
+import loginCover3 from "@/public/assets/img/login_cover_3.png"
 import Image from 'next/image'
 import LanguageSelect from '@/components/language-select';
 import ModeToggle from '@/components/mode-toggle';

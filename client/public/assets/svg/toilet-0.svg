@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126.65 239.31">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #afbacc;
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        isolation: isolate;
+      }
+
+      .cls-3 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-3, .cls-4 {
+        fill: #231f20;
+        font-family: Manrope-Bold, Manrope;
+        font-size: 38.63px;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" width="126.65" height="239.31" rx="10.49" ry="10.49"/>
+  <g class="cls-2">
+    <text class="cls-4" transform="translate(50.81 67.33) rotate(90) scale(.9 1)"><tspan x="0" y="0">TOILE</tspan></text>
+    <text class="cls-3" transform="translate(50.81 163.1) rotate(90) scale(.9 1)"><tspan x="0" y="0">T</tspan></text>
+  </g>
+</svg>

@@ -30,6 +30,7 @@ export async function getZone(req: Request, res: Response) {
             name: zone.ze_name,
             supervisor: {
                 userId: zone.supervisor.us_id,
+                name: zone.supervisor.profile?.pf_name,
                 email: zone.supervisor.us_email,
                 department: zone.supervisor.us_department,
                 age: zone.supervisor.profile?.pf_age,
@@ -72,6 +73,7 @@ export async function getAllZones(req: Request, res: Response) {
             name: zone.ze_name,
             supervisor: {
                 userId: zone.supervisor.us_id,
+                name: zone.supervisor.profile?.pf_name,
                 email: zone.supervisor.us_email,
                 department: zone.supervisor.us_department,
                 age: zone.supervisor.profile?.pf_age,

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 165.49 114.58">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #afbacc;
+      }
+
+      .cls-2 {
+        font-family: Manrope-Bold, Manrope;
+        font-size: 24px;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" width="165.49" height="114.58" rx="10.04" ry="10.04"/>
+  <text class="cls-2" transform="translate(20.28 65.21)"><tspan x="0" y="0">R&amp;D ROOM</tspan></text>
+</svg>
