@@ -297,7 +297,7 @@ export function PatrolCard({
 
               <DropdownMenuContent align="end" className="p-0">
                 <DropdownMenuItem onClick={() => handleDetail()}>
-                  <h1>{t("Details")}</h1>
+                  <h1>{t("Detail")}</h1>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="p-0">
                   <AlertDialog>

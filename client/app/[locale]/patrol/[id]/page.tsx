@@ -228,14 +228,14 @@ export default function Page() {
           </div>
         </div>
         <div className='flex flex-col p-4 rounded-md bg-card w-full h-full'>
-          <Tabs defaultValue="details">
+          <Tabs defaultValue="detail">
             <div className='flex w-full justify-between items-center'>
               <TabsList className='bg-secondary p-1 h-fit'>
-                <TabsTrigger value="details">
+                <TabsTrigger value="detail">
                   <span className="material-symbols-outlined mr-2">data_info_alert</span>
                   <p className='font-semibold'>{t('Detail')}</p>
                 </TabsTrigger>
-                <TabsTrigger value="reports">
+                <TabsTrigger value="report">
                   <span className="material-symbols-outlined mr-2">Campaign</span>
                   <p className='font-semibold'>{t('Report')}</p>
                 </TabsTrigger>
@@ -303,7 +303,7 @@ export default function Page() {
                 })()}
               </div>
             </div>
-            <TabsContent value="details">
+            <TabsContent value="detail">
               <div className='py-2'>
                 {patrol.checklist.map((c: Checklist) => (
                   <div className="mb-4">
@@ -312,7 +312,7 @@ export default function Page() {
                 ))}
               </div>
             </TabsContent>
-            <TabsContent value="reports">
+            <TabsContent value="report">
               Test Reports.
             </TabsContent>
           </Tabs>
