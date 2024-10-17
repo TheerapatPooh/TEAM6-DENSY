@@ -98,13 +98,14 @@ export interface PatrolChecklist {
     inspectorId: number;
 }
 
-export interface DefectData {
-    title: string;
-    note: string;
+export interface Defect {
+    name: string;
+    description: string;
     type: string;
     status: string;
-    userId: number;
-}
+    userId?: number;
+    patrolId?:number
+  }
 
 // filter 
 
@@ -113,3 +114,5 @@ export interface FilterPatrol {
     patrolStatus: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
+    
+  

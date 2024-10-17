@@ -1,377 +1,584 @@
-'use client';
+"use client";
 
-import { Button } from './ui/button';
+import { Button } from "./ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Textarea } from '@/components/ui/textarea';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogFooter } from './ui/alert-dialog';
-import { Checklist, Item, ItemType, Patrol, PatrolResult, Zone } from '@/app/type';
-import React, { useState, useEffect } from 'react';
-import { ScrollArea } from './ui/scroll-area';
-import { fetchData } from '@/lib/api';
-import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+  AlertDialogFooter,
+} from "./ui/alert-dialog";
+import {
+  Checklist,
+  Defect,
+  Image,
+  Item,
+  ItemType,
+  Patrol,
+  PatrolResult,
+  Zone,
+} from "@/app/type";
+import React, { useState, useEffect } from "react";
+import { fetchData, fetchDataFormFormat } from "@/lib/api";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 // TYPE
 
-
 interface PatrolChecklistProps {
-    checklist: Checklist;
-    disabled: boolean
-    handleResult: (result: { itemId: number, zoneId: number, status: boolean }) => void;
-    results: Array<{ itemId: number, zoneId: number, status: boolean }>;
-    patrolResult: PatrolResult[];
+  checklist: Checklist;
+  disabled: boolean;
+  handleResult: (result: {
+    itemId: number;
+    zoneId: number;
+    status: boolean;
+  }) => void;
+  results: Array<{ itemId: number; zoneId: number; status: boolean }>;
+  patrolResult: PatrolResult[];
 }
 
-export default function PatrolChecklist({ checklist, disabled, handleResult, results = [], patrolResult }: PatrolChecklistProps) {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [resultStatus, setResultStatus] = useState<{ [key: string]: boolean | null }>({});
-    const [patrol, setPatrol] = useState<Patrol | null>(null);
-    const params = useParams()
-    const t = useTranslations('General');
-    const s = useTranslations('Status');
+export default function PatrolChecklist({
+  checklist,
+  disabled,
+  handleResult,
+  results = [],
+  patrolResult,
+}: PatrolChecklistProps) {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [resultStatus, setResultStatus] = useState<{
+    [key: string]: boolean | null;
+  }>({});
+  const [patrol, setPatrol] = useState<Patrol | null>(null);
+  const [defectDescription, setDefectDescription] = useState<string>("");
+  const params = useParams();
+  const t = useTranslations("General");
+  const s = useTranslations("Status");
 
-    const getPatrolData = async () => {
-        if (params.id) {
-            try {
-                const data = await fetchData('get', `/patrol/${params.id}`, true);
-                setPatrol(data);
-                console.log(data)
-            } catch (error) {
-                console.error('Failed to fetch patrol data:', error);
-            }
-        }
-    };
+  const getPatrolData = async () => {
+    if (params.id) {
+      try {
+        const data = await fetchData("get", `/patrol/${params.id}`, true);
+        setPatrol(data);
+      } catch (error) {
+        console.error("Failed to fetch patrol data:", error);
+      }
+    }
+  };
 
-
-    const checkStatus = (itemId: number, zoneId: number) => {
-        const result = results.find(res => res.itemId === itemId && res.zoneId === zoneId);
-        return result ? result.status : null;
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setSelectedFile(event.target.files[0]);
-        }
-    };
-
-    const handleButtonClick = (event: React.FormEvent) => {
-        event.preventDefault();
-        document.getElementById('file-input')?.click();
-    };
-
-    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        const files = event.dataTransfer.files;
-        if (files && files.length > 0) {
-            setSelectedFile(files[0]);
-        }
-    };
-
-    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-    };
-
-    const getBadgeVariant = (type: ItemType) => {
-        switch (type) {
-            case "safety":
-                return "mint";
-            case "environment":
-                return "orange";
-            case "maintenance":
-                return "red";
-            default:
-                return "red";
-        }
-    };
-
-
-    const getExistingResult = (itemId: number, zoneId: number) => {
-        if (!patrol) {
-            console.warn("Patrol data is not yet loaded.");
-            return null; // Or handle this case as needed
-        }
-
-        const result = patrol.result.find(
-            (res) => res.itemId === itemId && res.zoneId === zoneId && res.status !== null
-        );
-
-        console.log("Result getExistingResult:", result);
-        return result;
-    };
-
-    useEffect(() => {
-        getPatrolData();
-
-        if (patrolResult && checklist.item) {
-            const initialStatus = checklist.item.reduce((acc, item) => {
-                item.zone.forEach((zone) => {
-                    const matchingResult = patrolResult.find(
-                        (result) => {
-                            return result.itemId === item.id && result.zoneId === zone.id;
-                        }
-                    );
-
-                    // ถ้ามี matchingResult และ status ไม่เป็น null ให้เก็บค่า status
-                    if (matchingResult && matchingResult.status !== null) {
-                        acc[`${item.id}-${zone.id}`] = matchingResult.status;
-                    }
-                });
-                return acc;
-            }, {} as { [key: string]: boolean | null });
-
-            setResultStatus(initialStatus); // เก็บค่า resultStatus ที่อัพเดตแล้ว
-        }
-    }, [checklist, patrolResult]);
-
-    const handleClick = (itemId: number, zoneId: number, status: boolean) => {
-        handleResult({ itemId, zoneId, status });
-        setResultStatus((prev) => ({
-            ...prev,
-            [`${itemId}-${zoneId}`]: status,
-        }));
-    };
-
-    return (
-        <div className='bg-secondary rounded-md px-4 py-2'>
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-1" className='border-none'>
-                    <AccordionTrigger className='hover:no-underline text-2xl font-semibold py-2'>{checklist.title}</AccordionTrigger>
-                    <AccordionContent>
-                        <div className='flex flex-rows items-center gap-2 text-muted-foreground text-base ps-4 py-2  border-t-2 '>
-                            <span className="material-symbols-outlined">
-                                engineering
-                            </span>
-                            <p className='font-semibold'>
-                                {t('Inspector')}
-                            </p>
-                            <p className='text-card-foreground'>
-                                {checklist.inspector.name}
-                            </p>
-                        </div>
-                        <div className='ps-2'>
-                            {checklist.item?.map((item: Item) => (
-                                <Accordion type="single" collapsible>
-                                    <AccordionItem value="item-1" className='border-none'>
-                                        <AccordionTrigger className='hover:no-underline'>
-                                            <div className='flex items-center justify-between w-full pe-2'>
-                                                <p className='text-xl font-semibold'>{item.name}</p>
-                                                <BadgeCustom variant={getBadgeVariant(item.type as ItemType)}>
-                                                    {s(item.type)}
-                                                </BadgeCustom>
-                                            </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className='flex flex-col py-2 gap-2'>
-                                            {item?.zone.map((zone: Zone) => {
-                                                const status = checkStatus(item.id, zone.id);
-                                                const existingResult = getExistingResult(item.id, zone.id);
-                                                return (
-                                                    <div key={zone.id} className='bg-card rounded-md p-2'>
-                                                        <div className='flex flex-row justify-between items-center'>
-                                                            <div className='flex flex-col'>
-                                                                <div className='flex items-center gap-2 mb-2'>
-                                                                    <span className="material-symbols-outlined">
-                                                                        location_on
-                                                                    </span>
-                                                                    <p className='font-semibold text-lg'>
-                                                                        {t('Zone')}
-                                                                    </p>
-                                                                    <p className='text-lg'>
-                                                                        {zone.name}
-                                                                    </p>
-                                                                </div>
-                                                                <div className='flex items-center gap-2'>
-                                                                    <span className="material-symbols-outlined">
-                                                                        badge
-                                                                    </span>
-                                                                    <p className='font-semibold text-lg'>
-                                                                        {t('Supervisor')}
-                                                                    </p>
-                                                                    <p className='text-lg'>
-                                                                        {zone.supervisor.profile.name}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className='flex gap-2 pe-2'>
-                                                                <Button
-                                                                    variant={resultStatus[`${item.id}-${zone.id}`] === true ? 'success' : 'secondary'}
-                                                                    className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}
-                                                                    ${existingResult?.status === true ? 'bg-green-500 hover:bg-green-500' : ''}
-                                                                    ${existingResult?.status === false ? 'bg-secondary hover:bg-secondary' : ''}
-                                                                    ${disabled ? ' cursor-not-allowed opacity-50' : ''}
-                                                                    `}
-                                                                    onClick={() => {
-                                                                        if (!disabled) {
-                                                                            handleClick(item.id, zone.id, true)
-                                                                        }
-                                                                    }}
-
-                                                                >
-                                                                    <span className="material-symbols-outlined">check</span>
-                                                                    <p>{t('Yes')}</p>
-                                                                </Button>
-                                                                <Button
-                                                                    variant={resultStatus[`${item.id}-${zone.id}`] === false ? 'fail' : 'secondary'}
-                                                                    className={`w-[155px] ${resultStatus === null ? 'bg-secondary text-card-foreground' : ''}
-                                                                    ${existingResult?.status === false ? 'bg-red-500 hover:bg-red-500' : ''}
-                                                                    ${existingResult?.status === true ? 'bg-secondary hover:bg-secondary' : ''}
-                                                                    ${disabled ? ' cursor-not-allowed opacity-50 ' : ''}
-                                                                    `}
-                                                                    onClick={() => {
-                                                                        if (!disabled) {
-                                                                            handleClick(item.id, zone.id, false);
-                                                                        }
-                                                                    }}
-
-                                                                >
-                                                                    <span className="material-symbols-outlined">close</span>
-                                                                    <p>{t('No')}</p>
-
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-
-                                                        {status === false && (
-                                                            <div className="mt-4 flex flex-col items-start">
-                                                                <AlertDialog>
-                                                                    <AlertDialogTrigger>
-                                                                        <Button variant={'outline'} size={'lg'}>
-                                                                            <span className="material-symbols-outlined">campaign</span>
-                                                                            {t('Report')}
-                                                                        </Button>
-                                                                    </AlertDialogTrigger>
-                                                                    <AlertDialogContent>
-                                                                        <AlertDialogHeader>
-                                                                            <AlertDialogTitle className="text-2xl font-semibold">
-                                                                                Report Defect
-                                                                            </AlertDialogTitle>
-                                                                            <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                                                                Please provide details for the defect
-                                                                            </AlertDialogDescription>
-                                                                            <div className="flex flex-col justify-start">
-                                                                                <p className='font-semibold'>{item.name}</p>
-                                                                                <div className='flex items-center'>
-                                                                                    <span className="material-symbols-outlined text-2xl me-2">
-                                                                                        location_on
-                                                                                    </span>
-                                                                                    <p className='font-semibold me-2'>
-                                                                                        Zone
-                                                                                    </p>
-                                                                                    <p>{zone.name}</p>
-                                                                                </div>
-                                                                                <div className='flex items-center'>
-                                                                                    <span className="material-symbols-outlined text-2xl me-2">
-                                                                                        badge
-                                                                                    </span>
-                                                                                    <p className='font-semibold me-2'>
-                                                                                        Supervisor
-                                                                                    </p>
-                                                                                    <p>{zone.supervisor.profile.name}</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </AlertDialogHeader>
-                                                                        <Textarea
-                                                                            className="h-[100px] mt-3 bg-secondary border-none"
-                                                                            placeholder="Details..."
-                                                                        />
-                                                                        <div className='flex flex-row justify-between gap-2'>
-                                                                            <div className='flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center' onDragOver={handleDragOver} onDrop={handleDrop}>
-                                                                                <div className='flex p-8 flex-col items-center justify-center'>
-                                                                                    <span className="material-symbols-outlined text-[48px] font-normal">
-                                                                                        upload
-                                                                                    </span>
-                                                                                    {!selectedFile ? (
-                                                                                        <>
-                                                                                            <div className="text-center mt-2">
-                                                                                                Drag & Drop file
-                                                                                            </div>
-                                                                                            <div className="text-center mt-1">
-                                                                                                Or
-                                                                                            </div>
-                                                                                            <div className="mt-2">
-                                                                                                <input
-                                                                                                    type="file"
-                                                                                                    id="file-input"
-                                                                                                    style={{ display: 'none' }}
-                                                                                                    onChange={handleFileChange}
-                                                                                                />
-                                                                                                <Button variant={'outline'} onClick={handleButtonClick}>
-                                                                                                    <span className="material-symbols-outlined mr-1">browser_updated</span>
-                                                                                                    Browse
-                                                                                                </Button>
-                                                                                            </div>
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        <div className='text-center mt-1'>
-                                                                                            <p>Selected file: {selectedFile.name}</p>
-                                                                                        </div>
-                                                                                    )}
-                                                                                </div>
-                                                                            </div>
-                                                                            <ScrollArea className='flex justify-between w-full'>
-                                                                                <div className='flex justify-between items-center p-2 w-full bg-secondary rounded-md'>
-                                                                                    <div className='flex items-center gap-2'>
-                                                                                        <span className="material-symbols-outlined">
-                                                                                            image
-                                                                                        </span>
-                                                                                        <div className='flex flex-col'>
-                                                                                            <p>Defect-1.jpg</p>
-                                                                                            <p className='text-sm font-semibold text-muted-foreground'>2KB</p>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <Button variant={'ghost'} className='w-[40px] h-[40px]'>
-                                                                                        <span className="material-symbols-outlined text-destructive">
-                                                                                            delete
-                                                                                        </span>
-                                                                                    </Button>
-                                                                                </div>
-                                                                            </ScrollArea>
-                                                                        </div>
-
-                                                                        <AlertDialogFooter>
-                                                                            <div className="flex items-end justify-end gap-[10px]">
-                                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                                <AlertDialogAction className='bg-primary hover:bg-primary/70'>
-                                                                                    <span className="material-symbols-outlined text-2xl me-2">
-                                                                                        send
-                                                                                    </span>
-                                                                                    Send
-                                                                                </AlertDialogAction>
-                                                                            </div>
-                                                                        </AlertDialogFooter>
-                                                                    </AlertDialogContent>
-                                                                </AlertDialog>
-                                                                <Textarea
-                                                                    className="h-[94px] mt-3 bg-secondary border-none"
-                                                                    placeholder={`${t('Comment')}...`}
-
-                                                                />
-                                                                <div className='flex justify-end w-full mt-2'>
-                                                                    <Button variant={'primary'} size={'lg'}>
-                                                                        <span className="material-symbols-outlined me-2">send</span>
-                                                                        {t('Send')}
-                                                                    </Button>
-                                                                </div>
-
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
-                            ))}
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-        </div>
-
+  const checkStatus = (itemId: number, zoneId: number) => {
+    const result = results.find(
+      (res) => res.itemId === itemId && res.zoneId === zoneId
     );
+    return result ? result.status : null;
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setSelectedFiles([...selectedFiles, ...Array.from(event.target.files)]);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      setSelectedFiles([...selectedFiles, ...Array.from(files)]);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleCreateDefect = async (
+    name: string,
+    description: string,
+    type: string,
+    userId: number,
+    patrolResultId: number | null,
+    files: File[]
+  ) => {
+    const formData = new FormData();
+
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("type", type);
+    formData.append("status", "reported");
+    formData.append("userId", userId.toString());
+    if (patrolResultId !== null) {
+      formData.append("patrolResultId", patrolResultId.toString());
+    }
+
+    files.forEach((file) => {
+      formData.append("imageFiles", file);
+    });
+
+    try {
+      const createDefect = await fetchDataFormFormat(
+        "post",
+        "/defect",
+        true,
+        formData
+      );
+      window.location.reload();
+    } catch (error) {
+      console.error("Error creating defect:", error);
+    }
+  };
+
+  const handleDefectDescription = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { value } = event.target;
+    setDefectDescription(value);
+  };
+  const handleButtonClick = (event: React.FormEvent) => {
+    event.preventDefault();
+    document.getElementById("file-input")?.click();
+  };
+
+  const getBadgeVariant = (type: ItemType) => {
+    switch (type) {
+      case "safety":
+        return "mint";
+      case "environment":
+        return "orange";
+      case "maintenance":
+        return "red";
+      default:
+        return "red";
+    }
+  };
+
+  const getExistingResult = (itemId: number, zoneId: number) => {
+    if (!patrol) {
+      console.warn("Patrol data is not yet loaded.");
+      return null;
+    }
+
+    const result = patrol.result.find(
+      (res) => res.itemId === itemId && res.zoneId === zoneId
+    );
+
+    return result;
+  };
+
+  useEffect(() => {
+    getPatrolData();
+
+    if (patrolResult && checklist.item) {
+      const initialStatus = checklist.item.reduce((acc, item) => {
+        item.zone.forEach((zone) => {
+          const matchingResult = patrolResult.find((result) => {
+            return result.itemId === item.id && result.zoneId === zone.id;
+          });
+
+          // ถ้ามี matchingResult และ status ไม่เป็น null ให้เก็บค่า status
+          if (matchingResult && matchingResult.status !== null) {
+            acc[`${item.id}-${zone.id}`] = matchingResult.status;
+          }
+        });
+        return acc;
+      }, {} as { [key: string]: boolean | null });
+
+      setResultStatus(initialStatus); // เก็บค่า resultStatus ที่อัพเดตแล้ว
+    }
+  }, [checklist, patrolResult]);
+
+  const handleClick = (itemId: number, zoneId: number, status: boolean) => {
+    handleResult({ itemId, zoneId, status });
+    console.log(status);
+    setResultStatus((prev) => ({
+      ...prev,
+      [`${itemId}-${zoneId}`]: status,
+    }));
+  };
+
+  return (
+    <div className="bg-secondary rounded-md px-4 py-2">
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1" className="border-none">
+          <AccordionTrigger className="hover:no-underline text-2xl font-semibold py-2">
+            {checklist.title}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-rows items-center gap-2 text-muted-foreground text-base ps-4 py-2  border-t-2 ">
+              <span className="material-symbols-outlined">engineering</span>
+              <p className="font-semibold">{t("Inspector")}</p>
+              <p className="text-card-foreground">{checklist.inspector.name}</p>
+            </div>
+            <div className="ps-2">
+              {checklist.item?.map((item: Item) => (
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="item-1" className="border-none">
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center justify-between w-full pe-2">
+                        <p className="text-xl font-semibold">{item.name}</p>
+                        <BadgeCustom
+                          variant={getBadgeVariant(item.type as ItemType)}
+                        >
+                          {s(item.type)}
+                        </BadgeCustom>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="flex flex-col py-2 gap-2">
+                      {item?.zone.map((zone: Zone) => {
+                        const status = checkStatus(item.id, zone.id);
+                        const existingResult = getExistingResult(
+                          item.id,
+                          zone.id
+                        );
+                        return (
+                          <div key={zone.id} className="bg-card rounded-md p-2">
+                            <div className="flex flex-row justify-between items-center">
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="material-symbols-outlined">
+                                    location_on
+                                  </span>
+                                  <p className="font-semibold text-lg">
+                                    {t("Zone")}
+                                  </p>
+                                  <p className="text-lg">{zone.name}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="material-symbols-outlined">
+                                    badge
+                                  </span>
+                                  <p className="font-semibold text-lg">
+                                    {t("Supervisor")}
+                                  </p>
+                                  <p className="text-lg">
+                                    {zone.supervisor.profile.name}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pe-2">
+                                <Button
+                                  variant={
+                                    resultStatus[`${item.id}-${zone.id}`] ===
+                                    true
+                                      ? "success"
+                                      : "secondary"
+                                  }
+                                  className={`w-[155px] ${
+                                    resultStatus === null
+                                      ? "bg-secondary text-card-foreground"
+                                      : ""
+                                  }
+                                                                    ${
+                                                                      existingResult?.status ===
+                                                                      true
+                                                                        ? "bg-green-500 hover:bg-green-500  cursor-not-allowed opacity-50"
+                                                                        : ""
+                                                                    }
+                                                                    ${
+                                                                      existingResult?.status ===
+                                                                      false
+                                                                        ? "bg-secondary hover:bg-secondary  cursor-not-allowed opacity-50"
+                                                                        : ""
+                                                                    }
+                                                                    ${
+                                                                      disabled
+                                                                        ? " cursor-not-allowed opacity-50"
+                                                                        : ""
+                                                                    }
+                                                                    `}
+                                  onClick={() => {
+                                    if (
+                                      !existingResult?.status === false ||
+                                      existingResult?.status === null
+                                    ) {
+                                      handleClick(item.id, zone.id, true);
+                                    }
+                                  }}
+                                >
+                                  <span className="material-symbols-outlined">
+                                    check
+                                  </span>
+                                  <p>{t("Yes")}</p>
+                                </Button>
+                                <Button
+                                  variant={
+                                    resultStatus[`${item.id}-${zone.id}`] ===
+                                    false
+                                      ? "fail"
+                                      : "secondary"
+                                  }
+                                  className={`w-[155px] ${
+                                    resultStatus === null
+                                      ? "bg-secondary text-card-foreground"
+                                      : ""
+                                  }
+                                                                    ${
+                                                                      existingResult?.status ===
+                                                                      false
+                                                                        ? "bg-red-500 hover:bg-red-500  cursor-not-allowed opacity-50"
+                                                                        : ""
+                                                                    }
+                                                                    ${
+                                                                      existingResult?.status ===
+                                                                      true
+                                                                        ? "bg-secondary hover:bg-secondary  cursor-not-allowed opacity-50"
+                                                                        : ""
+                                                                    }
+                                                                    ${
+                                                                      disabled
+                                                                        ? " cursor-not-allowed opacity-50 "
+                                                                        : ""
+                                                                    }
+                                                                    `}
+                                  onClick={() => {
+                                    if (
+                                      !existingResult?.status === false ||
+                                      existingResult?.status === null
+                                    ) {
+                                      handleClick(item.id, zone.id, false);
+                                    }
+                                  }}
+                                >
+                                  <span className="material-symbols-outlined">
+                                    close
+                                  </span>
+                                  <p>{t("No")}</p>
+                                </Button>
+                              </div>
+                            </div>
+
+                            {(status === false ||
+                              existingResult?.status === false) && (
+                              <div className="mt-4 flex flex-col items-start">
+                                <AlertDialog>
+                                  <AlertDialogTrigger
+                                    className={
+                                      existingResult ? "cursor-not-allowed" : ""
+                                    }
+                                    disabled={existingResult?.status === false}
+                                  >
+                                    <Button
+                                      variant={"outline"}
+                                      size={"lg"}
+                                      disabled={
+                                        existingResult?.status === false
+                                      }
+                                    >
+                                      <span className="material-symbols-outlined">
+                                        campaign
+                                      </span>
+                                      {t("Report")}
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle className="text-2xl font-semibold">
+                                        Report Defect
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                                        Please provide details for the defect
+                                      </AlertDialogDescription>
+                                      <div className="flex flex-col justify-start">
+                                        <p className="font-semibold">
+                                          {item.name}
+                                        </p>
+                                        <div className="flex items-center">
+                                          <span className="material-symbols-outlined text-2xl me-2">
+                                            location_on
+                                          </span>
+                                          <p className="font-semibold me-2">
+                                            Zone
+                                          </p>
+                                          <p>{zone.name}</p>
+                                        </div>
+                                        <div className="flex items-center">
+                                          <span className="material-symbols-outlined text-2xl me-2">
+                                            badge
+                                          </span>
+                                          <p className="font-semibold me-2">
+                                            Supervisor
+                                          </p>
+                                          <p>{zone.supervisor.profile.name}</p>
+                                        </div>
+                                      </div>
+                                    </AlertDialogHeader>
+                                    <Textarea
+                                      onChange={handleDefectDescription}
+                                      className="h-[100px] mt-3 bg-secondary border-none"
+                                      placeholder="Details..."
+                                    />
+                                    <div className="flex flex-row justify-between gap-2">
+                                      <div
+                                        className="flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center"
+                                        onDragOver={handleDragOver}
+                                        onDrop={handleDrop}
+                                      >
+                                        <div className="flex p-8 flex-col items-center justify-center">
+                                          <span className="material-symbols-outlined text-[48px] font-normal">
+                                            upload
+                                          </span>
+
+                                          <div className="text-center mt-2">
+                                            Drag & Drop file
+                                          </div>
+                                          <div className="text-center mt-1">
+                                            Or
+                                          </div>
+                                          <div className="mt-2">
+                                            <input
+                                              type="file"
+                                              id="file-input"
+                                              style={{ display: "none" }}
+                                              multiple
+                                              onChange={handleFileChange}
+                                            />
+                                            <Button
+                                              variant={"outline"}
+                                              onClick={handleButtonClick}
+                                            >
+                                              <span className="material-symbols-outlined mr-1">
+                                                browser_updated
+                                              </span>
+                                              Browse
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <ScrollArea className="  h-72 overflow-y-auto gap-5 rounded-md w-full">
+                                        <div className="flex flex-col gap-2 w-[215px]">
+                                          {selectedFiles.map((file, index) => (
+                                            <div
+                                              key={index}
+                                              className=" flex p-2 w-full bg-secondary rounded-md"
+                                            >
+                                              <span className="material-symbols-outlined">
+                                                image
+                                              </span>
+                                              <div className="flex items-center gap-2 ">
+                                                <div className="flex flex-col">
+                                                  <TooltipProvider>
+                                                    <Tooltip>
+                                                      <TooltipTrigger asChild>
+                                                        <div className=" truncate w-[145px]">
+                                                          {file.name}
+                                                        </div>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent className="bg-foreground">
+                                                        <div className=" w-full ">
+                                                          {file.name}
+                                                        </div>
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  </TooltipProvider>
+
+                                                  <p className="text-sm font-semibold text-muted-foreground">
+                                                    {(file.size / 1024).toFixed(
+                                                      2
+                                                    )}{" "}
+                                                    KB
+                                                  </p>
+                                                </div>
+                                              </div>
+                                              <Button
+                                                variant={"ghost"}
+                                                className="w-[40px] h-[40px]"
+                                                onClick={() =>
+                                                  handleRemoveFile(index)
+                                                }
+                                              >
+                                                <span className="material-symbols-outlined text-destructive">
+                                                  delete
+                                                </span>
+                                              </Button>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </ScrollArea>
+                                    </div>
+
+                                    <AlertDialogFooter>
+                                      <div className="flex items-end justify-end gap-[10px]">
+                                        <AlertDialogCancel>
+                                          Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() =>
+                                            handleCreateDefect(
+                                              item.name,
+                                              defectDescription,
+                                              item.type,
+                                              checklist.inspector.id,
+                                              existingResult?.id ?? null,
+                                              selectedFiles
+                                            )
+                                          }
+                                          disabled={
+                                            !defectDescription ||
+                                            selectedFiles.length === 0 ||
+                                            disabled
+                                          }
+                                          className={`bg-primary hover:bg-primary/70 ${
+                                            !defectDescription ||
+                                            selectedFiles.length === 0
+                                              ? "opacity-50 cursor-not-allowed"
+                                              : ""
+                                          }`}
+                                        >
+                                          <span className="material-symbols-outlined text-2xl me-2">
+                                            send
+                                          </span>
+                                          Send
+                                        </AlertDialogAction>
+                                      </div>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                                <Textarea
+                                  className="h-[94px] mt-3 bg-secondary border-none"
+                                  placeholder={`${t("Comment")}...`}
+                                />
+                                <div className="flex justify-end w-full mt-2">
+                                  <Button variant={"primary"} size={"lg"}>
+                                    <span className="material-symbols-outlined me-2">
+                                      send
+                                    </span>
+                                    {t("Send")}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
 }
