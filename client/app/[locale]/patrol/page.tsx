@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Checklist,
   Patrol,
   PatrolChecklist,
   patrolStatus,
@@ -53,6 +54,7 @@ import { User, FilterPatrol } from "@/app/type";
 import { exportData, filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Page() {
   const t = useTranslations("General");
@@ -197,6 +199,38 @@ export default function Page() {
     });
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (event: any) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const patrolQueryResults = filteredPatrolData?.filter((patrol) => {
+    const presetTitle = patrol.preset ? patrol.preset.title : 'No Title';
+    const patrolId = patrol.id.toString().toLowerCase();
+    const patrolDate = new Date(patrol.date).toLocaleDateString().toLowerCase();
+    const patrolStatus = patrol.status.toLowerCase();
+
+    const inspectors = patrol.checklist
+      .map((cl: Checklist) => cl.inspector?.name ? cl.inspector.name.toLowerCase() : '')
+      .join(' ');
+
+    const searchTokens = searchTerm.toLowerCase().split(' ').filter(Boolean);
+    const inspectorTokens = inspectors.split(' ').filter(Boolean);
+
+    const isInspectorMatch = searchTokens.every(token =>
+      inspectorTokens.some(namePart => namePart.includes(token))
+    );
+
+    return (
+      presetTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patrolId.includes(searchTerm.toLowerCase()) ||
+      patrolDate.includes(searchTerm.toLowerCase()) ||
+      patrolStatus.includes(searchTerm.toLowerCase()) ||
+      isInspectorMatch
+    )
+  })
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -252,6 +286,7 @@ export default function Page() {
           iconName="search"
           showIcon={true}
           placeholder={t("Search")}
+          onChange={handleSearch}
         />
 
         <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
@@ -534,8 +569,8 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {filteredPatrolData &&
-          filteredPatrolData.map((card) => {
+        {patrolQueryResults &&
+          patrolQueryResults.map((card) => {
             const { status, date, preset, checklist } = card;
             const inspectors = checklist.map((cl: any) => cl.inspector);
             return (
