@@ -1,7 +1,7 @@
 
 
-export type patrolStatus ="pending"|"scheduled"| "on_going"|"completed"
-export type Role = "admin"|"inspector"|"supervisor"
+export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
+export type Role = "admin" | "inspector" | "supervisor"
 export type DefectStatus = "reported" | "completed" | "pending_review" | "in_progress" | "resolved";
 export type ItemType = "safety" | "environment" | 'maintenance';
 export interface Zone {
@@ -41,8 +41,8 @@ export interface Preset {
     version: number;
     latest: boolean;
     updatedAt: string;
-    updateBy: Inspector; 
-    checklist: Checklist[]; 
+    updateBy: Inspector;
+    checklist: Checklist[];
 }
 
 export interface PatrolResult {
@@ -60,7 +60,7 @@ export interface Patrol {
     endTime?: string | null;
     duration?: string | null;
     status: string;
-    preset: Preset; 
+    preset: Preset;
     checklist: Checklist[];
     result: PatrolResult[];
 }
@@ -104,5 +104,12 @@ export interface DefectData {
     type: string;
     status: string;
     userId: number;
-  }
-  
+}
+
+// filter 
+
+export interface FilterPatrol {
+    presetTitle: string | null;
+    patrolStatus: string[];
+    dateRange: { start: Date | undefined; end: Date | undefined };
+}
