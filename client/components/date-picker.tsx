@@ -61,14 +61,34 @@ export function DatePicker({
   )
 }
 
-export function DatePickerWithRange({
+interface DatePickerWithRangeProps {
+  startDate: Date | undefined; 
+  endDate: Date | undefined; 
+  onSelect: (date: DateRange) => void; 
+  className?: string; 
+}
+
+export const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
+  startDate,
+  endDate,
+  onSelect,
   className,
-}: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 20),
-  })
- 
+}) => {
+  const [date, setDate] = React.useState<DateRange | undefined>(undefined); 
+
+  React.useEffect(() => {
+    setDate({
+      from: startDate,
+      to: endDate,
+    });
+  }, [startDate, endDate]);
+
+  const handleDateChange = (selectedDate: DateRange | undefined) => {
+    setDate(selectedDate);
+    if (selectedDate?.from && selectedDate?.to) {
+      onSelect(selectedDate);
+    }
+  };
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -81,7 +101,7 @@ export function DatePickerWithRange({
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4"  />
+            <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
               date.to ? (
                 <>
@@ -102,7 +122,7 @@ export function DatePickerWithRange({
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
+            onSelect={handleDateChange}
             numberOfMonths={2}
           />
         </PopoverContent>
