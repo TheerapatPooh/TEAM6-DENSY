@@ -52,7 +52,6 @@ import {
   Preset,
 } from "@/app/type";
 import { User } from "@/app/type";
-import { exportData } from "@/lib/utils";
 
 
 export default function Page() {
@@ -152,7 +151,7 @@ export default function Page() {
           <DropdownMenuContent align="end" className="p-2">
             <DropdownMenuLabel>{t('SortBy')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value="Doc No.">
-              <DropdownMenuRadioItem value="Doc No." className="text-base">
+              <DropdownMenuRadioItem value="Doc No." className="text-base" onSelect={(e) => e.preventDefault()}>
               {t('DocNo')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Date" className="text-base">

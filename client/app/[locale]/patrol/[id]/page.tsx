@@ -14,6 +14,7 @@ import PatrolChecklist from '@/components/patrol-checklist';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
 import { exportData } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 
 // const defectSchema = z.object({
@@ -72,7 +73,8 @@ export default function Page() {
   const [results, setResults] = useState<Array<{ itemId: number, zoneId: number, status: boolean }>>([]);
   const params = useParams()
   const router = useRouter();
-
+  const t = useTranslations("General");
+  const s = useTranslations("Status");
   const getPatrolData = async () => {
     if (params.id) {
       try {
@@ -194,22 +196,22 @@ export default function Page() {
                 case "completed":
                   iconName = "check";
                   variant = "green";
-                  status = "Completed"
+                  status = patrol.status
                   break;
                 case "on_going":
                   iconName = "cached";
                   variant = "purple";
-                  status = "On Going"
+                  status = patrol.status
                   break;
                 case "scheduled":
                   iconName = "event_available";
                   variant = "yellow";
-                  status = "Scheduled";
+                  status = patrol.status;
                   break;
                 default:
                   iconName = "hourglass_top";
                   variant = "blue";
-                  status = "Pending";
+                  status = patrol.status;
                   break;
               }
               return (
@@ -219,7 +221,7 @@ export default function Page() {
                   showTime={false}
                   variant={variant}
                 >
-                  {status}
+                  {s(status)}
                 </BadgeCustom>
               );
             })()}
@@ -231,16 +233,16 @@ export default function Page() {
               <TabsList className='bg-secondary p-1 h-fit'>
                 <TabsTrigger value="details">
                   <span className="material-symbols-outlined mr-2">data_info_alert</span>
-                  <p className='font-semibold'>Details</p>
+                  <p className='font-semibold'>{t('Detail')}</p>
                 </TabsTrigger>
                 <TabsTrigger value="reports">
                   <span className="material-symbols-outlined mr-2">Campaign</span>
-                  <p className='font-semibold'>Reports</p>
+                  <p className='font-semibold'>{t('Report')}</p>
                 </TabsTrigger>
               </TabsList>
               <div className='flex items-center gap-4'>
                 <Button variant={'secondary'} onClick={() => router.back()}>
-                  Back
+                  {t('Back')}
                 </Button>
                 {(() => {
                   let iconName: string
@@ -295,7 +297,7 @@ export default function Page() {
                       <span className="material-symbols-outlined">
                         {iconName}
                       </span>
-                      {text}
+                      {t(`${text}`)}
                     </Button>
                   );
                 })()}
