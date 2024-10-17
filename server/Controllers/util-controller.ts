@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { prisma } from "../Utils/database";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from 'jsonwebtoken'
-import multer from 'multer';
+import multer, { Multer } from 'multer';
 const jwt = require('jsonwebtoken')
 
 
@@ -81,13 +81,16 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
 }
 
 
+
 const storage = multer.diskStorage({
-  destination: function (req: Request, file: Express.Multer.File, callback: (error: Error | null, destination: string) => void) {
-    callback(null, 'uploads/');
+  destination: function (req, file, callback) {
+    callback(null, 'uploads/'); // Keep the upload path for file storage
   },
-  filename: function (req: Request, file: Express.Multer.File, callback: (error: Error | null, destination: string) => void) {
-    callback(null, Date.now() + '-' + file.originalname)
+  filename: function (req, file, callback) {
+    const uniqueSuffix = Date.now() + '-' + file.originalname;
+    callback(null, uniqueSuffix); // Store only the filename
   }
-})
+});
 
 export const upload = multer({ storage: storage });
+
