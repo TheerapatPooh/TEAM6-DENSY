@@ -1,6 +1,7 @@
 
 import { prisma } from '../Utils/database'
 import { Request, Response } from 'express'
+import axios from 'axios';
 
 export async function getPatrol(req: Request, res: Response) {
     try {
@@ -96,7 +97,7 @@ export async function getPatrol(req: Request, res: Response) {
                     age: checklist.inspector.profile?.pf_age,
                     tel: checklist.inspector.profile?.pf_tel,
                     address: checklist.inspector.profile?.pf_address,
-                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null 
+                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null
                 },
                 item: checklist.checklist.item.map((item: any) => ({
                     id: item.it_id,
@@ -106,7 +107,7 @@ export async function getPatrol(req: Request, res: Response) {
                         id: zone.zone.ze_id,
                         name: zone.zone.ze_name,
                         supervisor: {
-                            id: zone.zone.supervisor.us_id ,
+                            id: zone.zone.supervisor.us_id,
                             email: zone.zone.supervisor.us_email,
                             department: zone.zone.supervisor.us_department,
                             profile: {
@@ -426,7 +427,7 @@ export async function finishPatrol(req: Request, res: Response) {
 
         for (const resultObj of result) {
             const { id, status } = resultObj;
-        
+
             await prisma.patrolResult.update({
                 where: {
                     pr_id: id,
@@ -436,7 +437,7 @@ export async function finishPatrol(req: Request, res: Response) {
                 },
             });
         }
-        
+
         res.status(200).json(updatePatrol)
 
     } catch (err) {
@@ -471,19 +472,19 @@ export async function removePatrol(req: Request, res: Response) {
             message: 'Patrol and related records successfully deleted',
         });
     } catch (error) {
-        console.error(error); 
+        console.error(error);
         res.status(500).json({
             message: 'Failed to delete patrol',
         });
     }
-    
+
 }
 
 
 export async function updatePatrolStatus(req: Request, res: Response) {
-    try {             
+    try {
         const { patrolId, status } = req.body; // Destructure patrolId and status from the request body
-        
+
         // Validate input
         if (!patrolId || !status) {
             return res.status(400).json({ message: "Patrol ID and status are required." });
@@ -491,13 +492,13 @@ export async function updatePatrolStatus(req: Request, res: Response) {
 
         // Update the patrol status in the database
         const updatedPatrol = await prisma.patrol.update({
-            where: { pt_id: patrolId }, 
-            data: { pt_status: status }, 
+            where: { pt_id: patrolId },
+            data: { pt_status: status },
         });
 
         res.status(200).json(updatedPatrol);
     } catch (err) {
-        console.error(err); 
+        console.error(err);
         res.status(500).json({ message: "An error occurred while updating the patrol status." });
     }
 }
@@ -540,10 +541,10 @@ export async function commentPatrol(req: Request, res: Response) {
         }
 
         // รับข้อมูลจาก request body
-        const { patrolId, message, checklist, patrolResultId} = req.body;
+        const { patrolId, message, checklist, patrolResultId } = req.body;
 
         // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
-        if (!patrolId  ||  !message || !checklist || !patrolResultId) {
+        if (!patrolId || !message || !checklist || !patrolResultId) {
             return res.status(400).json({ message: "Bad Request: Missing required fields" });
         }
 
@@ -557,18 +558,18 @@ export async function commentPatrol(req: Request, res: Response) {
                     }
                 }
             }
-        }); 
+        });
         if (!validPatrol) {
             return res.status(404).json({ message: "Patrol or checklist not found" });
         }
-    
+
         // รับ message เข้ามา และเชื่อมกับ PatrolResult
         const newComment = await prisma.comment.create({
             data: {
-                cm_message: message,               
-                cm_us_id: userId,                  
-                cm_pr_id: patrolResultId,     
-                cm_timestamp: new Date()           
+                cm_message: message,
+                cm_us_id: userId,
+                cm_pr_id: patrolResultId,
+                cm_timestamp: new Date()
             }
         });
 
@@ -606,4 +607,57 @@ export async function getCommentPatrol(req: Request, res: Response) {
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
     }
+}
+
+// ฟังก์ชันสำหรับตรวจสอบและอัปเดต patrols ที่มีสถานะ pending
+export async function checkAndUpdatePendingPatrols() {
+    try {
+        const response = await axios.get(`${process.env.SERVER_URL}/patrols/pending`);
+        const patrols = response.data;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (const patrol of patrols) {
+            const patrolDate = new Date(patrol.date);
+            patrolDate.setHours(0, 0, 0, 0);
+
+            if (patrolDate.getTime() === today.getTime()) {
+                try {
+                    await axios.put(`${process.env.SERVER_URL}/patrol/${patrol.id}/status`, {
+                        patrolId: patrol.id,
+                        status: "scheduled"
+                    });
+                    console.log(`Patrol ${patrol.id} status updated to "on_going".`);
+                } catch (error) {
+                    if (axios.isAxiosError(error)) {
+                        console.error(`Error updating patrol ${patrol.id}:`, error.response?.data || error.message);
+                    } else {
+                        console.error(`Unknown error updating patrol ${patrol.id}:`, error);
+                    }
+                }
+            }
+        }
+
+        console.log("Checked and updated pending patrols for today.");
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("Error fetching patrol:", error.response?.data || error.message);
+        } else {
+            console.error("Unknown error fetching or updating patrols:", error);
+        }
+    }
+}
+
+// ฟังก์ชันสำหรับ schedule การ update status ของ patrol ทุกเที่ยงคืน
+export function schedulePatrolStatusUpdate() {
+    const now = new Date();
+    const nextMidnight = new Date();
+    nextMidnight.setHours(24, 0, 0, 0);
+    const timeUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+    setTimeout(() => {
+        checkAndUpdatePendingPatrols();
+        setInterval(checkAndUpdatePendingPatrols, 24 * 60 * 60 * 1000);
+    }, timeUntilMidnight);
 }
