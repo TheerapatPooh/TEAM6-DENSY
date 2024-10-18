@@ -35,7 +35,7 @@ export async function getUser(req: Request, res: Response) {
             return res.status(404).json({ message: "User not found" });
         }
     } catch (error) {
-        console.error(error); 
+        console.error(error);
         return res.status(500).json({ message: "Internal Server Error", error });
     }
 }
@@ -74,7 +74,7 @@ export async function createUser(req: Request, res: Response) {
         if (userRole !== 'admin') {
             return res.status(403).json({ message: "Access Denied: Admins only" })
         }
-        const { email, password, role, department }: User = req.body
+        let { username, email, password, role, department }: User = req.body
         const hashPassword = await bcrypt.hash(password, 10)
 
         const latestUser = await prisma.user.findFirst({
@@ -84,16 +84,17 @@ export async function createUser(req: Request, res: Response) {
         })
 
         const nextId = (latestUser?.us_id ?? 0) + 1
-
-        const randomWord = faker.word.noun()
-        const username = `${randomWord}${nextId}`
+        if (!username) {
+            const randomWord = faker.word.noun()
+            username = `${randomWord}${nextId}`
+        }
 
         const newUser = await prisma.user.create({
             data: {
                 us_username: username,
                 us_email: email ?? null,
                 us_password: hashPassword,
-                us_role: role ?? "INSPECTOR",
+                us_role: role ?? "inspector",
                 us_department: department || null,
             },
         })
@@ -134,14 +135,14 @@ export async function updateProfile(req: Request, res: Response) {
             include: {
                 profile: {
                     include: {
-                        pf_image: true, 
+                        pf_image: true,
                     },
                 },
             },
         });
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' }); 
+            return res.status(404).json({ error: 'User not found' });
         }
 
         if (imagePath && user.profile?.pf_image) {
@@ -158,13 +159,13 @@ export async function updateProfile(req: Request, res: Response) {
                 update: {
                     im_path: imagePath,
                     profiles: {
-                        connect: { pf_id: user.profile?.pf_id }, 
+                        connect: { pf_id: user.profile?.pf_id },
                     },
                 },
                 create: {
                     im_path: imagePath,
                     profiles: {
-                        connect: { pf_id: user.profile?.pf_id }, 
+                        connect: { pf_id: user.profile?.pf_id },
                     },
                 },
             });
@@ -250,7 +251,7 @@ export async function getProfile(req: Request, res: Response) {
                 tel: profile.pf_tel || undefined,
                 address: profile.pf_address || undefined,
                 image: profile.pf_image ? {
-                    id: profile.pf_image.im_id, 
+                    id: profile.pf_image.im_id,
                     path: profile.pf_image.im_path,
                 } : null,
                 userId: profile.pf_us_id
@@ -277,7 +278,7 @@ export async function getAllProfile(req: Request, res: Response) {
         })
 
         if (allUsers) {
-            
+
             const result: User[] = allUsers.map((user: any) => ({
                 id: user.us_id,
                 username: user.us_username,
@@ -291,10 +292,10 @@ export async function getAllProfile(req: Request, res: Response) {
                     tel: user.profile.pf_tel,
                     address: user.profile.pf_address,
                     image: user.profile.pf_image ? {
-                        id: user.profile.pf_image.im_id, 
+                        id: user.profile.pf_image.im_id,
                         path: user.profile.pf_image.im_path,
                     } : null,
-                    userId: user.pf_us_id                
+                    userId: user.pf_us_id
                 },
             }))
             res.status(200).json(result)
@@ -308,9 +309,9 @@ export async function getAllProfile(req: Request, res: Response) {
 }
 export async function updateUser(req: Request, res: Response) {
     try {
-        const loggedInUserId = (req as any).user.userId; 
-        const loggedInUserRole = (req as any).user.role; 
-        const id = parseInt(req.params.id, 10); 
+        const loggedInUserId = (req as any).user.userId;
+        const loggedInUserRole = (req as any).user.role;
+        const id = parseInt(req.params.id, 10);
         const { username, email, password, role, department } = req.body;
 
         // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin

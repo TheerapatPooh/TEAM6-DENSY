@@ -18,56 +18,6 @@ import { useTranslations } from 'next-intl';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 
-// const defectSchema = z.object({
-//   title: z.string(),
-//   note: z.string(),
-//   type: z.string(),
-//   status: z.string(),
-//   users_id: z.number(),
-// });
-
-// const DefectForm = ({ item }: { item: Item }) => {
-//   const defectForm = useForm<z.infer<typeof defectSchema>>({
-//     resolver: zodResolver(defectSchema),
-//     defaultValues: {
-//       title: "safety",
-//       note: "safety",
-//       type: "safety",
-//       status: "Reported",
-//       users_id: 1,
-//     },
-//   });
-
-//   const onSubmitDefect = async (values: z.infer<typeof defectSchema>) => {
-//     try {
-//       // const result = await createDefect(values);
-//       // console.log("Defect created successfully for item:", item.id, result);
-//     } catch (error) {
-//       console.error("Failed to create defect:", error);
-//     }
-//   };
-
-//   return (
-//     <Form {...defectForm}>
-//       <form onSubmit={}>
-//         <FormField
-//           control={}
-//           name="title"
-//           render={({ field }) => (
-//             <FormItem>
-//               <FormControl>
-//                 <Input {...field} placeholder="Enter title" />
-//               </FormControl>
-//             </FormItem>
-//           )}
-//         />
-//         <Button type="submit">Submit</Button>
-//       </form>
-//     </Form>
-//   );
-// };
-
-
 export default function Page() {
   const [mounted, setMounted] = useState(false);
   const [patrol, setPatrol] = useState<Patrol | null>(null);
@@ -81,7 +31,6 @@ export default function Page() {
       try {
         const data = await fetchData('get', `/patrol/${params.id}`, true);
         setPatrol(data);
-        console.log(data)
       } catch (error) {
         console.error('Failed to fetch patrol data:', error);
       }
@@ -124,14 +73,11 @@ export default function Page() {
 
   const handleFinishPatrol = async () => {
     if (!patrol) return;
-
     const updatedResults = results.map((result) => {
-
       const matchedResult = patrol.result.find(
         (res) =>
           res.itemId === result.itemId && res.zoneId === result.zoneId
       );
-
 
       if (matchedResult && result.status !== null) {
         return {
@@ -144,12 +90,17 @@ export default function Page() {
     })
 
     const data = {
-      status: "on_going",
+      status:patrol.status,
       checklist: patrol.checklist,
       result: updatedResults,
     };
-
-    if (data.result.length === patrol.result.length) {
+    let resultCount =0;
+    for (var index of patrol.result){
+      if(index.status === null){
+        resultCount++
+      }
+    }
+    if (data.result.length === resultCount) {
       console.log(data)
       try {
         const response = await fetchData("put", `/patrol/${patrol.id}/finish`, true, data);
@@ -176,7 +127,6 @@ export default function Page() {
     )
   }
 
-  console.log("Results: ", results);
 
   return (
     <div className='p-4'>

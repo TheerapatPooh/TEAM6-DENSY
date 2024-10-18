@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { User, PatrolChecklist } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface UserDropdownProps {
   userData: User[];
@@ -50,6 +51,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-0">
+        <ScrollArea className="h-72 w-full rounded-md border">
         {userData.map((user) => {
           return( 
           <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
@@ -61,6 +63,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
         </DropdownMenuItem>)
          
         })}
+      </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );
