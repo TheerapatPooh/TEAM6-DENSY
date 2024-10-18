@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Inspector, Patrol, patrolStatus, User } from "@/app/type";
+import { Defect, Inspector, Patrol, PatrolResult, patrolStatus, User } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/api";
 import {
@@ -60,9 +60,9 @@ export function PatrolCard({
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [profile, setProfile] = useState<User[]>();
-  const [itemCount, setItemCount] = useState(0);
-  const [failCount, setFailCount] = useState(0);
-  const [defectCount, setDefectCount] = useState(0);
+  const [items, setItems] = useState(0);
+  const [fails, setFails] = useState(0);
+  const [defects, setDefects] = useState(0);
 
   const [mounted, setMounted] = useState(false);
 
@@ -86,32 +86,32 @@ export function PatrolCard({
       let countDefects = 0;
   
       if (patrolfetch?.result) {
-        patrolfetch.result.forEach((patrolResult: { status: boolean, defectId: number | null }) => {
-        
-        if (patrolResult.status !== null) {
-          countItems++;
-        }
+        patrolfetch.result.forEach((patrolResult: PatrolResult) => {
+          if (patrolResult.status != null) {
+            countItems++;
+          }
 
-        if (patrolResult.status === false) {
+          if (patrolResult.status === false) {
             countFails++;
-        }
+          }
 
-        if (patrolResult.status === false && patrolResult.defectId !== null) {
+          if (patrolResult.defectId != null) {
             countDefects++;
-            console.log("items : ",  patrolResult.defectId)
-        }
-        
+          } else {
+            console.log("No defect found for this patrol result.");
+          }
+          console.log("defects: ", patrolResult.defectId)
         });
       }
       
-      setItemCount(countItems);
-      setFailCount(countFails);
-      setDefectCount(countDefects);
+      setItems(countItems);
+      setFails(countFails);
+      setDefects(countDefects);
     } catch (error) {
       console.error("Failed to fetch patrol data:", error);
     }
   };
-  
+  console.log(defects)
 
   useEffect(() => {
     getData();
@@ -273,17 +273,17 @@ export function PatrolCard({
         <div className="flex gap-2.5 items-center w-full">
           <div className="flex gap-2.5 text-blue-500 items-center">
             <span className="material-symbols-outlined">checklist</span>
-            <p className="text-[20px] font-semibold">{itemCount}</p>
+            <p className="text-[20px] font-semibold">{items}</p>
           </div>
           <div className="flex gap-2.5 text-yellow-500 items-center">
             <span className="material-symbols-outlined">close</span>
-            <p className="text-[20px] font-semibold">{failCount}</p>
+            <p className="text-[20px] font-semibold">{fails}</p>
           </div>
           <div className="flex gap-2.5 text-red-500 items-center">
             <span className="material-symbols-outlined text-red-500">
               error
             </span>
-            <p className="text-[20px] font-semibold">{defectCount}</p>
+            <p className="text-[20px] font-semibold">{defects}</p>
           </div>
           <div className="ml-auto items-center">
             <DropdownMenu>
