@@ -54,8 +54,10 @@ model Defect {
 model Notification {
   nt_id        Int      @id @default(autoincrement())
   nt_message   String
-  nt_status    Boolean
+  nt_read      Boolean
   nt_timestamp DateTime @default(now())
+  nt_type      NotificationType
+  nt_url       String? 
   nt_us_id     Int
 
   user User @relation(fields: [nt_us_id], references: [us_id])
@@ -272,4 +274,10 @@ enum ItemStatus {
   safety
   environment
   maintenance
+}
+
+enum NotificationType {
+  information
+  request
+  system
 }

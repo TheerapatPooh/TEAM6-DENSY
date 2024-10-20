@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from '@/components/theme-provider';
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 import localFont from "next/font/local";
 import "./globals.css";
 import "./globalicons.css";
 import { Roboto, Manrope } from 'next/font/google';
+import { SocketProvider } from "@/components/socket-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,11 +36,11 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  params: {locale}
+  params: { locale }
 
 }: Readonly<{
   children: React.ReactNode;
-  params: {locale: string};
+  params: { locale: string };
 }>) {
   // Providing all messages to the client
   // side is the easiest way to get started
@@ -47,9 +48,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${manRope.className} antialiased bg-background`}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider messages={messages}>
-            {children}
+            <SocketProvider>
+              {children}
+            </SocketProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
