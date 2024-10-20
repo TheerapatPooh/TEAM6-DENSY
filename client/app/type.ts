@@ -4,6 +4,7 @@ export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type Role = "admin" | "inspector" | "supervisor"
 export type DefectStatus = "reported" | "completed" | "pending_review" | "in_progress" | "resolved";
 export type ItemType = "safety" | "environment" | 'maintenance';
+export type NotificationType = "information" | "request" | 'system';
 export interface Zone {
     id: number;
     name: string;
@@ -105,6 +106,16 @@ export interface Defect {
     status: string;
     userId?: number;
     patrolId?:number
+  }
+
+  export interface NotificationProps {
+    nt_id: number
+    nt_message: string
+    nt_read: boolean,
+    nt_timestamp: string
+    nt_type: NotificationType
+    nt_url?: string
+    nt_us_id: number
   }
 
 // filter 

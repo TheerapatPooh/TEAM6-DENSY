@@ -1,7 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import axios, { AxiosRequestConfig } from "axios";
-import { fail } from "assert";
+import axios from "axios";
 import { Patrol, FilterPatrol } from "@/app/type";
 const ExcelJS = require("exceljs");
 
@@ -18,19 +17,6 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-export const fetchData = async (
-  url: string,
-  options: AxiosRequestConfig = {}
-) => {
-  try {
-    const response = await axiosInstance(url, options);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving data:", error);
-    throw new Error("Could not get data");
-  }
-};
 
 export const exportData = async (data: any) => {
   const dataArray = Array.isArray(data) ? data : [data];
@@ -229,4 +215,31 @@ export function filterPatrol(filter: FilterPatrol | null, patrols: Patrol[]) {
     });
     return newFilteredPatrolData
   }
-} 
+}
+
+
+// Function to calculate time ago
+export function timeAgo(timestamp: string, t: any): string {
+  const now = new Date();
+  const notificationDate = new Date(timestamp);
+  const seconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000);
+
+  const intervals: { [key: string]: number } = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1
+  };
+
+  for (const key in intervals) {
+    const interval = intervals[key];
+    const result = Math.floor(seconds / interval);
+    if (result >= 1) {
+      return t(`${key}Ago`, { count: result });
+    }
+  }
+  return t('justNow');
+}
