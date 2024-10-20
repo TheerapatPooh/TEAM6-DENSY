@@ -5,7 +5,7 @@ import { JwtPayload } from 'jsonwebtoken'
 import multer, { Multer } from 'multer';
 const jwt = require('jsonwebtoken')
 import { getIOInstance } from '../Utils/socket'; 
-import { Notification } from "@prisma/client";
+import nodemailer from 'nodemailer';
 
 
 
@@ -17,7 +17,7 @@ declare global {
     }
   }
 }
-
+//Login
 export async function login(req: Request, res: Response) {
   const { username, password, rememberMe } = req.body;
   try {
@@ -50,7 +50,7 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-
+//Logout
 export async function logout(req: Request, res: Response) {
   try {
     // ลบ cookie authToken
@@ -85,6 +85,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
 
 
 
+//Upload Image
 const storage = multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, 'uploads/'); // Keep the upload path for file storage
@@ -99,6 +100,7 @@ export const upload = multer({ storage: storage });
 
 
 
+//Notification
 export async function getNotifications(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -126,6 +128,19 @@ export async function createNotification({ nt_message, nt_type, nt_url, nt_us_id
         nt_us_id,
       },
     });
+
+    const user = await prisma.user.findUnique({
+      where: { us_id: nt_us_id },
+      select: { us_email: true },
+    });
+
+    // ส่งอีเมลแจ้งเตือนไปยังผู้ใช้
+    if (user?.us_email) {
+      const emailSubject = 'New Notification';
+      const emailMessage = `You have a new notification: ${nt_message}. Check it here: ${nt_url}`;
+
+      await sendEmail(user.us_email, emailSubject, emailMessage);
+    }
 
     const io = getIOInstance();
     io.to(nt_us_id).emit('new_notification', notification);  
@@ -179,5 +194,30 @@ export async function deleteOldNotifications() {
     console.log(`${deletedNotifications.count} notifications deleted.`);
   } catch (error) {
     console.error("Error deleting old notifications:", error);
+  }
+}
+
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+//Send Email
+export async function sendEmail(email: string, subject: string, message: string) {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, 
+      to: email, 
+      subject: subject,
+      text: message, 
+    });
+
+    console.log(`Notification email sent to ${email}`);
+  } catch (error) {
+    console.error('Error sending email:', error);
   }
 }
