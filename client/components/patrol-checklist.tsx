@@ -210,7 +210,6 @@ export default function PatrolChecklist({
 
   const handleClick = (itemId: number, zoneId: number, status: boolean) => {
     handleResult({ itemId, zoneId, status });
-    console.log(status);
     setResultStatus((prev) => ({
       ...prev,
       [`${itemId}-${zoneId}`]: status,
@@ -309,8 +308,8 @@ export default function PatrolChecklist({
                                                                     `}
                                   onClick={() => {
                                     if (
-                                      !existingResult?.status === false ||
-                                      existingResult?.status === null
+                                      (!existingResult?.status === false ||
+                                      existingResult?.status === null)
                                     ) {
                                       handleClick(item.id, zone.id, true);
                                     }
@@ -351,14 +350,14 @@ export default function PatrolChecklist({
                                                                         : ""
                                                                     }
                                                                     `}
-                                  onClick={() => {
-                                    if (
-                                      !existingResult?.status === false ||
-                                      existingResult?.status === null
-                                    ) {
-                                      handleClick(item.id, zone.id, false);
-                                    }
-                                  }}
+                                                                    onClick={() => {
+                                                                      if (existingResult === null || existingResult?.status === null) {
+                                                                        handleClick(item.id, zone.id, false);
+                                                                      } else if (existingResult?.status === false) {
+                                                                        handleClick(item.id, zone.id, false);
+                                                                      }
+                                                                    }}
+                                                                    
                                 >
                                   <span className="material-symbols-outlined">
                                     close
@@ -385,7 +384,7 @@ export default function PatrolChecklist({
                                         existingResult?.status === false
                                       }
                                     >
-                                      <span className="material-symbols-outlined">
+                                      <span className="material-symbols-outlined ">
                                         campaign
                                       </span>
                                       {t("Report")}

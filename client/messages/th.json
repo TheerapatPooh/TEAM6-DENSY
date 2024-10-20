@@ -46,7 +46,6 @@
     "Notifications": "การแจ้งเตือน",
     "YouHaveUnreadMessages": "คุณมี {count} ข้อความที่ยังไม่ได้อ่าน",
     "YourDefectHasBeenUpdated": "การแก้ไขปัญหาของคุณได้ถูกอัปเดตแล้ว",
-    "TimeAgo": "{time} ที่ผ่านมา",
     "MarkAllAsRead": "อ่านทั้งหมดแล้ว",
     "Zone": "พื้นที่",
     "Supervisor": "ผู้รับผิดชอบส่วนงาน",
@@ -67,6 +66,19 @@
     "completed": "สิ้นสุด",
     "safety": "ความปลอดภัย",
     "environment": "สภาพแวดล้อม",
-    "maintenance": "ซ่อมบำรุง"
+    "maintenance": "ซ่อมบำรุง",
+    "request": "ร้องขอ",
+    "information": "ประชาสัมพันธ์",
+    "System": "ระบบ"
+  },
+  "DateTime": {
+    "justNow": "ตอนนี้",
+    "secondAgo": "{count} วินาทีที่แล้ว",
+    "minuteAgo": "{count} นาทีที่แล้ว",
+    "hourAgo": "{count} ชั่วโมงที่แล้ว",
+    "dayAgo": "{count} วันที่แล้ว",
+    "weekAgo": "{count} สัปดาห์ที่แล้ว",
+    "monthAgo": "{count} เดือนที่แล้ว",
+    "yearAgo": "{count} ปีที่แล้ว"
   }
 }

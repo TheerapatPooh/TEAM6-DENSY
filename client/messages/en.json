@@ -46,7 +46,6 @@
     "Notifications": "Notifications",
     "YouHaveUnreadMessages": "You have {count} unread messages",
     "YourDefectHasBeenUpdated": " Your Defect has been update",
-    "TimeAgo": "{time} ago",
     "MarkAllAsRead": "Mark all as read",
     "Zone": "Zone",
     "Supervisor": "Supervisor",
@@ -67,6 +66,19 @@
     "completed": "Completed",
     "safety": "Safety",
     "environment": "Environment",
-    "maintenance": "Maintenance"
+    "maintenance": "Maintenance",
+    "request": "Request",
+    "information": "Information",
+    "System": "System"
+  },
+  "DateTime": {
+    "justNow": "just now",
+    "secondAgo": "{count} seconds ago",
+    "minuteAgo": "{count} minutes ago",
+    "hourAgo": "{count} hours ago",
+    "dayAgo": "{count} days ago",
+    "weekAgo": "{count} weeks ago",
+    "monthAgo": "{count} months ago",
+    "yearAgo": "{count} years ago"
   }
 }

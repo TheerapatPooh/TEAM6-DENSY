@@ -1,4 +1,4 @@
-import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, updatePatrolStatus, getPendingPatrols, commentPatrol, getCommentPatrol } from "../Controllers/patrol-controller";
+import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, updatePatrolStatus, getPendingPatrols, commentPatrol, getCommentPatrol, schedulePatrolStatusUpdate } from "../Controllers/patrol-controller";
 import { Router } from 'express'
 import { authenticateUser } from "../Controllers/util-controller";
 const router = Router()
@@ -14,5 +14,7 @@ router.put('/patrol/:id/status', updatePatrolStatus)
 router.delete('/patrol/:id', authenticateUser, removePatrol)
 router.post('/patrol/comment', authenticateUser, commentPatrol);
 router.get('/patrol/comment/:id', authenticateUser, getCommentPatrol)
+
+schedulePatrolStatusUpdate();
 
 module.exports = router

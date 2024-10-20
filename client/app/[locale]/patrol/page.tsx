@@ -51,10 +51,9 @@ import {
   Preset,
 } from "@/app/type";
 import { User, FilterPatrol } from "@/app/type";
-import { exportData, filterPatrol } from "@/lib/utils";
+import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
-import { useSearchParams } from 'react-router-dom';
 
 export default function Page() {
   const t = useTranslations("General");
