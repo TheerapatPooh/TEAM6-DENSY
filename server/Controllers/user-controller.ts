@@ -164,6 +164,7 @@ export async function updateProfile(req: Request, res: Response) {
                 },
                 create: {
                     im_path: imagePath,
+                    im_update_by: userId,
                     profiles: {
                         connect: { pf_id: user.profile?.pf_id },
                     },
@@ -375,7 +376,7 @@ export async function deleteUser(req: Request, res: Response) {
         if (user.zone) {
             // ลบข้อมูลที่เชื่อมโยงกับ PatrolResult
             const patrolResults = await prisma.patrolResult.findMany({
-                where: { pr_iz_ze_id: user.zone.ze_id },
+                where: { pr_itze_ze_id: user.zone.ze_id },
             });
 
             for (const patrolResult of patrolResults) {
@@ -392,7 +393,7 @@ export async function deleteUser(req: Request, res: Response) {
 
             // ลบข้อมูลใน PatrolResult ที่อ้างถึง Zone
             await prisma.patrolResult.deleteMany({
-                where: { pr_iz_ze_id: user.zone.ze_id },
+                where: { pr_itze_ze_id: user.zone.ze_id },
             });
 
             // ลบ Zone หลังจากจัดการข้อมูลที่เชื่อมโยงเสร็จ

@@ -70,10 +70,11 @@ export async function createDefect(req: Request, res: Response) {
         updateResult(patrolResultId)
       if (Array.isArray(imageFiles)) {
         for (const imageFile of imageFiles) {
-          const imagePath = imageFile.originalname; // Get the path of each uploaded file
+          const imagePath = imageFile.filename; // Get the path of each uploaded file
           const image = await prisma.image.create({
             data: {
               im_path: imagePath,
+              im_update_by: parseInt(defectUserId),
             },
           });
   

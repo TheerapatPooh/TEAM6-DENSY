@@ -8,8 +8,8 @@ import { fetchData } from '@/lib/api';
 import { Form, FormField, FormItem, FormControl } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import BadgeCustom from '@/components/badge-custom';
-import { Checklist, Patrol, patrolStatus } from '@/app/type';
-import Defect from '@/components/defect';
+import { Checklist, Patrol, patrolStatus, Defect, PatrolResult } from '@/app/type';
+import ReportDefect from '@/components/defect';
 import PatrolChecklist from '@/components/patrol-checklist';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
@@ -52,7 +52,7 @@ export default function Page() {
       }
     });
   };
-  
+
   const handleStartPatrol = async () => {
     if (!patrol) return;
     const patrolId = patrol.id
@@ -90,13 +90,13 @@ export default function Page() {
     })
 
     const data = {
-      status:patrol.status,
+      status: patrol.status,
       checklist: patrol.checklist,
       result: updatedResults,
     };
-    let resultCount =0;
-    for (var index of patrol.result){
-      if(index.status === null){
+    let resultCount = 0;
+    for (var index of patrol.result) {
+      if (index.status === null) {
         resultCount++
       }
     }
@@ -258,14 +258,50 @@ export default function Page() {
               <div className='py-2'>
                 {patrol.checklist.map((c: Checklist) => (
                   <div className="mb-4">
-                    <PatrolChecklist handleResult={handleResult} results={results} checklist={c} disabled={patrol.status === 'on_going' ? false : true}   patrolResult={patrol.result} />
+                    <PatrolChecklist handleResult={handleResult} results={results} checklist={c} disabled={patrol.status === 'on_going' ? false : true} patrolResult={patrol.result} />
                   </div>
                 ))}
               </div>
-              
+
             </TabsContent>
             <TabsContent value="report">
-              Test Reports.
+              <div className='py-2'>
+                {patrol.result.map((result: any) => {
+                  if (result.defect.length > 0) {
+                    const defect = result.defect[0];
+
+                    const date = new Date(defect.timestamp).toLocaleDateString('th-TH', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    });
+
+                    const time = new Date(defect.timestamp).toLocaleTimeString('th-TH', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false
+                    });                   
+                    console.log("defect log:",defect)
+                    return (
+                      <div className='py-2'>
+                        <ReportDefect
+                          date={date}
+                          title={defect.name}
+                          time={time}
+                          status={defect.status}
+                          beforeImage={defect.imageByInspector}
+                          afterImage={defect.imageBySupervisor}
+                          type={defect.type}
+                          description={defect.description}
+                          zone={result.zoneId}
+                        />
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
             </TabsContent>
           </Tabs>
         </div>

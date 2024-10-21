@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   us_id         Int      @id @default(autoincrement())
-  us_username   String   @unique 
+  us_username   String   @unique
   us_email      String?  @unique
   us_password   String
   us_role       Role
@@ -30,6 +30,7 @@ model User {
   defect           Defect[]
   zone             Zone?
   checklist        PatrolChecklist[]
+  image            Image[]
 
   @@map("users")
 }
@@ -38,7 +39,7 @@ model Defect {
   df_id          Int          @id @default(autoincrement())
   df_name        String
   df_description String
-  df_type        String
+  df_type        ItemType
   df_status      DefectStatus
   df_timestamp   DateTime     @default(now())
   df_us_id       Int
@@ -72,7 +73,7 @@ model Profile {
   pf_tel     String?
   pf_address String?
   pf_us_id   Int     @unique
-  pf_im_id   Int?    @unique 
+  pf_im_id   Int?    @unique
   pf_image   Image?  @relation("ProfileImage", fields: [pf_im_id], references: [im_id])
 
   user User @relation(fields: [pf_us_id], references: [us_id])
@@ -154,24 +155,24 @@ model Checklist {
 }
 
 model PatrolResult {
-  pr_id       Int     @id @default(autoincrement())
+  pr_id       Int      @id @default(autoincrement())
   pr_status   Boolean?
-  pr_iz_it_id Int
-  pr_iz_ze_id Int
+  pr_itze_it_id Int
+  pr_itze_ze_id Int
   pr_pt_id    Int
 
   comment   Comment[]
   defects   Defect[]
-  item_zone ItemZone  @relation(fields: [pr_iz_it_id, pr_iz_ze_id], references: [itze_it_id, itze_ze_id])
+  item_zone ItemZone  @relation(fields: [pr_itze_it_id, pr_itze_ze_id], references: [itze_it_id, itze_ze_id])
   patrol    Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
 
   @@map("patrol_results")
 }
 
 model Item {
-  it_id    Int        @id @default(autoincrement())
+  it_id    Int      @id @default(autoincrement())
   it_name  String
-  it_type  ItemStatus
+  it_type  ItemType
   it_cl_id Int
 
   item_zone ItemZone[]
@@ -231,9 +232,11 @@ model Image {
   im_id        Int      @id @default(autoincrement())
   im_path      String
   im_timestamp DateTime @default(now())
-  
-  profiles Profile[] @relation("ProfileImage") 
-  defect  DefectImage[]
+  im_update_by Int
+
+  user     User          @relation(fields: [im_update_by], references: [us_id])
+  profiles Profile[]     @relation("ProfileImage")
+  defect   DefectImage[]
 
   @@map("images")
 }
@@ -270,7 +273,7 @@ enum DefectStatus {
   completed
 }
 
-enum ItemStatus {
+enum ItemType {
   safety
   environment
   maintenance
