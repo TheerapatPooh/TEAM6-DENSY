@@ -2,6 +2,8 @@
 import { prisma } from '../Utils/database'
 import { Request, Response } from 'express'
 import axios from 'axios';
+import { createNotification } from './util-controller';
+import { NotificationType } from '@prisma/client';
 
 export async function getPatrol(req: Request, res: Response) {
     try {
@@ -303,7 +305,15 @@ export async function createPatrol(req: Request, res: Response) {
                     ptcl_cl_id: checklistId,
                     ptcl_us_id: inspectorId,
                 },
-            })
+            });
+
+            const message = `You have been assigned to a patrol scheduled for ${new Date(date).toLocaleDateString()}.`;
+            await createNotification({
+                nt_message: message,
+                nt_type: 'request' as NotificationType,
+                nt_url: `/patrol/${newPatrol.pt_id}`,
+                nt_us_id: inspectorId
+            });
         }
 
         res.status(201).json(newPatrol)
