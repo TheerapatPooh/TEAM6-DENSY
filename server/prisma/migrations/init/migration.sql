@@ -116,8 +116,8 @@ CREATE TABLE `checklists` (
 CREATE TABLE `patrol_results` (
     `pr_id` INTEGER NOT NULL AUTO_INCREMENT,
     `pr_status` BOOLEAN NULL,
-    `pr_iz_it_id` INTEGER NOT NULL,
-    `pr_iz_ze_id` INTEGER NOT NULL,
+    `pr_itze_it_id` INTEGER NOT NULL,
+    `pr_itze_ze_id` INTEGER NOT NULL,
     `pr_pt_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`pr_id`)
@@ -176,6 +176,7 @@ CREATE TABLE `images` (
     `im_id` INTEGER NOT NULL AUTO_INCREMENT,
     `im_path` VARCHAR(191) NOT NULL,
     `im_timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `im_update_by` INTEGER NOT NULL,
 
     PRIMARY KEY (`im_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -228,7 +229,7 @@ ALTER TABLE `preset_checklists` ADD CONSTRAINT `preset_checklists_pscl_cl_id_fke
 ALTER TABLE `checklists` ADD CONSTRAINT `checklists_cl_update_by_fkey` FOREIGN KEY (`cl_update_by`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_iz_it_id_pr_iz_ze_id_fkey` FOREIGN KEY (`pr_iz_it_id`, `pr_iz_ze_id`) REFERENCES `item_zones`(`itze_it_id`, `itze_ze_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_itze_it_id_pr_itze_ze_id_fkey` FOREIGN KEY (`pr_itze_it_id`, `pr_itze_ze_id`) REFERENCES `item_zones`(`itze_it_id`, `itze_ze_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `patrol_results` ADD CONSTRAINT `patrol_results_pr_pt_id_fkey` FOREIGN KEY (`pr_pt_id`) REFERENCES `patrols`(`pt_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

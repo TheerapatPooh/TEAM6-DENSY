@@ -40,18 +40,17 @@ export default function BadgeCustom({
 
     return (
         <Badge className={cn(
-            `${badgeClass} cursor-pointer align-center gap-2 p-2`,
-            width ? width : (showTime ? "w-[180px]" : "w-[150px]"),
-            height ? `h-[${height}px]` : "h-[30px]", 
-            showTime ? "justify-between" : showIcon ? "justify-between" : "justify-center"
+            `${badgeClass} cursor-pointer align-center gap-2 h-[30px] p-2`,
+            width ? width : ("w-[200px]"),
+            showTime ? "justify-between" : showIcon ? "justify-between" : "justify-center" 
         )}>
-            <div className='flex gap-2 items-center'>
+            <div className='flex gap-2 items-center justify-between w-full'>
                 {showIcon && iconName && (
                     <span className="material-symbols-outlined text-[22px]">
                         {iconName}
                     </span>
                 )}
-                <span className='text-base font-medium'>{children}</span>
+                <span className='text-base font-medium w-full text-center'>{children}</span>
             </div>
             {showTime && (
                 <span className="text-base font-normal">

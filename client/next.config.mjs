@@ -12,6 +12,9 @@ const nextConfig = {
     experimental: {
         esmExternals: "loose",
     },
+    images: {
+        domains: ['localhost'], // เพิ่ม localhost ใน domains
+    },
 };
 
 export default withNextIntl(nextConfig);

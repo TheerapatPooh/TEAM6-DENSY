@@ -1,9 +1,12 @@
 
+import { Defect } from '@prisma/client'
 import { prisma } from '../Utils/database'
 import { Request, Response } from 'express'
 import axios from 'axios';
 import { createNotification } from './util-controller';
 import { NotificationType } from '@prisma/client';
+import { tr } from '@faker-js/faker/.';
+import path from 'path';
 
 export async function getPatrol(req: Request, res: Response) {
     try {
@@ -67,7 +70,19 @@ export async function getPatrol(req: Request, res: Response) {
                             }
                         }
                     },
-                    patrol_result: true
+                    patrol_result: {
+                        include: {
+                            defects: {
+                                include: {
+                                    image: {
+                                        include: {
+                                            image: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             })
         }
@@ -124,8 +139,27 @@ export async function getPatrol(req: Request, res: Response) {
             result: patrol.patrol_result.map((result: any) => ({
                 id: result.pr_id,
                 status: result.pr_status,
-                itemId: result.pr_iz_it_id,
-                zoneId: result.pr_iz_ze_id,
+                itemId: result.pr_itze_it_id,
+                zoneId: result.pr_itze_ze_id,
+                defect: result.defects.map((defect: any) => ({
+                    id: defect.df_id,
+                    name: defect.df_name,
+                    description: defect.df_description,
+                    type: defect.df_type,
+                    status: defect.df_status,
+                    timestamp: defect.df_timestamp,
+                    imageByInspector: defect.image
+                        .filter((image: any) => image.image.im_update_by === defect.df_us_id)
+                        .map((image: any) => ({
+                            path: image.image.im_path,
+                        })) || null, 
+
+                    imageBySupervisor: defect.image
+                        .filter((image: any) => image.image.im_update_by !== defect.df_us_id) 
+                        .map((image: any) => ({
+                            path: image.image.im_path,
+                        })) || null  
+                })),
             })) ?? [],
         }
 
@@ -176,7 +210,11 @@ export async function getAllPatrols(req: Request, res: Response) {
                             }
                         }
                     },
-                    patrol_result: true
+                    patrol_result: {
+                        include: {
+                            defects: true
+                        }
+                    }
                 }
             })
         }
@@ -217,7 +255,11 @@ export async function getAllPatrols(req: Request, res: Response) {
                             }
                         }
                     },
-                    patrol_result: true
+                    patrol_result: {
+                        include: {
+                            defects: true
+                        }
+                    }
                 }
             })
         }
@@ -260,8 +302,17 @@ export async function getAllPatrols(req: Request, res: Response) {
             result: patrol.patrol_result.map((result: any) => ({
                 id: result.pr_id,
                 status: result.pr_status,
-                itemId: result.pr_it_id,
-                defectId: result.pr_df_id ?? null,
+                itemId: result.pr_itze_id,
+                zoneId: result.pr_itze_ze_id,
+                defect: result.defects.map((defect: Defect) => ({
+                    id: defect.df_id,
+                    name: defect.df_name,
+                    description: defect.df_description,
+                    type: defect.df_type,
+                    status: defect.df_status,
+                    timestamp: defect.df_timestamp
+                })),
+                
             })) ?? [],
         }))
         res.status(200).json(result)
@@ -381,8 +432,8 @@ export async function startPatrol(req: Request, res: Response) {
                     await prisma.patrolResult.create({
                         data: {
                             pr_status: null,
-                            pr_iz_it_id: itemId,
-                            pr_iz_ze_id: zoneId,
+                            pr_itze_it_id: itemId,
+                            pr_itze_ze_id: zoneId,
                             pr_pt_id: updatePatrol.pt_id,
                         },
                     });
