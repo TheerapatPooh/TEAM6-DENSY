@@ -1,4 +1,4 @@
-import { LoginSchema } from "@/app/[locale]/login/page";
+import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
 

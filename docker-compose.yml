@@ -6,10 +6,10 @@ services:
       dockerfile: client.dockerfile
     image: client
     restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:4000
+    # ports:
+    #   - "3000:3000"
+    # environment:
+    #   - NEXT_PUBLIC_API_URL=http://localhost:4000
     depends_on:
       - server
 
@@ -22,11 +22,11 @@ services:
     restart: always
     env_file:
       - ./server/.env.server
-    ports:
-      - "4000:4000"
-    # environment:
+    # ports:
+    #   - "4000:4000"
+    environment:
     #   # - DATABASE_URL=mysql://user:password@db:3306/densy_proto
-    #   DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - db
 
@@ -39,7 +39,7 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: verysecret
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     command:
@@ -52,7 +52,7 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.2.1
     ports:
-      - "8080:80"
+      - "8028:80"
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: verysecret
@@ -68,6 +68,7 @@ services:
     depends_on:
       - client
       - server
+
 
 volumes:
   db_data:

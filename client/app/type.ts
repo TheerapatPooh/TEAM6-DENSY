@@ -1,4 +1,4 @@
-
+import { z } from "zod"
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type Role = "admin" | "inspector" | "supervisor"
@@ -146,5 +146,9 @@ export interface FilterPatrol {
     patrolStatus: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
-    
   
+export const LoginSchema = z.object({
+    username: z.string(),
+    password: z.string(),
+    rememberMe: z.boolean().optional()
+})

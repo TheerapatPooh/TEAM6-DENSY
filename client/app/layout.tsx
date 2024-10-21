@@ -8,6 +8,8 @@ import "./globalicons.css";
 import { Roboto, Manrope } from 'next/font/google';
 import { SocketProvider } from "@/components/socket-provider";
 
+export const dynamic = "force-dynamic";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",

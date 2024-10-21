@@ -29,12 +29,12 @@ import { login } from '@/lib/api';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import EmblaAutoplay from 'embla-carousel-autoplay'
 import { useTheme } from 'next-themes';
-
-export const LoginSchema = z.object({
-    username: z.string(),
-    password: z.string(),
-    rememberMe: z.boolean().optional()
-})
+import { LoginSchema } from '@/app/type';
+// export const LoginSchema = z.object({
+//     username: z.string(),
+//     password: z.string(),
+//     rememberMe: z.boolean().optional()
+// })
 
 
 export default function LoginPage() {

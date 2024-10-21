@@ -22,8 +22,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { exportData } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { checklists } from "../../../../../server/prisma/data/checklists";
 
 export default function Page() {
   const [mounted, setMounted] = useState(false);

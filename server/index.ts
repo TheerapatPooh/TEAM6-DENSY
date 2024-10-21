@@ -10,7 +10,6 @@ import { initSocketIO } from './Utils/socket';
 
 dotenv.config()
 
-
 const app = express()
 const PORT = process.env.SERVER_PORT
 app.use(cookieParser());
