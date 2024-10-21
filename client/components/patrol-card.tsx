@@ -86,8 +86,8 @@ export function PatrolCard({
       let countDefects = 0;
   
       if (patrolfetch?.result) {
-        patrolfetch.result.forEach((patrolResult: PatrolResult) => {
-          if (patrolResult.status != null) {
+        patrolfetch.result.forEach(async (patrolResult: PatrolResult) => {
+          if (patrolResult.status !== null) {
             countItems++;
           }
 
@@ -95,12 +95,9 @@ export function PatrolCard({
             countFails++;
           }
 
-          if (patrolResult.defectId != null) {
+          if (patrolResult.status === false && patrolResult.defectId != null) {
             countDefects++;
-          } else {
-            console.log("No defect found for this patrol result.");
-          }
-          console.log("defects: ", patrolResult.defectId)
+          } 
         });
       }
       

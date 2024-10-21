@@ -124,6 +124,7 @@ export async function getPatrol(req: Request, res: Response) {
                 status: result.pr_status,
                 itemId: result.pr_iz_it_id,
                 zoneId: result.pr_iz_ze_id,
+                defectId: result.pr_df_id ?? null,
             })) ?? [],
         }
 
