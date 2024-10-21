@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { DatePickerWithRange } from '../components/date-picker';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { DateRange } from 'react-day-picker';
 
 const FilterDate = ({
     form,
@@ -14,29 +15,43 @@ const FilterDate = ({
     const { setValue, watch, resetField } = form;
     const watchDaterange = watch('daterange') as { from: Date | null; to: Date | null } | undefined;
 
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
     useEffect(() => {
         if (watchDaterange) {
-            setStartDate(watchDaterange.from ?? null);
-            setEndDate(watchDaterange.to ?? null);
+            setStartDate(watchDaterange.from ?? undefined);
+            setEndDate(watchDaterange.to ?? undefined);
         }
     }, [watchDaterange]);
 
-    const handleDateSelect = (selectedDate: Date | { from: Date; to: Date }) => {
-        if (selectedDate instanceof Date) {
-            setValue('daterange', { from: selectedDate, to: selectedDate });
+    // const handleDateSelect = (selectedDate: Date | { from: Date; to: Date }) => {
+    //     if (selectedDate instanceof Date) {
+    //         setValue('daterange', { from: selectedDate, to: selectedDate });
+    //     } else {
+    //         setValue('daterange', selectedDate);
+    //     }
+    // };
+    const handleDateSelect = (selectedDate: DateRange | undefined) => {
+        if (selectedDate?.from && selectedDate?.to) {
+            setValue('daterange', {
+                from: selectedDate.from,
+                to: selectedDate.to,
+            });
         } else {
-            setValue('daterange', selectedDate);
+            // Handle partial selection or reset
+            setValue('daterange', {
+                from: selectedDate?.from || new Date(), // Optional: Add default or handle differently
+                to: selectedDate?.to || new Date(),
+            });
         }
     };
-
+    
     useEffect(() => {
         const subscription = form.watch((value) => {
             if (!value.daterange) {
-                setStartDate(null);
-                setEndDate(null);
+                setStartDate(undefined);
+                setEndDate(undefined);
             }
         });
         return () => subscription.unsubscribe();
