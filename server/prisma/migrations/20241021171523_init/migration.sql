@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE `users` (
     `us_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `us_username` VARCHAR(191) NOT NULL COLLATE utf8_bin,
+    `us_username` VARCHAR(191) NOT NULL,
     `us_email` VARCHAR(191) NULL,
     `us_password` VARCHAR(191) NOT NULL,
     `us_role` ENUM('admin', 'inspector', 'supervisor') NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE `defects` (
     `df_id` INTEGER NOT NULL AUTO_INCREMENT,
     `df_name` VARCHAR(191) NOT NULL,
     `df_description` VARCHAR(191) NOT NULL,
-    `df_type` VARCHAR(191) NOT NULL,
+    `df_type` ENUM('safety', 'environment', 'maintenance') NOT NULL,
     `df_status` ENUM('reported', 'in_progress', 'pending_inspection', 'resolved', 'completed') NOT NULL,
     `df_timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `df_us_id` INTEGER NOT NULL,
@@ -32,9 +32,9 @@ CREATE TABLE `notifications` (
     `nt_id` INTEGER NOT NULL AUTO_INCREMENT,
     `nt_message` VARCHAR(191) NOT NULL,
     `nt_read` BOOLEAN NOT NULL,
-    `nt_type` ENUM('information', 'request', 'system') NOT NULL,
-    `nt_url` VARCHAR(191),
     `nt_timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `nt_type` ENUM('information', 'request', 'system') NOT NULL,
+    `nt_url` VARCHAR(191) NULL,
     `nt_us_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`nt_id`)
@@ -254,6 +254,9 @@ ALTER TABLE `comments` ADD CONSTRAINT `comments_cm_us_id_fkey` FOREIGN KEY (`cm_
 
 -- AddForeignKey
 ALTER TABLE `comments` ADD CONSTRAINT `comments_cm_pr_id_fkey` FOREIGN KEY (`cm_pr_id`) REFERENCES `patrol_results`(`pr_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `images` ADD CONSTRAINT `images_im_update_by_fkey` FOREIGN KEY (`im_update_by`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `defect_images` ADD CONSTRAINT `defect_images_dfim_df_id_fkey` FOREIGN KEY (`dfim_df_id`) REFERENCES `defects`(`df_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
