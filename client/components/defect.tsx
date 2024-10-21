@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { DefectStatus, DefectType } from "@/app/type";
+import React, { useEffect, useState } from "react";
+import { DefectStatus, ItemType } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "./ui/textarea";
@@ -11,20 +11,31 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import path from "path";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "./ui/carousel";
+import { Card, CardContent } from "./ui/card";
+import { Fullscreen } from "lucide-react";
+import { max } from "date-fns";
+
+interface ImageProps {
+  id: number;
+  path: string[]
+}
+
 
 interface DefectProps {
   date: string;
   title: string;
   time: string;
   status: DefectStatus;
-  type: DefectType;
+  type: ItemType;
   description?: string;
-  beforeImage?: string;
-  afterImage?: string;
+  beforeImage?: ImageProps[];
+  afterImage?: ImageProps[];
   zone: string;
 }
 
-export default function Defect({
+export default function ReportDefect({
   date,
   title,
   time,
@@ -37,13 +48,13 @@ export default function Defect({
 }: DefectProps) {
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case "Resolved":
+      case "resolved":
         return "blue";
-      case "Reported":
+      case "reported":
         return "mint";
-      case "Completed":
+      case "completed":
         return "green";
-      case "InProgress":
+      case "in_progress":
         return "orange";
       default:
         return "red";
@@ -52,13 +63,13 @@ export default function Defect({
 
   const getIconForStatus = (status: string) => {
     switch (status) {
-      case "Resolved":
+      case "resolved":
         return "autorenew";
-      case "Reported":
+      case "reported":
         return "campaign";
-      case "Completed":
+      case "completed":
         return "check_circle";
-      case "InProgress":
+      case "in_progress":
         return "hourglass_top";
       default:
         return "pending";
@@ -67,12 +78,81 @@ export default function Defect({
 
   const getTypeVariant = (type: string) => {
     switch (type) {
-      case "Safety":
+      case "safety":
         return "mint";
+      case "maintenance":
+        return "purple"
       default:
         return "orange";
     }
   };
+
+  const formatText = (name: string) => {
+    switch (name) {
+      case "safety":
+        return "Safety";
+      case "maintenance":
+        return "Maintenance"
+      case "environment":
+        return "Environment"
+      case "reported":
+        return "Reported";
+      case "in_progress":
+        return "In Progress";
+      case "resolved":
+        return "Resolved";
+      case "completed":
+        return "Completed";
+      default:
+        return "Pending Inspection";
+    }
+  }
+  console.log(beforeImage)
+
+
+  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const [isBeforeCarouselOpen, setIsBeforeCarouselOpen] = useState(false);
+  const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
+  const [beforeSlideIndex, setBeforeSlideIndex] = useState(0);
+  const [afterSlideIndex, setAfterSlideIndex] = useState(0);
+
+  // Handle before image click
+  const handleBeforeImageClick = (index: number) => {
+    setBeforeSlideIndex(index);
+    setIsBeforeCarouselOpen(true);
+  };
+
+  // Handle after image click
+  const handleAfterImageClick = (index: number) => {
+    setAfterSlideIndex(index);
+    setIsAfterCarouselOpen(true);
+  };
+
+  // Close before carousel
+  const handleCloseBeforeCarousel = () => {
+    setIsBeforeCarouselOpen(false);
+    setBeforeSlideIndex(0);
+  };
+
+  // Close after carousel
+  const handleCloseAfterCarousel = () => {
+    setIsAfterCarouselOpen(false);
+    setAfterSlideIndex(0);
+  };
+
+  const [api, setApi] = React.useState<CarouselApi>()
+
+  React.useEffect(() => {
+    if (!api) {
+      return
+    }
+    api.on("select", () => {
+      setAfterSlideIndex(api.selectedScrollSnap())
+      setBeforeSlideIndex(api.selectedScrollSnap())
+    })
+  }, [api])
 
   return (
     <Accordion type="single" collapsible>
@@ -105,13 +185,13 @@ export default function Defect({
               showIcon={true}
               iconName={getIconForStatus(status)}
             >
-              {status}
+              {formatText(status)}
             </BadgeCustom>
-            <BadgeCustom variant={getTypeVariant(type)}>{type}</BadgeCustom>
+            <BadgeCustom variant={getTypeVariant(type)}>{formatText(type)}</BadgeCustom>
           </div>
 
           {/* แสดงปุ่ม Verify และ Rework เฉพาะเมื่อ status เป็น Resolved */}
-          {status === "Resolved" && (
+          {status === "resolved" && (
             <div className="flex space-x-2">
               <Button variant="success" size={"lg"}>
                 <span className="material-symbols-outlined mr-2 text-[20px]">
@@ -134,7 +214,7 @@ export default function Defect({
             <Textarea
               className="w-full h-40 bg-card "
               placeholder="Description"
-              value={description || ""}
+              value={description}
               readOnly
             />
             <div className="flex space-x-4 justify-between mt-4">
@@ -150,39 +230,143 @@ export default function Defect({
                       </span>
                     </button>
                   </div>
-                  <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none">
-                    {beforeImage ? (
-                      <img
-                        src={beforeImage}
-                        alt="Before"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="cursor-default user-select-none">
-                        No Image
-                      </span>
+
+                  <div>
+                    <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleBeforeImageClick(0)}>
+                      {beforeImage && beforeImage.length > 0 && beforeImage[0].path ? (
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${beforeImage[0].path}`}
+                          alt="First Image"
+                          width={130}
+                          height={130}
+                          className="object-cover cursor-pointer"
+                        />
+                      ) : (
+                        <p>No image available.</p>
+                      )}
+                    </div>
+                    {isBeforeCarouselOpen && beforeImage && beforeImage?.length > 0 && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="relative">
+                          <Carousel setApi={setApi} className="w-full max-w-screen-lg">
+                            <CarouselContent>
+                              {Array.from({ length: beforeImage.length }).map((_, index) => (
+                                <CarouselItem key={index}>
+                                  <div className="p-1 flex justify-center">
+                                    <Card>
+                                      <CardContent className="flex items-center justify-center h-[500px] w-[800px] overflow-hidden">
+                                        <div className="flex items-center justify-center h-full w-full">
+                                          <Image
+                                            className="object-contain"
+                                            src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${beforeImage[index].path}`}
+                                            alt={`${beforeImage[index].path}`}
+                                            width={800}
+                                            height={500} 
+                                            priority
+                                          />
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                          <div className="flex justify-center mt-4">
+                            {beforeImage.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => {
+                                  setBeforeSlideIndex(index);
+                                }}
+                                disabled
+                                className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index ? 'bg-white' : 'bg-gray-400'}`}
+                                aria-label={`Slide ${index + 1}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <button onClick={handleCloseBeforeCarousel} className="absolute top-4 right-4 text-white">
+                          Close
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
+
                 <div>
-                  <p className="text-gray-500 mb-2 cursor-default user-select-none">
-                    After
-                  </p>
-                  <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none">
-                    {afterImage ? (
-                      <Image
-                        src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/1728239317254-Scan_20220113 (2).png`}
-                        alt="After"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="cursor-default user-select-none">
-                        No Image
-                      </span>
+                  <div className="flex items-center">
+                    <p className="text-gray-500 mb-2 cursor-default user-select-none">
+                      After
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
+                      {afterImage && afterImage.length > 0 && afterImage[0].path ? (
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${afterImage[0].path}`}
+                          alt="First Image"
+                          width={130}
+                          height={130}
+                          className="object-cover cursor-pointer"
+                        />
+                      ) : (
+                        <p>No image available.</p>
+                      )}
+                    </div>
+                    {isAfterCarouselOpen && afterImage && afterImage?.length > 0 && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="relative">
+                          <Carousel setApi={setApi} className="w-full max-w-screen-lg">
+                            <CarouselContent>
+                              {Array.from({ length: afterImage.length }).map((_, index) => (
+                                <CarouselItem key={index}>
+                                  <div className="p-1 flex justify-center">
+                                    <Card>
+                                      <CardContent className="flex items-center justify-center h-[500px] w-[800px]">
+                                        <Image
+                                          className="object-contain"
+                                          src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${afterImage[index].path}`}
+                                          alt={`${afterImage[index].path}`}
+                                          width={750}
+                                          height={450}
+                                          priority
+                                        />
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                          <div className="flex justify-center mt-4">
+                            {afterImage.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => {
+                                  setAfterSlideIndex(index);
+                                }}
+                                disabled
+                                className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index ? 'bg-white' : 'bg-gray-400'}`}
+                                aria-label={`Slide ${index + 1}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <button onClick={handleCloseAfterCarousel} className="absolute top-4 right-4 text-white">
+                          Close
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
+
               <div className="ml-auto">
                 <p className="text-gray-500 mb-2 cursor-default user-select-none"></p>
                 <div className="border p-2 rounded-md bg-background flex items-center justify-center h-48 w-48 cursor-default user-select-none">
@@ -193,6 +377,6 @@ export default function Defect({
           </div>
         </AccordionContent>
       </AccordionItem>
-    </Accordion>
+    </Accordion >
   );
 }
