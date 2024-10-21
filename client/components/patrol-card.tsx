@@ -95,7 +95,7 @@ export function PatrolCard({
             countFails++;
           }
 
-          if (patrolResult.status === false && patrolResult.defectId != null) {
+          if (patrolResult.status === false && patrolResult.defectId !== null) {
             countDefects++;
           } 
         });
