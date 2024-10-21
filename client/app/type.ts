@@ -5,6 +5,12 @@ export type Role = "admin" | "inspector" | "supervisor"
 export type DefectStatus = "reported" | "completed" | "pending_review" | "in_progress" | "resolved";
 export type ItemType = "safety" | "environment" | 'maintenance';
 export type NotificationType = "information" | "request" | 'system';
+
+export interface Location {
+    id: number
+    zone: Zone[]
+}
+
 export interface Zone {
     id: number;
     name: string;
@@ -32,7 +38,7 @@ export interface Inspector {
 }
 
 export interface Supervisor {
-    userId: number;
+    id: number;
     name: string;
     email: string | null;
     department: string | null;
