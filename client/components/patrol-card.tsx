@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Defect, Inspector, Patrol, PatrolResult, patrolStatus, User } from "@/app/type";
+import { Inspector, patrolStatus, User } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/api";
 import {
@@ -86,21 +86,21 @@ export function PatrolCard({
       let countDefects = 0;
   
       if (patrolfetch?.result) {
-        patrolfetch.result.forEach(async (patrolResult: PatrolResult) => {
+        for (const patrolResult of patrolfetch.result) {
           if (patrolResult.status !== null) {
-            countItems++;
+            countItems++;  
           }
-
+          
           if (patrolResult.status === false) {
-            countFails++;
-          }
+            countFails++;  
 
-          if (patrolResult.status === false && patrolResult.defectId !== null) {
-            countDefects++;
-          } 
-        });
+            if (patrolResult.defect && patrolResult.defect.length !== 0) {
+              countDefects++;  
+            }
+          }
+        }
       }
-      
+  
       setItems(countItems);
       setFails(countFails);
       setDefects(countDefects);
@@ -108,7 +108,6 @@ export function PatrolCard({
       console.error("Failed to fetch patrol data:", error);
     }
   };
-  console.log(defects)
 
   useEffect(() => {
     getData();
