@@ -8,6 +8,7 @@ export type NotificationType = "information" | "request" | 'system';
 
 export interface Location {
     id: number
+    name: string
     zone: Zone[]
 }
 
@@ -15,10 +16,13 @@ export interface Zone {
     id: number;
     name: string;
     supervisor: Supervisor;
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
+    pathData?: string;
+    text?: {
+        x: number;
+        y: number;
+        fontSize: number;
+        rotation: number;
+    } | null
 }
 
 export interface Item {

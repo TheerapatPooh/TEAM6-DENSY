@@ -9,7 +9,7 @@ export default function page() {
     console.log('Selected Zones:', selectedZones);
   };
   return (
-    <div className='flex w-full h-screen justify-center items-center'>
+    <div className='flex justify-center items-center'>
         <Map  onZoneSelect={handleZoneSelect}/>
     </div>
   )

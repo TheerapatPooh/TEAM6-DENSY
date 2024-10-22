@@ -80,5 +80,26 @@
     "weekAgo": "{count} weeks ago",
     "monthAgo": "{count} months ago",
     "yearAgo": "{count} years ago"
+  },
+  "Zone": {
+    "r&d_zone": "R&D ZONE",
+    "assembly_line_zone": "ASSEMBLY LINE\nZONE",
+    "raw_materials_storage_zone": "RAW MATERIALS\nSTORAGE ZONE",
+    "quality_control_zone": "QUALITY\nCONTROL",
+    "it_zone": "IT ZONE",
+    "customer_service_zone": "CUSTOMER\nSERVICE",
+    "prototype_zone": "PROTOTYPE\nZONE",
+    "manager_office": "MANAGER\nOFFICE",
+    "water_supply": "WATER\nSUPPLY",
+    "maintenance_zone": "MAINTENANCE\nZONE",
+    "warehouse": "WAREHOUSE",
+    "storage_zone": "STORAGE\nZONE",
+    "server_room": "SERVER\nROOM",
+    "electrical_zone": "ELECTRICAL\nZONE",
+    "engineering_zone": "ENGINEERING\nZONE",
+    "training_simulation_zone": "TRAINING\nSIMULATION\nZONE",
+    "workstation_a": "WORK\nSTATION A",
+    "workstation_b": "WORK\nSTATION B",
+    "testing_lab": "TESTING\nLAB"
   }
 }
