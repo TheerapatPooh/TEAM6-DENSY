@@ -206,7 +206,7 @@ export function PatrolCard({
                   <p className="text-xl me-2.5 truncate">{inspectorNames[0]}</p>
                 </div>
               )}
-              {inspectorNames.slice(0, 4).map((inspectorName, idx) => {
+              {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
                 const matchingProfile = profile?.find(
                   (profile) => profile.profile.name === inspectorName
                 );
@@ -244,7 +244,7 @@ export function PatrolCard({
                 {t("InspectorList")}
               </p>
             </div>
-            {inspectorNames.map((inspectorName, idx) => {
+            {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
               const matchingProfile = profile?.find(
                 (profile) => profile.profile.name === inspectorName
               );
