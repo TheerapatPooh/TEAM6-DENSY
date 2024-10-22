@@ -9,8 +9,8 @@ export default function page() {
     console.log('Selected Zones:', selectedZones);
   };
   return (
-    <div className='flex justify-center items-center'>
-        <Map  onZoneSelect={handleZoneSelect}/>
+    <div className="flex mt-2 justify-center">
+        <Map initialSelectedZones={[1,3,4]}  disable={true}/>
     </div>
   )
 }

@@ -9,15 +9,23 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 
 interface MapProps {
-  onZoneSelect: (selectedZones: Zone[]) => void;
+  onZoneSelect?: (selectedZones: Zone[]) => void;
+  disable: boolean;
+  initialSelectedZones?: number[];
 }
 
-export default function Map({ onZoneSelect }: MapProps) {
+export default function Map({ onZoneSelect, disable, initialSelectedZones }: MapProps) {
   const [location, setLocation] = useState<Location>();
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
   const z = useTranslations('Zone')
+
+  useEffect(() => {
+    if (disable && initialSelectedZones) {
+      setSelectedZones(initialSelectedZones);
+    }
+  }, [disable, initialSelectedZones]);
 
   const fetch = async () => {
     try {
@@ -63,6 +71,8 @@ export default function Map({ onZoneSelect }: MapProps) {
 
 
   const handleZoneSelect = (zoneId: number) => {
+    if (disable) return; // ถ้า disable เป็น true ห้ามเลือกโซนใหม่
+
     const isSelected = selectedZones.includes(zoneId);
 
     let updatedSelectedZones;
@@ -75,11 +85,16 @@ export default function Map({ onZoneSelect }: MapProps) {
     setSelectedZones(updatedSelectedZones);
 
     const selectedZoneObjects = location?.zone.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
-    onZoneSelect(selectedZoneObjects);
+
+    // ตรวจสอบว่า onZoneSelect ไม่เป็น undefined ก่อนเรียกใช้งาน
+    if (onZoneSelect) {
+      onZoneSelect(selectedZoneObjects);
+    }
   };
 
+
   const calculatePoint = (textY: number | undefined) => {
-    return (textY || 0) + 70; // ปรับค่าให้สัมพันธ์กับความสูงของ path แต่ละโซน
+    return (textY || 0) + 200; // ปรับค่าให้สัมพันธ์กับความสูงของ path แต่ละโซน
   }
 
   const getCSSVariableValue = (variableName: string) => {
@@ -107,42 +122,42 @@ export default function Map({ onZoneSelect }: MapProps) {
   }
 
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight}>
-      <Layer>
-        {zones.map((zone, index) => {
-          const isSelected = selectedZones.includes(zone.id);
-          const startPointY = (zone.text?.y ? zone.text.y - 20 : 0);
-          const endPointY = calculatePoint(startPointY);  // ใช้ฟังก์ชันคำนวณ end point
-          return (
-            <React.Fragment key={zone.id}>
-              <Path
-                data={zone.pathData}
-                fillLinearGradientStartPoint={{ x: 0, y: startPointY }} // จุดเริ่มต้นของ gradient
-                fillLinearGradientEndPoint={{ x: 0, y: endPointY }}    // จุดสิ้นสุดของ gradient
-                fillLinearGradientColorStops={getGradientColors(isSelected)} // ใช้ gradient ที่กำหนด
-                onClick={() => handleZoneSelect(zone.id)}
-              />
-              {zone.text && (
-                <Text
-                  x={zone.text.x} // ตำแหน่ง x
-                  y={zone.text.y} // ตำแหน่ง y
-                  text={z(zone.name)} // ข้อความที่จะแสดง
-                  fontSize={zone.text.fontSize} // ขนาดฟอนต์
-                  fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
-                  fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
-                  rotation={zone.text.rotation} // การหมุนของข้อความ
-                  align="center"
+      <Stage width={1350} height={895}>
+        <Layer>
+          {zones.map((zone, index) => {
+            const isSelected = selectedZones.includes(zone.id);
+            const startPointY = zone.text?.y ? zone.text.y - 80 : 0;
+            const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point
+            return (
+              <React.Fragment key={zone.id}>
+                <Path
+                  data={zone.pathData}
+                  fillLinearGradientStartPoint={{ x: 0, y: startPointY }} // จุดเริ่มต้นของ gradient
+                  fillLinearGradientEndPoint={{ x: 0, y: endPointY }} // จุดสิ้นสุดของ gradient
+                  fillLinearGradientColorStops={getGradientColors(isSelected)} // ใช้ gradient ที่กำหนด
+                  onClick={() => handleZoneSelect(zone.id)}
                 />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </Layer>
-      <Layer>
-        {walls.map((wall) => (
-          <Path key={wall.id} data={wall.pathData} fill={getCSSVariableValue('--input')} />
-        ))}
-      </Layer>
-    </Stage>
+                {zone.text && (
+                  <Text
+                    x={zone.text.x} // ตำแหน่ง x
+                    y={zone.text.y} // ตำแหน่ง y
+                    text={z(zone.name)} // ข้อความที่จะแสดง
+                    fontSize={zone.text.fontSize} // ขนาดฟอนต์
+                    fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
+                    fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
+                    rotation={zone.text.rotation} // การหมุนของข้อความ
+                    align="center"
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </Layer>
+        <Layer>
+          {walls.map((wall) => (
+            <Path key={wall.id} data={wall.pathData} fill={getCSSVariableValue('--input')} />
+          ))}
+        </Layer>
+      </Stage>
   );
 }
