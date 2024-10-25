@@ -9,7 +9,7 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: 12345
     ports:
-      - "8029:3306"
+      - "3306:3306"
     command: mysqld --character-set-server=utf8 --collation-server=utf8_bin
     volumes:
       - db_data:/var/lib/mysql
@@ -22,7 +22,7 @@ services:
     image: client
     restart: always
     ports:
-      - "8027:80"
+      - "3000:3000"
     env_file:
       - ./client/.env
     depends_on:
@@ -38,7 +38,7 @@ services:
       context: ./server
       dockerfile: server.dockerfile
     ports:
-      - "8027:80"
+      - "4000:4000"
     environment:
       DATABASE_URL: "mysql://root:12345@db:3306/densy_data"
     depends_on:
