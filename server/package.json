@@ -2,25 +2,54 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.ts",
+  "type": "model",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node-dev index.ts"
+    "test": "jest",
+    "start": "ts-node-dev index.ts",
+    "seed": "ts-node-dev prisma/seed.ts"
   },
   "author": "TEAM-6",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@faker-js/faker": "^9.0.3",
+    "@prisma/client": "^5.20.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.15",
+    "socket.io": "^4.8.0",
     "ts-node-dev": "^2.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.10.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/eslint__js": "^8.42.3",
+    "@types/jest": "^29.5.13",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.5.5",
+    "@types/nodemailer": "^6.4.16",
+    "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "eslint": "^9.10.0",
+    "eslint-plugin-unicorn": "^55.0.0",
+    "jest": "^29.7.0",
     "prisma": "^5.19.1",
-    "typescript": "^5.6.2"
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.5.0"
   }
 }
