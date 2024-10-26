@@ -26,7 +26,7 @@ export const SocketProvider = ({
     const [isConnected, setIsConnected] = useState(false)
 
     useEffect(() => {
-        const socketInstance = ClientIO(process.env.NEXT_PUBLIC_BASE_URL, {
+        const socketInstance = ClientIO(process.env.NEXT_PUBLIC_SOCKET_URL, {
             withCredentials: true,
             transports: ["websocket"],
         })
