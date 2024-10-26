@@ -8,7 +8,8 @@ export function initSocketIO(server: http.Server) {
         cors: {
             origin: process.env.CLIENT_URL,
             credentials: true
-        }
+        },
+        path: "/socket.io"
     });
 
     io.on('connection', (socket) => {
