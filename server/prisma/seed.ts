@@ -19,20 +19,24 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Start seeding...');
 
-  await prisma.location.createMany({ data: locations });
-  await prisma.user.createMany({ data: users });
-  await prisma.image.createMany({ data: images });
-  await prisma.profile.createMany({ data: profiles });
-  await prisma.zone.createMany({ data: zones });
-  await prisma.checklist.createMany({ data: checklists });
-  await prisma.item.createMany({ data: items });
-  await prisma.itemZone.createMany({ data: item_zones });
-  await prisma.preset.createMany({ data: presets });
-  await prisma.presetChecklist.createMany({ data: preset_checklists });
-  await prisma.patrol.createMany({ data: patrols });
-  await prisma.patrolChecklist.createMany({ data: patrol_checklists });
+  const locationsCount = await prisma.location.count();
 
-  console.log('Seeding finished.');
+  if (locationsCount === 0) {
+    await prisma.location.createMany({ data: locations });
+    await prisma.user.createMany({ data: users });
+    await prisma.image.createMany({ data: images });
+    await prisma.profile.createMany({ data: profiles });
+    await prisma.zone.createMany({ data: zones });
+    await prisma.checklist.createMany({ data: checklists });
+    await prisma.item.createMany({ data: items });
+    await prisma.itemZone.createMany({ data: item_zones });
+    await prisma.preset.createMany({ data: presets });
+    await prisma.presetChecklist.createMany({ data: preset_checklists });
+    await prisma.patrol.createMany({ data: patrols });
+    await prisma.patrolChecklist.createMany({ data: patrol_checklists });
+
+    console.log('Seeding finished.');
+  }
 }
 
 main()

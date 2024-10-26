@@ -54,8 +54,8 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
                 {selectUser ? (
                   <Avatar>
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${selectUser.profile.image?.path}`}
-                    />
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser.profile.image?.path}`}
+                      />
                     <AvatarFallback>
                       {getInitials(selectUser.profile.name)}
                     </AvatarFallback>
