@@ -235,7 +235,7 @@ export default function ReportDefect({
                     <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleBeforeImageClick(0)}>
                       {beforeImage && beforeImage.length > 0 && beforeImage[0].path ? (
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${beforeImage[0].path}`}
+                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
                           alt="First Image"
                           width={130}
                           height={130}
@@ -258,7 +258,7 @@ export default function ReportDefect({
                                         <div className="flex items-center justify-center h-full w-full">
                                           <Image
                                             className="object-contain"
-                                            src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${beforeImage[index].path}`}
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[index].path}`}
                                             alt={`${beforeImage[index].path}`}
                                             width={800}
                                             height={500} 
@@ -307,8 +307,8 @@ export default function ReportDefect({
                     <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
                       {afterImage && afterImage.length > 0 && afterImage[0].path ? (
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${afterImage[0].path}`}
-                          alt="First Image"
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
+                        alt="First Image"
                           width={130}
                           height={130}
                           className="object-cover cursor-pointer"
@@ -329,7 +329,7 @@ export default function ReportDefect({
                                       <CardContent className="flex items-center justify-center h-[500px] w-[800px]">
                                         <Image
                                           className="object-contain"
-                                          src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${afterImage[index].path}`}
+                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[index].path}`}
                                           alt={`${afterImage[index].path}`}
                                           width={750}
                                           height={450}

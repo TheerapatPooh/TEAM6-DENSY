@@ -338,6 +338,7 @@ export default function Page() {
             align="end"
           >
             <div>
+              <DropdownMenuLabel>{t('Date')}</DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
