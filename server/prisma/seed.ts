@@ -2,12 +2,12 @@ import { PrismaClient } from '@prisma/client';
 
 import { users } from './data/users';
 import { checklists } from './data/checklists';
-import { item_zones } from './data/item_zones';
+import { item_zones } from './data/item-zones';
 import { items } from './data/items';
 import { locations } from './data/locations';
-import { patrol_checklists } from './data/patrol_checklists';
+import { patrol_checklists } from './data/patrol-checklists';
 import { patrols } from './data/patrols';
-import { preset_checklists } from './data/preset_checklist';
+import { preset_checklists } from './data/preset-checklist';
 import { presets } from './data/presets';
 import { profiles } from './data/profiles';
 import { zones } from './data/zones';
