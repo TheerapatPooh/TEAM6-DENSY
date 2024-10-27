@@ -52,7 +52,6 @@ export default function Notification() {
     const updateNotification = async (nt_id: number) => {
         try {
             await fetchData("put", `/notification/${nt_id}`, true);
-
         } catch (error) {
             console.error("Failed to update notification:", error);
         }

@@ -1,19 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { fetchData } from "@/lib/api";
-import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Checklist,
   Patrol,
   patrolStatus,
-  Defect,
-  PatrolResult,
   User,
 } from "@/app/type";
 import ReportDefect from "@/components/defect";
@@ -112,11 +106,16 @@ export default function Page() {
       result: updatedResults,
     };
     let resultCount = 0;
-    for (var index of patrol.result) {
-      if (index.status === null) {
-        resultCount++;
+    for (const checklist of patrol.checklist) {
+      if (checklist.inspector.id === profile?.id) {
+        for (const item of checklist.item) {
+          for (const zone of item.zone) {
+            resultCount++;
+          }
+        }
       }
     }
+
     if (data.result.length === resultCount) {
       console.log(data);
       try {
@@ -132,7 +131,7 @@ export default function Page() {
       } catch (error) {
         console.error("Error finishing patrol:", error);
       }
-      window.location.reload();
+      // window.location.reload();
     }
   };
   const getProfileData = async () => {
@@ -156,7 +155,7 @@ export default function Page() {
       </div>
     );
   }
-
+  console.log(results)
   return (
     <div className="p-4">
       <div className="flex flex-col gap-4">
@@ -291,7 +290,7 @@ export default function Page() {
                       iconName = "cached";
                       text = "Start";
                       disabled = true;
-                      handleFunction = () => {};
+                      handleFunction = () => { };
                       break;
                   }
                   return (
@@ -315,16 +314,16 @@ export default function Page() {
                   <div className="mb-4">
                     {profile?.profile.name === c.inspector.name ? (
                       <PatrolChecklist
-                      handleResult={handleResult}
-                      results={results}
-                      checklist={c}
-                      disabled={patrol.status === "on_going" ? false : true}
-                      patrolResult={patrol.result}
-                    />
+                        handleResult={handleResult}
+                        results={results}
+                        checklist={c}
+                        disabled={patrol.status === "on_going" ? false : true}
+                        patrolResult={patrol.result}
+                      />
                     ) : (
                       <div></div>
                     )}
-                    
+
                   </div>
                 ))}
               </div>

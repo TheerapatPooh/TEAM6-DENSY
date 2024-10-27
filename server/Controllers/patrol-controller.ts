@@ -152,13 +152,13 @@ export async function getPatrol(req: Request, res: Response) {
                         .filter((image: any) => image.image.im_update_by === defect.df_us_id)
                         .map((image: any) => ({
                             path: image.image.im_path,
-                        })) || null, 
+                        })) || null,
 
                     imageBySupervisor: defect.image
-                        .filter((image: any) => image.image.im_update_by !== defect.df_us_id) 
+                        .filter((image: any) => image.image.im_update_by !== defect.df_us_id)
                         .map((image: any) => ({
                             path: image.image.im_path,
-                        })) || null  
+                        })) || null
                 })),
             })) ?? [],
         }
@@ -312,7 +312,7 @@ export async function getAllPatrols(req: Request, res: Response) {
                     status: defect.df_status,
                     timestamp: defect.df_timestamp
                 })),
-                
+
             })) ?? [],
         }))
         res.status(200).json(result)
@@ -460,8 +460,15 @@ export async function finishPatrol(req: Request, res: Response) {
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         const patrolId = parseInt(req.params.id, 10)
-        const { status, checklist, result } = req.body
-
+        const { checklist, result } = req.body
+        const patrol = await prisma.patrol.findUnique({
+            where: {
+                pt_id: patrolId,
+            },
+            include: {
+                patrol_result: true
+            }
+        })
         if (role !== 'admin' && role !== 'inspector') {
             return res.status(403).json({ message: "Access Denied" })
         }
@@ -474,24 +481,13 @@ export async function finishPatrol(req: Request, res: Response) {
             return res.status(403).json({ message: "You are not authorized to finish this patrol. Only assigned inspectors can start the patrol." });
         }
 
-
-        if (!checklist || !result) {
+        if (!patrol || !checklist || !result) {
             return res.status(400).json({ message: "Invalid Data" })
         }
 
-        if (status !== 'on_going') {
+        if (patrol.pt_status !== 'on_going') {
             return res.status(403).json({ message: "Cannot finish patrol." });
         }
-
-        const updatePatrol = await prisma.patrol.update({
-            where: {
-                pt_id: patrolId,
-            },
-            data: {
-                pt_status: 'completed',
-                pt_end_time: new Date(),
-            },
-        });
 
         for (const resultObj of result) {
             const { id, status } = resultObj;
@@ -506,7 +502,21 @@ export async function finishPatrol(req: Request, res: Response) {
             });
         }
 
-        res.status(200).json(updatePatrol)
+        const hasNullStatus = patrol.patrol_result.some(resultObj => resultObj.pr_status === null);
+        if (!hasNullStatus) {
+            const updatePatrol = await prisma.patrol.update({
+                where: {
+                    pt_id: patrolId,
+                },
+                data: {
+                    pt_status: 'completed',
+                    pt_end_time: new Date(),
+                },
+            });
+            return res.status(200).json(updatePatrol);  
+        }
+
+        res.status(200).json({ message: "Patrol not yet completed, still awaiting other inspectors." });
 
     } catch (err) {
         res.status(500)
@@ -609,7 +619,8 @@ export async function commentPatrol(req: Request, res: Response) {
         }
 
         // รับข้อมูลจาก request body
-        const { patrolId, message, checklist, patrolResultId } = req.body;
+        const patrolId = parseInt(req.params.id, 10);
+        const { message, checklist, patrolResultId } = req.body;
 
         // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
         if (!patrolId || !message || !checklist || !patrolResultId) {
@@ -619,7 +630,7 @@ export async function commentPatrol(req: Request, res: Response) {
         // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
         const validPatrol = await prisma.patrol.findUnique({
             where: {
-                pt_id: parseInt(patrolId, 10),
+                pt_id: patrolId,
                 checklist: {
                     some: {
                         ptcl_us_id: userId,
