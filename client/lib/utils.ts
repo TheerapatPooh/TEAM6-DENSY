@@ -1,22 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import axios from "axios";
 import { Patrol, FilterPatrol } from "@/app/type";
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// tools/api.ts
-
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:4000",
-  timeout: 5000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 export const exportData = async (data: any) => {
   const dataArray = Array.isArray(data) ? data : [data];
@@ -123,26 +112,6 @@ export const exportData = async (data: any) => {
       `Could not export data: ${error instanceof Error ? error.message : "Unknown error"
       }`
     );
-  }
-};
-
-// Define an interface for Defect data
-export interface DefectData {
-  title: string;
-  note: string;
-  type: string;
-  status: string;
-  users_id: number;
-}
-
-// Create the defect function that accepts DefectData type
-export const createDefect = async (defectData: DefectData) => {
-  try {
-    const response = await axiosInstance.post("/defect", defectData);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating defect:", error);
-    throw new Error("Could not create defect");
   }
 };
 

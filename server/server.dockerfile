@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db execute --file prisma/migrations/update.sql && npm run seed && npm run start"]

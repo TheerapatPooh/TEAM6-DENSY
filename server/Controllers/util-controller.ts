@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from 'jsonwebtoken'
 import multer, { Multer } from 'multer';
 const jwt = require('jsonwebtoken')
-import { getIOInstance } from '../Utils/socket'; 
+import { getIOInstance } from '../Utils/socket';
 import nodemailer from 'nodemailer';
 
 
@@ -37,10 +37,12 @@ export async function login(req: Request, res: Response) {
     const token = jwt.sign({ userId: user.us_id, role: user.us_role }, process.env.JWT_SECRET, { expiresIn: "1h" })
     // Set HttpOnly cookie with the token
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: maxAge
     })
 
@@ -52,14 +54,14 @@ export async function login(req: Request, res: Response) {
 
 //Logout
 export async function logout(req: Request, res: Response) {
+  const isProduction = process.env.NODE_ENV === 'production';
   try {
     // ลบ cookie authToken
     res.clearCookie("authToken", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
     });
-
     // ส่ง response กลับไปหาผู้ใช้เพื่อแจ้งว่า logout สำเร็จ
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
@@ -124,7 +126,7 @@ export async function createNotification({ nt_message, nt_type, nt_url, nt_us_id
         nt_timestamp: new Date(),
         nt_type,
         nt_url,
-        nt_read: false,  
+        nt_read: false,
         nt_us_id,
       },
     });
@@ -143,7 +145,7 @@ export async function createNotification({ nt_message, nt_type, nt_url, nt_us_id
     }
 
     const io = getIOInstance();
-    io.to(nt_us_id).emit('new_notification', notification);  
+    io.to(nt_us_id).emit('new_notification', notification);
 
     return notification;
   } catch (error) {
@@ -181,12 +183,12 @@ export async function markAllAsRead(req: Request, res: Response) {
 export async function deleteOldNotifications() {
   try {
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const deletedNotifications = await prisma.notification.deleteMany({
       where: {
         nt_timestamp: {
-          lt: sevenDaysAgo, 
+          lt: sevenDaysAgo,
         },
       },
     });
@@ -210,10 +212,10 @@ const transporter = nodemailer.createTransport({
 export async function sendEmail(email: string, subject: string, message: string) {
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_USER, 
-      to: email, 
+      from: process.env.EMAIL_USER,
+      to: email,
       subject: subject,
-      text: message, 
+      text: message,
     });
 
     console.log(`Notification email sent to ${email}`);

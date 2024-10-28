@@ -214,7 +214,7 @@ export function PatrolCard({
                 return (
                   <Avatar key={idx} className="custom-shadow ms-[-10px]">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${matchingProfile?.profile?.image?.path}`}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
                       alt={inspectorName}
                     />
                     <AvatarFallback>
@@ -252,8 +252,8 @@ export function PatrolCard({
                 <div key={idx} className="flex items-center p-2">
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${matchingProfile?.profile?.image?.path}`}
-                    />
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
+                      />
                     <AvatarFallback>
                       {getInitials(inspectorName)}
                     </AvatarFallback>
@@ -319,7 +319,7 @@ export function PatrolCard({
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t('Cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={async (e) => {
                             try {

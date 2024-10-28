@@ -87,8 +87,12 @@ export const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
     setDate(selectedDate);
     if (selectedDate?.from && selectedDate?.to) {
       onSelect(selectedDate);
+    } else {
+      // Handle the case where 'from' or 'to' is undefined
+      onSelect({ from: selectedDate?.from || new Date(), to: selectedDate?.to || new Date() });
     }
   };
+  
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>

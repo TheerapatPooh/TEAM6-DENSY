@@ -1,4 +1,4 @@
-import { Checklist } from "@prisma/client";
+import { Checklist } from "@prisma/client"
 
 export const checklists: Checklist[] = [
     { cl_id: 1, cl_title: 'Safety Inspection', cl_version: 1, cl_latest: true, cl_update_at: new Date('2024-10-06 17:05:09.000'), cl_update_by: 1 },

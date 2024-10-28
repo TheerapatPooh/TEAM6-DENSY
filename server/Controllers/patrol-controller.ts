@@ -339,14 +339,16 @@ export async function createPatrol(req: Request, res: Response) {
                 pt_date: new Date(date),
                 pt_status: "pending",
                 pt_ps_id: parseInt(presetId, 10),
-            }
-        })
+            },
+        });
+
+        const notifiedInspectors = new Set<number>();
 
         for (const checklist of checklists) {
             const { checklistId, inspectorId } = checklist
 
             if (!checklistId || !inspectorId) {
-                return res.status(400)
+                continue
             }
 
             await prisma.patrolChecklist.create({
@@ -357,13 +359,17 @@ export async function createPatrol(req: Request, res: Response) {
                 },
             });
 
-            const message = `You have been assigned to a patrol scheduled for ${new Date(date).toLocaleDateString()}.`;
-            await createNotification({
-                nt_message: message,
-                nt_type: 'request' as NotificationType,
-                nt_url: `/patrol/${newPatrol.pt_id}`,
-                nt_us_id: inspectorId
-            });
+            if (!notifiedInspectors.has(inspectorId)) {
+                const message = `You have been assigned to a patrol scheduled for ${new Date(date).toLocaleDateString()}.`;
+                await createNotification({
+                    nt_message: message,
+                    nt_type: 'request' as NotificationType,
+                    nt_url: `/patrol/${newPatrol.pt_id}`,
+                    nt_us_id: inspectorId,
+                });
+
+                notifiedInspectors.add(inspectorId);
+            }
         }
 
         res.status(201).json(newPatrol)
