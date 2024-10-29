@@ -14,10 +14,14 @@ export function initSocketIO(server: http.Server) {
 
     io.on('connection', (socket) => {
         console.log(`User connected: ${socket.id}`);
-        
+
         socket.on('join_room', (userId: string) => {
-            socket.join(userId); 
+            socket.join(userId);
             console.log(`User ${userId} joined room: ${userId}`);
+        });
+
+        socket.on('patrol_result_update', (updatedResults, patrolId) => {
+            io.to(patrolId).emit('patrol_result_update', updatedResults);
         });
 
         socket.on('disconnect', () => {

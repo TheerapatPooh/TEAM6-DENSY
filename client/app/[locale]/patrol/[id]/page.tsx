@@ -7,6 +7,7 @@ import BadgeCustom from "@/components/badge-custom";
 import {
   Checklist,
   Patrol,
+  PatrolResult,
   patrolStatus,
   User,
 } from "@/app/type";
@@ -16,14 +17,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { exportData } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useSocket } from "@/components/socket-provider"
+import { Progress } from "@/components/ui/progress";
+import { SocketIndicator } from "@/components/socket-indicator";
 
 export default function Page() {
   const [mounted, setMounted] = useState(false);
   const [patrol, setPatrol] = useState<Patrol | null>(null);
-  const [results, setResults] = useState<
-    Array<{ itemId: number; zoneId: number; status: boolean }>
-  >([]);
+  const [results, setResults] = useState<PatrolResult[]>([]);
+  const [otherResults, setOtherResults] = useState<PatrolResult[]>([]);
+
   const [profile, setProfile] = useState<User>();
+  const { socket, isConnected } = useSocket();
+  const [allChecked, setAllChecked] = useState(false);
+  const [lock, setLock] = useState(false);
 
   const params = useParams();
   const router = useRouter();
@@ -40,11 +47,70 @@ export default function Page() {
     }
   };
 
-  const handleResult = (result: {
-    itemId: number;
-    zoneId: number;
-    status: boolean;
-  }) => {
+  const checkIfAllChecked = () => {
+    if (!patrol || !profile) return false;
+
+    let totalItemsToCheck = 0;
+    patrol.checklist.forEach((checklist) => {
+      if (checklist.inspector.id === profile.id) {
+        checklist.item.forEach((item) => {
+          totalItemsToCheck += item.zone.length;
+        });
+      }
+    });
+
+    const completedResults = results.filter(
+      (result) => result.status !== null
+    ).length;
+
+    return completedResults >= totalItemsToCheck;
+  };
+
+  useEffect(() => {
+    const allDone = checkIfAllChecked();
+    setAllChecked(allDone);
+  }, [results, patrol]);
+
+  const calculateProgress = () => {
+    if (!patrol) return 0;
+
+    const totalResults = patrol.result.length;
+    const checkedResults = patrol.result.filter((res) => res.status !== null).length;
+
+    if (totalResults === 0) return 0;
+    console.log("total: ", totalResults, " check: ", checkedResults)
+    return (checkedResults / totalResults) * 100;
+  };
+
+  const mergeResults = (newResults: PatrolResult[]) => {
+    setPatrol((prevPatrol) => {
+      if (!prevPatrol) return null;
+
+      const updatedResults = [...prevPatrol.result];
+
+      newResults.forEach((newResult) => {
+        const existingIndex = updatedResults.findIndex(
+          (res) => res.itemId === newResult.itemId && res.zoneId === newResult.zoneId
+        );
+
+        if (existingIndex !== -1) {
+          updatedResults[existingIndex] = { ...updatedResults[existingIndex], ...newResult };
+        }
+      });
+
+      const updatedPatrol = {
+        ...prevPatrol,
+        result: updatedResults,
+      };
+      console.log('update', updatedPatrol)
+      return updatedPatrol;
+    });
+  };
+
+  const toggleLock = () => {
+    setLock((prevLock) => !prevLock)
+  }
+  const handleResult = (result: PatrolResult) => {
     setResults((prevResults) => {
       const existingIndex = prevResults.findIndex(
         (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
@@ -131,7 +197,6 @@ export default function Page() {
       } catch (error) {
         console.error("Error finishing patrol:", error);
       }
-      // window.location.reload();
     }
   };
   const getProfileData = async () => {
@@ -143,11 +208,81 @@ export default function Page() {
     }
   };
   useEffect(() => {
-    getProfileData();
-    getPatrolData();
-    setMounted(true);
+    const fetchData = async () => {
+      try {
+        await getProfileData();
+        await getPatrolData();
+
+        const savedResults = localStorage.getItem('patrolResults');
+        const otherResults = localStorage.getItem('otherResults');
+        if (savedResults) {
+          setResults(JSON.parse(savedResults));
+        }
+        if (otherResults) {
+          setOtherResults(JSON.parse(otherResults));
+        }
+      } catch (error) {
+        console.error("Error loading data: ", error);
+      }
+    };
+    fetchData();
+    setMounted(true)
   }, []);
 
+  useEffect(() => {
+    if (otherResults) {
+      mergeResults(otherResults);
+    }
+  }, [otherResults])
+
+  useEffect(() => {
+    if (socket && isConnected && patrol) {
+      console.log("Connected to socket!");
+      socket.emit('join_room', patrol.id);
+      socket.on('patrol_result_update', (updatedResults) => {
+        localStorage.setItem('otherResults', JSON.stringify(updatedResults));
+        const filteredResults = updatedResults.filter(
+          (res: any) => res.inspectorId !== profile?.id
+        );
+        setOtherResults(filteredResults);
+        localStorage.getItem('otherResults');
+
+        const combinedResults = [...results, ...filteredResults];
+
+        combinedResults.forEach((updatedResult: PatrolResult) => {
+          const existingIndex = combinedResults.findIndex(
+            (result) =>
+              result.itemId === updatedResult.itemId &&
+              result.zoneId === updatedResult.zoneId
+          );
+          if (existingIndex !== -1) {
+            combinedResults[existingIndex] = { ...combinedResults[existingIndex], ...updatedResult };
+          } else {
+            combinedResults.push(updatedResult);
+          }
+        });
+
+        console.log("combined", combinedResults);
+        mergeResults(combinedResults);
+      });
+
+      return () => {
+        socket.off("patrol_result_update");
+      };
+    }
+  }, [socket, isConnected, results]);
+
+  useEffect(() => {
+    if (socket && isConnected && results.length > 0 && patrol) {
+      console.log("Emitting result update:", results);
+      socket.emit('patrol_result_update', results, patrol.id);
+      localStorage.setItem('patrolResults', JSON.stringify(results));
+    }
+  }, [results, socket, isConnected]);
+
+
+  console.log("patrol: ", patrol)
+  console.log("result: ", results)
   if (!patrol || !mounted) {
     return (
       <div>
@@ -155,18 +290,23 @@ export default function Page() {
       </div>
     );
   }
-  console.log(results)
   return (
     <div className="p-4">
+      <SocketIndicator>
+
+      </SocketIndicator>
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
-          <div className="flex align-center p-0 justify-center text-center">
-            <Button size={"icon"} variant="ghost">
+          <div className="flex items-center p-0 justify-center text-center gap-2">
+            <Button variant="ghost" className="flex hover:bg-secondary w-[40px] h-[40px]">
               <span className="material-symbols-outlined text-card-foreground">
                 error
               </span>
             </Button>
-            <p className="text-2xl font-bold">{patrol.preset.title}</p>
+            <div className="flex flex-col h-full justify-start w-full">
+              <p className="text-2xl font-bold">{patrol.preset.title}</p>
+              <Progress value={calculateProgress()} />
+            </div>
           </div>
           <div>
             {(() => {
@@ -269,8 +409,8 @@ export default function Page() {
                       break;
                     case "on_going":
                       variant = "primary";
-                      iconName = "check";
-                      text = "Finish";
+                      iconName = "lock";
+                      text = "";
                       disabled = false;
                       handleFunction = () => {
                         handleFinishPatrol();
@@ -294,16 +434,21 @@ export default function Page() {
                       break;
                   }
                   return (
-                    <Button
-                      variant={variant}
-                      disabled={disabled}
-                      onClick={handleFunction}
-                    >
-                      <span className="material-symbols-outlined">
-                        {iconName}
-                      </span>
-                      {t(`${text}`)}
-                    </Button>
+                    <div>
+                      {patrol.status === 'on_going' ? (
+                        allChecked ? (
+                          <Button variant={"secondary"} disabled={true} onClick={handleFinishPatrol}>
+                            <span className="material-symbols-outlined">lock</span>
+                            {t("Finish")}
+                          </Button>
+                        ) : (
+                          <Button variant={ lock ? 'secondary' : variant} disabled={disabled} onClick={toggleLock}>
+                            <span className="material-symbols-outlined">{lock ? "lock_open" : iconName }</span>
+                            {lock ? t('Unlock') : t('Lock')}
+                          </Button>
+                        )
+                      ) : null}
+                    </div>
                   );
                 })()}
               </div>
@@ -317,7 +462,7 @@ export default function Page() {
                         handleResult={handleResult}
                         results={results}
                         checklist={c}
-                        disabled={patrol.status === "on_going" ? false : true}
+                        disabled={patrol.status === "on_going" && !lock ? false : true} 
                         patrolResult={patrol.result}
                       />
                     ) : (
