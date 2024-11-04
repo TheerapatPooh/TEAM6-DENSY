@@ -40,9 +40,6 @@ export interface patrolCardProps {
   patrolPreset: string;
   patrolId: number;
   inspector: Inspector[];
-  items: number;
-  fails: number;
-  defects: number;
 }
 
 export function PatrolCard({
@@ -51,9 +48,6 @@ export function PatrolCard({
   patrolPreset,
   patrolId,
   inspector = [],
-  items,
-  fails,
-  defects,
 }: patrolCardProps) {
   const formattedDate =
     patrolDate instanceof Date
@@ -66,6 +60,9 @@ export function PatrolCard({
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [profile, setProfile] = useState<User[]>();
+  const [items, setItems] = useState(0);
+  const [fails, setFails] = useState(0);
+  const [defects, setDefects] = useState(0);
 
   const [mounted, setMounted] = useState(false);
 
@@ -79,8 +76,42 @@ export function PatrolCard({
       console.error("Failed to fetch profile data:", error);
     }
   };
+
+  const getPatrolData = async () => {
+    try {
+      const patrolfetch = await fetchData("get", `/patrol/${patrolId}`, true);
+  
+      let countItems = 0;
+      let countFails = 0;
+      let countDefects = 0;
+  
+      if (patrolfetch?.result) {
+        for (const patrolResult of patrolfetch.result) {
+          if (patrolResult.status !== null) {
+            countItems++;  
+          }
+          
+          if (patrolResult.status === false) {
+            countFails++;  
+
+            if (patrolResult.defect && patrolResult.defect.length !== 0) {
+              countDefects++;  
+            }
+          }
+        }
+      }
+  
+      setItems(countItems);
+      setFails(countFails);
+      setDefects(countDefects);
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+
   useEffect(() => {
     getData();
+    getPatrolData();
     setMounted(true);
   }, []);
 
@@ -175,7 +206,7 @@ export function PatrolCard({
                   <p className="text-xl me-2.5 truncate">{inspectorNames[0]}</p>
                 </div>
               )}
-              {inspectorNames.slice(0, 4).map((inspectorName, idx) => {
+              {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
                 const matchingProfile = profile?.find(
                   (profile) => profile.profile.name === inspectorName
                 );
@@ -183,7 +214,7 @@ export function PatrolCard({
                 return (
                   <Avatar key={idx} className="custom-shadow ms-[-10px]">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${matchingProfile?.profile?.image?.path}`}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
                       alt={inspectorName}
                     />
                     <AvatarFallback>
@@ -213,7 +244,7 @@ export function PatrolCard({
                 {t("InspectorList")}
               </p>
             </div>
-            {inspectorNames.map((inspectorName, idx) => {
+            {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
               const matchingProfile = profile?.find(
                 (profile) => profile.profile.name === inspectorName
               );
@@ -221,8 +252,8 @@ export function PatrolCard({
                 <div key={idx} className="flex items-center p-2">
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${matchingProfile?.profile?.image?.path}`}
-                    />
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
+                      />
                     <AvatarFallback>
                       {getInitials(inspectorName)}
                     </AvatarFallback>

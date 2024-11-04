@@ -338,6 +338,7 @@ export default function Page() {
             align="end"
           >
             <div>
+              <DropdownMenuLabel>{t('Date')}</DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
@@ -580,9 +581,6 @@ export default function Page() {
                 patrolPreset={preset ? preset.title : "No Title"}
                 patrolId={card.id}
                 inspector={inspectors}
-                items={0}
-                fails={0}
-                defects={0}
               />
             );
           })}

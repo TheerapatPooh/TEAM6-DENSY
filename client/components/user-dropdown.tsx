@@ -27,7 +27,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
 
   useEffect(() => {
     console.log(selectedUser)
-  },[selectedUser])
+  }, [selectedUser])
   return (
     <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
       <DropdownMenuTrigger className="w-[300px] h-[65px]">
@@ -35,12 +35,12 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
           <div className="flex items-center gap-2">
             {selectedUser && (
               <Avatar>
-                <AvatarImage src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${selectedUser?.profile?.image?.path}`} />
+                <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectedUser?.profile?.image?.path}`} />
                 <AvatarFallback>{getInitials(selectedUser.profile.name)}</AvatarFallback>
               </Avatar>
             )}
             <p className="font-normal text-muted-foreground">
-              {selectedUser ? selectedUser.profile.name :  t("SelectAUser")}
+              {selectedUser ? selectedUser.profile.name : t("SelectAUser")}
             </p>
           </div>
           <span
@@ -52,18 +52,17 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-0">
         <ScrollArea className="h-72 w-full rounded-md border">
-        {userData.map((user) => {
-          return( 
-          <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
-          <Avatar>
-            <AvatarImage src={`${process.env.NEXT_PUBLIC_SERVER_URL}/uploads/${user?.profile?.image?.path}`}/>
-            <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
-          </Avatar>
-          <p className="font-normal text-muted-foreground">{user.profile.name}</p>
-        </DropdownMenuItem>)
-         
-        })}
-      </ScrollArea>
+          {userData.map((user) => {
+            return (
+              <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
+                <Avatar>
+                  <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`} />
+                  <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
+                </Avatar>
+                <p className="font-normal text-muted-foreground">{user.profile.name}</p>
+              </DropdownMenuItem>)
+          })}
+        </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );
