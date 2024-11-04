@@ -1,5 +1,6 @@
 import { prisma } from '../Utils/database'
 import { Request, Response } from 'express'
+import { Defect } from '../../client/app/type';
 
 export async function createDefect(req: Request, res: Response) {
     try {
@@ -123,6 +124,24 @@ export async function getDefect(req: Request, res: Response) {
             where: {
                 df_id: Number(id),
             },
+            include: {
+                user:{select:{
+                    profile: true
+                }},
+                patrol_result: {
+                    include: {
+                        defects: {
+                            select: {
+                                image: {
+                                    include: {
+                                        image: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         if (!defect) {
@@ -157,7 +176,7 @@ export async function getDefect(req: Request, res: Response) {
             patrolResultId: defect.df_pr_id
         };
         
-        res.status(200).json(result);
+        res.status(200).json(defect);
     } catch (err) {
         res.status(500).send(err);
     }
