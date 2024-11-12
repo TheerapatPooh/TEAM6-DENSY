@@ -8,8 +8,15 @@ interface LintResult {
 
 // ฟังก์ชันสรุปผลลัพธ์จากข้อมูลที่อ่านจากไฟล์ JSON
 function summarizeLintResults(results: LintResult[]) {
-    const totalFiles = results.length;
-    const totalWarnings = results.reduce((sum, file) => sum + (file.warningCount > 0 ? 1 : 0), 0);
+    const filteredResults = results.filter(result =>
+        result.filePath.includes('app') ||
+        result.filePath.includes('components') ||
+        result.filePath.includes('lib')
+    );
+
+    const totalFiles = filteredResults.length;
+    const totalWarnings = filteredResults.reduce((sum, file) => sum + (file.warningCount > 0 ? 1 : 0), 0);
+
 
     console.log(`จำนวนไฟล์ที่ตรวจทั้งหมด: ${totalFiles} ไฟล์`);
     console.log(`จำนวนไฟล์ที่พบข้อผิดพลาด: ${totalWarnings} ไฟล์`);
@@ -24,7 +31,7 @@ function getLatestLintReportFile(directory: string) {
             time: fs.statSync(path.join(directory, file)).mtime.getTime()
         }))
         .sort((a, b) => b.time - a.time); // เรียงตามเวลาล่าสุด
-    
+
     return files.length ? path.join(directory, files[0].name) : null;
 }
 
