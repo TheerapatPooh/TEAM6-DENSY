@@ -1,7 +1,7 @@
-import { prisma } from '../Utils/database'
+import { prisma } from '@Utils/database.js'
 import { Request, response, Response } from 'express'
 import bcrypt from 'bcrypt'
-import { Profile, User } from '../Utils/type'
+import { User } from '@Utils/type.js'
 import { faker } from '@faker-js/faker'
 import fs from 'fs'
 import path from 'path'
@@ -16,7 +16,8 @@ export async function getUser(req: Request, res: Response) {
         });
 
         if (role !== 'admin') {
-             res.status(403).json({ message: "Access Denied: Admins only" });
+            res.status(403).json({ message: "Access Denied: Admins only" });
+            return
         }
 
         if (user) {
@@ -30,21 +31,25 @@ export async function getUser(req: Request, res: Response) {
                 createdAt: user.us_created_at.toISOString(),
             };
 
-             res.status(200).json(result);
+            res.status(200).json(result);
+            return
         } else {
-             res.status(404).json({ message: "User not found" });
+            res.status(404).json({ message: "User not found" });
+            return
         }
     } catch (error) {
         console.error(error);
-         res.status(500).json({ message: "Internal Server Error", error });
+        res.status(500).json({ message: "Internal Server Error", error });
+        return
     }
 }
 
-export async function getAllUsers(req: Request, res: Response) {
+export async function getAllUsers(req: Request, res: Response): Promise<void> {
     try {
         const role = (req as any).user.role
         if (role !== 'admin') {
-             res.status(403).json({ message: "Access Denied: Admins only" })
+            res.status(403).json({ message: "Access Denied: Admins only" })
+            return
         }
         const allUsers = await prisma.user.findMany()
 
@@ -59,11 +64,14 @@ export async function getAllUsers(req: Request, res: Response) {
                 createdAt: user.us_created_at,
             }))
             res.status(200).send(result)
+            return
         } else {
             res.status(404)
+            return
         }
     } catch (error) {
         res.status(500)
+        return
     }
 }
 
@@ -72,7 +80,8 @@ export async function createUser(req: Request, res: Response) {
 
         const userRole = (req as any).user.role
         if (userRole !== 'admin') {
-             res.status(403).json({ message: "Access Denied: Admins only" })
+            res.status(403).json({ message: "Access Denied: Admins only" })
+            return
         }
         let { username, email, password, role, department }: User = req.body
         const hashPassword = await bcrypt.hash(password, 10)
@@ -118,8 +127,10 @@ export async function createUser(req: Request, res: Response) {
         }
 
         res.status(201).json(result)
+        return
     } catch (error) {
         res.status(500).send(error)
+        return
     }
 }
 
@@ -142,7 +153,8 @@ export async function updateProfile(req: Request, res: Response) {
         });
 
         if (!user) {
-             res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: 'User not found' });
+            return
         }
 
         if (imagePath && user.profile?.pf_image) {
@@ -196,9 +208,11 @@ export async function updateProfile(req: Request, res: Response) {
         };
 
         res.status(200).json(result);
+        return
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to update user profile' }); // Improved error handling
+        return
     }
 }
 
@@ -234,7 +248,8 @@ export async function getProfile(req: Request, res: Response) {
         }
 
         if (!user) {
-             res.status(404)
+            res.status(404)
+            return
         }
 
         const profile = user.profile || null
@@ -260,9 +275,11 @@ export async function getProfile(req: Request, res: Response) {
         }
 
         res.status(200).json(result)
+        return
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: 'Failed to fetch user profile' })
+        return
     }
 }
 
@@ -300,12 +317,15 @@ export async function getAllProfile(req: Request, res: Response) {
                 },
             }))
             res.status(200).json(result)
+            return
         } else {
             response.status(404)
+            return
         }
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: 'Failed to fetch user profile' })
+        return
     }
 }
 export async function updateUser(req: Request, res: Response) {
@@ -317,7 +337,8 @@ export async function updateUser(req: Request, res: Response) {
 
         // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
         if (loggedInUserId !== id && loggedInUserRole !== 'admin') {
-             res.status(403).json({ message: "Access Denied: You must be the owner of this account or an admin" });
+            res.status(403).json({ message: "Access Denied: You must be the owner of this account or an admin" });
+            return
         }
 
         const updateData: any = {
@@ -348,9 +369,11 @@ export async function updateUser(req: Request, res: Response) {
         };
 
         res.status(200).json(result);
+        return
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to update user' });
+        return
     }
 }
 
@@ -360,7 +383,8 @@ export async function deleteUser(req: Request, res: Response) {
         const role = (req as any).user.role;
 
         if (role !== 'admin') {
-             res.status(403).json({ message: "Access Denied: Admin only" });
+            res.status(403).json({ message: "Access Denied: Admin only" });
+            return
         }
 
         const user = await prisma.user.findUnique({
@@ -369,7 +393,8 @@ export async function deleteUser(req: Request, res: Response) {
         });
 
         if (!user) {
-             res.status(404).json({ message: 'User not found' });
+            res.status(404).json({ message: 'User not found' });
+            return
         }
 
         // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่
@@ -415,10 +440,10 @@ export async function deleteUser(req: Request, res: Response) {
         });
 
         res.status(200).json({ message: 'User deleted successfully' });
+        return
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to delete user' });
+        return
     }
 }
-
-

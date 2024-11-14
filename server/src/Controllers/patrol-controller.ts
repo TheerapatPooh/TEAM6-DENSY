@@ -1,12 +1,10 @@
 
 import { Defect } from '@prisma/client'
-import { prisma } from '../Utils/database'
+import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
 import axios from 'axios';
-import { createNotification } from './util-controller';
+import { createNotification } from '@Controllers/util-controller.js';
 import { NotificationType } from '@prisma/client';
-import { tr } from '@faker-js/faker/.';
-import path from 'path';
 
 export async function getPatrol(req: Request, res: Response) {
     try {
@@ -15,7 +13,8 @@ export async function getPatrol(req: Request, res: Response) {
         const patrolId = parseInt(req.params.id, 10)
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
+            return
         }
 
         let patrol: any
@@ -88,7 +87,8 @@ export async function getPatrol(req: Request, res: Response) {
         }
 
         if (!patrol) {
-             res.status(404)
+            res.status(404)
+            return
         }
 
         const result = {
@@ -176,7 +176,8 @@ export async function getAllPatrols(req: Request, res: Response) {
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins only" })
+            res.status(403).json({ message: "Access Denied: Admins only" })
+            return
         }
         let allPatrols: any
 
@@ -324,20 +325,30 @@ export async function getAllPatrols(req: Request, res: Response) {
 
 export async function createPatrol(req: Request, res: Response) {
     try {
-        const userRole = (req as any).user.role
+        const userRole = (req as any).user.role;
         if (userRole !== 'admin' && userRole !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins only" })
+            res.status(403).json({ message: "Access Denied: Admins only" });
+            return
         }
-        const { date, presetId, checklists } = req.body
+
+        const { date, presetId, checklists } = req.body;
 
         if (!date || !presetId || !checklists) {
-             res.status(400)
+            res.status(400).json({ message: "Missing required fields" });
+            return
         }
+
+        const patrolDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        patrolDate.setHours(0, 0, 0, 0);
+
+        const status = patrolDate.getTime() === today.getTime() ? "scheduled" : "pending";
 
         const newPatrol = await prisma.patrol.create({
             data: {
-                pt_date: new Date(date),
-                pt_status: "pending",
+                pt_date: patrolDate,
+                pt_status: status,
                 pt_ps_id: parseInt(presetId, 10),
             },
         });
@@ -345,7 +356,7 @@ export async function createPatrol(req: Request, res: Response) {
         const notifiedInspectors = new Set<number>();
 
         for (const checklist of checklists) {
-            const { checklistId, inspectorId } = checklist
+            const { checklistId, inspectorId } = checklist;
 
             if (!checklistId || !inspectorId) {
                 continue
@@ -372,12 +383,12 @@ export async function createPatrol(req: Request, res: Response) {
             }
         }
 
-        res.status(201).json(newPatrol)
+        res.status(201).json(newPatrol);
 
     } catch (err) {
-        res.status(500)
     }
 }
+
 
 export async function startPatrol(req: Request, res: Response) {
     try {
@@ -387,23 +398,27 @@ export async function startPatrol(req: Request, res: Response) {
         const { status, checklist } = req.body
 
         const isUserInspector = checklist.some((checklistObj: any) => {
-             checklistObj.inspector.id === userId;
+            return checklistObj.inspector.id === userId;
         });
 
         if (!isUserInspector) {
-             res.status(403).json({ message: "You are not authorized to start this patrol. Only assigned inspectors can start the patrol." });
+            res.status(403).json({ message: "You are not authorized to start this patrol. Only assigned inspectors can start the patrol." });
+            return
         }
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied" })
+            res.status(403).json({ message: "Access Denied" })
+            return
         }
 
         if (!status || !checklist) {
-             res.status(400)
+            res.status(400)
+            return
         }
 
         if (status !== 'scheduled') {
-             res.status(403).json({ message: "Cannot start patrol." });
+            res.status(403).json({ message: "Cannot start patrol." });
+            return
         }
 
         const updatePatrol = await prisma.patrol.update({
@@ -441,9 +456,10 @@ export async function startPatrol(req: Request, res: Response) {
         }
 
         res.status(200).json(updatePatrol)
-
+        return
     } catch (err) {
         res.status(500)
+        return
     }
 }
 
@@ -455,24 +471,28 @@ export async function finishPatrol(req: Request, res: Response) {
         const { status, checklist, result } = req.body
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied" })
+            res.status(403).json({ message: "Access Denied" })
+            return
         }
 
         const isUserInspector = checklist.some((checklistObj: any) => {
-             checklistObj.inspector.id === userId;
+            return checklistObj.inspector.id === userId;
         });
 
         if (!isUserInspector) {
-             res.status(403).json({ message: "You are not authorized to finish this patrol. Only assigned inspectors can start the patrol." });
+            res.status(403).json({ message: "You are not authorized to finish this patrol. Only assigned inspectors can start the patrol." });
+            return
         }
 
 
         if (!checklist || !result) {
-             res.status(400).json({ message: "Invalid Data" })
+            res.status(400).json({ message: "Invalid Data" })
+            return
         }
 
         if (status !== 'on_going') {
-             res.status(403).json({ message: "Cannot finish patrol." });
+            res.status(403).json({ message: "Cannot finish patrol." });
+            return
         }
 
         const updatePatrol = await prisma.patrol.update({
@@ -499,9 +519,11 @@ export async function finishPatrol(req: Request, res: Response) {
         }
 
         res.status(200).json(updatePatrol)
+        return
 
     } catch (err) {
         res.status(500)
+        return
     }
 }
 
@@ -531,11 +553,13 @@ export async function removePatrol(req: Request, res: Response) {
         res.status(200).json({
             message: 'Patrol and related records successfully deleted',
         });
+        return
     } catch (error) {
         console.error(error);
         res.status(500).json({
             message: 'Failed to delete patrol',
         });
+        return
     }
 
 }
@@ -547,7 +571,7 @@ export async function updatePatrolStatus(req: Request, res: Response) {
 
         // Validate input
         if (!patrolId || !status) {
-             res.status(400).json({ message: "Patrol ID and status are required." });
+            return res.status(400).json({ message: "Patrol ID and status are required." });
         }
 
         // Update the patrol status in the database
@@ -557,9 +581,11 @@ export async function updatePatrolStatus(req: Request, res: Response) {
         });
 
         res.status(200).json(updatedPatrol);
+        return
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "An error occurred while updating the patrol status." });
+        return
     }
 }
 
@@ -584,10 +610,12 @@ export async function getPendingPatrols(req: Request, res: Response) {
         }));
 
         res.status(200).json(result);
+        return
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
+        return
     }
 }
 export async function commentPatrol(req: Request, res: Response) {
@@ -597,7 +625,8 @@ export async function commentPatrol(req: Request, res: Response) {
 
         // ตรวจสอบสิทธิ์ว่าเป็น Inspector หรือไม่
         if (role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Inspectors only" });
+            res.status(403).json({ message: "Access Denied: Inspectors only" });
+            return
         }
 
         // รับข้อมูลจาก request body
@@ -605,7 +634,8 @@ export async function commentPatrol(req: Request, res: Response) {
 
         // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
         if (!patrolId || !message || !checklist || !patrolResultId) {
-             res.status(400).json({ message: "Bad Request: Missing required fields" });
+            res.status(400).json({ message: "Bad Request: Missing required fields" });
+            return
         }
 
         // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
@@ -620,7 +650,8 @@ export async function commentPatrol(req: Request, res: Response) {
             }
         });
         if (!validPatrol) {
-             res.status(404).json({ message: "Patrol or checklist not found" });
+            res.status(404).json({ message: "Patrol or checklist not found" });
+            return
         }
 
         // รับ message เข้ามา และเชื่อมกับ PatrolResult
@@ -639,10 +670,11 @@ export async function commentPatrol(req: Request, res: Response) {
             comment: newComment.cm_message,
             timestamp: newComment.cm_timestamp
         });
-
+        return
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
+        return
     }
 }
 
@@ -663,9 +695,11 @@ export async function getCommentPatrol(req: Request, res: Response) {
             patrolResultId: comment.cm_pr_id
         }))
         res.status(200).json(result);
+        return
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
+        return
     }
 }
 

@@ -1,6 +1,5 @@
-import { prisma } from '../Utils/database'
+import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
-import { Defect } from '../../client/app/type';
 
 export async function createDefect(req: Request, res: Response) {
     try {
@@ -10,7 +9,8 @@ export async function createDefect(req: Request, res: Response) {
       const imageFiles = req.files as Express.Multer.File[]; // Cast to an array of Multer files
   
       if (role !== 'admin' && role !== 'inspector') {
-         res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+        res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+        return
       }
   
       const validPatrol = await prisma.patrol.findFirst({
@@ -29,7 +29,8 @@ export async function createDefect(req: Request, res: Response) {
       });
   
       if (!validPatrol) {
-         res.status(404).json({ message: "You are not associated with this Patrol or PatrolResult not found" });
+        res.status(404).json({ message: "You are not associated with this Patrol or PatrolResult not found" });
+        return
       }
   
       const newDefect = await prisma.defect.create({
@@ -52,7 +53,7 @@ export async function createDefect(req: Request, res: Response) {
     
             if (!result) {
                 console.error("Patrol result not found");
-                ;
+                return;
             }
     
             const updatedResult = await prisma.patrolResult.update({
@@ -63,7 +64,7 @@ export async function createDefect(req: Request, res: Response) {
             });
     
             console.log("Patrol result updated successfully:", updatedResult);
-             updatedResult;
+            return updatedResult;
         } catch (error) {
             console.error("Error updating patrol result:", error);
         }
@@ -115,7 +116,8 @@ export async function getDefect(req: Request, res: Response) {
         const userId = (req as any).user.userId;
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            return
         }
 
         const { id } = req.params;
@@ -124,28 +126,11 @@ export async function getDefect(req: Request, res: Response) {
             where: {
                 df_id: Number(id),
             },
-            include: {
-                user:{select:{
-                    profile: true
-                }},
-                patrol_result: {
-                    include: {
-                        defects: {
-                            select: {
-                                image: {
-                                    include: {
-                                        image: true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         });
 
         if (!defect) {
-             res.status(404).json({ message: "Defect not found" });
+            res.status(404).json({ message: "Defect not found" });
+            return
         }
 
         const validPatrol = await prisma.patrol.findFirst({
@@ -164,7 +149,8 @@ export async function getDefect(req: Request, res: Response) {
         });
 
         if (!validPatrol) {
-             res.status(404).json({ message: "You are not associated with this Patrol" });
+            res.status(404).json({ message: "You are not associated with this Patrol" });
+            return
         }
         
         const result = {
@@ -176,9 +162,11 @@ export async function getDefect(req: Request, res: Response) {
             patrolResultId: defect.df_pr_id
         };
         
-        res.status(200).json(defect);
+        res.status(200).json(result);
+        return
     } catch (err) {
         res.status(500).send(err);
+        return
     }
 }
 
@@ -188,7 +176,8 @@ export async function getAllDefect(req: Request, res: Response) {
         const userId = (req as any).user.userId;
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            return
         }
 
         const patrolId = parseInt(req.params.id, 10);
@@ -209,7 +198,8 @@ export async function getAllDefect(req: Request, res: Response) {
         });
 
         if (!validPatrol) {
-             res.status(404).json({ message: "You are not associated with this Patrol" });
+            res.status(404).json({ message: "You are not associated with this Patrol" });
+            return
         }
 
         const defects = await prisma.defect.findMany({
@@ -219,7 +209,8 @@ export async function getAllDefect(req: Request, res: Response) {
         });
 
         if (defects.length === 0) {
-             res.status(404).json({ message: "Defect not found" });
+            res.status(404).json({ message: "Defect not found" });
+            return
         }
 
         const result = defects.map(defect => ({
@@ -232,8 +223,10 @@ export async function getAllDefect(req: Request, res: Response) {
         }));
 
         res.status(200).json(result);
+        return
     } catch (err) {
         res.status(500).send(err);
+        return
     }
 }
 
@@ -246,7 +239,8 @@ export async function updateDefect(req: Request, res: Response) {
         const { name, description, type, status, userId: defectUserId, patrolResultId } = req.body;
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            return
         }
 
         const defect = await prisma.defect.findUnique({
@@ -256,7 +250,8 @@ export async function updateDefect(req: Request, res: Response) {
         });
 
         if (!defect) {
-             res.status(404).json({ message: "Defect not found" });
+            res.status(404).json({ message: "Defect not found" });
+            return
         }
 
         const validPatrol = await prisma.patrol.findFirst({
@@ -275,7 +270,8 @@ export async function updateDefect(req: Request, res: Response) {
         });
 
         if (!validPatrol) {
-             res.status(404).json({ message: "You are not associated with this Patrol" });
+            res.status(404).json({ message: "You are not associated with this Patrol" });
+            return
         }
 
         const updatedDefect = await prisma.defect.update({
@@ -302,18 +298,21 @@ export async function updateDefect(req: Request, res: Response) {
         };
 
         res.status(200).json(result);
+        return
     } catch (err) {
         res.status(500).send(err);
+        return
     }
 }
 
-export async function deleteDefect(req: Request, res: Response) {
+export async function deleteDefect(req: Request, res: Response): Promise<void> {
     try {
         const role = (req as any).user.role;
         const userId = (req as any).user.userId;
 
         if (role !== 'admin' && role !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            return
         }
 
         const { id } = req.params;
@@ -325,7 +324,8 @@ export async function deleteDefect(req: Request, res: Response) {
         });
 
         if (!defect) {
-             res.status(404).json({ message: "Defect not found" });
+            res.status(404).json({ message: "Defect not found" });
+            return
         }
 
         const validPatrol = await prisma.patrol.findFirst({
@@ -344,7 +344,8 @@ export async function deleteDefect(req: Request, res: Response) {
         });
 
         if (!validPatrol) {
-             res.status(404).json({ message: "You are not associated with this Patrol" });
+            res.status(404).json({ message: "You are not associated with this Patrol" });
+            return
         }
 
         await prisma.defect.delete({
@@ -353,7 +354,9 @@ export async function deleteDefect(req: Request, res: Response) {
             }
         });
         res.status(200).json({message: 'Defect deleted successfully',});
+        return
     } catch (err) {
         res.status(500).send(err);
+        return
     }
 }

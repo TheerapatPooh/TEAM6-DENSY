@@ -1,11 +1,12 @@
-import { prisma } from '../Utils/database'
+import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
 
 export async function getZone(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role;
         if (userRole !== 'admin' && userRole !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins only" });
+            res.status(403).json({ message: "Access Denied: Admins only" });
+            return
         }
         const zoneId = parseInt(req.params.id, 10)
         const zone = await prisma.zone.findUnique({
@@ -23,7 +24,8 @@ export async function getZone(req: Request, res: Response) {
             }
         })
         if (!zone) {
-             res.status(404)
+            res.status(404)
+            return
         }
         const result = {
             id: zone.ze_id,
@@ -38,9 +40,11 @@ export async function getZone(req: Request, res: Response) {
                 imagePath: zone.supervisor.profile?.pf_image?.im_path || null
             }
         }
-        res.send(result)
+        res.status(200).send(result)
+        return
     } catch (err) {
         res.status(500)
+        return
     }
 }
 
@@ -48,7 +52,8 @@ export async function getAllZones(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role;
         if (userRole !== 'admin' && userRole !== 'inspector') {
-             res.status(403).json({ message: "Access Denied: Admins only" });
+            res.status(403).json({ message: "Access Denied: Admins only" });
+            return
         }
         const allZone = await prisma.zone.findMany({
             include: {
@@ -64,7 +69,8 @@ export async function getAllZones(req: Request, res: Response) {
             }
         })
         if (!allZone) {
-             res.status(404)
+            res.status(404)
+            return
         }
 
         const result = allZone.map((zone) => ({
@@ -80,8 +86,10 @@ export async function getAllZones(req: Request, res: Response) {
                 imagePath: zone.supervisor.profile?.pf_image?.im_path || null
             }
         }))
-        res.send(result)
+        res.status(200).send(result)
+        return
     } catch (err) {
         res.status(500)
+        return
     }
 }

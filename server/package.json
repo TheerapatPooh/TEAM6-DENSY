@@ -1,11 +1,14 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.ts",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "start": "ts-node-dev index.ts",
-    "seed": "ts-node-dev prisma/seed.ts",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc && tsc-alias",
+    "seed": "ts-node-dev src/prisma/seed.ts",
     "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json && ts-node eslint-report.ts"
   },
   "author": "TEAM-6",
@@ -52,7 +55,9 @@
     "prisma": "^5.19.1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.6.2",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
     "typescript-eslint": "^8.5.0"
   }
 }
