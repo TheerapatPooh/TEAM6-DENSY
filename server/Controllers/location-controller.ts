@@ -5,7 +5,7 @@ export async function getZone(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role;
         if (userRole !== 'admin' && userRole !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Admins only" });
+             res.status(403).json({ message: "Access Denied: Admins only" });
         }
         const zoneId = parseInt(req.params.id, 10)
         const zone = await prisma.zone.findUnique({
@@ -23,7 +23,7 @@ export async function getZone(req: Request, res: Response) {
             }
         })
         if (!zone) {
-            return res.status(404)
+             res.status(404)
         }
         const result = {
             id: zone.ze_id,
@@ -48,7 +48,7 @@ export async function getAllZones(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role;
         if (userRole !== 'admin' && userRole !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Admins only" });
+             res.status(403).json({ message: "Access Denied: Admins only" });
         }
         const allZone = await prisma.zone.findMany({
             include: {
@@ -64,7 +64,7 @@ export async function getAllZones(req: Request, res: Response) {
             }
         })
         if (!allZone) {
-            return res.status(404)
+             res.status(404)
         }
 
         const result = allZone.map((zone) => ({

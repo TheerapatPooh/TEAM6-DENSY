@@ -46,7 +46,7 @@ export async function getPreset(req: Request, res: Response) {
         })
 
         if (!preset) {
-            return res.status(404)
+             res.status(404)
         }
         const result = {
             id: preset.ps_id,
@@ -138,7 +138,7 @@ export async function getAllPresets(req: Request, res: Response) {
         })
 
         if (!presets.length) {
-            return res.status(404)
+             res.status(404)
         }
 
         const result = presets.map((preset: any) => ({

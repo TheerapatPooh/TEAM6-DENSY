@@ -15,7 +15,7 @@ export async function getPatrol(req: Request, res: Response) {
         const patrolId = parseInt(req.params.id, 10)
 
         if (role !== 'admin' && role !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
+             res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
         }
 
         let patrol: any
@@ -88,7 +88,7 @@ export async function getPatrol(req: Request, res: Response) {
         }
 
         if (!patrol) {
-            return res.status(404)
+             res.status(404)
         }
 
         const result = {
@@ -176,7 +176,7 @@ export async function getAllPatrols(req: Request, res: Response) {
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         if (role !== 'admin' && role !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Admins only" })
+             res.status(403).json({ message: "Access Denied: Admins only" })
         }
         let allPatrols: any
 
@@ -326,12 +326,12 @@ export async function createPatrol(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role
         if (userRole !== 'admin' && userRole !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Admins only" })
+             res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const { date, presetId, checklists } = req.body
 
         if (!date || !presetId || !checklists) {
-            return res.status(400)
+             res.status(400)
         }
 
         const newPatrol = await prisma.patrol.create({
@@ -387,23 +387,23 @@ export async function startPatrol(req: Request, res: Response) {
         const { status, checklist } = req.body
 
         const isUserInspector = checklist.some((checklistObj: any) => {
-            return checklistObj.inspector.id === userId;
+             checklistObj.inspector.id === userId;
         });
 
         if (!isUserInspector) {
-            return res.status(403).json({ message: "You are not authorized to start this patrol. Only assigned inspectors can start the patrol." });
+             res.status(403).json({ message: "You are not authorized to start this patrol. Only assigned inspectors can start the patrol." });
         }
 
         if (role !== 'admin' && role !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied" })
+             res.status(403).json({ message: "Access Denied" })
         }
 
         if (!status || !checklist) {
-            return res.status(400)
+             res.status(400)
         }
 
         if (status !== 'scheduled') {
-            return res.status(403).json({ message: "Cannot start patrol." });
+             res.status(403).json({ message: "Cannot start patrol." });
         }
 
         const updatePatrol = await prisma.patrol.update({
@@ -455,24 +455,24 @@ export async function finishPatrol(req: Request, res: Response) {
         const { status, checklist, result } = req.body
 
         if (role !== 'admin' && role !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied" })
+             res.status(403).json({ message: "Access Denied" })
         }
 
         const isUserInspector = checklist.some((checklistObj: any) => {
-            return checklistObj.inspector.id === userId;
+             checklistObj.inspector.id === userId;
         });
 
         if (!isUserInspector) {
-            return res.status(403).json({ message: "You are not authorized to finish this patrol. Only assigned inspectors can start the patrol." });
+             res.status(403).json({ message: "You are not authorized to finish this patrol. Only assigned inspectors can start the patrol." });
         }
 
 
         if (!checklist || !result) {
-            return res.status(400).json({ message: "Invalid Data" })
+             res.status(400).json({ message: "Invalid Data" })
         }
 
         if (status !== 'on_going') {
-            return res.status(403).json({ message: "Cannot finish patrol." });
+             res.status(403).json({ message: "Cannot finish patrol." });
         }
 
         const updatePatrol = await prisma.patrol.update({
@@ -547,7 +547,7 @@ export async function updatePatrolStatus(req: Request, res: Response) {
 
         // Validate input
         if (!patrolId || !status) {
-            return res.status(400).json({ message: "Patrol ID and status are required." });
+             res.status(400).json({ message: "Patrol ID and status are required." });
         }
 
         // Update the patrol status in the database
@@ -597,7 +597,7 @@ export async function commentPatrol(req: Request, res: Response) {
 
         // ตรวจสอบสิทธิ์ว่าเป็น Inspector หรือไม่
         if (role !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Inspectors only" });
+             res.status(403).json({ message: "Access Denied: Inspectors only" });
         }
 
         // รับข้อมูลจาก request body
@@ -605,7 +605,7 @@ export async function commentPatrol(req: Request, res: Response) {
 
         // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
         if (!patrolId || !message || !checklist || !patrolResultId) {
-            return res.status(400).json({ message: "Bad Request: Missing required fields" });
+             res.status(400).json({ message: "Bad Request: Missing required fields" });
         }
 
         // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
@@ -620,7 +620,7 @@ export async function commentPatrol(req: Request, res: Response) {
             }
         });
         if (!validPatrol) {
-            return res.status(404).json({ message: "Patrol or checklist not found" });
+             res.status(404).json({ message: "Patrol or checklist not found" });
         }
 
         // รับ message เข้ามา และเชื่อมกับ PatrolResult

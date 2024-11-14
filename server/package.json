@@ -4,8 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsc",
-    "start": "npm run build && node dist/index.js",
+    "start": "ts-node-dev index.ts",
     "seed": "ts-node-dev prisma/seed.ts",
     "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json && ts-node eslint-report.ts"
   },

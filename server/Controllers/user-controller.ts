@@ -16,7 +16,7 @@ export async function getUser(req: Request, res: Response) {
         });
 
         if (role !== 'admin') {
-            return res.status(403).json({ message: "Access Denied: Admins only" });
+             res.status(403).json({ message: "Access Denied: Admins only" });
         }
 
         if (user) {
@@ -30,13 +30,13 @@ export async function getUser(req: Request, res: Response) {
                 createdAt: user.us_created_at.toISOString(),
             };
 
-            return res.status(200).json(result);
+             res.status(200).json(result);
         } else {
-            return res.status(404).json({ message: "User not found" });
+             res.status(404).json({ message: "User not found" });
         }
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "Internal Server Error", error });
+         res.status(500).json({ message: "Internal Server Error", error });
     }
 }
 
@@ -44,7 +44,7 @@ export async function getAllUsers(req: Request, res: Response) {
     try {
         const role = (req as any).user.role
         if (role !== 'admin') {
-            return res.status(403).json({ message: "Access Denied: Admins only" })
+             res.status(403).json({ message: "Access Denied: Admins only" })
         }
         const allUsers = await prisma.user.findMany()
 
@@ -72,7 +72,7 @@ export async function createUser(req: Request, res: Response) {
 
         const userRole = (req as any).user.role
         if (userRole !== 'admin') {
-            return res.status(403).json({ message: "Access Denied: Admins only" })
+             res.status(403).json({ message: "Access Denied: Admins only" })
         }
         let { username, email, password, role, department }: User = req.body
         const hashPassword = await bcrypt.hash(password, 10)
@@ -142,7 +142,7 @@ export async function updateProfile(req: Request, res: Response) {
         });
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+             res.status(404).json({ error: 'User not found' });
         }
 
         if (imagePath && user.profile?.pf_image) {
@@ -234,7 +234,7 @@ export async function getProfile(req: Request, res: Response) {
         }
 
         if (!user) {
-            return res.status(404)
+             res.status(404)
         }
 
         const profile = user.profile || null
@@ -317,7 +317,7 @@ export async function updateUser(req: Request, res: Response) {
 
         // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
         if (loggedInUserId !== id && loggedInUserRole !== 'admin') {
-            return res.status(403).json({ message: "Access Denied: You must be the owner of this account or an admin" });
+             res.status(403).json({ message: "Access Denied: You must be the owner of this account or an admin" });
         }
 
         const updateData: any = {
@@ -360,7 +360,7 @@ export async function deleteUser(req: Request, res: Response) {
         const role = (req as any).user.role;
 
         if (role !== 'admin') {
-            return res.status(403).json({ message: "Access Denied: Admin only" });
+             res.status(403).json({ message: "Access Denied: Admin only" });
         }
 
         const user = await prisma.user.findUnique({
@@ -369,7 +369,7 @@ export async function deleteUser(req: Request, res: Response) {
         });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+             res.status(404).json({ message: 'User not found' });
         }
 
         // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่

@@ -26,13 +26,13 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" })
+       res.status(401).json({ message: "Invalid username or password" })
     }
 
     const passwordMatch = await bcrypt.compare(password, user.us_password)
 
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid username or password" })
+       res.status(401).json({ message: "Invalid username or password" })
     }
     const token = jwt.sign({ userId: user.us_id, role: user.us_role }, process.env.JWT_SECRET, { expiresIn: "1h" })
     // Set HttpOnly cookie with the token
@@ -69,21 +69,24 @@ export async function logout(req: Request, res: Response) {
   }
 }
 
-export function authenticateUser(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies.authToken
+export function authenticateUser(req: Request, res: Response, next: NextFunction): void {
+  const token = req.cookies.authToken;
 
   if (!token) {
-    return res.status(401).json({ message: "Access Denied, No Token Provided" })
+    res.status(401).json({ message: "Access Denied, No Token Provided" });
+    ; // หยุดการทำงานต่อ
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    req.user = decoded
-    next();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next(); // ดำเนินการต่อไปยัง middleware ถัดไป
   } catch (error) {
-    return res.status(400).json({ message: "Invalid Token" })
+    res.status(400).json({ message: "Invalid Token" });
+    ;
   }
 }
+
 
 
 
@@ -147,7 +150,7 @@ export async function createNotification({ nt_message, nt_type, nt_url, nt_us_id
     const io = getIOInstance();
     io.to(nt_us_id).emit('new_notification', notification);
 
-    return notification;
+     notification;
   } catch (error) {
     console.error("Error creating notification", error);
   }
