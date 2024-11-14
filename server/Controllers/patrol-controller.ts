@@ -325,28 +325,20 @@ export async function getAllPatrols(req: Request, res: Response) {
 
 export async function createPatrol(req: Request, res: Response) {
     try {
-        const userRole = (req as any).user.role;
+        const userRole = (req as any).user.role
         if (userRole !== 'admin' && userRole !== 'inspector') {
-            return res.status(403).json({ message: "Access Denied: Admins only" });
+            return res.status(403).json({ message: "Access Denied: Admins only" })
         }
-
-        const { date, presetId, checklists } = req.body;
+        const { date, presetId, checklists } = req.body
 
         if (!date || !presetId || !checklists) {
-            return res.status(400).json({ message: "Missing required fields" });
+            return res.status(400)
         }
-
-        const patrolDate = new Date(date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        patrolDate.setHours(0, 0, 0, 0);
-
-        const status = patrolDate.getTime() === today.getTime() ? "scheduled" : "pending";
 
         const newPatrol = await prisma.patrol.create({
             data: {
-                pt_date: patrolDate,
-                pt_status: status,
+                pt_date: new Date(date),
+                pt_status: "pending",
                 pt_ps_id: parseInt(presetId, 10),
             },
         });
@@ -354,7 +346,7 @@ export async function createPatrol(req: Request, res: Response) {
         const notifiedInspectors = new Set<number>();
 
         for (const checklist of checklists) {
-            const { checklistId, inspectorId } = checklist;
+            const { checklistId, inspectorId } = checklist
 
             if (!checklistId || !inspectorId) {
                 continue
@@ -381,12 +373,12 @@ export async function createPatrol(req: Request, res: Response) {
             }
         }
 
-        res.status(201).json(newPatrol);
+        res.status(201).json(newPatrol)
 
     } catch (err) {
+        res.status(500)
     }
 }
-
 
 export async function startPatrol(req: Request, res: Response) {
     try {
