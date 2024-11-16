@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
-    "seed": "ts-node-dev src/prisma/seed.ts",
+    "seed": "node dist/Utils/seed.js",
     "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json && ts-node eslint-report.ts"
   },
   "author": "TEAM-6",
@@ -18,7 +18,7 @@
     "@faker-js/faker": "^9.2.0",
     "@prisma/client": "^5.22.0",
     "axios": "^1.7.7",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@eslint/js": "^9.10.0",
     "@types/axios": "^0.14.4",
-    "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",

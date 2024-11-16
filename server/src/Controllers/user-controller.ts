@@ -1,6 +1,6 @@
 import { prisma } from '@Utils/database.js'
 import { Request, response, Response } from 'express'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { User } from '@Utils/type.js'
 import { faker } from '@faker-js/faker'
 import fs from 'fs'

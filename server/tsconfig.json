@@ -4,7 +4,7 @@
     "paths": {
       "@/*": ["./*"],
       "@Controllers/*": ["src/Controllers/*"],
-      "@prisma/*": ["src/prisma/*"],
+      "@prisma/*": ["prisma/*"],
       "@Routes/*": ["src/Routes/*"],
       "@tests/*": ["src/tests/*"],
       "@uploads/*": ["src/uploads/*"],
