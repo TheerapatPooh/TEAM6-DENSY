@@ -2,12 +2,13 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",    
+    "build": "next build",
     "start": "next start",
     "server": "node server",
-    "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json && node --loader ts-node/esm eslint-report.ts"
+    "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json &&  node --loader ts-node/esm eslint-report.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
