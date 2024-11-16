@@ -335,10 +335,16 @@ export async function createPatrol(req: Request, res: Response) {
             return res.status(400)
         }
 
+        const patrolDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        patrolDate.setHours(0, 0, 0, 0);
+
+        const status = patrolDate.getTime() === today.getTime() ? "scheduled" : "pending";
         const newPatrol = await prisma.patrol.create({
             data: {
                 pt_date: new Date(date),
-                pt_status: "pending",
+                pt_status: status,
                 pt_ps_id: parseInt(presetId, 10),
             },
         });

@@ -83,6 +83,10 @@ export default function PatrolChecklist({
       }
     }
   };
+  useEffect(()=>{
+    getPatrolData();
+    
+  },[])
 
   const checkStatus = (itemId: number, zoneId: number) => {
     const result = results.find(
@@ -90,7 +94,7 @@ export default function PatrolChecklist({
     );
     return result ? result.status : null;
   };
-
+  
   useEffect(() => {
     if (results.length > 0) {
       const initialStatus = results.reduce((acc, result) => {
@@ -199,7 +203,7 @@ export default function PatrolChecklist({
   };
 
   useEffect(() => {
-    getPatrolData();
+   
 
     if (patrolResult && checklist.item) {
       const initialStatus = checklist.item.reduce((acc, item) => {

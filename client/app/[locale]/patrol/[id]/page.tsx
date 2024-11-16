@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { exportData } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { useSocket } from "@/components/socket-provider"
+import { useSocket } from "@/components/socket-provider";
 import { Progress } from "@/components/ui/progress";
 import { SocketIndicator } from "@/components/socket-indicator";
 
@@ -26,6 +26,10 @@ export default function Page() {
   const [patrol, setPatrol] = useState<Patrol | null>(null);
   const [results, setResults] = useState<PatrolResult[]>([]);
   const [otherResults, setOtherResults] = useState<PatrolResult[]>([]);
+
+  const totalResults = patrol?.result?.length || 0;
+  const checkedResults = patrol?.result?.filter(res => res.status !== null).length || 0;
+  const canFinish = checkedResults === totalResults; 
 
   const [profile, setProfile] = useState<User>();
   const { socket, isConnected } = useSocket();
@@ -40,6 +44,16 @@ export default function Page() {
     if (params.id) {
       try {
         const data = await fetchData("get", `/patrol/${params.id}`, true);
+        console.log("patrolID : "+data.id)
+        const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
+        console.log("saveresult : "+ savedResults) 
+        const otherResults = localStorage.getItem(`otherResults_${data.id}`); 
+        if (savedResults) {
+          setResults(JSON.parse(savedResults));
+        }
+        if (otherResults) {
+          setOtherResults(JSON.parse(otherResults));
+        }
         setPatrol(data);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -75,10 +89,12 @@ export default function Page() {
     if (!patrol) return 0;
 
     const totalResults = patrol.result.length;
-    const checkedResults = patrol.result.filter((res) => res.status !== null).length;
+    const checkedResults = patrol.result.filter(
+      (res) => res.status !== null
+    ).length;
 
     if (totalResults === 0) return 0;
-    console.log("total: ", totalResults, " check: ", checkedResults)
+    console.log("total: ", totalResults, " check: ", checkedResults);
     return (checkedResults / totalResults) * 100;
   };
 
@@ -90,11 +106,15 @@ export default function Page() {
 
       newResults.forEach((newResult) => {
         const existingIndex = updatedResults.findIndex(
-          (res) => res.itemId === newResult.itemId && res.zoneId === newResult.zoneId
+          (res) =>
+            res.itemId === newResult.itemId && res.zoneId === newResult.zoneId
         );
 
         if (existingIndex !== -1) {
-          updatedResults[existingIndex] = { ...updatedResults[existingIndex], ...newResult };
+          updatedResults[existingIndex] = {
+            ...updatedResults[existingIndex],
+            ...newResult,
+          };
         }
       });
 
@@ -102,14 +122,14 @@ export default function Page() {
         ...prevPatrol,
         result: updatedResults,
       };
-      console.log('update', updatedPatrol)
+      console.log("update", updatedPatrol);
       return updatedPatrol;
     });
   };
 
   const toggleLock = () => {
-    setLock((prevLock) => !prevLock)
-  }
+    setLock((prevLock) => !prevLock);
+  };
   const handleResult = (result: PatrolResult) => {
     setResults((prevResults) => {
       const existingIndex = prevResults.findIndex(
@@ -198,6 +218,7 @@ export default function Page() {
         console.error("Error finishing patrol:", error);
       }
     }
+    window.location.reload()
   };
   const getProfileData = async () => {
     try {
@@ -212,40 +233,38 @@ export default function Page() {
       try {
         await getProfileData();
         await getPatrolData();
-
-        const savedResults = localStorage.getItem('patrolResults');
-        const otherResults = localStorage.getItem('otherResults');
-        if (savedResults) {
-          setResults(JSON.parse(savedResults));
-        }
-        if (otherResults) {
-          setOtherResults(JSON.parse(otherResults));
-        }
+       
       } catch (error) {
         console.error("Error loading data: ", error);
       }
     };
     fetchData();
-    setMounted(true)
+    setMounted(true);
   }, []);
+  useEffect(() => {
+    if (patrol) {
+      console.log("patrolID", patrol.id); // Only log when patrol data is available
+    }
+  }, [patrol]); // This will run when `patrol` state is updated
+
 
   useEffect(() => {
     if (otherResults) {
       mergeResults(otherResults);
     }
-  }, [otherResults])
+  }, [otherResults]);
 
   useEffect(() => {
     if (socket && isConnected && patrol) {
       console.log("Connected to socket!");
-      socket.emit('join_room', patrol.id);
-      socket.on('patrol_result_update', (updatedResults) => {
-        localStorage.setItem('otherResults', JSON.stringify(updatedResults));
+      socket.emit("join_room", patrol.id);
+      socket.on("patrol_result_update", (updatedResults) => {
+        localStorage.setItem(`otherResults_${patrol?.id}`, JSON.stringify(updatedResults));
         const filteredResults = updatedResults.filter(
           (res: any) => res.inspectorId !== profile?.id
         );
         setOtherResults(filteredResults);
-        localStorage.getItem('otherResults');
+        localStorage.getItem(`otherResults_${patrol?.id}`);
 
         const combinedResults = [...results, ...filteredResults];
 
@@ -256,7 +275,10 @@ export default function Page() {
               result.zoneId === updatedResult.zoneId
           );
           if (existingIndex !== -1) {
-            combinedResults[existingIndex] = { ...combinedResults[existingIndex], ...updatedResult };
+            combinedResults[existingIndex] = {
+              ...combinedResults[existingIndex],
+              ...updatedResult,
+            };
           } else {
             combinedResults.push(updatedResult);
           }
@@ -275,14 +297,12 @@ export default function Page() {
   useEffect(() => {
     if (socket && isConnected && results.length > 0 && patrol) {
       console.log("Emitting result update:", results);
-      socket.emit('patrol_result_update', results, patrol.id);
-      localStorage.setItem('patrolResults', JSON.stringify(results));
+      socket.emit("patrol_result_update", results, patrol.id);
+      console.log("SetItemPR : "+ patrol.id)
+      localStorage.setItem(`patrolResults_${patrol?.id}`, JSON.stringify(results));
     }
   }, [results, socket, isConnected]);
 
-
-  console.log("patrol: ", patrol)
-  console.log("result: ", results)
   if (!patrol || !mounted) {
     return (
       <div>
@@ -292,13 +312,14 @@ export default function Page() {
   }
   return (
     <div className="p-4">
-      <SocketIndicator>
-
-      </SocketIndicator>
+      <SocketIndicator></SocketIndicator>
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center p-0 justify-center text-center gap-2">
-            <Button variant="ghost" className="flex hover:bg-secondary w-[40px] h-[40px]">
+            <Button
+              variant="ghost"
+              className="flex hover:bg-secondary w-[40px] h-[40px]"
+            >
               <span className="material-symbols-outlined text-card-foreground">
                 error
               </span>
@@ -430,25 +451,45 @@ export default function Page() {
                       iconName = "cached";
                       text = "Start";
                       disabled = true;
-                      handleFunction = () => { };
+                      handleFunction = () => {};
                       break;
                   }
                   return (
                     <div>
-                      {patrol.status === 'on_going' ? (
-                        allChecked ? (
-                          <Button variant={"secondary"} disabled={true} onClick={handleFinishPatrol}>
-                            <span className="material-symbols-outlined">lock</span>
-                            {t("Finish")}
-                          </Button>
-                        ) : (
-                          <Button variant={ lock ? 'secondary' : variant} disabled={disabled} onClick={toggleLock}>
-                            <span className="material-symbols-outlined">{lock ? "lock_open" : iconName }</span>
-                            {lock ? t('Unlock') : t('Lock')}
-                          </Button>
-                        )
-                      ) : null}
-                    </div>
+{patrol.status === 'on_going' ? (
+  allChecked ? (
+    <Button
+      variant="secondary"
+      disabled={!canFinish}
+      onClick={handleFinishPatrol}
+    >
+      <span className="material-symbols-outlined">lock</span>
+      {t("Finish")}
+    </Button>
+  ) : (
+    <Button
+      variant={lock ? "secondary" : variant}
+      disabled={disabled}
+      onClick={toggleLock}
+    >
+      <span className="material-symbols-outlined">
+        {lock ? "lock_open" : "lock"}
+      </span>
+      {lock ? t("Unlock") : t("Lock")}
+    </Button>
+  )
+) : patrol.status !== 'completed' ? (
+  <Button
+    variant="primary"
+    onClick={handleStartPatrol}
+  >
+    <span className="material-symbols-outlined">play_arrow</span>
+    {t("Start")}
+  </Button>
+) : null}
+
+</div>
+
                   );
                 })()}
               </div>
@@ -462,13 +503,14 @@ export default function Page() {
                         handleResult={handleResult}
                         results={results}
                         checklist={c}
-                        disabled={patrol.status === "on_going" && !lock ? false : true} 
+                        disabled={
+                          patrol.status === "on_going" && !lock ? false : true
+                        }
                         patrolResult={patrol.result}
                       />
                     ) : (
                       <div></div>
                     )}
-
                   </div>
                 ))}
               </div>
