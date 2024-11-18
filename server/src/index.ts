@@ -18,20 +18,20 @@ const PORT = process.env.SERVER_PORT
 
 app.use(cookieParser());
 app.use(corsMiddleware)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../../server/uploads')));
 app.use(bodyParse.json({ limit: '10mb' }))
 
 
 readdirSync(path.join(__dirname, 'Routes')).map(async (file) => {
-    const route = await import(`./Routes/${file}`);
-    app.use('/api', route.default || route);
-  });
+  const route = await import(`./Routes/${file}`);
+  app.use('/api', route.default || route);
+});
 
 const server = http.createServer(app)
 
 initSocketIO(server);
 
 server.listen(PORT || 4000, () => {
-    console.log(`Server is running at http://0.0.0.0:${PORT}`);
+  console.log(`Server is running at http://0.0.0.0:${PORT}`);
 });
 

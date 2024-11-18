@@ -44,7 +44,7 @@ COPY --from=base /app/server/package.json ./server/
 
 # Set environment variables (optional)
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV CLIENT_PORT=3000
 ENV SERVER_PORT=4000
 
 # Expose ports for client and server
