@@ -9,8 +9,8 @@ WORKDIR /app
 COPY client/package*.json ./client/
 WORKDIR /app/client
 RUN npm install
+RUN mkdir -p ./public
 COPY client ./
-# Build client using Next.js
 RUN npm run build
 
 # Server
