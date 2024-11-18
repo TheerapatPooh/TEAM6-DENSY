@@ -19,9 +19,6 @@ services:
       context: .
       dockerfile: .dockerfile
     restart: always
-    ports:
-      - "${CLIENT_PORT}:3000"
-      - "${SERVER_PORT}:4000"
     env_file:
       - ./server/.env
       - ./client/.env
