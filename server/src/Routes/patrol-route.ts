@@ -1,6 +1,6 @@
-import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, updatePatrolStatus, getPendingPatrols, commentPatrol, getCommentPatrol, schedulePatrolStatusUpdate } from "../Controllers/patrol-controller";
+import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, updatePatrolStatus, getPendingPatrols, commentPatrol, getCommentPatrol, schedulePatrolStatusUpdate } from "@Controllers/patrol-controller.js";
 import { Router } from 'express'
-import { authenticateUser } from "../Controllers/util-controller";
+import { authenticateUser } from "@Controllers/util-controller.js";
 const router = Router()
 
 router.get('/patrols', authenticateUser, getAllPatrols)
@@ -15,4 +15,4 @@ router.get('/patrol/comment/:id', authenticateUser, getCommentPatrol)
 
 schedulePatrolStatusUpdate();
 
-module.exports = router
+export default router
