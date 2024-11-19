@@ -1,7 +1,7 @@
 // util-controller.test.ts
 import { login, logout, authenticateUser } from '../Controllers/util-controller';
 import { prisma } from '../Utils/database';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 

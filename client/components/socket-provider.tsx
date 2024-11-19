@@ -26,8 +26,10 @@ export const SocketProvider = ({
     const [isConnected, setIsConnected] = useState(false)
 
     useEffect(() => {
-        const socketInstance = ClientIO(process.env.NEXT_PUBLIC_SERVER_URL, {
-            withCredentials: true     
+        const socketInstance = ClientIO(process.env.NEXT_PUBLIC_SOCKET_URL, {
+            withCredentials: true,
+            transports: ["websocket"],
+            secure: true
         })
 
         socketInstance.on("connect", () => {
@@ -38,7 +40,7 @@ export const SocketProvider = ({
             setIsConnected(false)
         })
 
-        setSocket(socketInstance)  
+        setSocket(socketInstance)
 
         return () => {
             socketInstance.disconnect()
