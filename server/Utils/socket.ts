@@ -18,6 +18,8 @@ export function initSocketIO(server: http.Server) {
         socket.on('join_room', (userId: string) => {
             socket.join(userId);
             console.log(`User ${userId} joined room: ${userId}`);
+            socket.broadcast.emit("new_user_joined", userId);
+
         });
 
         socket.on('patrol_result_update', (updatedResults, patrolId) => {
