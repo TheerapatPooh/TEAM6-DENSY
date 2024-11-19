@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
-    "seed": "node dist/Utils/seed.js",
+    "seed": "if exist dist (node dist/Utils/seed.js) else (tsx src/Utils/seed.ts)",
     "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json && tsx eslint-report.ts"
   },
   "author": "TEAM-6",
