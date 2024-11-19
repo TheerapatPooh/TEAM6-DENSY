@@ -1,17 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 
-import { users } from './data/users';
-import { checklists } from './data/checklists';
-import { item_zones } from './data/item-zones';
-import { items } from './data/items';
-import { locations } from './data/locations';
-import { patrol_checklists } from './data/patrol-checklists';
-import { patrols } from './data/patrols';
-import { preset_checklists } from './data/preset-checklist';
-import { presets } from './data/presets';
-import { profiles } from './data/profiles';
-import { zones } from './data/zones';
-import { images } from './data/images';
+import { users } from './data/users.js';
+import { checklists } from './data/checklists.js';
+import { item_zones } from './data/item-zones.js';
+import { items } from './data/items.js';
+import { locations } from './data/locations.js';
+import { patrol_checklists } from './data/patrol-checklists.js';
+import { patrols } from './data/patrols.js';
+import { preset_checklists } from './data/preset-checklist.js';
+import { presets } from './data/presets.js';
+import { profiles } from './data/profiles.js';
+import { zones } from './data/zones.js';
+import { images } from './data/images.js';
 
 
 const prisma = new PrismaClient();

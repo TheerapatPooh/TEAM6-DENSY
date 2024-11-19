@@ -1,10 +1,9 @@
-import bcrypt from "bcrypt";
-import { prisma } from "../Utils/database";
+import bcrypt from "bcryptjs";
+import { prisma } from "@Utils/database.js";
 import { NextFunction, Request, Response } from "express";
-import { JwtPayload } from 'jsonwebtoken'
-import multer, { Multer } from 'multer';
-const jwt = require('jsonwebtoken')
-import { getIOInstance } from '../Utils/socket';
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import multer from 'multer';
+import { getIOInstance } from '@Utils/socket.js';
 import nodemailer from 'nodemailer';
 
 
@@ -26,15 +25,18 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" })
+      res.status(401).json({ message: "Invalid username or password" })
+      return
     }
 
     const passwordMatch = await bcrypt.compare(password, user.us_password)
 
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid username or password" })
+      res.status(401).json({ message: "Invalid username or password" })
+      return
     }
-    const token = jwt.sign({ userId: user.us_id, role: user.us_role }, process.env.JWT_SECRET, { expiresIn: "1h" })
+    const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey"; 
+    const token = jwt.sign({ userId: user.us_id, role: user.us_role }, jwtSecret, { expiresIn: "1h" })
     // Set HttpOnly cookie with the token
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
     const isProduction = process.env.NODE_ENV === 'production';
@@ -73,15 +75,18 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
   const token = req.cookies.authToken
 
   if (!token) {
-    return res.status(401).json({ message: "Access Denied, No Token Provided" })
+    res.status(401).json({ message: "Access Denied, No Token Provided" })
+    return 
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey"
+    const decoded = jwt.verify(token, jwtSecret)
     req.user = decoded
     next();
   } catch (error) {
-    return res.status(400).json({ message: "Invalid Token" })
+    res.status(400).json({ message: "Invalid Token" })
+    return 
   }
 }
 
