@@ -28,6 +28,7 @@ import {
   ItemType,
   Patrol,
   PatrolResult,
+  User,
   Zone,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
@@ -45,9 +46,11 @@ import {
 // TYPE
 
 interface PatrolChecklistProps {
+  user:User;
   checklist: Checklist;
   disabled: boolean;
   handleResult: (result: {
+    inspectorId:number;
     itemId: number;
     zoneId: number;
     status: boolean;
@@ -57,6 +60,7 @@ interface PatrolChecklistProps {
 }
 
 export default function PatrolChecklist({
+  user,
   checklist,
   disabled,
   handleResult,
@@ -83,6 +87,10 @@ export default function PatrolChecklist({
       }
     }
   };
+  useEffect(()=>{
+    getPatrolData();
+    
+  },[])
 
   const checkStatus = (itemId: number, zoneId: number) => {
     const result = results.find(
@@ -90,6 +98,18 @@ export default function PatrolChecklist({
     );
     return result ? result.status : null;
   };
+  
+  useEffect(() => {
+    if (results.length > 0) {
+      const initialStatus = results.reduce((acc, result) => {
+        acc[`${result.itemId}-${result.zoneId}`] = result.status;
+        return acc;
+      }, {} as { [key: string]: boolean | null });
+
+      setResultStatus(initialStatus);
+    }
+  }, [results]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -187,7 +207,7 @@ export default function PatrolChecklist({
   };
 
   useEffect(() => {
-    getPatrolData();
+   
 
     if (patrolResult && checklist.item) {
       const initialStatus = checklist.item.reduce((acc, item) => {
@@ -208,12 +228,14 @@ export default function PatrolChecklist({
     }
   }, [checklist, patrolResult]);
 
-  const handleClick = (itemId: number, zoneId: number, status: boolean) => {
-    handleResult({ itemId, zoneId, status });
-    setResultStatus((prev) => ({
-      ...prev,
-      [`${itemId}-${zoneId}`]: status,
-    }));
+  const handleClick = (inspectorId:number,itemId: number, zoneId: number, status: boolean) => {
+    if (!disabled) {
+      handleResult({inspectorId, itemId, zoneId, status });
+      setResultStatus((prev) => ({
+        ...prev,
+        [`${itemId}-${zoneId}`]: status,
+      }));
+    }
   };
 
   return (
@@ -279,39 +301,35 @@ export default function PatrolChecklist({
                                 <Button
                                   variant={
                                     resultStatus[`${item.id}-${zone.id}`] ===
-                                    true
+                                      true
                                       ? "success"
                                       : "secondary"
                                   }
-                                  className={`w-[155px] ${
-                                    resultStatus === null
-                                      ? "bg-secondary text-card-foreground"
+                                  className={`w-[155px] ${resultStatus === null
+                                    ? "bg-secondary text-card-foreground"
+                                    : ""
+                                    }
+                                                                    ${existingResult?.status ===
+                                      true
+                                      ? "bg-[#27BC31] hover:bg-[#27BC31]  cursor-not-allowed opacity-50"
                                       : ""
-                                  }
-                                                                    ${
-                                                                      existingResult?.status ===
-                                                                      true
-                                                                        ? "bg-green-500 hover:bg-green-500  cursor-not-allowed opacity-50"
-                                                                        : ""
-                                                                    }
-                                                                    ${
-                                                                      existingResult?.status ===
-                                                                      false
-                                                                        ? "bg-secondary hover:bg-secondary  cursor-not-allowed opacity-50"
-                                                                        : ""
-                                                                    }
-                                                                    ${
-                                                                      disabled
-                                                                        ? " cursor-not-allowed opacity-50"
-                                                                        : ""
-                                                                    }
+                                    }
+                                                                    ${existingResult?.status ===
+                                      false
+                                      ? "bg-secondary hover:bg-secondary  cursor-not-allowed opacity-50"
+                                      : ""
+                                    }
+                                                                    ${disabled
+                                      ? " cursor-not-allowed opacity-50"
+                                      : ""
+                                    }
                                                                     `}
                                   onClick={() => {
                                     if (
                                       (!existingResult?.status === false ||
-                                      existingResult?.status === null)
+                                        existingResult?.status === null)
                                     ) {
-                                      handleClick(item.id, zone.id, true);
+                                      handleClick(user.id,item.id, zone.id, true);
                                     }
                                   }}
                                 >
@@ -323,41 +341,37 @@ export default function PatrolChecklist({
                                 <Button
                                   variant={
                                     resultStatus[`${item.id}-${zone.id}`] ===
-                                    false
+                                      false
                                       ? "fail"
                                       : "secondary"
                                   }
-                                  className={`w-[155px] ${
-                                    resultStatus === null
-                                      ? "bg-secondary text-card-foreground"
+                                  className={`w-[155px] ${resultStatus === null
+                                    ? "bg-secondary text-card-foreground"
+                                    : ""
+                                    }
+                                                                    ${existingResult?.status ===
+                                      false
+                                      ? "bg-destructive hover:bg-destructive  cursor-not-allowed opacity-50"
                                       : ""
-                                  }
-                                                                    ${
-                                                                      existingResult?.status ===
-                                                                      false
-                                                                        ? "bg-red-500 hover:bg-red-500  cursor-not-allowed opacity-50"
-                                                                        : ""
-                                                                    }
-                                                                    ${
-                                                                      existingResult?.status ===
-                                                                      true
-                                                                        ? "bg-secondary hover:bg-secondary  cursor-not-allowed opacity-50"
-                                                                        : ""
-                                                                    }
-                                                                    ${
-                                                                      disabled
-                                                                        ? " cursor-not-allowed opacity-50 "
-                                                                        : ""
-                                                                    }
+                                    }
+                                                                    ${existingResult?.status ===
+                                      true
+                                      ? "bg-secondary hover:bg-secondary  cursor-not-allowed opacity-50"
+                                      : ""
+                                    }
+                                                                    ${disabled
+                                      ? " cursor-not-allowed opacity-50 "
+                                      : ""
+                                    }
                                                                     `}
-                                                                    onClick={() => {
-                                                                      if (existingResult === null || existingResult?.status === null) {
-                                                                        handleClick(item.id, zone.id, false);
-                                                                      } else if (existingResult?.status === false) {
-                                                                        handleClick(item.id, zone.id, false);
-                                                                      }
-                                                                    }}
-                                                                    
+                                  onClick={() => {
+                                    if (existingResult === null || existingResult?.status === null) {
+                                      handleClick(user.id,item.id, zone.id, false);
+                                    } else if (existingResult?.status === false) {
+                                      handleClick(user.id,item.id, zone.id, false);
+                                    }
+                                  }}
+
                                 >
                                   <span className="material-symbols-outlined">
                                     close
@@ -369,204 +383,203 @@ export default function PatrolChecklist({
 
                             {(status === false ||
                               existingResult?.status === false) && (
-                              <div className="mt-4 flex flex-col items-start">
-                                <AlertDialog>
-                                  <AlertDialogTrigger
-                                    className={
-                                      existingResult ? "cursor-not-allowed" : ""
-                                    }
-                                    disabled={existingResult?.status === false}
-                                  >
-                                    <Button
-                                      variant={"outline"}
-                                      size={"lg"}
-                                      disabled={
-                                        existingResult?.status === false
+                                <div className="mt-4 flex flex-col items-start">
+                                  <AlertDialog>
+                                    <AlertDialogTrigger
+                                      className={
+                                        existingResult ? "cursor-not-allowed" : ""
                                       }
+                                      disabled={existingResult?.status === false}
                                     >
-                                      <span className="material-symbols-outlined ">
-                                        campaign
-                                      </span>
-                                      {t("Report")}
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="text-2xl font-semibold">
-                                        Report Defect
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                        Please provide details for the defect
-                                      </AlertDialogDescription>
-                                      <div className="flex flex-col justify-start">
-                                        <p className="font-semibold">
-                                          {item.name}
-                                        </p>
-                                        <div className="flex items-center">
-                                          <span className="material-symbols-outlined text-2xl me-2">
-                                            location_on
-                                          </span>
-                                          <p className="font-semibold me-2">
-                                            Zone
-                                          </p>
-                                          <p>{zone.name}</p>
-                                        </div>
-                                        <div className="flex items-center">
-                                          <span className="material-symbols-outlined text-2xl me-2">
-                                            badge
-                                          </span>
-                                          <p className="font-semibold me-2">
-                                            Supervisor
-                                          </p>
-                                          <p>{zone.supervisor.profile.name}</p>
-                                        </div>
-                                      </div>
-                                    </AlertDialogHeader>
-                                    <Textarea
-                                      onChange={handleDefectDescription}
-                                      className="h-[100px] mt-3 bg-secondary border-none"
-                                      placeholder="Details..."
-                                    />
-                                    <div className="flex flex-row justify-between gap-2">
-                                      <div
-                                        className="flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center"
-                                        onDragOver={handleDragOver}
-                                        onDrop={handleDrop}
+                                      <Button
+                                        variant={"outline"}
+                                        size={"lg"}
+                                        disabled={
+                                          existingResult?.status === false
+                                        }
                                       >
-                                        <div className="flex p-8 flex-col items-center justify-center">
-                                          <span className="material-symbols-outlined text-[48px] font-normal">
-                                            upload
-                                          </span>
-
-                                          <div className="text-center mt-2">
-                                            Drag & Drop file
+                                        <span className="material-symbols-outlined ">
+                                          campaign
+                                        </span>
+                                        {t("Report")}
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-2xl font-semibold">
+                                          Report Defect
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                                          Please provide details for the defect
+                                        </AlertDialogDescription>
+                                        <div className="flex flex-col justify-start">
+                                          <p className="font-semibold">
+                                            {item.name}
+                                          </p>
+                                          <div className="flex items-center">
+                                            <span className="material-symbols-outlined text-2xl me-2">
+                                              location_on
+                                            </span>
+                                            <p className="font-semibold me-2">
+                                              Zone
+                                            </p>
+                                            <p>{zone.name}</p>
                                           </div>
-                                          <div className="text-center mt-1">
-                                            Or
-                                          </div>
-                                          <div className="mt-2">
-                                            <input
-                                              type="file"
-                                              id="file-input"
-                                              style={{ display: "none" }}
-                                              multiple
-                                              onChange={handleFileChange}
-                                            />
-                                            <Button
-                                              variant={"outline"}
-                                              onClick={handleButtonClick}
-                                            >
-                                              <span className="material-symbols-outlined mr-1">
-                                                browser_updated
-                                              </span>
-                                              Browse
-                                            </Button>
+                                          <div className="flex items-center">
+                                            <span className="material-symbols-outlined text-2xl me-2">
+                                              badge
+                                            </span>
+                                            <p className="font-semibold me-2">
+                                              Supervisor
+                                            </p>
+                                            <p>{zone.supervisor.profile.name}</p>
                                           </div>
                                         </div>
-                                      </div>
-                                      <ScrollArea className="  h-72 overflow-y-auto gap-5 rounded-md w-full">
-                                        <div className="flex flex-col gap-2 w-[215px]">
-                                          {selectedFiles.map((file, index) => (
-                                            <div
-                                              key={index}
-                                              className=" flex p-2 w-full bg-secondary rounded-md"
-                                            >
-                                              <span className="material-symbols-outlined">
-                                                image
-                                              </span>
-                                              <div className="flex items-center gap-2 ">
-                                                <div className="flex flex-col">
-                                                  <TooltipProvider>
-                                                    <Tooltip>
-                                                      <TooltipTrigger asChild>
-                                                        <div className=" truncate w-[145px]">
-                                                          {file.name}
-                                                        </div>
-                                                      </TooltipTrigger>
-                                                      <TooltipContent className="bg-foreground">
-                                                        <div className=" w-full ">
-                                                          {file.name}
-                                                        </div>
-                                                      </TooltipContent>
-                                                    </Tooltip>
-                                                  </TooltipProvider>
+                                      </AlertDialogHeader>
+                                      <Textarea
+                                        onChange={handleDefectDescription}
+                                        className="h-[100px] mt-3 bg-secondary border-none"
+                                        placeholder="Details..."
+                                      />
+                                      <div className="flex flex-row justify-between gap-2">
+                                        <div
+                                          className="flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center"
+                                          onDragOver={handleDragOver}
+                                          onDrop={handleDrop}
+                                        >
+                                          <div className="flex p-8 flex-col items-center justify-center">
+                                            <span className="material-symbols-outlined text-[48px] font-normal">
+                                              upload
+                                            </span>
 
-                                                  <p className="text-sm font-semibold text-muted-foreground">
-                                                    {(file.size / 1024).toFixed(
-                                                      2
-                                                    )}{" "}
-                                                    KB
-                                                  </p>
-                                                </div>
-                                              </div>
+                                            <div className="text-center mt-2">
+                                              Drag & Drop file
+                                            </div>
+                                            <div className="text-center mt-1">
+                                              Or
+                                            </div>
+                                            <div className="mt-2">
+                                              <input
+                                                type="file"
+                                                id="file-input"
+                                                style={{ display: "none" }}
+                                                multiple
+                                                onChange={handleFileChange}
+                                              />
                                               <Button
-                                                variant={"ghost"}
-                                                className="w-[40px] h-[40px]"
-                                                onClick={() =>
-                                                  handleRemoveFile(index)
-                                                }
+                                                variant={"outline"}
+                                                onClick={handleButtonClick}
                                               >
-                                                <span className="material-symbols-outlined text-destructive">
-                                                  delete
+                                                <span className="material-symbols-outlined mr-1">
+                                                  browser_updated
                                                 </span>
+                                                Browse
                                               </Button>
                                             </div>
-                                          ))}
+                                          </div>
                                         </div>
-                                      </ScrollArea>
-                                    </div>
+                                        <ScrollArea className="  h-72 overflow-y-auto gap-5 rounded-md w-full">
+                                          <div className="flex flex-col gap-2 w-[215px]">
+                                            {selectedFiles.map((file, index) => (
+                                              <div
+                                                key={index}
+                                                className=" flex p-2 w-full bg-secondary rounded-md"
+                                              >
+                                                <span className="material-symbols-outlined">
+                                                  image
+                                                </span>
+                                                <div className="flex items-center gap-2 ">
+                                                  <div className="flex flex-col">
+                                                    <TooltipProvider>
+                                                      <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                          <div className=" truncate w-[145px]">
+                                                            {file.name}
+                                                          </div>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="bg-foreground">
+                                                          <div className=" w-full ">
+                                                            {file.name}
+                                                          </div>
+                                                        </TooltipContent>
+                                                      </Tooltip>
+                                                    </TooltipProvider>
 
-                                    <AlertDialogFooter>
-                                      <div className="flex items-end justify-end gap-[10px]">
-                                        <AlertDialogCancel>
-                                          Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() =>
-                                            handleCreateDefect(
-                                              item.name,
-                                              defectDescription,
-                                              item.type,
-                                              checklist.inspector.id,
-                                              existingResult?.id ?? null,
-                                              selectedFiles
-                                            )
-                                          }
-                                          disabled={
-                                            !defectDescription ||
-                                            selectedFiles.length === 0 ||
-                                            disabled
-                                          }
-                                          className={`bg-primary hover:bg-primary/70 ${
-                                            !defectDescription ||
-                                            selectedFiles.length === 0
+                                                    <p className="text-sm font-semibold text-muted-foreground">
+                                                      {(file.size / 1024).toFixed(
+                                                        2
+                                                      )}{" "}
+                                                      KB
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                                <Button
+                                                  variant={"ghost"}
+                                                  className="w-[40px] h-[40px]"
+                                                  onClick={() =>
+                                                    handleRemoveFile(index)
+                                                  }
+                                                >
+                                                  <span className="material-symbols-outlined text-destructive">
+                                                    delete
+                                                  </span>
+                                                </Button>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </ScrollArea>
+                                      </div>
+
+                                      <AlertDialogFooter>
+                                        <div className="flex items-end justify-end gap-[10px]">
+                                          <AlertDialogCancel>
+                                            Cancel
+                                          </AlertDialogCancel>
+                                          <AlertDialogAction
+                                            onClick={() =>
+                                              handleCreateDefect(
+                                                item.name,
+                                                defectDescription,
+                                                item.type,
+                                                checklist.inspector.id,
+                                                existingResult?.id ?? null,
+                                                selectedFiles
+                                              )
+                                            }
+                                            disabled={
+                                              !defectDescription ||
+                                              selectedFiles.length === 0 ||
+                                              disabled
+                                            }
+                                            className={`bg-primary hover:bg-primary/70 ${!defectDescription ||
+                                              selectedFiles.length === 0
                                               ? "opacity-50 cursor-not-allowed"
                                               : ""
-                                          }`}
-                                        >
-                                          <span className="material-symbols-outlined text-2xl me-2">
-                                            send
-                                          </span>
-                                          Send
-                                        </AlertDialogAction>
-                                      </div>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                                <Textarea
-                                  className="h-[94px] mt-3 bg-secondary border-none"
-                                  placeholder={`${t("Comment")}...`}
-                                />
-                                <div className="flex justify-end w-full mt-2">
-                                  <Button variant={"primary"} size={"lg"}>
-                                    <span className="material-symbols-outlined me-2">
-                                      send
-                                    </span>
-                                    {t("Send")}
-                                  </Button>
+                                              }`}
+                                          >
+                                            <span className="material-symbols-outlined text-2xl me-2">
+                                              send
+                                            </span>
+                                            Send
+                                          </AlertDialogAction>
+                                        </div>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                  <Textarea
+                                    className="h-[94px] mt-3 bg-secondary border-none"
+                                    placeholder={`${t("Comment")}...`}
+                                  />
+                                  <div className="flex justify-end w-full mt-2">
+                                    <Button variant={"primary"} size={"lg"}>
+                                      <span className="material-symbols-outlined me-2">
+                                        send
+                                      </span>
+                                      {t("Send")}
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
                           </div>
                         );
                       })}

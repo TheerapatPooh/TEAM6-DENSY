@@ -72,11 +72,12 @@ export interface Preset {
 }
 
 export interface PatrolResult {
-    id: number;
+    inspectorId:number
+    id?: number;
     status: boolean;
     itemId: number;
     zoneId: number;
-    defectId: number | null;
+    defectId?: number | null;
 }
 
 export interface Patrol {
