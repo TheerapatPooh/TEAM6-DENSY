@@ -57,7 +57,9 @@
     "Back": "Back",
     "Start": "Start",
     "Finish": "Finish",
-    "Export": "Export"
+    "Export": "Export",
+    "Lock": "Lock",
+    "Unlock": "Unlock"
   },
   "Status": {
     "pending": "Pending",
