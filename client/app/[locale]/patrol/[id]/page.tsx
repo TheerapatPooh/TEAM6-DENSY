@@ -515,7 +515,7 @@ export default function Page() {
                       break;
                     case "on_going":
                       variant = "primary";
-                      iconName = "lock";
+                      iconName = "Check";
                       text = "Finish";
                       disabled = false;
                       handleFunction = () => {
@@ -562,7 +562,7 @@ export default function Page() {
                             </span>
                             {t(text)}
                           </Button>
-                        ) : !allChecked ? (
+                        ) : (
                           <Button
                             variant={lock ? "secondary" : variant}
                             disabled={disabled}
@@ -573,19 +573,8 @@ export default function Page() {
                             </span>
                             {lock ? t("Unlock") : t("Lock")}
                           </Button>
-                        ) : null
-                      ) : patrol.status === "completed" ? (
-                        <Button
-                          variant={variant}
-                          onClick={handleFunction}
-                          disabled={disabled}
-                        >
-                          <span className="material-symbols-outlined">
-                            {iconName}
-                          </span>
-                          {t(text)}
-                        </Button>
-                      ) : (
+                        ) 
+                      ) :(
                         <Button
                           variant={variant}
                           onClick={handleFunction}
