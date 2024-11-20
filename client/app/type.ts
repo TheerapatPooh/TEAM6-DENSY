@@ -47,6 +47,7 @@ export interface Preset {
 }
 
 export interface PatrolResult {
+    inspectorId:number
     id?: number;
     status: boolean;
     itemId: number;

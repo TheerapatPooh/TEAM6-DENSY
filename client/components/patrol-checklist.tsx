@@ -28,6 +28,7 @@ import {
   ItemType,
   Patrol,
   PatrolResult,
+  User,
   Zone,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
@@ -45,9 +46,11 @@ import {
 // TYPE
 
 interface PatrolChecklistProps {
+  user:User;
   checklist: Checklist;
   disabled: boolean;
   handleResult: (result: {
+    inspectorId:number;
     itemId: number;
     zoneId: number;
     status: boolean;
@@ -57,6 +60,7 @@ interface PatrolChecklistProps {
 }
 
 export default function PatrolChecklist({
+  user,
   checklist,
   disabled,
   handleResult,
@@ -224,9 +228,9 @@ export default function PatrolChecklist({
     }
   }, [checklist, patrolResult]);
 
-  const handleClick = (itemId: number, zoneId: number, status: boolean) => {
+  const handleClick = (inspectorId:number,itemId: number, zoneId: number, status: boolean) => {
     if (!disabled) {
-      handleResult({ itemId, zoneId, status });
+      handleResult({inspectorId, itemId, zoneId, status });
       setResultStatus((prev) => ({
         ...prev,
         [`${itemId}-${zoneId}`]: status,
@@ -325,7 +329,7 @@ export default function PatrolChecklist({
                                       (!existingResult?.status === false ||
                                         existingResult?.status === null)
                                     ) {
-                                      handleClick(item.id, zone.id, true);
+                                      handleClick(user.id,item.id, zone.id, true);
                                     }
                                   }}
                                 >
@@ -362,9 +366,9 @@ export default function PatrolChecklist({
                                                                     `}
                                   onClick={() => {
                                     if (existingResult === null || existingResult?.status === null) {
-                                      handleClick(item.id, zone.id, false);
+                                      handleClick(user.id,item.id, zone.id, false);
                                     } else if (existingResult?.status === false) {
-                                      handleClick(item.id, zone.id, false);
+                                      handleClick(user.id,item.id, zone.id, false);
                                     }
                                   }}
 

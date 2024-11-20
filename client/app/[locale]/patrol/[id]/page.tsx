@@ -135,7 +135,7 @@ export default function Page() {
       const existingIndex = prevResults.findIndex(
         (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
       );
-
+  
       if (existingIndex !== -1) {
         const updatedResults = [...prevResults];
         updatedResults[existingIndex] = result;
@@ -254,51 +254,71 @@ export default function Page() {
   }, [otherResults]);
 
   useEffect(() => {
-    if (socket && isConnected && patrol) {
-      console.log("Connected to socket!");
-      socket.emit("join_room",patrol.id);
+    if (socket && isConnected && patrol?.id && profile?.id) {
+      console.log("Connected to socket and joining room:", patrol.id);
+      socket.emit("join_room", patrol.id);
   
-      socket.on("patrol_result_update", (updatedResults) => {
-        localStorage.setItem(
-          `otherResults_${patrol.id}`,
-          JSON.stringify(updatedResults)
+      const handleResultUpdate = (updatedResults: PatrolResult[]) => {
+        const currentUserResults = updatedResults.filter(
+          (res) => res.inspectorId === profile.id
         );
   
-        const filteredResults = updatedResults.filter(
-          (res:any) => res.inspectorId !== profile?.id
+        const otherUserResults = updatedResults.filter(
+          (res) => res.inspectorId !== profile.id
         );
-        setOtherResults(filteredResults);
   
-        // Use mergeResults directly
-        mergeResults([...results, ...filteredResults]);
-      });
+        // Avoid unnecessary updates to localStorage
+        if (currentUserResults.length > 0) {
+          const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
+          const parsedResults: PatrolResult[] = savedResults ? JSON.parse(savedResults) : [];
+          if (JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)) {
+            localStorage.setItem(`patrolResults_${patrol.id}`, JSON.stringify(currentUserResults));
+          }
+        }
+  
+        if (otherUserResults.length > 0) {
+          const savedOtherResults = localStorage.getItem(`otherResults_${patrol.id}`);
+          const parsedOtherResults: PatrolResult[] = savedOtherResults ? JSON.parse(savedOtherResults) : [];
+          if (JSON.stringify(parsedOtherResults) !== JSON.stringify(otherUserResults)) {
+            localStorage.setItem(`otherResults_${patrol.id}`, JSON.stringify(otherUserResults));
+          }
+        }
+  
+        setOtherResults(otherUserResults);
+        mergeResults([...results, ...otherUserResults]);
+      };
+  
+      socket.on("patrol_result_update", handleResultUpdate);
   
       return () => {
-        socket.off("patrol_result_update");
+        socket.off("patrol_result_update", handleResultUpdate);
       };
     }
-  }, [socket, isConnected, patrol, results, profile]);
+  }, [socket, isConnected, patrol?.id, profile?.id, results]);
+  
   
   const lastEmittedResults = useRef<PatrolResult[]>([]); 
-  
+ 
+
+
   useEffect(() => {
-    if (socket) {
+    if (socket && patrol?.id) {
       const handleNewUserJoin = (userId: string) => {
-        console.log("New user joined, emitting results...");
+        console.log("New user joined:", userId);
   
-        const uniqueResults = results.map(({ id, itemId, zoneId, status }) => ({
-          id,
-          itemId,
-          zoneId,
-          status,
-        }));
+        const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
+        if (savedResults) {
+          try {
+            const parsedResults: PatrolResult[] = JSON.parse(savedResults);
   
-        console.log("Emitting result update:", uniqueResults);
-        socket.emit("patrol_result_update", uniqueResults, patrol?.id);
-  
-        localStorage.setItem(`patrolResults_${patrol?.id}`, JSON.stringify(uniqueResults));
-  
-        lastEmittedResults.current = uniqueResults;
+            console.log("Emitting saved results:", parsedResults);
+            socket.emit("patrol_result_update", parsedResults, patrol.id);
+          } catch (error) {
+            console.error("Error parsing saved results:", error);
+          }
+        } else {
+          console.log("No saved results found in localStorage.");
+        }
       };
   
       socket.on("new_user_joined", handleNewUserJoin);
@@ -307,16 +327,20 @@ export default function Page() {
         socket.off("new_user_joined", handleNewUserJoin);
       };
     }
-  }, [socket, results, patrol?.id]);
+  }, [socket, patrol?.id]);
+  
+  
   
   useEffect(() => {
     if (socket && isConnected && results.length > 0 && patrol) {
-      const uniqueResults = results.map(({ id, itemId, zoneId, status }) => ({
+      const uniqueResults = results.map(({ inspectorId, id, itemId, zoneId, status }) => ({
+        inspectorId, 
         id,
         itemId,
         zoneId,
         status,
       }));
+      
   
       const hasChanged =
         uniqueResults.length !== lastEmittedResults.current.length ||
@@ -331,13 +355,13 @@ export default function Page() {
       if (hasChanged) {
         console.log("Emitting result update:", uniqueResults);
         socket.emit("patrol_result_update", uniqueResults, patrol.id);
+        mergeResults([...results, ...uniqueResults]);
+        localStorage.setItem(`patrolResults_${patrol.id}`, JSON.stringify(results));
   
-        localStorage.setItem(`patrolResults_${patrol.id}`, JSON.stringify(uniqueResults));
-  
-        lastEmittedResults.current = uniqueResults;
+        lastEmittedResults.current = results;
       }
     }
-  }, [results, socket, isConnected, patrol]);
+  }, [results]);
   
   useEffect(() => {
     const savedResults = localStorage.getItem(`patrolResults_${patrol?.id}`);
@@ -548,11 +572,9 @@ export default function Page() {
                         handleResult={handleResult}
                         results={results}
                         checklist={c}
-                        disabled={
-                          patrol.status === "on_going" && !lock ? false : true
-                        }
-                        patrolResult={patrol.result}
-                      />
+                        disabled={patrol.status === "on_going" && !lock ? false : true}
+                        patrolResult={patrol.result} 
+                        user={profile}                      />
                     ) : (
                       <div></div>
                     )}
