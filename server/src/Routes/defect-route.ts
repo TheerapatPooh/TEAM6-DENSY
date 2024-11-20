@@ -1,6 +1,6 @@
-import { createDefect,getDefect, getAllDefect, deleteDefect, updateDefect,} from "../Controllers/defect-controller";
+import { createDefect,getDefect, getAllDefect, deleteDefect, updateDefect,} from "@Controllers/defect-controller.js";
 import { Router } from 'express'
-import { authenticateUser, upload } from "../Controllers/util-controller";
+import { authenticateUser, upload } from "@Controllers/util-controller.js";
 
 const router = Router()
 
@@ -14,4 +14,4 @@ router.get('/defects/:id', authenticateUser, getAllDefect)
 router.put('/defect/:id', authenticateUser, updateDefect)
 router.delete('/defect/:id', authenticateUser, deleteDefect)
 
-module.exports = router
+export default router

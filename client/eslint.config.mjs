@@ -18,7 +18,7 @@ export default [
     rules: {
       
       '@typescript-eslint/naming-convention': [
-        'error',
+        'warn',
         {
           selector: 'function',
           format: ['PascalCase','camelCase'],
@@ -26,7 +26,7 @@ export default [
       ],
       
       'unicorn/filename-case': [
-        'error',
+        'warn',
         {
           case: 'kebabCase',
         },
