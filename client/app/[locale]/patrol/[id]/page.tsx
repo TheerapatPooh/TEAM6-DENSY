@@ -99,10 +99,10 @@ export default function Page() {
     return (checkedResults / totalResults) * 100;
   };
 
-  const mergeResults = (newResults : PatrolResult[]) => {
+  const mergeResults = (newResults: PatrolResult[]) => {
     setPatrol((prevPatrol) => {
       if (!prevPatrol) return null;
-  
+
       const updatedResults = prevPatrol.result.map((res) => {
         const matchingResult = newResults.find(
           (newRes) =>
@@ -110,7 +110,7 @@ export default function Page() {
         );
         return matchingResult ? { ...res, ...matchingResult } : res;
       });
-  
+
       const newUniqueResults = newResults.filter(
         (newRes) =>
           !updatedResults.some(
@@ -118,14 +118,13 @@ export default function Page() {
               res.itemId === newRes.itemId && res.zoneId === newRes.zoneId
           )
       );
-  
+
       return {
         ...prevPatrol,
         result: [...updatedResults, ...newUniqueResults],
       };
     });
   };
-  
 
   const toggleLock = () => {
     setLock((prevLock) => !prevLock);
@@ -135,7 +134,7 @@ export default function Page() {
       const existingIndex = prevResults.findIndex(
         (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
       );
-  
+
       if (existingIndex !== -1) {
         const updatedResults = [...prevResults];
         updatedResults[existingIndex] = result;
@@ -240,7 +239,7 @@ export default function Page() {
     fetchData();
     setMounted(true);
   }, []);
-  
+
   useEffect(() => {
     if (patrol) {
       console.log("patrolID", patrol.id); // Only log when patrol data is available
@@ -257,60 +256,76 @@ export default function Page() {
     if (socket && isConnected && patrol?.id && profile?.id) {
       console.log("Connected to socket and joining room:", patrol.id);
       socket.emit("join_room", patrol.id);
-  
+
       const handleResultUpdate = (updatedResults: PatrolResult[]) => {
         const currentUserResults = updatedResults.filter(
           (res) => res.inspectorId === profile.id
         );
-  
+
         const otherUserResults = updatedResults.filter(
           (res) => res.inspectorId !== profile.id
         );
-  
+
         // Avoid unnecessary updates to localStorage
         if (currentUserResults.length > 0) {
-          const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
-          const parsedResults: PatrolResult[] = savedResults ? JSON.parse(savedResults) : [];
-          if (JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)) {
-            localStorage.setItem(`patrolResults_${patrol.id}`, JSON.stringify(currentUserResults));
+          const savedResults = localStorage.getItem(
+            `patrolResults_${patrol.id}`
+          );
+          const parsedResults: PatrolResult[] = savedResults
+            ? JSON.parse(savedResults)
+            : [];
+          if (
+            JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)
+          ) {
+            localStorage.setItem(
+              `patrolResults_${patrol.id}`,
+              JSON.stringify(currentUserResults)
+            );
           }
         }
-  
+
         if (otherUserResults.length > 0) {
-          const savedOtherResults = localStorage.getItem(`otherResults_${patrol.id}`);
-          const parsedOtherResults: PatrolResult[] = savedOtherResults ? JSON.parse(savedOtherResults) : [];
-          if (JSON.stringify(parsedOtherResults) !== JSON.stringify(otherUserResults)) {
-            localStorage.setItem(`otherResults_${patrol.id}`, JSON.stringify(otherUserResults));
+          const savedOtherResults = localStorage.getItem(
+            `otherResults_${patrol.id}`
+          );
+          const parsedOtherResults: PatrolResult[] = savedOtherResults
+            ? JSON.parse(savedOtherResults)
+            : [];
+          if (
+            JSON.stringify(parsedOtherResults) !==
+            JSON.stringify(otherUserResults)
+          ) {
+            localStorage.setItem(
+              `otherResults_${patrol.id}`,
+              JSON.stringify(otherUserResults)
+            );
           }
         }
-  
+
         setOtherResults(otherUserResults);
         mergeResults([...results, ...otherUserResults]);
       };
-  
+
       socket.on("patrol_result_update", handleResultUpdate);
-  
+
       return () => {
         socket.off("patrol_result_update", handleResultUpdate);
       };
     }
   }, [socket, isConnected, patrol?.id, profile?.id, results]);
-  
-  
-  const lastEmittedResults = useRef<PatrolResult[]>([]); 
- 
 
+  const lastEmittedResults = useRef<PatrolResult[]>([]);
 
   useEffect(() => {
     if (socket && patrol?.id) {
       const handleNewUserJoin = (userId: string) => {
         console.log("New user joined:", userId);
-  
+
         const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
         if (savedResults) {
           try {
             const parsedResults: PatrolResult[] = JSON.parse(savedResults);
-  
+
             console.log("Emitting saved results:", parsedResults);
             socket.emit("patrol_result_update", parsedResults, patrol.id);
           } catch (error) {
@@ -320,28 +335,27 @@ export default function Page() {
           console.log("No saved results found in localStorage.");
         }
       };
-  
+
       socket.on("new_user_joined", handleNewUserJoin);
-  
+
       return () => {
         socket.off("new_user_joined", handleNewUserJoin);
       };
     }
   }, [socket, patrol?.id]);
-  
-  
-  
+
   useEffect(() => {
     if (socket && isConnected && results.length > 0 && patrol) {
-      const uniqueResults = results.map(({ inspectorId, id, itemId, zoneId, status }) => ({
-        inspectorId, 
-        id,
-        itemId,
-        zoneId,
-        status,
-      }));
-      
-  
+      const uniqueResults = results.map(
+        ({ inspectorId, id, itemId, zoneId, status }) => ({
+          inspectorId,
+          id,
+          itemId,
+          zoneId,
+          status,
+        })
+      );
+
       const hasChanged =
         uniqueResults.length !== lastEmittedResults.current.length ||
         uniqueResults.some(
@@ -351,27 +365,28 @@ export default function Page() {
             result.zoneId !== lastEmittedResults.current[index]?.zoneId ||
             result.status !== lastEmittedResults.current[index]?.status
         );
-  
+
       if (hasChanged) {
         console.log("Emitting result update:", uniqueResults);
         socket.emit("patrol_result_update", uniqueResults, patrol.id);
         mergeResults([...results, ...uniqueResults]);
-        localStorage.setItem(`patrolResults_${patrol.id}`, JSON.stringify(results));
-  
+        localStorage.setItem(
+          `patrolResults_${patrol.id}`,
+          JSON.stringify(results)
+        );
+
         lastEmittedResults.current = results;
       }
     }
   }, [results]);
-  
+
   useEffect(() => {
     const savedResults = localStorage.getItem(`patrolResults_${patrol?.id}`);
     if (savedResults) {
       const parsedResults = JSON.parse(savedResults);
-      setResults(parsedResults); 
+      setResults(parsedResults);
     }
   }, [patrol?.id]);
-  
-  
 
   if (!patrol || !mounted) {
     return (
@@ -501,7 +516,7 @@ export default function Page() {
                     case "on_going":
                       variant = "primary";
                       iconName = "lock";
-                      text = "";
+                      text = "Finish";
                       disabled = false;
                       handleFunction = () => {
                         handleFinishPatrol();
@@ -527,18 +542,18 @@ export default function Page() {
                   return (
                     <div>
                       {patrol.status === "on_going" ? (
-                        allChecked ? (
+                        canFinish ? (
                           <Button
-                            variant="secondary"
-                            disabled={!canFinish}
-                            onClick={handleFinishPatrol}
+                            variant={variant}
+                            onClick={handleFunction}
+                            disabled={disabled}
                           >
                             <span className="material-symbols-outlined">
-                              lock
+                              {iconName}
                             </span>
-                            {t("Finish")}
+                            {t(text)}
                           </Button>
-                        ) : (
+                        ) : !allChecked ? (
                           <Button
                             variant={lock ? "secondary" : variant}
                             disabled={disabled}
@@ -549,13 +564,17 @@ export default function Page() {
                             </span>
                             {lock ? t("Unlock") : t("Lock")}
                           </Button>
-                        )
-                      ) : patrol.status !== "completed" ? (
-                        <Button variant="primary" onClick={handleStartPatrol}>
+                        ) : null
+                      ) : patrol.status === "completed" ? (
+                        <Button
+                          variant={variant}
+                          onClick={handleFunction}
+                          disabled={disabled}
+                        >
                           <span className="material-symbols-outlined">
-                            autorenew
+                            {iconName}
                           </span>
-                          {t("Start")}
+                          {t(text)}
                         </Button>
                       ) : null}
                     </div>
@@ -572,9 +591,12 @@ export default function Page() {
                         handleResult={handleResult}
                         results={results}
                         checklist={c}
-                        disabled={patrol.status === "on_going" && !lock ? false : true}
-                        patrolResult={patrol.result} 
-                        user={profile}                      />
+                        disabled={
+                          patrol.status === "on_going" && !lock ? false : true
+                        }
+                        patrolResult={patrol.result}
+                        user={profile}
+                      />
                     ) : (
                       <div></div>
                     )}
