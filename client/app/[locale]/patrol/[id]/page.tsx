@@ -531,6 +531,15 @@ export default function Page() {
                         handleStartPatrol();
                       };
                       break;
+                    case "pending":
+                      variant = "primary";
+                      iconName = "cached";
+                      text = "Start";
+                      disabled = true;
+                      handleFunction = () => {
+                        handleStartPatrol();
+                      };
+                      break;
                     default:
                       variant = "primary";
                       iconName = "cached";
@@ -576,7 +585,18 @@ export default function Page() {
                           </span>
                           {t(text)}
                         </Button>
-                      ) : null}
+                      ) : (
+                        <Button
+                          variant={variant}
+                          onClick={handleFunction}
+                          disabled={disabled}
+                        >
+                          <span className="material-symbols-outlined">
+                            {iconName}
+                          </span>
+                          {t(text)}
+                        </Button>
+                      )}
                     </div>
                   );
                 })()}
