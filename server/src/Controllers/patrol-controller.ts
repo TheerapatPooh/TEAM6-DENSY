@@ -1,10 +1,9 @@
-
-import { Defect } from '@prisma/client'
 import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
 import axios from 'axios';
 import { createNotification } from '@Controllers/util-controller.js';
 import { NotificationType } from '@prisma/client';
+import transformKeys, { keyMap } from '@Utils/key-map.js';
 
 export async function getPatrol(req: Request, res: Response) {
     try {
@@ -18,42 +17,30 @@ export async function getPatrol(req: Request, res: Response) {
         }
 
         let patrol: any
-
-        if (role === 'inspector' || role === 'admin') {
+        if (role === 'admin') {
             patrol = await prisma.patrol.findFirst({
                 where: {
                     pt_id: patrolId,
-                    checklist: {
-                        some: {
-                            ptcl_us_id: userId
-                        }
-                    }
                 },
                 include: {
                     preset: true,
-                    checklist: {
+                    patrolChecklist: {
                         include: {
                             checklist: {
                                 include: {
                                     item: {
                                         include: {
-                                            item_zone: {
-                                                include: {
+                                            itemZone: {
+                                                select: {
                                                     zone: {
-                                                        include: {
-                                                            supervisor: {
-                                                                include: {
-                                                                    profile: {
-                                                                        include: {
-                                                                            pf_image: true
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
+                                                        select: {
+                                                            ze_id: true,
+                                                            ze_name: true
                                                         }
                                                     }
                                                 }
                                             }
+
                                         }
                                     }
                                 }
@@ -62,18 +49,63 @@ export async function getPatrol(req: Request, res: Response) {
                                 include: {
                                     profile: {
                                         include: {
-                                            pf_image: true
+                                            image: true
                                         }
                                     }
                                 }
                             }
                         }
-                    },
-                    patrol_result: {
+                    }
+                }
+            })
+        }
+
+        else if (role === 'inspector') {
+            patrol = await prisma.patrol.findFirst({
+                where: {
+                    pt_id: patrolId,
+                    patrolChecklist: {
+                        some: {
+                            ptcl_us_id: userId
+                        }
+                    }
+                },
+                include: {
+                    preset: true,
+                    patrolChecklist: {
                         include: {
-                            defects: {
+                            checklist: {
                                 include: {
-                                    image: {
+                                    item: {
+                                        include: {
+                                            itemZone: {
+                                                select: {
+                                                    zone: {
+                                                        select: {
+                                                            ze_id: true,
+                                                            ze_name: true,
+                                                            supervisor: {
+                                                                select: {
+                                                                    us_id: true,
+                                                                    profile: {
+                                                                        select: {
+                                                                            pf_name: true
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+                            },
+                            inspector: {
+                                include: {
+                                    profile: {
                                         include: {
                                             image: true
                                         }
@@ -90,84 +122,76 @@ export async function getPatrol(req: Request, res: Response) {
             res.status(404)
             return
         }
-
-        const result = {
-            id: patrol.pt_id,
-            date: patrol.pt_date,
-            startTime: patrol.pt_start_time ?? null,
-            endTime: patrol.pt_end_time ?? null,
-            duration: patrol.pt_duration ?? null,
-            status: patrol.pt_status,
-            preset: {
-                id: patrol.preset.ps_id,
-                title: patrol.preset.ps_title,
-                description: patrol.preset.ps_description,
-                version: patrol.preset.ps_version,
-            },
-            checklist: patrol.checklist.map((checklist: any) => ({
-                id: checklist.ptcl_id,
-                title: checklist.checklist.cl_title,
-                version: checklist.checklist.cl_version,
-                inspector: {
-                    id: checklist.inspector.us_id,
-                    name: checklist.inspector.profile?.pf_name,
-                    age: checklist.inspector.profile?.pf_age,
-                    tel: checklist.inspector.profile?.pf_tel,
-                    address: checklist.inspector.profile?.pf_address,
-                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null
-                },
-                item: checklist.checklist.item.map((item: any) => ({
-                    id: item.it_id,
-                    name: item.it_name,
-                    type: item.it_type,
-                    zone: item.item_zone.map((zone: any) => ({
-                        id: zone.zone.ze_id,
-                        name: zone.zone.ze_name,
-                        supervisor: {
-                            id: zone.zone.supervisor.us_id,
-                            email: zone.zone.supervisor.us_email,
-                            department: zone.zone.supervisor.us_department,
-                            profile: {
-                                name: zone.zone.supervisor.profile.pf_name,
-                                tel: zone.zone.supervisor.profile.pf_tel,
-                                image: zone.zone.supervisor.profile.pf_image
-                            }
-                        }
-                    })),
-                })),
-            })),
-            result: patrol.patrol_result.map((result: any) => ({
-                id: result.pr_id,
-                status: result.pr_status,
-                itemId: result.pr_itze_it_id,
-                zoneId: result.pr_itze_ze_id,
-                defect: result.defects.map((defect: any) => ({
-                    id: defect.df_id,
-                    name: defect.df_name,
-                    description: defect.df_description,
-                    type: defect.df_type,
-                    status: defect.df_status,
-                    timestamp: defect.df_timestamp,
-                    imageByInspector: defect.image
-                        .filter((image: any) => image.image.im_update_by === defect.df_us_id)
-                        .map((image: any) => ({
-                            path: image.image.im_path,
-                        })) || null, 
-
-                    imageBySupervisor: defect.image
-                        .filter((image: any) => image.image.im_update_by !== defect.df_us_id) 
-                        .map((image: any) => ({
-                            path: image.image.im_path,
-                        })) || null  
-                })),
-            })) ?? [],
-        }
+        let result = transformKeys(patrol, keyMap);
 
         res.status(200).json(result)
-
+        return
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: "Internal server error" })
+        return
+    }
+}
+
+export async function getPatrolResult(req: Request, res: Response) {
+    try {
+        const role = (req as any).user.role
+        const userId = (req as any).user.userId
+        const patrolId = parseInt(req.params.id, 10)
+
+        if (role !== 'admin' && role !== 'inspector') {
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
+            return
+        }
+
+        let patrol: any
+        if (role === 'admin') {
+            patrol = await prisma.patrol.findFirst({
+                where: {
+                    pt_id: patrolId,
+                },
+                select: {
+                    result: {
+                        include: {
+                            defects: true
+                        }
+                    }
+                }
+            })
+        }
+
+        else if (role === 'inspector') {
+            patrol = await prisma.patrol.findFirst({
+                where: {
+                    pt_id: patrolId,
+                    patrolChecklist: {
+                        some: {
+                            ptcl_us_id: userId
+                        }
+                    }
+                },
+                select: {
+                    result: {
+                        include: {
+                            defects: true
+                        }
+                    }
+                }
+            })
+        }
+
+        if (!patrol) {
+            res.status(404)
+            return
+        }
+        let result = transformKeys(patrol, keyMap);
+
+        res.status(200).json(result)
+        return
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: "Internal server error" })
+        return
     }
 }
 
@@ -185,17 +209,23 @@ export async function getAllPatrols(req: Request, res: Response) {
             allPatrols = await prisma.patrol.findMany({
                 include: {
                     preset: true,
-                    checklist: {
+                    patrolChecklist: {
                         include: {
                             checklist: {
                                 include: {
                                     item: {
                                         include: {
-                                            item_zone: {
-                                                include: {
-                                                    zone: true
+                                            itemZone: {
+                                                select: {
+                                                    zone: {
+                                                        select: {
+                                                            ze_id: true,
+                                                            ze_name: true
+                                                        }
+                                                    }
                                                 }
                                             }
+
                                         }
                                     }
                                 }
@@ -204,16 +234,11 @@ export async function getAllPatrols(req: Request, res: Response) {
                                 include: {
                                     profile: {
                                         include: {
-                                            pf_image: true
+                                            image: true
                                         }
                                     }
                                 }
                             }
-                        }
-                    },
-                    patrol_result: {
-                        include: {
-                            defects: true
                         }
                     }
                 }
@@ -222,7 +247,7 @@ export async function getAllPatrols(req: Request, res: Response) {
         if (role === 'inspector') {
             allPatrols = await prisma.patrol.findMany({
                 where: {
-                    checklist: {
+                    patrolChecklist: {
                         some: {
                             ptcl_us_id: userId
                         }
@@ -230,17 +255,23 @@ export async function getAllPatrols(req: Request, res: Response) {
                 },
                 include: {
                     preset: true,
-                    checklist: {
+                    patrolChecklist: {
                         include: {
                             checklist: {
                                 include: {
                                     item: {
                                         include: {
-                                            item_zone: {
-                                                include: {
-                                                    zone: true
+                                            itemZone: {
+                                                select: {
+                                                    zone: {
+                                                        select: {
+                                                            ze_id: true,
+                                                            ze_name: true
+                                                        }
+                                                    }
                                                 }
                                             }
+
                                         }
                                     }
                                 }
@@ -249,77 +280,23 @@ export async function getAllPatrols(req: Request, res: Response) {
                                 include: {
                                     profile: {
                                         include: {
-                                            pf_image: true
+                                            image: true
                                         }
                                     }
                                 }
                             }
                         }
-                    },
-                    patrol_result: {
-                        include: {
-                            defects: true
-                        }
                     }
                 }
             })
         }
+        let result = allPatrols.map((patrol: any) => transformKeys(patrol, keyMap));
 
-        const result = allPatrols.map((patrol: any) => ({
-            id: patrol.pt_id,
-            date: patrol.pt_date,
-            startTime: patrol.pt_start_time ?? null,
-            endTime: patrol.pt_end_time ?? null,
-            duration: patrol.pt_duration ?? null,
-            status: patrol.pt_status,
-            preset: {
-                id: patrol.preset.ps_id,
-                title: patrol.preset.ps_title,
-                description: patrol.preset.ps_description,
-                version: patrol.preset.ps_version,
-            },
-            checklist: patrol.checklist.map((checklist: any) => ({
-                id: checklist.ptcl_id,
-                title: checklist.checklist.cl_title,
-                version: checklist.checklist.cl_version,
-                inspector: {
-                    id: checklist.inspector.us_id,
-                    name: checklist.inspector.profile?.pf_name,
-                    age: checklist.inspector.profile?.pf_age,
-                    tel: checklist.inspector.profile?.pf_tel,
-                    address: checklist.inspector.profile?.pf_address,
-                    imagePath: checklist.inspector.profile?.pf_image?.im_path ?? null // เพิ่ม imagePath
-                },
-                item: checklist.checklist.item.map((item: any) => ({
-                    id: item.it_id,
-                    name: item.it_name,
-                    type: item.it_type,
-                    zone: item.item_zone.map((zone: any) => ({
-                        id: zone.zone.ze_id,
-                        name: zone.zone.ze_name,
-                    })),
-                })),
-            })),
-            result: patrol.patrol_result.map((result: any) => ({
-                id: result.pr_id,
-                status: result.pr_status,
-                itemId: result.pr_itze_id,
-                zoneId: result.pr_itze_ze_id,
-                defect: result.defects.map((defect: Defect) => ({
-                    id: defect.df_id,
-                    name: defect.df_name,
-                    description: defect.df_description,
-                    type: defect.df_type,
-                    status: defect.df_status,
-                    timestamp: defect.df_timestamp
-                })),
-                
-            })) ?? [],
-        }))
         res.status(200).json(result)
-
+        return
     } catch (error) {
         res.status(500)
+        return
     }
 }
 
@@ -356,9 +333,9 @@ export async function createPatrol(req: Request, res: Response) {
         const notifiedInspectors = new Set<number>();
 
         for (const checklist of checklists) {
-            const { checklistId, inspectorId } = checklist;
+            const { checklistId, userId } = checklist;
 
-            if (!checklistId || !inspectorId) {
+            if (!checklistId || !userId) {
                 continue
             }
 
@@ -366,29 +343,28 @@ export async function createPatrol(req: Request, res: Response) {
                 data: {
                     ptcl_pt_id: newPatrol.pt_id,
                     ptcl_cl_id: checklistId,
-                    ptcl_us_id: inspectorId,
+                    ptcl_us_id: userId,
                 },
             });
 
-            if (!notifiedInspectors.has(inspectorId)) {
+            if (!notifiedInspectors.has(userId)) {
                 const message = `You have been assigned to a patrol scheduled for ${new Date(date).toLocaleDateString()}.`;
                 await createNotification({
                     nt_message: message,
                     nt_type: 'request' as NotificationType,
                     nt_url: `/patrol/${newPatrol.pt_id}`,
-                    nt_us_id: inspectorId,
+                    nt_us_id: userId,
                 });
 
-                notifiedInspectors.add(inspectorId);
+                notifiedInspectors.add(userId);
             }
         }
-
-        res.status(201).json(newPatrol);
+        let result = transformKeys(newPatrol, keyMap);
+        res.status(201).json(result);
 
     } catch (err) {
     }
 }
-
 
 export async function startPatrol(req: Request, res: Response) {
     try {
@@ -432,30 +408,21 @@ export async function startPatrol(req: Request, res: Response) {
         });
 
         for (const checklistObj of checklist) {
-            const { item } = checklistObj;
-
-
-            for (const itemObj of item) {
-                const { id: itemId, zone } = itemObj;
-
-
-                for (const zoneObj of zone) {
-                    const { id: zoneId } = zoneObj;
-
-
+            for (const item of checklistObj.checklist.item) {
+                for (const zone of item.itemZone) {
                     await prisma.patrolResult.create({
                         data: {
                             pr_status: null,
-                            pr_itze_it_id: itemId,
-                            pr_itze_ze_id: zoneId,
+                            pr_itze_it_id: item.id,
+                            pr_itze_ze_id: zone.zone.id,
                             pr_pt_id: updatePatrol.pt_id,
                         },
                     });
                 }
             }
         }
-
-        res.status(200).json(updatePatrol)
+        let result = transformKeys(updatePatrol, keyMap);
+        res.status(200).json(result)
         return
     } catch (err) {
         res.status(500)
@@ -517,8 +484,9 @@ export async function finishPatrol(req: Request, res: Response) {
                 },
             });
         }
+        let json = transformKeys(updatePatrol, keyMap);
 
-        res.status(200).json(updatePatrol)
+        res.status(200).json(json)
         return
 
     } catch (err) {
@@ -526,7 +494,6 @@ export async function finishPatrol(req: Request, res: Response) {
         return
     }
 }
-
 
 export async function removePatrol(req: Request, res: Response) {
     try {
@@ -564,7 +531,6 @@ export async function removePatrol(req: Request, res: Response) {
 
 }
 
-
 export async function updatePatrolStatus(req: Request, res: Response) {
     try {
         const { patrolId, status } = req.body; // Destructure patrolId and status from the request body
@@ -579,8 +545,8 @@ export async function updatePatrolStatus(req: Request, res: Response) {
             where: { pt_id: patrolId },
             data: { pt_status: status },
         });
-
-        res.status(200).json(updatedPatrol);
+        let result = transformKeys(updatedPatrol, keyMap);
+        res.status(200).json(result);
         return
     } catch (err) {
         console.error(err);
@@ -588,7 +554,6 @@ export async function updatePatrolStatus(req: Request, res: Response) {
         return
     }
 }
-
 
 export async function getPendingPatrols(req: Request, res: Response) {
     try {
@@ -603,12 +568,8 @@ export async function getPendingPatrols(req: Request, res: Response) {
             }
         });
 
-        const result = pendingPatrols.map((patrol: any) => ({
-            id: patrol.pt_id,
-            date: patrol.pt_date,
-            status: patrol.pt_status,
-        }));
 
+        let result = transformKeys(pendingPatrols, keyMap);
         res.status(200).json(result);
         return
 
@@ -618,6 +579,7 @@ export async function getPendingPatrols(req: Request, res: Response) {
         return
     }
 }
+
 export async function commentPatrol(req: Request, res: Response) {
     try {
         const role = (req as any).user.role;
@@ -642,7 +604,7 @@ export async function commentPatrol(req: Request, res: Response) {
         const validPatrol = await prisma.patrol.findUnique({
             where: {
                 pt_id: parseInt(patrolId, 10),
-                checklist: {
+                patrolChecklist: {
                     some: {
                         ptcl_us_id: userId,
                     }
@@ -665,11 +627,8 @@ export async function commentPatrol(req: Request, res: Response) {
         });
 
         // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
-        res.status(201).json({
-            userId: newComment.cm_us_id,
-            comment: newComment.cm_message,
-            timestamp: newComment.cm_timestamp
-        });
+        let result = transformKeys(newComment, keyMap);
+        res.status(201).json(result);
         return
     } catch (err) {
         console.error(err);
@@ -687,13 +646,8 @@ export async function getCommentPatrol(req: Request, res: Response) {
                 cm_id: commentId
             }
         });
-        const result = comments.map(comment => ({
-            id: comment.cm_us_id,
-            message: comment.cm_message,
-            timestamp: comment.cm_timestamp,
-            userId: comment.cm_us_id,
-            patrolResultId: comment.cm_pr_id
-        }))
+
+        let result = transformKeys(comments, keyMap);
         res.status(200).json(result);
         return
     } catch (err) {

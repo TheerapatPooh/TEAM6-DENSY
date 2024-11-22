@@ -15,7 +15,7 @@ export interface Location {
 export interface Zone {
     id: number;
     name: string;
-    supervisor: Supervisor;
+    supervisor: User;
     pathData?: string;
     text?: {
         x: number;
@@ -29,34 +29,24 @@ export interface Item {
     id: number;
     name: string;
     type: string;
-    zone: Zone[];
+    checklistId: number;
+    itemZone: ItemZone[];
 }
 
-export interface Inspector {
-    id: number;
-    name: string;
-    age: number | null;
-    tel: string | null;
-    address: string | null;
-    imagePath: string | null;
+export interface ItemZone {
+    zone: Zone;
 }
 
-export interface Supervisor {
-    id: number;
-    name: string;
-    email: string | null;
-    department: string | null;
-    age: number;
-    tel: string;
-    address: string;
-    imagePath: string | null;
-}
+
 
 export interface Checklist {
     id: number;
     title: string;
     version: number;
-    inspector: Inspector;
+    latest: boolean;
+    updatedAt: string;
+    updatedBy: number;
+    user: User;
     item: Item[];
 }
 
@@ -67,8 +57,14 @@ export interface Preset {
     version: number;
     latest: boolean;
     updatedAt: string;
-    updateBy: Inspector;
-    checklist: Checklist[];
+    updateBy: number;
+    checklist?: PresetChecklist[];
+}
+
+export interface PresetChecklist {
+    presetId: number;
+    checklistId: number;
+    checklist: Checklist;
 }
 
 export interface PatrolResult {
@@ -77,8 +73,20 @@ export interface PatrolResult {
     status: boolean;
     itemId: number;
     zoneId: number;
+    patrolId?: number
     defectId?: number | null;
+    defects?: Defect[]
 }
+
+export interface PatrolChecklistType {
+    id?: number;
+    patrolId?: number;
+    checklistId: number;
+    checklist?: Checklist;
+    userId: number;
+    inspector?: User;
+}
+
 
 export interface Patrol {
     id: number;
@@ -86,9 +94,10 @@ export interface Patrol {
     startTime?: string | null;
     endTime?: string | null;
     duration?: string | null;
-    status: string;
+    status: patrolStatus;
+    presetId?: number
     preset: Preset;
-    checklist: Checklist[];
+    patrolChecklist: PatrolChecklistType[];
     result: PatrolResult[];
 }
 
@@ -98,40 +107,47 @@ export interface Profile {
     age?: number;
     tel?: string;
     address?: string;
+    userId: number
+    imageId: number | null
     image?: Image | null;
-    userId: number;
 }
 
 export interface User {
-    name: string;
-    createdAt?: string;
-    department?: string | null;
-    email?: string;
     id: number;
-    profile: Profile;
-    role: Role;
     username?: string;
     password?: any;
+    email?: string;
+    role: Role;
+    department?: string | null;
+    createdAt?: string;
+    profile: Profile;
 }
 
 
 export interface Image {
     id: number;
     path: string;
-}
-
-export interface PatrolChecklist {
-    checklistId: number;
-    inspectorId: number;
+    timestamp?: string;
+    user?: User;
 }
 
 export interface Defect {
+    id: number;
     name: string;
     description: string;
-    type: string;
-    status: string;
+    type: ItemType;
+    status: DefectStatus;
+    timestamp: string;
     userId?: number;
     patrolId?:number
+    patrolResult: PatrolResult;
+    image: DefectImage[];
+  }
+
+  export interface DefectImage {
+    defectId?: number
+    imageId?: number
+    image: Image
   }
 
   export interface NotificationProps {

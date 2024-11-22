@@ -46,7 +46,7 @@ import {
 import {
   Checklist,
   Patrol,
-  PatrolChecklist,
+  PatrolChecklistType,
   patrolStatus,
   Preset,
 } from "@/app/type";
@@ -63,7 +63,7 @@ export default function Page() {
 
   const [selectedPreset, setSelectedPreset] = useState<Preset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<PatrolChecklist[]>([]);
+  const [patrolChecklist, setPatrolChecklist] = useState<PatrolChecklistType[]>([]);
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -86,6 +86,7 @@ export default function Page() {
       checklists: patrolChecklist,
     };
 
+    console.log(data)
     try {
       const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
@@ -93,8 +94,8 @@ export default function Page() {
     } catch (error) { }
   };
 
-  const handleSelectUser = (checklistId: number, inspectorId: number) => {
-    setPatrolChecklist((prev) => {
+  const handleSelectUser = (checklistId: number, userId: number) => {
+    setPatrolChecklist((prev: PatrolChecklistType[]) => {
       const existingIndex = prev.findIndex(
         (item) => item.checklistId === checklistId
       );
@@ -102,11 +103,11 @@ export default function Page() {
       if (existingIndex !== -1) {
         // If the checklist already exists, update the inspectorId
         const updatedChecklist = [...prev];
-        updatedChecklist[existingIndex].inspectorId = inspectorId;
+        updatedChecklist[existingIndex].userId = userId;
         return updatedChecklist;
       } else {
         // Add new checklist
-        return [...prev, { checklistId, inspectorId }];
+        return [...prev, { checklistId, userId }];
       }
     });
   };
@@ -210,10 +211,13 @@ export default function Page() {
     const patrolDate = new Date(patrol.date).toLocaleDateString().toLowerCase();
     const patrolStatus = patrol.status.toLowerCase();
 
-    const inspectors = patrol.checklist
-      .map((cl: Checklist) => cl.inspector?.name ? cl.inspector.name.toLowerCase() : '')
+    const inspectors = patrol.patrolChecklist
+      .flatMap((pc) => {
+        return pc.inspector?.profile?.name
+          ? [pc.inspector.profile.name.toLowerCase()]
+          : [];
+      })
       .join(' ');
-
     const searchTokens = searchTerm.toLowerCase().split(' ').filter(Boolean);
     const inspectorTokens = inspectors.split(' ').filter(Boolean);
 
@@ -274,9 +278,6 @@ export default function Page() {
     console.log(selectedPreset);
   }, [selectedPreset]);
 
-  useEffect(() => {
-    console.log(patrolChecklist);
-  }, [patrolChecklist]);
 
   return (
     <div className="flex flex-col p-5 gap-y-5">
@@ -537,12 +538,12 @@ export default function Page() {
               <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
-                  {selectedPreset?.checklist.map((presetChecklist) => (
+                  {selectedPreset?.checklist.flatMap((presetChecklist) => (
                     <ChecklistDropdown
-                      key={presetChecklist.id}
-                      checklist={presetChecklist}
+                      key={presetChecklist.checklist.id}
+                      checklist={presetChecklist.checklist}
                       handleselectUser={(selectedUser: User) => {
-                        handleSelectUser(presetChecklist.id, selectedUser.id);
+                        handleSelectUser(presetChecklist.checklistId, selectedUser.id);
                       }}
                     />
                   ))}
@@ -570,16 +571,16 @@ export default function Page() {
         </AlertDialog>
 
         {patrolQueryResults &&
-          patrolQueryResults.map((card) => {
-            const { status, date, preset, checklist } = card;
-            const inspectors = checklist.map((cl: any) => cl.inspector);
+          patrolQueryResults.map((patrol: Patrol) => {
+            const inspectors = patrol.patrolChecklist.map((cl: PatrolChecklistType) => cl.inspector);
             return (
               <PatrolCard
-                key={card.id || date}
-                patrolStatus={status as patrolStatus}
-                patrolDate={new Date(date)}
-                patrolPreset={preset ? preset.title : "No Title"}
-                patrolId={card.id}
+                key={patrol.id}
+                patrolStatus={patrol.status as patrolStatus}
+                patrolDate={new Date(patrol.date)}
+                patrolPreset={patrol.preset.title}
+                patrolId={patrol.id}
+                patrolChecklist={patrol.patrolChecklist}
                 inspector={inspectors}
               />
             );

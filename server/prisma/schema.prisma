@@ -46,7 +46,7 @@ model Defect {
   df_pr_id       Int
 
   user          User          @relation(fields: [df_us_id], references: [us_id])
-  patrol_result PatrolResult  @relation(fields: [df_pr_id], references: [pr_id])
+  patrolResult PatrolResult  @relation(fields: [df_pr_id], references: [pr_id])
   image         DefectImage[]
 
   @@map("defects")
@@ -74,8 +74,8 @@ model Profile {
   pf_address String?
   pf_us_id   Int     @unique
   pf_im_id   Int?    @unique
-  pf_image   Image?  @relation("ProfileImage", fields: [pf_im_id], references: [im_id])
 
+  image   Image?  @relation("ProfileImage", fields: [pf_im_id], references: [im_id])
   user User @relation(fields: [pf_us_id], references: [us_id])
 
   @@map("profiles")
@@ -90,9 +90,9 @@ model Patrol {
   pt_status     PatrolStatus
   pt_ps_id      Int
 
-  checklist     PatrolChecklist[]
+  patrolChecklist     PatrolChecklist[]
   preset        Preset            @relation(fields: [pt_ps_id], references: [ps_id])
-  patrol_result PatrolResult[]
+  result PatrolResult[]
 
   @@map("patrols")
 }
@@ -118,9 +118,9 @@ model Preset {
   ps_version     Int
   ps_latest      Boolean
   ps_update_at   DateTime
-  ps_us_id       Int
+  ps_update_by      Int
 
-  user      User              @relation(fields: [ps_us_id], references: [us_id])
+  user      User              @relation(fields: [ps_update_by], references: [us_id])
   checklist PresetChecklist[]
   patrol    Patrol[]
 
@@ -175,7 +175,7 @@ model Item {
   it_type  ItemType
   it_cl_id Int
 
-  item_zone ItemZone[]
+  itemZone ItemZone[]
   checklist Checklist  @relation(fields: [it_cl_id], references: [cl_id])
 
   @@map("items")
@@ -187,7 +187,7 @@ model Zone {
   ze_lt_id Int
   ze_us_id Int    @unique
 
-  zone_items ItemZone[]
+  itemZone   ItemZone[]
   location   Location   @relation(fields: [ze_lt_id], references: [lt_id])
   supervisor User       @relation(fields: [ze_us_id], references: [us_id])
 
@@ -223,7 +223,7 @@ model Comment {
   cm_pr_id     Int
 
   user          User         @relation(fields: [cm_us_id], references: [us_id])
-  patrol_result PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
+  patrolResult PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
 
   @@map("comments")
 }

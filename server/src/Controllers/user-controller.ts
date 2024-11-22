@@ -5,7 +5,7 @@ import { User } from '@Utils/type.js'
 import { faker } from '@faker-js/faker'
 import fs from 'fs'
 import path from 'path'
-
+import transformKeys, { keyMap } from '@Utils/key-map.js'
 
 export async function getUser(req: Request, res: Response) {
     try {
@@ -21,16 +21,7 @@ export async function getUser(req: Request, res: Response) {
         }
 
         if (user) {
-            const result: User = {
-                id: user.us_id,
-                username: user.us_username,
-                email: user.us_email,
-                password: user.us_password,
-                role: user.us_role,
-                department: user.us_department,
-                createdAt: user.us_created_at.toISOString(),
-            };
-
+            const result = transformKeys(user, keyMap);
             res.status(200).json(result);
             return
         } else {
@@ -54,15 +45,7 @@ export async function getAllUsers(req: Request, res: Response): Promise<void> {
         const allUsers = await prisma.user.findMany()
 
         if (allUsers) {
-            const result: User[] = allUsers.map((user: any) => ({
-                id: user.us_id,
-                username: user.us_username,
-                email: user.us_email,
-                password: user.us_password,
-                role: user.us_role,
-                department: user.us_department,
-                createdAt: user.us_created_at,
-            }))
+            let result = transformKeys(allUsers, keyMap);
             res.status(200).send(result)
             return
         } else {
@@ -77,7 +60,6 @@ export async function getAllUsers(req: Request, res: Response): Promise<void> {
 
 export async function createUser(req: Request, res: Response) {
     try {
-
         const userRole = (req as any).user.role
         if (userRole !== 'admin') {
             res.status(403).json({ message: "Access Denied: Admins only" })
@@ -117,15 +99,20 @@ export async function createUser(req: Request, res: Response) {
                 pf_address: null
             }
         })
-        const result = {
-            id: newUser.us_id,
-            username: newUser.us_username,
-            email: newUser.us_email,
-            role: newUser.us_role,
-            department: newUser.us_department,
-            createdAt: newUser.us_created_at.toISOString(),
-        }
+        const user = await prisma.user.findUnique({
+            where: { 
+                us_id: newUser.us_id 
+            },
+            include: {
+                profile: {
+                    include: {
+                        image: true
+                    }
+                }
+            }
+        })
 
+        let result = transformKeys(user, keyMap);
         res.status(201).json(result)
         return
     } catch (error) {
@@ -146,7 +133,7 @@ export async function updateProfile(req: Request, res: Response) {
             include: {
                 profile: {
                     include: {
-                        pf_image: true,
+                        image: true,
                     },
                 },
             },
@@ -157,8 +144,8 @@ export async function updateProfile(req: Request, res: Response) {
             return
         }
 
-        if (imagePath && user.profile?.pf_image) {
-            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile.pf_image.im_path);
+        if (imagePath && user.profile?.image) {
+            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile.image.im_path);
             if (fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath);
             }
@@ -167,7 +154,7 @@ export async function updateProfile(req: Request, res: Response) {
         let image = null;
         if (imagePath) {
             image = await prisma.image.upsert({
-                where: { im_id: user.profile?.pf_image?.im_id || 0 },
+                where: { im_id: user.profile?.image?.im_id || 0 },
                 update: {
                     im_path: imagePath,
                     profiles: {
@@ -192,21 +179,12 @@ export async function updateProfile(req: Request, res: Response) {
                 pf_age: parseInt(age, 10),
                 pf_tel: tel,
                 pf_address: address,
-                pf_image: image ? { connect: { im_id: image.im_id } } : undefined, // Connect image if it exists
+                pf_im_id: image?.im_id , // Connect image if it exists
             },
         });
 
         // Prepare result response
-        const result = {
-            id: updatedProfile.pf_id,
-            name: updatedProfile.pf_name,
-            age: updatedProfile.pf_age,
-            tel: updatedProfile.pf_tel,
-            address: updatedProfile.pf_address,
-            userId: updatedProfile.pf_us_id,
-            imagePath: image ? image.im_path : null, // Return image path if available
-        };
-
+        let result = transformKeys(updatedProfile, keyMap);
         res.status(200).json(result);
         return
     } catch (error) {
@@ -228,7 +206,7 @@ export async function getProfile(req: Request, res: Response) {
                 include: {
                     profile: {
                         include: {
-                            pf_image: true
+                            image: true
                         }
                     },
                 },
@@ -240,7 +218,7 @@ export async function getProfile(req: Request, res: Response) {
                 include: {
                     profile: {
                         include: {
-                            pf_image: true
+                            image: true
                         }
                     },
                 },
@@ -252,28 +230,7 @@ export async function getProfile(req: Request, res: Response) {
             return
         }
 
-        const profile = user.profile || null
-        const result: User = {
-            id: user.us_id,
-            username: user.us_username,
-            email: user.us_email,
-            role: user.us_role,
-            department: user.us_department,
-            createdAt: user.us_created_at.toISOString(),
-            profile: profile ? {
-                id: profile.pf_id,
-                name: profile.pf_name || undefined,
-                age: profile.pf_age || undefined,
-                tel: profile.pf_tel || undefined,
-                address: profile.pf_address || undefined,
-                image: profile.pf_image ? {
-                    id: profile.pf_image.im_id,
-                    path: profile.pf_image.im_path,
-                } : null,
-                userId: profile.pf_us_id
-            } : undefined
-        }
-
+        let result = transformKeys(user, keyMap);
         res.status(200).json(result)
         return
     } catch (error) {
@@ -289,33 +246,14 @@ export async function getAllProfile(req: Request, res: Response) {
             include: {
                 profile: {
                     include: {
-                        pf_image: true
+                        image: true
                     }
                 },
             },
         })
 
         if (allUsers) {
-
-            const result: User[] = allUsers.map((user: any) => ({
-                id: user.us_id,
-                username: user.us_username,
-                email: user.us_email,
-                role: user.us_role,
-                department: user.us_department,
-                profile: {
-                    id: user.profile.pf_id,
-                    name: user.profile.pf_name,
-                    age: user.profile.pf_age,
-                    tel: user.profile.pf_tel,
-                    address: user.profile.pf_address,
-                    image: user.profile.pf_image ? {
-                        id: user.profile.pf_image.im_id,
-                        path: user.profile.pf_image.im_path,
-                    } : null,
-                    userId: user.pf_us_id
-                },
-            }))
+            let result = transformKeys(allUsers, keyMap);
             res.status(200).json(result)
             return
         } else {

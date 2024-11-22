@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Inspector, patrolStatus, User } from "@/app/type";
+import { PatrolChecklist, patrolStatus, User } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/api";
 import {
@@ -39,7 +39,8 @@ export interface patrolCardProps {
   patrolDate: Date;
   patrolPreset: string;
   patrolId: number;
-  inspector: Inspector[];
+  patrolChecklist: PatrolChecklist[]
+  inspector: User[];
 }
 
 export function PatrolCard({
@@ -47,15 +48,16 @@ export function PatrolCard({
   patrolDate,
   patrolPreset,
   patrolId,
+  patrolChecklist,
   inspector = [],
 }: patrolCardProps) {
   const formattedDate =
     patrolDate instanceof Date
       ? patrolDate.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
       : "N/A"; // Fallback if patrolDate is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -79,28 +81,35 @@ export function PatrolCard({
 
   const getPatrolData = async () => {
     try {
-      const patrolfetch = await fetchData("get", `/patrol/${patrolId}`, true);
-  
       let countItems = 0;
       let countFails = 0;
       let countDefects = 0;
-  
-      if (patrolfetch?.result) {
-        for (const patrolResult of patrolfetch.result) {
-          if (patrolResult.status !== null) {
-            countItems++;  
-          }
-          
-          if (patrolResult.status === false) {
-            countFails++;  
 
-            if (patrolResult.defect && patrolResult.defect.length !== 0) {
-              countDefects++;  
+      if (patrolChecklist) {
+        for (const patrolChecklistObj of patrolChecklist) {
+          if (patrolChecklistObj.checklist && patrolChecklistObj.checklist.item) {
+            for (const item of patrolChecklistObj.checklist.item) {
+              if (item.itemZone) {
+                countItems += item.itemZone.length;
+              }
             }
           }
         }
       }
-  
+
+      if (patrolStatus !== 'pending' && patrolStatus !== 'scheduled') {
+        const resultFetch = await fetchData("get", `/patrol/${patrolId}/result`, true);
+        if (resultFetch?.result) {
+          for (const patrolResult of resultFetch.result) {
+            if (patrolResult.status === false) {
+              countFails++;
+              if (patrolResult.defects && patrolResult.defects.length !== 0) {
+                countDefects += patrolResult.defects.length;
+              }
+            }
+          }
+        }
+      }
       setItems(countItems);
       setFails(countFails);
       setDefects(countDefects);
@@ -133,12 +142,13 @@ export function PatrolCard({
     router.push(`/${locale}/patrol/${patrolId}`)
   }
 
-  const inspectorNames = inspector.map((insp) => insp.name).filter(Boolean);
-  if(!mounted){
+  const inspectorNames = inspector.map((insp) => insp.profile.name).filter(Boolean);
+  if (!mounted) {
     return (
       null
     )
   }
+
   return (
     <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="gap-0 p-[10px]">
@@ -189,7 +199,7 @@ export function PatrolCard({
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
-             onClick={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               handleClick();
             }}
@@ -253,7 +263,7 @@ export function PatrolCard({
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
-                      />
+                    />
                     <AvatarFallback>
                       {getInitials(inspectorName)}
                     </AvatarFallback>
@@ -301,7 +311,7 @@ export function PatrolCard({
                       <div
                         className=" text-destructive cursor-pointer w-full h-full flex"
                         onClick={(e) => {
-                          e.stopPropagation(); 
+                          e.stopPropagation();
                         }}
                       >
                         {t("Delete")}

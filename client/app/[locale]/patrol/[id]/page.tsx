@@ -1,12 +1,12 @@
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import { fetchData } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
-  Checklist,
+  Defect,
   Patrol,
+  PatrolChecklistType,
   PatrolResult,
   patrolStatus,
   User,
@@ -26,25 +26,28 @@ export default function Page() {
   const [patrol, setPatrol] = useState<Patrol | null>(null);
   const [results, setResults] = useState<PatrolResult[]>([]);
   const [otherResults, setOtherResults] = useState<PatrolResult[]>([]);
-
-  const totalResults = patrol?.result?.length || 0;
-  const checkedResults =
-    patrol?.result?.filter((res) => res.status !== null).length || 0;
-  const canFinish = checkedResults === totalResults;
-
+  const [patrolResults, setPatrolResults] = useState<PatrolResult[]>([]);
+  const [defects, setDefects] = useState<Defect[]>([]);
   const [profile, setProfile] = useState<User>();
   const { socket, isConnected } = useSocket();
-  const [allChecked, setAllChecked] = useState(false);
   const [lock, setLock] = useState(false);
 
   const params = useParams();
   const router = useRouter();
   const t = useTranslations("General");
   const s = useTranslations("Status");
+
+  const totalResults = patrolResults.length
+  const checkedResults =
+    patrolResults.filter((res) => res.status !== null).length || 0;
+  const canFinish = checkedResults === totalResults;
+
+
   const getPatrolData = async () => {
     if (params.id) {
       try {
         const data = await fetchData("get", `/patrol/${params.id}`, true);
+        const result = await fetchData("get", `/patrol/${params.id}/result`, true);
         console.log("patrolID : " + data.id);
         const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
         console.log("saveresult : " + savedResults);
@@ -56,41 +59,16 @@ export default function Page() {
           setOtherResults(JSON.parse(otherResults));
         }
         setPatrol(data);
+        setPatrolResults(result.result)
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
     }
   };
 
-  const checkIfAllChecked = () => {
-    if (!patrol || !profile) return false;
-
-    let totalItemsToCheck = 0;
-    patrol.checklist.forEach((checklist) => {
-      if (checklist.inspector.id === profile.id) {
-        checklist.item.forEach((item) => {
-          totalItemsToCheck += item.zone.length;
-        });
-      }
-    });
-
-    const completedResults = results.filter(
-      (result) => result.status !== null
-    ).length;
-
-    return completedResults >= totalItemsToCheck;
-  };
-
-  useEffect(() => {
-    const allDone = checkIfAllChecked();
-    setAllChecked(allDone);
-  }, [results, patrol]);
-
   const calculateProgress = () => {
     if (!patrol) return 0;
-
-    const totalResults = patrol.result.length;
-    const checkedResults = patrol.result.filter(
+    const checkedResults = patrolResults.filter(
       (res) => res.status !== null
     ).length;
 
@@ -100,10 +78,9 @@ export default function Page() {
   };
 
   const mergeResults = (newResults: PatrolResult[]) => {
-    setPatrol((prevPatrol) => {
-      if (!prevPatrol) return null;
-
-      const updatedResults = prevPatrol.result.map((res) => {
+    setPatrolResults((prevPatrolResult = []) => {
+      console.log('prevPatrolResult', prevPatrolResult);
+      const updatedResults = prevPatrolResult.map((res) => {
         const matchingResult = newResults.find(
           (newRes) =>
             res.itemId === newRes.itemId && res.zoneId === newRes.zoneId
@@ -119,16 +96,14 @@ export default function Page() {
           )
       );
 
-      return {
-        ...prevPatrol,
-        result: [...updatedResults, ...newUniqueResults],
-      };
+      return [...updatedResults, ...newUniqueResults];
     });
-  };
+  }
 
   const toggleLock = () => {
     setLock((prevLock) => !prevLock);
   };
+
   const handleResult = (result: PatrolResult) => {
     setResults((prevResults) => {
       const existingIndex = prevResults.findIndex(
@@ -150,8 +125,10 @@ export default function Page() {
     const patrolId = patrol.id;
     const data = {
       status: patrol?.status,
-      checklist: patrol?.checklist,
+      checklist: patrol?.patrolChecklist,
     };
+    console.log(data)
+
     try {
       const response = await fetchData(
         "put",
@@ -170,8 +147,8 @@ export default function Page() {
 
   const handleFinishPatrol = async () => {
     if (!patrol) return;
-    const updatedResults = results.map((result) => {
-      const matchedResult = patrol.result.find(
+    const updatedResults = patrolResults.map((result) => {
+      const matchedResult = patrolResults.find(
         (res) => res.itemId === result.itemId && res.zoneId === result.zoneId
       );
 
@@ -187,22 +164,20 @@ export default function Page() {
 
     const data = {
       status: patrol.status,
-      checklist: patrol.checklist,
+      checklist: patrol.patrolChecklist,
       result: updatedResults,
     };
+
     let resultCount = 0;
-    for (const checklist of patrol.checklist) {
-      if (checklist.inspector.id === profile?.id) {
-        for (const item of checklist.item) {
-          for (const zone of item.zone) {
-            resultCount++;
-          }
+    for (const checklist of patrol.patrolChecklist) {
+      for (const item of checklist.checklist.item) {
+        for (const zone of item.itemZone) {
+          resultCount++;
         }
       }
     }
 
     if (data.result.length === resultCount) {
-      console.log(data);
       try {
         const response = await fetchData(
           "put",
@@ -219,6 +194,7 @@ export default function Page() {
     }
     window.location.reload();
   };
+
   const getProfileData = async () => {
     try {
       const profilefetch = await fetchData("get", "/profile", true);
@@ -227,11 +203,22 @@ export default function Page() {
       console.error("Failed to fetch profile data:", error);
     }
   };
+
+  const getDefectData = async () => {
+    try {
+      const defectFetch = await fetchData("get", `/defects/${params.id}`, true);
+      setDefects(defectFetch);
+    } catch (error) {
+      console.error("Failed to fetch defects data:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         await getProfileData();
         await getPatrolData();
+        await getDefectData()
       } catch (error) {
         console.error("Error loading data: ", error);
       }
@@ -395,6 +382,7 @@ export default function Page() {
       </div>
     );
   }
+
   return (
     <div className="p-4">
       <SocketIndicator></SocketIndicator>
@@ -545,7 +533,7 @@ export default function Page() {
                       iconName = "cached";
                       text = "Start";
                       disabled = true;
-                      handleFunction = () => {};
+                      handleFunction = () => { };
                       break;
                   }
                   return (
@@ -573,8 +561,8 @@ export default function Page() {
                             </span>
                             {lock ? t("Unlock") : t("Lock")}
                           </Button>
-                        ) 
-                      ) :(
+                        )
+                      ) : (
                         <Button
                           variant={variant}
                           onClick={handleFunction}
@@ -593,17 +581,17 @@ export default function Page() {
             </div>
             <TabsContent value="detail">
               <div className="py-2">
-                {patrol.checklist.map((c: Checklist) => (
+                {patrol.patrolChecklist.map((pc: PatrolChecklistType) => (
                   <div className="mb-4">
-                    {profile?.profile.name === c.inspector.name ? (
+                    {profile?.profile.name === pc.inspector.profile.name ? (
                       <PatrolChecklist
                         handleResult={handleResult}
                         results={results}
-                        checklist={c}
+                        patrolChecklist={pc}
                         disabled={
                           patrol.status === "on_going" && !lock ? false : true
                         }
-                        patrolResult={patrol.result}
+                        patrolResult={patrolResults}
                         user={profile}
                       />
                     ) : (
@@ -615,46 +603,24 @@ export default function Page() {
             </TabsContent>
             <TabsContent value="report">
               <div className="py-2">
-                {patrol.result.map((result: any) => {
-                  if (result.defect.length > 0) {
-                    const defect = result.defect[0];
-
-                    const date = new Date(defect.timestamp).toLocaleDateString(
-                      "th-TH",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    );
-
-                    const time = new Date(defect.timestamp).toLocaleTimeString(
-                      "th-TH",
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: false,
-                      }
-                    );
-                    console.log("defect log:", defect);
-                    return (
-                      <div className="py-2">
-                        <ReportDefect
-                          date={date}
-                          title={defect.name}
-                          time={time}
-                          status={defect.status}
-                          beforeImage={defect.imageByInspector}
-                          afterImage={defect.imageBySupervisor}
-                          type={defect.type}
-                          description={defect.description}
-                          zone={result.zoneId}
-                        />
-                      </div>
-                    );
-                  }
-                  return null;
+                {defects.map((defect: Defect) => {
+                  console.log("defect log:", defect);
+                  return (
+                    <div className="py-2">
+                      <ReportDefect
+                        key={defect.id}
+                        id={defect.id}
+                        name={defect.name}
+                        description={defect.description}
+                        type={defect.type}
+                        status={defect.status}
+                        timestamp={defect.timestamp}
+                        userId={defect.userId}
+                        patrolResult={defect.patrolResult}
+                        image={defect.image}
+                      />
+                    </div>
+                  )
                 })}
               </div>
             </TabsContent>
