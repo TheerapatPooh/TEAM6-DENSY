@@ -15,7 +15,8 @@ export interface Location {
 export interface Zone {
     id: number;
     name: string;
-    supervisor: User;
+    locationId: number;
+    userId: number;
     pathData?: string;
     text?: {
         x: number;
@@ -23,6 +24,7 @@ export interface Zone {
         fontSize: number;
         rotation: number;
     } | null
+    supervisor?: User;
 }
 
 export interface Item {
@@ -35,6 +37,7 @@ export interface Item {
 
 export interface ItemZone {
     zone: Zone;
+    item: Item;
 }
 
 
