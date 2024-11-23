@@ -166,6 +166,7 @@ export default function Page() {
       status: patrol.status,
       checklist: patrol.patrolChecklist,
       result: updatedResults,
+      startTime: patrol.startTime
     };
 
     let resultCount = 0;
@@ -498,7 +499,7 @@ export default function Page() {
                       text = "Export";
                       disabled = false;
                       handleFunction = () => {
-                        exportData(patrol);
+                        exportData(patrol,patrolResults);
                       };
                       break;
                     case "on_going":

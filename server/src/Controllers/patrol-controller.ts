@@ -435,7 +435,7 @@ export async function finishPatrol(req: Request, res: Response) {
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         const patrolId = parseInt(req.params.id, 10)
-        const { status, checklist, result } = req.body
+        const { status, checklist, result, startTime } = req.body
 
         if (role !== 'admin' && role !== 'inspector') {
             res.status(403).json({ message: "Access Denied" })
@@ -461,6 +461,7 @@ export async function finishPatrol(req: Request, res: Response) {
             res.status(403).json({ message: "Cannot finish patrol." });
             return
         }
+        const duration = calculateDuration(startTime);
 
         const updatePatrol = await prisma.patrol.update({
             where: {
@@ -469,6 +470,7 @@ export async function finishPatrol(req: Request, res: Response) {
             data: {
                 pt_status: 'completed',
                 pt_end_time: new Date(),
+                pt_duration: duration,
             },
         });
 
@@ -709,3 +711,23 @@ export function schedulePatrolStatusUpdate() {
         setInterval(checkAndUpdatePendingPatrols, 24 * 60 * 60 * 1000);
     }, timeUntilMidnight);
 }
+
+// ฟังก์ชันสำหรับ คำนวณ Duration ของ patrol
+const calculateDuration = (startTime: string): string => {
+    // แปลง startTime เป็น Date object
+    const start = new Date(startTime);
+
+    // คำนวณเวลาปัจจุบัน
+    const end = new Date();
+
+    // คำนวณความแตกต่างในหน่วยมิลลิวินาที
+    const durationMs = end.getTime() - start.getTime();
+
+    // แปลงมิลลิวินาทีเป็นหน่วยชั่วโมง นาที และวินาที
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+
+    // แสดงผลในรูปแบบที่อ่านง่าย เช่น "2h 15m 30s"
+    return `${hours}h ${minutes}m ${seconds}s`;
+};
