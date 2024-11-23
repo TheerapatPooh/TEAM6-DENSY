@@ -239,8 +239,6 @@ export default function PatrolChecklist({
     }
   };
 
-  console.log('patrol', patrol, 'disabled', disabled)
-
   return (
     <div className="bg-secondary rounded-md px-4 py-2">
       <Accordion type="single" collapsible>
@@ -386,10 +384,7 @@ export default function PatrolChecklist({
                                       disabled={disabled}
                                     >
                                       <Button
-                                        variant={"outline"}
-                                        className={
-                                          existingResult ? "cursor-not-allowed" : ""
-                                        }
+                                        variant={"outline"}                          
                                         size={"lg"}
                                         disabled={disabled}
                                       >
