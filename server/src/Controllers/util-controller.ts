@@ -151,9 +151,10 @@ export async function createNotification({ nt_message, nt_type, nt_url, nt_us_id
 
       await sendEmail(user.us_email, emailSubject, emailMessage);
     }
+    let result = transformKeys(notification, keyMap);
 
     const io = getIOInstance();
-    io.to(nt_us_id).emit('new_notification', notification);
+    io.to(nt_us_id).emit('new_notification', result);
 
     return notification;
   } catch (error) {
