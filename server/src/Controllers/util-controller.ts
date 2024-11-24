@@ -35,10 +35,11 @@ export async function login(req: Request, res: Response) {
       res.status(401).json({ message: "Invalid username or password" })
       return
     }
-    const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey"; 
-    const token = jwt.sign({ userId: user.us_id, role: user.us_role }, jwtSecret, { expiresIn: "1h" })
-    // Set HttpOnly cookie with the token
+    const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey";
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
+    const iat = Math.floor(Date.now() / 1000)
+    const exp = iat + maxAge / 1000
+    const token = jwt.sign({ userId: user.us_id, role: user.us_role, iat, exp }, jwtSecret)
     const isProduction = process.env.NODE_ENV === 'production';
 
     res.cookie("authToken", token, {
@@ -76,7 +77,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
 
   if (!token) {
     res.status(401).json({ message: "Access Denied, No Token Provided" })
-    return 
+    return
   }
 
   try {
@@ -86,7 +87,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
     next();
   } catch (error) {
     res.status(400).json({ message: "Invalid Token" })
-    return 
+    return
   }
 }
 
