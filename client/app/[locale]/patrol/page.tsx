@@ -44,26 +44,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Checklist,
-  Patrol,
-  PatrolChecklist,
+  IPatrol,
+  IPatrolChecklist,
   patrolStatus,
-  Preset,
+  IPreset,
+  IPresetChecklist,
 } from "@/app/type";
-import { User, FilterPatrol } from "@/app/type";
+import { IUser, FilterPatrol } from "@/app/type";
 import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
+import Loading from "../../../components/loading";
 
 export default function Page() {
   const t = useTranslations("General");
-  const [patrolData, setPatrolData] = useState<Patrol[]>([]);
-  const [presetData, setPresetData] = useState<Preset[]>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [patrolData, setPatrolData] = useState<IPatrol[]>([]);
+  const [presetData, setPresetData] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
 
-  const [selectedPreset, setSelectedPreset] = useState<Preset>();
+  const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<PatrolChecklist[]>([]);
+  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>([]);
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -72,7 +74,7 @@ export default function Page() {
   const isSubmitDisabled =
     !selectedDate ||
     !selectedPreset ||
-    patrolChecklist.length !== selectedPreset.checklist.length;
+    patrolChecklist.length !== selectedPreset.presetChecklist.length;
 
   const onSubmit = async () => {
     if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
@@ -86,6 +88,7 @@ export default function Page() {
       checklists: patrolChecklist,
     };
 
+    console.log(data)
     try {
       const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
@@ -93,8 +96,8 @@ export default function Page() {
     } catch (error) { }
   };
 
-  const handleSelectUser = (checklistId: number, inspectorId: number) => {
-    setPatrolChecklist((prev) => {
+  const handleSelectUser = (checklistId: number, userId: number) => {
+    setPatrolChecklist((prev: IPatrolChecklist[]) => {
       const existingIndex = prev.findIndex(
         (item) => item.checklistId === checklistId
       );
@@ -102,11 +105,11 @@ export default function Page() {
       if (existingIndex !== -1) {
         // If the checklist already exists, update the inspectorId
         const updatedChecklist = [...prev];
-        updatedChecklist[existingIndex].inspectorId = inspectorId;
+        updatedChecklist[existingIndex].userId = userId;
         return updatedChecklist;
       } else {
         // Add new checklist
-        return [...prev, { checklistId, inspectorId }];
+        return [...prev, { checklistId, userId }];
       }
     });
   };
@@ -135,7 +138,7 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<FilterPatrol | null>(getStoredFilter())
-  const [filteredPatrolData, setFilteredPatrolData] = useState<Patrol[]>([])
+  const [filteredPatrolData, setFilteredPatrolData] = useState<IPatrol[]>([])
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -210,10 +213,13 @@ export default function Page() {
     const patrolDate = new Date(patrol.date).toLocaleDateString().toLowerCase();
     const patrolStatus = patrol.status.toLowerCase();
 
-    const inspectors = patrol.checklist
-      .map((cl: Checklist) => cl.inspector?.name ? cl.inspector.name.toLowerCase() : '')
+    const inspectors = patrol.patrolChecklist
+      .flatMap((pc) => {
+        return pc.inspector?.profile?.name
+          ? [pc.inspector.profile.name.toLowerCase()]
+          : [];
+      })
       .join(' ');
-
     const searchTokens = searchTerm.toLowerCase().split(' ').filter(Boolean);
     const inspectorTokens = inspectors.split(' ').filter(Boolean);
 
@@ -230,33 +236,41 @@ export default function Page() {
     )
   })
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const patrol = await fetchData("get", "/patrols", true);
-        const preset = await fetchData("get", "/presets", true);
-        setPatrolData(patrol);
-        setPresetData(preset);
+  const getPatrolData = async () => {
+    try {
+      const patrol = await fetchData("get", "/patrols", true);
+      setPatrolData(patrol);
 
-        if (typeof window !== 'undefined') {
-          const storedFilter = localStorage.getItem('filter');
-          let localStorageFilter: FilterPatrol | null = null;
-          if (storedFilter) {
-            localStorageFilter = JSON.parse(storedFilter) as FilterPatrol;
-          }
-          if (!localStorageFilter) {
-            setFilteredPatrolData(patrol);
-          } else {
-            setFilteredPatrolData(filterPatrol(localStorageFilter, patrol));
-          }
-        } else {
-          setFilteredPatrolData(patrol);
+      if (typeof window !== 'undefined') {
+        const storedFilter = localStorage.getItem('filter');
+        let localStorageFilter: FilterPatrol | null = null;
+        if (storedFilter) {
+          localStorageFilter = JSON.parse(storedFilter) as FilterPatrol;
         }
-      } catch (error) {
-        console.error("Failed to fetch patrol data:", error);
+        if (!localStorageFilter) {
+          setFilteredPatrolData(patrol);
+        } else {
+          setFilteredPatrolData(filterPatrol(localStorageFilter, patrol));
+        }
+      } else {
+        setFilteredPatrolData(patrol);
       }
-    };
-    getData();
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+  const getPresetData = async () => {
+    try {
+      const preset = await fetchData("get", "/presets", true);
+      setPresetData(preset);
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+  useEffect(() => {
+    getPatrolData();
+    getPresetData()
+    setLoading(false)
   }, []);
 
   useEffect(() => {
@@ -270,13 +284,9 @@ export default function Page() {
     }
   }, [sort, filteredPatrolData]);
 
-  useEffect(() => {
-    console.log(selectedPreset);
-  }, [selectedPreset]);
-
-  useEffect(() => {
-    console.log(patrolChecklist);
-  }, [patrolChecklist]);
+  if (loading) {
+    return <Loading />
+  }
 
   return (
     <div className="flex flex-col p-5 gap-y-5">
@@ -537,12 +547,12 @@ export default function Page() {
               <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
-                  {selectedPreset?.checklist.map((presetChecklist) => (
+                  {selectedPreset?.presetChecklist.flatMap((presetChecklist: IPresetChecklist) => (
                     <ChecklistDropdown
-                      key={presetChecklist.id}
-                      checklist={presetChecklist}
-                      handleselectUser={(selectedUser: User) => {
-                        handleSelectUser(presetChecklist.id, selectedUser.id);
+                      key={presetChecklist.checklist.id}
+                      checklist={presetChecklist.checklist}
+                      handleselectUser={(selectedUser: IUser) => {
+                        handleSelectUser(presetChecklist.checklist.id, selectedUser.id);
                       }}
                     />
                   ))}
@@ -570,16 +580,16 @@ export default function Page() {
         </AlertDialog>
 
         {patrolQueryResults &&
-          patrolQueryResults.map((card) => {
-            const { status, date, preset, checklist } = card;
-            const inspectors = checklist.map((cl: any) => cl.inspector);
+          patrolQueryResults.map((patrol: IPatrol) => {
+            const inspectors = patrol.patrolChecklist.map((cl: IPatrolChecklist) => cl.inspector);
             return (
               <PatrolCard
-                key={card.id || date}
-                patrolStatus={status as patrolStatus}
-                patrolDate={new Date(date)}
-                patrolPreset={preset ? preset.title : "No Title"}
-                patrolId={card.id}
+                key={patrol.id}
+                patrolStatus={patrol.status as patrolStatus}
+                patrolDate={new Date(patrol.date)}
+                patrolPreset={patrol.preset.title}
+                patrolId={patrol.id}
+                patrolChecklist={patrol.patrolChecklist}
                 inspector={inspectors}
               />
             );

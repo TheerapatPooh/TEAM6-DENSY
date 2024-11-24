@@ -14,13 +14,13 @@ import { useTranslations } from "next-intl";
 import { fetchData, logout } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton";
-import { Profile, User } from "@/app/type";
+import { IUser } from "@/app/type";
 
 export default function ProfileDropdown() {
   const t = useTranslations("General");
   const [isFlipped, setIsFlipped] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [profile, setProfile] = useState<User>();
+  const [profile, setProfile] = useState<IUser>();
   const router = useRouter();
 
   const hadleLogout = async () => {
@@ -45,7 +45,7 @@ export default function ProfileDropdown() {
 
   const getData = async () => {
     try {
-      const profilefetch = await fetchData("get", "/profile", true);
+      const profilefetch = await fetchData("get", "/user?profile=true&image=true", true);
       setProfile(profilefetch);
     } catch (error) {
       console.error("Failed to fetch profile data:", error);

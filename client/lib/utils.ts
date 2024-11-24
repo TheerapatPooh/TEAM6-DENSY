@@ -1,119 +1,118 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Patrol, FilterPatrol } from "@/app/type";
+import { IPatrol, FilterPatrol, IPatrolResult } from "@/app/type";
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const exportData = async (data: any) => {
-  const dataArray = Array.isArray(data) ? data : [data];
-
+export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("PatrolReport");
-    let passChecklist = 0;
-    let failChecklist = 0;
+    const worksheet = workbook.addWorksheet("Patrol Report");
 
+    // เพิ่มข้อมูล Patrol ที่ด้านบนของเอกสาร
+    worksheet.addRow(["Patrol ID:", patrol.id]);
+    worksheet.addRow(["Date:", patrol.date]);
+    worksheet.addRow(["Start Time:", patrol.startTime]);
+    worksheet.addRow(["End Time:", patrol.endTime]);
+    worksheet.addRow(["Status:", patrol.status]);
+    worksheet.addRow(["Preset Title:", patrol.preset.title]);
+    worksheet.addRow(["Preset Description:", patrol.preset.description]);
+    worksheet.addRow([]); // เพิ่มบรรทัดว่าง
+
+    // ตั้งค่าคอลัมน์พร้อมกับหัวข้อและคีย์
     worksheet.columns = [
-      { key: "A", width: 30 },
-      { key: "B", width: 40 },
-      { key: "C", width: 40 },
-      { key: "D", width: 20 },
-      { key: "E", width: 20 },
-      { key: "F", width: 20 },
-
+      { header: "Item Name", key: "itemName", width: 30 },
+      { header: "Zone Name", key: "zoneName", width: 20 },
+      { header: "Inspector Name", key: "inspectorName", width: 25 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "Number of Defects", key: "defectCount", width: 20 },
     ];
 
-    dataArray.forEach((entry) => {
-      const {
-        id,
-        date,
-        startTime,
-        endTime,
-        status,
-        preset,
-        checklist,
-        result,
-      } = entry;
-      worksheet.addRow({ A: "Patrol Id:" + id });
-      worksheet.addRow({ A: "Preset:" + preset.title });
-      worksheet.addRow({ A: "Description:" + preset.description });
-      worksheet.addRow({ A: "Schedule Date:" + date });
-      worksheet.addRow({ A: "StartTime:" + startTime });
-      worksheet.addRow({ A: "EndTime:" + endTime });
+    let totalFails = 0;
+    let totalDefects = 0;
 
-      checklist.forEach(
-        (checklist: {
-          title: any; item: any[]; inspector: { name: string }
-        }) => {
-          let isFirstItem = true; // Initialize a flag to track the first item
-          checklist.item.forEach((item) => {
-            if (isFirstItem) {
-              worksheet.addRow({
-                A: "Checklist:" + checklist.title
-              });
-              isFirstItem = false;
+    // วนลูปผ่าน patrolChecklist
+    for (const patrolChecklist of patrol.patrolChecklist) {
+      const inspectorName = patrolChecklist.inspector.profile.name;
+      const checklist = patrolChecklist.checklist;
+
+      // เพิ่มชื่อ Checklist
+      worksheet.addRow([]);
+      worksheet.addRow(["Checklist:", checklist.title]);
+
+      // วนลูปผ่านรายการใน Checklist
+      for (const item of checklist.item) {
+        // วนลูปผ่าน itemZone
+        for (const itemZone of item.itemZone) {
+          const zoneName = itemZone.zone.name;
+
+          // หา result ที่ตรงกับ item และ zone นี้
+          const resultItem = result.find(
+            (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
+          );
+
+          let statusText = "N/A";
+          let defectCount = 0;
+          if (resultItem) {
+            if (resultItem.status === true) {
+              statusText = "Pass";
+            } else if (resultItem.status === false) {
+              statusText = "Fail";
+              totalFails++; // เพิ่มจำนวน fail
             }
 
-            item.zone.forEach((zone: { [x: string]: any; name: string }) => {
-              const resultItem = result.find(
-                (r: { [x: string]: any; itemId: number }) =>
-                  r.itemId === item.id && r.zoneId === zone.id
-              ) || { status: null, itemId: null };
+            if (resultItem.defects && resultItem.defects.length > 0) {
+              defectCount = resultItem.defects.length;
+              totalDefects += defectCount; // เพิ่มจำนวน defect
+            }
+          }
 
-              const status =
-                resultItem.status === true
-                  ? "Pass"
-                  : resultItem.status === false
-                    ? "Fail"
-                    : "N/A";
-
-              if (resultItem.status === true) {
-                passChecklist++; // Increment pass counter
-              } else if (resultItem.status === false) {
-                failChecklist++; // Increment fail counter
-              }
-              worksheet.addRow({
-                B: item.name,
-                C: zone.name,
-                D: status,
-                E: "N/A",
-              });
-            });
+          // เพิ่มแถวข้อมูลลงใน worksheet
+          worksheet.addRow({
+            itemName: item.name,
+            zoneName: zoneName,
+            inspectorName: inspectorName,
+            status: statusText,
+            defectCount: defectCount,
           });
         }
-      );
-      worksheet.addRow({
-        A: "Pass Checklist: " + passChecklist,
-        B: "Fail Checklist: " + failChecklist,
-        C: "Total: " + (passChecklist + failChecklist)
-      });
-    });
+      }
+    }
 
+    // เพิ่มสรุปที่ด้านล่าง
+    worksheet.addRow([]);
+    worksheet.addRow(["Summary"]);
+    worksheet.addRow(["Total Fails", totalFails]);
+    worksheet.addRow(["Total Defects", totalDefects]);
+
+    // เขียน workbook เป็น buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
-    // Create a blob from the buffer for download in the browser
+    // สร้าง blob และดาวน์โหลดไฟล์
     const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "patrol_report.xlsx";
 
-    // Append the link to the document and click it programmatically
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   } catch (error) {
     console.error("Error exporting data:", error);
     throw new Error(
-      `Could not export data: ${error instanceof Error ? error.message : "Unknown error"
+      `Could not export data: ${
+        error instanceof Error ? error.message : "Unknown error"
       }`
     );
   }
 };
+
 
 export const getInitials = (name: string) => {
   if (!name) return "";
@@ -147,7 +146,7 @@ export const sortData = (patrolData: any, sort: { by: string; order: string }) =
   return sortedData
 }
 
-export function filterPatrol(filter: FilterPatrol | null, patrols: Patrol[]) {
+export function filterPatrol(filter: FilterPatrol | null, patrols: IPatrol[]) {
   if (filter?.presetTitle === "All" && JSON.stringify(filter?.patrolStatus) === JSON.stringify(["pending", "on_going", "scheduled"]) && filter?.dateRange.start === null && filter?.dateRange.end === null) {
     return patrols
   }

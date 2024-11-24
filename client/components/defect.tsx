@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { DefectStatus, ItemType } from "@/app/type";
+import { IDefect, defectStatus, itemType, IZone } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "./ui/textarea";
@@ -11,41 +11,22 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import path from "path";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "./ui/carousel";
 import { Card, CardContent } from "./ui/card";
-import { Fullscreen } from "lucide-react";
-import { max } from "date-fns";
-
-interface ImageProps {
-  id: number;
-  path: string[]
-}
 
 
-interface DefectProps {
-  date: string;
-  title: string;
-  time: string;
-  status: DefectStatus;
-  type: ItemType;
-  description?: string;
-  beforeImage?: ImageProps[];
-  afterImage?: ImageProps[];
-  zone: string;
-}
 
 export default function ReportDefect({
-  date,
-  title,
-  time,
-  status,
-  type,
+  id,
+  name,
   description,
-  beforeImage,
-  afterImage,
-  zone,
-}: DefectProps) {
+  type,
+  status,
+  timestamp,
+  userId,
+  patrolResult,
+  image,
+}: IDefect) {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "resolved":
@@ -107,11 +88,35 @@ export default function ReportDefect({
         return "Pending Inspection";
     }
   }
-  console.log(beforeImage)
 
+  const date = new Date(timestamp).toLocaleDateString(
+    "th-TH",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  );
 
-  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const time = new Date(timestamp).toLocaleTimeString(
+    "th-TH",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }
+  );
+
+  const beforeImage = image.filter((image) => image.image.user.id === userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null
+
+  const afterImage = image.filter((image) => image.image.user.id !== userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null
 
   const [isBeforeCarouselOpen, setIsBeforeCarouselOpen] = useState(false);
   const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
@@ -172,7 +177,7 @@ export default function ReportDefect({
               {time}
             </span>
             <h2 className="text-lg font-bold text-card-foreground cursor-default ">
-              {title}
+              {name}
             </h2>
           </div>
         </AccordionTrigger>
@@ -261,7 +266,7 @@ export default function ReportDefect({
                                             src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[index].path}`}
                                             alt={`${beforeImage[index].path}`}
                                             width={800}
-                                            height={500} 
+                                            height={500}
                                             priority
                                           />
                                         </div>
@@ -307,8 +312,8 @@ export default function ReportDefect({
                     <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
                       {afterImage && afterImage.length > 0 && afterImage[0].path ? (
                         <Image
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
-                        alt="First Image"
+                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
+                          alt="First Image"
                           width={130}
                           height={130}
                           className="object-cover cursor-pointer"
@@ -370,7 +375,7 @@ export default function ReportDefect({
               <div className="ml-auto">
                 <p className="text-gray-500 mb-2 cursor-default user-select-none"></p>
                 <div className="border p-2 rounded-md bg-background flex items-center justify-center h-48 w-48 cursor-default user-select-none">
-                  {zone}
+                  {patrolResult.zoneId}
                 </div>
               </div>
             </div>

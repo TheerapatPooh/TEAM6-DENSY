@@ -2,21 +2,21 @@ import React, { useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { User, PatrolChecklist } from "@/app/type";
+import { IUser, IPatrolChecklist } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface UserDropdownProps {
-  userData: User[];
-  onUserSelect: (selectedUser: User) => void;
+  userData: IUser[];
+  onUserSelect: (selectedUser: IUser) => void;
 }
 
 const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
-  const handleSelectUser = (user: User) => {
+  const handleSelectUser = (user: IUser) => {
     setSelectedUser(user);
     onUserSelect(user);
     setIsOpen(false);

@@ -87,7 +87,7 @@ CREATE TABLE `presets` (
     `ps_version` INTEGER NOT NULL,
     `ps_latest` BOOLEAN NOT NULL,
     `ps_update_at` DATETIME(3) NOT NULL,
-    `ps_us_id` INTEGER NOT NULL,
+    `ps_update_by` INTEGER NOT NULL,
 
     PRIMARY KEY (`ps_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -217,7 +217,7 @@ ALTER TABLE `patrol_checklists` ADD CONSTRAINT `patrol_checklists_ptcl_cl_id_fke
 ALTER TABLE `patrol_checklists` ADD CONSTRAINT `patrol_checklists_ptcl_us_id_fkey` FOREIGN KEY (`ptcl_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `presets` ADD CONSTRAINT `presets_ps_us_id_fkey` FOREIGN KEY (`ps_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `presets` ADD CONSTRAINT `presets_ps_update_by_fkey` FOREIGN KEY (`ps_update_by`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `preset_checklists` ADD CONSTRAINT `preset_checklists_pscl_ps_id_fkey` FOREIGN KEY (`pscl_ps_id`) REFERENCES `presets`(`ps_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
