@@ -1,7 +1,7 @@
 'use client';
-import { Stage, Layer, Rect, Path, Text } from 'react-konva';
-import { useEffect, useRef, useState } from 'react';
-import { Zone, Location } from '@/app/type';
+import { Stage, Layer, Path, Text } from 'react-konva';
+import { useEffect, useState } from 'react';
+import { IZone, ILocation } from '@/app/type';
 import { fetchData } from '@/lib/api';
 import zonePath from '@/lib/zonePath.json'
 import wallPath from '@/lib/wallPath.json'
@@ -9,15 +9,15 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 
 interface MapProps {
-  onZoneSelect?: (selectedZones: Zone[]) => void;
+  onZoneSelect?: (selectedZones: IZone[]) => void;
   disable: boolean;
   initialSelectedZones?: number[];
 }
 
 export default function Map({ onZoneSelect, disable, initialSelectedZones }: MapProps) {
-  const [location, setLocation] = useState<Location>();
+  const [location, setLocation] = useState<ILocation>();
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
-  const [zones, setZones] = useState<Zone[]>([]);
+  const [zones, setZones] = useState<IZone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
   const z = useTranslations('Zone')
 

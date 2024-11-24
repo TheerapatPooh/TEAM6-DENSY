@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { PatrolChecklist, patrolStatus, User } from "@/app/type";
+import { IPatrolChecklist, patrolStatus, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/api";
 import {
@@ -39,8 +39,8 @@ export interface patrolCardProps {
   patrolDate: Date;
   patrolPreset: string;
   patrolId: number;
-  patrolChecklist: PatrolChecklist[]
-  inspector: User[];
+  patrolChecklist: IPatrolChecklist[]
+  inspector: IUser[];
 }
 
 export function PatrolCard({
@@ -61,7 +61,7 @@ export function PatrolCard({
       : "N/A"; // Fallback if patrolDate is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [profile, setProfile] = useState<User[]>();
+  const [user, setUser] = useState<IUser[]>();
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
@@ -72,8 +72,8 @@ export function PatrolCard({
   const locale = useLocale()
   const getData = async () => {
     try {
-      const profilefetch = await fetchData("get", "/profiles", true);
-      setProfile(profilefetch);
+      const userFetch = await fetchData("get", "/users?profile=true&image=true", true);
+      setUser(userFetch);
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
     }
@@ -98,7 +98,7 @@ export function PatrolCard({
       }
 
       if (patrolStatus !== 'pending' && patrolStatus !== 'scheduled') {
-        const resultFetch = await fetchData("get", `/patrol/${patrolId}/result`, true);
+        const resultFetch = await fetchData("get", `/patrol/${patrolId}?result=true`, true);
         if (resultFetch?.result) {
           for (const patrolResult of resultFetch.result) {
             if (patrolResult.status === false) {
@@ -217,7 +217,7 @@ export function PatrolCard({
                 </div>
               )}
               {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
-                const matchingProfile = profile?.find(
+                const matchingProfile = user?.find(
                   (profile) => profile.profile.name === inspectorName
                 );
 
@@ -255,7 +255,7 @@ export function PatrolCard({
               </p>
             </div>
             {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
-              const matchingProfile = profile?.find(
+              const matchingProfile = user?.find(
                 (profile) => profile.profile.name === inspectorName
               );
               return (

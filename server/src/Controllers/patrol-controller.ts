@@ -2,11 +2,14 @@ import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
 import axios from 'axios';
 import { createNotification } from '@Controllers/util-controller.js';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, PatrolStatus } from '@prisma/client';
 import transformKeys, { keyMap } from '@Utils/key-map.js';
 
 export async function getPatrol(req: Request, res: Response) {
     try {
+        const includePreset = req.query.preset === "true";
+        const includeResult = req.query.result === "true";
+
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         const patrolId = parseInt(req.params.id, 10)
@@ -17,80 +20,44 @@ export async function getPatrol(req: Request, res: Response) {
         }
 
         let patrol: any
-        if (role === 'admin') {
-            patrol = await prisma.patrol.findFirst({
-                where: {
-                    pt_id: patrolId,
-                },
-                include: {
-                    preset: true,
-                    patrolChecklist: {
-                        include: {
-                            checklist: {
-                                include: {
-                                    item: {
-                                        include: {
-                                            itemZone: {
-                                                select: {
-                                                    zone: {
-                                                        select: {
-                                                            ze_id: true,
-                                                            ze_name: true
-                                                        }
-                                                    }
-                                                }
-                                            }
 
-                                        }
-                                    }
-                                }
-                            },
-                            inspector: {
-                                include: {
-                                    profile: {
-                                        include: {
-                                            image: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        patrol = await prisma.patrol.findFirst({
+            where: {
+                pt_id: patrolId,
+                patrolChecklist: {
+                    some: {
+                        ptcl_us_id: userId
                     }
                 }
-            })
-        }
-
-        else if (role === 'inspector') {
-            patrol = await prisma.patrol.findFirst({
-                where: {
-                    pt_id: patrolId,
-                    patrolChecklist: {
-                        some: {
-                            ptcl_us_id: userId
-                        }
+            },
+            include: {
+                preset: includePreset ? {
+                    select: {
+                        ps_id: true,
+                        ps_title: true,
+                        ps_description: true,
                     }
-                },
-                include: {
-                    preset: true,
-                    patrolChecklist: {
-                        include: {
-                            checklist: {
-                                include: {
-                                    item: {
-                                        include: {
-                                            itemZone: {
-                                                select: {
-                                                    zone: {
-                                                        select: {
-                                                            ze_id: true,
-                                                            ze_name: true,
-                                                            supervisor: {
-                                                                select: {
-                                                                    us_id: true,
-                                                                    profile: {
-                                                                        select: {
-                                                                            pf_name: true
-                                                                        }
+                } : undefined,
+                patrolChecklist: {
+                    include: {
+                        checklist: {
+                            select: {
+                                cl_id: true,
+                                cl_title: true,
+                                item: {
+                                    include: {
+                                        itemZone: {
+                                            select: {
+                                                zone: {
+                                                    select: {
+                                                        ze_id: true,
+                                                        ze_name: true,
+                                                        supervisor: {
+                                                            select: {
+                                                                us_id: true,
+                                                                profile: {
+                                                                    select: {
+                                                                        pf_name: true
                                                                     }
                                                                 }
                                                             }
@@ -98,87 +65,30 @@ export async function getPatrol(req: Request, res: Response) {
                                                     }
                                                 }
                                             }
-
                                         }
+
                                     }
                                 }
-                            },
-                            inspector: {
-                                include: {
-                                    profile: {
-                                        include: {
-                                            image: true
-                                        }
+                            }
+                        },
+                        inspector: {
+                            include: {
+                                profile: {
+                                    include: {
+                                        image: true
                                     }
                                 }
                             }
                         }
                     }
-                }
-            })
-        }
-
-        if (!patrol) {
-            res.status(404)
-            return
-        }
-        let result = transformKeys(patrol, keyMap);
-
-        res.status(200).json(result)
-        return
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ message: "Internal server error" })
-        return
-    }
-}
-
-export async function getPatrolResult(req: Request, res: Response) {
-    try {
-        const role = (req as any).user.role
-        const userId = (req as any).user.userId
-        const patrolId = parseInt(req.params.id, 10)
-
-        if (role !== 'admin' && role !== 'inspector') {
-            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" })
-            return
-        }
-
-        let patrol: any
-        if (role === 'admin') {
-            patrol = await prisma.patrol.findFirst({
-                where: {
-                    pt_id: patrolId,
                 },
-                select: {
-                    result: {
-                        include: {
-                            defects: true
-                        }
+                result: includeResult ? {
+                    include: {
+                        defects: true
                     }
-                }
-            })
-        }
-
-        else if (role === 'inspector') {
-            patrol = await prisma.patrol.findFirst({
-                where: {
-                    pt_id: patrolId,
-                    patrolChecklist: {
-                        some: {
-                            ptcl_us_id: userId
-                        }
-                    }
-                },
-                select: {
-                    result: {
-                        include: {
-                            defects: true
-                        }
-                    }
-                }
-            })
-        }
+                } : undefined
+            }
+        })
 
         if (!patrol) {
             res.status(404)
@@ -197,6 +107,8 @@ export async function getPatrolResult(req: Request, res: Response) {
 
 export async function getAllPatrols(req: Request, res: Response) {
     try {
+        const filterStatus = req.query.status as PatrolStatus | undefined;
+
         const role = (req as any).user.role
         const userId = (req as any).user.userId
         if (role !== 'admin' && role !== 'inspector') {
@@ -205,91 +117,63 @@ export async function getAllPatrols(req: Request, res: Response) {
         }
         let allPatrols: any
 
-        if (role === 'admin') {
-            allPatrols = await prisma.patrol.findMany({
-                include: {
-                    preset: true,
-                    patrolChecklist: {
-                        include: {
-                            checklist: {
-                                include: {
-                                    item: {
-                                        include: {
-                                            itemZone: {
-                                                select: {
-                                                    zone: {
-                                                        select: {
-                                                            ze_id: true,
-                                                            ze_name: true
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                        }
-                                    }
-                                }
-                            },
-                            inspector: {
-                                include: {
-                                    profile: {
-                                        include: {
-                                            image: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        allPatrols = await prisma.patrol.findMany({
+            where: {
+                pt_status: filterStatus,
+                patrolChecklist: {
+                    some: {
+                        ptcl_us_id: userId
                     }
                 }
-            })
-        }
-        if (role === 'inspector') {
-            allPatrols = await prisma.patrol.findMany({
-                where: {
-                    patrolChecklist: {
-                        some: {
-                            ptcl_us_id: userId
-                        }
+            },
+            select: {
+                pt_id: true,
+                pt_date: true,
+                pt_status: true,
+                preset: {
+                    select: {
+                        ps_title: true,
                     }
                 },
-                include: {
-                    preset: true,
-                    patrolChecklist: {
-                        include: {
-                            checklist: {
-                                include: {
-                                    item: {
-                                        include: {
-                                            itemZone: {
-                                                select: {
-                                                    zone: {
-                                                        select: {
-                                                            ze_id: true,
-                                                            ze_name: true
-                                                        }
+                patrolChecklist: {
+                    include: {
+                        checklist: {
+                            select: {
+                                cl_id: true,
+                                cl_title: true,
+                                item: {
+                                    include: {
+                                        itemZone: {
+                                            select: {
+                                                zone: {
+                                                    select: {
+                                                        ze_id: true,
+                                                        ze_name: true
                                                     }
                                                 }
                                             }
-
                                         }
+
                                     }
                                 }
-                            },
-                            inspector: {
-                                include: {
-                                    profile: {
-                                        include: {
-                                            image: true
-                                        }
+                            }
+                        },
+                        inspector: {
+                            select: {
+                                us_id: true,
+                                us_email: true,
+                                profile: {
+                                    include: {
+                                        image: true
                                     }
                                 }
                             }
                         }
                     }
                 }
-            })
-        }
+            }
+        })
+
         let result = allPatrols.map((patrol: any) => transformKeys(patrol, keyMap));
 
         res.status(200).json(result)
@@ -557,31 +441,6 @@ export async function updatePatrolStatus(req: Request, res: Response) {
     }
 }
 
-export async function getPendingPatrols(req: Request, res: Response) {
-    try {
-        const pendingPatrols = await prisma.patrol.findMany({
-            where: {
-                pt_status: 'pending'
-            },
-            select: {
-                pt_id: true,
-                pt_date: true,
-                pt_status: true,
-            }
-        });
-
-
-        let result = transformKeys(pendingPatrols, keyMap);
-        res.status(200).json(result);
-        return
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
-        return
-    }
-}
-
 export async function commentPatrol(req: Request, res: Response) {
     try {
         const role = (req as any).user.role;
@@ -622,9 +481,9 @@ export async function commentPatrol(req: Request, res: Response) {
         const newComment = await prisma.comment.create({
             data: {
                 cm_message: message,
+                cm_timestamp: new Date(),
                 cm_us_id: userId,
-                cm_pr_id: patrolResultId,
-                cm_timestamp: new Date()
+                cm_pr_id: patrolResultId
             }
         });
 
@@ -662,7 +521,7 @@ export async function getCommentPatrol(req: Request, res: Response) {
 // ฟังก์ชันสำหรับตรวจสอบและอัปเดต patrols ที่มีสถานะ pending
 export async function checkAndUpdatePendingPatrols() {
     try {
-        const response = await axios.get(`${process.env.SERVER_URL}/patrols/pending`);
+        const response = await axios.get(`${process.env.SERVER_URL}/patrols?status=pending`);
         const patrols = response.data;
 
         const today = new Date();

@@ -4,33 +4,34 @@ import { fetchData } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
-  Defect,
-  Patrol,
-  PatrolChecklistType,
-  PatrolResult,
+  IDefect,
+  IPatrol,
+  IPatrolChecklist,
+  IPatrolResult,
   patrolStatus,
-  User,
+  IUser,
 } from "@/app/type";
 import ReportDefect from "@/components/defect";
 import PatrolChecklist from "@/components/patrol-checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { exportData } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useSocket } from "@/components/socket-provider";
 import { Progress } from "@/components/ui/progress";
 import { SocketIndicator } from "@/components/socket-indicator";
 
 export default function Page() {
   const [mounted, setMounted] = useState(false);
-  const [patrol, setPatrol] = useState<Patrol | null>(null);
-  const [results, setResults] = useState<PatrolResult[]>([]);
-  const [otherResults, setOtherResults] = useState<PatrolResult[]>([]);
-  const [patrolResults, setPatrolResults] = useState<PatrolResult[]>([]);
-  const [defects, setDefects] = useState<Defect[]>([]);
-  const [profile, setProfile] = useState<User>();
+  const [patrol, setPatrol] = useState<IPatrol | null>(null);
+  const [results, setResults] = useState<IPatrolResult[]>([]);
+  const [otherResults, setOtherResults] = useState<IPatrolResult[]>([]);
+  const [patrolResults, setPatrolResults] = useState<IPatrolResult[]>([]);
+  const [defects, setDefects] = useState<IDefect[]>([]);
+  const [user, setUser] = useState<IUser>();
   const { socket, isConnected } = useSocket();
   const [lock, setLock] = useState(false);
+  const locale = useLocale()
 
   const params = useParams();
   const router = useRouter();
@@ -46,8 +47,8 @@ export default function Page() {
   const getPatrolData = async () => {
     if (params.id) {
       try {
-        const data = await fetchData("get", `/patrol/${params.id}`, true);
-        const result = await fetchData("get", `/patrol/${params.id}/result`, true);
+        const data = await fetchData("get", `/patrol/${params.id}?preset=true`, true);
+        const result = await fetchData("get", `/patrol/${params.id}/?result=true`, true);
         console.log("patrolID : " + data.id);
         const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
         console.log("saveresult : " + savedResults);
@@ -77,7 +78,7 @@ export default function Page() {
     return (checkedResults / totalResults) * 100;
   };
 
-  const mergeResults = (newResults: PatrolResult[]) => {
+  const mergeResults = (newResults: IPatrolResult[]) => {
     setPatrolResults((prevPatrolResult = []) => {
       console.log('prevPatrolResult', prevPatrolResult);
       const updatedResults = prevPatrolResult.map((res) => {
@@ -104,7 +105,7 @@ export default function Page() {
     setLock((prevLock) => !prevLock);
   };
 
-  const handleResult = (result: PatrolResult) => {
+  const handleResult = (result: IPatrolResult) => {
     setResults((prevResults) => {
       const existingIndex = prevResults.findIndex(
         (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
@@ -196,10 +197,10 @@ export default function Page() {
     window.location.reload();
   };
 
-  const getProfileData = async () => {
+  const getUserData = async () => {
     try {
-      const profilefetch = await fetchData("get", "/profile", true);
-      setProfile(profilefetch);
+      const userfetch = await fetchData("get", "/user?profile=true&image=true", true);
+      setUser(userfetch);
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
     }
@@ -217,7 +218,7 @@ export default function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await getProfileData();
+        await getUserData();
         await getPatrolData();
         await getDefectData()
       } catch (error) {
@@ -241,17 +242,17 @@ export default function Page() {
   }, [otherResults]);
 
   useEffect(() => {
-    if (socket && isConnected && patrol?.id && profile?.id) {
+    if (socket && isConnected && patrol?.id && user?.id) {
       console.log("Connected to socket and joining room:", patrol.id);
       socket.emit("join_room", patrol.id);
 
-      const handleResultUpdate = (updatedResults: PatrolResult[]) => {
+      const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
         const currentUserResults = updatedResults.filter(
-          (res) => res.inspectorId === profile.id
+          (res) => res.inspectorId === user.id
         );
 
         const otherUserResults = updatedResults.filter(
-          (res) => res.inspectorId !== profile.id
+          (res) => res.inspectorId !== user.id
         );
 
         // Avoid unnecessary updates to localStorage
@@ -259,7 +260,7 @@ export default function Page() {
           const savedResults = localStorage.getItem(
             `patrolResults_${patrol.id}`
           );
-          const parsedResults: PatrolResult[] = savedResults
+          const parsedResults: IPatrolResult[] = savedResults
             ? JSON.parse(savedResults)
             : [];
           if (
@@ -276,7 +277,7 @@ export default function Page() {
           const savedOtherResults = localStorage.getItem(
             `otherResults_${patrol.id}`
           );
-          const parsedOtherResults: PatrolResult[] = savedOtherResults
+          const parsedOtherResults: IPatrolResult[] = savedOtherResults
             ? JSON.parse(savedOtherResults)
             : [];
           if (
@@ -300,9 +301,9 @@ export default function Page() {
         socket.off("patrol_result_update", handleResultUpdate);
       };
     }
-  }, [socket, isConnected, patrol?.id, profile?.id, results]);
+  }, [socket, isConnected, patrol?.id, user?.id, results]);
 
-  const lastEmittedResults = useRef<PatrolResult[]>([]);
+  const lastEmittedResults = useRef<IPatrolResult[]>([]);
 
   useEffect(() => {
     if (socket && patrol?.id) {
@@ -312,7 +313,7 @@ export default function Page() {
         const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
         if (savedResults) {
           try {
-            const parsedResults: PatrolResult[] = JSON.parse(savedResults);
+            const parsedResults: IPatrolResult[] = JSON.parse(savedResults);
 
             console.log("Emitting saved results:", parsedResults);
             socket.emit("patrol_result_update", parsedResults, patrol.id);
@@ -472,7 +473,7 @@ export default function Page() {
                 </TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-4">
-                <Button variant={"secondary"} onClick={() => router.back()}>
+                <Button variant={"secondary"} onClick={() => router.push(`/${locale}`)}>
                   {t("Back")}
                 </Button>
                 {(() => {
@@ -582,9 +583,9 @@ export default function Page() {
             </div>
             <TabsContent value="detail">
               <div className="py-2">
-                {patrol.patrolChecklist.map((pc: PatrolChecklistType) => (
+                {patrol.patrolChecklist.map((pc: IPatrolChecklist) => (
                   <div className="mb-4">
-                    {profile?.profile.name === pc.inspector.profile.name ? (
+                    {user?.profile.name === pc.inspector.profile.name ? (
                       <PatrolChecklist
                         handleResult={handleResult}
                         results={results}
@@ -593,7 +594,7 @@ export default function Page() {
                           patrol.status === "on_going" && !lock ? false : true
                         }
                         patrolResult={patrolResults}
-                        user={profile}
+                        user={user}
                       />
                     ) : (
                       <div></div>
@@ -604,7 +605,7 @@ export default function Page() {
             </TabsContent>
             <TabsContent value="report">
               <div className="py-2">
-                {defects.map((defect: Defect) => {
+                {defects.map((defect: IDefect) => {
                   console.log("defect log:", defect);
                   return (
                     <div className="py-2">

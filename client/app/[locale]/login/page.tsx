@@ -30,12 +30,6 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import EmblaAutoplay from 'embla-carousel-autoplay'
 import { useTheme } from 'next-themes';
 import { LoginSchema } from '@/app/type';
-// export const LoginSchema = z.object({
-//     username: z.string(),
-//     password: z.string(),
-//     rememberMe: z.boolean().optional()
-// })
-
 
 export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')

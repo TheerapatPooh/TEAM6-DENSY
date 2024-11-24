@@ -1,62 +1,10 @@
 import { prisma } from '@Utils/database.js'
 import { Request, response, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import { User } from '@Utils/type.js'
 import { faker } from '@faker-js/faker'
 import fs from 'fs'
 import path from 'path'
 import transformKeys, { keyMap } from '@Utils/key-map.js'
-
-export async function getUser(req: Request, res: Response) {
-    try {
-        const role = (req as any).user.role;
-        const Id = parseInt(req.params.id, 10);
-        const user = await prisma.user.findUnique({
-            where: { us_id: Id },
-        });
-
-        if (role !== 'admin') {
-            res.status(403).json({ message: "Access Denied: Admins only" });
-            return
-        }
-
-        if (user) {
-            const result = transformKeys(user, keyMap);
-            res.status(200).json(result);
-            return
-        } else {
-            res.status(404).json({ message: "User not found" });
-            return
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error", error });
-        return
-    }
-}
-
-export async function getAllUsers(req: Request, res: Response): Promise<void> {
-    try {
-        const role = (req as any).user.role
-        if (role !== 'admin') {
-            res.status(403).json({ message: "Access Denied: Admins only" })
-            return
-        }
-        const allUsers = await prisma.user.findMany()
-
-        if (allUsers) {
-            let result = transformKeys(allUsers, keyMap);
-            res.status(200).send(result)
-            return
-        } else {
-            res.status(404)
-            return
-        }
-    } catch (error) {
-        res.status(500)
-        return
-    }
-}
 
 export async function createUser(req: Request, res: Response) {
     try {
@@ -65,7 +13,7 @@ export async function createUser(req: Request, res: Response) {
             res.status(403).json({ message: "Access Denied: Admins only" })
             return
         }
-        let { username, email, password, role, department }: User = req.body
+        let { username, email, password, role, department } = req.body
         const hashPassword = await bcrypt.hash(password, 10)
 
         const latestUser = await prisma.user.findFirst({
@@ -100,8 +48,8 @@ export async function createUser(req: Request, res: Response) {
             }
         })
         const user = await prisma.user.findUnique({
-            where: { 
-                us_id: newUser.us_id 
+            where: {
+                us_id: newUser.us_id
             },
             include: {
                 profile: {
@@ -179,7 +127,7 @@ export async function updateProfile(req: Request, res: Response) {
                 pf_age: parseInt(age, 10),
                 pf_tel: tel,
                 pf_address: address,
-                pf_im_id: image?.im_id , // Connect image if it exists
+                pf_im_id: image?.im_id, // Connect image if it exists
             },
         });
 
@@ -195,8 +143,11 @@ export async function updateProfile(req: Request, res: Response) {
 }
 
 
-export async function getProfile(req: Request, res: Response) {
+export async function getUser(req: Request, res: Response) {
     try {
+        const includeProfile = req.query.profile === "true";
+        const includeImage = req.query.image === "true";
+
         const userId = (req as any).user.userId
         const id = parseInt(req.params.id, 10)
         let user = null
@@ -204,11 +155,12 @@ export async function getProfile(req: Request, res: Response) {
             user = await prisma.user.findUnique({
                 where: { us_id: userId },
                 include: {
-                    profile: {
-                        include: {
-                            image: true
-                        }
-                    },
+                    profile: includeProfile
+                        ? {
+                            include: {
+                                image: includeImage
+                            }
+                        } : undefined,
                 },
             })
         }
@@ -216,11 +168,12 @@ export async function getProfile(req: Request, res: Response) {
             user = await prisma.user.findUnique({
                 where: { us_id: id },
                 include: {
-                    profile: {
-                        include: {
-                            image: true
-                        }
-                    },
+                    profile: includeProfile
+                        ? {
+                            include: {
+                                image: includeImage
+                            }
+                        } : undefined,
                 },
             })
         }
@@ -240,15 +193,19 @@ export async function getProfile(req: Request, res: Response) {
     }
 }
 
-export async function getAllProfile(req: Request, res: Response) {
+export async function getAllUser(req: Request, res: Response) {
     try {
+        const includeProfile = req.query.profile === "true";
+        const includeImage = req.query.image === "true";
+
         const allUsers = await prisma.user.findMany({
             include: {
-                profile: {
-                    include: {
-                        image: true
-                    }
-                },
+                profile: includeProfile
+                    ? {
+                        include: {
+                            image: includeImage
+                        }
+                    } : undefined,
             },
         })
 
@@ -266,6 +223,7 @@ export async function getAllProfile(req: Request, res: Response) {
         return
     }
 }
+
 export async function updateUser(req: Request, res: Response) {
     try {
         const loggedInUserId = (req as any).user.userId;

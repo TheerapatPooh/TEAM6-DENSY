@@ -21,17 +21,14 @@ import {
   AlertDialogFooter,
 } from "./ui/alert-dialog";
 import {
-  Checklist,
-  Defect,
-  Image,
-  Item,
-  ItemType,
-  ItemZone,
-  Patrol,
-  PatrolChecklistType,
-  PatrolResult,
-  User,
-  Zone,
+  IItem,
+  itemType,
+  IItemZone,
+  IPatrol,
+  IPatrolChecklist,
+  IPatrolResult,
+  IUser,
+  IZone,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
 import { fetchData, fetchDataFormFormat } from "@/lib/api";
@@ -48,8 +45,8 @@ import {
 // TYPE
 
 interface PatrolChecklistProps {
-  user: User;
-  patrolChecklist: PatrolChecklistType;
+  user: IUser;
+  patrolChecklist: IPatrolChecklist;
   disabled: boolean;
   handleResult: (result: {
     inspectorId: number;
@@ -58,7 +55,7 @@ interface PatrolChecklistProps {
     status: boolean;
   }) => void;
   results: Array<{ itemId: number; zoneId: number; status: boolean }>;
-  patrolResult: PatrolResult[];
+  patrolResult: IPatrolResult[];
 }
 
 export default function PatrolChecklist({
@@ -73,27 +70,11 @@ export default function PatrolChecklist({
   const [resultStatus, setResultStatus] = useState<{
     [key: string]: boolean | null;
   }>({});
-  const [patrol, setPatrol] = useState<Patrol | null>(null);
   const [defectDescription, setDefectDescription] = useState<string>("");
-  const params = useParams();
+  const [comments, setComments] = useState()
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
-
-  const getPatrolData = async () => {
-    if (params.id) {
-      try {
-        const data = await fetchData("get", `/patrol/${params.id}`, true);
-        setPatrol(data);
-      } catch (error) {
-        console.error("Failed to fetch patrol data:", error);
-      }
-    }
-  };
-  useEffect(() => {
-    getPatrolData();
-    console.log('pc', patrolChecklist)
-  }, [])
 
   const checkStatus = (itemId: number, zoneId: number) => {
     const result = results.find(
@@ -183,7 +164,7 @@ export default function PatrolChecklist({
     document.getElementById("file-input")?.click();
   };
 
-  const getBadgeVariant = (type: ItemType) => {
+  const getBadgeVariant = (type: itemType) => {
     switch (type) {
       case "safety":
         return "mint";
@@ -197,11 +178,6 @@ export default function PatrolChecklist({
   };
 
   const getExistingResult = (itemId: number, zoneId: number) => {
-    if (!patrol) {
-      console.warn("Patrol data is not yet loaded.");
-      return null;
-    }
-
     const result = patrolResult.find(
       (res) => res.itemId === itemId && res.zoneId === zoneId
     );
@@ -212,7 +188,7 @@ export default function PatrolChecklist({
   useEffect(() => {
     if (patrolResult && patrolChecklist.checklist.item) {
       const initialStatus = patrolChecklist.checklist.item.reduce((acc, item) => {
-        item.itemZone.flatMap((itemZone: ItemZone) => {
+        item.itemZone.flatMap((itemZone: IItemZone) => {
           const matchingResult = patrolResult.find((result) => {
             return result.itemId === item.id && result.zoneId === itemZone.zone.id;
           });
@@ -253,21 +229,21 @@ export default function PatrolChecklist({
               <p className="text-card-foreground">{patrolChecklist.inspector.profile.name}</p>
             </div>
             <div className="ps-2">
-              {patrolChecklist.checklist.item?.map((item: Item) => (
+              {patrolChecklist.checklist.item?.map((item: IItem) => (
                 <Accordion type="single" collapsible>
                   <AccordionItem value="item-1" className="border-none">
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center justify-between w-full pe-2">
                         <p className="text-xl font-semibold">{item.name}</p>
                         <BadgeCustom
-                          variant={getBadgeVariant(item.type as ItemType)}
+                          variant={getBadgeVariant(item.type as itemType)}
                         >
                           {s(item.type)}
                         </BadgeCustom>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col py-2 gap-2">
-                      {item.itemZone.flatMap((itemZone: ItemZone) => {
+                      {item.itemZone.flatMap((itemZone: IItemZone) => {
                         const status = checkStatus(item.id, itemZone.zone.id);
                         const existingResult = getExistingResult(
                           item.id,

@@ -5,6 +5,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import multer from 'multer';
 import { getIOInstance } from '@Utils/socket.js';
 import nodemailer from 'nodemailer';
+import transformKeys, { keyMap } from "@Utils/key-map.js";
 
 
 
@@ -116,8 +117,9 @@ export async function getNotifications(req: Request, res: Response) {
       where: { nt_us_id: userId },
       orderBy: { nt_timestamp: 'desc' },
     });
+    let result = transformKeys(notifications, keyMap);
 
-    res.status(200).json(notifications);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "Error fetching notifications", error });
   }

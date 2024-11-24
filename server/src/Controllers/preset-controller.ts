@@ -1,27 +1,22 @@
 import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
 import transformKeys, { keyMap } from '@Utils/key-map.js'
-import { Preset } from '@prisma/client'
 
 export async function getPreset(req: Request, res: Response) {
     try {
         const presetId = parseInt(req.params.id, 10)
         const preset = await prisma.preset.findUnique({
             where: { ps_id: presetId },
-            include: {
-                checklist: {
-                    include: {
+            select: {
+                ps_id: true,
+                ps_title: true,
+                ps_description: true,
+                presetChecklist: {
+                    select: {
                         checklist: {
-                            include: {
-                                user: {
-                                    include: {
-                                        profile: {
-                                            include: {
-                                                image: true
-                                            }
-                                        }
-                                    }
-                                },
+                            select: {
+                                cl_id: true,
+                                cl_title: true,
                                 item: {
                                     include: {
                                         itemZone: {
@@ -56,22 +51,19 @@ export async function getPreset(req: Request, res: Response) {
 
 export async function getAllPresets(req: Request, res: Response) {
     try {
+        const latest = req.query.latest === "true";
         const presets = await prisma.preset.findMany({
-            where: { ps_latest: true },
-            include: {
-                checklist: {
-                    include: {
+            where: latest ? { ps_latest: latest } : undefined,
+            select: {
+                ps_id: true,
+                ps_title: true,
+                ps_description: true,
+                presetChecklist: {
+                    select: {
                         checklist: {
-                            include: {
-                                user: {
-                                    include: {
-                                        profile: {
-                                            include: {
-                                                image: true
-                                            }
-                                        }
-                                    }
-                                },
+                            select: {
+                                cl_id: true,
+                                cl_title: true,
                                 item: {
                                     include: {
                                         itemZone: {
@@ -98,7 +90,7 @@ export async function getAllPresets(req: Request, res: Response) {
             return
         }
 
-        let result = presets.map((preset: Preset) => transformKeys(preset, keyMap));
+        let result = presets.map((preset: any) => transformKeys(preset, keyMap));
         res.status(200).json(result)
     } catch (err) {
         res.status(500)

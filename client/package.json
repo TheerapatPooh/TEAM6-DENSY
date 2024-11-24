@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "server": "node server",
-    "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json &&  node --loader ts-node/esm eslint-report.ts"
+    "lint": "node -e \"const fs = require('fs'); const date = new Date(); const dateString = date.toISOString().split('T')[0].replace(/-/g, '_'); const timeString = date.toTimeString().split(' ')[0].replace(/:/g, '_'); const fileName = `lintReports/lintReport_${dateString}_${timeString}.json`; fs.mkdirSync('lintReports', { recursive: true }); require('child_process').execSync(`eslint . --format json -o ${fileName}`);\"  &&  node --loader ts-node/esm eslint-report.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

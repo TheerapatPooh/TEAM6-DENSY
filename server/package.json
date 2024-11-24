@@ -8,8 +8,8 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
-    "seed": "if exist dist (node dist/Utils/seed.js) else (tsx src/Utils/seed.ts)",
-    "lint": "eslint . --format json -o lintReports/lintReport_%DATE:~10,4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json && tsx eslint-report.ts"
+    "seed": "tsx src/Utils/seed.ts",
+    "lint": "node -e \"const fs = require('fs'); const date = new Date(); const dateString = date.toISOString().split('T')[0].replace(/-/g, '_'); const timeString = date.toTimeString().split(' ')[0].replace(/:/g, '_'); const fileName = `lintReports/lintReport_${dateString}_${timeString}.json`; fs.mkdirSync('lintReports', { recursive: true }); require('child_process').execSync(`eslint . --format json -o ${fileName}`);\" && tsx eslint-report.ts"
   },
   "author": "TEAM-6",
   "license": "ISC",
@@ -43,7 +43,7 @@
     "@types/jest": "^29.5.13",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.9.3",
     "@types/nodemailer": "^6.4.16",
     "@types/socket.io": "^3.0.2",
     "@types/supertest": "^6.0.2",

@@ -51,4 +51,4 @@ ENV SERVER_PORT=4000
 EXPOSE 3000 4000
 
 # Command to handle migrations, seed data, and start client and server
-CMD ["sh", "-c", "cd server && npx prisma migrate deploy && npx prisma db execute --file prisma/migrations/update.sql && npm run seed && concurrently \"node dist/index.js\" \"npm start --prefix ../client\""]
+CMD ["sh", "-c", "cd server && npx prisma migrate deploy && npx prisma db execute --file prisma/migrations/update.sql && node dist/index.js concurrently npm start --prefix ../client"]

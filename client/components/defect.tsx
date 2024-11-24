@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Defect, DefectStatus, ItemType, Zone } from "@/app/type";
+import { IDefect, defectStatus, itemType, IZone } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "./ui/textarea";
@@ -26,7 +26,7 @@ export default function ReportDefect({
   userId,
   patrolResult,
   image,
-}: Defect) {
+}: IDefect) {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "resolved":

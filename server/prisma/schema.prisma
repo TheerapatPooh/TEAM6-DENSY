@@ -22,8 +22,8 @@ model User {
   us_department String?
   us_created_at DateTime @default(now())
 
-  preset           Preset[]
-  update_checklist Checklist[]       @relation("user")
+  updatereset           Preset[]
+  updateChecklist Checklist[]       @relation("user")
   comment          Comment[]
   profile          Profile?
   notification     Notification[]
@@ -121,7 +121,7 @@ model Preset {
   ps_update_by      Int
 
   user      User              @relation(fields: [ps_update_by], references: [us_id])
-  checklist PresetChecklist[]
+  presetChecklist PresetChecklist[]
   patrol    Patrol[]
 
   @@map("presets")
@@ -148,7 +148,7 @@ model Checklist {
 
   patrol PatrolChecklist[]
   user   User              @relation("user", fields: [cl_update_by], references: [us_id])
-  preset PresetChecklist[]
+  presetChecklist PresetChecklist[]
   item   Item[]
 
   @@map("checklists")
@@ -163,7 +163,7 @@ model PatrolResult {
 
   comment   Comment[]
   defects   Defect[]
-  item_zone ItemZone  @relation(fields: [pr_itze_it_id, pr_itze_ze_id], references: [itze_it_id, itze_ze_id])
+  itemZone ItemZone  @relation(fields: [pr_itze_it_id, pr_itze_ze_id], references: [itze_it_id, itze_ze_id])
   patrol    Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
 
   @@map("patrol_results")
@@ -198,7 +198,7 @@ model ItemZone {
   itze_it_id Int
   itze_ze_id Int
 
-  patrol_result PatrolResult[]
+  result PatrolResult[]
   item          Item           @relation(fields: [itze_it_id], references: [it_id], onDelete: Cascade)
   zone          Zone           @relation(fields: [itze_ze_id], references: [ze_id], onDelete: Cascade)
 

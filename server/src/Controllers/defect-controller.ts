@@ -1,6 +1,6 @@
 import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
-import transformKeys, { keyMap } from '@Utils/key-map';
+import transformKeys, { keyMap } from '@Utils/key-map.js';
 
 export async function createDefect(req: Request, res: Response) {
     try {
@@ -147,14 +147,7 @@ export async function getDefect(req: Request, res: Response) {
             return
         }
 
-        const result = {
-            name: defect.df_name,
-            description: defect.df_description,
-            type: defect.df_type,
-            status: defect.df_status,
-            userId: defect.df_us_id,
-            patrolResultId: defect.df_pr_id
-        };
+        let result = transformKeys(defect, keyMap);
 
         res.status(200).json(result);
         return
@@ -280,7 +273,7 @@ export async function updateDefect(req: Request, res: Response) {
                 df_type: type,
                 df_status: status,
                 user: { connect: { us_id: defectUserId } },
-                patrol_result: { connect: { pr_id: patrolResultId } }
+                patrolResult: { connect: { pr_id: patrolResultId } }
             },
         });
 
@@ -326,12 +319,12 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
 
         const validPatrol = await prisma.patrol.findFirst({
             where: {
-                patrol_result: {
+                result: {
                     some: {
                         pr_id: defect.df_pr_id,
                     }
                 },
-                checklist: {
+                patrolChecklist: {
                     some: {
                         ptcl_us_id: userId,
                     }

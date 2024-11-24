@@ -44,26 +44,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Checklist,
-  Patrol,
-  PatrolChecklistType,
+  IPatrol,
+  IPatrolChecklist,
   patrolStatus,
-  Preset,
+  IPreset,
+  IPresetChecklist,
 } from "@/app/type";
-import { User, FilterPatrol } from "@/app/type";
+import { IUser, FilterPatrol } from "@/app/type";
 import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
 
 export default function Page() {
   const t = useTranslations("General");
-  const [patrolData, setPatrolData] = useState<Patrol[]>([]);
-  const [presetData, setPresetData] = useState<Preset[]>();
+  const [patrolData, setPatrolData] = useState<IPatrol[]>([]);
+  const [presetData, setPresetData] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
 
-  const [selectedPreset, setSelectedPreset] = useState<Preset>();
+  const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<PatrolChecklistType[]>([]);
+  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>([]);
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -72,7 +72,7 @@ export default function Page() {
   const isSubmitDisabled =
     !selectedDate ||
     !selectedPreset ||
-    patrolChecklist.length !== selectedPreset.checklist.length;
+    patrolChecklist.length !== selectedPreset.presetChecklist.length;
 
   const onSubmit = async () => {
     if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
@@ -95,7 +95,7 @@ export default function Page() {
   };
 
   const handleSelectUser = (checklistId: number, userId: number) => {
-    setPatrolChecklist((prev: PatrolChecklistType[]) => {
+    setPatrolChecklist((prev: IPatrolChecklist[]) => {
       const existingIndex = prev.findIndex(
         (item) => item.checklistId === checklistId
       );
@@ -136,7 +136,7 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<FilterPatrol | null>(getStoredFilter())
-  const [filteredPatrolData, setFilteredPatrolData] = useState<Patrol[]>([])
+  const [filteredPatrolData, setFilteredPatrolData] = useState<IPatrol[]>([])
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -538,12 +538,12 @@ export default function Page() {
               <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
-                  {selectedPreset?.checklist.flatMap((presetChecklist) => (
+                  {selectedPreset?.presetChecklist.flatMap((presetChecklist: IPresetChecklist) => (
                     <ChecklistDropdown
                       key={presetChecklist.checklist.id}
                       checklist={presetChecklist.checklist}
-                      handleselectUser={(selectedUser: User) => {
-                        handleSelectUser(presetChecklist.checklistId, selectedUser.id);
+                      handleselectUser={(selectedUser: IUser) => {
+                        handleSelectUser(presetChecklist.checklist.id, selectedUser.id);
                       }}
                     />
                   ))}
@@ -571,8 +571,8 @@ export default function Page() {
         </AlertDialog>
 
         {patrolQueryResults &&
-          patrolQueryResults.map((patrol: Patrol) => {
-            const inspectors = patrol.patrolChecklist.map((cl: PatrolChecklistType) => cl.inspector);
+          patrolQueryResults.map((patrol: IPatrol) => {
+            const inspectors = patrol.patrolChecklist.map((cl: IPatrolChecklist) => cl.inspector);
             return (
               <PatrolCard
                 key={patrol.id}

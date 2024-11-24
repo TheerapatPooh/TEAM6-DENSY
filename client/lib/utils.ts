@@ -1,13 +1,13 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Patrol, FilterPatrol, PatrolResult } from "@/app/type";
+import { IPatrol, FilterPatrol, IPatrolResult } from "@/app/type";
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const exportData = async (patrol: Patrol, result: PatrolResult[]) => {
+export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Patrol Report");
@@ -146,7 +146,7 @@ export const sortData = (patrolData: any, sort: { by: string; order: string }) =
   return sortedData
 }
 
-export function filterPatrol(filter: FilterPatrol | null, patrols: Patrol[]) {
+export function filterPatrol(filter: FilterPatrol | null, patrols: IPatrol[]) {
   if (filter?.presetTitle === "All" && JSON.stringify(filter?.patrolStatus) === JSON.stringify(["pending", "on_going", "scheduled"]) && filter?.dateRange.start === null && filter?.dateRange.end === null) {
     return patrols
   }

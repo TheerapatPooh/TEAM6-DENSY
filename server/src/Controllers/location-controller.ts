@@ -1,6 +1,6 @@
 import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
-import transformKeys, { keyMap } from '@Utils/key-map';
+import transformKeys, { keyMap } from '@Utils/key-map.js';
 
 export async function getZone(req: Request, res: Response) {
     try {
