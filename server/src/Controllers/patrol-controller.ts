@@ -9,6 +9,7 @@ export async function getPatrol(req: Request, res: Response) {
     try {
         const includePreset = req.query.preset === "true";
         const includeResult = req.query.result === "true";
+        const includeComment = req.query.comment === "true";
 
         const role = (req as any).user.role
         const userId = (req as any).user.userId
@@ -84,7 +85,25 @@ export async function getPatrol(req: Request, res: Response) {
                 },
                 result: includeResult ? {
                     include: {
-                        defects: true
+                        defects: true,
+                        comment: {
+                            include: {
+                                user: {
+                                    select: {
+                                        us_id: true,
+                                        us_email: true,
+                                        us_department: true,
+                                        us_role: true,
+                                        profile: {
+                                            select: {
+                                                pf_name: true,
+                                                image: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 } : undefined
             }
@@ -445,7 +464,7 @@ export async function commentPatrol(req: Request, res: Response) {
     try {
         const role = (req as any).user.role;
         const userId = (req as any).user.userId;
-
+        const patrolId = parseInt(req.params.id, 10)
         // ตรวจสอบสิทธิ์ว่าเป็น Inspector หรือไม่
         if (role !== 'inspector') {
             res.status(403).json({ message: "Access Denied: Inspectors only" });
@@ -453,10 +472,10 @@ export async function commentPatrol(req: Request, res: Response) {
         }
 
         // รับข้อมูลจาก request body
-        const { patrolId, message, checklist, patrolResultId } = req.body;
+        const { message, patrolResultId } = req.body;
 
         // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
-        if (!patrolId || !message || !checklist || !patrolResultId) {
+        if (!message || !patrolResultId) {
             res.status(400).json({ message: "Bad Request: Missing required fields" });
             return
         }
@@ -464,7 +483,7 @@ export async function commentPatrol(req: Request, res: Response) {
         // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
         const validPatrol = await prisma.patrol.findUnique({
             where: {
-                pt_id: parseInt(patrolId, 10),
+                pt_id: patrolId,
                 patrolChecklist: {
                     some: {
                         ptcl_us_id: userId,
@@ -477,19 +496,19 @@ export async function commentPatrol(req: Request, res: Response) {
             return
         }
 
-        // รับ message เข้ามา และเชื่อมกับ PatrolResult
+        // // รับ message เข้ามา และเชื่อมกับ PatrolResult
         const newComment = await prisma.comment.create({
             data: {
                 cm_message: message,
                 cm_timestamp: new Date(),
                 cm_us_id: userId,
-                cm_pr_id: patrolResultId
+                cm_pr_id: parseInt(patrolResultId, 10)
             }
         });
 
         // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
         let result = transformKeys(newComment, keyMap);
-        res.status(201).json(result);
+        res.status(201)
         return
     } catch (err) {
         console.error(err);

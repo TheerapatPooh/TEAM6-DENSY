@@ -136,7 +136,7 @@ export interface IPatrolResult {
     zoneId: number;
     patrolId?: number;
 
-    comment?: IComment;
+    comment?: IComment[];
     defects?: IDefect[]
     itemIZone?: IItemZone;
     patrol?: IPatrol;

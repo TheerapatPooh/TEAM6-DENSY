@@ -54,9 +54,11 @@ import { IUser, FilterPatrol } from "@/app/type";
 import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
+import Loading from "../../../components/loading";
 
 export default function Page() {
   const t = useTranslations("General");
+  const [loading, setLoading] = useState<boolean>(true);
   const [patrolData, setPatrolData] = useState<IPatrol[]>([]);
   const [presetData, setPresetData] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
@@ -234,33 +236,41 @@ export default function Page() {
     )
   })
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const patrol = await fetchData("get", "/patrols", true);
-        const preset = await fetchData("get", "/presets", true);
-        setPatrolData(patrol);
-        setPresetData(preset);
+  const getPatrolData = async () => {
+    try {
+      const patrol = await fetchData("get", "/patrols", true);
+      setPatrolData(patrol);
 
-        if (typeof window !== 'undefined') {
-          const storedFilter = localStorage.getItem('filter');
-          let localStorageFilter: FilterPatrol | null = null;
-          if (storedFilter) {
-            localStorageFilter = JSON.parse(storedFilter) as FilterPatrol;
-          }
-          if (!localStorageFilter) {
-            setFilteredPatrolData(patrol);
-          } else {
-            setFilteredPatrolData(filterPatrol(localStorageFilter, patrol));
-          }
-        } else {
-          setFilteredPatrolData(patrol);
+      if (typeof window !== 'undefined') {
+        const storedFilter = localStorage.getItem('filter');
+        let localStorageFilter: FilterPatrol | null = null;
+        if (storedFilter) {
+          localStorageFilter = JSON.parse(storedFilter) as FilterPatrol;
         }
-      } catch (error) {
-        console.error("Failed to fetch patrol data:", error);
+        if (!localStorageFilter) {
+          setFilteredPatrolData(patrol);
+        } else {
+          setFilteredPatrolData(filterPatrol(localStorageFilter, patrol));
+        }
+      } else {
+        setFilteredPatrolData(patrol);
       }
-    };
-    getData();
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+  const getPresetData = async () => {
+    try {
+      const preset = await fetchData("get", "/presets", true);
+      setPresetData(preset);
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+  useEffect(() => {
+    getPatrolData();
+    getPresetData()
+    setLoading(false)
   }, []);
 
   useEffect(() => {
@@ -274,10 +284,9 @@ export default function Page() {
     }
   }, [sort, filteredPatrolData]);
 
-  useEffect(() => {
-    console.log(selectedPreset);
-  }, [selectedPreset]);
-
+  if (loading) {
+    return <Loading />
+  }
 
   return (
     <div className="flex flex-col p-5 gap-y-5">

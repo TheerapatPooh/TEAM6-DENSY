@@ -1,5 +1,7 @@
 "use client";
 
+import { getInitials } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "./ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
@@ -29,9 +31,10 @@ import {
   IPatrolResult,
   IUser,
   IZone,
+  IChecklist,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
-import { fetchData, fetchDataFormFormat } from "@/lib/api";
+import { fetchData } from "@/lib/api";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -41,6 +44,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { Skeleton } from "./ui/skeleton";
 
 // TYPE
 
@@ -66,15 +70,17 @@ export default function PatrolChecklist({
   results = [],
   patrolResult,
 }: PatrolChecklistProps) {
+  const [mounted, setMounted] = useState<boolean>(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [resultStatus, setResultStatus] = useState<{
     [key: string]: boolean | null;
   }>({});
   const [defectDescription, setDefectDescription] = useState<string>("");
-  const [comments, setComments] = useState()
+  const [comment, setComment] = useState<string>("")
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
+  const param = useParams()
 
   const checkStatus = (itemId: number, zoneId: number) => {
     const result = results.find(
@@ -117,6 +123,27 @@ export default function PatrolChecklist({
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
+  const handleCreateComment = async (
+    message: string,
+    patrolResultId: number,
+  ) => {
+    const data = {
+      message: message,
+      patrolResultId: patrolResultId,
+    };
+    try {
+      await fetchData(
+        "post",
+        `/patrol/${param.id}/comment`,
+        true,
+        data,
+      );
+      window.location.reload();
+    } catch (error) {
+      console.error("Error creating Comment:", error);
+    }
+  };
+
   const handleCreateDefect = async (
     name: string,
     description: string,
@@ -134,18 +161,16 @@ export default function PatrolChecklist({
     formData.append("defectUserId", userId.toString());
     formData.append("patrolResultId", patrolResultId.toString());
 
-    const test = {name,description,type,userId, patrolResultId}
-
     files.forEach((file) => {
       formData.append("imageFiles", file);
     });
-    console.log('form',test)
     try {
-      await fetchDataFormFormat(
+      await fetchData(
         "post",
         "/defect",
         true,
-        formData
+        formData,
+        true
       );
       window.location.reload();
     } catch (error) {
@@ -214,6 +239,20 @@ export default function PatrolChecklist({
       }));
     }
   };
+
+  useEffect(() => {
+    if (patrolChecklist) {
+      setMounted(true)
+    }
+  }, [])
+
+  if (!mounted) {
+    return (
+      <Skeleton className="flex h-16 items-center">
+        <Skeleton className="flex h-10 ms-4 w-56 bg-card"></Skeleton>
+      </Skeleton>
+    )
+  }
 
   return (
     <div className="bg-secondary rounded-md px-4 py-2">
@@ -355,12 +394,34 @@ export default function PatrolChecklist({
                             {(status === false ||
                               existingResult?.status === false) && (
                                 <div className="mt-4 flex flex-col items-start">
+                                  {existingResult.comment.map((comment) => (
+                                    <div className="flex bg-secondary rounded-md w-full p-2 mb-2 gap-2">
+                                      <div>
+                                        <div className="flex justify-start items-center gap-2">
+                                          <Avatar className="w-6 h-6">
+                                            <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`} />
+                                            <AvatarFallback>
+                                              {getInitials(comment.user.profile.name)}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <p className="text-bold">{comment.user.profile.name}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-muted-foreground font-bold text-lg">{comment.timestamp}</p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-end">
+                                        <p className="text-lg">{comment.message}</p>
+                                      </div>
+
+                                    </div>
+                                  ))}
                                   <AlertDialog>
                                     <AlertDialogTrigger
                                       disabled={disabled}
                                     >
                                       <Button
-                                        variant={"outline"}                          
+                                        variant={"outline"}
                                         size={"lg"}
                                         disabled={disabled}
                                       >
@@ -535,9 +596,10 @@ export default function PatrolChecklist({
                                     className="h-[94px] mt-3 bg-secondary border-none"
                                     placeholder={`${t("Comment")}...`}
                                     disabled={disabled}
+                                    onChange={(e) => setComment(e.target.value)}
                                   />
                                   <div className="flex justify-end w-full mt-2">
-                                    <Button variant={"primary"} size={"lg"} disabled={disabled}>
+                                    <Button variant={"primary"} size={"lg"} disabled={disabled} onClick={() => handleCreateComment(comment, existingResult.id)}>
                                       <span className="material-symbols-outlined me-2">
                                         send
                                       </span>

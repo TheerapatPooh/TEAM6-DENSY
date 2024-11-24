@@ -20,6 +20,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSocket } from "@/components/socket-provider";
 import { Progress } from "@/components/ui/progress";
 import { SocketIndicator } from "@/components/socket-indicator";
+import Loading from "../../../../components/loading";
 
 export default function Page() {
   const [mounted, setMounted] = useState(false);
@@ -48,7 +49,7 @@ export default function Page() {
     if (params.id) {
       try {
         const data = await fetchData("get", `/patrol/${params.id}?preset=true`, true);
-        const result = await fetchData("get", `/patrol/${params.id}/?result=true`, true);
+        const result = await fetchData("get", `/patrol/${params.id}?result=true`, true);
         console.log("patrolID : " + data.id);
         const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
         console.log("saveresult : " + savedResults);
@@ -74,7 +75,6 @@ export default function Page() {
     ).length;
 
     if (totalResults === 0) return 0;
-    console.log("total: ", totalResults, " check: ", checkedResults);
     return (checkedResults / totalResults) * 100;
   };
 
@@ -379,10 +379,8 @@ export default function Page() {
 
   if (!patrol || !mounted) {
     return (
-      <div>
-        <p>Loading ...</p>
-      </div>
-    );
+      <Loading />
+    )
   }
 
   return (
