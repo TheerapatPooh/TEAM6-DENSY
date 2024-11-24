@@ -49,9 +49,9 @@ export default function Notification() {
         }
     };
 
-    const updateNotification = async (nt_id: number) => {
+    const updateNotification = async (id: number) => {
         try {
-            await fetchData("put", `/notification/${nt_id}`, true);
+            await fetchData("put", `/notification/${id}`, true);
         } catch (error) {
             console.error("Failed to update notification:", error);
         }
@@ -61,7 +61,7 @@ export default function Notification() {
         if (!notification.read) {
             setNotifications(prevNotifications =>
                 prevNotifications.map(n =>
-                    n.id === notification.id ? { ...n, nt_read: true } : n
+                    n.id === notification.id ? { ...n, read: true } : n
                 )
             );
             updateNotification(notification.id); // ถ้ายังไม่ได้อ่านให้ update สถานะ
@@ -75,7 +75,7 @@ export default function Notification() {
         try {
             await fetchData("put", "/notifications/mark-all-read", true); // เรียก API ที่สร้างใน Backend
             setNotifications(prevNotifications =>
-                prevNotifications.map(n => ({ ...n, nt_read: true }))
+                prevNotifications.map(n => ({ ...n, read: true }))
             );
         } catch (error) {
             console.error("Failed to mark all notifications as read", error);
