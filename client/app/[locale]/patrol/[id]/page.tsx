@@ -11,7 +11,7 @@ import {
   patrolStatus,
   IUser,
 } from "@/app/type";
-import ReportDefect from "@/components/defect";
+import ReportDefect from "@/components/report-defect";
 import PatrolChecklist from "@/components/patrol-checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
@@ -208,7 +208,7 @@ export default function Page() {
 
   const getDefectData = async () => {
     try {
-      const defectFetch = await fetchData("get", `/defects/${params.id}`, true);
+      const defectFetch = await fetchData("get", `/patrol/${params.id}/defects`, true);
       setDefects(defectFetch);
     } catch (error) {
       console.error("Failed to fetch defects data:", error);

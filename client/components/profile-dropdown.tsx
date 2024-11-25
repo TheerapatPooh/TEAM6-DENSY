@@ -99,7 +99,7 @@ export default function ProfileDropdown() {
             ) : (
               <Skeleton className="h-12 w-12 rounded-full" />
             )}
-            <div className="w-[97px] h-[27px] font-medium">
+            <div className="w-[97px] h-[27px] font-medium truncate">
               {profile ? (
                 profile.profile.name
               ) : (

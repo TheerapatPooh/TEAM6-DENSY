@@ -460,6 +460,68 @@ export async function updatePatrolStatus(req: Request, res: Response) {
     }
 }
 
+export async function getAllPatrolDefect(req: Request, res: Response) {
+    try {
+        const role = (req as any).user.role;
+        const userId = (req as any).user.userId;
+
+        if (role !== 'admin' && role !== 'inspector') {
+            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
+            return
+        }
+
+        const patrolId = parseInt(req.params.id, 10);
+        const validPatrol = await prisma.patrol.findFirst({
+            where: {
+                pt_id: patrolId,
+                patrolChecklist: {
+                    some: {
+                        ptcl_us_id: userId,
+                    }
+                }
+            }
+        });
+
+        if (!validPatrol) {
+            res.status(404).json({ message: "You are not associated with this Patrol" });
+            return
+        }
+
+        const defects = await prisma.defect.findMany({
+            where: {
+                patrolResult: {
+                    pr_pt_id: patrolId
+                },
+            },
+            include: {
+                patrolResult: {
+                    select: {
+                        pr_itze_ze_id: true
+                    }
+                },
+                image:{
+                    select: {
+                        image: {
+                            select: {
+                                im_id: true,
+                                im_path: true,
+                                user: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        let result = defects.map((defect: any) => transformKeys(defect, keyMap));
+        res.status(200).json(result);
+        return
+    } catch (err) {
+        res.status(500).send(err);
+        return
+    }
+}
+
 export async function commentPatrol(req: Request, res: Response) {
     try {
         const role = (req as any).user.role;

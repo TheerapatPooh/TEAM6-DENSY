@@ -162,38 +162,41 @@ export async function getAllDefect(req: Request, res: Response) {
         const role = (req as any).user.role;
         const userId = (req as any).user.userId;
 
-        if (role !== 'admin' && role !== 'inspector') {
-            res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
-            return
-        }
-
-        const patrolId = parseInt(req.params.id, 10);
-        const validPatrol = await prisma.patrol.findFirst({
-            where: {
-                pt_id: patrolId,
-                patrolChecklist: {
-                    some: {
-                        ptcl_us_id: userId,
-                    }
-                }
-            }
-        });
-
-        if (!validPatrol) {
-            res.status(404).json({ message: "You are not associated with this Patrol" });
+        if (role !== 'admin' && role !== 'supervisor') {
+            res.status(403).json({ message: "Access Denied: Admins or Supervisor only" });
             return
         }
 
         const defects = await prisma.defect.findMany({
             where: {
                 patrolResult: {
-                    pr_pt_id: patrolId
+                    itemZone: {
+                        zone: {
+                            supervisor: {
+                                us_id: userId
+                            }
+                        }
+                    }
                 },
             },
             include: {
                 patrolResult: {
                     select: {
                         pr_itze_ze_id: true
+                    }
+                },
+                user: {
+                    select: {
+                        us_id: true,
+                        us_role: true,
+                        us_email: true,
+                        profile: {
+                            select: {
+                                pf_id: true,
+                                pf_name: true,
+                                image: true
+                            }
+                        } 
                     }
                 },
                 image:{
