@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { IZone, ILocation } from '@/app/type';
 import { fetchData } from '@/lib/api';
 import zonePath from '@/lib/zonePath.json'
+import zonePathSm from '@/lib/zonePath-sm.json'
 import wallPath from '@/lib/wallPath.json'
+import wallPathSM from '@/lib/wallPath-sm.json'
 import React from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -38,11 +40,11 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
 
   useEffect(() => {
     fetch();
-    setWalls(wallPath)
+    setWalls(wallPathSM)
 
     if (location) {
       const updatedZones = location.zone.map(zone => {
-        const matchedZonePath = zonePath.find(path => path.id === zone.id);
+        const matchedZonePath = zonePathSm.find(path => path.id === zone.id);
         return {
           ...zone,
           pathData: matchedZonePath ? matchedZonePath.pathData : '',
