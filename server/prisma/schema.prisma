@@ -15,21 +15,22 @@ datasource db {
 
 model User {
   us_id         Int      @id @default(autoincrement())
-  us_username   String   @unique
+  us_username   String   @unique 
   us_email      String?  @unique
   us_password   String
   us_role       Role
   us_department String?
   us_created_at DateTime @default(now())
 
-  preset           Preset[]
-  update_checklist Checklist[]       @relation("user")
+  updatereset           Preset[]
+  updateChecklist Checklist[]       @relation("user")
   comment          Comment[]
   profile          Profile?
   notification     Notification[]
   defect           Defect[]
   zone             Zone?
   checklist        PatrolChecklist[]
+  image            Image[]
 
   @@map("users")
 }
@@ -38,14 +39,14 @@ model Defect {
   df_id          Int          @id @default(autoincrement())
   df_name        String
   df_description String
-  df_type        String
+  df_type        ItemType
   df_status      DefectStatus
   df_timestamp   DateTime     @default(now())
   df_us_id       Int
   df_pr_id       Int
 
   user          User          @relation(fields: [df_us_id], references: [us_id])
-  patrol_result PatrolResult  @relation(fields: [df_pr_id], references: [pr_id])
+  patrolResult PatrolResult  @relation(fields: [df_pr_id], references: [pr_id])
   image         DefectImage[]
 
   @@map("defects")
@@ -54,8 +55,10 @@ model Defect {
 model Notification {
   nt_id        Int      @id @default(autoincrement())
   nt_message   String
-  nt_status    Boolean
+  nt_read      Boolean
   nt_timestamp DateTime @default(now())
+  nt_type      NotificationType
+  nt_url       String? 
   nt_us_id     Int
 
   user User @relation(fields: [nt_us_id], references: [us_id])
@@ -69,9 +72,10 @@ model Profile {
   pf_age     Int?
   pf_tel     String?
   pf_address String?
-  pf_image   Image?
   pf_us_id   Int     @unique
+  pf_im_id   Int?    @unique
 
+  image   Image?  @relation("ProfileImage", fields: [pf_im_id], references: [im_id])
   user User @relation(fields: [pf_us_id], references: [us_id])
 
   @@map("profiles")
@@ -86,9 +90,9 @@ model Patrol {
   pt_status     PatrolStatus
   pt_ps_id      Int
 
-  checklist     PatrolChecklist[]
+  patrolChecklist     PatrolChecklist[]
   preset        Preset            @relation(fields: [pt_ps_id], references: [ps_id])
-  patrol_result PatrolResult[]
+  result PatrolResult[]
 
   @@map("patrols")
 }
@@ -114,10 +118,10 @@ model Preset {
   ps_version     Int
   ps_latest      Boolean
   ps_update_at   DateTime
-  ps_us_id       Int
+  ps_update_by      Int
 
-  user      User              @relation(fields: [ps_us_id], references: [us_id])
-  checklist PresetChecklist[]
+  user      User              @relation(fields: [ps_update_by], references: [us_id])
+  presetChecklist PresetChecklist[]
   patrol    Patrol[]
 
   @@map("presets")
@@ -144,34 +148,34 @@ model Checklist {
 
   patrol PatrolChecklist[]
   user   User              @relation("user", fields: [cl_update_by], references: [us_id])
-  preset PresetChecklist[]
+  presetChecklist PresetChecklist[]
   item   Item[]
 
   @@map("checklists")
 }
 
 model PatrolResult {
-  pr_id       Int     @id @default(autoincrement())
+  pr_id       Int      @id @default(autoincrement())
   pr_status   Boolean?
-  pr_iz_it_id Int
-  pr_iz_ze_id Int
+  pr_itze_it_id Int
+  pr_itze_ze_id Int
   pr_pt_id    Int
 
   comment   Comment[]
   defects   Defect[]
-  item_zone ItemZone  @relation(fields: [pr_iz_it_id, pr_iz_ze_id], references: [itze_it_id, itze_ze_id])
+  itemZone ItemZone  @relation(fields: [pr_itze_it_id, pr_itze_ze_id], references: [itze_it_id, itze_ze_id])
   patrol    Patrol    @relation(fields: [pr_pt_id], references: [pt_id])
 
   @@map("patrol_results")
 }
 
 model Item {
-  it_id    Int        @id @default(autoincrement())
+  it_id    Int      @id @default(autoincrement())
   it_name  String
-  it_type  ItemStatus
+  it_type  ItemType
   it_cl_id Int
 
-  item_zone ItemZone[]
+  itemZone ItemZone[]
   checklist Checklist  @relation(fields: [it_cl_id], references: [cl_id])
 
   @@map("items")
@@ -183,7 +187,7 @@ model Zone {
   ze_lt_id Int
   ze_us_id Int    @unique
 
-  zone_items ItemZone[]
+  itemZone   ItemZone[]
   location   Location   @relation(fields: [ze_lt_id], references: [lt_id])
   supervisor User       @relation(fields: [ze_us_id], references: [us_id])
 
@@ -194,7 +198,7 @@ model ItemZone {
   itze_it_id Int
   itze_ze_id Int
 
-  patrol_result PatrolResult[]
+  result PatrolResult[]
   item          Item           @relation(fields: [itze_it_id], references: [it_id], onDelete: Cascade)
   zone          Zone           @relation(fields: [itze_ze_id], references: [ze_id], onDelete: Cascade)
 
@@ -219,7 +223,7 @@ model Comment {
   cm_pr_id     Int
 
   user          User         @relation(fields: [cm_us_id], references: [us_id])
-  patrol_result PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
+  patrolResult PatrolResult @relation(fields: [cm_pr_id], references: [pr_id])
 
   @@map("comments")
 }
@@ -228,10 +232,11 @@ model Image {
   im_id        Int      @id @default(autoincrement())
   im_path      String
   im_timestamp DateTime @default(now())
-  im_pf_id     Int      @unique
+  im_update_by Int
 
-  defect  DefectImage[]
-  profile Profile?      @relation(fields: [im_pf_id], references: [pf_id])
+  user     User          @relation(fields: [im_update_by], references: [us_id])
+  profiles Profile[]     @relation("ProfileImage")
+  defect   DefectImage[]
 
   @@map("images")
 }
@@ -268,8 +273,14 @@ enum DefectStatus {
   completed
 }
 
-enum ItemStatus {
+enum ItemType {
   safety
   environment
   maintenance
+}
+
+enum NotificationType {
+  information
+  request
+  system
 }

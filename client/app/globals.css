@@ -97,3 +97,100 @@ body {
 .rounded-md {
   border-radius: 10px;
 }
+
+.loader {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 30px, 0 -30px;
+  border-radius: 4px;
+  background: currentColor;
+  display: block;
+  margin: -50px auto 0;
+  position: relative;
+  color: hsl(var(--card));
+  transform: translateY(30px);
+  box-sizing: border-box;
+  animation: animloader 2s ease infinite;
+}
+.loader::after,
+.loader::before {
+  content: '';  
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 30px, 0 -30px;
+  border-radius: 4px;
+  background: currentColor;
+  color: hsl(var(--card));
+  position: absolute;
+  left: 30px;
+  top: 0;
+  animation: animloader 2s 0.2s ease infinite;
+}
+.loader::before {
+  animation-delay: 0.4s;
+  left: 60px;
+}
+
+@keyframes animloader {
+  0% {
+    top: 0;
+    color: hsl(var(--card-foreground));
+  }
+  50% {
+    top: 30px;
+    color: hsl(var(--destructive));
+  }
+  100% {
+    top: 0;
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+.loader2 {
+  color: hsl(var(--card-foreground));
+  position: relative;
+  display: inline-block;
+  margin-top: 40px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 48px;
+  letter-spacing: 4px;
+  box-sizing: border-box;
+}
+.loader2::before {
+  content: '';  
+  box-sizing: border-box;
+  position: absolute;
+  right: 70px;
+  bottom: 20px;
+  height: 24px;
+  width: 5.15px;
+  background: currentColor;
+}
+.loader2::after {
+  content: '';  
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  left: 125px;
+  top: 10px;
+  border-radius: 50%;
+  background: hsl(var(--destructive));
+  box-sizing: border-box;
+  animation: animloader2 1s ease-in infinite;
+}
+
+@keyframes animloader2 {
+  0% {
+    transform: translateY(8px) scaleY(1) scaleX(1.25);
+  }
+  25%, 75% {
+    transform: translateY(-5px) scaleY(1.2) scaleX(1);
+  }
+  50% {
+    transform: translateY(-10px) scaleY(1) scaleX(1);
+  }
+  100% {
+    transform: translateY(8px) scaleY(0.8) scaleX(0.8);
+  }
+}

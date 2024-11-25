@@ -1,131 +1,105 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import axios, { AxiosRequestConfig } from "axios";
-import { fail } from "assert";
+import { IPatrol, FilterPatrol, IPatrolResult } from "@/app/type";
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// tools/api.ts
-
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:4000",
-  timeout: 5000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const fetchData = async (
-  url: string,
-  options: AxiosRequestConfig = {}
-) => {
-  try {
-    const response = await axiosInstance(url, options);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving data:", error);
-    throw new Error("Could not get data");
-  }
-};
-
-export const exportData = async (data: any) => {
-  const dataArray = Array.isArray(data) ? data : [data];
-
+export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("PatrolReport");
-    let passChecklist = 0;
-    let failChecklist = 0;
+    const worksheet = workbook.addWorksheet("Patrol Report");
 
+    // เพิ่มข้อมูล Patrol ที่ด้านบนของเอกสาร
+    worksheet.addRow(["Patrol ID:", patrol.id]);
+    worksheet.addRow(["Date:", patrol.date]);
+    worksheet.addRow(["Start Time:", patrol.startTime]);
+    worksheet.addRow(["End Time:", patrol.endTime]);
+    worksheet.addRow(["Status:", patrol.status]);
+    worksheet.addRow(["Preset Title:", patrol.preset.title]);
+    worksheet.addRow(["Preset Description:", patrol.preset.description]);
+    worksheet.addRow([]); // เพิ่มบรรทัดว่าง
+
+    // ตั้งค่าคอลัมน์พร้อมกับหัวข้อและคีย์
     worksheet.columns = [
-      { key: "A", width: 30 },
-      { key: "B", width: 40 },
-      { key: "C", width: 40 },
-      { key: "D", width: 20 },
-      { key: "E", width: 20 },
-      { key: "F", width: 20 },
-
+      { header: "Item Name", key: "itemName", width: 30 },
+      { header: "Zone Name", key: "zoneName", width: 20 },
+      { header: "Inspector Name", key: "inspectorName", width: 25 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "Number of Defects", key: "defectCount", width: 20 },
     ];
-    
-    dataArray.forEach((entry) => {
-      const {
-        id,
-        date,
-        startTime,
-        endTime,
-        status,
-        preset,
-        checklist,
-        result,
-      } = entry;
-      worksheet.addRow({A:"Patrol Id:"+ id});
-      worksheet.addRow({A:"Preset:"+ preset.title});
-      worksheet.addRow({A:"Description:"+ preset.description});
-      worksheet.addRow({A:"Schedule Date:"+ date});
-      worksheet.addRow({A:"StartTime:"+ startTime});
-      worksheet.addRow({A:"EndTime:"+ endTime});
 
-      checklist.forEach(
-        (checklist: {
-          title: any; item: any[]; inspector: { name: string } 
-}) => {
-          let isFirstItem = true; // Initialize a flag to track the first item
-          checklist.item.forEach((item) => {
-            if(isFirstItem){
-              worksheet.addRow({
-                A:"Checklist:"+checklist.title
-              }); 
-              isFirstItem = false;
-            }
-          
-            item.zone.forEach((zone: { [x: string]: any; name: string }) => {
-              const resultItem = result.find(
-                (r: { [x: string]: any; itemId: number }) =>
-                  r.itemId === item.id && r.zoneId === zone.id
-              ) || { status: null, itemId: null };
+    let totalFails = 0;
+    let totalDefects = 0;
 
-              const status =
-              resultItem.status === true
-                ? "Pass"
-                : resultItem.status === false
-                ? "Fail"
-                : "N/A";
+    // วนลูปผ่าน patrolChecklist
+    for (const patrolChecklist of patrol.patrolChecklist) {
+      const inspectorName = patrolChecklist.inspector.profile.name;
+      const checklist = patrolChecklist.checklist;
 
+      // เพิ่มชื่อ Checklist
+      worksheet.addRow([]);
+      worksheet.addRow(["Checklist:", checklist.title]);
+
+      // วนลูปผ่านรายการใน Checklist
+      for (const item of checklist.item) {
+        // วนลูปผ่าน itemZone
+        for (const itemZone of item.itemZone) {
+          const zoneName = itemZone.zone.name;
+
+          // หา result ที่ตรงกับ item และ zone นี้
+          const resultItem = result.find(
+            (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
+          );
+
+          let statusText = "N/A";
+          let defectCount = 0;
+          if (resultItem) {
             if (resultItem.status === true) {
-              passChecklist++; // Increment pass counter
+              statusText = "Pass";
             } else if (resultItem.status === false) {
-              failChecklist++; // Increment fail counter
+              statusText = "Fail";
+              totalFails++; // เพิ่มจำนวน fail
             }
-              worksheet.addRow({
-                B: item.name,
-                C: zone.name,
-                D:status,
-                E: "N/A",
-              });
-            });
+
+            if (resultItem.defects && resultItem.defects.length > 0) {
+              defectCount = resultItem.defects.length;
+              totalDefects += defectCount; // เพิ่มจำนวน defect
+            }
+          }
+
+          // เพิ่มแถวข้อมูลลงใน worksheet
+          worksheet.addRow({
+            itemName: item.name,
+            zoneName: zoneName,
+            inspectorName: inspectorName,
+            status: statusText,
+            defectCount: defectCount,
           });
         }
-      );
-      worksheet.addRow({A:"Pass Checklist: "+ passChecklist,
-        B:"Fail Checklist: " + failChecklist,
-        C:"Total: "+(passChecklist+failChecklist)
-      });
-    });
+      }
+    }
 
+    // เพิ่มสรุปที่ด้านล่าง
+    worksheet.addRow([]);
+    worksheet.addRow(["Summary"]);
+    worksheet.addRow(["Total Fails", totalFails]);
+    worksheet.addRow(["Total Defects", totalDefects]);
+
+    // เขียน workbook เป็น buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
-    // Create a blob from the buffer for download in the browser
+    // สร้าง blob และดาวน์โหลดไฟล์
     const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "patrol_report.xlsx";
 
-    // Append the link to the document and click it programmatically
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -139,25 +113,6 @@ export const exportData = async (data: any) => {
   }
 };
 
-// Define an interface for Defect data
-export interface DefectData {
-  title: string;
-  note: string;
-  type: string;
-  status: string;
-  users_id: number;
-}
-
-// Create the defect function that accepts DefectData type
-export const createDefect = async (defectData: DefectData) => {
-  try {
-    const response = await axiosInstance.post("/defect", defectData);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating defect:", error);
-    throw new Error("Could not create defect");
-  }
-};
 
 export const getInitials = (name: string) => {
   if (!name) return "";
@@ -172,3 +127,87 @@ export const getInitials = (name: string) => {
     );
   }
 };
+
+export const sortData = (patrolData: any, sort: { by: string; order: string }) => {
+  const sortedData = [...patrolData];
+  if (sort.by === "Doc No.") {
+    sortedData.sort((a, b) =>
+      sort.order === "Ascending"
+        ? a.id - b.id  // เรียงจากน้อยไปมาก 
+        : b.id - a.id  // เรียงจากมากไปน้อย 
+    );
+  } else if (sort.by === "Date") {
+    sortedData.sort((a, b) =>
+      sort.order === "Ascending"
+        ? new Date(a.date).getTime() - new Date(b.date).getTime()
+        : new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }
+  return sortedData
+}
+
+export function filterPatrol(filter: FilterPatrol | null, patrols: IPatrol[]) {
+  if (filter?.presetTitle === "All" && JSON.stringify(filter?.patrolStatus) === JSON.stringify(["pending", "on_going", "scheduled"]) && filter?.dateRange.start === null && filter?.dateRange.end === null) {
+    return patrols
+  }
+  else if (filter?.patrolStatus.length === 0) {
+    return []
+  }
+  else {
+    const newFilteredPatrolData = patrols.filter((patrol) => {
+      // Convert patrol.date from string to ISO string
+      const patrolDateISOString = new Date(patrol.date).toISOString();
+
+      // Convert filter dateRange.start and dateRange.end to ISO strings if they exist
+      const filterStartISOString = filter?.dateRange.start ? new Date(filter.dateRange.start).toISOString() : null;
+      const filterEndISOString = filter?.dateRange.end ? new Date(filter.dateRange.end).toISOString() : null;
+
+      // Check if the presetTitle matches
+      let matchesPreset: boolean;
+      if (filter?.presetTitle === 'All') {
+        matchesPreset = true;
+      } else {
+        matchesPreset = !filter?.presetTitle || patrol.preset?.title === filter?.presetTitle;
+      }
+
+      // Check if the status matches
+      const matchesStatus = filter?.patrolStatus.length === 0 || filter?.patrolStatus.includes(patrol.status);
+
+      // Check if the date is within the selected range using ISO string comparison
+      const matchesDateRange =
+        (!filterStartISOString || patrolDateISOString >= filterStartISOString) &&  // Compare ISO strings
+        (!filterEndISOString || patrolDateISOString <= filterEndISOString);        // Compare ISO strings
+
+      // Return true if all conditions match
+      return matchesPreset && matchesStatus && matchesDateRange;
+    });
+    return newFilteredPatrolData
+  }
+}
+
+
+// Function to calculate time ago
+export function timeAgo(timestamp: string, t: any): string {
+  const now = new Date();
+  const notificationDate = new Date(timestamp);
+  const seconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000);
+
+  const intervals: { [key: string]: number } = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1
+  };
+
+  for (const key in intervals) {
+    const interval = intervals[key];
+    const result = Math.floor(seconds / interval);
+    if (result >= 1) {
+      return t(`${key}Ago`, { count: result });
+    }
+  }
+  return t('justNow');
+}

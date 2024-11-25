@@ -1,11 +1,10 @@
 'use client'
 import { useTransition, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import lightLogo from "/app/img/system_logo_light.png"
-import darkLogo from "/app/img/system_logo_dark.png"
-import loginCover1 from "/app/img/login_cover_1.png"
-import loginCover2 from "/app/img/login_cover_2.png"
-import loginCover3 from "/app/img/login_cover_3.png"
+import lightLogo from "@/public/assets/img/system_logo_light.png"
+import darkLogo from "@/public/assets/img/system_logo_dark.png"
+import loginCover1 from "@/public/assets/img/login_cover_1.png"
+import loginCover2 from "@/public/assets/img/login_cover_2.png"
+import loginCover3 from "@/public/assets/img/login_cover_3.png"
 import Image from 'next/image'
 import LanguageSelect from '@/components/language-select';
 import ModeToggle from '@/components/mode-toggle';
@@ -30,13 +29,7 @@ import { login } from '@/lib/api';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import EmblaAutoplay from 'embla-carousel-autoplay'
 import { useTheme } from 'next-themes';
-
-export const LoginSchema = z.object({
-    username: z.string(),
-    password: z.string(),
-    rememberMe: z.boolean().optional()
-})
-
+import { LoginSchema } from '@/app/type';
 
 export default function LoginPage() {
     const [error, setError] = useState<string | undefined>('')

@@ -1,7 +1,7 @@
 
 import { getUser, getAllUsers, createUser, getProfile } from '../Controllers/user-controller';
 import { prisma } from '../Utils/database';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 
 jest.mock('../Utils/database', () => ({

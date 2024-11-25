@@ -1,21 +1,24 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.ts",
-  "type": "model",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "start": "ts-node-dev index.ts"
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc && tsc-alias",
+    "seed": "tsx src/Utils/seed.ts",
+    "lint": "node -e \"const fs = require('fs'); const date = new Date(); const dateString = date.toISOString().split('T')[0].replace(/-/g, '_'); const timeString = date.toTimeString().split(' ')[0].replace(/:/g, '_'); const fileName = `lintReports/lintReport_${dateString}_${timeString}.json`; fs.mkdirSync('lintReports', { recursive: true }); require('child_process').execSync(`eslint . --format json -o ${fileName}`);\" && tsx eslint-report.ts"
   },
   "author": "TEAM-6",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@faker-js/faker": "^9.0.3",
-    "@prisma/client": "^5.20.0",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "bcrypt": "^5.1.1",
+    "@faker-js/faker": "^9.2.0",
+    "@prisma/client": "^5.22.0",
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -24,17 +27,25 @@
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "ts-node-dev": "^2.0.0"
+    "nodemailer": "^6.9.15",
+    "socket.io": "^4.8.1",
+    "ts-node-dev": "^2.0.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
-    "@types/bcrypt": "^5.0.2",
+    "@types/axios": "^0.14.4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
     "@types/eslint__js": "^8.42.3",
+    "@types/express": "^5.0.0",
     "@types/jest": "^29.5.13",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.9.3",
+    "@types/nodemailer": "^6.4.16",
+    "@types/socket.io": "^3.0.2",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.5.0",
     "@typescript-eslint/parser": "^8.5.0",
@@ -44,7 +55,9 @@
     "prisma": "^5.19.1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.6.2",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
     "typescript-eslint": "^8.5.0"
   }
 }
