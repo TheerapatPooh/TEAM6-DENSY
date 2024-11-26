@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { DatePickerWithRange } from '../components/date-picker';
+import { DatePickerWithRange } from '@/components/date-picker';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { DateRange } from 'react-day-picker';
 
@@ -12,7 +12,7 @@ const FilterDate = ({
         daterange?: { from: Date; to: Date } | Date | undefined;
     }, any, undefined>;
 }) => {
-    const { setValue, watch, resetField } = form;
+    const { setValue, watch} = form;
     const watchDaterange = watch('daterange') as { from: Date | null; to: Date | null } | undefined;
 
     const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -63,6 +63,7 @@ const FilterDate = ({
                 <FormField
                     control={form.control}
                     name="daterange"
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Date Range</FormLabel>

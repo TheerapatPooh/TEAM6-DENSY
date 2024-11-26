@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { IUser, IPatrolChecklist } from "@/app/type";
+import React, { useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { IUser} from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,10 +24,6 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
   };
   const t = useTranslations("General");
 
-
-  useEffect(() => {
-    console.log(selectedUser)
-  }, [selectedUser])
   return (
     <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
       <DropdownMenuTrigger className="w-[300px] h-[65px]">

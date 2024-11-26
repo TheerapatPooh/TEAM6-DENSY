@@ -32,7 +32,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
       const data = await fetchData('get', '/location/1', true)
       setLocation(data)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -124,7 +124,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   return (
       <Stage width={1350} height={895}>
         <Layer>
-          {zones.map((zone, index) => {
+          {zones.map((zone) => {
             const isSelected = selectedZones.includes(zone.id);
             const startPointY = zone.text?.y ? zone.text.y - 80 : 0;
             const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function Skeleton({
   className,
   ...props
