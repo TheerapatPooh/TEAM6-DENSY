@@ -10,6 +10,7 @@ import wallPathSM from '@/lib/wallPath-sm.json'
 import React from 'react';
 import { useTranslations } from 'next-intl';
 
+
 interface MapProps {
   onZoneSelect?: (selectedZones: IZone[]) => void;
   disable: boolean;
@@ -21,7 +22,30 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
+  const [paths, setPaths] = useState<{ text: any, id: number, pathData: string }[]>([])
   const z = useTranslations('Zone')
+  const [stageDimensions, setStageDimensions] = useState({ width: 1350, height: 895, size: "LG"});
+
+  const responsiveStage = () => {
+    const screenWidth = window.innerWidth;
+    
+    if (screenWidth <= 800) { 
+      setStageDimensions({ width: 800, height: 600, size: "SM" });
+    } else if (screenWidth <= 1024) { 
+      setStageDimensions({ width: 800, height: 600, size: "MD" });
+    } else { 
+      setStageDimensions({ width: 1350, height: 895, size: "LG" });
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => responsiveStage();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
 
   useEffect(() => {
     if (disable && initialSelectedZones) {
@@ -40,11 +64,17 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
 
   useEffect(() => {
     fetch();
-    setWalls(wallPathSM)
+    if (stageDimensions.size === "LG") {
+      setWalls(wallPath)
+      setPaths(zonePath) 
+    } else {
+      setWalls(wallPathSM)
+      setPaths(zonePathSm) 
+    }
 
     if (location) {
       const updatedZones = location.zone.map(zone => {
-        const matchedZonePath = zonePathSm.find(path => path.id === zone.id);
+        const matchedZonePath = paths.find(path => path.id === zone.id);
         return {
           ...zone,
           pathData: matchedZonePath ? matchedZonePath.pathData : '',
@@ -124,7 +154,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   }
 
   return (
-      <Stage width={1350} height={895}>
+      <Stage width={stageDimensions.width} height={stageDimensions.height}>
         <Layer>
           {zones.map((zone, index) => {
             const isSelected = selectedZones.includes(zone.id);
