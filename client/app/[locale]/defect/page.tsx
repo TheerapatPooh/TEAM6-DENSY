@@ -110,7 +110,6 @@ export default function Page() {
           <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
             <div>
               <DropdownMenuLabel>Date</DropdownMenuLabel>
-              <DatePickerWithRange />
             </div>
 
             <div>
