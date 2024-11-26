@@ -255,9 +255,7 @@ export async function createPatrol(req: Request, res: Response) {
       });
 
       if (!notifiedInspectors.has(userId)) {
-        const message = `You have been assigned to a patrol scheduled for ${new Date(
-          date
-        ).toLocaleDateString()}.`;
+        const message = `patrol_assigned-${new Date(patrolDate).toISOString()}`;
         await createNotification({
           nt_message: message,
           nt_type: "request" as NotificationType,
@@ -335,7 +333,7 @@ export async function startPatrol(req: Request, res: Response) {
             },
           });
           if (!notifiedInspectors.has(inspectorId)) {
-            const message = `Your Patrol ID: ${patrolId} has been started.`;
+            const message = `start_patrol`;
             await createNotification({
               nt_message: message,
               nt_type: "information" as NotificationType,
@@ -422,7 +420,7 @@ export async function finishPatrol(req: Request, res: Response) {
       const inspectorId = checklistObj.inspector.id;
 
       if (!notifiedInspectors.has(inspectorId)) {
-        const message = `Your Patrol ID: ${patrolId} has been finish.`;
+        const message = `finish_patrol`;
         await createNotification({
           nt_message: message,
           nt_type: "information" as NotificationType,

@@ -110,7 +110,7 @@ export async function createDefect(req: Request, res: Response) {
     } else {
       console.error("No files uploaded or incorrect file structure.");
     }
-    const message = `Your has been reported defect.`;
+    const message = `report_defect`;
     const supervisor = parseInt(supervisorId, 10);
   
      await createNotification({

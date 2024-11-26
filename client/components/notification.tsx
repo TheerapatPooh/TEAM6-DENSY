@@ -21,6 +21,7 @@ export default function Notification() {
     const t = useTranslations('General'); // ฟังก์ชันแปลข้อความจาก 'General'
     const s = useTranslations("Status");
     const d = useTranslations('DateTime');
+    const n = useTranslations('Notification');
 
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
@@ -29,6 +30,13 @@ export default function Notification() {
     const router = useRouter()
 
     const unreadCount = notifications.filter(notification => !notification.read).length;
+
+    function formatMessage(message: string) {
+        const [key, ...dynamicParts] = message.split('-');
+        const dynamicData = dynamicParts.join('-');
+        return { key, dynamicData };
+    }
+
 
     const fetchNotifications = async () => {
         try {
@@ -123,51 +131,60 @@ export default function Notification() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className='p-0'>
-                <Card className="w-[300px] border-none" >
+                <Card className="w-96 border-none" >
                     <CardHeader>
                         <CardTitle>{t('Notifications')}</CardTitle>
                         <CardDescription>{t('YouHaveUnreadMessages', { count: unreadCount })}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col">
                         <ScrollArea className="p-0 h-[300px] w-full pr-4 overflow-y-auto">
-                            {getRecentNotifications().map((notification, index) => (
-                                <Button
-                                    key={index}
-                                    variant={'ghost'}
-                                    className="justify-between items-center space-x-2 w-full h-fit gap-2 truncate"
-                                    onClick={() => handleNotificationClick(notification)}
-                                >
-                                    <span className={`p-1 h-2 w-2 rounded-full ${notification.read ? 'bg-gray-400' : 'bg-sky-500'}`} />
-                                    <div className="flex flex-col justify-start w-full truncate gap-1">
-                                        <p className="text-sm font-medium text-start truncate">
-                                            {notification.message}
-                                        </p>
-                                        <div className='flex items-center justify-between'>
-                                            <p className="text-xs text-muted-foreground text-start">
-                                                <p>{timeAgo(notification.timestamp, d)}</p>
-                                            </p>
-                                            {(() => {
-                                                let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
-                                                switch (notification.type as notificationType) {
-                                                    case "information":
-                                                        variant = "blue";
-                                                        break;
-                                                    case "request":
-                                                        variant = "orange";
-                                                        break;
-                                                    default:
-                                                        variant = "purple";
-                                                        break;
-                                                }
-                                                return (
-                                                    <BadgeCustom height='20' width='100' variant={variant}><p className='text-sm'>{s(notification.type)}</p></BadgeCustom>
-                                                )
-                                            })()}
-                                        </div>
+                            {getRecentNotifications().map((notification, index) => {
+                                const { key, dynamicData } = formatMessage(notification.message);
 
-                                    </div>
-                                </Button>
-                            ))}
+                                return (
+                                    <Button
+                                        key={index}
+                                        variant={'ghost'}
+                                        className="justify-between items-center space-x-2 w-full h-fit gap-2 truncate"
+                                        onClick={() => handleNotificationClick(notification)}
+                                    >
+                                        <span className={`p-1 h-2 w-2 rounded-full ${notification.read ? 'bg-gray-400' : 'bg-sky-500'}`} />
+                                        <div className="flex flex-col justify-start w-full truncate gap-1">
+                                            <textarea
+                                                className="text-sm font-medium text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
+                                                readOnly
+                                            >
+                                                {n(key, { date: dynamicData})}
+                                            </textarea>
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs text-muted-foreground text-start">
+                                                    {timeAgo(notification.timestamp, d)}
+                                                </p>
+                                                {(() => {
+                                                    let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
+                                                    switch (notification.type as notificationType) {
+                                                        case "information":
+                                                            variant = "blue";
+                                                            break;
+                                                        case "request":
+                                                            variant = "orange";
+                                                            break;
+                                                        default:
+                                                            variant = "purple";
+                                                            break;
+                                                    }
+                                                    return (
+                                                        <BadgeCustom height='20' width='100' variant={variant}>
+                                                            <p className='text-sm'>{s(notification.type)}</p>
+                                                        </BadgeCustom>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </Button>
+                                );
+                            })}
+
                         </ScrollArea>
                     </CardContent>
                     <CardFooter>
