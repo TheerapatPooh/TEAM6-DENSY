@@ -1,7 +1,7 @@
 import { prisma } from "@Utils/database.js";
 import { Request, Response } from "express";
 import transformKeys, { keyMap } from "@Utils/key-map.js";
-import { createNotification } from "./util-controller";
+import { createNotification } from "./util-controller.js";
 import { NotificationType } from "@prisma/client";
 
 export async function createDefect(req: Request, res: Response) {
