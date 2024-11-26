@@ -5,43 +5,42 @@ import transformKeys, { keyMap } from '@Utils/key-map.js'
 export async function createPreset(req: Request, res: Response) {
     try {
         const userRole = (req as any).user.role;
-         if (userRole !== 'admin') {
-             res.status(403).json({ message: "Access Denied: Admins only" });
-             return
-         }
+        if (userRole !== 'admin') {
+            res.status(403).json({ message: "Access Denied: Admins only" });
+            return
+        }
 
-        const {title,description, checklists ,userId} = req.body;
+        const { title, description, checklists, userId } = req.body;
 
         if (!title || !description || !checklists || !userId) {
             res.status(400).json({ message: "Missing required fields" });
             return
         }
-        
+
 
         const newPreset = await prisma.preset.create({
             data: {
-                ps_title:title,
-                ps_description:description,
-                ps_version:1,
-                ps_latest:true,
+                ps_title: title,
+                ps_description: description,
+                ps_version: 1,
+                ps_latest: true,
                 ps_update_at: new Date(),
-                ps_update_by:userId
-                
+                ps_update_by: userId
+
             },
         });
-    for (const checklist of checklists) {
-    const { id, title } = checklist.checklist;
-    await prisma.presetChecklist.create({
-        data: {
-            pscl_ps_id: newPreset.ps_id,
-            pscl_cl_id: id,
-        },
-    });
-}
-
+        for (const checklist of checklists) {
+            const { id } = checklist.checklist;
+            await prisma.presetChecklist.create({
+                data: {
+                    pscl_ps_id: newPreset.ps_id,
+                    pscl_cl_id: id,
+                },
+            });
+        }
         res.status(201).json({ message: "Preset created successfully", preset: newPreset });
-
-    } catch (err) {
+    } catch (error) {
+        console.error(error)
     }
 }
 
@@ -53,7 +52,7 @@ export async function updatePreset(req: Request, res: Response) {
             return;
         }
 
-        const {  title, description, checklists, userId } = req.body;
+        const { title, description, checklists, userId } = req.body;
         const presetId = parseInt(req.params.id, 10)
 
         if (!presetId || !title || !description || !checklists || !userId) {
@@ -79,7 +78,7 @@ export async function updatePreset(req: Request, res: Response) {
             data: {
                 ps_title: title,
                 ps_description: description,
-                ps_version: currentPreset.ps_version + 1, 
+                ps_version: currentPreset.ps_version + 1,
                 ps_latest: true,
                 ps_update_at: new Date(),
                 ps_update_by: userId,
@@ -96,8 +95,9 @@ export async function updatePreset(req: Request, res: Response) {
             });
         }
 
-        res.status(200).json({message: "Preset updated successfully",preset: newPreset,});
-    } catch (err) {
+        res.status(200).json({ message: "Preset updated successfully", preset: newPreset, });
+    } catch (error) {
+        console.error(error)
     }
 }
 
@@ -143,8 +143,8 @@ export async function getPreset(req: Request, res: Response) {
         }
         let result = transformKeys(preset, keyMap);
         res.status(200).json(result)
-    } catch (err) {
-        res.status(500)
+    } catch (error) {
+        res.status(500).json(error)
     }
 }
 
@@ -191,7 +191,7 @@ export async function getAllPresets(req: Request, res: Response) {
 
         let result = presets.map((preset: any) => transformKeys(preset, keyMap));
         res.status(200).json(result)
-    } catch (err) {
-        res.status(500)
+    } catch (error) {
+        res.status(500).json(error)
     }
 }

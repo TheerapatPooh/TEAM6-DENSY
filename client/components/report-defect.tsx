@@ -1,18 +1,18 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { IDefect, defectStatus, itemType, IZone } from "@/app/type";
+import React, { useState } from "react";
+import { IDefect } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "./ui/carousel";
-import { Card, CardContent } from "./ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatTime, getDefectStatusVariant } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 

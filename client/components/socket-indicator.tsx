@@ -1,7 +1,7 @@
 "use client"
 
-import BadgeCustom from "./badge-custom"
-import { useSocket } from "./socket-provider"
+import BadgeCustom from "@/components/badge-custom"
+import { useSocket } from "@/components/socket-provider"
 
 
 export const SocketIndicator = () => {

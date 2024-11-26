@@ -3,19 +3,18 @@ import React, { useEffect, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { INotification, notificationType, IUser } from '@/app/type'
 import { fetchData } from '@/lib/api'
-import { useSocket } from './socket-provider'
-import BadgeCustom from './badge-custom'
+import { useSocket } from '@/components/socket-provider'
+import BadgeCustom from '@/components/badge-custom'
 import { useRouter } from 'next/navigation'
 import { timeAgo } from '@/lib/utils'
-import { ScrollArea } from './ui/scroll-area'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 
 export default function Notification() {
@@ -101,15 +100,10 @@ export default function Notification() {
 
     useEffect(() => {
         if (socket && isConnected && user?.id) {
-            // ถ้าการเชื่อมต่อสำเร็จ
-            console.log('Connected to socket!');
-
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
             socket.on('new_notification', (data: any) => {
-                console.log('Received new notification:', data);
                 setNotifications((prevNotifications) => [...prevNotifications, data]);
-                console.log(notifications)
             });
 
             return () => {
@@ -153,7 +147,6 @@ export default function Notification() {
                                                 <p>{timeAgo(notification.timestamp, d)}</p>
                                             </p>
                                             {(() => {
-                                                let status: string
                                                 let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
                                                 switch (notification.type as notificationType) {
                                                     case "information":

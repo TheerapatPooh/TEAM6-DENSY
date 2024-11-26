@@ -5,8 +5,6 @@ import { authenticateUser, upload } from "@Controllers/util-controller.js";
 const router = Router()
 
 router.post('/defect', (req, res, next) => {
-    console.log(req.body); // This will log all non-file fields
-    console.log(req.files); // This will log the uploaded files
     next();
 }, upload.array('imageFiles', 10), authenticateUser, createDefect);
 router.get('/defect/:id', authenticateUser, getDefect)

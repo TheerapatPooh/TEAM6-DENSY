@@ -82,7 +82,6 @@ export async function createDefect(req: Request, res: Response) {
           },
         });
 
-        console.log("Patrol result updated successfully:", updatedResult);
         return updatedResult;
       } catch (error) {
         console.error("Error updating patrol result:", error);

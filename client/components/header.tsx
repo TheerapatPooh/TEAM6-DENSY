@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import lightLogo from "@/public/assets/img/system_logo_light.png"
 import darkLogo from "@/public/assets/img/system_logo_dark.png"
 import Image from 'next/image'
-import ProfileDropdown from './profile-dropdown'
+import ProfileDropdown from '@/components/profile-dropdown'
 import LanguageSelect from '@/components/language-select'
 import ModeToggle from '@/components/mode-toggle'
 import Notification from '@/components/notification'
