@@ -80,7 +80,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
                                     <div className="flex items-center ps-2 p-2">
                                         <Avatar className="custom-shadow ms-[-10px] me-2.5">
                                             <AvatarImage
-                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image.path}`}
+                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                                             />
                                             <AvatarFallback>
                                                 {getInitials(defect.user.profile.name)}
@@ -94,7 +94,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
                                         <Avatar>
                                             <Avatar>
                                                 <AvatarImage
-                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image.path}`}
+                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                                                 />
                                                 <AvatarFallback>
                                                     {getInitials(defect.user.profile.name)}
