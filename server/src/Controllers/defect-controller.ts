@@ -190,10 +190,12 @@ export async function getAllDefect(req: Request, res: Response) {
                         us_id: true,
                         us_role: true,
                         us_email: true,
+                        us_created_at: true,
                         profile: {
                             select: {
                                 pf_id: true,
                                 pf_name: true,
+                                pf_tel: true,
                                 image: true
                             }
                         } 
