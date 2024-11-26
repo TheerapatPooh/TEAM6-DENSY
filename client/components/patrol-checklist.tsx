@@ -45,7 +45,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { Skeleton } from "./ui/skeleton";
-
+import { formatTime } from "@/lib/utils";
 // TYPE
 
 interface PatrolChecklistProps {
@@ -150,6 +150,7 @@ export default function PatrolChecklist({
     type: string,
     userId: number,
     patrolResultId: number | null,
+    supervisorId: number,
     files: File[]
   ) => {
     const formData = new FormData();
@@ -160,6 +161,7 @@ export default function PatrolChecklist({
     formData.append("status", "reported");
     formData.append("defectUserId", userId.toString());
     formData.append("patrolResultId", patrolResultId.toString());
+    formData.append("supervisorId", supervisorId.toString());
 
     files.forEach((file) => {
       formData.append("imageFiles", file);
@@ -395,21 +397,10 @@ export default function PatrolChecklist({
                               existingResult?.status === false) && (
                                 <div className="mt-4 flex flex-col items-start">
                                   {existingResult.comment.map((comment) => (
+                                    //Comment Patrol
                                     <div className="flex bg-secondary rounded-md w-full p-2 mb-2 gap-2">
-                                      <div>
-                                        <div className="flex justify-start items-center gap-2">
-                                          <Avatar className="w-6 h-6">
-                                            <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`} />
-                                            <AvatarFallback>
-                                              {getInitials(comment.user.profile.name)}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <p className="text-bold">{comment.user.profile.name}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-muted-foreground font-bold text-lg">{comment.timestamp}</p>
-                                        </div>
-                                      </div>
+                                      <p className="text-muted-foreground font-bold text-lg">{formatTime(comment.timestamp)}</p>
+
                                       <div className="flex items-end">
                                         <p className="text-lg">{comment.message}</p>
                                       </div>
@@ -569,6 +560,7 @@ export default function PatrolChecklist({
                                                 item.type,
                                                 patrolChecklist.inspector.id,
                                                 existingResult?.id ?? null,
+                                                itemZone.zone.supervisor.id,
                                                 selectedFiles
                                               )
                                             }
