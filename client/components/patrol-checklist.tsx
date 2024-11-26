@@ -150,6 +150,7 @@ export default function PatrolChecklist({
     type: string,
     userId: number,
     patrolResultId: number | null,
+    supervisorId: number,
     files: File[]
   ) => {
     const formData = new FormData();
@@ -160,6 +161,7 @@ export default function PatrolChecklist({
     formData.append("status", "reported");
     formData.append("defectUserId", userId.toString());
     formData.append("patrolResultId", patrolResultId.toString());
+    formData.append("supervisorId", supervisorId.toString());
 
     files.forEach((file) => {
       formData.append("imageFiles", file);
@@ -569,6 +571,7 @@ export default function PatrolChecklist({
                                                 item.type,
                                                 patrolChecklist.inspector.id,
                                                 existingResult?.id ?? null,
+                                                itemZone.zone.supervisor.id,
                                                 selectedFiles
                                               )
                                             }
