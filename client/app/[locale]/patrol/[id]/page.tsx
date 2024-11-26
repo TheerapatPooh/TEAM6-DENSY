@@ -148,6 +148,8 @@ export default function Page() {
 
   const handleFinishPatrol = async () => {
     if (!patrol) return;
+   
+    
     const updatedResults = patrolResults.map((result) => {
       const matchedResult = patrolResults.find(
         (res) => res.itemId === result.itemId && res.zoneId === result.zoneId
@@ -181,6 +183,8 @@ export default function Page() {
 
     if (data.result.length === resultCount) {
       try {
+        localStorage.removeItem(`patrolResults_${patrol.id}`);
+        localStorage.removeItem(`otherResults_${patrol.id}`);
         const response = await fetchData(
           "put",
           `/patrol/${patrol.id}/finish`,
