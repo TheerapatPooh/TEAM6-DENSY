@@ -151,7 +151,7 @@ export default function Notification() {
                                         <span className={`p-1 h-2 w-2 rounded-full ${notification.read ? 'bg-gray-400' : 'bg-sky-500'}`} />
                                         <div className="flex flex-col justify-start w-full truncate gap-1">
                                             <textarea
-                                                className="text-sm font-medium text-start line-clamp-2 bg-transparent resize-none cursor-pointer"
+                                                className="text-sm font-medium text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                 readOnly
                                             >
                                                 {n(key, { date: dynamicData})}
