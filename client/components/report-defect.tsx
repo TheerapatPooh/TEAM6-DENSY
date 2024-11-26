@@ -13,49 +13,11 @@ import {
 } from "@/components/ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "./ui/carousel";
 import { Card, CardContent } from "./ui/card";
+import { formatTime, getDefectStatusVariant } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
-
-
-export default function ReportDefect({
-  id,
-  name,
-  description,
-  type,
-  status,
-  timestamp,
-  userId,
-  patrolResult,
-  image,
-}: IDefect) {
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case "resolved":
-        return "blue";
-      case "reported":
-        return "mint";
-      case "completed":
-        return "green";
-      case "in_progress":
-        return "orange";
-      default:
-        return "red";
-    }
-  };
-
-  const getIconForStatus = (status: string) => {
-    switch (status) {
-      case "resolved":
-        return "autorenew";
-      case "reported":
-        return "campaign";
-      case "completed":
-        return "check_circle";
-      case "in_progress":
-        return "hourglass_top";
-      default:
-        return "pending";
-    }
-  };
+export default function ReportDefect({ defect }: { defect: IDefect }) {
+  const s = useTranslations("Status");
 
   const getTypeVariant = (type: string) => {
     switch (type) {
@@ -68,52 +30,12 @@ export default function ReportDefect({
     }
   };
 
-  const formatText = (name: string) => {
-    switch (name) {
-      case "safety":
-        return "Safety";
-      case "maintenance":
-        return "Maintenance"
-      case "environment":
-        return "Environment"
-      case "reported":
-        return "Reported";
-      case "in_progress":
-        return "In Progress";
-      case "resolved":
-        return "Resolved";
-      case "completed":
-        return "Completed";
-      default:
-        return "Pending Inspection";
-    }
-  }
-
-  const date = new Date(timestamp).toLocaleDateString(
-    "th-TH",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }
-  );
-
-  const time = new Date(timestamp).toLocaleTimeString(
-    "th-TH",
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    }
-  );
-
-  const beforeImage = image.filter((image) => image.image.user.id === userId)
+  const beforeImage = defect.image.filter((image) => image.image.user.id === defect.userId)
     .map((image: any) => ({
       path: image.image.path,
     })) || null
 
-  const afterImage = image.filter((image) => image.image.user.id !== userId)
+  const afterImage = defect.image.filter((image) => image.image.user.id !== defect.userId)
     .map((image: any) => ({
       path: image.image.path,
     })) || null
@@ -170,14 +92,11 @@ export default function ReportDefect({
             <span className="material-symbols-outlined text-[#707A8A] cursor-default ">
               schedule
             </span>
-            <span className="text-lg font-bold text-[#707A8A] cursor-default ">
-              {date}
-            </span>
-            <span className="text-lg font-bold text-[#707A8A] cursor-default ">
-              {time}
+            <span className="text-lg font-bold text-muted-foreground cursor-default ">
+              {formatTime(defect.timestamp)}
             </span>
             <h2 className="text-lg font-bold text-card-foreground cursor-default ">
-              {name}
+              {defect.name}
             </h2>
           </div>
         </AccordionTrigger>
@@ -185,18 +104,33 @@ export default function ReportDefect({
         {/* โชว์ส่วนของ status, type, และปุ่ม Verify/Rework */}
         <div className="flex justify-between items-center mb-4 mt-2">
           <div className="flex space-x-2">
-            <BadgeCustom
-              variant={getStatusVariant(status)}
-              showIcon={true}
-              iconName={getIconForStatus(status)}
-            >
-              {formatText(status)}
-            </BadgeCustom>
-            <BadgeCustom variant={getTypeVariant(type)}>{formatText(type)}</BadgeCustom>
+            {(() => {
+              const { iconName, variant } = getDefectStatusVariant(defect.status);
+              return (
+                <BadgeCustom
+                  variant={variant}
+                  showIcon={true}
+                  iconName={iconName}
+                >
+                  {s(defect.status)}
+                </BadgeCustom>
+              );
+            })()}
+            {(() => {
+              const variant  = getTypeVariant(defect.status);
+              return (
+                <BadgeCustom
+                  variant={variant}
+                  showIcon={false}
+                >
+                  {s(defect.type)}
+                </BadgeCustom>
+              );
+            })()}
           </div>
 
           {/* แสดงปุ่ม Verify และ Rework เฉพาะเมื่อ status เป็น Resolved */}
-          {status === "resolved" && (
+          {defect.status === "resolved" && (
             <div className="flex space-x-2">
               <Button variant="success" size={"lg"}>
                 <span className="material-symbols-outlined mr-2 text-[20px]">
@@ -219,7 +153,7 @@ export default function ReportDefect({
             <Textarea
               className="w-full h-40 bg-card border-none"
               placeholder="Description"
-              value={description}
+              value={defect.description}
               readOnly
             />
             <div className="flex space-x-4 justify-between mt-4">
@@ -375,7 +309,7 @@ export default function ReportDefect({
               <div className="ml-auto">
                 <p className="text-gray-500 mb-2 cursor-default user-select-none"></p>
                 <div className="p-2 rounded-md bg-background flex items-center justify-center h-48 w-48 cursor-default user-select-none">
-                  {patrolResult.zoneId}
+                  {defect.patrolResult.zoneId}
                 </div>
               </div>
             </div>

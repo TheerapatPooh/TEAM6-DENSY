@@ -51,7 +51,7 @@ export default function Page() {
     getData()
     setLoading(false)
   }, [])
-  
+
   if (loading) {
     return <Loading />
   }
@@ -178,7 +178,9 @@ export default function Page() {
         </DropdownMenu>
       </div>
       <div className="flex flex-col gap-y-4 py-4">
-        <Defect defects={defects}/>
+        {defects.map((defect) => (
+          <Defect defect={defect} />
+        ))}
       </div>
     </div>
   );
