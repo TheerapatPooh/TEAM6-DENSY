@@ -32,8 +32,8 @@ export async function getZone(req: Request, res: Response) {
      
         res.status(200).send(result)
         return
-    } catch (err) {
-        res.status(500)
+    } catch (error) {
+        res.status(500).json(error)
         return
     }
 }
@@ -62,8 +62,8 @@ export async function getLocation(req: Request, res: Response) {
 
         res.send(result)
         return
-    } catch (err) {
-        res.status(500)
+    } catch (error) {
+        res.status(500).json(error)
         return
     }
 }

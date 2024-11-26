@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTranslations } from "next-intl";
-import { DatePickerWithRange, } from "@/components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Select,
@@ -56,7 +55,6 @@ export default function Page() {
     return <Loading />
   }
 
-  console.log(defects)
   return (
     <div className="flex flex-col p-4">
 

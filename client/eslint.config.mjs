@@ -21,7 +21,7 @@ export default [
         'warn',
         {
           selector: 'function',
-          format: ['camelCase'],
+          format: ['camelCase', 'PascalCase'], 
         },
       ],
 
@@ -54,4 +54,10 @@ export default [
       'no-console': 'off', // ปิดการตรวจสอบ no-console สำหรับไฟล์นี้
     },
   },
+  {
+    files: ['.next/**/*.ts', 'app/layout.tsx'], // ระบุไฟล์ที่ต้องการยกเว้น
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off', // ปิดการตรวจสอบ no-console สำหรับไฟล์นี้
+    },
+  }
 ];

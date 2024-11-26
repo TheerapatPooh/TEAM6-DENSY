@@ -1,4 +1,4 @@
-import { Badge } from './ui/badge'
+import { Badge } from '@/components/ui/badge'
 import { cn } from "@/lib/utils"
 
 interface BadgeCustomProps {
@@ -34,6 +34,7 @@ export default function BadgeCustom({
     timeStamp,
     showTime = false,
     width,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     height, 
     children
 }: BadgeCustomProps) {

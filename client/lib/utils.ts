@@ -1,9 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { IPatrol, FilterPatrol, IPatrolResult, defectStatus, patrolStatus, itemType } from "@/app/type";
-import { BadgeProps } from "@/components/ui/badge";
 import { badgeVariants } from "@/components/badge-custom";
-import { buttonVariants } from "@/components/ui/button";
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {

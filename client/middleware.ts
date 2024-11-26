@@ -25,7 +25,6 @@ export function middleware(req: NextRequest) {
     try {
       const decodedToken: any = jwtDecode(authToken); // ถอดรหัส token
       const userRole = decodedToken.role; // ดึง role จาก token
-      console.log(userRole)
 
       if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
         return NextResponse.redirect(new URL(`/${locale}/admin`, req.url));

@@ -32,7 +32,7 @@ import { ChecklistDropdown } from "@/components/checklist-dropdown";
 import {
   DatePicker,
   DatePickerWithRange,
-} from "../../../components/date-picker";
+} from "@/components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Select,
@@ -53,8 +53,9 @@ import {
 import { IUser, FilterPatrol } from "@/app/type";
 import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
-import Loading from "../../../components/loading";
+import Loading from "@/components/loading";
 
 export default function Page() {
   const t = useTranslations("General");
@@ -88,12 +89,13 @@ export default function Page() {
       checklists: patrolChecklist,
     };
 
-    console.log(data)
     try {
-      const response = await fetchData("post", "/patrol", true, data);
+      await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
       window.location.reload();
-    } catch (error) { }
+    } catch (error) {
+        console.error(error)
+     }
   };
 
   const handleSelectUser = (checklistId: number, userId: number) => {
@@ -177,11 +179,9 @@ export default function Page() {
 
   const applyFilter = () => {
     setFilteredPatrolData(filterPatrol(filter, patrolData))
-    console.log("filter apply:", filter)
   };
 
   const resetFilter = () => {
-    console.log("filter reset:", filter)
     setFilter(initialFilter)
     localStorage.setItem('filter', JSON.stringify(initialFilter));
     setFilteredPatrolData(filterPatrol(initialFilter, patrolData))

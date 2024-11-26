@@ -9,7 +9,6 @@ export async function getPatrol(req: Request, res: Response) {
   try {
     const includePreset = req.query.preset === "true";
     const includeResult = req.query.result === "true";
-    const includeComment = req.query.comment === "true";
 
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
@@ -202,7 +201,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500);
+    res.status(500).json(error);
     return;
   }
 }
@@ -271,7 +270,9 @@ export async function createPatrol(req: Request, res: Response) {
     }
     let result = transformKeys(newPatrol, keyMap);
     res.status(201).json(result);
-  } catch (err) {}
+  } catch (error) {
+     console.error(error)
+  }
 }
 
 export async function startPatrol(req: Request, res: Response) {
@@ -351,8 +352,8 @@ export async function startPatrol(req: Request, res: Response) {
     let result = transformKeys(updatePatrol, keyMap);
     res.status(200).json(result);
     return;
-  } catch (err) {
-    res.status(500);
+  } catch (error) {
+    res.status(500).json(error);
     return;
   }
 }
@@ -436,8 +437,8 @@ export async function finishPatrol(req: Request, res: Response) {
 
     res.status(200).json(json);
     return;
-  } catch (err) {
-    res.status(500);
+  } catch (error) {
+    res.status(500).json(error);
     return;
   }
 }
@@ -496,8 +497,8 @@ export async function updatePatrolStatus(req: Request, res: Response) {
     let result = transformKeys(updatedPatrol, keyMap);
     res.status(200).json(result);
     return;
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ message: "An error occurred while updating the patrol status." });
@@ -565,8 +566,8 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
     let result = defects.map((defect: any) => transformKeys(defect, keyMap));
     res.status(200).json(result);
     return;
-  } catch (err) {
-    res.status(500).send(err);
+  } catch (error) {
+    res.status(500).send(error);
     return;
   }
 }
@@ -619,10 +620,10 @@ export async function commentPatrol(req: Request, res: Response) {
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = transformKeys(newComment, keyMap);
-    res.status(201);
+    res.status(201).json(result);
     return;
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Internal server error" });
     return;
   }
@@ -641,8 +642,8 @@ export async function getCommentPatrol(req: Request, res: Response) {
     let result = transformKeys(comments, keyMap);
     res.status(200).json(result);
     return;
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Internal server error" });
     return;
   }
@@ -672,7 +673,6 @@ export async function checkAndUpdatePendingPatrols() {
               status: "scheduled",
             }
           );
-          console.log(`Patrol ${patrol.id} status updated to "on_going".`);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(
@@ -686,7 +686,6 @@ export async function checkAndUpdatePendingPatrols() {
       }
     }
 
-    console.log("Checked and updated pending patrols for today.");
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(

@@ -87,7 +87,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
     req.user = decoded
     next();
   } catch (error) {
-    res.status(400).json({ message: "Invalid Token" })
+    res.status(400).json({ message: "Invalid Token" , error})
     return
   }
 }
@@ -182,7 +182,6 @@ export async function markAllAsRead(req: Request, res: Response) {
       where: { nt_us_id: userId, nt_read: false },
       data: { nt_read: true },
     });
-
     res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
     res.status(500).json({ message: "Error updating notifications", error });
@@ -194,15 +193,13 @@ export async function deleteOldNotifications() {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const deletedNotifications = await prisma.notification.deleteMany({
+    await prisma.notification.deleteMany({
       where: {
         nt_timestamp: {
           lt: sevenDaysAgo,
         },
       },
     });
-
-    console.log(`${deletedNotifications.count} notifications deleted.`);
   } catch (error) {
     console.error("Error deleting old notifications:", error);
   }
@@ -226,8 +223,6 @@ export async function sendEmail(email: string, subject: string, message: string)
       subject: subject,
       text: message,
     });
-
-    console.log(`Notification email sent to ${email}`);
   } catch (error) {
     console.error('Error sending email:', error);
   }

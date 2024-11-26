@@ -1,8 +1,6 @@
 "use client";
 
-import { getInitials } from "@/lib/utils";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Accordion,
@@ -21,17 +19,14 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
   AlertDialogFooter,
-} from "./ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import {
   IItem,
   itemType,
   IItemZone,
-  IPatrol,
   IPatrolChecklist,
   IPatrolResult,
   IUser,
-  IZone,
-  IChecklist,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
 import { fetchData } from "@/lib/api";

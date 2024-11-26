@@ -10,6 +10,7 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function Toaster() {
   const { toasts } = useToast()
 
