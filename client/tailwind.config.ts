@@ -53,7 +53,7 @@ const config: Config = {
 			},
 			backgroundImage: {
 				'accent-gradient': 'linear-gradient(to bottom, #C16975, #FB0023)',
-				'accent-gradient-hover': 'linear-gradient(to bottom, #A15561, #E8001A)' 
+				'accent-gradient-hover': 'linear-gradient(to bottom, #CE9099, #FF3A56)' 
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

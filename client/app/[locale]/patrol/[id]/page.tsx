@@ -11,11 +11,11 @@ import {
   patrolStatus,
   IUser,
 } from "@/app/type";
-import ReportDefect from "@/components/defect";
+import ReportDefect from "@/components/report-defect";
 import PatrolChecklist from "@/components/patrol-checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
-import { exportData } from "@/lib/utils";
+import { exportData, getPatrolStatusVariant } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useSocket } from "@/components/socket-provider";
 import { Progress } from "@/components/ui/progress";
@@ -208,7 +208,7 @@ export default function Page() {
 
   const getDefectData = async () => {
     try {
-      const defectFetch = await fetchData("get", `/defects/${params.id}`, true);
+      const defectFetch = await fetchData("get", `/patrol/${params.id}/defects`, true);
       setDefects(defectFetch);
     } catch (error) {
       console.error("Failed to fetch defects data:", error);
@@ -385,7 +385,6 @@ export default function Page() {
 
   return (
     <div className="p-4">
-      <SocketIndicator></SocketIndicator>
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center p-0 justify-center text-center gap-2">
@@ -404,50 +403,15 @@ export default function Page() {
           </div>
           <div>
             {(() => {
-              let iconName: string;
-              let status: string;
-              let variant:
-                | "green"
-                | "red"
-                | "yellow"
-                | "blue"
-                | "default"
-                | "purple"
-                | "secondary"
-                | "mint"
-                | "orange"
-                | "cyan"
-                | undefined;
-              switch (patrol.status as patrolStatus) {
-                case "completed":
-                  iconName = "check";
-                  variant = "green";
-                  status = patrol.status;
-                  break;
-                case "on_going":
-                  iconName = "cached";
-                  variant = "purple";
-                  status = patrol.status;
-                  break;
-                case "scheduled":
-                  iconName = "event_available";
-                  variant = "yellow";
-                  status = patrol.status;
-                  break;
-                default:
-                  iconName = "hourglass_top";
-                  variant = "blue";
-                  status = patrol.status;
-                  break;
-              }
+              const { iconName, variant } = getPatrolStatusVariant(patrol.status);
               return (
                 <BadgeCustom
                   iconName={iconName}
                   showIcon={true}
                   showTime={false}
-                  variant={variant}
+                  variant={variant }
                 >
-                  {s(status)}
+                  {s(patrol.status)}
                 </BadgeCustom>
               );
             })()}
@@ -498,7 +462,7 @@ export default function Page() {
                       text = "Export";
                       disabled = false;
                       handleFunction = () => {
-                        exportData(patrol,patrolResults);
+                        exportData(patrol, patrolResults);
                       };
                       break;
                     case "on_going":
@@ -608,16 +572,7 @@ export default function Page() {
                   return (
                     <div className="py-2">
                       <ReportDefect
-                        key={defect.id}
-                        id={defect.id}
-                        name={defect.name}
-                        description={defect.description}
-                        type={defect.type}
-                        status={defect.status}
-                        timestamp={defect.timestamp}
-                        userId={defect.userId}
-                        patrolResult={defect.patrolResult}
-                        image={defect.image}
+                        defect={defect}
                       />
                     </div>
                   )

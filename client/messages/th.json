@@ -71,7 +71,11 @@
     "maintenance": "ซ่อมบำรุง",
     "request": "ร้องขอ",
     "information": "ประชาสัมพันธ์",
-    "System": "ระบบ"
+    "System": "ระบบ",
+    "reported": "รายงานแล้ว",
+    "in_progress": "กำลังดำเนินการ",
+    "resolved": "แก้ไขแล้ว",
+    "pending_inspection": "รอการตรวจสอบ"
   },
   "DateTime": {
     "justNow": "ตอนนี้",

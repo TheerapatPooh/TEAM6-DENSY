@@ -71,7 +71,11 @@
     "maintenance": "Maintenance",
     "request": "Request",
     "information": "Information",
-    "System": "System"
+    "System": "System",
+    "reported": "Reported",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "pending_inspection": "Pending Inspection"
   },
   "DateTime": {
     "justNow": "just now",

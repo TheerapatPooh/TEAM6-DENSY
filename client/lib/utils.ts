@@ -1,6 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { IPatrol, FilterPatrol, IPatrolResult } from "@/app/type";
+import { IPatrol, FilterPatrol, IPatrolResult, defectStatus, patrolStatus, itemType } from "@/app/type";
+import { BadgeProps } from "@/components/ui/badge";
+import { badgeVariants } from "@/components/badge-custom";
+import { buttonVariants } from "@/components/ui/button";
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
@@ -106,8 +109,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   } catch (error) {
     console.error("Error exporting data:", error);
     throw new Error(
-      `Could not export data: ${
-        error instanceof Error ? error.message : "Unknown error"
+      `Could not export data: ${error instanceof Error ? error.message : "Unknown error"
       }`
     );
   }
@@ -210,4 +212,89 @@ export function timeAgo(timestamp: string, t: any): string {
     }
   }
   return t('justNow');
+}
+
+export const getPatrolStatusVariant = (status: patrolStatus) => {
+  let iconName: string
+  let variant: keyof typeof badgeVariants
+  switch (status) {
+    case "completed":
+      iconName = "check";
+      variant = "green";
+      break;
+    case "on_going":
+      iconName = "cached";
+      variant = "purple";
+      break;
+    case "scheduled":
+      iconName = "event_available";
+      variant = "yellow";
+      break;
+    default:
+      iconName = "hourglass_top";
+      variant = "blue";
+      break;
+  }
+  return { iconName, variant };
+};
+
+export const getDefectStatusVariant = (status: defectStatus) => {
+  let iconName: string
+  let variant: keyof typeof badgeVariants
+  switch (status) {
+    case "completed":
+      iconName = 'check'
+      variant = 'green'
+      break;
+    case "resolved":
+      iconName = 'published_with_changes'
+      variant = 'blue'
+      break;
+    case "in_progress":
+      iconName = 'cache'
+      variant = 'yellow'
+      break;
+    case "pending_inspection":
+      iconName = 'pending_actions'
+      variant = 'orange'
+      break;
+    default:
+      iconName = 'campaign'
+      variant = 'mint'
+      break;
+  }
+  return { iconName, variant };
+};
+
+export const getItemTypeVariant = (type: itemType) => {
+  switch (type) {
+    case "safety":
+      return "mint";
+    case "maintenance":
+      return "purple"
+    default:
+      return "orange";
+  }
+};
+
+export function formatTime(timestamp: string) {
+  const date = new Date(timestamp).toLocaleDateString(
+    "th-TH",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  );
+
+  const time = new Date(timestamp).toLocaleTimeString(
+    "th-TH",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }
+  );
+  return date + " " + time
 }

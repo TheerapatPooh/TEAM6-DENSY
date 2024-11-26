@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type role = "admin" | "inspector" | "supervisor"
-export type defectStatus = "reported" | "completed" | "pending_review" | "in_progress" | "resolved";
+export type defectStatus = "reported" | "completed" | "pending_inspection" | "in_progress" | "resolved";
 export type itemType = "safety" | "environment" | 'maintenance';
 export type notificationType = "information" | "request" | 'system';
 
