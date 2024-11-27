@@ -57,7 +57,9 @@
     "Back": "ย้อนกลับ",
     "Start": "เริ่มตรวจ",
     "Finish": "เสร็จสิ้น",
-    "Export": "นำออก"
+    "Export": "นำออก",
+    "Lock": "ล็อก",
+    "Unlock": "ปลดล็อก"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -69,7 +71,11 @@
     "maintenance": "ซ่อมบำรุง",
     "request": "ร้องขอ",
     "information": "ประชาสัมพันธ์",
-    "System": "ระบบ"
+    "System": "ระบบ",
+    "reported": "รายงานแล้ว",
+    "in_progress": "กำลังดำเนินการ",
+    "resolved": "แก้ไขแล้ว",
+    "pending_inspection": "รอการตรวจสอบ"
   },
   "DateTime": {
     "justNow": "ตอนนี้",
@@ -80,5 +86,32 @@
     "weekAgo": "{count} สัปดาห์ที่แล้ว",
     "monthAgo": "{count} เดือนที่แล้ว",
     "yearAgo": "{count} ปีที่แล้ว"
+  },
+  "Zone": {
+    "r&d_zone": "เขตวิจัย\nและพัฒนา",
+    "assembly_line_zone": "เขตสายการผลิต",
+    "raw_materials_storage_zone": "   เขตคลังวัตถุดิบ",
+    "quality_control_zone": "เขตควบคุม\nคุณภาพ",
+    "it_zone": " เขตไอที",
+    "customer_service_zone": "เขตบริการ\nลูกค้า",
+    "prototype_zone": "เขตต้นแบบ",
+    "manager_office": "  สำนักงาน\n   ผู้จัดการ",
+    "water_supply": "เขต\nน้ำประปา",
+    "maintenance_zone": "   เขตซ่อมบำรุง",
+    "warehouse": "คลังสินค้า",
+    "storage_zone": "เขตจัดเก็บสินค้า",
+    "server_room": "ห้องเซิร์ฟเวอร์",
+    "electrical_zone": "    เขตระบบ\n   ไฟฟ้า",
+    "engineering_zone": "เขตวิศวกรรม",
+    "training_simulation_zone": "เขตฝึกอบรม\nและจำลอง\nสถานการณ์",
+    "workstation_a": "พื้นที่ทำงาน A",
+    "workstation_b": "\nพื้นที่ทำงาน B",
+    "testing_lab": "ห้องทดลอง\nและทดสอบ"
+  },
+  "Notification": {
+    "patrol_assigned": "คุณได้รับมอบหมายให้ทำการตรวจสอบที่กำหนดไว้ในวันที่ {date}",
+    "start_patrol": "การตรวจของคุณได้เริ่มต้นแล้ว กรุณาดำเนินการตรวจสอบ",
+    "finish_patrol": "การตรวจของคุณเสร็จสิ้นแล้ว ขอบคุณสำหรับความร่วมมือ",
+    "report_defect": "มีการแจ้งปัญหาในโซนที่คุณรับผิดชอบ กรุณาตรวจสอบทันที"
   }
 }

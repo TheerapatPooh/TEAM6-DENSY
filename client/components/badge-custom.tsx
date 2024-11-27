@@ -1,4 +1,4 @@
-import { Badge } from './ui/badge'
+import { Badge } from '@/components/ui/badge'
 import { cn } from "@/lib/utils"
 
 interface BadgeCustomProps {
@@ -24,6 +24,7 @@ export const badgeVariants = {
     purple: "bg-purple-300/40 text-purple-500 hover:bg-purple-300/20",
     cyan: "bg-cyan-300/40 text-cyan-500 hover:bg-cyan-300/20",
     green: "bg-green-300/40 text-green-500 hover:bg-green-300/20",
+    brown: "bg-[#A2845E33] text-[#A2845E] hover:bg-[#A2845E1A]",
 }
 
 export default function BadgeCustom({
@@ -33,6 +34,7 @@ export default function BadgeCustom({
     timeStamp,
     showTime = false,
     width,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     height, 
     children
 }: BadgeCustomProps) {
@@ -41,7 +43,7 @@ export default function BadgeCustom({
     return (
         <Badge className={cn(
             `${badgeClass} cursor-pointer align-center gap-2 h-[30px] p-2`,
-            width ? width : ("w-[200px]"),
+            width ? width : ("w-[180px]"),
             showTime ? "justify-between" : showIcon ? "justify-between" : "justify-center" 
         )}>
             <div className='flex gap-2 items-center justify-between w-full'>
@@ -50,7 +52,7 @@ export default function BadgeCustom({
                         {iconName}
                     </span>
                 )}
-                <span className='text-base font-medium w-full text-center'>{children}</span>
+                <span className='text-base font-bold w-full text-center'>{children}</span>
             </div>
             {showTime && (
                 <span className="text-base font-normal">

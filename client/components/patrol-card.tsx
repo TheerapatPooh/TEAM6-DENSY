@@ -6,19 +6,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Button } from "./ui/button";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Inspector, patrolStatus, User } from "@/app/type";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { IPatrolChecklist, patrolStatus, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/api";
 import {
@@ -31,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 
 export interface patrolCardProps {
@@ -39,10 +39,8 @@ export interface patrolCardProps {
   patrolDate: Date;
   patrolPreset: string;
   patrolId: number;
-  inspector: Inspector[];
-  items: number;
-  fails: number;
-  defects: number;
+  patrolChecklist: IPatrolChecklist[]
+  inspector: IUser[];
 }
 
 export function PatrolCard({
@@ -50,22 +48,23 @@ export function PatrolCard({
   patrolDate,
   patrolPreset,
   patrolId,
+  patrolChecklist,
   inspector = [],
-  items,
-  fails,
-  defects,
 }: patrolCardProps) {
   const formattedDate =
     patrolDate instanceof Date
       ? patrolDate.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
       : "N/A"; // Fallback if patrolDate is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [profile, setProfile] = useState<User[]>();
+  const [user, setUser] = useState<IUser[]>();
+  const [items, setItems] = useState(0);
+  const [fails, setFails] = useState(0);
+  const [defects, setDefects] = useState(0);
 
   const [mounted, setMounted] = useState(false);
 
@@ -73,14 +72,55 @@ export function PatrolCard({
   const locale = useLocale()
   const getData = async () => {
     try {
-      const profilefetch = await fetchData("get", "/profiles", true);
-      setProfile(profilefetch);
+      const userFetch = await fetchData("get", "/users?profile=true&image=true", true);
+      setUser(userFetch);
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
     }
   };
+
+  const getPatrolData = async () => {
+    try {
+      let countItems = 0;
+      let countFails = 0;
+      let countDefects = 0;
+
+      if (patrolChecklist) {
+        for (const patrolChecklistObj of patrolChecklist) {
+          if (patrolChecklistObj.checklist && patrolChecklistObj.checklist.item) {
+            for (const item of patrolChecklistObj.checklist.item) {
+              if (item.itemZone) {
+                countItems += item.itemZone.length;
+              }
+            }
+          }
+        }
+      }
+
+      if (patrolStatus !== 'pending' && patrolStatus !== 'scheduled') {
+        const resultFetch = await fetchData("get", `/patrol/${patrolId}?result=true`, true);
+        if (resultFetch?.result) {
+          for (const patrolResult of resultFetch.result) {
+            if (patrolResult.status === false) {
+              countFails++;
+              if (patrolResult.defects && patrolResult.defects.length !== 0) {
+                countDefects += patrolResult.defects.length;
+              }
+            }
+          }
+        }
+      }
+      setItems(countItems);
+      setFails(countFails);
+      setDefects(countDefects);
+    } catch (error) {
+      console.error("Failed to fetch patrol data:", error);
+    }
+  };
+
   useEffect(() => {
     getData();
+    getPatrolData();
     setMounted(true);
   }, []);
 
@@ -102,12 +142,13 @@ export function PatrolCard({
     router.push(`/${locale}/patrol/${patrolId}`)
   }
 
-  const inspectorNames = inspector.map((insp) => insp.name).filter(Boolean);
-  if(!mounted){
+  const inspectorNames = inspector.map((insp) => insp.profile.name).filter(Boolean);
+  if (!mounted) {
     return (
       null
     )
   }
+
   return (
     <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="gap-0 p-[10px]">
@@ -158,7 +199,7 @@ export function PatrolCard({
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
-             onClick={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               handleClick();
             }}
@@ -175,8 +216,8 @@ export function PatrolCard({
                   <p className="text-xl me-2.5 truncate">{inspectorNames[0]}</p>
                 </div>
               )}
-              {inspectorNames.slice(0, 4).map((inspectorName, idx) => {
-                const matchingProfile = profile?.find(
+              {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
+                const matchingProfile = user?.find(
                   (profile) => profile.profile.name === inspectorName
                 );
 
@@ -213,8 +254,8 @@ export function PatrolCard({
                 {t("InspectorList")}
               </p>
             </div>
-            {inspectorNames.map((inspectorName, idx) => {
-              const matchingProfile = profile?.find(
+            {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
+              const matchingProfile = user?.find(
                 (profile) => profile.profile.name === inspectorName
               );
               return (
@@ -222,7 +263,7 @@ export function PatrolCard({
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
-                      />
+                    />
                     <AvatarFallback>
                       {getInitials(inspectorName)}
                     </AvatarFallback>
@@ -270,7 +311,7 @@ export function PatrolCard({
                       <div
                         className=" text-destructive cursor-pointer w-full h-full flex"
                         onClick={(e) => {
-                          e.stopPropagation(); 
+                          e.stopPropagation();
                         }}
                       >
                         {t("Delete")}

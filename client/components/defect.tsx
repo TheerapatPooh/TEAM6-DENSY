@@ -1,382 +1,148 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { DefectStatus, ItemType } from "@/app/type";
-import BadgeCustom from "@/components/badge-custom";
-import Image from "next/image";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import React from 'react'
+import BadgeCustom from './badge-custom'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { formatTime, getDefectStatusVariant, getInitials, getItemTypeVariant } from '@/lib/utils'
+import { IDefect } from '@/app/type'
+import { useTranslations } from 'next-intl'
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import path from "path";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "./ui/carousel";
-import { Card, CardContent } from "./ui/card";
-import { Fullscreen } from "lucide-react";
-import { max } from "date-fns";
-
-interface ImageProps {
-  id: number;
-  path: string[]
-}
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 
-interface DefectProps {
-  date: string;
-  title: string;
-  time: string;
-  status: DefectStatus;
-  type: ItemType;
-  description?: string;
-  beforeImage?: ImageProps[];
-  afterImage?: ImageProps[];
-  zone: string;
-}
+export default function Defect({ defect }: { defect: IDefect }) {
+    const s = useTranslations("Status");
 
-export default function ReportDefect({
-  date,
-  title,
-  time,
-  status,
-  type,
-  description,
-  beforeImage,
-  afterImage,
-  zone,
-}: DefectProps) {
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case "resolved":
-        return "blue";
-      case "reported":
-        return "mint";
-      case "completed":
-        return "green";
-      case "in_progress":
-        return "orange";
-      default:
-        return "red";
-    }
-  };
+    return (
+        <div>
+            {(() => {
+                const { iconName, variant } = getDefectStatusVariant(defect.status)
+                let color;
+                switch (variant) {
+                    case "mint":
+                        color = 'teal'
+                        break;
+                    case "blue":
+                        color = 'blue'
+                        break;
+                    case "yellow":
+                        color = 'yellow'
+                        break;
+                    case "orange":
+                        color = 'orange'
+                        break;
+                    default:
+                        color = 'green'
+                        break;
+                }
+                return (
+                    <div className={`bg-card p-4 rounded-lg shadow-md border-l-8 border-${color}-500 cursor-pointer`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center text-black-500 space-x-2">
+                                <span className="material-symbols-outlined text-muted-foreground cursor-default ">schedule</span>
+                                <span className="font-semibold text-lg text-muted-foreground">{formatTime(defect.timestamp)}</span>
+                            </div>
+                            <div>
+                                <BadgeCustom
+                                    iconName={iconName}
+                                    showIcon={true}
+                                    showTime={false}
+                                    variant={variant}
+                                >
+                                    {s(defect.status)}
+                                </BadgeCustom>
+                            </div>
+                        </div>
+                        <div className="my-2">
+                            {(() => {
+                                const variant = getItemTypeVariant(defect.type)
 
-  const getIconForStatus = (status: string) => {
-    switch (status) {
-      case "resolved":
-        return "autorenew";
-      case "reported":
-        return "campaign";
-      case "completed":
-        return "check_circle";
-      case "in_progress":
-        return "hourglass_top";
-      default:
-        return "pending";
-    }
-  };
+                                return (
+                                    <BadgeCustom
+                                        showTime={false}
+                                        variant={variant}
+                                    >
+                                        {s(defect.type)}
+                                    </BadgeCustom>
+                                );
+                            })()}
+                        </div>
+                        <div>
+                            <span className="font-bold text-2xl text-card-foreground">{defect.name}</span>
+                        </div>
 
-  const getTypeVariant = (type: string) => {
-    switch (type) {
-      case "safety":
-        return "mint";
-      case "maintenance":
-        return "purple"
-      default:
-        return "orange";
-    }
-  };
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-muted-foreground">person_alert</span>
+                            <span className="font-bold text-lg text-muted-foreground">Reporter</span>
+                            <HoverCard>
+                                <HoverCardTrigger>
+                                    <div className="flex items-center ps-2 p-2">
+                                        <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                                            <AvatarImage
+                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
+                                            />
+                                            <AvatarFallback>
+                                                {getInitials(defect.user.profile.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <p className="text-[20px]">{defect.user.profile.name}</p>
+                                    </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="w-80">
+                                    <div className="flex flex-row gap-4">
+                                        <Avatar>
+                                            <Avatar>
+                                                <AvatarImage
+                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
+                                                />
+                                                <AvatarFallback>
+                                                    {getInitials(defect.user.profile.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </Avatar>
+                                        <div className="space-y-1">
+                                            <h4 className="text-lg font-semibold text-card-foreground">{defect.user.profile.name}</h4>
+                                            <div className='flex flex-row gap-2'>
+                                                <span className="material-symbols-outlined">
+                                                    mail
+                                                </span>
+                                                <p className="text-card-foreground">
+                                                    {defect.user.email}
+                                                </p>
+                                            </div>
+                                            <div className='flex flex-row gap-2'>
+                                                <span className="material-symbols-outlined">
+                                                    call
+                                                </span>
+                                                <p className="text-card-foreground">
+                                                    {defect.user.profile.tel}
+                                                </p>
+                                            </div>
 
-  const formatText = (name: string) => {
-    switch (name) {
-      case "safety":
-        return "Safety";
-      case "maintenance":
-        return "Maintenance"
-      case "environment":
-        return "Environment"
-      case "reported":
-        return "Reported";
-      case "in_progress":
-        return "In Progress";
-      case "resolved":
-        return "Resolved";
-      case "completed":
-        return "Completed";
-      default:
-        return "Pending Inspection";
-    }
-  }
-  console.log(beforeImage)
+                                            <div className="flex items-center pt-2">
+                                                <span className="text-sm text-muted-foreground">
+                                                    Joined {formatTime(defect.user.createdAt)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </HoverCardContent>
+                            </HoverCard>
 
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between">
+                                <span className="material-symbols-outlined text-muted-foreground">location_on</span>
+                                <span className="font-bold text-lg text-muted-foreground ml-2">Location</span>
+                                <span className="text-card-foreground text-lg ml-4">Zone A</span>
+                            </div>
+                        </div>
+                    </div>
 
-  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const [isBeforeCarouselOpen, setIsBeforeCarouselOpen] = useState(false);
-  const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
-  const [beforeSlideIndex, setBeforeSlideIndex] = useState(0);
-  const [afterSlideIndex, setAfterSlideIndex] = useState(0);
-
-  // Handle before image click
-  const handleBeforeImageClick = (index: number) => {
-    setBeforeSlideIndex(index);
-    setIsBeforeCarouselOpen(true);
-  };
-
-  // Handle after image click
-  const handleAfterImageClick = (index: number) => {
-    setAfterSlideIndex(index);
-    setIsAfterCarouselOpen(true);
-  };
-
-  // Close before carousel
-  const handleCloseBeforeCarousel = () => {
-    setIsBeforeCarouselOpen(false);
-    setBeforeSlideIndex(0);
-  };
-
-  // Close after carousel
-  const handleCloseAfterCarousel = () => {
-    setIsAfterCarouselOpen(false);
-    setAfterSlideIndex(0);
-  };
-
-  const [api, setApi] = React.useState<CarouselApi>()
-
-  React.useEffect(() => {
-    if (!api) {
-      return
-    }
-    api.on("select", () => {
-      setAfterSlideIndex(api.selectedScrollSnap())
-      setBeforeSlideIndex(api.selectedScrollSnap())
-    })
-  }, [api])
-
-  return (
-    <Accordion type="single" collapsible>
-      <AccordionItem
-        value="item-1"
-        className="bg-secondary rounded-md w-full px-4 py-2 border-none"
-      >
-        <AccordionTrigger className="hover:no-underline">
-          <div className="flex items-center space-x-2">
-            <span className="material-symbols-outlined text-[#707A8A] cursor-default ">
-              schedule
-            </span>
-            <span className="text-lg font-bold text-[#707A8A] cursor-default ">
-              {date}
-            </span>
-            <span className="text-lg font-bold text-[#707A8A] cursor-default ">
-              {time}
-            </span>
-            <h2 className="text-lg font-bold text-card-foreground cursor-default ">
-              {title}
-            </h2>
-          </div>
-        </AccordionTrigger>
-
-        {/* โชว์ส่วนของ status, type, และปุ่ม Verify/Rework */}
-        <div className="flex justify-between items-center mb-4 mt-2">
-          <div className="flex space-x-2">
-            <BadgeCustom
-              variant={getStatusVariant(status)}
-              showIcon={true}
-              iconName={getIconForStatus(status)}
-            >
-              {formatText(status)}
-            </BadgeCustom>
-            <BadgeCustom variant={getTypeVariant(type)}>{formatText(type)}</BadgeCustom>
-          </div>
-
-          {/* แสดงปุ่ม Verify และ Rework เฉพาะเมื่อ status เป็น Resolved */}
-          {status === "resolved" && (
-            <div className="flex space-x-2">
-              <Button variant="success" size={"lg"}>
-                <span className="material-symbols-outlined mr-2 text-[20px]">
-                  check_circle
-                </span>
-                Verify
-              </Button>
-              <Button variant="destructive" size={"lg"}>
-                <span className="material-symbols-outlined mr-2 text-[20px]">
-                  cancel
-                </span>
-                Rework
-              </Button>
-            </div>
-          )}
+                );
+            })()}
         </div>
 
-        <AccordionContent>
-          <div className="flex flex-col mt-4">
-            <Textarea
-              className="w-full h-40 bg-card "
-              placeholder="Description"
-              value={description}
-              readOnly
-            />
-            <div className="flex space-x-4 justify-between mt-4">
-              <div className="flex space-x-4">
-                <div>
-                  <div className="flex items-center">
-                    <p className="text-gray-500 mb-2 cursor-default user-select-none">
-                      Before
-                    </p>
-                    <button className="ml-2 focus:outline-none cursor-default user-select-none">
-                      <span className="material-symbols-outlined text-gray-500 cursor-default user-select-none">
-                        edit
-                      </span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleBeforeImageClick(0)}>
-                      {beforeImage && beforeImage.length > 0 && beforeImage[0].path ? (
-                        <Image
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
-                          alt="First Image"
-                          width={130}
-                          height={130}
-                          className="object-cover cursor-pointer"
-                        />
-                      ) : (
-                        <p>No image available.</p>
-                      )}
-                    </div>
-                    {isBeforeCarouselOpen && beforeImage && beforeImage?.length > 0 && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div className="relative">
-                          <Carousel setApi={setApi} className="w-full max-w-screen-lg">
-                            <CarouselContent>
-                              {Array.from({ length: beforeImage.length }).map((_, index) => (
-                                <CarouselItem key={index}>
-                                  <div className="p-1 flex justify-center">
-                                    <Card>
-                                      <CardContent className="flex items-center justify-center h-[500px] w-[800px] overflow-hidden">
-                                        <div className="flex items-center justify-center h-full w-full">
-                                          <Image
-                                            className="object-contain"
-                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[index].path}`}
-                                            alt={`${beforeImage[index].path}`}
-                                            width={800}
-                                            height={500} 
-                                            priority
-                                          />
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                          </Carousel>
-                          <div className="flex justify-center mt-4">
-                            {beforeImage.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => {
-                                  setBeforeSlideIndex(index);
-                                }}
-                                disabled
-                                className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index ? 'bg-white' : 'bg-gray-400'}`}
-                                aria-label={`Slide ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <button onClick={handleCloseBeforeCarousel} className="absolute top-4 right-4 text-white">
-                          Close
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center">
-                    <p className="text-gray-500 mb-2 cursor-default user-select-none">
-                      After
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="border p-2 rounded-md bg-background h-40 w-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
-                      {afterImage && afterImage.length > 0 && afterImage[0].path ? (
-                        <Image
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
-                        alt="First Image"
-                          width={130}
-                          height={130}
-                          className="object-cover cursor-pointer"
-                        />
-                      ) : (
-                        <p>No image available.</p>
-                      )}
-                    </div>
-                    {isAfterCarouselOpen && afterImage && afterImage?.length > 0 && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div className="relative">
-                          <Carousel setApi={setApi} className="w-full max-w-screen-lg">
-                            <CarouselContent>
-                              {Array.from({ length: afterImage.length }).map((_, index) => (
-                                <CarouselItem key={index}>
-                                  <div className="p-1 flex justify-center">
-                                    <Card>
-                                      <CardContent className="flex items-center justify-center h-[500px] w-[800px]">
-                                        <Image
-                                          className="object-contain"
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[index].path}`}
-                                          alt={`${afterImage[index].path}`}
-                                          width={750}
-                                          height={450}
-                                          priority
-                                        />
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                          </Carousel>
-                          <div className="flex justify-center mt-4">
-                            {afterImage.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => {
-                                  setAfterSlideIndex(index);
-                                }}
-                                disabled
-                                className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index ? 'bg-white' : 'bg-gray-400'}`}
-                                aria-label={`Slide ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <button onClick={handleCloseAfterCarousel} className="absolute top-4 right-4 text-white">
-                          Close
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="ml-auto">
-                <p className="text-gray-500 mb-2 cursor-default user-select-none"></p>
-                <div className="border p-2 rounded-md bg-background flex items-center justify-center h-48 w-48 cursor-default user-select-none">
-                  {zone}
-                </div>
-              </div>
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion >
-  );
+    )
 }

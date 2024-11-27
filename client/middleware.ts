@@ -25,7 +25,6 @@ export function middleware(req: NextRequest) {
     try {
       const decodedToken: any = jwtDecode(authToken); // ถอดรหัส token
       const userRole = decodedToken.role; // ดึง role จาก token
-      console.log(userRole)
 
       if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
         return NextResponse.redirect(new URL(`/${locale}/admin`, req.url));
@@ -35,7 +34,11 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL(`/${locale}/patrol`, req.url));
       }
 
-      if (userRole !== "admin" && userRole !== "patrol" && !currentPathname.startsWith(`/${locale}`)) {
+      if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`)) {
+        return NextResponse.redirect(new URL(`/${locale}/defect`, req.url));
+      }
+
+      if (userRole !== "admin" && userRole !== "inspector" && !currentPathname.startsWith(`/${locale}`)) {
         return NextResponse.redirect(new URL(`/${locale}`, req.url));
       }
 

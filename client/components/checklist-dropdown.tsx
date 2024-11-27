@@ -1,31 +1,31 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchData } from "@/lib/api";
-import UserDropdown from "./user-dropdown";
+import UserDropdown from "@/components/user-dropdown";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "./ui/accordion";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Checklist, User } from "@/app/type";
+} from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { IChecklist, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 interface Props {
-  checklist: Checklist;
-  handleselectUser: (user: User) => void;
+  checklist: IChecklist;
+  handleselectUser: (user: IUser) => void;
 }
 
 export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
-  const [userData, setUserData] = useState<User[]>([]);
-  const [selectUser, setSelectUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<IUser[]>([]);
+  const [selectUser, setSelectUser] = useState<IUser | null>(null);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const users = await fetchData("get", "/profiles", true);
+        const users = await fetchData("get", "/users?profile=true&image=true", true);
         setUserData(users);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -34,7 +34,7 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
     getData();
   }, []);
 
-  const handleUserSelect = (dropdownUser: User) => {
+  const handleUserSelect = (dropdownUser: IUser) => {
     setSelectUser(dropdownUser);
     handleselectUser(dropdownUser);
   };

@@ -1,60 +1,54 @@
-version: '3.8'
 services:
   db:
     image: mysql:latest
     container_name: densy_db
     environment:
-      MYSQL_DATABASE: densy_data
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "8029:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - densy_network
 
-  client:
-    container_name: densy_client
+  app:
+    container_name: densy_app
     build:
-      context: ./client
-      dockerfile: client.dockerfile
-    image: client
+      context: .
+      dockerfile: .dockerfile
     restart: always
-    ports:
-      - "8027:3000"
     environment:
-      - PORT=3000
-    env_file:
-      - ./client/.env
-    depends_on:
-      - server
-
-  server:
-    container_name: densy_server
-    image: server
-    restart: always
+      NODE_ENV: production
     env_file:
       - ./server/.env
-    build:
-      context: ./server
-      dockerfile: server.dockerfile
-    ports:
-      - "8028:4000"
-    environment:
-      DATABASE_URL: "mysql://root:12345@db:3306/densy_data"
+      - ./client/.env
+    volumes:
+      - ./server/uploads:/app/server/uploads
     depends_on:
       - db
+    networks:
+      - densy_network
+
   nginx:
     container_name: densy_nginx
     image: nginx:1.13.0-alpine
     restart: always
     ports:
-      - "8026:80"
+      - "${NGINX_PORT}:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - client
-      - server
+      - app
+    networks:
+      - densy_network
 
 volumes:
   db_data:
+
+
+networks:
+  densy_network:
+    driver: bridge

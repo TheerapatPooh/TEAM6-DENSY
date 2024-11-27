@@ -10,8 +10,8 @@ export async function login(values: z.infer<typeof LoginSchema>) {
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
         return response.data
-    } catch (err: any) {
-        return { error: err.response?.data?.message || "Login failed" };
+    } catch (error: any) {
+        return { error: error.response?.data?.message || "Login failed" };
     }
 }
 
@@ -19,7 +19,7 @@ export async function logout() {
     try {
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
     } catch (error: any) {
-        throw new Error("Logout failed");
+        throw new Error("Logout failed",error);
     }
 }
 
@@ -29,14 +29,19 @@ export async function fetchData(
     type: "get" | "delete" | "post" | "put",
     endpoint: string,
     credential: boolean,
-    value?: any
+    value?: any,
+    form?: boolean
 ) {
     try {
-        const config = {
+        const config: AxiosRequestConfig = {
             withCredentials: credential,
-            headers: {
-                'Content-Type': 'application/json',
-            }
+            headers:
+                form ? {
+                    "Content-Type": "multipart/form-data",
+                }
+                    : {
+                        'Content-Type': 'application/json',
+                    }
         };
 
         let response;
@@ -50,28 +55,5 @@ export async function fetchData(
     } catch (error) {
         console.error("Failed to fetch data:", error);
         return null; // Returning null on error
-    }
-}
-
-
-export async function fetchDataFormFormat(
-    type: "get" | "delete" | "post" | "put",
-    endpoint: string,
-    credential: boolean,
-    value?: any
-) {
-    try {
-        const config: AxiosRequestConfig = {
-            withCredentials: credential,
-            headers: {}, // Leave headers empty for FormData
-        };
-
-        const url = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
-        const response = await axios[type](url, type === "get" || type === "delete" ? config : value, config);
-
-        return response.data; // response.data will contain the response body
-    } catch (error) {
-        console.error("Failed to fetch data:", error);
-        return null; // You could also throw an error or return more detailed error information
     }
 }
