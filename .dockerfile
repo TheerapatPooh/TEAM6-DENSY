@@ -41,6 +41,8 @@ COPY --from=base /app/server/node_modules ./server/node_modules
 COPY --from=base /app/server/prisma ./server/prisma
 COPY --from=base /app/server/package.json ./server/ 
 
+# Copy the entrypoint script
+COPY entrypoint.sh /app/
 
 # Set environment variables (optional)
 ENV NODE_ENV=production
@@ -51,4 +53,4 @@ ENV SERVER_PORT=4000
 EXPOSE 3000 4000
 
 # Command to handle migrations, seed data, and start client and server
-CMD ["sh", "-c", "cd server && npx prisma migrate deploy && npx prisma db execute --file prisma/migrations/update.sql && node dist/index.js concurrently npm start --prefix ../client"]
+CMD ["sh", "/app/entrypoint.sh"]

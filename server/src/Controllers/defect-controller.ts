@@ -1,7 +1,7 @@
 import { prisma } from "@Utils/database.js";
 import { Request, Response } from "express";
 import transformKeys, { keyMap } from "@Utils/key-map.js";
-import { createNotification } from "./util-controller";
+import { createNotification } from "./util-controller.js";
 import { NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
@@ -113,7 +113,7 @@ export async function createDefect(req: Request, res: Response) {
     } else {
       console.error("No files uploaded or incorrect file structure.");
     }
-    const message = `Your has been reported defect.`;
+    const message = `report_defect`;
     const supervisor = parseInt(supervisorId, 10);
   
      await createNotification({

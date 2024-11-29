@@ -41,12 +41,11 @@ export async function login(req: Request, res: Response) {
     const iat = Math.floor(Date.now() / 1000)
     const exp = iat + maxAge / 1000
     const token = jwt.sign({ userId: user.us_id, role: user.us_role, iat, exp }, jwtSecret)
-    const isProduction = process.env.NODE_ENV === 'production';
 
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: false,
+      sameSite: 'lax',
       maxAge: maxAge
     })
 
@@ -58,13 +57,12 @@ export async function login(req: Request, res: Response) {
 
 //Logout
 export async function logout(req: Request, res: Response) {
-  const isProduction = process.env.NODE_ENV === 'production';
   try {
     // ลบ cookie authToken
     res.clearCookie("authToken", {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: false,
+      sameSite: 'lax',
     });
     // ส่ง response กลับไปหาผู้ใช้เพื่อแจ้งว่า logout สำเร็จ
     res.status(200).json({ message: "Logout successful" });

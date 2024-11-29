@@ -13,7 +13,7 @@ const nextConfig = {
         esmExternals: "loose",
     },
     images: {
-        domains: ['localhost'], // เพิ่ม localhost ใน domains
+        domains: ['http://dekdee2.informatics.buu.ac.th/'], 
     },
 };
 

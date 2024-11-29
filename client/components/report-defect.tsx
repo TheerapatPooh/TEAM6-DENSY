@@ -179,6 +179,7 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
                           width={130}
                           height={130}
                           className="object-cover cursor-pointer"
+                          unoptimized 
                         />
                       ) : (
                         <p>No image available.</p>
@@ -202,6 +203,7 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
                                             width={800}
                                             height={500}
                                             priority
+                                            unoptimized 
                                           />
                                         </div>
                                       </CardContent>
