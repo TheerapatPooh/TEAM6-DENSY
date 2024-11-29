@@ -9,7 +9,11 @@ router.post('/defect', (req, res, next) => {
 }, upload.array('imageFiles', 10), authenticateUser, createDefect);
 router.get('/defect/:id', authenticateUser, getDefect)
 router.get('/defects', authenticateUser, getAllDefect)
-router.put('/defect/:id', authenticateUser, updateDefect)
-router.delete('/defect/:id', authenticateUser, deleteDefect)
+router.put('/defect/:id',
+    upload.array('imageFiles', 10),
+    authenticateUser,
+    updateDefect
+  );
+  router.delete('/defect/:id', authenticateUser, deleteDefect)
 
 export default router

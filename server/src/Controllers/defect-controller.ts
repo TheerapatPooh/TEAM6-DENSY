@@ -3,6 +3,9 @@ import { Request, Response } from "express";
 import transformKeys, { keyMap } from "@Utils/key-map.js";
 import { createNotification } from "./util-controller";
 import { NotificationType } from "@prisma/client";
+import fs from 'fs';
+import path from "path";
+import { fileURLToPath } from "url";
 
 export async function createDefect(req: Request, res: Response) {
   try {
@@ -254,92 +257,118 @@ export async function getAllDefect(req: Request, res: Response) {
     return;
   }
 }
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsPath = path.join(__dirname, '../../uploads');
 
-export async function updateDefect(req: Request, res: Response) {
+
+export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
-    const role = (req as any).user.role;
-    const userId = (req as any).user.userId;
-
+    const { role, userId } = (req as any).user;
     const { id } = req.params;
     const {
       name,
       description,
       type,
       status,
-      userId: defectUserId,
+      defectUserId,
       patrolResultId,
     } = req.body;
+    const newImageFiles = req.files as Express.Multer.File[];
 
-    if (role !== "admin" && role !== "inspector") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Inspectors only" });
+    if (role !== 'admin' && role !== 'inspector') {
+      res.status(403).json({ message: 'Access Denied: Admins or Inspectors only' });
       return;
     }
 
     const defect = await prisma.defect.findUnique({
-      where: {
-        df_id: Number(id),
-      },
+      where: { df_id: Number(id) },
     });
-
     if (!defect) {
-      res.status(404).json({ message: "Defect not found" });
+      res.status(404).json({ message: 'Defect not found' });
       return;
     }
 
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        result: {
-          some: {
-            pr_id: defect.df_pr_id,
-          },
-        },
-        patrolChecklist: {
-          some: {
-            ptcl_us_id: userId,
-          },
-        },
+        result: { some: { pr_id: defect.df_pr_id } },
+        patrolChecklist: { some: { ptcl_us_id: userId } },
       },
     });
-
     if (!validPatrol) {
-      res
-        .status(404)
-        .json({ message: "You are not associated with this Patrol" });
+      res.status(403).json({ message: 'You are not associated with this Patrol' });
       return;
     }
 
+    if (newImageFiles?.length) {
+      const existingDefectImages = await prisma.defectImage.findMany({
+        where: { dfim_df_id: Number(id) },
+        select: { dfim_im_id: true },
+      });
+
+      const imageIdsToDelete = existingDefectImages.map((img) => img.dfim_im_id);
+
+      const imagesToDelete = await prisma.image.findMany({
+        where: { im_id: { in: imageIdsToDelete } },
+        select: { im_path: true },
+      });
+
+      for (const image of imagesToDelete) {
+        const filePath = path.join(uploadsPath, image.im_path);
+        try {
+          fs.unlinkSync(filePath);
+          console.log(`File at ${filePath} deleted successfully.`);
+        } catch (err) {
+          console.error(`Failed to delete file at ${filePath}:`, err);
+        }
+      }
+
+      await prisma.defectImage.deleteMany({
+        where: { dfim_df_id: Number(id) },
+      });
+      await prisma.image.deleteMany({
+        where: { im_id: { in: imageIdsToDelete } },
+      });
+
+      for (const file of newImageFiles) {
+        const image = await prisma.image.create({
+          data: {
+            im_path: file.filename,
+            im_update_by: parseInt(defectUserId, 10),
+          },
+        });
+        await prisma.defectImage.create({
+          data: {
+            dfim_df_id: Number(id),
+            dfim_im_id: image.im_id,
+          },
+        });
+      }
+    }
+
     const updatedDefect = await prisma.defect.update({
-      where: {
-        df_id: Number(id),
-      },
+      where: { df_id: Number(id) },
       data: {
         df_name: name,
         df_description: description,
         df_type: type,
         df_status: status,
-        user: { connect: { us_id: defectUserId } },
-        patrolResult: { connect: { pr_id: patrolResultId } },
+        user: { connect: { us_id: parseInt(defectUserId) } },
+        patrolResult: { connect: { pr_id: parseInt(patrolResultId) } },
       },
     });
 
-    const result = {
-      name: updatedDefect.df_name,
-      description: updatedDefect.df_description,
-      type: updatedDefect.df_type,
-      status: updatedDefect.df_status,
-      userId: updatedDefect.df_us_id,
-      patrolResultId: updatedDefect.df_pr_id,
-    };
-
-    res.status(200).json(result);
-    return;
+    res.status(200).json({
+      message: 'Defect updated successfully',
+      defect: updatedDefect,
+    });
   } catch (err) {
-    res.status(500).send(err);
-    return;
+    console.error('Error updating defect:', err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+
 
 export async function deleteDefect(req: Request, res: Response): Promise<void> {
   try {
@@ -365,7 +394,35 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
       res.status(404).json({ message: "Defect not found" });
       return;
     }
+    const existingDefectImages = await prisma.defectImage.findMany({
+      where: { dfim_df_id: Number(id) },
+      select: { dfim_im_id: true },
+    });
 
+    const imageIdsToDelete = existingDefectImages.map((img) => img.dfim_im_id);
+
+    const imagesToDelete = await prisma.image.findMany({
+      where: { im_id: { in: imageIdsToDelete } },
+      select: { im_path: true },
+    });
+
+    for (const image of imagesToDelete) {
+      const filePath = path.join(uploadsPath, image.im_path);
+      try {
+        fs.unlinkSync(filePath);
+        console.log(`File at ${filePath} deleted successfully.`);
+      } catch (err) {
+        console.error(`Failed to delete file at ${filePath}:`, err);
+      }
+    }
+
+    await prisma.defectImage.deleteMany({
+      where: { dfim_df_id: Number(id) },
+    });
+    await prisma.image.deleteMany({
+      where: { im_id: { in: imageIdsToDelete } },
+    });
+    
     const validPatrol = await prisma.patrol.findFirst({
       where: {
         result: {
