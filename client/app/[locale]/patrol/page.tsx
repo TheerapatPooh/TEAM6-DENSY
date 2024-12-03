@@ -289,7 +289,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col p-5 gap-y-5">
+    <div className="flex flex-col p-4 gap-y-4">
       <div className="flex items-center gap-2">
         <Textfield
           iconName="search"
@@ -454,7 +454,7 @@ export default function Page() {
 
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Create Patrol Card with AlertDialog */}
         <AlertDialog>
           <AlertDialogTrigger className="w-full">
