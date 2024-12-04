@@ -29,10 +29,7 @@ import { fetchData } from "@/lib/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { ChecklistDropdown } from "@/components/checklist-dropdown";
-import {
-  DatePicker,
-  DatePickerWithRange,
-} from "@/components/date-picker";
+import { DatePicker, DatePickerWithRange } from "@/components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Select,
@@ -54,9 +51,9 @@ import { IUser, FilterPatrol } from "@/app/type";
 import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
+import { DateRange, DateRange as DayPickerDateRange } from "react-day-picker";
 import Loading from "@/components/loading";
-
+import { toast } from "@/hooks/use-toast";
 export default function Page() {
   const t = useTranslations("General");
   const [loading, setLoading] = useState<boolean>(true);
@@ -66,7 +63,9 @@ export default function Page() {
 
   const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>([]);
+  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>(
+    []
+  );
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -94,8 +93,8 @@ export default function Page() {
       setSecondDialog(false);
       window.location.reload();
     } catch (error) {
-        console.error(error)
-     }
+      console.error(error);
+    }
   };
 
   const handleSelectUser = (checklistId: number, userId: number) => {
@@ -130,8 +129,8 @@ export default function Page() {
   };
 
   const getStoredFilter = () => {
-    if (typeof window !== 'undefined') {
-      const storedFilter = localStorage.getItem('filter');
+    if (typeof window !== "undefined") {
+      const storedFilter = localStorage.getItem("filter");
       if (storedFilter) {
         return JSON.parse(storedFilter);
       }
@@ -139,8 +138,8 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<FilterPatrol | null>(getStoredFilter())
-  const [filteredPatrolData, setFilteredPatrolData] = useState<IPatrol[]>([])
+  const [filter, setFilter] = useState<FilterPatrol | null>(getStoredFilter());
+  const [filteredPatrolData, setFilteredPatrolData] = useState<IPatrol[]>([]);
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -159,12 +158,11 @@ export default function Page() {
           return {
             presetTitle: "All",
             patrolStatus: [],
-            dateRange: { start: undefined, end: undefined }
-          }
+            dateRange: { start: undefined, end: undefined },
+          };
         }
       });
-    }
-    else {
+    } else {
       setFilter((prev) => {
         if (prev) {
           return {
@@ -178,13 +176,13 @@ export default function Page() {
   };
 
   const applyFilter = () => {
-    setFilteredPatrolData(filterPatrol(filter, patrolData))
+    setFilteredPatrolData(filterPatrol(filter, patrolData));
   };
 
   const resetFilter = () => {
-    setFilter(initialFilter)
-    localStorage.setItem('filter', JSON.stringify(initialFilter));
-    setFilteredPatrolData(filterPatrol(initialFilter, patrolData))
+    setFilter(initialFilter);
+    localStorage.setItem("filter", JSON.stringify(initialFilter));
+    setFilteredPatrolData(filterPatrol(initialFilter, patrolData));
   };
 
   const handleDateSelect = (dateRange: DateRange) => {
@@ -196,19 +194,19 @@ export default function Page() {
       patrolStatus: filter?.patrolStatus || [],
       dateRange: {
         start: startDate || undefined,
-        end: endDate || undefined
-      }
+        end: endDate || undefined,
+      },
     });
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (event: any) => {
     setSearchTerm(event.target.value);
   };
 
   const patrolQueryResults = filteredPatrolData?.filter((patrol) => {
-    const presetTitle = patrol.preset ? patrol.preset.title : 'No Title';
+    const presetTitle = patrol.preset ? patrol.preset.title : "No Title";
     const patrolId = patrol.id.toString().toLowerCase();
     const patrolDate = new Date(patrol.date).toLocaleDateString().toLowerCase();
     const patrolStatus = patrol.status.toLowerCase();
@@ -219,12 +217,12 @@ export default function Page() {
           ? [pc.inspector.profile.name.toLowerCase()]
           : [];
       })
-      .join(' ');
-    const searchTokens = searchTerm.toLowerCase().split(' ').filter(Boolean);
-    const inspectorTokens = inspectors.split(' ').filter(Boolean);
+      .join(" ");
+    const searchTokens = searchTerm.toLowerCase().split(" ").filter(Boolean);
+    const inspectorTokens = inspectors.split(" ").filter(Boolean);
 
-    const isInspectorMatch = searchTokens.every(token =>
-      inspectorTokens.some(namePart => namePart.includes(token))
+    const isInspectorMatch = searchTokens.every((token) =>
+      inspectorTokens.some((namePart) => namePart.includes(token))
     );
 
     return (
@@ -233,16 +231,16 @@ export default function Page() {
       patrolDate.includes(searchTerm.toLowerCase()) ||
       patrolStatus.includes(searchTerm.toLowerCase()) ||
       isInspectorMatch
-    )
-  })
+    );
+  });
 
   const getPatrolData = async () => {
     try {
       const patrol = await fetchData("get", "/patrols", true);
       setPatrolData(patrol);
 
-      if (typeof window !== 'undefined') {
-        const storedFilter = localStorage.getItem('filter');
+      if (typeof window !== "undefined") {
+        const storedFilter = localStorage.getItem("filter");
         let localStorageFilter: FilterPatrol | null = null;
         if (storedFilter) {
           localStorageFilter = JSON.parse(storedFilter) as FilterPatrol;
@@ -269,12 +267,12 @@ export default function Page() {
   };
   useEffect(() => {
     getPatrolData();
-    getPresetData()
-    setLoading(false)
+    getPresetData();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('filter', JSON.stringify(filter));
+    localStorage.setItem("filter", JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -285,9 +283,22 @@ export default function Page() {
   }, [sort, filteredPatrolData]);
 
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
+  const alertTest = async () => {
+    try {
+      toast({
+        title: "Scheduled: Catch up",
+        description: "Friday, February 10, 2023 at 5:57 PM",
+        // type: "info",
+        // type: "success",
+        type: "error",
 
+      })
+    } catch (error) {
+      console.error("Failed", error);
+    }
+  };
   return (
     <div className="flex flex-col p-4 gap-y-4">
       <div className="flex items-center gap-2">
@@ -304,32 +315,48 @@ export default function Page() {
     ${isSortOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg">{t('Sort')}</div>
+            <div className="text-lg">{t("Sort")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="p-2">
-            <DropdownMenuLabel>{t('SortBy')}</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("SortBy")}</DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.by}
-              onValueChange={(value) => handleSortChange('by', value)}
+              onValueChange={(value) => handleSortChange("by", value)}
             >
-              <DropdownMenuRadioItem value="Doc No." className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('DocNo')}
+              <DropdownMenuRadioItem
+                value="Doc No."
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("DocNo")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Date')}
+              <DropdownMenuRadioItem
+                value="Date"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Date")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
-            <DropdownMenuLabel>{t('Order')}</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("Order")}</DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.order}
-              onValueChange={(value) => handleSortChange('order', value)}
+              onValueChange={(value) => handleSortChange("order", value)}
             >
-              <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Ascending')}
+              <DropdownMenuRadioItem
+                value="Ascending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Ascending")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Descending')}
+              <DropdownMenuRadioItem
+                value="Descending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Descending")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -341,14 +368,14 @@ export default function Page() {
     ${isFilterOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg">{t('Filter')}</div>
+            <div className="text-lg">{t("Filter")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="flex flex-col justify-center gap-2 p-2 z-50"
             align="end"
           >
             <div>
-              <DropdownMenuLabel>{t('Date')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("Date")}</DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
@@ -357,10 +384,12 @@ export default function Page() {
               />
             </div>
             <div>
-              <DropdownMenuLabel>{t('Status')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("Status")}</DropdownMenuLabel>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatus.includes("pending")}
-                onCheckedChange={(checked) => toggleStatusFilter("pending", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("pending", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -373,7 +402,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatus.includes("scheduled")}
-                onCheckedChange={(checked) => toggleStatusFilter("scheduled", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("scheduled", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -386,7 +417,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatus.includes("on_going")}
-                onCheckedChange={(checked) => toggleStatusFilter("on_going", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("on_going", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -399,7 +432,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatus.includes("completed")}
-                onCheckedChange={(checked) => toggleStatusFilter("completed", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("completed", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -410,29 +445,35 @@ export default function Page() {
                   children="Complete"
                 />
               </DropdownMenuCheckboxItem>
-
             </div>
             <div>
-              <DropdownMenuLabel>{t('Preset')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("Preset")}</DropdownMenuLabel>
               <Select
-                value={filter?.presetTitle || 'All'}
+                value={filter?.presetTitle || "All"}
                 onValueChange={(value) =>
                   setFilter({
                     presetTitle: value,
                     patrolStatus: filter?.patrolStatus || [],
-                    dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
+                    dateRange: {
+                      start: filter?.dateRange.start,
+                      end: filter?.dateRange.end,
+                    },
                   })
                 }
               >
                 <SelectTrigger className="">
                   <SelectValue
-                    placeholder={filter?.presetTitle === 'All' ? t('All') : filter?.presetTitle}
+                    placeholder={
+                      filter?.presetTitle === "All"
+                        ? t("All")
+                        : filter?.presetTitle
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>{t('Preset')}</SelectLabel>
-                    <SelectItem value="All">{t('All')}</SelectItem>
+                    <SelectLabel>{t("Preset")}</SelectLabel>
+                    <SelectItem value="All">{t("All")}</SelectItem>
                     {presetData &&
                       presetData.map((preset) => (
                         <SelectItem value={preset.title} key={preset.id}>
@@ -445,15 +486,16 @@ export default function Page() {
             </div>
             <div className="flex w-full justify-end gap-2">
               <Button size="sm" variant="secondary" onClick={resetFilter}>
-                {t('Reset')}
+                {t("Reset")}
               </Button>
-              <Button size="sm" onClick={applyFilter}>{t('Apply')}</Button>
+              <Button size="sm" onClick={applyFilter}>
+                {t("Apply")}
+              </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
-
+      <Button onClick={alertTest}></Button>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Create Patrol Card with AlertDialog */}
         <AlertDialog>
@@ -463,10 +505,10 @@ export default function Page() {
           <AlertDialogContent className="w-[620px] h-[715px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
-                {t('PatrolPreset')}
+                {t("PatrolPreset")}
               </AlertDialogTitle>
               <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                {t('PleaseSelectAPresetForThePatrol')}
+                {t("PleaseSelectAPresetForThePatrol")}
               </AlertDialogDescription>
               <div className="flex items-center justify-center">
                 <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
@@ -476,10 +518,11 @@ export default function Page() {
                         <Button
                           key={index}
                           variant={"outline"}
-                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${selectedPreset === preset
-                            ? "border-red-600"
-                            : "border-transparent"
-                            } border p-2`}
+                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-[300px] ${
+                            selectedPreset === preset
+                              ? "border-red-600"
+                              : "border-transparent"
+                          } border p-2`}
                           onClick={() => setSelectedPreset(preset)}
                         >
                           {/* Title */}
@@ -513,12 +556,12 @@ export default function Page() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
-                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => setSecondDialog(true)}
                   disabled={isNextButtonDisabled}
                 >
-                  {t('Next')}
+                  {t("Next")}
                   <span className="material-symbols-outlined text-2xl">
                     chevron_right
                   </span>
@@ -533,36 +576,47 @@ export default function Page() {
           <AlertDialogContent className="max-w-[995px] h-[700px]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-2xl font-semibold">
-                {t('PatrolPreset')}
+                {t("PatrolPreset")}
               </AlertDialogTitle>
               <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                {t('PleaseSelectAPresetForThePatrol')}
+                {t("PleaseSelectAPresetForThePatrol")}
               </AlertDialogDescription>
-              <p className="font-semibold text-muted-foreground"> {t('Date')}</p>
+              <p className="font-semibold text-muted-foreground">
+                {" "}
+                {t("Date")}
+              </p>
               <DatePicker
                 handleSelectedTime={(time: string) => setSelectedDate(time)}
               />
             </AlertDialogHeader>
             <div className="grid grid-cols-1">
-              <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
+              <p className="font-semibold text-muted-foreground">
+                {" "}
+                {t("Checklist")}
+              </p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
-                  {selectedPreset?.presetChecklist.flatMap((presetChecklist: IPresetChecklist) => (
-                    <ChecklistDropdown
-                      key={presetChecklist.checklist.id}
-                      checklist={presetChecklist.checklist}
-                      handleselectUser={(selectedUser: IUser) => {
-                        handleSelectUser(presetChecklist.checklist.id, selectedUser.id);
-                      }}
-                    />
-                  ))}
+                  {selectedPreset?.presetChecklist.flatMap(
+                    (presetChecklist: IPresetChecklist) => (
+                      <ChecklistDropdown
+                        key={presetChecklist.checklist.id}
+                        checklist={presetChecklist.checklist}
+                        handleselectUser={(selectedUser: IUser) => {
+                          handleSelectUser(
+                            presetChecklist.checklist.id,
+                            selectedUser.id
+                          );
+                        }}
+                      />
+                    )
+                  )}
                 </div>
               </ScrollArea>
             </div>
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-[10px]">
                 <AlertDialogCancel onClick={() => setSecondDialog(false)}>
-                  {t('Cancel')}
+                  {t("Cancel")}
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className="gap-2"
@@ -572,7 +626,7 @@ export default function Page() {
                   <span className="material-symbols-outlined text-2xl">
                     note_add
                   </span>
-                  {t('NewPatrol')}
+                  {t("NewPatrol")}
                 </AlertDialogAction>
               </div>
             </AlertDialogFooter>
@@ -581,7 +635,9 @@ export default function Page() {
 
         {patrolQueryResults &&
           patrolQueryResults.map((patrol: IPatrol) => {
-            const inspectors = patrol.patrolChecklist.map((cl: IPatrolChecklist) => cl.inspector);
+            const inspectors = patrol.patrolChecklist.map(
+              (cl: IPatrolChecklist) => cl.inspector
+            );
             return (
               <PatrolCard
                 key={patrol.id}
