@@ -1,6 +1,5 @@
 import { prisma } from "@Utils/database.js";
 import { Request, Response } from "express";
-import transformKeys, { keyMap } from "@Utils/key-map.js";
 import { createNotification } from "./util-controller.js";
 import { NotificationType } from "@prisma/client";
 import fs from 'fs';
@@ -31,14 +30,14 @@ export async function createDefect(req: Request, res: Response) {
 
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        result: {
+        results: {
           some: {
-            pr_id: parseInt(patrolResultId),
+            id: parseInt(patrolResultId),
           },
         },
-        patrolChecklist: {
+        patrolChecklists: {
           some: {
-            ptcl_us_id: parseInt(userId),
+            userId: parseInt(userId),
           },
         },
       },
@@ -56,12 +55,12 @@ export async function createDefect(req: Request, res: Response) {
 
     const newDefect = await prisma.defect.create({
       data: {
-        df_name: name,
-        df_description: description,
-        df_type: type,
-        df_status: status,
-        user: { connect: { us_id: parseInt(defectUserId) } },
-        patrolResult: { connect: { pr_id: parseInt(patrolResultId) } },
+        name: name,
+        description: description,
+        type: type,
+        status: status,
+        user: { connect: { id: parseInt(defectUserId) } },
+        patrolResult: { connect: { id: parseInt(patrolResultId) } },
       },
     });
 
@@ -69,7 +68,7 @@ export async function createDefect(req: Request, res: Response) {
       try {
         const result = await prisma.patrolResult.findUnique({
           where: {
-            pr_id: parseInt(patrolResultId.toString()), // Ensure it's an integer
+            id: parseInt(patrolResultId.toString()), // Ensure it's an integer
           },
         });
 
@@ -79,9 +78,9 @@ export async function createDefect(req: Request, res: Response) {
         }
 
         const updatedResult = await prisma.patrolResult.update({
-          where: { pr_id: parseInt(patrolResultId.toString()) },
+          where: { id: parseInt(patrolResultId.toString()) },
           data: {
-            pr_status: false,
+            status: false,
           },
         });
 
@@ -96,16 +95,16 @@ export async function createDefect(req: Request, res: Response) {
         const imagePath = imageFile.filename; // Get the path of each uploaded file
         const image = await prisma.image.create({
           data: {
-            im_path: imagePath,
-            im_update_by: parseInt(defectUserId),
+            path: imagePath,
+            updatedBy: parseInt(defectUserId),
           },
         });
 
         if (image) {
           await prisma.defectImage.create({
             data: {
-              dfim_df_id: newDefect.df_id,
-              dfim_im_id: image.im_id,
+              defectId: newDefect.id,
+              imageId: image.id,
             },
           });
         }
@@ -115,15 +114,15 @@ export async function createDefect(req: Request, res: Response) {
     }
     const message = `report_defect`;
     const supervisor = parseInt(supervisorId, 10);
-  
-     await createNotification({
-       nt_message: message,
-       nt_type: "information" as NotificationType,
-       nt_url: `/defect/${newDefect.df_id}`,
-       nt_us_id: supervisor,
-     });
 
-    let result = transformKeys(newDefect, keyMap);
+    await createNotification({
+      message: message,
+      type: "information" as NotificationType,
+      url: `/defect/${newDefect.id}`,
+      userId: supervisor,
+    });
+
+    let result = newDefect
 
     res.status(201).json(result);
   } catch (err) {
@@ -148,7 +147,7 @@ export async function getDefect(req: Request, res: Response) {
 
     const defect = await prisma.defect.findUnique({
       where: {
-        df_id: Number(id),
+        id: Number(id),
       },
     });
 
@@ -159,14 +158,14 @@ export async function getDefect(req: Request, res: Response) {
 
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        result: {
+        results: {
           some: {
-            pr_id: defect.df_pr_id,
+            id: defect.patrolResultId,
           },
         },
-        patrolChecklist: {
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -179,7 +178,7 @@ export async function getDefect(req: Request, res: Response) {
       return;
     }
 
-    let result = transformKeys(defect, keyMap);
+    let result = defect
 
     res.status(200).json(result);
     return;
@@ -207,7 +206,7 @@ export async function getAllDefect(req: Request, res: Response) {
           itemZone: {
             zone: {
               supervisor: {
-                us_id: userId,
+                id: userId,
               },
             },
           },
@@ -216,31 +215,31 @@ export async function getAllDefect(req: Request, res: Response) {
       include: {
         patrolResult: {
           select: {
-            pr_itze_ze_id: true,
+            zoneId: true,
           },
         },
         user: {
           select: {
-            us_id: true,
-            us_role: true,
-            us_email: true,
-            us_created_at: true,
+            id: true,
+            role: true,
+            email: true,
+            createdAt: true,
             profile: {
               select: {
-                pf_id: true,
-                pf_name: true,
-                pf_tel: true,
+                id: true,
+                name: true,
+                tel: true,
                 image: true,
               },
             },
           },
         },
-        image: {
+        images: {
           select: {
             image: {
               select: {
-                im_id: true,
-                im_path: true,
+                id: true,
+                path: true,
                 user: true,
               },
             },
@@ -249,7 +248,7 @@ export async function getAllDefect(req: Request, res: Response) {
       },
     });
 
-    let result = defects.map((defect: any) => transformKeys(defect, keyMap));
+    let result = defects
     res.status(200).json(result);
     return;
   } catch (err) {
@@ -282,7 +281,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     }
 
     const defect = await prisma.defect.findUnique({
-      where: { df_id: Number(id) },
+      where: { id: Number(id) },
     });
     if (!defect) {
       res.status(404).json({ message: 'Defect not found' });
@@ -291,8 +290,8 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        result: { some: { pr_id: defect.df_pr_id } },
-        patrolChecklist: { some: { ptcl_us_id: userId } },
+        results: { some: { id: defect.patrolResultId } },
+        patrolChecklists: { some: { userId: userId } },
       },
     });
     if (!validPatrol) {
@@ -302,19 +301,19 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     if (newImageFiles?.length) {
       const existingDefectImages = await prisma.defectImage.findMany({
-        where: { dfim_df_id: Number(id) },
-        select: { dfim_im_id: true },
+        where: { defectId: Number(id) },
+        select: { imageId: true },
       });
 
-      const imageIdsToDelete = existingDefectImages.map((img) => img.dfim_im_id);
+      const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
 
       const imagesToDelete = await prisma.image.findMany({
-        where: { im_id: { in: imageIdsToDelete } },
-        select: { im_path: true },
+        where: { id: { in: imageIdsToDelete } },
+        select: { path: true },
       });
 
       for (const image of imagesToDelete) {
-        const filePath = path.join(uploadsPath, image.im_path);
+        const filePath = path.join(uploadsPath, image.path);
         try {
           fs.unlinkSync(filePath);
           console.log(`File at ${filePath} deleted successfully.`);
@@ -324,37 +323,37 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       }
 
       await prisma.defectImage.deleteMany({
-        where: { dfim_df_id: Number(id) },
+        where: { defectId: Number(id) },
       });
       await prisma.image.deleteMany({
-        where: { im_id: { in: imageIdsToDelete } },
+        where: { id: { in: imageIdsToDelete } },
       });
 
       for (const file of newImageFiles) {
         const image = await prisma.image.create({
           data: {
-            im_path: file.filename,
-            im_update_by: parseInt(defectUserId, 10),
+            path: file.filename,
+            updatedBy: parseInt(defectUserId, 10),
           },
         });
         await prisma.defectImage.create({
           data: {
-            dfim_df_id: Number(id),
-            dfim_im_id: image.im_id,
+            defectId: Number(id),
+            imageId: image.id,
           },
         });
       }
     }
 
     const updatedDefect = await prisma.defect.update({
-      where: { df_id: Number(id) },
+      where: { id: Number(id) },
       data: {
-        df_name: name,
-        df_description: description,
-        df_type: type,
-        df_status: status,
-        user: { connect: { us_id: parseInt(defectUserId) } },
-        patrolResult: { connect: { pr_id: parseInt(patrolResultId) } },
+        name: name,
+        description: description,
+        type: type,
+        status: status,
+        user: { connect: { id: parseInt(defectUserId) } },
+        patrolResult: { connect: { id: parseInt(patrolResultId) } },
       },
     });
 
@@ -386,7 +385,7 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
 
     const defect = await prisma.defect.findUnique({
       where: {
-        df_id: Number(id),
+        id: Number(id),
       },
     });
 
@@ -395,19 +394,19 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
       return;
     }
     const existingDefectImages = await prisma.defectImage.findMany({
-      where: { dfim_df_id: Number(id) },
-      select: { dfim_im_id: true },
+      where: { defectId: Number(id) },
+      select: { imageId: true },
     });
 
-    const imageIdsToDelete = existingDefectImages.map((img) => img.dfim_im_id);
+    const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
 
     const imagesToDelete = await prisma.image.findMany({
-      where: { im_id: { in: imageIdsToDelete } },
-      select: { im_path: true },
+      where: { id: { in: imageIdsToDelete } },
+      select: { path: true },
     });
 
     for (const image of imagesToDelete) {
-      const filePath = path.join(uploadsPath, image.im_path);
+      const filePath = path.join(uploadsPath, image.path);
       try {
         fs.unlinkSync(filePath);
         console.log(`File at ${filePath} deleted successfully.`);
@@ -417,22 +416,22 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     }
 
     await prisma.defectImage.deleteMany({
-      where: { dfim_df_id: Number(id) },
+      where: { defectId: Number(id) },
     });
     await prisma.image.deleteMany({
-      where: { im_id: { in: imageIdsToDelete } },
+      where: { id: { in: imageIdsToDelete } },
     });
-    
+
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        result: {
+        results: {
           some: {
-            pr_id: defect.df_pr_id,
+            id: defect.patrolResultId,
           },
         },
-        patrolChecklist: {
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -447,7 +446,7 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
 
     await prisma.defect.delete({
       where: {
-        df_id: Number(id),
+        id: Number(id),
       },
     });
     res.status(200).json({ message: "Defect deleted successfully" });

@@ -29,12 +29,12 @@ model User {
   profile        Profile?
   notifications  Notification[]
   defects        Defect[]
-  zones          Zone?
+  zone          Zone?
   patrolChecklists PatrolChecklist[]
   images         Image[]
 
   @@map("users")
-  Checklist Checklist[]
+  Checklists Checklist[]
 }
 
 model Defect {
@@ -124,8 +124,8 @@ model Preset {
   updatedBy   Int        @map("ps_update_by")
 
   user        User       @relation(fields: [updatedBy], references: [id])
-  presetChecklist PresetChecklist[]
-  patrol    Patrol[]
+  presetChecklists PresetChecklist[]
+  patrols    Patrol[]
   
   @@map("presets")
 }
@@ -149,12 +149,12 @@ model Checklist {
   updatedAt   DateTime   @default(now()) @map("cl_update_at")
   updatedBy   Int        @map("cl_update_by")
 
-  patrol PatrolChecklist[]
+  patrols PatrolChecklist[]
   user        User       @relation(fields: [updatedBy], references: [id])
-  presetChecklist PresetChecklist[]
-  item   Item[]
+  presetChecklists PresetChecklist[]
+  items   Item[]
   @@map("checklists")
-  User User[] @relation("user")
+  Users User[] @relation("user")
 }
 
 model PatrolResult {
@@ -164,7 +164,7 @@ model PatrolResult {
   zoneId      Int        @map("pr_itze_ze_id")
   patrolId    Int        @map("pr_pt_id")
 
-  comment   Comment[]
+  comments   Comment[]
   defects   Defect[]
   itemZone ItemZone   @relation(fields: [itemId, zoneId], references: [itemId, zoneId])
   patrol    Patrol    @relation(fields: [patrolId], references: [id])
@@ -179,7 +179,7 @@ model Item {
   type        ItemType   @map("it_type")
   checklistId Int        @map("it_cl_id")
 
-  itemZone ItemZone[]
+  itemZones ItemZone[]
   checklist   Checklist  @relation(fields: [checklistId], references: [id])
 
   @@map("items")
@@ -191,7 +191,7 @@ model Zone {
   locationId  Int        @map("ze_lt_id")
   userId      Int        @map("ze_us_id") @unique
 
-  itemZone   ItemZone[]
+  itemZones   ItemZone[]
   location   Location   @relation(fields: [locationId], references: [id])
   supervisor User       @relation(fields: [userId], references: [id])
 
@@ -203,7 +203,7 @@ model ItemZone {
   itemId Int @map("itze_it_id")
   zoneId Int @map("itze_ze_id")
 
-  result PatrolResult[]
+  results PatrolResult[]
   item          Item           @relation(fields: [itemId], references: [id], onDelete: Cascade)
   zone          Zone           @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
@@ -215,7 +215,7 @@ model Location {
   id   Int    @id @default(autoincrement()) @map("lt_id")
   name String @map("lt_name")
 
-  zone Zone[]
+  zones Zone[]
 
   @@map("locations")
 }
@@ -242,7 +242,7 @@ model Image {
 
   user User @relation(fields: [updatedBy], references: [id])
   profiles Profile[]     @relation("ProfileImage")
-  defect   DefectImage[]
+  defects   DefectImage[]
   @@map("images")
 }
 
