@@ -1,4 +1,4 @@
 export const locations = [
-    { lt_id: 1, lt_name: 'Factory A' }
+    { id: 1, name: 'Factory A' }
   ];
   
