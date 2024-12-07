@@ -195,3 +195,46 @@ export async function getAllPresets(req: Request, res: Response) {
         res.status(500).json(error)
     }
 }
+
+export async function removePreset(req: Request, res: Response) {
+    try {
+        const userRole = (req as any).user.role;
+        if (userRole !== 'admin') {
+            res.status(403).json({ message: "Access Denied: Admins only" });
+            return;
+        }
+
+        const presetId = parseInt(req.params.id, 10);
+        if (!presetId) {
+            res.status(400).json({ message: "Preset ID is required" });
+            return;
+        }
+        const preset = await prisma.preset.findUnique({
+            where: { ps_id: presetId },
+        });
+        if (!preset) {
+            res.status(404).json({ message: "Preset not found" });
+            return;
+        }
+        //สร้างตัวแปรเก็บ Count 
+        const presetChecklistCount = await prisma.presetChecklist.count({
+            where: { pscl_ps_id: presetId },
+        });
+        //เช็คใน presetChecklist ว่ามีข้อมูลไหม ถ้ามีไปลบใน presetChecklist ก่อน
+        if (presetChecklistCount > 0) {
+            await prisma.presetChecklist.deleteMany({
+                where: { pscl_ps_id: presetId },
+            });
+        }
+        // ลบข้อมูล preset
+        await prisma.preset.delete({
+            where: { ps_id: presetId },
+        });
+        res.status(200).json({ message: "Preset removed successfully" });
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+
+
