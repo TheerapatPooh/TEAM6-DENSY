@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs'
 import { faker } from '@faker-js/faker'
 import fs from 'fs'
 import path from 'path'
-import transformKeys, { keyMap } from '@Utils/key-map.js'
 
 export async function createUser(req: Request, res: Response) {
     try {
@@ -18,11 +17,11 @@ export async function createUser(req: Request, res: Response) {
 
         const latestUser = await prisma.user.findFirst({
             orderBy: {
-                us_id: 'desc',
+                id: 'desc',
             },
         })
 
-        const nextId = (latestUser?.us_id ?? 0) + 1
+        const nextId = (latestUser?.id ?? 0) + 1
         if (!username) {
             const randomWord = faker.word.noun()
             username = `${randomWord}${nextId}`
@@ -30,26 +29,26 @@ export async function createUser(req: Request, res: Response) {
 
         const newUser = await prisma.user.create({
             data: {
-                us_username: username,
-                us_email: email ?? null,
-                us_password: hashPassword,
-                us_role: role ?? "inspector",
-                us_department: department || null,
+                username: username,
+                email: email ?? null,
+                password: hashPassword,
+                role: role ?? "inspector",
+                department: department || null,
             },
         })
 
         await prisma.profile.create({
             data: {
-                pf_us_id: newUser.us_id,
-                pf_name: null,
-                pf_age: null,
-                pf_tel: null,
-                pf_address: null
+                userId: newUser.id,
+                name: null,
+                age: null,
+                tel: null,
+                address: null
             }
         })
         const user = await prisma.user.findUnique({
             where: {
-                us_id: newUser.us_id
+                id: newUser.id
             },
             include: {
                 profile: {
@@ -60,7 +59,7 @@ export async function createUser(req: Request, res: Response) {
             }
         })
 
-        let result = transformKeys(user, keyMap);
+        let result = user
         res.status(201).json(result)
         return
     } catch (error) {
@@ -77,7 +76,7 @@ export async function updateProfile(req: Request, res: Response) {
         const imagePath = req.file?.filename || '';
 
         const user = await prisma.user.findUnique({
-            where: { us_id: userId },
+            where: { id: userId },
             include: {
                 profile: {
                     include: {
@@ -93,7 +92,7 @@ export async function updateProfile(req: Request, res: Response) {
         }
 
         if (imagePath && user.profile?.image) {
-            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile.image.im_path);
+            const oldImagePath = path.join(__dirname, '..', 'uploads', user.profile.image.path);
             if (fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath);
             }
@@ -102,18 +101,18 @@ export async function updateProfile(req: Request, res: Response) {
         let image = null;
         if (imagePath) {
             image = await prisma.image.upsert({
-                where: { im_id: user.profile?.image?.im_id || 0 },
+                where: { id: user.profile?.image?.id || 0 },
                 update: {
-                    im_path: imagePath,
+                    path: imagePath,
                     profiles: {
-                        connect: { pf_id: user.profile?.pf_id },
+                        connect: { id: user.profile?.id },
                     },
                 },
                 create: {
-                    im_path: imagePath,
-                    im_update_by: userId,
+                    path: imagePath,
+                    updatedBy: userId,
                     profiles: {
-                        connect: { pf_id: user.profile?.pf_id },
+                        connect: { id: user.profile?.id },
                     },
                 },
             });
@@ -121,18 +120,18 @@ export async function updateProfile(req: Request, res: Response) {
 
         // Update profile data
         const updatedProfile = await prisma.profile.update({
-            where: { pf_us_id: userId },
+            where: { userId: userId },
             data: {
-                pf_name: name,
-                pf_age: parseInt(age, 10),
-                pf_tel: tel,
-                pf_address: address,
-                pf_im_id: image?.im_id, // Connect image if it exists
+                name: name,
+                age: parseInt(age, 10),
+                tel: tel,
+                address: address,
+                imageId: image?.id, // Connect image if it exists
             },
         });
 
         // Prepare result response
-        let result = transformKeys(updatedProfile, keyMap);
+        let result = updatedProfile
         res.status(200).json(result);
         return
     } catch (error) {
@@ -147,14 +146,20 @@ export async function getUser(req: Request, res: Response) {
     try {
         const includeProfile = req.query.profile === "true";
         const includeImage = req.query.image === "true";
+        const includePassword = req.query.password === "true";
 
         const userId = (req as any).user.userId
         const id = parseInt(req.params.id, 10)
         let user = null
         if (!id) {
             user = await prisma.user.findUnique({
-                where: { us_id: userId },
-                include: {
+                where: { id: userId },
+                select: {
+                    id: true,
+                    email: true,
+                    password: includePassword ? true : false,
+                    role: true,
+                    createdAt: true,
                     profile: includeProfile
                         ? {
                             include: {
@@ -166,7 +171,7 @@ export async function getUser(req: Request, res: Response) {
         }
         else {
             user = await prisma.user.findUnique({
-                where: { us_id: id },
+                where: { id: id },
                 include: {
                     profile: includeProfile
                         ? {
@@ -183,7 +188,7 @@ export async function getUser(req: Request, res: Response) {
             return
         }
 
-        let result = transformKeys(user, keyMap);
+        let result = user
         res.status(200).json(result)
         return
     } catch (error) {
@@ -199,7 +204,11 @@ export async function getAllUser(req: Request, res: Response) {
         const includeImage = req.query.image === "true";
 
         const allUsers = await prisma.user.findMany({
-            include: {
+            select: {
+                id: true,
+                email: true,
+                role: true,
+                createdAt: true,
                 profile: includeProfile
                     ? {
                         include: {
@@ -210,7 +219,7 @@ export async function getAllUser(req: Request, res: Response) {
         })
 
         if (allUsers) {
-            let result = transformKeys(allUsers, keyMap);
+            let result = allUsers
             res.status(200).json(result)
             return
         } else {
@@ -251,17 +260,17 @@ export async function updateUser(req: Request, res: Response) {
 
         // อัปเดตข้อมูลผู้ใช้
         const updatedUser = await prisma.user.update({
-            where: { us_id: id },
+            where: { id: id },
             data: updateData,
         });
 
         const result = {
-            id: updatedUser.us_id,
-            username: updatedUser.us_username,
-            email: updatedUser.us_email,
-            role: updatedUser.us_role,
-            department: updatedUser.us_department,
-            createdAt: updatedUser.us_created_at.toISOString(),
+            id: updatedUser.id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            department: updatedUser.department,
+            createdAt: updatedUser.createdAt.toISOString(),
         };
 
         res.status(200).json(result);
@@ -284,8 +293,8 @@ export async function deleteUser(req: Request, res: Response) {
         }
 
         const user = await prisma.user.findUnique({
-            where: { us_id: id },
-            include: { profile: true, zone: true },
+            where: { id: id },
+            include: { profile: true, zones: true },
         });
 
         if (!user) {
@@ -294,45 +303,45 @@ export async function deleteUser(req: Request, res: Response) {
         }
 
         // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่
-        if (user.zone) {
+        if (user.zones) {
             // ลบข้อมูลที่เชื่อมโยงกับ PatrolResult
             const patrolResults = await prisma.patrolResult.findMany({
-                where: { pr_itze_ze_id: user.zone.ze_id },
+                where: { zoneId: user.zones.id },
             });
 
             for (const patrolResult of patrolResults) {
                 // ลบ Comment ที่อ้างถึง PatrolResult นี้
                 await prisma.comment.deleteMany({
-                    where: { cm_pr_id: patrolResult.pr_id },
+                    where: { patrolResultId: patrolResult.id },
                 });
 
                 // ลบ Defect ที่อ้างถึง PatrolResult นี้
                 await prisma.defect.deleteMany({
-                    where: { df_pr_id: patrolResult.pr_id },
+                    where: { patrolResultId: patrolResult.id },
                 });
             }
 
             // ลบข้อมูลใน PatrolResult ที่อ้างถึง Zone
             await prisma.patrolResult.deleteMany({
-                where: { pr_itze_ze_id: user.zone.ze_id },
+                where: { zoneId: user.zones.id },
             });
 
             // ลบ Zone หลังจากจัดการข้อมูลที่เชื่อมโยงเสร็จ
             await prisma.zone.delete({
-                where: { ze_us_id: id },
+                where: { userId: id },
             });
         }
 
         // ลบ Profile ถ้ามี
         if (user.profile) {
             await prisma.profile.delete({
-                where: { pf_us_id: id },
+                where: { userId: id },
             });
         }
 
         // ลบ User หลังจากจัดการ Zone และ Profile
         await prisma.user.delete({
-            where: { us_id: id },
+            where: { id: id },
         });
 
         res.status(200).json({ message: 'User deleted successfully' });

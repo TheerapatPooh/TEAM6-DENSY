@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import axios from "axios";
 import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType, PatrolStatus } from "@prisma/client";
-import transformKeys, { keyMap } from "@Utils/key-map.js";
 
 export async function getPatrol(req: Request, res: Response) {
   try {
@@ -25,10 +24,10 @@ export async function getPatrol(req: Request, res: Response) {
 
     patrol = await prisma.patrol.findFirst({
       where: {
-        pt_id: patrolId,
-        patrolChecklist: {
+        id: patrolId,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -36,32 +35,32 @@ export async function getPatrol(req: Request, res: Response) {
         preset: includePreset
           ? {
               select: {
-                ps_id: true,
-                ps_title: true,
-                ps_description: true,
+                id: true,
+                title: true,
+                description: true,
               },
             }
           : undefined,
-        patrolChecklist: {
+        patrolChecklists: {
           include: {
             checklist: {
               select: {
-                cl_id: true,
-                cl_title: true,
-                item: {
+                id: true,
+                title: true,
+                items: {
                   include: {
-                    itemZone: {
+                    itemZones: {
                       select: {
                         zone: {
                           select: {
-                            ze_id: true,
-                            ze_name: true,
+                            id: true,
+                            name: true,
                             supervisor: {
                               select: {
-                                us_id: true,
+                                id: true,
                                 profile: {
                                   select: {
-                                    pf_name: true,
+                                    name: true,
                                   },
                                 },
                               },
@@ -85,21 +84,21 @@ export async function getPatrol(req: Request, res: Response) {
             },
           },
         },
-        result: includeResult
+        results: includeResult
           ? {
               include: {
                 defects: true,
-                comment: {
+                comments: {
                   include: {
                     user: {
                       select: {
-                        us_id: true,
-                        us_email: true,
-                        us_department: true,
-                        us_role: true,
+                        id: true,
+                        email: true,
+                        department: true,
+                        role: true,
                         profile: {
                           select: {
-                            pf_name: true,
+                            name: true,
                             image: true,
                           },
                         },
@@ -117,7 +116,7 @@ export async function getPatrol(req: Request, res: Response) {
       res.status(404);
       return;
     }
-    let result = transformKeys(patrol, keyMap);
+    let result = patrol
 
     res.status(200).json(result);
     return;
@@ -142,36 +141,36 @@ export async function getAllPatrols(req: Request, res: Response) {
 
     allPatrols = await prisma.patrol.findMany({
       where: {
-        pt_status: filterStatus,
-        patrolChecklist: {
+        status: filterStatus,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
       select: {
-        pt_id: true,
-        pt_date: true,
-        pt_status: true,
+        id: true,
+        date: true,
+        status: true,
         preset: {
           select: {
-            ps_title: true,
+            title: true,
           },
         },
-        patrolChecklist: {
+        patrolChecklists: {
           include: {
             checklist: {
               select: {
-                cl_id: true,
-                cl_title: true,
-                item: {
+                id: true,
+                title: true,
+                items: {
                   include: {
-                    itemZone: {
+                    itemZones: {
                       select: {
                         zone: {
                           select: {
-                            ze_id: true,
-                            ze_name: true,
+                            id: true,
+                            name: true,
                           },
                         },
                       },
@@ -182,8 +181,8 @@ export async function getAllPatrols(req: Request, res: Response) {
             },
             inspector: {
               select: {
-                us_id: true,
-                us_email: true,
+                id: true,
+                email: true,
                 profile: {
                   include: {
                     image: true,
@@ -196,7 +195,7 @@ export async function getAllPatrols(req: Request, res: Response) {
       },
     });
 
-    let result = allPatrols.map((patrol: any) => transformKeys(patrol, keyMap));
+    let result = allPatrols;
 
     res.status(200).json(result);
     return;
@@ -231,9 +230,9 @@ export async function createPatrol(req: Request, res: Response) {
 
     const newPatrol = await prisma.patrol.create({
       data: {
-        pt_date: patrolDate,
-        pt_status: status,
-        pt_ps_id: parseInt(presetId, 10),
+        date: patrolDate,
+        status: status,
+        presetId: parseInt(presetId, 10),
       },
     });
 
@@ -248,25 +247,25 @@ export async function createPatrol(req: Request, res: Response) {
 
       await prisma.patrolChecklist.create({
         data: {
-          ptcl_pt_id: newPatrol.pt_id,
-          ptcl_cl_id: checklistId,
-          ptcl_us_id: userId,
+          patrolId: newPatrol.id,
+          checklistId: checklistId,
+          userId: userId,
         },
       });
 
       if (!notifiedInspectors.has(userId)) {
         const message = `patrol_assigned-${new Date(patrolDate).toISOString()}`;
         await createNotification({
-          nt_message: message,
-          nt_type: "request" as NotificationType,
-          nt_url: `/patrol/${newPatrol.pt_id}`,
-          nt_us_id: userId,
+          message: message,
+          type: "request" as NotificationType,
+          url: `/patrol/${newPatrol.id}`,
+          userId: userId,
         });
 
         notifiedInspectors.add(userId);
       }
     }
-    let result = transformKeys(newPatrol, keyMap);
+    let result = newPatrol
     res.status(201).json(result);
   } catch (error) {
      console.error(error)
@@ -278,9 +277,9 @@ export async function startPatrol(req: Request, res: Response) {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
-    const { status, checklist } = req.body;
+    const { status, checklists } = req.body;
 
-    const isUserInspector = checklist.some((checklistObj: any) => {
+    const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
     });
 
@@ -297,7 +296,7 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (!status || !checklist) {
+    if (!status || !checklists) {
       res.status(400);
       return;
     }
@@ -309,36 +308,36 @@ export async function startPatrol(req: Request, res: Response) {
 
     const updatePatrol = await prisma.patrol.update({
       where: {
-        pt_id: patrolId,
+        id: patrolId,
       },
       data: {
-        pt_status: "on_going",
-        pt_start_time: new Date(),
+        status: "on_going",
+        startTime: new Date(),
       },
     });
 
     const notifiedInspectors = new Set<number>();
 
-    for (const checklistObj of checklist) {
+    for (const checklistObj of checklists) {
       const inspectorId = checklistObj.inspector.id;
 
-      for (const item of checklistObj.checklist.item) {
-        for (const zone of item.itemZone) {
+      for (const items of checklistObj.checklist.items) {
+        for (const zones of items.itemZones) {
           await prisma.patrolResult.create({
             data: {
-              pr_status: null,
-              pr_itze_it_id: item.id,
-              pr_itze_ze_id: zone.zone.id,
-              pr_pt_id: updatePatrol.pt_id,
+              status: null,
+              itemId: items.id,
+              zoneId: zones.zone.id,
+              patrolId: updatePatrol.id,
             },
           });
           if (!notifiedInspectors.has(inspectorId)) {
             const message = `start_patrol`;
             await createNotification({
-              nt_message: message,
-              nt_type: "information" as NotificationType,
-              nt_url: `/patrol/${updatePatrol.pt_id}`,
-              nt_us_id: inspectorId,
+              message: message,
+              type: "information" as NotificationType,
+              url: `/patrol/${updatePatrol.id}`,
+              userId: inspectorId,
             });
 
             notifiedInspectors.add(inspectorId);
@@ -347,7 +346,7 @@ export async function startPatrol(req: Request, res: Response) {
       }
     }
 
-    let result = transformKeys(updatePatrol, keyMap);
+    let result = updatePatrol
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -393,12 +392,12 @@ export async function finishPatrol(req: Request, res: Response) {
 
     const updatePatrol = await prisma.patrol.update({
       where: {
-        pt_id: patrolId,
+        id: patrolId,
       },
       data: {
-        pt_status: "completed",
-        pt_end_time: new Date(),
-        pt_duration: duration,
+        status: "completed",
+        endTime: new Date(),
+        duration: duration,
       },
     });
 
@@ -407,10 +406,10 @@ export async function finishPatrol(req: Request, res: Response) {
 
       await prisma.patrolResult.update({
         where: {
-          pr_id: id,
+          id: id,
         },
         data: {
-          pr_status: status,
+          status: status,
         },
       });
     }
@@ -422,16 +421,16 @@ export async function finishPatrol(req: Request, res: Response) {
       if (!notifiedInspectors.has(inspectorId)) {
         const message = `finish_patrol`;
         await createNotification({
-          nt_message: message,
-          nt_type: "information" as NotificationType,
-          nt_url: `/patrol/${updatePatrol.pt_id}`,
-          nt_us_id: inspectorId,
+          message: message,
+          type: "information" as NotificationType,
+          url: `/patrol/${updatePatrol.id}`,
+          userId: inspectorId,
         });
         notifiedInspectors.add(inspectorId);
       }
     }
 
-    let json = transformKeys(updatePatrol, keyMap);
+    let json = updatePatrol
 
     res.status(200).json(json);
     return;
@@ -447,19 +446,19 @@ export async function removePatrol(req: Request, res: Response) {
 
     await prisma.patrolChecklist.deleteMany({
       where: {
-        ptcl_pt_id: patrolId,
+        patrolId: patrolId,
       },
     });
 
     await prisma.patrolResult.deleteMany({
       where: {
-        pr_pt_id: patrolId,
+        patrolId: patrolId,
       },
     });
 
     await prisma.patrol.delete({
       where: {
-        pt_id: patrolId,
+        id: patrolId,
       },
     });
 
@@ -476,33 +475,6 @@ export async function removePatrol(req: Request, res: Response) {
   }
 }
 
-export async function updatePatrolStatus(req: Request, res: Response) {
-  try {
-    const { patrolId, status } = req.body; // Destructure patrolId and status from the request body
-
-    // Validate input
-    if (!patrolId || !status) {
-      return res
-        .status(400)
-        .json({ message: "Patrol ID and status are required." });
-    }
-
-    // Update the patrol status in the database
-    const updatedPatrol = await prisma.patrol.update({
-      where: { pt_id: patrolId },
-      data: { pt_status: status },
-    });
-    let result = transformKeys(updatedPatrol, keyMap);
-    res.status(200).json(result);
-    return;
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while updating the patrol status." });
-    return;
-  }
-}
 
 export async function getAllPatrolDefect(req: Request, res: Response) {
   try {
@@ -519,10 +491,10 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
     const patrolId = parseInt(req.params.id, 10);
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        pt_id: patrolId,
-        patrolChecklist: {
+        id: patrolId,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -538,21 +510,21 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
     const defects = await prisma.defect.findMany({
       where: {
         patrolResult: {
-          pr_pt_id: patrolId,
+          patrolId: patrolId,
         },
       },
       include: {
         patrolResult: {
           select: {
-            pr_itze_ze_id: true,
+            zoneId: true,
           },
         },
-        image: {
+        images: {
           select: {
             image: {
               select: {
-                im_id: true,
-                im_path: true,
+                id: true,
+                path: true,
                 user: true,
               },
             },
@@ -561,7 +533,7 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
       },
     });
 
-    let result = defects.map((defect: any) => transformKeys(defect, keyMap));
+    let result = defects
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -593,10 +565,10 @@ export async function commentPatrol(req: Request, res: Response) {
     // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
     const validPatrol = await prisma.patrol.findUnique({
       where: {
-        pt_id: patrolId,
-        patrolChecklist: {
+        id: patrolId,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -609,15 +581,15 @@ export async function commentPatrol(req: Request, res: Response) {
     // // รับ message เข้ามา และเชื่อมกับ PatrolResult
     const newComment = await prisma.comment.create({
       data: {
-        cm_message: message,
-        cm_timestamp: new Date(),
-        cm_us_id: userId,
-        cm_pr_id: parseInt(patrolResultId, 10),
+        message: message,
+        timestamp: new Date(),
+        userId: userId,
+        patrolResultId: parseInt(patrolResultId, 10),
       },
     });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
-    let result = transformKeys(newComment, keyMap);
+    let result = newComment
     res.status(201).json(result);
     return;
   } catch (error) {
@@ -633,11 +605,11 @@ export async function getCommentPatrol(req: Request, res: Response) {
 
     const comments = await prisma.comment.findMany({
       where: {
-        cm_id: commentId,
+        id: commentId,
       },
     });
 
-    let result = transformKeys(comments, keyMap);
+    let result = comments
     res.status(200).json(result);
     return;
   } catch (error) {

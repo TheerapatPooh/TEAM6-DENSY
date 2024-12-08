@@ -58,7 +58,7 @@ export default function Page() {
           setOtherResults(JSON.parse(otherResults));
         }
         setPatrol(data);
-        setPatrolResults(result.result)
+        setPatrolResults(result.results)
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -122,7 +122,7 @@ export default function Page() {
     const patrolId = patrol.id;
     const data = {
       status: patrol?.status,
-      checklist: patrol?.patrolChecklist,
+      checklists: patrol?.patrolChecklists,
     };
 
     try {
@@ -140,8 +140,8 @@ export default function Page() {
 
   const handleFinishPatrol = async () => {
     if (!patrol) return;
-   
-    
+
+
     const updatedResults = patrolResults.map((result) => {
       const matchedResult = patrolResults.find(
         (res) => res.itemId === result.itemId && res.zoneId === result.zoneId
@@ -159,16 +159,16 @@ export default function Page() {
 
     const data = {
       status: patrol.status,
-      checklist: patrol.patrolChecklist,
+      checklist: patrol.patrolChecklists,
       result: updatedResults,
       startTime: patrol.startTime
     };
 
     let resultCount = 0;
-    for (const checklist of patrol.patrolChecklist) {
-      for (const item of checklist.checklist.item) {
+    for (const checklist of patrol.patrolChecklists) {
+      for (const item of checklist.checklist.items) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const zone of item.itemZone) {
+        for (const zone of item.itemZones) {
           resultCount++;
         }
       }
@@ -391,7 +391,7 @@ export default function Page() {
                   iconName={iconName}
                   showIcon={true}
                   showTime={false}
-                  variant={variant }
+                  variant={variant}
                 >
                   {s(patrol.status)}
                 </BadgeCustom>
@@ -527,7 +527,7 @@ export default function Page() {
             </div>
             <TabsContent value="detail">
               <div className="py-2">
-                {patrol.patrolChecklist.map((pc: IPatrolChecklist) => (
+                {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
                   <div className="mb-4">
                     {user?.profile.name === pc.inspector.profile.name ? (
                       <PatrolChecklist

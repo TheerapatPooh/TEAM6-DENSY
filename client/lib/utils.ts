@@ -36,7 +36,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     let totalDefects = 0;
 
     // วนลูปผ่าน patrolChecklist
-    for (const patrolChecklist of patrol.patrolChecklist) {
+    for (const patrolChecklist of patrol.patrolChecklists) {
       const inspectorName = patrolChecklist.inspector.profile.name;
       const checklist = patrolChecklist.checklist;
 
@@ -45,9 +45,9 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       worksheet.addRow(["Checklist:", checklist.title]);
 
       // วนลูปผ่านรายการใน Checklist
-      for (const item of checklist.item) {
+      for (const item of checklist.items) {
         // วนลูปผ่าน itemZone
-        for (const itemZone of item.itemZone) {
+        for (const itemZone of item.itemZones) {
           const zoneName = itemZone.zone.name;
 
           // หา result ที่ตรงกับ item และ zone นี้

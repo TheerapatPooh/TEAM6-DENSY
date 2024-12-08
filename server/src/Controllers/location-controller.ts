@@ -1,6 +1,5 @@
 import { prisma } from '@Utils/database.js'
 import { Request, Response } from 'express'
-import transformKeys, { keyMap } from '@Utils/key-map.js';
 
 export async function getZone(req: Request, res: Response) {
     try {
@@ -11,7 +10,7 @@ export async function getZone(req: Request, res: Response) {
         }
         const zoneId = parseInt(req.params.id, 10)
         const zone = await prisma.zone.findUnique({
-            where: { ze_id: zoneId },
+            where: { id: zoneId },
             include: {
                 supervisor: {
                     include: {
@@ -28,7 +27,7 @@ export async function getZone(req: Request, res: Response) {
             res.status(404)
             return
         }
-        let result = transformKeys(zone, keyMap);
+        let result = zone;
      
         res.status(200).send(result)
         return
@@ -47,7 +46,7 @@ export async function getLocation(req: Request, res: Response) {
             return
         }
         const location = await prisma.location.findUnique({
-            where: { lt_id: id },
+            where: { id: id },
             include: {
                 zone: true
             }
@@ -58,7 +57,7 @@ export async function getLocation(req: Request, res: Response) {
             return
         }
 
-        let result = transformKeys(location, keyMap);
+        let result = location;
 
         res.send(result)
         return

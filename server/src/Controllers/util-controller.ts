@@ -5,8 +5,6 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import multer from 'multer';
 import { getIOInstance } from '@Utils/socket.js';
 import nodemailer from 'nodemailer';
-import transformKeys, { keyMap } from "@Utils/key-map.js";
-
 
 
 
@@ -22,7 +20,7 @@ export async function login(req: Request, res: Response) {
   const { username, password, rememberMe } = req.body;
   try {
     const user = await prisma.user.findUnique({
-      where: { us_username: username },
+      where: { username: username },
     });
 
     if (!user) {
@@ -30,7 +28,7 @@ export async function login(req: Request, res: Response) {
       return
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.us_password)
+    const passwordMatch = await bcrypt.compare(password, user.password)
 
     if (!passwordMatch) {
       res.status(401).json({ message: "Invalid username or password" })
@@ -40,7 +38,7 @@ export async function login(req: Request, res: Response) {
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000
     const iat = Math.floor(Date.now() / 1000)
     const exp = iat + maxAge / 1000
-    const token = jwt.sign({ userId: user.us_id, role: user.us_role, iat, exp }, jwtSecret)
+    const token = jwt.sign({ userId: user.id, role: user.role, iat, exp }, jwtSecret)
 
     res.cookie("authToken", token, {
       httpOnly: true,
@@ -113,10 +111,10 @@ export async function getNotifications(req: Request, res: Response) {
     const userId = (req as any).user.userId;
 
     const notifications = await prisma.notification.findMany({
-      where: { nt_us_id: userId },
-      orderBy: { nt_timestamp: 'desc' },
+      where: { userId: userId },
+      orderBy: { timestamp: 'desc' },
     });
-    let result = transformKeys(notifications, keyMap);
+    let result = notifications
 
     res.status(200).json(result);
   } catch (error) {
@@ -124,35 +122,35 @@ export async function getNotifications(req: Request, res: Response) {
   }
 }
 
-export async function createNotification({ nt_message, nt_type, nt_url, nt_us_id }: any) {
+export async function createNotification({ message, type, url, userId }: any) {
   try {
     const notification = await prisma.notification.create({
       data: {
-        nt_message,
-        nt_timestamp: new Date(),
-        nt_type,
-        nt_url,
-        nt_read: false,
-        nt_us_id,
+        message,
+        timestamp: new Date(),
+        type,
+        url,
+        read: false,
+        userId,
       },
     });
 
     const user = await prisma.user.findUnique({
-      where: { us_id: nt_us_id },
-      select: { us_email: true },
+      where: { id: userId },
+      select: { email: true },
     });
 
     // ส่งอีเมลแจ้งเตือนไปยังผู้ใช้
-    if (user?.us_email) {
+    if (user?.email) {
       const emailSubject = 'New Notification';
-      const emailMessage = `You have a new notification: ${nt_message}. Check it here: ${nt_url}`;
+      const emailMessage = `You have a new notification: ${message}. Check it here: ${url}`;
 
-      await sendEmail(user.us_email, emailSubject, emailMessage);
+      await sendEmail(user.email, emailSubject, emailMessage);
     }
-    let result = transformKeys(notification, keyMap);
+    let result = notification
 
     const io = getIOInstance();
-    io.to(nt_us_id).emit('new_notification', result);
+    io.to(userId).emit('new_notification', result);
 
     return notification;
   } catch (error) {
@@ -164,8 +162,8 @@ export async function updateNotification(req: Request, res: Response) {
   try {
     const { id } = req.params
     const notification = await prisma.notification.update({
-      where: { nt_id: parseInt(id, 10) },
-      data: { nt_read: true },
+      where: { id: parseInt(id, 10) },
+      data: { read: true },
     });
     res.status(200).json(notification);
   } catch (error) {
@@ -177,8 +175,8 @@ export async function markAllAsRead(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
     await prisma.notification.updateMany({
-      where: { nt_us_id: userId, nt_read: false },
-      data: { nt_read: true },
+      where: { userId: userId, read: false },
+      data: { read: true },
     });
     res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
@@ -193,7 +191,7 @@ export async function deleteOldNotifications() {
 
     await prisma.notification.deleteMany({
       where: {
-        nt_timestamp: {
+        timestamp: {
           lt: sevenDaysAgo,
         },
       },
