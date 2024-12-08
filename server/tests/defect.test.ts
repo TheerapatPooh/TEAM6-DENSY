@@ -1,8 +1,9 @@
-import { createDefect } from '../Controllers/defect-controller';
-import { prisma } from '../Utils/database';
+import { createDefect } from '@Controllers/defect-controller';
+import { prisma } from '@Utils/database';
 import { Request, Response } from 'express';
+import { jest } from "@jest/globals";
 
-jest.mock('../Utils/database', () => ({
+jest.mock('@Utils/database', () => ({
     prisma: {
         defect: {
             create: jest.fn(),

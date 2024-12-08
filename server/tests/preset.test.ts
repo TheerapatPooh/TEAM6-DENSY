@@ -1,10 +1,11 @@
 // preset.test.ts
 
 import { Request, Response } from 'express';
-import { prisma } from '../Utils/database';
-import { getAllPresets } from '../Controllers/preset-controller'; // Adjust the import path accordingly
+import { prisma } from '@Utils/database';
+import { getAllPresets } from '@Controllers/preset-controller'; // Adjust the import path accordingly
+import { jest } from "@jest/globals";
 
-jest.mock('../Utils/database', () => ({
+jest.mock('@Utils/database', () => ({
     prisma: {
         preset: {
             findMany: jest.fn(),

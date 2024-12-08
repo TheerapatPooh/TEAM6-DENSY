@@ -476,7 +476,7 @@ export async function removePatrol(req: Request, res: Response) {
 }
 
 
-export async function getAllPatrolDefect(req: Request, res: Response) {
+export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;

@@ -198,7 +198,7 @@ export async function getUser(req: Request, res: Response) {
     }
 }
 
-export async function getAllUser(req: Request, res: Response) {
+export async function getAllUsers(req: Request, res: Response) {
     try {
         const includeProfile = req.query.profile === "true";
         const includeImage = req.query.image === "true";

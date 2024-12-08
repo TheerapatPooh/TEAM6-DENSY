@@ -1,10 +1,11 @@
 
-import { getUser, getAllUsers, createUser, getProfile } from '../Controllers/user-controller';
-import { prisma } from '../Utils/database';
+import { getUser, getAllUsers, createUser, getProfile } from '@Controllers/user-controller';
+import { prisma } from '@Utils/database';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
+import { jest } from "@jest/globals";
 
-jest.mock('../Utils/database', () => ({
+jest.mock('@Utils/database', () => ({
     prisma: {
         user: {
             findUnique: jest.fn(),

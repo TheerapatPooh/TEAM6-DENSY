@@ -188,7 +188,7 @@ export async function getDefect(req: Request, res: Response) {
   }
 }
 
-export async function getAllDefect(req: Request, res: Response) {
+export async function getAllDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;

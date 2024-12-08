@@ -1,10 +1,10 @@
-import { createUser, getUser, updateProfile, getAllUser, updateUser, deleteUser } from "@Controllers/user-controller.js";
+import { createUser, getUser, updateProfile, getAllUsers, updateUser, deleteUser } from "@Controllers/user-controller.js";
 import { Router } from 'express'
 import { authenticateUser } from "@Controllers/util-controller.js";
 import { upload } from "@Controllers/util-controller.js";
 const router = Router()
 
-router.get('/users', authenticateUser, getAllUser)
+router.get('/users', authenticateUser, getAllUsers)
 router.get('/user', authenticateUser, getUser)
 router.get('/user/:id', authenticateUser, getUser)
 router.post('/user', authenticateUser, createUser)

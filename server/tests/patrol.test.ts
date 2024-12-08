@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { prisma } from '../Utils/database';
-import { getPatrol, getAllPatrols, createPatrol } from '../Controllers/patrol-controller';
+import { prisma } from '@Utils/database';
+import { getPatrol, getAllPatrols, createPatrol } from '@Controllers/patrol-controller';
+import { jest } from "@jest/globals";
 
-jest.mock('../Utils/database', () => ({
+jest.mock('@Utils/database', () => ({
     prisma: {
         user: {
             findUnique: jest.fn(),

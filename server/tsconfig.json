@@ -22,6 +22,6 @@
     "resolveJsonModule": true,
     "types": ["node", "jest", "express"]
   },
-  "include": ["src/**/*.ts"],               // ระบุโฟลเดอร์และไฟล์ที่ต้องการ compile
+  "include": ["src/**/*.ts","tests/*.ts"],               // ระบุโฟลเดอร์และไฟล์ที่ต้องการ compile
   "exclude": ["node_modules"]
 }
