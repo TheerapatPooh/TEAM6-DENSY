@@ -140,8 +140,8 @@ export default function Page() {
 
   const handleFinishPatrol = async () => {
     if (!patrol) return;
-   
-    
+
+
     const updatedResults = patrolResults.map((result) => {
       const matchedResult = patrolResults.find(
         (res) => res.itemId === result.itemId && res.zoneId === result.zoneId
@@ -391,7 +391,7 @@ export default function Page() {
                   iconName={iconName}
                   showIcon={true}
                   showTime={false}
-                  variant={variant }
+                  variant={variant}
                 >
                   {s(patrol.status)}
                 </BadgeCustom>

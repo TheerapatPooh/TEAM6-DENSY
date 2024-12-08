@@ -475,33 +475,6 @@ export async function removePatrol(req: Request, res: Response) {
   }
 }
 
-export async function updatePatrolStatus(req: Request, res: Response) {
-  try {
-    const { patrolId, status } = req.body; // Destructure patrolId and status from the request body
-
-    // Validate input
-    if (!patrolId || !status) {
-      return res
-        .status(400)
-        .json({ message: "Patrol ID and status are required." });
-    }
-
-    // Update the patrol status in the database
-    const updatedPatrol = await prisma.patrol.update({
-      where: { id: patrolId },
-      data: { status: status },
-    });
-    let result = updatedPatrol
-    res.status(200).json(result);
-    return;
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while updating the patrol status." });
-    return;
-  }
-}
 
 export async function getAllPatrolDefect(req: Request, res: Response) {
   try {
