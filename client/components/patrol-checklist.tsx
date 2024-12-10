@@ -29,7 +29,7 @@ import {
   IUser,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";

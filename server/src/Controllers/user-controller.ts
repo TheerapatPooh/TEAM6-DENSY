@@ -7,11 +7,13 @@ import path from 'path'
 
 export async function createUser(req: Request, res: Response) {
     try {
+        // Check if the logged-in user has an admin role
         const userRole = (req as any).user.role
         if (userRole !== 'admin') {
             res.status(403).json({ message: "Access Denied: Admins only" })
             return
         }
+        // Extract user data from request body and hash the password
         let { username, email, password, role, department } = req.body
         const hashPassword = await bcrypt.hash(password, 10)
 
@@ -20,13 +22,14 @@ export async function createUser(req: Request, res: Response) {
                 id: 'desc',
             },
         })
-
+        // Get the latest user to calculate the next ID
         const nextId = (latestUser?.id ?? 0) + 1
+        // Generate a random username if not provided
         if (!username) {
             const randomWord = faker.word.noun()
             username = `${randomWord}${nextId}`
         }
-
+        // Create a new user and profile in the database
         const newUser = await prisma.user.create({
             data: {
                 username: username,
@@ -36,7 +39,6 @@ export async function createUser(req: Request, res: Response) {
                 department: department || null,
             },
         })
-
         await prisma.profile.create({
             data: {
                 userId: newUser.id,
@@ -74,7 +76,7 @@ export async function updateProfile(req: Request, res: Response) {
         const userId = (req as any).user.userId;
         const { name, age, tel, address } = req.body;
         const imagePath = req.file?.filename || '';
-
+        // Fetch the user and their associated profile and image
         const user = await prisma.user.findUnique({
             where: { id: userId },
             include: {
@@ -97,7 +99,7 @@ export async function updateProfile(req: Request, res: Response) {
                 fs.unlinkSync(oldImagePath);
             }
         }
-
+        // Delete the old image file if a new one is provided
         let image = null;
         if (imagePath) {
             image = await prisma.image.upsert({
@@ -130,7 +132,6 @@ export async function updateProfile(req: Request, res: Response) {
             },
         });
 
-        // Prepare result response
         let result = updatedProfile
         res.status(200).json(result);
         return
@@ -141,15 +142,17 @@ export async function updateProfile(req: Request, res: Response) {
     }
 }
 
-
+// Function to get user details
 export async function getUser(req: Request, res: Response) {
     try {
+        // Parse query parameters for including profile, image, and password
         const includeProfile = req.query.profile === "true";
         const includeImage = req.query.image === "true";
         const includePassword = req.query.password === "true";
-
+        // Retrieve the user ID from request or logged-in user context
         const userId = (req as any).user.userId
         const id = parseInt(req.params.id, 10)
+        // Fetch user details based on the ID
         let user = null
         if (!id) {
             user = await prisma.user.findUnique({
@@ -197,12 +200,13 @@ export async function getUser(req: Request, res: Response) {
         return
     }
 }
-
+// Function to get all users
 export async function getAllUser(req: Request, res: Response) {
     try {
+        // Parse query parameters for including profile and image
         const includeProfile = req.query.profile === "true";
         const includeImage = req.query.image === "true";
-
+        // Fetch all users with optional profile and image inclusion
         const allUsers = await prisma.user.findMany({
             select: {
                 id: true,
@@ -232,33 +236,34 @@ export async function getAllUser(req: Request, res: Response) {
         return
     }
 }
-
+// Function to update a user's data
 export async function updateUser(req: Request, res: Response) {
     try {
+        // Get logged-in user's ID and role, and the target user's ID from the request
         const loggedInUserId = (req as any).user.userId;
         const loggedInUserRole = (req as any).user.role;
         const id = parseInt(req.params.id, 10);
         const { username, email, password, role, department } = req.body;
 
-        // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
+         // Check permissions for updating the user
         if (loggedInUserId !== id && loggedInUserRole !== 'admin') {
             res.status(403).json({ message: "Access Denied: You must be the owner of this account or an admin" });
             return
         }
-
+        // Prepare data for updating
         const updateData: any = {
             us_email: email,
             us_password: password ? await bcrypt.hash(password, 10) : undefined,
             us_department: department,
         };
 
-        // เฉพาะ admin เท่านั้นที่สามารถเปลี่ยน username และ role ได้
+        // Only admin can update username and role
         if (loggedInUserRole === 'admin') {
             updateData.us_username = username;
             updateData.us_role = role;
         }
 
-        // อัปเดตข้อมูลผู้ใช้
+        // Update the user in the database
         const updatedUser = await prisma.user.update({
             where: { id: id },
             data: updateData,
@@ -281,65 +286,59 @@ export async function updateUser(req: Request, res: Response) {
         return
     }
 }
-
+// Function to delete a user
 export async function deleteUser(req: Request, res: Response) {
     try {
+        // Get the user ID from the request and logged-in user's role
         const id = parseInt(req.params.id, 10);
         const role = (req as any).user.role;
-
+        // Only admin can delete users
         if (role !== 'admin') {
             res.status(403).json({ message: "Access Denied: Admin only" });
             return
         }
-
+        // Fetch the user and their related profile and zone
         const user = await prisma.user.findUnique({
             where: { id: id },
-            include: { profile: true, zones: true },
+            include: { profile: true, zone: true },
         });
-
+        // Handle case where the user is not found
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return
         }
 
-        // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่
-        if (user.zones) {
-            // ลบข้อมูลที่เชื่อมโยงกับ PatrolResult
+        // Remove related zone-user , comment, defect , PatrolResult , Profile connections and last delete User
+        if (user.zone) {
             const patrolResults = await prisma.patrolResult.findMany({
-                where: { zoneId: user.zones.id },
+                where: { zoneId: user.zone.id },
             });
 
             for (const patrolResult of patrolResults) {
-                // ลบ Comment ที่อ้างถึง PatrolResult นี้
                 await prisma.comment.deleteMany({
                     where: { patrolResultId: patrolResult.id },
                 });
 
-                // ลบ Defect ที่อ้างถึง PatrolResult นี้
                 await prisma.defect.deleteMany({
                     where: { patrolResultId: patrolResult.id },
                 });
             }
 
-            // ลบข้อมูลใน PatrolResult ที่อ้างถึง Zone
             await prisma.patrolResult.deleteMany({
-                where: { zoneId: user.zones.id },
+                where: { zoneId: user.zone.id },
             });
 
-            // ลบ Zone หลังจากจัดการข้อมูลที่เชื่อมโยงเสร็จ
             await prisma.zone.delete({
                 where: { userId: id },
             });
         }
 
-        // ลบ Profile ถ้ามี
         if (user.profile) {
             await prisma.profile.delete({
                 where: { userId: id },
             });
         }
 
-        // ลบ User หลังจากจัดการ Zone และ Profile
         await prisma.user.delete({
             where: { id: id },
         });

@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { IPatrolChecklist, patrolStatus, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,10 +87,10 @@ export function PatrolCard({
 
       if (patrolChecklist) {
         for (const patrolChecklistObj of patrolChecklist) {
-          if (patrolChecklistObj.checklist && patrolChecklistObj.checklist.item) {
-            for (const item of patrolChecklistObj.checklist.item) {
-              if (item.itemZone) {
-                countItems += item.itemZone.length;
+          if (patrolChecklistObj.checklist && patrolChecklistObj.checklist.items) {
+            for (const item of patrolChecklistObj.checklist.items) {
+              if (item.itemZones) {
+                countItems += item.itemZones.length;
               }
             }
           }
