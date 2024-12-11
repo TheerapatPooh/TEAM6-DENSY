@@ -48,7 +48,7 @@ export async function getLocation(req: Request, res: Response) {
         const location = await prisma.location.findUnique({
             where: { id: id },
             include: {
-                zone: true
+                zones: true
             }
         })
 
