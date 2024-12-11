@@ -1,4 +1,4 @@
-import  prisma  from "@Utils/database.js";
+import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import axios from "axios";
 import { createNotification } from "@Controllers/util-controller.js";
@@ -34,12 +34,12 @@ export async function getPatrol(req: Request, res: Response) {
       include: {
         preset: includePreset
           ? {
-              select: {
-                id: true,
-                title: true,
-                description: true,
-              },
-            }
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          }
           : undefined,
         patrolChecklists: {
           include: {
@@ -86,28 +86,28 @@ export async function getPatrol(req: Request, res: Response) {
         },
         results: includeResult
           ? {
-              include: {
-                defects: true,
-                comments: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        email: true,
-                        department: true,
-                        role: true,
-                        profile: {
-                          select: {
-                            name: true,
-                            image: true,
-                          },
+            include: {
+              defects: true,
+              comments: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      department: true,
+                      role: true,
+                      profile: {
+                        select: {
+                          name: true,
+                          image: true,
                         },
                       },
                     },
                   },
                 },
               },
-            }
+            },
+          }
           : undefined,
       },
     });
@@ -134,7 +134,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     if (role !== "admin" && role !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
+      res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
       return;
     }
     let allPatrols: any;
@@ -200,7 +200,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ message: "Internal server error" });
     return;
   }
 }
@@ -209,7 +209,7 @@ export async function createPatrol(req: Request, res: Response) {
   try {
     const userRole = (req as any).user.role;
     if (userRole !== "admin" && userRole !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
+      res.status(403).json({ message: "Access Denied: Admins or Inspector only" });
       return;
     }
 
@@ -268,7 +268,8 @@ export async function createPatrol(req: Request, res: Response) {
     let result = newPatrol
     res.status(201).json(result);
   } catch (error) {
-     console.error(error)
+    res.status(500).json({ message: "Internal server error" });
+    console.error(error)
   }
 }
 
@@ -360,14 +361,14 @@ export async function finishPatrol(req: Request, res: Response) {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
-    const { status, checklist, result, startTime } = req.body;
+    const { status, checklists, results, startTime } = req.body;
 
     if (role !== "admin" && role !== "inspector") {
       res.status(403).json({ message: "Access Denied" });
       return;
     }
 
-    const isUserInspector = checklist.some((checklistObj: any) => {
+    const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
     });
 
@@ -379,7 +380,7 @@ export async function finishPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (!checklist || !result) {
+    if (!checklists || !results) {
       res.status(400).json({ message: "Invalid Data" });
       return;
     }
@@ -401,7 +402,7 @@ export async function finishPatrol(req: Request, res: Response) {
       },
     });
 
-    for (const resultObj of result) {
+    for (const resultObj of results) {
       const { id, status } = resultObj;
 
       await prisma.patrolResult.update({
@@ -415,7 +416,7 @@ export async function finishPatrol(req: Request, res: Response) {
     }
 
     const notifiedInspectors = new Set<number>();
-    for (const checklistObj of checklist) {
+    for (const checklistObj of checklists) {
       const inspectorId = checklistObj.inspector.id;
 
       if (!notifiedInspectors.has(inspectorId)) {
@@ -475,7 +476,6 @@ export async function removePatrol(req: Request, res: Response) {
   }
 }
 
-
 export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
@@ -525,7 +525,15 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
               select: {
                 id: true,
                 path: true,
-                user: true,
+                user: {
+                  select:{
+                    id: true,
+                    email: true,
+                    role: true,
+                    department: true,
+                    createdAt: true
+                  }
+                },
               },
             },
           },
@@ -563,7 +571,7 @@ export async function commentPatrol(req: Request, res: Response) {
     }
 
     // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
-    const validPatrol = await prisma.patrol.findUnique({
+    const validPatrol = await prisma.patrol.findFirst({
       where: {
         id: patrolId,
         patrolChecklists: {
@@ -591,26 +599,6 @@ export async function commentPatrol(req: Request, res: Response) {
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = newComment
     res.status(201).json(result);
-    return;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-    return;
-  }
-}
-
-export async function getCommentPatrol(req: Request, res: Response) {
-  try {
-    const commentId = parseInt(req.params.id, 10);
-
-    const comments = await prisma.comment.findMany({
-      where: {
-        id: commentId,
-      },
-    });
-
-    let result = comments
-    res.status(200).json(result);
     return;
   } catch (error) {
     console.error(error);
@@ -682,7 +670,7 @@ export function schedulePatrolStatusUpdate() {
 }
 
 // ฟังก์ชันสำหรับ คำนวณ Duration ของ patrol
-const calculateDuration = (startTime: string): string => {
+export const calculateDuration = (startTime: string): string => {
   // แปลง startTime เป็น Date object
   const start = new Date(startTime);
 

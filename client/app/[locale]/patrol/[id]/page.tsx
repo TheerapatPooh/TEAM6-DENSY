@@ -159,8 +159,8 @@ export default function Page() {
 
     const data = {
       status: patrol.status,
-      checklist: patrol.patrolChecklists,
-      result: updatedResults,
+      checklists: patrol.patrolChecklists,
+      results: updatedResults,
       startTime: patrol.startTime
     };
 

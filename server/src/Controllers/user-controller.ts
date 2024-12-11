@@ -68,7 +68,6 @@ export async function createUser(req: Request, res: Response) {
     }
 }
 
-
 export async function updateProfile(req: Request, res: Response) {
     try {
         const userId = (req as any).user.userId;
@@ -140,7 +139,6 @@ export async function updateProfile(req: Request, res: Response) {
         return
     }
 }
-
 
 export async function getUser(req: Request, res: Response) {
     try {
