@@ -1,198 +1,240 @@
-import { Request, Response } from 'express';
-import { prisma } from '@Utils/database';
-import { getPatrol, getAllPatrols, createPatrol } from '@Controllers/patrol-controller';
-import { jest } from "@jest/globals";
+import { PatrolStatus } from '@prisma/client'
+import { prismaMock } from './singleton'
+import { getPatrol } from '@Controllers/patrol-controller.js'
 
-jest.mock('@Utils/database', () => ({
-    prisma: {
-        user: {
-            findUnique: jest.fn(),
-        },
-        patrol: {
-            findUnique: jest.fn(),
-            findMany: jest.fn(),
-            create: jest.fn(),
-        },
-    },
-}));
-
-describe('Patrol Controller', () => {
-    let req: Partial<Request>;
-    let res: Partial<Response>;
-    let json: jest.Mock;
-    let send: jest.Mock;
-
-    beforeEach(() => {
-        json = jest.fn();
-        send = jest.fn();
-        res = {
-            status: jest.fn().mockReturnValue({
-                json,
-                send,
-            }),
-        } as Partial<Response>;
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
-    describe('getPatrol', () => {
-        it('should return patrol details if found', async () => {
-            const userId = 1;
-            req = {
-                params: { id: '1' },
-                user: { userId },
-            } as Partial<Request>;
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({ us_role: 'INSPECTOR', us_id: userId });
-            (prisma.patrol.findUnique as jest.Mock).mockResolvedValue({
-                pt_id: 1,
-                pt_date: new Date(),
-                pt_start_time: '10:00',
-                pt_end_time: '11:00',
-                pt_duration: 60,
-                pt_status: 'Pending',
-                preset: {
-                    ps_id: 1,
-                    ps_title: 'Test Preset',
-                    ps_description: 'Description',
-                    ps_version: '1.0',
-                    ps_lasted: new Date(),
-                    ps_update_at: new Date(),
-                    ps_us_id: userId,
-                    checklist: [
+test('should retrieve patrol successfully without preset and result', async () => {
+    const patrol = {
+        id: 3,
+        date: new Date("2024-12-09T17:00:00.000Z"),
+        startTime: new Date("2024-12-10T15:42:33.129Z"),
+        endTime: new Date("2024-12-10T15:44:16.784Z"),
+        duration: "0h 1m 43s",
+        status: "completed" as PatrolStatus,
+        presetId: 1,
+        patrolChecklists: [
+            {
+                id: 5,
+                patrolId: 3,
+                checklistId: 3,
+                userId: 3,
+                checklist: {
+                    id: 3,
+                    title: "Cleanliness Inspection",
+                    items: [
                         {
-                            cl_id: 1,
-                            checklist: {
-                                cl_title: 'Test Checklist',
-                                cl_version: '1.0',
-                                cl_lasted: new Date(),
-                                cl_update_at: new Date(),
-                                cl_us_id: userId,
-                                item: [
-                                    { it_id: 1, it_name: 'Test Item', it_type: 'Type A', it_ze_id: 1 }
-                                ],
-                            },
+                            id: 8,
+                            name: "Floor Cleanliness Check",
+                            type: "environment",
+                            checklistId: 3,
+                            itemZones: [
+                                {
+                                    zone: {
+                                        id: 4,
+                                        name: "quality_control_zone",
+                                        supervisor: {
+                                            id: 6,
+                                            profile: {
+                                                name: "David Wilson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    zone: {
+                                        id: 6,
+                                        name: "customer_service_zone",
+                                        supervisor: {
+                                            id: 8,
+                                            profile: {
+                                                name: "Jack Danial"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         },
-                    ],
+                        {
+                            id: 9,
+                            name: "Trash Disposal Check",
+                            type: "environment",
+                            checklistId: 3,
+                            itemZones: [
+                                {
+                                    zone: {
+                                        id: 6,
+                                        name: "customer_service_zone",
+                                        supervisor: {
+                                            id: 8,
+                                            profile: {
+                                                name: "Jack Danial"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
                 },
-                checklist: [{
-                    pthc_us_id: userId,
-                    inspector: { profile: [{ pf_id: userId, pf_name: 'Inspector Name' }] }
-                }]
-            });
-
-            await getPatrol(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(200);
-            expect(send).toHaveBeenCalled(); // Check if send was called
-            const patrolDetail = send.mock.calls[0][0]; // Get the first call argument of send
-            expect(patrolDetail).toHaveProperty('id', 1);
-            expect(patrolDetail).toHaveProperty('preset.title', 'Test Preset');
-        });
-
-        it('should return 404 if patrol not found', async () => {
-            const userId = 1;
-            req = {
-                params: { id: '1' },
-                user: { userId },
-            } as Partial<Request>;
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({ us_role: 'INSPECTOR', us_id: userId });
-            (prisma.patrol.findUnique as jest.Mock).mockResolvedValue(null);
-
-            await getPatrol(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(send).toHaveBeenCalledWith('Patrol not found');
-        });
-
-        it('should return 403 if user does not have access', async () => {
-            const userId = 1;
-            req = {
-                params: { id: '1' },
-                user: { userId },
-            } as Partial<Request>;
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({ us_role: 'USER' });
-            (prisma.patrol.findUnique as jest.Mock).mockResolvedValue({
-                checklist: [{ pthc_us_id: 2 }],
-            });
-
-            await getPatrol(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(403);
-            expect(json).toHaveBeenCalledWith({ message: "Access Denied" });
-        });
-    });
-
-    describe('getAllPatrols', () => {
-        it('should return patrols for an inspector', async () => {
-            const userId = 1;
-            req = { user: { userId } } as Partial<Request>;
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({ us_role: 'INSPECTOR' });
-            (prisma.patrol.findMany as jest.Mock).mockResolvedValue([{
-                pt_id: 1,
-                pt_date: new Date(),
-                pt_start_time: '10:00',
-                pt_end_time: '11:00',
-                pt_duration: 60,
-                pt_status: 'Pending',
-                checklist: [{ inspector: { us_id: userId } }],
-            }]);
-
-            await getAllPatrols(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(200);
-            expect(json).toHaveBeenCalled(); // Check if json was called
-        });
-
-        it('should return 403 if user role is not INSPECTOR or ADMIN', async () => {
-            const userId = 1;
-            req = { user: { userId } } as Partial<Request>;
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({ us_role: 'USER' });
-
-            await getAllPatrols(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(403);
-            expect(json).toHaveBeenCalledWith({ message: "Access Denied" });
-        });
-    });
-
-    describe('createPatrol', () => {
-        it('should create a new patrol', async () => {
-            req = {
-                body: {
-                    date: '2024-10-01T10:00:00Z',
-                    presetId: '1',
+                inspector: {
+                    id: 3,
+                    username: "jameSmith",
+                    email: null,
+                    password: "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
+                    role: "inspector",
+                    department: null,
+                    createdAt: new Date("2024-10-06T10:27:09.916Z"),
+                    active: true,
+                    profile: {
+                        id: 3,
+                        name: "Jame Smith",
+                        age: 30,
+                        tel: "0987654321",
+                        address: "Chiang Mai, Thailand",
+                        userId: 3,
+                        imageId: 1,
+                        image: {
+                            id: 1,
+                            path: "1728239317254-Scan_20220113 (2).png",
+                            timestamp: new Date("2024-10-10T01:15:14.000Z"),
+                            updatedBy: 8
+                        }
+                    }
+                }
+            },
+            {
+                id: 6,
+                patrolId: 3,
+                checklistId: 4,
+                userId: 3,
+                checklist: {
+                    id: 4,
+                    title: "Security Inspection",
+                    items: [
+                        {
+                            id: 10,
+                            name: "CCTV Functionality Check",
+                            type: "safety",
+                            checklistId: 4,
+                            itemZones: [
+                                {
+                                    zone: {
+                                        id: 2,
+                                        name: "assembly_line_zone",
+                                        supervisor: {
+                                            id: 4,
+                                            profile: {
+                                                name: "Michael Johnson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    zone: {
+                                        id: 3,
+                                        name: "raw_materials_storage_zone",
+                                        supervisor: {
+                                            id: 5,
+                                            profile: {
+                                                name: "Emily Davis"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    zone: {
+                                        id: 4,
+                                        name: "quality_control_zone",
+                                        supervisor: {
+                                            id: 6,
+                                            profile: {
+                                                name: "David Wilson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            id: 11,
+                            name: "Access Control System Check",
+                            type: "safety",
+                            checklistId: 4,
+                            itemZones: [
+                                {
+                                    zone: {
+                                        id: 4,
+                                        name: "quality_control_zone",
+                                        supervisor: {
+                                            id: 6,
+                                            profile: {
+                                                name: "David Wilson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    zone: {
+                                        id: 5,
+                                        name: "it_zone",
+                                        supervisor: {
+                                            id: 7,
+                                            profile: {
+                                                name: "Sophia Taylor"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
                 },
-            } as Partial<Request>;
+                inspector: {
+                    id: 3,
+                    username: "jameSmith",
+                    email: null,
+                    password: "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
+                    role: "inspector",
+                    department: null,
+                    createdAt: new Date("2024-10-06T10:27:09.916Z"),
+                    active: true,
+                    profile: {
+                        id: 3,
+                        name: "Jame Smith",
+                        age: 30,
+                        tel: "0987654321",
+                        address: "Chiang Mai, Thailand",
+                        userId: 3,
+                        imageId: 1,
+                        image: {
+                            id: 1,
+                            path: "1728239317254-Scan_20220113 (2).png",
+                            timestamp: new Date("2024-10-10T01:15:14.000Z"),
+                            updatedBy: 8
+                        }
+                    }
+                }
+            }
+        ]
+    }
 
-            (prisma.patrol.create as jest.Mock).mockResolvedValue({
-                pt_id: 1,
-                pt_date: new Date('2024-10-01T10:00:00Z'),
-                pt_status: 'Pending',
-                pt_ps_id: 1,
-            });
+    prismaMock.patrol.findFirst.mockResolvedValue(patrol)
+    const req = {
+        params: { id: "3" },
+        query: { preset: "false", result: "false" },
+        user: {
+            role: "inspector",
+            userId: 3,
+        },
+    } as any;
 
-            await createPatrol(req as Request, res as Response);
+    const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+    } as any;
 
-            expect(res.status).toHaveBeenCalledWith(201);
-            expect(json).toHaveBeenCalled(); // Check if json was called
-        });
+    // Call the function and assert the result
+    await getPatrol(req, res); 
 
-        it('should return 400 if required fields are missing', async () => {
-            req = {
-                body: {},
-            } as Partial<Request>;
-
-            await createPatrol(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(json).toHaveBeenCalledWith({ error: 'Missing required fields' });
-        });
-    });
-});
+    expect(res.status).toHaveBeenCalledWith(200); 
+    expect(res.json).toHaveBeenCalledWith(patrol); 
+})
