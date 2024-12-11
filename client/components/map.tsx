@@ -8,7 +8,7 @@ import zonePathSm from '@/lib/zonePath-sm.json'
 import wallPath from '@/lib/wallPath.json'
 import wallPathSM from '@/lib/wallPath-sm.json'
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 
 interface MapProps {
@@ -25,6 +25,14 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [paths, setPaths] = useState<{ text: any, id: number, pathData: string }[]>([])
   const z = useTranslations('Zone')
   const [stageDimensions, setStageDimensions] = useState({ width: 1350, height: 895, size: "LG"});
+  const locale = useLocale(); 
+  const [language, setLanguage] = useState('en');
+
+  useEffect(() => {
+    const currentLanguage = locale;
+    console.log(currentLanguage)
+    setLanguage(currentLanguage || 'en');
+  }, []);
 
   const responsiveStage = () => {
     const screenWidth = window.innerWidth;
@@ -158,7 +166,8 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
         <Layer>
           {zones.map((zone, index) => {
             const isSelected = selectedZones.includes(zone.id);
-            const startPointY = zone.text?.y ? zone.text.y - 80 : 0;
+            const textLanguage = zone.text?.[language] || zone.text?.['en'];  
+            const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;
             const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point
             return (
               <React.Fragment key={zone.id}>
@@ -169,15 +178,15 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
                   fillLinearGradientColorStops={getGradientColors(isSelected)} // ใช้ gradient ที่กำหนด
                   onClick={() => handleZoneSelect(zone.id)}
                 />
-                {zone.text && (
+                {textLanguage && (
                   <Text
-                    x={zone.text.x} // ตำแหน่ง x
-                    y={zone.text.y} // ตำแหน่ง y
+                    x={textLanguage.x} // ตำแหน่ง x
+                    y={textLanguage.y} // ตำแหน่ง y
                     text={z(zone.name)} // ข้อความที่จะแสดง
-                    fontSize={zone.text.fontSize} // ขนาดฟอนต์
+                    fontSize={textLanguage.fontSize} // ขนาดฟอนต์
                     fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
                     fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
-                    rotation={zone.text.rotation} // การหมุนของข้อความ
+                    rotation={textLanguage.rotation} // การหมุนของข้อความ
                     align="center"
                   />
                 )}
