@@ -1,4 +1,4 @@
-import { prisma } from "@Utils/database.js";
+import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "./util-controller.js";
 import { NotificationType } from "@prisma/client";

@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { prisma } from "@Utils/database.js";
+import  prisma  from "@Utils/database.js";
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import multer from 'multer';

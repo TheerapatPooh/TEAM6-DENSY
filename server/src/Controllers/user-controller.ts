@@ -1,4 +1,4 @@
-import { prisma } from '@Utils/database.js'
+import  prisma from '@Utils/database.js'
 import { Request, response, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import { faker } from '@faker-js/faker'
@@ -282,73 +282,73 @@ export async function updateUser(req: Request, res: Response) {
     }
 }
 
-export async function deleteUser(req: Request, res: Response) {
-    try {
-        const id = parseInt(req.params.id, 10);
-        const role = (req as any).user.role;
+// export async function deleteUser(req: Request, res: Response) {
+//     try {
+//         const id = parseInt(req.params.id, 10);
+//         const role = (req as any).user.role;
 
-        if (role !== 'admin') {
-            res.status(403).json({ message: "Access Denied: Admin only" });
-            return
-        }
+//         if (role !== 'admin') {
+//             res.status(403).json({ message: "Access Denied: Admin only" });
+//             return
+//         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: id },
-            include: { profile: true, zones: true },
-        });
+//         const user = await prisma.user.findUnique({
+//             where: { id: id },
+//             include: { profile: true, zone: true },
+//         });
 
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return
-        }
+//         if (!user) {
+//             res.status(404).json({ message: 'User not found' });
+//             return
+//         }
 
-        // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่
-        if (user.zones) {
-            // ลบข้อมูลที่เชื่อมโยงกับ PatrolResult
-            const patrolResults = await prisma.patrolResult.findMany({
-                where: { zoneId: user.zones.id },
-            });
+//         // ตรวจสอบว่ามี Zone ที่เชื่อมโยงอยู่หรือไม่
+//         if (user.zone) {
+//             // ลบข้อมูลที่เชื่อมโยงกับ PatrolResult
+//             const patrolResults = await prisma.patrolResult.findMany({
+//                 where: { zoneId: user.zone.id },
+//             });
 
-            for (const patrolResult of patrolResults) {
-                // ลบ Comment ที่อ้างถึง PatrolResult นี้
-                await prisma.comment.deleteMany({
-                    where: { patrolResultId: patrolResult.id },
-                });
+//             for (const patrolResult of patrolResults) {
+//                 // ลบ Comment ที่อ้างถึง PatrolResult นี้
+//                 await prisma.comment.deleteMany({
+//                     where: { patrolResultId: patrolResult.id },
+//                 });
 
-                // ลบ Defect ที่อ้างถึง PatrolResult นี้
-                await prisma.defect.deleteMany({
-                    where: { patrolResultId: patrolResult.id },
-                });
-            }
+//                 // ลบ Defect ที่อ้างถึง PatrolResult นี้
+//                 await prisma.defect.deleteMany({
+//                     where: { patrolResultId: patrolResult.id },
+//                 });
+//             }
 
-            // ลบข้อมูลใน PatrolResult ที่อ้างถึง Zone
-            await prisma.patrolResult.deleteMany({
-                where: { zoneId: user.zones.id },
-            });
+//             // ลบข้อมูลใน PatrolResult ที่อ้างถึง Zone
+//             await prisma.patrolResult.deleteMany({
+//                 where: { zoneId: user.zone.id },
+//             });
 
-            // ลบ Zone หลังจากจัดการข้อมูลที่เชื่อมโยงเสร็จ
-            await prisma.zone.delete({
-                where: { userId: id },
-            });
-        }
+//             // ลบ Zone หลังจากจัดการข้อมูลที่เชื่อมโยงเสร็จ
+//             await prisma.zone.delete({
+//                 where: { userId: id },
+//             });
+//         }
 
-        // ลบ Profile ถ้ามี
-        if (user.profile) {
-            await prisma.profile.delete({
-                where: { userId: id },
-            });
-        }
+//         // ลบ Profile ถ้ามี
+//         if (user.profile) {
+//             await prisma.profile.delete({
+//                 where: { userId: id },
+//             });
+//         }
 
-        // ลบ User หลังจากจัดการ Zone และ Profile
-        await prisma.user.delete({
-            where: { id: id },
-        });
+//         // ลบ User หลังจากจัดการ Zone และ Profile
+//         await prisma.user.delete({
+//             where: { id: id },
+//         });
 
-        res.status(200).json({ message: 'User deleted successfully' });
-        return
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete user' });
-        return
-    }
-}
+//         res.status(200).json({ message: 'User deleted successfully' });
+//         return
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Failed to delete user' });
+//         return
+//     }
+// }

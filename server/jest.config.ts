@@ -13,7 +13,7 @@ const config: Config = {
   },
   extensionsToTreatAsEsm: [".ts"],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-  setupFilesAfterEnv: ['<rootDir>/tests/singleton.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/mock.ts'],
 };
 
 export default config;

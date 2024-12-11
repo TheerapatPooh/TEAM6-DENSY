@@ -1,4 +1,4 @@
-import { prisma } from '@Utils/database.js'
+import  prisma  from '@Utils/database.js'
 import { Request, Response } from 'express'
 
 export async function createPreset(req: Request, res: Response) {
