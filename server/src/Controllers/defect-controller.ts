@@ -1,10 +1,9 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification } from "./util-controller.js";
+import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
-import { fileURLToPath } from "url";
 
 export async function createDefect(req: Request, res: Response) {
   try {
@@ -256,10 +255,13 @@ export async function getAllDefects(req: Request, res: Response) {
     return;
   }
 }
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadsPath = path.join(__dirname, '../../uploads');
 
+function getUploadsPath(): string {
+  const currentDir = process.cwd();
+  return path.join(currentDir, 'uploads'); // Adjust path as needed
+}
+
+const uploadsPath = getUploadsPath();
 
 export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
@@ -452,7 +454,7 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     res.status(200).json({ message: "Defect deleted successfully" });
     return;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500);
     return;
   }
 }
