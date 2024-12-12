@@ -19,7 +19,7 @@ declare global {
  * Input: 
  * - req.body: { username: String, password: String, rememberMe: Boolean}
  * Output: JSON message ยืนยันการ login สำเร็จ
- **/
+**/
 export async function login(req: Request, res: Response) {
   const { username, password, rememberMe } = req.body;
   try {
@@ -62,7 +62,7 @@ export async function login(req: Request, res: Response) {
  * Input: 
  * - req.cookies.authToken: String (Token ของผู้ใช้งานที่ใช้สำหรับการยืนยันตัวตน) 
  * Output: JSON message ยืนยันการ logout สำเร็จ
- **/
+**/
 export async function logout(req: Request, res: Response) {
   try {
     // ลบ cookie authToken
@@ -85,7 +85,7 @@ export async function logout(req: Request, res: Response) {
  * Output: 
  * - ถ้า Token ถูกต้อง: ส่งต่อการทำงานไปยังฟังก์ชันถัดไป (next middleware)
  * - ถ้า TOken ไม่ถูกต้อง: JSON message แจ้งเตือนข้อผิดพลาด เช่น "Access Denied" หรือ "Invalid Token"
- **/
+**/
 export function authenticateUser(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies.authToken
 
@@ -100,7 +100,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
     req.user = decoded
     next();
   } catch (error) {
-    res.status(400).json({ message: "Invalid Token" , error})
+    res.status(400).json({ message: "Invalid Token", error })
     return
   }
 }
@@ -113,7 +113,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
  * Output: 
  * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บในโฟลเดอร์ `uploads/` พร้อมกับชื่อไฟล์ที่ไม่ซ้ำกัน
  * - req.file: Object (รายละเอียดของไฟล์ที่ถูกอัปโหลด เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
- **/
+**/
 const storage = multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, 'uploads/'); // กำหนดโฟลเดอร์สำหรับเก็บไฟล์ที่อัปโหลด
@@ -131,7 +131,7 @@ export const upload = multer({ storage: storage });
  * Input: 
  * - (req as any).user.userId : Int (Id ของผู้ใช้ที่กำลังล็อคอิน)
  * Output: JSON message ของ notification  
- **/
+**/
 export async function getNotifications(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -153,7 +153,7 @@ export async function getNotifications(req: Request, res: Response) {
  * Input: 
  * - req.body: { message: string, type: NotificationType, url: String | Null, userId: Int }
  * Output: JSON object ของ notification ที่ถูกสร้าง รวมถึงข้อมูลที่เกี่ยวข้อง 
- **/
+**/
 export async function createNotification({ message, type, url, userId }: any) {
   try {
     const notification = await prisma.notification.create({
@@ -195,7 +195,7 @@ export async function createNotification({ message, type, url, userId }: any) {
  * Input: 
  * - req.params: { id: int } (ID ของการแจ้งเตือนที่ต้องการอัปเดต)
  * Output: JSON object ของการแจ้งเตือนที่ถูกอัปเดต 
- **/
+**/
 export async function updateNotification(req: Request, res: Response) {
   try {
     const { id } = req.params
@@ -215,7 +215,7 @@ export async function updateNotification(req: Request, res: Response) {
  * - req.user.userId: int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: 
  * - JSON message ยืนยันการเปลี่ยนสถานะการแจ้งเตือนสำเร็จ
- **/
+**/
 export async function markAllAsRead(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -235,7 +235,7 @@ export async function markAllAsRead(req: Request, res: Response) {
  * - ไม่มี Input
  * Output: 
  * - ไม่มี Output ที่ส่งกลับ แต่จะลบการแจ้งเตือนเก่าจากฐานข้อมูล
- **/
+**/
 export async function deleteOldNotifications() {
   try {
     const sevenDaysAgo = new Date();
@@ -270,7 +270,7 @@ const transporter = nodemailer.createTransport({
  * - message: String (ข้อความในเนื้อหาอีเมล)
  * Output: 
  * - ไม่มี Output ที่ส่งกลับ แต่จะทำการส่งอีเมล
- **/
+**/
 export async function sendEmail(email: string, subject: string, message: string) {
   try {
     await transporter.sendMail({

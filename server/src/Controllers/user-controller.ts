@@ -11,7 +11,7 @@ import path from "path";
  * - (req as any).user.role: String (ต้องเป็น "admin")
  * - req.body: { username: String, email: String | null, password: String, role: String, department: String | null }
  * Output: JSON object ข้อมูล User ที่ถูกสร้าง
- **/
+**/
 export async function createUser(req: Request, res: Response) {
   try {
     const userRole = (req as any).user.role;
@@ -82,7 +82,7 @@ export async function createUser(req: Request, res: Response) {
  * - req.body: { name: String | null, age: number | null, tel: String | null, address: String | null }
  * - req.file?.filename: String (optional, path ของไฟล์รูปภาพ)
  * Output: JSON object ข้อมูล profile ที่ถูกอัปเดต หรือ error หากไม่พบ User
- **/
+**/
 export async function updateProfile(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -166,7 +166,7 @@ export async function updateProfile(req: Request, res: Response) {
  * - req.query: { profile: "true" | "false", image: "true" | "false", password: "true" | "false" } (optional)
  * - req.params.id: number (optional, ถ้าไม่ระบุจะดึงข้อมูล User ที่ login อยู่)
  * Output: JSON object ข้อมูล User รวมถึง profile และ image หากมีการร้องขอ
- **/
+**/
 export async function getUser(req: Request, res: Response) {
   try {
     const includeProfile = req.query.profile === "true";
@@ -229,7 +229,7 @@ export async function getUser(req: Request, res: Response) {
  * Input: 
  * - req.query: { profile: "true" | "false", image: "true" | "false" } (optional)
  * Output: JSON array ข้อมูล User รวมถึง profile และ image หากมีการร้องขอ
- **/
+**/
 export async function getAllUser(req: Request, res: Response) {
   try {
     const includeProfile = req.query.profile === "true";
@@ -273,7 +273,7 @@ export async function getAllUser(req: Request, res: Response) {
  * - req.body: { username: String, email: String | null, password: String, role: String, department: String | null }
  * Output: JSON object ข้อมูล User หลังการอัปเดต
  * Note: admin เท่านั้นที่สามารถอัปเดต role และ username ได้
- **/
+**/
 export async function updateUser(req: Request, res: Response) {
   try {
     const loggedInUserId = (req as any).user.userId;
@@ -330,7 +330,7 @@ export async function updateUser(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับลบ User (เปลี่ยนสถานะเป็น inactive)
  * Input: req.params.id: Int (ID ของ User ที่จะลบ)
  * Output: JSON message ยืนยันการลบ User สำเร็จ
- **/
+**/
 export async function removeUser(req: Request, res: Response) {
   try {
     const id = parseInt(req.params.id, 10);

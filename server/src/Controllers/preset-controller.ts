@@ -12,7 +12,7 @@ import { Request, Response } from "express";
  *   } (ข้อมูลของ Preset ที่ต้องการสร้าง)
  * - req.user: { role: String } (บทบาทของผู้ใช้งาน เช่น "admin")
  * Output: JSON object { message: String, preset: Object } ยืนยันการสร้าง Preset สำเร็จ
- **/
+**/
 export async function createPreset(req: Request, res: Response) {
   try {
     const userRole = (req as any).user.role;
@@ -67,7 +67,7 @@ export async function createPreset(req: Request, res: Response) {
  *   } (ข้อมูลของ Preset ที่ต้องการอัปเดต)
  * - req.user: { role: String } (บทบาทของผู้ใช้งาน เช่น "admin")
  * Output: JSON object { message: String, preset: Object } ยืนยันการอัปเดต Preset สำเร็จ
- **/
+**/
 export async function updatePreset(req: Request, res: Response) {
   try {
     const userRole = (req as any).user.role;
@@ -132,7 +132,7 @@ export async function updatePreset(req: Request, res: Response) {
  * Input:
  * - req.params.id: number (ID ของ Preset ที่ต้องการดึงข้อมูล)
  * Output: JSON object ข้อมูลของ Preset รวมถึงรายการ Checklist
- **/
+**/
 export async function getPreset(req: Request, res: Response) {
   try {
     const presetId = parseInt(req.params.id, 10);
@@ -185,7 +185,7 @@ export async function getPreset(req: Request, res: Response) {
  * Input:
  * - req.query.latest: "true" | "false" (optional, ระบุเพื่อดึงเฉพาะ Preset ที่เป็นเวอร์ชันล่าสุด)
  * Output: JSON array ข้อมูลของ Preset ทั้งหมด รวมถึงรายการ Checklist
- **/
+**/
 export async function getAllPresets(req: Request, res: Response) {
   try {
     const latest = req.query.latest === "true";
@@ -240,7 +240,7 @@ export async function getAllPresets(req: Request, res: Response) {
  * - req.params.id: number (ID ของ Checklist ที่ต้องการดึงข้อมูล)
  * - req.query.supervisor: "true" | "false" (optional, ระบุเพื่อดึงข้อมูล Supervisor ที่เกี่ยวข้อง)
  * Output: JSON object ข้อมูลของ Checklist รวมถึงรายการ Item และ Zone
- **/
+**/
 export async function getChecklist(req: Request, res: Response) {
   try {
     const checklistId = parseInt(req.params.id, 10);
@@ -305,7 +305,7 @@ export async function getChecklist(req: Request, res: Response) {
  * Input:
  * - ไม่มี Input
  * Output: JSON array ข้อมูลของ Checklist รวมถึงการนับจำนวน Item แต่ละประเภท
- **/
+**/
 export async function getAllChecklists(req: Request, res: Response) {
   try {
     // ดึงข้อมูล Checklist ทั้งหมด
