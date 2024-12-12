@@ -4,7 +4,17 @@ import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
+import { fileURLToPath } from "url";
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
+ * Input: 
+ * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
+ * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.body: { name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int, supervisorId: Int }
+ * - req.files: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
+ * Output: JSON object ข้อมูล Defect ที่ถูกสร้าง พร้อมกับอัปเดตสถานะของ patrolResult
+**/
 export async function createDefect(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
@@ -67,7 +77,7 @@ export async function createDefect(req: Request, res: Response) {
       try {
         const result = await prisma.patrolResult.findUnique({
           where: {
-            id: parseInt(patrolResultId.toString()), // Ensure it's an integer
+            id: parseInt(patrolResultId.toString()), // Ensure it's an Integer
           },
         });
 
@@ -130,6 +140,14 @@ export async function createDefect(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect 
+ * Input: 
+ * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
+ * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.params: { id: Int} (ID ของ Defect)
+ * Output: JSON object ข้อมูล Defect และข้อมูล patrolResult ที่เกี่ยวข้อง
+**/
 export async function getDefect(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
@@ -187,7 +205,14 @@ export async function getDefect(req: Request, res: Response) {
   }
 }
 
-export async function getAllDefects(req: Request, res: Response) {
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมด
+ * Input: 
+ * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
+ * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON array ข้อมูล Defect ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง 
+**/
+export async function getAllDefect(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
@@ -263,6 +288,16 @@ function getUploadsPath(): string {
 
 const uploadsPath = getUploadsPath();
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect 
+ * Input: 
+ * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
+ * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.params: { id: Int} (ID ของ Defect ที่จะอัปเดต)
+ * - req.body: {name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int }
+ * - req.file: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
+ * Output: JSON object ข้อมูล Defect หลังการอัปเดต
+**/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
     const { role, userId } = (req as any).user;
@@ -369,8 +404,14 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
   }
 }
 
-
-
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ Defect 
+ * Input: 
+ * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
+ * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.params: { id: Int} (ID ของ Defect ที่จะลบ)
+ * Output: JSON message ยืนยันการลบ Defect สำเร็จ
+**/
 export async function deleteDefect(req: Request, res: Response): Promise<void> {
   try {
     const role = (req as any).user.role;
