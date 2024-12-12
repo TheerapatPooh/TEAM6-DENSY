@@ -1,4 +1,4 @@
-import { prisma } from "@Utils/database.js";
+import prisma from "@Utils/database.js";
 import { Request, response, Response } from "express";
 import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
@@ -230,7 +230,7 @@ export async function getUser(req: Request, res: Response) {
  * - req.query: { profile: "true" | "false", image: "true" | "false" } (optional)
  * Output: JSON array ข้อมูล User รวมถึง profile และ image หากมีการร้องขอ
 **/
-export async function getAllUser(req: Request, res: Response) {
+export async function getAllUsers(req: Request, res: Response) {
   try {
     const includeProfile = req.query.profile === "true";
     const includeImage = req.query.image === "true";

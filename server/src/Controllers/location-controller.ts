@@ -1,4 +1,4 @@
-import { prisma } from '@Utils/database.js'
+import prisma from '@Utils/database.js'
 import { Request, Response } from 'express'
 
 /**
@@ -35,7 +35,7 @@ export async function getZone(req: Request, res: Response) {
             return
         }
         let result = zone;
-     
+
         res.status(200).send(result)
         return
     } catch (error) {

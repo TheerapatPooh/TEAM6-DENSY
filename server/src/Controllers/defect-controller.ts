@@ -1,6 +1,6 @@
-import { prisma } from "@Utils/database.js";
+import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification } from "./util-controller.js";
+import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
@@ -212,7 +212,7 @@ export async function getDefect(req: Request, res: Response) {
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง 
 **/
-export async function getAllDefect(req: Request, res: Response) {
+export async function getAllDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
@@ -280,9 +280,13 @@ export async function getAllDefect(req: Request, res: Response) {
     return;
   }
 }
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadsPath = path.join(__dirname, '../../uploads');
+
+function getUploadsPath(): string {
+  const currentDir = process.cwd();
+  return path.join(currentDir, 'uploads'); // Adjust path as needed
+}
+
+const uploadsPath = getUploadsPath();
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect 
@@ -491,7 +495,7 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     res.status(200).json({ message: "Defect deleted successfully" });
     return;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500);
     return;
   }
 }
