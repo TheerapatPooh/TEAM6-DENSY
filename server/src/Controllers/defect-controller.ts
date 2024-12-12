@@ -212,7 +212,7 @@ export async function getDefect(req: Request, res: Response) {
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง 
 **/
-export async function getAllDefect(req: Request, res: Response) {
+export async function getAllDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;

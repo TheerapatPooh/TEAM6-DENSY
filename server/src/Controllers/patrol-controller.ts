@@ -539,7 +539,7 @@ export async function removePatrol(req: Request, res: Response) {
  * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect และข้อมูลที่เกี่ยวข้อง
 **/
-export async function getAllPatrolDefect(req: Request, res: Response) {
+export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
@@ -670,32 +670,6 @@ export async function commentPatrol(req: Request, res: Response) {
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = newComment;
     res.status(201).json(result);
-    return;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-    return;
-  }
-}
-
-/**
- * คำอธิบาย: ฟังก์ชันสำหรับดึงความคิดเห็นใน Patrol
- * Input:
- * - req.params.id: number (ID ของความคิดเห็น)
- * Output: JSON array ข้อมูลความคิดเห็นที่เกี่ยวข้อง
-**/
-export async function getCommentPatrol(req: Request, res: Response) {
-  try {
-    const commentId = parseInt(req.params.id, 10);
-
-    const comments = await prisma.comment.findMany({
-      where: {
-        id: commentId,
-      },
-    });
-
-    let result = comments;
-    res.status(200).json(result);
     return;
   } catch (error) {
     console.error(error);
