@@ -432,3 +432,43 @@ export async function createChecklist(req: Request, res: Response) {
     console.error(error)
   }
 }
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ checklist (เปลี่ยนสถานะเป็น false)
+ * Input: req.params.id: Int (ID ของ User ที่จะลบ)
+ * Output: JSON message ยืนยันการลบ User สำเร็จ
+**/
+export async function removeChecklist(req: Request, res: Response) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const role = (req as any).user.role;
+
+    if (role !== "admin") {
+      res.status(403).json({ message: "Access Denied: Admin only" });
+      return;
+    }
+
+    const checklist = await prisma.checklist.findUnique({
+      where: { id: id },
+    });
+
+    if (!checklist) {
+      res.status(404).json({ message: "Checklist not found" });
+      return;
+    }
+
+    await prisma.checklist.update({
+      where: { id: id },
+      data: {
+        latest: false,
+      },
+    });
+
+    res.status(200).json({ message: "Checklist has been deactivated successfully" });
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to deactivated checklist" });
+    return;
+  }
+}
