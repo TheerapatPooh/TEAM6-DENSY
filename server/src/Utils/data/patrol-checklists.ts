@@ -1,8 +1,8 @@
 import { PatrolChecklist } from "@prisma/client";
 
 export const patrol_checklists: PatrolChecklist[] = [
-    { ptcl_id: 1, ptcl_pt_id: 1, ptcl_cl_id: 3, ptcl_us_id: 2 },
-    { ptcl_id: 2, ptcl_pt_id: 1, ptcl_cl_id: 4, ptcl_us_id: 8 },
-    { ptcl_id: 3, ptcl_pt_id: 2, ptcl_cl_id: 2, ptcl_us_id: 8 },
-    { ptcl_id: 4, ptcl_pt_id: 2, ptcl_cl_id: 5, ptcl_us_id: 8 },
+    { id: 1, patrolId: 1, checklistId: 3, userId: 2 },
+    { id: 2, patrolId: 1, checklistId: 4, userId: 8 },
+    { id: 3, patrolId: 2, checklistId: 2, userId: 8 },
+    { id: 4, patrolId: 2, checklistId: 5, userId: 8 },
 ];

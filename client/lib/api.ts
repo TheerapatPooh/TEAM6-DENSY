@@ -15,6 +15,7 @@ export async function login(values: z.infer<typeof LoginSchema>) {
     }
 }
 
+
 export async function logout() {
     try {
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
@@ -22,7 +23,6 @@ export async function logout() {
         throw new Error("Logout failed",error);
     }
 }
-
 
 
 export async function fetchData(

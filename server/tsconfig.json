@@ -10,7 +10,8 @@
       "@uploads/*": ["src/uploads/*"],
       "@Utils/*": ["src/Utils/*"]
     },
-    "rootDir": "./src",
+    "rootDir": "./src",   
+    // "rootDir": "./",                     // สำหรับ Test               
     "target": "ESNext",                     // ระบุเวอร์ชัน JavaScript 
     "module": "ESNext",                     // ใช้ ESModule
     "moduleResolution": "bundler",             // ใช้การ resolve module แบบ Node.js
@@ -20,8 +21,9 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node", "jest", "express"]
+    "types": ["node", "jest", "express"],
   },
-  "include": ["src/**/*.ts"],               // ระบุโฟลเดอร์และไฟล์ที่ต้องการ compile
+  "include": ["src/**/*.ts"], 
+  // "include": ["src/**/*.ts", "tests/**/*.ts"],  // สำหรับ Test
   "exclude": ["node_modules"]
 }

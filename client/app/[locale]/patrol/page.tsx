@@ -75,7 +75,7 @@ export default function Page() {
   const isSubmitDisabled =
     !selectedDate ||
     !selectedPreset ||
-    patrolChecklist.length !== selectedPreset.presetChecklist.length;
+    patrolChecklist.length !== selectedPreset.presetChecklists.length;
 
   const onSubmit = async () => {
     if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
@@ -213,7 +213,7 @@ export default function Page() {
     const patrolDate = new Date(patrol.date).toLocaleDateString().toLowerCase();
     const patrolStatus = patrol.status.toLowerCase();
 
-    const inspectors = patrol.patrolChecklist
+    const inspectors = patrol.patrolChecklists
       .flatMap((pc) => {
         return pc.inspector?.profile?.name
           ? [pc.inspector.profile.name.toLowerCase()]
@@ -289,7 +289,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col p-5 gap-y-5">
+    <div className="flex flex-col p-4 gap-y-4">
       <div className="flex items-center gap-2">
         <Textfield
           iconName="search"
@@ -454,7 +454,7 @@ export default function Page() {
 
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Create Patrol Card with AlertDialog */}
         <AlertDialog>
           <AlertDialogTrigger className="w-full">
@@ -547,7 +547,7 @@ export default function Page() {
               <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <ScrollArea className="pr-[10px] h-[400px] w-full rounded-md pr-[15px] overflow-visible overflow-y-clip">
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[10px] ">
-                  {selectedPreset?.presetChecklist.flatMap((presetChecklist: IPresetChecklist) => (
+                  {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
                     <ChecklistDropdown
                       key={presetChecklist.checklist.id}
                       checklist={presetChecklist.checklist}
@@ -581,7 +581,7 @@ export default function Page() {
 
         {patrolQueryResults &&
           patrolQueryResults.map((patrol: IPatrol) => {
-            const inspectors = patrol.patrolChecklist.map((cl: IPatrolChecklist) => cl.inspector);
+            const inspectors = patrol.patrolChecklists.map((cl: IPatrolChecklist) => cl.inspector);
             return (
               <PatrolCard
                 key={patrol.id}
@@ -589,7 +589,7 @@ export default function Page() {
                 patrolDate={new Date(patrol.date)}
                 patrolPreset={patrol.preset.title}
                 patrolId={patrol.id}
-                patrolChecklist={patrol.patrolChecklist}
+                patrolChecklist={patrol.patrolChecklists}
                 inspector={inspectors}
               />
             );

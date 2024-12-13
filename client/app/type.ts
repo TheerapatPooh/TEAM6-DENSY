@@ -14,16 +14,17 @@ export interface IUser {
     role: role;
     department?: string | null;
     createdAt?: string;
+    active?: boolean;
 
-    updatePreset?: IPreset[];
-    updateChecklist?: IChecklist[]
-    comment?: IComment[]
+    presets?: IPreset[];
+    checklists?: IChecklist[]
+    comments?: IComment[]
     profile: IProfile;
-    notification?: INotification[]
-    defect?: IDefect[]
+    notifications?: INotification[]
+    defects?: IDefect[]
     zone?: IZone;
-    checklist?: IPatrolChecklist[]
-    image?: IImage[]
+    patrolChecklists?: IPatrolChecklist[]
+    images?: IImage[]
 }
 
 export interface IDefect {
@@ -34,11 +35,11 @@ export interface IDefect {
     status: defectStatus;
     timestamp: string;
     userId?: number;
-    patrolId?: number;
+    patrolResultId?: number;
 
     user?: IUser;
     patrolResult: IPatrolResult;
-    image: IDefectIImage[];
+    images: IDefectIImage[];
 }
 
 export interface INotification {
@@ -76,9 +77,9 @@ export interface IPatrol {
     status: patrolStatus;
     presetId?: number
 
-    patrolChecklist: IPatrolChecklist[];
+    patrolChecklists: IPatrolChecklist[];
     preset: IPreset;
-    result: IPatrolResult[];
+    results: IPatrolResult[];
 }
 
 export interface IPatrolChecklist {
@@ -99,11 +100,11 @@ export interface IPreset {
     version: number;
     latest: boolean;
     updatedAt: string;
-    updateBy: number;
+    updatedBy: number;
 
     user?: IUser;
-    presetChecklist?: IPresetChecklist[];
-    patrol?: IPatrol[];
+    presetChecklists?: IPresetChecklist[];
+    patrols?: IPatrol[];
 }
 
 export interface IPresetChecklist {
@@ -122,10 +123,10 @@ export interface IChecklist {
     updatedAt: string;
     updatedBy: number;
 
-    patrol?: IPatrolChecklist[];
+    patrols?: IPatrolChecklist[];
     user: IUser;
-    presetChecklist?: IPresetChecklist;
-    item: IItem[];
+    presetChecklists?: IPresetChecklist[];
+    items: IItem[];
 }
 
 export interface IPatrolResult {
@@ -136,7 +137,7 @@ export interface IPatrolResult {
     zoneId: number;
     patrolId?: number;
 
-    comment?: IComment[];
+    comments?: IComment[];
     defects?: IDefect[]
     itemIZone?: IItemZone;
     patrol?: IPatrol;
@@ -148,7 +149,7 @@ export interface IItem {
     type: string;
     checklistId: number;
 
-    itemZone: IItemZone[];
+    itemZones: IItemZone[];
     checklist?: IChecklist
 }
 
@@ -171,16 +172,17 @@ export interface IZone {
 export interface IItemZone {
     itemId: number;
     zoneId: number;
-    zone: IZone;
+
+    results?: IPatrolResult;
     item: IItem;
-    result?: IPatrolResult;
+    zone: IZone;
 }
 
 export interface ILocation {
     id: number
     name: string
 
-    zone: IZone[]
+    zones: IZone[]
 }
 
 export interface IComment {
@@ -203,7 +205,7 @@ export interface IImage {
 
     user?: IUser;
     profiles: IProfile[];
-    defect: IDefectIImage[];
+    defects: IDefectIImage[];
 }
 
 export interface IDefectIImage {
