@@ -1,8 +1,24 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Notification ใช้สำหรับแสดงและจัดการรายการแจ้งเตือนของผู้ใช้งาน รวมถึงการเปลี่ยนสถานะการแจ้งเตือน 
+ *   และแสดงรายการแจ้งเตือนล่าสุดในรูปแบบ Dropdown
+ *
+ * Input:
+ *   - ไม่มี props ที่รับเข้ามาโดยตรง
+ *   - ใช้ข้อมูลแจ้งเตือน (notifications) และข้อมูลผู้ใช้ (user) ที่ดึงมาจาก API
+ *
+ * Output:
+ *   - Dropdown แสดงรายการแจ้งเตือนล่าสุดสูงสุด 8 รายการ
+ *   - ปุ่ม "Mark All As Read" สำหรับเปลี่ยนสถานะแจ้งเตือนทั้งหมดให้เป็น "อ่านแล้ว"
+ *   - การคลิกแจ้งเตือนเปลี่ยนสถานะเป็น "อ่านแล้ว" และนำทางไปยัง URL ถ้ามี
+**/
+
 'use client'
 import React, { useEffect, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
@@ -100,7 +116,6 @@ export default function Notification() {
         return recentNotifications;
     };
 
-
     useEffect(() => {
         fetchNotifications();
         fetchUser();
@@ -126,38 +141,56 @@ export default function Notification() {
                 <Button variant='ghost' className="w-[45px] h-[45px] text-input relative">
                     <span className="material-symbols-outlined">notifications</span>
                     {unreadCount > 0 && (
-                        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-sky-500" />
+                        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className='p-0'>
-                <Card className="w-96 border-none" >
-                    <CardHeader>
-                        <CardTitle>{t('Notifications')}</CardTitle>
-                        <CardDescription>{t('YouHaveUnreadMessages', { count: unreadCount })}</CardDescription>
+            <DropdownMenuContent align="start" className='p-0'>
+                <Card className="flex flex-col w-[480px] h-[580px] border-none px-6 py-4 gap-4" >
+                    <CardHeader className='p-0 flex gap-0'>
+                        <CardTitle className='flex flex-col'>
+                            <div className='flex text-2xl w-full justify-between items-center'>
+                                {t('Notifications')}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" className="w-[45px] h-[45px]">
+                                            <span className="material-symbols-outlined items-center text-muted-foreground">
+                                                more_vert
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent align="end" className="p-0">
+                                        <DropdownMenuItem>
+                                            <h1 className='text-destructive'>{t("DeleteAllNotifications")}</h1>
+                                        </DropdownMenuItem>                     
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <p className='p-0 text-base font-normal text-muted-foreground'>{t('YouHaveUnreadMessages', { count: unreadCount })}</p>
+                        </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col">
-                        <ScrollArea className="p-0 h-[300px] w-full pr-4 overflow-y-auto">
+                    <div className='h-full w-full flex flex-col gap-6'>
+                        <ScrollArea className="flex-1 p-0 pr-4 overflow-y-auto">
                             {getRecentNotifications().map((notification, index) => {
                                 const { key, dynamicData } = formatMessage(notification.message);
-
                                 return (
                                     <Button
                                         key={index}
                                         variant={'ghost'}
-                                        className="justify-between items-center space-x-2 w-full h-fit gap-2 truncate"
+                                        className="justify-between items-center w-full h-fit gap-6 px-6 py-4 truncate mb-4"
                                         onClick={() => handleNotificationClick(notification)}
                                     >
-                                        <span className={`p-1 h-2 w-2 rounded-full ${notification.read ? 'bg-gray-400' : 'bg-sky-500'}`} />
+                                        <span className={`h-3 w-3 rounded-full ${notification.read ? 'bg-input' : 'bg-primary'}`} />
                                         <div className="flex flex-col justify-start w-full truncate gap-1">
                                             <textarea
-                                                className="text-sm font-medium text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
+                                                className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                 readOnly
                                             >
-                                                {n(key, { date: dynamicData})}
+                                                {n(key, { date: dynamicData })}
                                             </textarea>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs text-muted-foreground text-start">
+                                                <p className="text-xs font-normal text-muted-foreground text-start">
                                                     {timeAgo(notification.timestamp, d)}
                                                 </p>
                                                 {(() => {
@@ -174,8 +207,8 @@ export default function Notification() {
                                                             break;
                                                     }
                                                     return (
-                                                        <BadgeCustom height='20' width='100' variant={variant}>
-                                                            <p className='text-sm'>{s(notification.type)}</p>
+                                                        <BadgeCustom variant={variant}>
+                                                            {s(notification.type)}
                                                         </BadgeCustom>
                                                     );
                                                 })()}
@@ -184,15 +217,13 @@ export default function Notification() {
                                     </Button>
                                 );
                             })}
-
                         </ScrollArea>
-                    </CardContent>
-                    <CardFooter>
                         <Button variant={'primary'} size={'lg'} className="w-full"
                             onClick={markAllAsRead}>
                             {t('MarkAllAsRead')}
                         </Button>
-                    </CardFooter>
+                    </div>
+
                 </Card>
             </DropdownMenuContent>
         </DropdownMenu>

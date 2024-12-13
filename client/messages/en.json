@@ -59,7 +59,8 @@
     "Finish": "Finish",
     "Export": "Export",
     "Lock": "Lock",
-    "Unlock": "Unlock"
+    "Unlock": "Unlock",
+    "DeleteAllNotifications": "Delete All Notifications"
   },
   "Status": {
     "pending": "Pending",

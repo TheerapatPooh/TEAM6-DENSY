@@ -59,7 +59,8 @@
     "Finish": "เสร็จสิ้น",
     "Export": "นำออก",
     "Lock": "ล็อก",
-    "Unlock": "ปลดล็อก"
+    "Unlock": "ปลดล็อก",
+    "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด"
   },
   "Status": {
     "pending": "รอดำเนินการ",
