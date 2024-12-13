@@ -2,7 +2,7 @@
 import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useState } from 'react';
 import { IZone, ILocation } from '@/app/type';
-import { fetchData } from '@/lib/api';
+import { fetchData } from '@/lib/utils';
 import zonePath from '@/lib/zonePath.json'
 import wallPath from '@/lib/wallPath.json'
 import React from 'react';
@@ -41,7 +41,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
     setWalls(wallPath)
 
     if (location) {
-      const updatedZones = location.zone.map(zone => {
+      const updatedZones = location.zones.map(zone => {
         const matchedZonePath = zonePath.find(path => path.id === zone.id);
         return {
           ...zone,
@@ -84,7 +84,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
 
     setSelectedZones(updatedSelectedZones);
 
-    const selectedZoneObjects = location?.zone.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
+    const selectedZoneObjects = location?.zones.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
 
     // ตรวจสอบว่า onZoneSelect ไม่เป็น undefined ก่อนเรียกใช้งาน
     if (onZoneSelect) {

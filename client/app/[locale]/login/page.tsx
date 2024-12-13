@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form"
 import FormError from '@/components/form-error'
 import FormSuccess from '@/components/form-success'
-import { login } from '@/lib/api';
+import { login } from '@/lib/utils';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import EmblaAutoplay from 'embla-carousel-autoplay'
 import { useTheme } from 'next-themes';
