@@ -108,6 +108,7 @@ export interface IPreset {
     user?: IUser;
     presetChecklists?: IPresetChecklist[];
     patrols?: IPatrol[];
+    zones?: IZone[];
 }
 
 export interface IPresetChecklist {

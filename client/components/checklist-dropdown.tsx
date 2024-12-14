@@ -49,13 +49,13 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex justify-between w-full">
-              <p className="text-2xl">{checklist.title}</p>
-              <div className="flex  w-[300px] gap-2 items-center mr-[100px]">
+              <p className="text-2xl font-bold">{checklist.title}</p>
+              <div className="flex  w-[200px] gap-2 items-center mr-[100px]">
                 {selectUser ? (
                   <Avatar>
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser.profile.image?.path}`}
-                      />
+                    />
                     <AvatarFallback>
                       {getInitials(selectUser.profile.name)}
                     </AvatarFallback>
@@ -69,10 +69,10 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-muted-foreground">
-                engineering
+                person_search
               </span>
               <p className="font-semibold text-lg text-muted-foreground">
                 {t("Inspector")}

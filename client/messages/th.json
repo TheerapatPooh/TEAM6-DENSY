@@ -90,6 +90,27 @@
     "yearAgo": "{count} ปีที่แล้ว"
   },
   "Zone": {
+    "r&d_zone": "เขตวิจัยและพัฒนา",
+    "assembly_line_zone": "เขตสายการผลิต",
+    "raw_materials_storage_zone": "เขตคลังวัตถุดิบ",
+    "quality_control_zone": "เขตควบคุมคุณภาพ",
+    "it_zone": " เขตไอที",
+    "customer_service_zone": "เขตบริการลูกค้า",
+    "prototype_zone": "เขตต้นแบบ",
+    "manager_office": "  สำนักงานผู้จัดการ",
+    "water_supply": "เขตน้ำประปา",
+    "maintenance_zone": "เขตซ่อมบำรุง",
+    "warehouse": "คลังสินค้า",
+    "storage_zone": "เขตจัดเก็บสินค้า",
+    "server_room": "ห้องเซิร์ฟเวอร์",
+    "electrical_zone": "    เขตระบบไฟฟ้า",
+    "engineering_zone": "เขตวิศวกรรม",
+    "training_simulation_zone": "เขตฝึกอบรมและจำลองสถานการณ์",
+    "workstation_a": "พื้นที่ทำงาน A",
+    "workstation_b": "พื้นที่ทำงาน B",
+    "testing_lab": "ห้องทดลองและทดสอบ"
+  },
+  "Map": {
     "r&d_zone": "เขตวิจัย\nและพัฒนา",
     "assembly_line_zone": "เขตสายการผลิต",
     "raw_materials_storage_zone": "   เขตคลังวัตถุดิบ",

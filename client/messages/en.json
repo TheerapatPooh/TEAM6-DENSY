@@ -90,6 +90,27 @@
     "yearAgo": "{count} years ago"
   },
   "Zone": {
+    "r&d_zone": "R&D Zone",
+    "assembly_line_zone": "Assembly Line Zone",
+    "raw_materials_storage_zone": "Raw Materials Storage Zone",
+    "quality_control_zone": "Quality Control Zone",
+    "it_zone": "IT Zone",
+    "customer_service_zone": "Customer Service Zone",
+    "prototype_zone": "Prototype Zone",
+    "manager_office": "Manager Office",
+    "water_supply": "Water Supply",
+    "maintenance_zone": "Maintenance Zone",
+    "warehouse": "Warehouse",
+    "storage_zone": "Storage Zone",
+    "server_room": "Server Room",
+    "electrical_zone": "Electrical Zone",
+    "engineering_zone": "Engineering Zone",
+    "training_simulation_zone": "Training Simulation Zone",
+    "workstation_a": "Work Station A",
+    "workstation_b": "Work Station B",
+    "testing_lab": "Testing Lab"
+  },
+  "Map": {
     "r&d_zone": "R&D ZONE",
     "assembly_line_zone": "ASSEMBLY LINE\nZONE",
     "raw_materials_storage_zone": "RAW MATERIALS\nSTORAGE ZONE",

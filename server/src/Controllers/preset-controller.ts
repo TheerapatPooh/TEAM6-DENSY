@@ -184,7 +184,7 @@ export async function getPreset(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Preset ทั้งหมด
  * Input:
  * - req.query.latest: "true" | "false" (optional, ระบุเพื่อดึงเฉพาะ Preset ที่เป็นเวอร์ชันล่าสุด)
- * Output: JSON array ข้อมูลของ Preset ทั้งหมด รวมถึงรายการ Checklist
+ * Output: JSON array ข้อมูลของ Preset ทั้งหมดรวมถึงรายการ Checklist และรายการ Zone
 **/
 export async function getAllPresets(req: Request, res: Response) {
   try {
@@ -227,7 +227,30 @@ export async function getAllPresets(req: Request, res: Response) {
       return;
     }
 
-    let result = presets;
+    const result = presets.map((preset) => {
+      const zones = preset.presetChecklists.flatMap((checklist) =>
+        checklist.checklist.items.flatMap((item) =>
+          item.itemZones.map((itemZone) => ({
+            id: itemZone.zone.id,
+            name: itemZone.zone.name,
+          }))
+        )
+      );
+      
+      // ใช้ Set เพื่อกรองค่าที่ซ้ำกัน
+      const uniqueZones = Array.from(
+        new Map(zones.map((zone) => [`${zone.id}-${zone.name}`, zone])).values()
+      );
+
+      return {
+        id: preset.id,
+        title: preset.title,
+        description: preset.description,
+        presetChecklists: preset.presetChecklists,
+        zones: uniqueZones,
+      };
+    });
+
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error);
@@ -242,44 +265,44 @@ export async function getAllPresets(req: Request, res: Response) {
 **/
 export async function removePreset(req: Request, res: Response) {
   try {
-      const userRole = (req as any).user.role;
-      if (userRole !== 'admin') {
-          res.status(403).json({ message: "Access Denied: Admins only" });
-          return;
-      }
+    const userRole = (req as any).user.role;
+    if (userRole !== 'admin') {
+      res.status(403).json({ message: "Access Denied: Admins only" });
+      return;
+    }
 
-      const presetId = parseInt(req.params.id, 10);
-      if (isNaN(presetId)) {
-          res.status(400).json({ message: "Invalid Preset ID" });
-          return;
-      }
+    const presetId = parseInt(req.params.id, 10);
+    if (isNaN(presetId)) {
+      res.status(400).json({ message: "Invalid Preset ID" });
+      return;
+    }
 
-      // ตรวจสอบว่า Preset มีการใช้งานใน Patrol หรือไม่
-      const patrolCount = await prisma.patrol.count({
-          where: { presetId: presetId },
+    // ตรวจสอบว่า Preset มีการใช้งานใน Patrol หรือไม่
+    const patrolCount = await prisma.patrol.count({
+      where: { presetId: presetId },
+    });
+
+    if (patrolCount > 0) {
+      res.status(400).json({
+        message: "Cannot delete Preset: Patrols are still linked to this Preset",
       });
+      return;
+    }
 
-      if (patrolCount > 0) {
-          res.status(400).json({
-              message: "Cannot delete Preset: Patrols are still linked to this Preset",
-          });
-          return;
-      }
+    // ลบข้อมูล PresetChecklist ที่เกี่ยวข้อง
+    await prisma.presetChecklist.deleteMany({
+      where: { presetId: presetId },
+    });
 
-      // ลบข้อมูล PresetChecklist ที่เกี่ยวข้อง
-      await prisma.presetChecklist.deleteMany({
-          where: { presetId: presetId },
-      });
+    // ลบข้อมูล Preset
+    await prisma.preset.delete({
+      where: { id: presetId },
+    });
 
-      // ลบข้อมูล Preset
-      await prisma.preset.delete({
-          where: { id: presetId },
-      });
-
-      res.status(200).json({ message: "Preset removed successfully" });
+    res.status(200).json({ message: "Preset removed successfully" });
   } catch (error) {
-      console.error("Error removing preset:", error);
-      res.status(500).json({ message: "Internal server error", error });
+    console.error("Error removing preset:", error);
+    res.status(500).json({ message: "Internal server error", error });
   }
 }
 
@@ -476,7 +499,7 @@ export async function createChecklist(req: Request, res: Response) {
       }
     }
 
-    res.status(201).json({ message: "Checklist created successfully",checklists: newChecklist });
+    res.status(201).json({ message: "Checklist created successfully", checklists: newChecklist });
   } catch (error) {
     console.error(error)
   }

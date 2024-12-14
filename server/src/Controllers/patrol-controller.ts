@@ -138,7 +138,7 @@ export async function getPatrol(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ทั้งหมดตามสถานะ
  * Input:
- * - req.query: { status: String | undefined } (สถานะของ Patrol เช่น "pending", "scheduled")
+ * - req.query: { status, preset, startDate, endDate, search } ("status", "preset", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
  * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Patrol และข้อมูลที่เกี่ยวข้อง
 **/
