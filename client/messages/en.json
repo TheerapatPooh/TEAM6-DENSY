@@ -60,7 +60,8 @@
     "Export": "Export",
     "Lock": "Lock",
     "Unlock": "Unlock",
-    "DeleteAllNotifications": "Delete All Notifications"
+    "DeleteAllNotifications": "Delete All Notifications",
+    "Total": "Total"
   },
   "Status": {
     "pending": "Pending",

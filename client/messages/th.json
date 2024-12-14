@@ -60,7 +60,8 @@
     "Export": "นำออก",
     "Lock": "ล็อก",
     "Unlock": "ปลดล็อก",
-    "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด"
+    "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด",
+    "Total": "ทั้งหมด"
   },
   "Status": {
     "pending": "รอดำเนินการ",

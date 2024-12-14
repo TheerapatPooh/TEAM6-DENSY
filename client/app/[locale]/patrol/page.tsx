@@ -278,7 +278,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col p-4 gap-y-4">
+    <div className="flex flex-col px-6 py-4 gap-4">
       <div className="flex items-center gap-2">
         <Textfield
           iconName="search"
@@ -295,8 +295,8 @@ export default function Page() {
             <span className="material-symbols-outlined">swap_vert</span>
             <div className="text-lg">{t('Sort')}</div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-2">
-            <DropdownMenuLabel>{t('SortBy')}</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="p-2 gap-2">
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.by}
               onValueChange={(value) => handleSortChange('by', value)}
@@ -309,7 +309,7 @@ export default function Page() {
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
-            <DropdownMenuLabel>{t('Order')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.order}
               onValueChange={(value) => handleSortChange('order', value)}
@@ -337,7 +337,7 @@ export default function Page() {
             align="end"
           >
             <div>
-              <DropdownMenuLabel>{t('Date')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Date')}</DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
@@ -346,7 +346,7 @@ export default function Page() {
               />
             </div>
             <div>
-              <DropdownMenuLabel>{t('Status')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatus.includes("pending")}
                 onCheckedChange={(checked) => toggleStatusFilter("pending", checked)}
@@ -402,7 +402,7 @@ export default function Page() {
 
             </div>
             <div>
-              <DropdownMenuLabel>{t('Preset')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Preset')}</DropdownMenuLabel>
               <Select
                 value={filter?.presetTitle || 'All'}
                 onValueChange={(value) =>
@@ -432,7 +432,7 @@ export default function Page() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-full justify-end gap-2">
+            <div className="flex w-full justify-end mt-4 gap-2">
               <Button size="sm" variant="secondary" onClick={resetFilter}>
                 {t('Reset')}
               </Button>

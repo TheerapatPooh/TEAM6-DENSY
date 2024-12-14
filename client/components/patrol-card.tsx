@@ -89,7 +89,6 @@ export function PatrolCard({
           }
         }
       }
-      console.log(id, countFails, countDefects)
       setItems(countItems);
       setFails(countFails);
       setDefects(countDefects);
@@ -120,7 +119,7 @@ export function PatrolCard({
   const handleDetail = () => {
     router.push(`/${locale}/patrol/${id}`)
   }
-  
+
   const uniqueInspectors: Partial<IUser[]> = inspectors.reduce((acc, insp) => {
     // เช็คว่าชื่อยังไม่อยู่ใน accumulator หรือไม่
     if (!acc.some(item => item.profile.name === insp.profile.name)) {
@@ -128,7 +127,7 @@ export function PatrolCard({
     }
     return acc;
   }, []);
-  
+
   if (!mounted) {
     return (
       null
@@ -136,52 +135,53 @@ export function PatrolCard({
   }
 
   return (
-    <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
-      <CardHeader className="gap-0 p-[10px]">
-        <div className="flex justify-between items-center">
-          <CardDescription className="text-lg font-semibold">
+    <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
+      <CardHeader className="flex flex-row gap-0 p-0">
+        <div className="flex flex-col justify-between items-start gap-1 truncate">
+          <CardDescription className="text-lg font-semibold text-muted-foreground">
             {formattedDate}
           </CardDescription>
-          {status === ("pending" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-blue-500">
-                hourglass_top
-              </span>
-            </div>
-          ) : status === ("scheduled" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-yellow-500">
-                event_available
-              </span>
-            </div>
-          ) : status === ("on_going" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-purple-500">
-                cached
-              </span>
-            </div>
-          ) : status === ("completed" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-green-500">
-                check
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-red-500">
-                error
-              </span>
-            </div>
-          )}
+          <CardTitle className="text-card-foreground text-2xl truncate">
+            {preset.title}
+          </CardTitle>
         </div>
-        <CardTitle className="card-foreground text-2xl truncate">
-          {preset.title}
-        </CardTitle>
+        {status === ("pending" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-primary/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-primary">
+              hourglass_top
+            </span>
+          </div>
+        ) : status === ("scheduled" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-yellow/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-yellow">
+              event_available
+            </span>
+          </div>
+        ) : status === ("on_going" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-purple/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-purple">
+              cached
+            </span>
+          </div>
+        ) : status === ("completed" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-green/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-green">
+              check
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
+            <span className="material-symbols-outlined text-red-500">
+              error
+            </span>
+          </div>
+        )}
+
       </CardHeader>
-      <CardContent className="gap-0 px-[10px] py-0">
-        <div className="flex gap-2.5 text-muted-foreground items-center">
+      <CardContent className="flex flex-col gap-2 p-0">
+        <div className="flex text-muted-foreground items-center gap-1">
           <span className="material-symbols-outlined">description</span>
-          <p className="text-xl">{id}</p>
+          <p className="text-lg font-normal">{id}</p>
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
@@ -193,12 +193,12 @@ export function PatrolCard({
             onMouseLeave={handleMouseLeave}
             asChild
           >
-            <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
-              <span className="material-symbols-outlined me-2.5">
-                engineering
+            <div className="flex text-muted-foreground items-center">
+              <span className="material-symbols-outlined me-1">
+                person_search
               </span>
               {uniqueInspectors.length > 0 && (
-                <div className="flex items-center me-2.5 truncate max-w-[190px]">
+                <div className="flex items-center me-1 truncate max-w-[190px]">
                   <p className="text-xl me-2.5 truncate">{uniqueInspectors[0].profile.name}</p>
                 </div>
               )}
@@ -226,18 +226,18 @@ export function PatrolCard({
               )}
             </div>
           </HoverCardTrigger>
-          <HoverCardContent className="w-full border-none custom-shadow">
-            <div className="flex items-center justify-center">
-              <span className="material-symbols-outlined me-2.5">
-                engineering
+          <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
+            <div className="flex items-center justify-center gap-1">
+              <span className="material-symbols-outlined">
+                person_search
               </span>
-              <p className="text-lg font-medium text-center">
+              <p className="text-lg font-semibold">
                 {t("InspectorList")}
               </p>
             </div>
             {uniqueInspectors.map((inspector, idx) => {
               return (
-                <div key={idx} className="flex items-center p-2">
+                <div key={idx} className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary">
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
@@ -246,34 +246,42 @@ export function PatrolCard({
                       {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-[20px]">{inspector.profile.name}</p>
+                  <p className="text-lg">{inspector.profile.name}</p>
                 </div>
               );
             })}
+            <div className="flex items-center justify-between w-full text-muted-foreground">
+              <p className="text-lg font-semibold">
+                {t("Total")}
+              </p>
+              <p className="text-lg font-semibold">
+                {uniqueInspectors.length}
+              </p>
+            </div>
           </HoverCardContent>
         </HoverCard>
       </CardContent>
-      <CardFooter className="gap-0 px-[10px]">
-        <div className="flex gap-2.5 items-center w-full">
-          <div className="flex gap-2.5 text-blue-500 items-center">
+      <CardFooter className="p-0 gap-0">
+        <div className="flex gap-2 items-center w-full">
+          <div className="flex gap-1 text-primary items-center">
             <span className="material-symbols-outlined">checklist</span>
-            <p className="text-[20px] font-semibold">{items}</p>
+            <p className="text-xl font-semibold">{items}</p>
           </div>
-          <div className="flex gap-2.5 text-yellow-500 items-center">
+          <div className="flex gap-1 text-orange items-center">
             <span className="material-symbols-outlined">close</span>
-            <p className="text-[20px] font-semibold">{fails}</p>
+            <p className="text-xl font-semibold">{fails}</p>
           </div>
-          <div className="flex gap-2.5 text-red-500 items-center">
-            <span className="material-symbols-outlined text-red-500">
+          <div className="flex gap-1 text-destructive items-center">
+            <span className="material-symbols-outlined">
               error
             </span>
-            <p className="text-[20px] font-semibold">{defects}</p>
+            <p className="text-xl font-semibold">{defects}</p>
           </div>
           <div className="ml-auto items-center">
             <DropdownMenu>
               <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" className="w-[45px] h-[45px]">
-                  <span className="material-symbols-outlined items-center text-muted-foreground">
+                  <span className="material-symbols-outlined items-center text-input">
                     more_vert
                   </span>
                 </Button>
@@ -340,8 +348,8 @@ export function PatrolCard({
 
 export function CreatePatrolCard() {
   return (
-    <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
-      <span className="material-symbols-outlined text-card text-9xl">
+    <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-full hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
+      <span className="material-symbols-outlined text-card text-8xl">
         note_add
       </span>
     </Card>
