@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {

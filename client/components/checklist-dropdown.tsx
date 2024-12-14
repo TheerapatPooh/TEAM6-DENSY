@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import UserDropdown from "@/components/user-dropdown";
 import {
   Accordion,
