@@ -348,7 +348,7 @@ export function PatrolCard({
 
 export function CreatePatrolCard() {
   return (
-    <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-full hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
+    <Card className="bg-accent-gradient border-none flex justify-center items-center min-h-[249px] w-full h-full hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
       <span className="material-symbols-outlined text-card text-8xl">
         note_add
       </span>

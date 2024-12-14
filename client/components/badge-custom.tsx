@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 
 interface BadgeCustomProps {
     variant?: keyof typeof badgeVariants,
+    shape?: keyof typeof shapeVariants,
     iconName?: string,
     showIcon?: boolean,
     timeStamp?: string,
@@ -11,6 +12,11 @@ interface BadgeCustomProps {
     width?: string,
     height?: string,
     children?: React.ReactNode
+}
+
+export const shapeVariants = {
+    default: "rounded-full",
+    squre: "rounded-lg",
 }
 
 export const badgeVariants = {
@@ -27,24 +33,25 @@ export const badgeVariants = {
 
 export default function BadgeCustom({
     variant = 'default',
+    shape: shapeProp = 'default',
     iconName,
     showIcon = false,
     timeStamp,
     showTime = false,
     width,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    height, 
     children
 }: BadgeCustomProps) {
     const badgeClass = badgeVariants[variant] || badgeVariants.default;
+    const shape = shapeVariants[shapeProp] || shapeVariants.default
 
     return (
         <Badge className={cn(
-            `${badgeClass} cursor-pointer align-center h-[30px] py-4`,
+            `${badgeClass} ${shape} cursor-pointer align-center h-[30px] py-4`,
             width ? width : ("w-[180px]"),
-            showTime ? "justify-between" : showIcon ? "justify-between" : "justify-center" 
+            showTime ? "justify-between" : showIcon ? "justify-center" : "justify-center" 
         )}>
-            <div className='flex gap-2 items-center justify-between w-full'>
+            <div className='flex gap-2 items-center'>
                 {showIcon && iconName && (
                     <span className="material-symbols-outlined text-[22px]">
                         {iconName}
