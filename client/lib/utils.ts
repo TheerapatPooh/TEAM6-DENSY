@@ -206,46 +206,6 @@ export const sortData = (patrolData: any, sort: { by: string; order: string }) =
   return sortedData
 }
 
-export function filterPatrol(filter: FilterPatrol | null, patrols: IPatrol[]) {
-  if (filter?.presetTitle === "All" && JSON.stringify(filter?.patrolStatus) === JSON.stringify(["pending", "on_going", "scheduled"]) && filter?.dateRange.start === null && filter?.dateRange.end === null) {
-    return patrols
-  }
-  else if (filter?.patrolStatus.length === 0) {
-    return []
-  }
-  else {
-    const newFilteredPatrolData = patrols.filter((patrol) => {
-      // Convert patrol.date from string to ISO string
-      const patrolDateISOString = new Date(patrol.date).toISOString();
-
-      // Convert filter dateRange.start and dateRange.end to ISO strings if they exist
-      const filterStartISOString = filter?.dateRange.start ? new Date(filter.dateRange.start).toISOString() : null;
-      const filterEndISOString = filter?.dateRange.end ? new Date(filter.dateRange.end).toISOString() : null;
-
-      // Check if the presetTitle matches
-      let matchesPreset: boolean;
-      if (filter?.presetTitle === 'All') {
-        matchesPreset = true;
-      } else {
-        matchesPreset = !filter?.presetTitle || patrol.preset?.title === filter?.presetTitle;
-      }
-
-      // Check if the status matches
-      const matchesStatus = filter?.patrolStatus.length === 0 || filter?.patrolStatus.includes(patrol.status);
-
-      // Check if the date is within the selected range using ISO string comparison
-      const matchesDateRange =
-        (!filterStartISOString || patrolDateISOString >= filterStartISOString) &&  // Compare ISO strings
-        (!filterEndISOString || patrolDateISOString <= filterEndISOString);        // Compare ISO strings
-
-      // Return true if all conditions match
-      return matchesPreset && matchesStatus && matchesDateRange;
-    });
-    return newFilteredPatrolData
-  }
-}
-
-
 // Function to calculate time ago
 export function timeAgo(timestamp: string, t: any): string {
   const now = new Date();

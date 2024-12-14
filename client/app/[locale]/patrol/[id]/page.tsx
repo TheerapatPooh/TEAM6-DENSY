@@ -174,7 +174,7 @@ export default function Page() {
       }
     }
 
-    if (data.result.length === resultCount) {
+    if (data.results.length === resultCount) {
       try {
         localStorage.removeItem(`patrolResults_${patrol.id}`);
         localStorage.removeItem(`otherResults_${patrol.id}`);

@@ -33,7 +33,8 @@ export interface IDefect {
     description: string;
     type: itemType;
     status: defectStatus;
-    timestamp: string;
+    startTime: string;
+    endTime: string;
     userId?: number;
     patrolResultId?: number;
 
@@ -71,15 +72,17 @@ export interface IProfile {
 export interface IPatrol {
     id: number;
     date: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    duration?: string | null;
+    startTime: string | null;
+    endTime: string | null;
+    duration: string | null;
     status: patrolStatus;
-    presetId?: number
+    presetId: number;
 
     patrolChecklists: IPatrolChecklist[];
     preset: IPreset;
     results: IPatrolResult[];
+    itemCounts: number; 
+    inspectors?: IUser[]
 }
 
 export interface IPatrolChecklist {
@@ -105,6 +108,7 @@ export interface IPreset {
     user?: IUser;
     presetChecklists?: IPresetChecklist[];
     patrols?: IPatrol[];
+    zones?: IZone[];
 }
 
 export interface IPresetChecklist {

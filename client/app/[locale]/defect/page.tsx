@@ -56,7 +56,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col p-4">
+    <div className="flex flex-col">
 
       <div className="flex items-center gap-2">
         <Textfield

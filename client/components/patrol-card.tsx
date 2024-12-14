@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { IPatrolChecklist, patrolStatus, IUser } from "@/app/type";
+import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import {
@@ -34,34 +34,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 
-export interface patrolCardProps {
-  patrolStatus: patrolStatus;
-  patrolDate: Date;
-  patrolPreset: string;
-  patrolId: number;
-  patrolChecklist: IPatrolChecklist[]
-  inspector: IUser[];
+export interface IPatrolCard {
+  id: number;
+  date: Date;
+  status: patrolStatus;
+  preset: IPreset;
+  itemCounts: number;
+  inspectors: IUser[];
 }
 
 export function PatrolCard({
-  patrolStatus,
-  patrolDate,
-  patrolPreset,
-  patrolId,
-  patrolChecklist,
-  inspector = [],
-}: patrolCardProps) {
+  id,
+  date,
+  status,
+  preset,
+  itemCounts,
+  inspectors = [],
+}: IPatrolCard) {
   const formattedDate =
-    patrolDate instanceof Date
-      ? patrolDate.toLocaleDateString("en-GB", {
+    date instanceof Date
+      ? date.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       })
-      : "N/A"; // Fallback if patrolDate is not valid
+      : "N/A"; // Fallback if date is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [user, setUser] = useState<IUser[]>();
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
@@ -70,37 +69,17 @@ export function PatrolCard({
 
   const router = useRouter()
   const locale = useLocale()
-  const getData = async () => {
-    try {
-      const userFetch = await fetchData("get", "/users?profile=true&image=true", true);
-      setUser(userFetch);
-    } catch (error) {
-      console.error("Failed to fetch profile data:", error);
-    }
-  };
 
   const getPatrolData = async () => {
     try {
-      let countItems = 0;
+      let countItems = itemCounts;
       let countFails = 0;
       let countDefects = 0;
 
-      if (patrolChecklist) {
-        for (const patrolChecklistObj of patrolChecklist) {
-          if (patrolChecklistObj.checklist && patrolChecklistObj.checklist.items) {
-            for (const item of patrolChecklistObj.checklist.items) {
-              if (item.itemZones) {
-                countItems += item.itemZones.length;
-              }
-            }
-          }
-        }
-      }
-
-      if (patrolStatus !== 'pending' && patrolStatus !== 'scheduled') {
-        const resultFetch = await fetchData("get", `/patrol/${patrolId}?result=true`, true);
-        if (resultFetch?.result) {
-          for (const patrolResult of resultFetch.result) {
+      if (status !== 'pending' && status !== 'scheduled') {
+        const resultFetch: Partial<IPatrol> = await fetchData("get", `/patrol/${id}?result=true`, true);
+        if (resultFetch?.results) {
+          for (const patrolResult of resultFetch.results) {
             if (patrolResult.status === false) {
               countFails++;
               if (patrolResult.defects && patrolResult.defects.length !== 0) {
@@ -119,7 +98,6 @@ export function PatrolCard({
   };
 
   useEffect(() => {
-    getData();
     getPatrolData();
     setMounted(true);
   }, []);
@@ -139,10 +117,17 @@ export function PatrolCard({
   };
 
   const handleDetail = () => {
-    router.push(`/${locale}/patrol/${patrolId}`)
+    router.push(`/${locale}/patrol/${id}`)
   }
 
-  const inspectorNames = inspector.map((insp) => insp.profile.name).filter(Boolean);
+  const uniqueInspectors: Partial<IUser[]> = inspectors.reduce((acc, insp) => {
+    // เช็คว่าชื่อยังไม่อยู่ใน accumulator หรือไม่
+    if (!acc.some(item => item.profile.name === insp.profile.name)) {
+      acc.push(insp); // ถ้าไม่ซ้ำก็เพิ่มเข้าไป
+    }
+    return acc;
+  }, []);
+
   if (!mounted) {
     return (
       null
@@ -150,52 +135,53 @@ export function PatrolCard({
   }
 
   return (
-    <Card className="custom-shadow border-none w-full h-[230px] hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
-      <CardHeader className="gap-0 p-[10px]">
-        <div className="flex justify-between items-center">
-          <CardDescription className="text-lg font-semibold">
+    <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
+      <CardHeader className="flex flex-row gap-0 p-0">
+        <div className="flex flex-col justify-between items-start gap-1 truncate">
+          <CardDescription className="text-lg font-semibold text-muted-foreground">
             {formattedDate}
           </CardDescription>
-          {patrolStatus === ("pending" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-blue-500">
-                hourglass_top
-              </span>
-            </div>
-          ) : patrolStatus === ("scheduled" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-yellow-500">
-                event_available
-              </span>
-            </div>
-          ) : patrolStatus === ("on_going" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-purple-500">
-                cached
-              </span>
-            </div>
-          ) : patrolStatus === ("completed" as patrolStatus) ? (
-            <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-green-500">
-                check
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
-              <span className="material-symbols-outlined text-red-500">
-                error
-              </span>
-            </div>
-          )}
+          <CardTitle className="text-card-foreground text-2xl truncate">
+            {preset.title}
+          </CardTitle>
         </div>
-        <CardTitle className="card-foreground text-2xl truncate">
-          {patrolPreset}
-        </CardTitle>
+        {status === ("pending" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-primary/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-primary">
+              hourglass_top
+            </span>
+          </div>
+        ) : status === ("scheduled" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-yellow/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-yellow">
+              event_available
+            </span>
+          </div>
+        ) : status === ("on_going" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-purple/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-purple">
+              cached
+            </span>
+          </div>
+        ) : status === ("completed" as patrolStatus) ? (
+          <div className="flex items-center justify-center rounded-full bg-green/20 w-9 h-9 custom-shadow">
+            <span className="material-symbols-outlined text-green">
+              check
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
+            <span className="material-symbols-outlined text-red-500">
+              error
+            </span>
+          </div>
+        )}
+
       </CardHeader>
-      <CardContent className="gap-0 px-[10px] py-0">
-        <div className="flex gap-2.5 text-muted-foreground items-center">
+      <CardContent className="flex flex-col gap-2 p-0">
+        <div className="flex text-muted-foreground items-center gap-1">
           <span className="material-symbols-outlined">description</span>
-          <p className="text-xl">{patrolId}</p>
+          <p className="text-lg font-normal">{id}</p>
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
@@ -207,95 +193,95 @@ export function PatrolCard({
             onMouseLeave={handleMouseLeave}
             asChild
           >
-            <div className="flex text-muted-foreground items-center overflow-hidden pb-2">
-              <span className="material-symbols-outlined me-2.5">
-                engineering
+            <div className="flex text-muted-foreground items-center">
+              <span className="material-symbols-outlined me-1">
+                person_search
               </span>
-              {inspectorNames.length > 0 && (
-                <div className="flex items-center me-2.5 truncate max-w-[190px]">
-                  <p className="text-xl me-2.5 truncate">{inspectorNames[0]}</p>
+              {uniqueInspectors.length > 0 && (
+                <div className="flex items-center me-1 truncate max-w-[190px]">
+                  <p className="text-xl me-2.5 truncate">{uniqueInspectors[0].profile.name}</p>
                 </div>
               )}
-              {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
-                const matchingProfile = user?.find(
-                  (profile) => profile.profile.name === inspectorName
-                );
-
+              {uniqueInspectors.map((inspector, idx) => {
                 return (
                   <Avatar key={idx} className="custom-shadow ms-[-10px]">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
-                      alt={inspectorName}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                     />
                     <AvatarFallback>
-                      {getInitials(inspectorName)}
+                      {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>
                 );
               })}
 
-              {inspectorNames.length > 5 && (
+              {uniqueInspectors.length > 5 && (
                 <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                   <AvatarImage src="" />
                   <span className="absolute text-card-foreground text-[16px] font-semibold">
-                    +{inspectorNames.length - 5}
+                    +{uniqueInspectors.length - 5}
                   </span>
                   <AvatarFallback></AvatarFallback>
                 </Avatar>
               )}
             </div>
           </HoverCardTrigger>
-          <HoverCardContent className="w-full border-none custom-shadow">
-            <div className="flex items-center justify-center">
-              <span className="material-symbols-outlined me-2.5">
-                engineering
+          <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
+            <div className="flex items-center justify-center gap-1">
+              <span className="material-symbols-outlined">
+                person_search
               </span>
-              <p className="text-lg font-medium text-center">
+              <p className="text-lg font-semibold">
                 {t("InspectorList")}
               </p>
             </div>
-            {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
-              const matchingProfile = user?.find(
-                (profile) => profile.profile.name === inspectorName
-              );
+            {uniqueInspectors.map((inspector, idx) => {
               return (
-                <div key={idx} className="flex items-center p-2">
+                <div key={idx} className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary">
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                     />
                     <AvatarFallback>
-                      {getInitials(inspectorName)}
+                      {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-[20px]">{inspectorName}</p>
+                  <p className="text-lg">{inspector.profile.name}</p>
                 </div>
               );
             })}
+            <div className="flex items-center justify-between w-full text-muted-foreground">
+              <p className="text-lg font-semibold">
+                {t("Total")}
+              </p>
+              <p className="text-lg font-semibold">
+                {uniqueInspectors.length}
+              </p>
+            </div>
           </HoverCardContent>
         </HoverCard>
       </CardContent>
-      <CardFooter className="gap-0 px-[10px]">
-        <div className="flex gap-2.5 items-center w-full">
-          <div className="flex gap-2.5 text-blue-500 items-center">
+      <CardFooter className="p-0 gap-0">
+        <div className="flex gap-2 items-center w-full">
+          <div className="flex gap-1 text-primary items-center">
             <span className="material-symbols-outlined">checklist</span>
-            <p className="text-[20px] font-semibold">{items}</p>
+            <p className="text-xl font-semibold">{items}</p>
           </div>
-          <div className="flex gap-2.5 text-yellow-500 items-center">
+          <div className="flex gap-1 text-orange items-center">
             <span className="material-symbols-outlined">close</span>
-            <p className="text-[20px] font-semibold">{fails}</p>
+            <p className="text-xl font-semibold">{fails}</p>
           </div>
-          <div className="flex gap-2.5 text-red-500 items-center">
-            <span className="material-symbols-outlined text-red-500">
+          <div className="flex gap-1 text-destructive items-center">
+            <span className="material-symbols-outlined">
               error
             </span>
-            <p className="text-[20px] font-semibold">{defects}</p>
+            <p className="text-xl font-semibold">{defects}</p>
           </div>
           <div className="ml-auto items-center">
             <DropdownMenu>
               <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" className="w-[45px] h-[45px]">
-                  <span className="material-symbols-outlined items-center text-muted-foreground">
+                  <span className="material-symbols-outlined items-center text-input">
                     more_vert
                   </span>
                 </Button>
@@ -335,7 +321,7 @@ export function PatrolCard({
                             try {
                               await fetchData(
                                 "delete",
-                                `/patrol/${patrolId}`,
+                                `/patrol/${id}`,
                                 true
                               );
                               e.stopPropagation()
@@ -362,8 +348,8 @@ export function PatrolCard({
 
 export function CreatePatrolCard() {
   return (
-    <Card className="bg-accent-gradient border-none flex justify-center items-center w-full h-[225px] hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
-      <span className="material-symbols-outlined text-card text-9xl">
+    <Card className="bg-accent-gradient border-none flex justify-center items-center min-h-[249px] w-full h-full hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
+      <span className="material-symbols-outlined text-card text-8xl">
         note_add
       </span>
     </Card>

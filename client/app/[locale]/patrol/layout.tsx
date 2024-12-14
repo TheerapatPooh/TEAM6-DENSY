@@ -7,7 +7,7 @@ export default function PatrolLayout({
   }>) {
     return (
     <>
-      <Header />
+      <Header variant="inspector"/>
       {children}
     </>
     );

@@ -19,7 +19,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
-  const z = useTranslations('Zone')
+  const m = useTranslations('Map')
 
   useEffect(() => {
     if (disable && initialSelectedZones) {
@@ -141,7 +141,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
                   <Text
                     x={zone.text.x} // ตำแหน่ง x
                     y={zone.text.y} // ตำแหน่ง y
-                    text={z(zone.name)} // ข้อความที่จะแสดง
+                    text={m(zone.name)} // ข้อความที่จะแสดง
                     fontSize={zone.text.fontSize} // ขนาดฟอนต์
                     fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
                     fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor

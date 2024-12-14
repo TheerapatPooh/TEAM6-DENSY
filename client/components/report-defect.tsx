@@ -93,7 +93,7 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
               schedule
             </span>
             <span className="text-lg font-bold text-muted-foreground cursor-default ">
-              {formatTime(defect.timestamp)}
+              {formatTime(defect.startTime)}
             </span>
             <h2 className="text-lg font-bold text-card-foreground cursor-default ">
               {defect.name}

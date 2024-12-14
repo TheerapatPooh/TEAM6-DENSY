@@ -1,5 +1,21 @@
-"use client";
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ ProfileDropdown ใช้สำหรับแสดงเมนูโปรไฟล์ของผู้ใช้งาน 
+ *   โดยจะแสดงข้อมูลผู้ใช้เช่นรูปประจำตัวและชื่อผู้ใช้ พร้อมปุ่มเมนูย่อยเพื่อทำการจัดการโปรไฟล์หรือออกจากระบบ
+ *
+ * Input:
+ *   - ไม่มี props ที่รับเข้ามาโดยตรง
+ *   - ตัวคอมโพเนนต์จะทำการดึงข้อมูล profile ของผู้ใช้งานผ่านฟังก์ชัน fetchData
+ *   - เมื่อข้อมูลพร้อมแล้วจะแสดงรูปประจำตัว (Avatar) และชื่อผู้ใช้งาน
+ *
+ * Output:
+ *   - Dropdown ที่เมื่อกดที่โปรไฟล์ จะแสดงเมนูย่อย:
+ *       - Profile: สำหรับไปยังหน้าจัดการโปรไฟล์ของผู้ใช้งาน
+ *       - Logout: สำหรับออกจากระบบ
+ *
+**/
 
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import {
   DropdownMenu,
@@ -34,7 +50,7 @@ export default function ProfileDropdown() {
     return nameParts.length === 1
       ? nameParts[0].charAt(0).toUpperCase()
       : nameParts[0].charAt(0).toUpperCase() +
-          nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+      nameParts[nameParts.length - 1].charAt(0).toUpperCase();
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -72,13 +88,13 @@ export default function ProfileDropdown() {
     };
   }, []);
 
- 
 
-  
+
+
   if (!mounted) {
     return null;
   }
-  
+
   return (
     <div>
       <DropdownMenu>
@@ -86,30 +102,32 @@ export default function ProfileDropdown() {
           <Button
             ref={buttonRef}
             variant="ghost"
-            className="text-input w-[226px] h-[50px] bg-card flex gap-[10px] justify-start items-center py-[10px] px-[20px]"
+            className="text-input w-56 h-[45px] bg-card flex gap-2 justify-between items-center py-2 px-2"
             onPointerDown={handleIconClick}
           >
-            {profile ? (
-              <Avatar>
-                <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${profile.profile.image?.path}`}/>
-                <AvatarFallback>
-                  {getInitials(profile.profile.name)}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <Skeleton className="h-12 w-12 rounded-full" />
-            )}
-            <div className="w-[97px] h-[27px] font-medium truncate">
+            <div className="flex items-center gap-2">
               {profile ? (
-                profile.profile.name
+                <Avatar>
+                  <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${profile.profile.image?.path}`} />
+                  <AvatarFallback>
+                    {getInitials(profile.profile.name)}
+                  </AvatarFallback>
+                </Avatar>
               ) : (
-                <Skeleton className="h-full w-full" />
+                <Skeleton className="h-12 w-12 rounded-full" />
+
               )}
+              <div className="w-[97px] h-[27px] font-normal text-lg truncate">
+                {profile ? (
+                  profile.profile.name
+                ) : (
+                  <Skeleton className="h-full w-full" />
+                )}
+              </div>
             </div>
             <span
-              className={`material-symbols-outlined inline-block transition-transform duration-300 ${
-                isFlipped ? "rotate-180" : "rotate-0"
-              }`}
+              className={`material-symbols-outlined inline-block transition-transform duration-300 ${isFlipped ? "rotate-180" : "rotate-0"
+                }`}
             >
               stat_minus_1
             </span>
