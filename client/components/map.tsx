@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { IZone, ILocation } from '@/app/type';
 import { fetchData } from '@/lib/api';
 import zonePath from '@/lib/zonePath.json'
+import zonePathMd from '@/lib/zonePath-md.json'
 import zonePathSm from '@/lib/zonePath-sm.json'
 import wallPath from '@/lib/wallPath.json'
-import wallPathSM from '@/lib/wallPath-sm.json'
+import wallPathMd from '@/lib/wallPath-md.json'
+import wallPathSm from '@/lib/wallPath-sm.json'
 import React from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -29,19 +31,18 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [language, setLanguage] = useState('en');
 
   useEffect(() => {
-    const currentLanguage = locale;
-    console.log(currentLanguage)
+    const currentLanguage = locale; // ภาษาที่ใช้อยู่ในปัจจุบัน
     setLanguage(currentLanguage || 'en');
   }, []);
 
   const responsiveStage = () => {
-    const screenWidth = window.innerWidth;
+    const screenWidth = window.innerWidth; // ความกว้างของหน้าจอปัจจุบัน
     
-    if (screenWidth <= 800) { 
+    if (screenWidth <= 800) { // ความกว้างของหน้าจอสำหรับจอมือถือ
       setStageDimensions({ width: 800, height: 600, size: "SM" });
-    } else if (screenWidth <= 1024) { 
+    } else if (screenWidth <= 1024) { // ความกว้างของหน้าจอสำหรับจอไอแพต
       setStageDimensions({ width: 800, height: 600, size: "MD" });
-    } else { 
+    } else { // ความกว้างของหน้าจอสำหรับจอคอมพิวเตอร์
       setStageDimensions({ width: 1350, height: 895, size: "LG" });
     }
   };
@@ -53,7 +54,6 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
 
   useEffect(() => {
     if (disable && initialSelectedZones) {
@@ -71,13 +71,16 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   }
 
   useEffect(() => {
-    fetch();
-    if (stageDimensions.size === "LG") {
+    fetch()
+    if (stageDimensions.size === "SM") {
+      setWalls(wallPath)
+      setPaths(zonePath) 
+    } else if (stageDimensions.size === "MD") {
       setWalls(wallPath)
       setPaths(zonePath) 
     } else {
-      setWalls(wallPathSM)
-      setPaths(zonePathSm) 
+      setWalls(wallPath)
+      setPaths(zonePath) 
     }
 
     if (location) {
@@ -166,7 +169,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
         <Layer>
           {zones.map((zone, index) => {
             const isSelected = selectedZones.includes(zone.id);
-            const textLanguage = zone.text?.[language] || zone.text?.['en'];  
+            const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
             const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;
             const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point
             return (
