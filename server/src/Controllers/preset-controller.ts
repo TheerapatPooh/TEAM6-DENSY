@@ -235,6 +235,55 @@ export async function getAllPresets(req: Request, res: Response) {
 }
 
 /**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ Preset
+ * Input:
+ * - req.params.id: number (ID ของ Preset ที่ต้องการลบ)
+ * Output: JSON object {  "message": "Preset removed successfully" } ยืนยันการลบ Preset สำเร็จ
+**/
+export async function removePreset(req: Request, res: Response) {
+  try {
+      const userRole = (req as any).user.role;
+      if (userRole !== 'admin') {
+          res.status(403).json({ message: "Access Denied: Admins only" });
+          return;
+      }
+
+      const presetId = parseInt(req.params.id, 10);
+      if (isNaN(presetId)) {
+          res.status(400).json({ message: "Invalid Preset ID" });
+          return;
+      }
+
+      // ตรวจสอบว่า Preset มีการใช้งานใน Patrol หรือไม่
+      const patrolCount = await prisma.patrol.count({
+          where: { presetId: presetId },
+      });
+
+      if (patrolCount > 0) {
+          res.status(400).json({
+              message: "Cannot delete Preset: Patrols are still linked to this Preset",
+          });
+          return;
+      }
+
+      // ลบข้อมูล PresetChecklist ที่เกี่ยวข้อง
+      await prisma.presetChecklist.deleteMany({
+          where: { presetId: presetId },
+      });
+
+      // ลบข้อมูล Preset
+      await prisma.preset.delete({
+          where: { id: presetId },
+      });
+
+      res.status(200).json({ message: "Preset removed successfully" });
+  } catch (error) {
+      console.error("Error removing preset:", error);
+      res.status(500).json({ message: "Internal server error", error });
+  }
+}
+
+/**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ตาม ID
  * Input:
  * - req.params.id: number (ID ของ Checklist ที่ต้องการดึงข้อมูล)

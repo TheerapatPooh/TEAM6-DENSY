@@ -7,6 +7,7 @@ CREATE TABLE `users` (
     `us_role` ENUM('admin', 'inspector', 'supervisor') NOT NULL,
     `us_department` VARCHAR(191) NULL,
     `us_created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `us_active` BOOLEAN NOT NULL DEFAULT true,
 
     UNIQUE INDEX `users_us_username_key`(`us_username`),
     UNIQUE INDEX `users_us_email_key`(`us_email`),
@@ -189,6 +190,15 @@ CREATE TABLE `defect_images` (
     PRIMARY KEY (`dfim_df_id`, `dfim_im_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `_user` (
+    `A` INTEGER NOT NULL,
+    `B` INTEGER NOT NULL,
+
+    UNIQUE INDEX `_user_AB_unique`(`A`, `B`),
+    INDEX `_user_B_index`(`B`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `defects` ADD CONSTRAINT `defects_df_us_id_fkey` FOREIGN KEY (`df_us_id`) REFERENCES `users`(`us_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -263,3 +273,9 @@ ALTER TABLE `defect_images` ADD CONSTRAINT `defect_images_dfim_df_id_fkey` FOREI
 
 -- AddForeignKey
 ALTER TABLE `defect_images` ADD CONSTRAINT `defect_images_dfim_im_id_fkey` FOREIGN KEY (`dfim_im_id`) REFERENCES `images`(`im_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `_user` ADD CONSTRAINT `_user_A_fkey` FOREIGN KEY (`A`) REFERENCES `checklists`(`cl_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `_user` ADD CONSTRAINT `_user_B_fkey` FOREIGN KEY (`B`) REFERENCES `users`(`us_id`) ON DELETE CASCADE ON UPDATE CASCADE;
