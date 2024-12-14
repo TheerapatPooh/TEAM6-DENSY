@@ -22,7 +22,7 @@ model User {
   department  String?  @map("us_department")
   createdAt   DateTime @default(now()) @map("us_created_at")
   active      Boolean @default(true)@map("us_active")
-
+          
   presets        Preset[]
   checklists     Checklist[]       @relation("user")
   comments       Comment[]

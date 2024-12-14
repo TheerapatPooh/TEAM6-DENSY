@@ -235,6 +235,55 @@ export async function getAllPresets(req: Request, res: Response) {
 }
 
 /**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ Preset
+ * Input:
+ * - req.params.id: number (ID ของ Preset ที่ต้องการลบ)
+ * Output: JSON object {  "message": "Preset removed successfully" } ยืนยันการลบ Preset สำเร็จ
+**/
+export async function removePreset(req: Request, res: Response) {
+  try {
+      const userRole = (req as any).user.role;
+      if (userRole !== 'admin') {
+          res.status(403).json({ message: "Access Denied: Admins only" });
+          return;
+      }
+
+      const presetId = parseInt(req.params.id, 10);
+      if (isNaN(presetId)) {
+          res.status(400).json({ message: "Invalid Preset ID" });
+          return;
+      }
+
+      // ตรวจสอบว่า Preset มีการใช้งานใน Patrol หรือไม่
+      const patrolCount = await prisma.patrol.count({
+          where: { presetId: presetId },
+      });
+
+      if (patrolCount > 0) {
+          res.status(400).json({
+              message: "Cannot delete Preset: Patrols are still linked to this Preset",
+          });
+          return;
+      }
+
+      // ลบข้อมูล PresetChecklist ที่เกี่ยวข้อง
+      await prisma.presetChecklist.deleteMany({
+          where: { presetId: presetId },
+      });
+
+      // ลบข้อมูล Preset
+      await prisma.preset.delete({
+          where: { id: presetId },
+      });
+
+      res.status(200).json({ message: "Preset removed successfully" });
+  } catch (error) {
+      console.error("Error removing preset:", error);
+      res.status(500).json({ message: "Internal server error", error });
+  }
+}
+
+/**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ตาม ID
  * Input:
  * - req.params.id: number (ID ของ Checklist ที่ต้องการดึงข้อมูล)
@@ -348,5 +397,127 @@ export async function getAllChecklists(req: Request, res: Response) {
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error);
+  }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Checklist ใหม่ 
+ * Input:
+ * - req.body:
+ *   - title: string (ชื่อของ Checklist)
+ *   - items: Array (รายการของไอเทมใน Checklist)
+ *     - name: string (ชื่อของไอเทม)
+ *     - type: string (ประเภทของไอเทม เช่น safety, maintenance)
+ *     - zoneId: Array<number> (Array ของ Zone ID ที่เชื่อมโยงกับไอเทมนั้น)
+ * Output:
+ * - JSON message ยืนยันการสร้าง Checklist สำเร็จ
+ **/
+export async function createChecklist(req: Request, res: Response) {
+  try {
+    const userRole = (req as any).user.role;
+    const userId = (req as any).user.userId;
+
+    // ตรวจสอบสิทธิ์ว่าเป็น admin
+    if (userRole !== "admin") {
+      res.status(403).json({ message: "Access Denied: Admins only" });
+      return;
+    }
+
+    // รับค่าจาก body
+    const { title, items } = req.body;
+
+    // ตรวจสอบข้อมูล
+    if (!title || !items) {
+      res.status(400).json({ message: "Missing required fields" });
+      return;
+    }
+
+    // สร้าง Checklist ใหม่
+    const newChecklist = await prisma.checklist.create({
+      data: {
+        title: title,
+        version: 1,
+        latest: true,
+        updatedBy: userId, // ID ของผู้ใช้งานที่สร้าง
+      },
+    });
+
+    // สร้างไอเทมและเชื่อมโยงโซน
+    for (const item of items) {
+      const { name, type, zoneId } = item;
+
+      // สร้างไอเทมใหม่
+      const newItem = await prisma.item.create({
+        data: {
+          name: name,
+          type: type,
+          checklistId: newChecklist.id,
+        },
+      });
+
+      // เชื่อมโยงไอเทมกับโซนโดยใช้ Zone ID
+      for (const id of zoneId) {
+        const zone = await prisma.zone.findUnique({
+          where: { id: id },
+        });
+
+        if (!zone) {
+          res.status(404).json({ message: `Zone ID "${id}" not found` });
+          return;
+        }
+
+        // สร้าง itemZone
+        await prisma.itemZone.create({
+          data: {
+            itemId: newItem.id,
+            zoneId: zone.id,
+          },
+        });
+      }
+    }
+
+    res.status(201).json({ message: "Checklist created successfully",checklists: newChecklist });
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ checklist (เปลี่ยนสถานะเป็น false)
+ * Input: req.params.id: Int (ID ของ User ที่จะลบ)
+ * Output: JSON message ยืนยันการลบ User สำเร็จ
+**/
+export async function removeChecklist(req: Request, res: Response) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const role = (req as any).user.role;
+
+    if (role !== "admin") {
+      res.status(403).json({ message: "Access Denied: Admin only" });
+      return;
+    }
+
+    const checklist = await prisma.checklist.findUnique({
+      where: { id: id },
+    });
+
+    if (!checklist) {
+      res.status(404).json({ message: "Checklist not found" });
+      return;
+    }
+
+    await prisma.checklist.update({
+      where: { id: id },
+      data: {
+        latest: false,
+      },
+    });
+
+    res.status(200).json({ message: "Checklist has been deactivated successfully" });
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to deactivated checklist" });
+    return;
   }
 }

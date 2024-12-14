@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import Defect from "@/components/defect";
 import { IDefect } from "@/app/type";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import Loading from "@/components/loading";
 
 
