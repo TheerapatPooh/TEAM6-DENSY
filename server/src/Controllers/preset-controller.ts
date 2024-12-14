@@ -385,3 +385,85 @@ export async function getAllChecklists(req: Request, res: Response) {
     res.status(500).json(error);
   }
 }
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Checklist ใหม่ 
+ * Input:
+ * - req.body:
+ *   - title: string (ชื่อของ Checklist)
+ *   - items: Array (รายการของไอเทมใน Checklist)
+ *     - name: string (ชื่อของไอเทม)
+ *     - type: string (ประเภทของไอเทม เช่น safety, maintenance)
+ *     - zoneId: Array<number> (Array ของ Zone ID ที่เชื่อมโยงกับไอเทมนั้น)
+ * Output:
+ * - JSON message ยืนยันการสร้าง Checklist สำเร็จ
+ **/
+export async function createChecklist(req: Request, res: Response) {
+  try {
+    const userRole = (req as any).user.role;
+    const userId = (req as any).user.userId;
+
+    // ตรวจสอบสิทธิ์ว่าเป็น admin
+    if (userRole !== "admin") {
+      res.status(403).json({ message: "Access Denied: Admins only" });
+      return;
+    }
+
+    // รับค่าจาก body
+    const { title, items } = req.body;
+
+    // ตรวจสอบข้อมูล
+    if (!title || !items) {
+      res.status(400).json({ message: "Missing required fields" });
+      return;
+    }
+
+    // สร้าง Checklist ใหม่
+    const newChecklist = await prisma.checklist.create({
+      data: {
+        title: title,
+        version: 1,
+        latest: true,
+        updatedBy: userId, // ID ของผู้ใช้งานที่สร้าง
+      },
+    });
+
+    // สร้างไอเทมและเชื่อมโยงโซน
+    for (const item of items) {
+      const { name, type, zoneId } = item;
+
+      // สร้างไอเทมใหม่
+      const newItem = await prisma.item.create({
+        data: {
+          name: name,
+          type: type,
+          checklistId: newChecklist.id,
+        },
+      });
+
+      // เชื่อมโยงไอเทมกับโซนโดยใช้ Zone ID
+      for (const id of zoneId) {
+        const zone = await prisma.zone.findUnique({
+          where: { id: id },
+        });
+
+        if (!zone) {
+          res.status(404).json({ message: `Zone ID "${id}" not found` });
+          return;
+        }
+
+        // สร้าง itemZone
+        await prisma.itemZone.create({
+          data: {
+            itemId: newItem.id,
+            zoneId: zone.id,
+          },
+        });
+      }
+    }
+
+    res.status(201).json({ message: "Checklist created successfully",checklists: newChecklist });
+  } catch (error) {
+    console.error(error)
+  }
+}
