@@ -313,20 +313,20 @@ export async function getChecklist(req: Request, res: Response) {
                   include: {
                     supervisor: includeSupervisor
                       ? {
-                          select: {
-                            id: true,
-                            role: true,
-                            profile: {
-                              select: {
-                                id: true,
-                                name: true,
-                                age: true,
-                                tel: true,
-                                address: true,
-                              },
+                        select: {
+                          id: true,
+                          role: true,
+                          profile: {
+                            select: {
+                              id: true,
+                              name: true,
+                              age: true,
+                              tel: true,
+                              address: true,
                             },
                           },
-                        }
+                        },
+                      }
                       : undefined,
                   },
                 },

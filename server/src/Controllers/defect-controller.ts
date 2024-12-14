@@ -1,7 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType } from "@prisma/client";
+import { DefectStatus, NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
 import { fileURLToPath } from "url";
@@ -23,7 +23,6 @@ export async function createDefect(req: Request, res: Response) {
       name,
       description,
       type,
-      status,
       defectUserId,
       patrolResultId,
       supervisorId,
@@ -67,7 +66,8 @@ export async function createDefect(req: Request, res: Response) {
         name: name,
         description: description,
         type: type,
-        status: status,
+        status: "reported" as DefectStatus,
+        startTime: new Date(),
         user: { connect: { id: parseInt(defectUserId) } },
         patrolResult: { connect: { id: parseInt(patrolResultId) } },
       },

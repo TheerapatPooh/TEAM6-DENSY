@@ -51,7 +51,6 @@ import {
   IPresetChecklist,
 } from "@/app/type";
 import { IUser, FilterPatrol } from "@/app/type";
-import { filterPatrol } from "@/lib/utils";
 import { sortData } from "@/lib/utils";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
@@ -60,8 +59,8 @@ import Loading from "@/components/loading";
 export default function Page() {
   const t = useTranslations("General");
   const [loading, setLoading] = useState<boolean>(true);
-  const [patrolData, setPatrolData] = useState<IPatrol[]>([]);
-  const [presetData, setPresetData] = useState<IPreset[]>();
+  const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
+  const [allPresets, setAllPresets] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
 
   const [selectedPreset, setSelectedPreset] = useState<IPreset>();
@@ -94,8 +93,8 @@ export default function Page() {
       setSecondDialog(false);
       window.location.reload();
     } catch (error) {
-        console.error(error)
-     }
+      console.error(error)
+    }
   };
 
   const handleSelectUser = (checklistId: number, userId: number) => {
@@ -140,7 +139,6 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<FilterPatrol | null>(getStoredFilter())
-  const [filteredPatrolData, setFilteredPatrolData] = useState<IPatrol[]>([])
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -178,19 +176,18 @@ export default function Page() {
   };
 
   const applyFilter = () => {
-    setFilteredPatrolData(filterPatrol(filter, patrolData))
+    getPatrolData()
   };
 
   const resetFilter = () => {
     setFilter(initialFilter)
-    localStorage.setItem('filter', JSON.stringify(initialFilter));
-    setFilteredPatrolData(filterPatrol(initialFilter, patrolData))
   };
 
   const handleDateSelect = (dateRange: DateRange) => {
     const startDate = dateRange.from ?? null;
-    const endDate = dateRange.to ?? null;
-
+    const endDate = dateRange.to
+      ? new Date(new Date(dateRange.to).setHours(23, 59, 59, 999))
+      : null;
     setFilter({
       presetTitle: filter?.presetTitle || null,
       patrolStatus: filter?.patrolStatus || [],
@@ -207,66 +204,54 @@ export default function Page() {
     setSearchTerm(event.target.value);
   };
 
-  const patrolQueryResults = filteredPatrolData?.filter((patrol) => {
-    const presetTitle = patrol.preset ? patrol.preset.title : 'No Title';
-    const patrolId = patrol.id.toString().toLowerCase();
-    const patrolDate = new Date(patrol.date).toLocaleDateString().toLowerCase();
-    const patrolStatus = patrol.status.toLowerCase();
+  const buildQueryString = (filter: FilterPatrol | null, searchTerm: string) => {
+    const params: Record<string, string | undefined> = {};
 
-    const inspectors = patrol.patrolChecklists
-      .flatMap((pc) => {
-        return pc.inspector?.profile?.name
-          ? [pc.inspector.profile.name.toLowerCase()]
-          : [];
-      })
-      .join(' ');
-    const searchTokens = searchTerm.toLowerCase().split(' ').filter(Boolean);
-    const inspectorTokens = inspectors.split(' ').filter(Boolean);
+    // เพิ่ม search term ถ้ามี
+    if (searchTerm) params.search = searchTerm;
 
-    const isInspectorMatch = searchTokens.every(token =>
-      inspectorTokens.some(namePart => namePart.includes(token))
-    );
+    // เพิ่ม preset filter ถ้าไม่ใช่ "All"
+    if (filter?.presetTitle && filter.presetTitle !== "All") {
+      params.preset = filter.presetTitle;
+    }
 
-    return (
-      presetTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patrolId.includes(searchTerm.toLowerCase()) ||
-      patrolDate.includes(searchTerm.toLowerCase()) ||
-      patrolStatus.includes(searchTerm.toLowerCase()) ||
-      isInspectorMatch
-    )
-  })
+    // เพิ่ม status filter
+    if (filter?.patrolStatus?.length) {
+      params.status = filter.patrolStatus.join(",");
+    }
+
+    // เพิ่ม startDate
+    if (filter?.dateRange?.start) {
+      params.startDate = filter?.dateRange.start.toISOString();
+    }
+
+    // เพิ่ม endDate 
+    if (filter?.dateRange?.end) {
+      params.endDate = filter?.dateRange?.end.toISOString();
+    }
+
+    return new URLSearchParams(params).toString();
+  };
 
   const getPatrolData = async () => {
     try {
-      const patrol = await fetchData("get", "/patrols", true);
-      setPatrolData(patrol);
-
-      if (typeof window !== 'undefined') {
-        const storedFilter = localStorage.getItem('filter');
-        let localStorageFilter: FilterPatrol | null = null;
-        if (storedFilter) {
-          localStorageFilter = JSON.parse(storedFilter) as FilterPatrol;
-        }
-        if (!localStorageFilter) {
-          setFilteredPatrolData(patrol);
-        } else {
-          setFilteredPatrolData(filterPatrol(localStorageFilter, patrol));
-        }
-      } else {
-        setFilteredPatrolData(patrol);
-      }
+      const queryString = buildQueryString(filter, searchTerm);
+      const patrols = await fetchData("get", `/patrols?${queryString}`, true);
+      setAllPatrols(patrols);
     } catch (error) {
       console.error("Failed to fetch patrol data:", error);
     }
   };
+
   const getPresetData = async () => {
     try {
       const preset = await fetchData("get", "/presets", true);
-      setPresetData(preset);
+      setAllPresets(preset);
     } catch (error) {
       console.error("Failed to fetch patrol data:", error);
     }
   };
+
   useEffect(() => {
     getPatrolData();
     getPresetData()
@@ -274,15 +259,19 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    getPatrolData();
+  }, [searchTerm]);
+
+  useEffect(() => {
     localStorage.setItem('filter', JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
-    const sortedData = sortData(filteredPatrolData, sort);
-    if (JSON.stringify(sortedData) !== JSON.stringify(filteredPatrolData)) {
-      setFilteredPatrolData(sortedData);
+    const sortedData = sortData(allPatrols, sort);
+    if (JSON.stringify(sortedData) !== JSON.stringify(allPatrols)) {
+      setAllPatrols(sortedData);
     }
-  }, [sort, filteredPatrolData]);
+  }, [sort, allPatrols]);
 
   if (loading) {
     return <Loading />
@@ -433,8 +422,8 @@ export default function Page() {
                   <SelectGroup>
                     <SelectLabel>{t('Preset')}</SelectLabel>
                     <SelectItem value="All">{t('All')}</SelectItem>
-                    {presetData &&
-                      presetData.map((preset) => (
+                    {allPresets &&
+                      allPresets.map((preset) => (
                         <SelectItem value={preset.title} key={preset.id}>
                           {preset.title}
                         </SelectItem>
@@ -471,8 +460,8 @@ export default function Page() {
               <div className="flex items-center justify-center">
                 <ScrollArea className="p-[1px] h-[545px] w-full rounded-md border border-none pr-[15px] overflow-y-auto">
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
-                    {presetData &&
-                      presetData.map((preset, index) => (
+                    {allPresets &&
+                      allPresets.map((preset, index) => (
                         <Button
                           key={index}
                           variant={"outline"}
@@ -579,18 +568,17 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {patrolQueryResults &&
-          patrolQueryResults.map((patrol: IPatrol) => {
-            const inspectors = patrol.patrolChecklists.map((cl: IPatrolChecklist) => cl.inspector);
+        {allPatrols &&
+          allPatrols.map((patrol: IPatrol) => {
             return (
               <PatrolCard
                 key={patrol.id}
-                patrolStatus={patrol.status as patrolStatus}
-                patrolDate={new Date(patrol.date)}
-                patrolPreset={patrol.preset.title}
-                patrolId={patrol.id}
-                patrolChecklist={patrol.patrolChecklists}
-                inspector={inspectors}
+                status={patrol.status as patrolStatus}
+                date={new Date(patrol.date)}
+                preset={patrol.preset}
+                id={patrol.id}
+                itemCounts={patrol.itemCounts}
+                inspectors={patrol.inspectors}
               />
             );
           })}

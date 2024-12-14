@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { IPatrolChecklist, patrolStatus, IUser } from "@/app/type";
+import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import {
@@ -34,34 +34,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 
-export interface patrolCardProps {
-  patrolStatus: patrolStatus;
-  patrolDate: Date;
-  patrolPreset: string;
-  patrolId: number;
-  patrolChecklist: IPatrolChecklist[]
-  inspector: IUser[];
+export interface IPatrolCard {
+  id: number;
+  date: Date;
+  status: patrolStatus;
+  preset: IPreset;
+  itemCounts: number;
+  inspectors: IUser[];
 }
 
 export function PatrolCard({
-  patrolStatus,
-  patrolDate,
-  patrolPreset,
-  patrolId,
-  patrolChecklist,
-  inspector = [],
-}: patrolCardProps) {
+  id,
+  date,
+  status,
+  preset,
+  itemCounts,
+  inspectors = [],
+}: IPatrolCard) {
   const formattedDate =
-    patrolDate instanceof Date
-      ? patrolDate.toLocaleDateString("en-GB", {
+    date instanceof Date
+      ? date.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       })
-      : "N/A"; // Fallback if patrolDate is not valid
+      : "N/A"; // Fallback if date is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [user, setUser] = useState<IUser[]>();
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
@@ -70,37 +69,17 @@ export function PatrolCard({
 
   const router = useRouter()
   const locale = useLocale()
-  const getData = async () => {
-    try {
-      const userFetch = await fetchData("get", "/users?profile=true&image=true", true);
-      setUser(userFetch);
-    } catch (error) {
-      console.error("Failed to fetch profile data:", error);
-    }
-  };
 
   const getPatrolData = async () => {
     try {
-      let countItems = 0;
+      let countItems = itemCounts;
       let countFails = 0;
       let countDefects = 0;
 
-      if (patrolChecklist) {
-        for (const patrolChecklistObj of patrolChecklist) {
-          if (patrolChecklistObj.checklist && patrolChecklistObj.checklist.items) {
-            for (const item of patrolChecklistObj.checklist.items) {
-              if (item.itemZones) {
-                countItems += item.itemZones.length;
-              }
-            }
-          }
-        }
-      }
-
-      if (patrolStatus !== 'pending' && patrolStatus !== 'scheduled') {
-        const resultFetch = await fetchData("get", `/patrol/${patrolId}?result=true`, true);
-        if (resultFetch?.result) {
-          for (const patrolResult of resultFetch.result) {
+      if (status !== 'pending' && status !== 'scheduled') {
+        const resultFetch: Partial<IPatrol> = await fetchData("get", `/patrol/${id}?result=true`, true);
+        if (resultFetch?.results) {
+          for (const patrolResult of resultFetch.results) {
             if (patrolResult.status === false) {
               countFails++;
               if (patrolResult.defects && patrolResult.defects.length !== 0) {
@@ -110,6 +89,7 @@ export function PatrolCard({
           }
         }
       }
+      console.log(id, countFails, countDefects)
       setItems(countItems);
       setFails(countFails);
       setDefects(countDefects);
@@ -119,7 +99,6 @@ export function PatrolCard({
   };
 
   useEffect(() => {
-    getData();
     getPatrolData();
     setMounted(true);
   }, []);
@@ -139,10 +118,17 @@ export function PatrolCard({
   };
 
   const handleDetail = () => {
-    router.push(`/${locale}/patrol/${patrolId}`)
+    router.push(`/${locale}/patrol/${id}`)
   }
-
-  const inspectorNames = inspector.map((insp) => insp.profile.name).filter(Boolean);
+  
+  const uniqueInspectors: Partial<IUser[]> = inspectors.reduce((acc, insp) => {
+    // เช็คว่าชื่อยังไม่อยู่ใน accumulator หรือไม่
+    if (!acc.some(item => item.profile.name === insp.profile.name)) {
+      acc.push(insp); // ถ้าไม่ซ้ำก็เพิ่มเข้าไป
+    }
+    return acc;
+  }, []);
+  
   if (!mounted) {
     return (
       null
@@ -156,25 +142,25 @@ export function PatrolCard({
           <CardDescription className="text-lg font-semibold">
             {formattedDate}
           </CardDescription>
-          {patrolStatus === ("pending" as patrolStatus) ? (
+          {status === ("pending" as patrolStatus) ? (
             <div className="flex items-center justify-center rounded-full bg-blue-300/40 w-10 h-10 custom-shadow">
               <span className="material-symbols-outlined text-blue-500">
                 hourglass_top
               </span>
             </div>
-          ) : patrolStatus === ("scheduled" as patrolStatus) ? (
+          ) : status === ("scheduled" as patrolStatus) ? (
             <div className="flex items-center justify-center rounded-full bg-yellow-300/40 w-10 h-10 custom-shadow">
               <span className="material-symbols-outlined text-yellow-500">
                 event_available
               </span>
             </div>
-          ) : patrolStatus === ("on_going" as patrolStatus) ? (
+          ) : status === ("on_going" as patrolStatus) ? (
             <div className="flex items-center justify-center rounded-full bg-purple-300/40 w-10 h-10 custom-shadow">
               <span className="material-symbols-outlined text-purple-500">
                 cached
               </span>
             </div>
-          ) : patrolStatus === ("completed" as patrolStatus) ? (
+          ) : status === ("completed" as patrolStatus) ? (
             <div className="flex items-center justify-center rounded-full bg-green-300/40 w-10 h-10 custom-shadow">
               <span className="material-symbols-outlined text-green-500">
                 check
@@ -189,13 +175,13 @@ export function PatrolCard({
           )}
         </div>
         <CardTitle className="card-foreground text-2xl truncate">
-          {patrolPreset}
+          {preset.title}
         </CardTitle>
       </CardHeader>
       <CardContent className="gap-0 px-[10px] py-0">
         <div className="flex gap-2.5 text-muted-foreground items-center">
           <span className="material-symbols-outlined">description</span>
-          <p className="text-xl">{patrolId}</p>
+          <p className="text-xl">{id}</p>
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
@@ -211,34 +197,29 @@ export function PatrolCard({
               <span className="material-symbols-outlined me-2.5">
                 engineering
               </span>
-              {inspectorNames.length > 0 && (
+              {uniqueInspectors.length > 0 && (
                 <div className="flex items-center me-2.5 truncate max-w-[190px]">
-                  <p className="text-xl me-2.5 truncate">{inspectorNames[0]}</p>
+                  <p className="text-xl me-2.5 truncate">{uniqueInspectors[0].profile.name}</p>
                 </div>
               )}
-              {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
-                const matchingProfile = user?.find(
-                  (profile) => profile.profile.name === inspectorName
-                );
-
+              {uniqueInspectors.map((inspector, idx) => {
                 return (
                   <Avatar key={idx} className="custom-shadow ms-[-10px]">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
-                      alt={inspectorName}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                     />
                     <AvatarFallback>
-                      {getInitials(inspectorName)}
+                      {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>
                 );
               })}
 
-              {inspectorNames.length > 5 && (
+              {uniqueInspectors.length > 5 && (
                 <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                   <AvatarImage src="" />
                   <span className="absolute text-card-foreground text-[16px] font-semibold">
-                    +{inspectorNames.length - 5}
+                    +{uniqueInspectors.length - 5}
                   </span>
                   <AvatarFallback></AvatarFallback>
                 </Avatar>
@@ -254,21 +235,18 @@ export function PatrolCard({
                 {t("InspectorList")}
               </p>
             </div>
-            {Array.from(new Set(inspectorNames.slice(0, 4))).map((inspectorName, idx) => {
-              const matchingProfile = user?.find(
-                (profile) => profile.profile.name === inspectorName
-              );
+            {uniqueInspectors.map((inspector, idx) => {
               return (
                 <div key={idx} className="flex items-center p-2">
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${matchingProfile?.profile?.image?.path}`}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                     />
                     <AvatarFallback>
-                      {getInitials(inspectorName)}
+                      {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-[20px]">{inspectorName}</p>
+                  <p className="text-[20px]">{inspector.profile.name}</p>
                 </div>
               );
             })}
@@ -335,7 +313,7 @@ export function PatrolCard({
                             try {
                               await fetchData(
                                 "delete",
-                                `/patrol/${patrolId}`,
+                                `/patrol/${id}`,
                                 true
                               );
                               e.stopPropagation()

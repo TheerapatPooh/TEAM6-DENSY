@@ -153,7 +153,6 @@ export default function PatrolChecklist({
     formData.append("name", name);
     formData.append("description", description);
     formData.append("type", type);
-    formData.append("status", "reported");
     formData.append("defectUserId", userId.toString());
     formData.append("patrolResultId", patrolResultId.toString());
     formData.append("supervisorId", supervisorId.toString());

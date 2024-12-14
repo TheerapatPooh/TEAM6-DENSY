@@ -2,7 +2,7 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import axios from "axios";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, PatrolStatus } from "@prisma/client";
+import { NotificationType, Patrol, PatrolStatus } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -144,31 +144,140 @@ export async function getPatrol(req: Request, res: Response) {
 **/
 export async function getAllPatrols(req: Request, res: Response) {
   try {
-    const filterStatus = req.query.status as PatrolStatus | undefined;
-
+    const { status, preset, startDate, endDate, search } = req.query;
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     if (role !== "admin" && role !== "inspector") {
       res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
       return;
     }
-    let allPatrols: any;
 
-    allPatrols = await prisma.patrol.findMany({
-      where: {
-        status: filterStatus,
-        patrolChecklists: {
-          some: {
-            userId: userId,
+    // สร้างเงื่อนไขหลัก
+    const whereConditions: any = {
+      patrolChecklists: {
+        some: {
+          userId: userId,
+        },
+      }
+    };
+
+    const andConditions: any[] = [];
+
+    // เงื่อนไขการกรองตาม status
+    if (status) {
+      const statusArray = (status as string).split(","); // แยกค่าด้วย comma
+      const orStatusConditions = statusArray.map((s) => ({ status: s })); // สร้าง array ของ OR เงื่อนไข
+
+      andConditions.push({ OR: orStatusConditions });
+    }
+
+    // เงื่อนไขการกรองตาม preset
+    if (preset) {
+      andConditions.push({
+        preset: {
+          title: { contains: preset as string }
+        }
+      });
+    }
+
+    // เงื่อนไขการกรองตามช่วงเวลา
+    if (startDate && endDate) {
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        andConditions.push({
+          date: {
+            gte: start,
+            lte: end,
+          },
+        });
+      } else {
+        console.error('Invalid date range:', startDate, endDate);
+      }
+    }
+
+    // เงื่อนไขการค้นหา (search)
+    if (search) {
+      const searchId = parseInt(search as string, 10);
+
+      function mapSearchToStatus(search: string): PatrolStatus | null {
+        const searchLower = search.toLowerCase();
+
+        // ตรวจสอบความใกล้เคียงกับค่าของ PatrolStatus
+        if (searchLower.startsWith('p')) {
+          return PatrolStatus.pending;
+        } else if (searchLower.startsWith('s')) {
+          return PatrolStatus.scheduled;
+        } else if (searchLower.startsWith('o')) {
+          return PatrolStatus.on_going;
+        } else if (searchLower.startsWith('c')) {
+          return PatrolStatus.completed;
+        }
+
+        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+        return null;
+      }
+
+      const mappedStatus = mapSearchToStatus(search as string);
+
+      const orConditions = [];
+
+      if (!isNaN(searchId)) {
+        orConditions.push({ id: searchId });
+      }
+
+      // ถ้า mappedStatus มีค่า (ค้นหาตรงกับสถานะ)
+      if (mappedStatus) {
+        orConditions.push({ status: mappedStatus as PatrolStatus });
+      }
+
+      // ถ้ามีค่า preset title
+      orConditions.push({
+        preset: {
+          title: {
+            contains: search as string,
           },
         },
-      },
+      });
+
+      orConditions.push({
+        patrolChecklists: {
+          some: {
+            inspector: {
+              profile: {
+                name: {
+                  contains: search as string,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // ถ้ามีเงื่อนไขใน OR ให้เพิ่มเข้าไปใน AND
+      if (orConditions.length > 0) {
+        andConditions.push({ OR: orConditions });
+      }
+    }
+
+    // ถ้ามีเงื่อนไขเพิ่มเติมให้เพิ่มเข้าไปใน AND
+    if (andConditions.length > 0) {
+      whereConditions.AND = andConditions;
+    }
+
+    // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
+    console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
+
+    const allPatrols = await prisma.patrol.findMany({
+      where: whereConditions,
       select: {
         id: true,
         date: true,
         status: true,
         preset: {
           select: {
+            id: true,
             title: true,
           },
         },
@@ -210,7 +319,41 @@ export async function getAllPatrols(req: Request, res: Response) {
       },
     });
 
-    let result = allPatrols;
+    // จัดกลุ่ม patrols โดยใช้ id และรวม Inspectors และ Item Counts
+    const groupedPatrols: Record<number, any> = {};
+
+    allPatrols.forEach(patrol => {
+      if (!groupedPatrols[patrol.id]) {
+        groupedPatrols[patrol.id] = {
+          id: patrol.id,
+          date: patrol.date,
+          status: patrol.status,
+          preset: patrol.preset,
+          itemCounts: {},
+          inspectors: []
+        };
+      }
+
+      let count = 0
+      patrol.patrolChecklists.forEach(patrolChecklist => {
+        // นับจำนวน item แต่ละประเภท
+        patrolChecklist.checklist.items.forEach(item => {
+          item.itemZones.forEach(itemZone => {
+            count++
+          })
+        });
+        groupedPatrols[patrol.id].itemCounts = count;
+
+        // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
+        const inspector = patrolChecklist.inspector;
+        if (inspector && !groupedPatrols[patrol.id].inspectors.some((ins: any) => ins.id === inspector.id)) {
+          groupedPatrols[patrol.id].inspectors.push(inspector);
+        }
+      });
+    });
+
+    // แปลงกลุ่ม patrols เป็น array
+    const result = Object.values(groupedPatrols)
 
     res.status(200).json(result);
     return;
@@ -589,7 +732,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                 id: true,
                 path: true,
                 user: {
-                  select:{
+                  select: {
                     id: true,
                     email: true,
                     role: true,
