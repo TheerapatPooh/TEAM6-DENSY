@@ -51,14 +51,6 @@ export function PatrolCard({
   itemCounts,
   inspectors = [],
 }: IPatrolCard) {
-  const formattedDate =
-    date instanceof Date
-      ? date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      : "N/A"; // Fallback if date is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [items, setItems] = useState(0);
@@ -69,6 +61,15 @@ export function PatrolCard({
 
   const router = useRouter()
   const locale = useLocale()
+
+  const formattedDate =
+    date instanceof Date
+      ? date.toLocaleDateString(`${locale}-GB`, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      : "N/A"; // Fallback if date is not valid
 
   const getPatrolData = async () => {
     try {
@@ -137,7 +138,7 @@ export function PatrolCard({
   return (
     <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="flex flex-row gap-0 p-0">
-        <div className="flex flex-col justify-between items-start gap-1 truncate">
+        <div className="flex flex-col justify-between items-start gap-4 truncate">
           <CardDescription className="text-lg font-semibold text-muted-foreground">
             {formattedDate}
           </CardDescription>

@@ -133,18 +133,18 @@ export default function ProfileDropdown() {
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="bg-card p-0">
-          <DropdownMenuLabel className="w-[226px] text-lg font-medium">
+        <DropdownMenuContent className="bg-card p-1">
+          <DropdownMenuLabel className="w-[226px] text-lg font-semibold">
             {t("MyAccount")}
           </DropdownMenuLabel>
-          <DropdownMenuItem className="w-[226px] h-[full]">
+          <DropdownMenuItem className="rounded-md">
             <div className="flex gap-1 w-full items-center">
               <span className="material-symbols-outlined">account_circle</span>
               <div>{t("Profile")}</div>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="w-[226px] h-[full]"
+            className="rounded-md"
             onClick={hadleLogout}
           >
             <div className="flex gap-1 w-full h-full items-center hover:text-destructive">
