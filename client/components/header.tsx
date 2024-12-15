@@ -11,7 +11,7 @@ import { useTheme } from 'next-themes'
 import { useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 
-export default function Header() {
+export default function Header({ withLogo = true}) {
   const [mounted, setMounted] = useState(false)
   const { resolvedTheme } = useTheme()
   const locale = useLocale()
@@ -26,18 +26,20 @@ export default function Header() {
   }
   
   return (
-    <header className="bg-card h-[70px] flex justify-between items-center p-4 custom-shadow sticky top-0 z-50">
-      <div className="flex items-center">
-        <Image
-          className="flex items-center cursor-pointer"
-          src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
-          alt="Logo"
-          width={130}
-          height={112}
-          priority
-          onClick={() => router.push(`/${locale}`)}
-        />
-      </div>
+    <header className={`bg-card h-[70px] flex items-center p-4 custom-shadow sticky top-0 z-50 ${withLogo ? "justify-between" : "justify-end"}`}>
+      { withLogo && (
+        <div className="flex items-center">
+          <Image
+            className="flex items-center cursor-pointer"
+            src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
+            alt="Logo"
+            width={130}
+            height={112}
+            priority
+            onClick={() => router.push(`/${locale}`)}
+          />
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         <ModeToggle />
