@@ -21,7 +21,8 @@ CREATE TABLE `defects` (
     `df_description` VARCHAR(191) NOT NULL,
     `df_type` ENUM('safety', 'environment', 'maintenance') NOT NULL,
     `df_status` ENUM('reported', 'in_progress', 'pending_inspection', 'resolved', 'completed') NOT NULL,
-    `df_timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `df_start_time` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `df_finish_time` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `df_us_id` INTEGER NOT NULL,
     `df_pr_id` INTEGER NOT NULL,
 
