@@ -29,7 +29,7 @@ import {
   IUser,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -153,7 +153,6 @@ export default function PatrolChecklist({
     formData.append("name", name);
     formData.append("description", description);
     formData.append("type", type);
-    formData.append("status", "reported");
     formData.append("defectUserId", userId.toString());
     formData.append("patrolResultId", patrolResultId.toString());
     formData.append("supervisorId", supervisorId.toString());
@@ -208,9 +207,9 @@ export default function PatrolChecklist({
   };
 
   useEffect(() => {
-    if (patrolResult && patrolChecklist.checklist.item) {
-      const initialStatus = patrolChecklist.checklist.item.reduce((acc, item) => {
-        item.itemZone.flatMap((itemZone: IItemZone) => {
+    if (patrolResult && patrolChecklist.checklist.items) {
+      const initialStatus = patrolChecklist.checklist.items.reduce((acc, item) => {
+        item.itemZones.flatMap((itemZone: IItemZone) => {
           const matchingResult = patrolResult.find((result) => {
             return result.itemId === item.id && result.zoneId === itemZone.zone.id;
           });
@@ -265,7 +264,7 @@ export default function PatrolChecklist({
               <p className="text-card-foreground">{patrolChecklist.inspector.profile.name}</p>
             </div>
             <div className="ps-2">
-              {patrolChecklist.checklist.item?.map((item: IItem) => (
+              {patrolChecklist.checklist.items?.map((item: IItem) => (
                 <Accordion type="single" collapsible>
                   <AccordionItem value="item-1" className="border-none">
                     <AccordionTrigger className="hover:no-underline">
@@ -279,14 +278,14 @@ export default function PatrolChecklist({
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col py-2 gap-2">
-                      {item.itemZone.flatMap((itemZone: IItemZone) => {
-                        const status = checkStatus(item.id, itemZone.zone.id);
+                      {item.itemZones.flatMap((itemZones: IItemZone) => {
+                        const status = checkStatus(item.id, itemZones.zone.id);
                         const existingResult = getExistingResult(
                           item.id,
-                          itemZone.zone.id
+                          itemZones.zone.id
                         );
                         return (
-                          <div key={itemZone.zone.id} className="bg-card rounded-md p-2">
+                          <div key={itemZones.zone.id} className="bg-card rounded-md p-2">
                             <div className="flex flex-row justify-between items-center">
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-2 mb-2">
@@ -296,7 +295,7 @@ export default function PatrolChecklist({
                                   <p className="font-semibold text-lg">
                                     {t("Zone")}
                                   </p>
-                                  <p className="text-lg">{z(itemZone.zone.name)}</p>
+                                  <p className="text-lg">{z(itemZones.zone.name)}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="material-symbols-outlined">
@@ -306,14 +305,14 @@ export default function PatrolChecklist({
                                     {t("Supervisor")}
                                   </p>
                                   <p className="text-lg">
-                                    {itemZone.zone.supervisor.profile.name}
+                                    {itemZones.zone.supervisor.profile.name}
                                   </p>
                                 </div>
                               </div>
                               <div className="flex gap-2 pe-2">
                                 <Button
                                   variant={
-                                    resultStatus[`${item.id}-${itemZone.zone.id}`] ===
+                                    resultStatus[`${item.id}-${itemZones.zone.id}`] ===
                                       true
                                       ? "success"
                                       : "secondary"
@@ -339,7 +338,7 @@ export default function PatrolChecklist({
                                                                     `}
                                   onClick={() => {
                                     if (!existingResult.status === true || existingResult.status === null) {
-                                      handleClick(user.id, item.id, itemZone.zone.id, true);
+                                      handleClick(user.id, item.id, itemZones.zone.id, true);
                                     }
                                   }}
                                 >
@@ -350,7 +349,7 @@ export default function PatrolChecklist({
                                 </Button>
                                 <Button
                                   variant={
-                                    resultStatus[`${item.id}-${itemZone.zone.id}`] ===
+                                    resultStatus[`${item.id}-${itemZones.zone.id}`] ===
                                       false
                                       ? "fail"
                                       : "secondary"
@@ -376,7 +375,7 @@ export default function PatrolChecklist({
                                                                     `}
                                   onClick={() => {
                                     if (!existingResult.status === false || existingResult.status === null) {
-                                      handleClick(user.id, item.id, itemZone.zone.id, false);
+                                      handleClick(user.id, item.id, itemZones.zone.id, false);
                                     }
                                   }}
                                 >
@@ -391,7 +390,7 @@ export default function PatrolChecklist({
                             {(status === false ||
                               existingResult?.status === false) && (
                                 <div className="mt-4 flex flex-col items-start">
-                                  {existingResult.comment.map((comment) => (
+                                  {existingResult.comments.map((comment) => (
                                     //Comment Patrol
                                     <div className="flex bg-secondary rounded-md w-full p-2 mb-2 gap-2">
                                       <p className="text-muted-foreground font-bold text-lg">{formatTime(comment.timestamp)}</p>
@@ -436,7 +435,7 @@ export default function PatrolChecklist({
                                             <p className="font-semibold me-2">
                                               Zone
                                             </p>
-                                            <p>{itemZone.zone.name}</p>
+                                            <p>{itemZones.zone.name}</p>
                                           </div>
                                           <div className="flex items-center">
                                             <span className="material-symbols-outlined text-2xl me-2">
@@ -445,7 +444,7 @@ export default function PatrolChecklist({
                                             <p className="font-semibold me-2">
                                               Supervisor
                                             </p>
-                                            <p>{itemZone.zone.supervisor.profile.name}</p>
+                                            <p>{itemZones.zone.supervisor.profile.name}</p>
                                           </div>
                                         </div>
                                       </AlertDialogHeader>
@@ -555,7 +554,7 @@ export default function PatrolChecklist({
                                                 item.type,
                                                 patrolChecklist.inspector.id,
                                                 existingResult?.id ?? null,
-                                                itemZone.zone.supervisor.id,
+                                                itemZones.zone.supervisor.id,
                                                 selectedFiles
                                               )
                                             }

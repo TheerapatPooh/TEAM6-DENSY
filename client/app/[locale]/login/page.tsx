@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form"
 import FormError from '@/components/form-error'
 import FormSuccess from '@/components/form-success'
-import { login } from '@/lib/api';
+import { login } from '@/lib/utils';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import EmblaAutoplay from 'embla-carousel-autoplay'
 import { useTheme } from 'next-themes';
@@ -82,7 +82,7 @@ export default function LoginPage() {
                     priority
                 />
                 <div className="grid grid-rows-subgrid gap-4 row-span-3 justify-center items-center">
-                    <Carousel className='row-start-2'  plugins={[autoplayOptions]} opts={{ loop: true }}>
+                    <Carousel className='row-start-2' plugins={[autoplayOptions]} opts={{ loop: true }}>
                         <CarouselContent>
                             <CarouselItem>
                                 <Image
@@ -126,66 +126,77 @@ export default function LoginPage() {
                 <FormError message={error} />
                 <FormSuccess message={success} />
                 <div className='gap-2 flex flex-col justify-center items-start w-full lg:w-[450px] h-full'>
-                    <h1 className='text-4xl lg:text-5xl font-semibold'>{t('Login')}</h1>
-                    <p>{t('EnterCredentials')}</p>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className='w-full'>
-                            <FormField
-                                control={form.control}
-                                name="username"
-                                render={({ field }) => (
-                                    <FormItem className='mt-6'>
-                                        <label className='text-xl font-semibold'>{t('Username')}</label>
-                                        <FormControl>
-                                            <Textfield className='bg-secondary' showIcon={true} iconName='person' placeholder='johnDoe' {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem className='mt-6'>
-                                        <label className='text-xl font-semibold mt-6'>{t('Password')}</label>
-                                        <FormControl>
-                                            <Textfield className='bg-secondary' type='password' showIcon={true} iconName='lock' placeholder='verySecure' {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="flex justify-between items-center w-full">
+                    <div className='flex flex-col gap-4 w-[440px]'>
+                        <div className='flex flex-col gap-1'>
+                            <h1 className='text-[40px] font-semibold'>{t('Login')}</h1>
+                            <p className='text-base'>{t('EnterCredentials')}</p>
+                        </div>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className='w-full'>
                                 <FormField
                                     control={form.control}
-                                    name="rememberMe"
+                                    name="username"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <div className="w-full h-full flex gap-2 items-center ">
+                                        <FormItem className='mt-2'>
+                                            <div className='flex flex-col gap-1'>
+                                                <label className='text-sm font-semibold text-muted-foreground'>{t('Username')}</label>
                                                 <FormControl>
-                                                    <Checkbox id="terms1" checked={field.value} onCheckedChange={field.onChange} />
+                                                    <Textfield className='bg-secondary' showIcon={true} iconName='person' placeholder='johnDoe' {...field} />
                                                 </FormControl>
-                                                <label
-                                                    htmlFor="terms1"
-                                                    className="text-sm font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:cursor-pointer"
-                                                >
-                                                    {t('RememberMe')}
-                                                </label>
+                                                <FormMessage />
                                             </div>
                                         </FormItem>
                                     )}
                                 />
-                                <Button variant='link'>{t('ForgotPassword')}</Button>
-                            </div>
-                            <Button size="lg" className='mt-6' disabled={isPending}>
-                                {t('Login')}
-                                <span className="material-symbols-outlined">
-                                    login
-                                </span>
-                            </Button>
-                        </form>
-                    </Form>
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem className='mt-6'>
+                                            <div className='flex flex-col gap-1'>
+                                                <label className='text-sm font-semibold text-muted-foreground'>{t('Password')}</label>
+                                                <FormControl>
+                                                    <Textfield className='bg-secondary' type='password' showIcon={true} iconName='lock' placeholder='verySecure' {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className='flex flex-col gap-6'>
+                                    <div className="flex justify-between items-center w-full">
+                                        <FormField
+                                            control={form.control}
+                                            name="rememberMe"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <div className="w-full h-full flex gap-2 items-center ">
+                                                        <FormControl>
+                                                            <Checkbox id="terms1" checked={field.value} onCheckedChange={field.onChange} />
+                                                        </FormControl>
+                                                        <label
+                                                            htmlFor="terms1"
+                                                            className="text-sm font-medium text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:cursor-pointer"
+                                                        >
+                                                            {t('RememberMe')}
+                                                        </label>
+                                                    </div>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <Button className='text-sm font-medium' variant='link'>{t('ForgotPassword')}</Button>
+                                    </div>
+                                    <Button size="lg" disabled={isPending}>
+                                        {t('Login')}
+                                        <span className="material-symbols-outlined">
+                                            login
+                                        </span>
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </div>
+
                 </div>
             </div>
         </section>

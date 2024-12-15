@@ -1,10 +1,17 @@
-import { prisma } from "@Utils/database.js";
+import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import axios from "axios";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, PatrolStatus } from "@prisma/client";
-import transformKeys, { keyMap } from "@Utils/key-map.js";
+import { NotificationType, Patrol, PatrolStatus } from "@prisma/client";
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
+ * Input:
+ * - req.query: { preset: "true" | "false", result: "true" | "false" } (optional)
+ * - req.params.id: number (ID ของ Patrol ที่ต้องการดึงข้อมูล)
+ * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON object ข้อมูล Patrol รวมถึง preset และ result หากร้องขอ
+**/
 export async function getPatrol(req: Request, res: Response) {
   try {
     const includePreset = req.query.preset === "true";
@@ -25,43 +32,43 @@ export async function getPatrol(req: Request, res: Response) {
 
     patrol = await prisma.patrol.findFirst({
       where: {
-        pt_id: patrolId,
-        patrolChecklist: {
+        id: patrolId,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
       include: {
         preset: includePreset
           ? {
-              select: {
-                ps_id: true,
-                ps_title: true,
-                ps_description: true,
-              },
-            }
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          }
           : undefined,
-        patrolChecklist: {
+        patrolChecklists: {
           include: {
             checklist: {
               select: {
-                cl_id: true,
-                cl_title: true,
-                item: {
+                id: true,
+                title: true,
+                items: {
                   include: {
-                    itemZone: {
+                    itemZones: {
                       select: {
                         zone: {
                           select: {
-                            ze_id: true,
-                            ze_name: true,
+                            id: true,
+                            name: true,
                             supervisor: {
                               select: {
-                                us_id: true,
+                                id: true,
                                 profile: {
                                   select: {
-                                    pf_name: true,
+                                    name: true,
                                   },
                                 },
                               },
@@ -85,30 +92,30 @@ export async function getPatrol(req: Request, res: Response) {
             },
           },
         },
-        result: includeResult
+        results: includeResult
           ? {
-              include: {
-                defects: true,
-                comment: {
-                  include: {
-                    user: {
-                      select: {
-                        us_id: true,
-                        us_email: true,
-                        us_department: true,
-                        us_role: true,
-                        profile: {
-                          select: {
-                            pf_name: true,
-                            image: true,
-                          },
+            include: {
+              defects: true,
+              comments: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      department: true,
+                      role: true,
+                      profile: {
+                        select: {
+                          name: true,
+                          image: true,
                         },
                       },
                     },
                   },
                 },
               },
-            }
+            },
+          }
           : undefined,
       },
     });
@@ -117,7 +124,7 @@ export async function getPatrol(req: Request, res: Response) {
       res.status(404);
       return;
     }
-    let result = transformKeys(patrol, keyMap);
+    let result = patrol;
 
     res.status(200).json(result);
     return;
@@ -128,50 +135,166 @@ export async function getPatrol(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ทั้งหมดตามสถานะ
+ * Input:
+ * - req.query: { status, preset, startDate, endDate, search } ("status", "preset", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
+ * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON array ข้อมูล Patrol และข้อมูลที่เกี่ยวข้อง
+**/
 export async function getAllPatrols(req: Request, res: Response) {
   try {
-    const filterStatus = req.query.status as PatrolStatus | undefined;
-
+    const { status, preset, startDate, endDate, search } = req.query;
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     if (role !== "admin" && role !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
+      res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
       return;
     }
-    let allPatrols: any;
 
-    allPatrols = await prisma.patrol.findMany({
-      where: {
-        pt_status: filterStatus,
-        patrolChecklist: {
-          some: {
-            ptcl_us_id: userId,
+    // สร้างเงื่อนไขหลัก
+    const whereConditions: any = {
+      patrolChecklists: {
+        some: {
+          userId: userId,
+        },
+      }
+    };
+
+    const andConditions: any[] = [];
+
+    // เงื่อนไขการกรองตาม status
+    if (status) {
+      const statusArray = (status as string).split(","); // แยกค่าด้วย comma
+      const orStatusConditions = statusArray.map((s) => ({ status: s })); // สร้าง array ของ OR เงื่อนไข
+
+      andConditions.push({ OR: orStatusConditions });
+    }
+
+    // เงื่อนไขการกรองตาม preset
+    if (preset) {
+      andConditions.push({
+        preset: {
+          title: { contains: preset as string }
+        }
+      });
+    }
+
+    // เงื่อนไขการกรองตามช่วงเวลา
+    if (startDate && endDate) {
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        andConditions.push({
+          date: {
+            gte: start,
+            lte: end,
+          },
+        });
+      } else {
+        console.error('Invalid date range:', startDate, endDate);
+      }
+    }
+
+    // เงื่อนไขการค้นหา (search)
+    if (search) {
+      const searchId = parseInt(search as string, 10);
+
+      function mapSearchToStatus(search: string): PatrolStatus | null {
+        const searchLower = search.toLowerCase();
+
+        // ตรวจสอบความใกล้เคียงกับค่าของ PatrolStatus
+        if (searchLower.startsWith('p')) {
+          return PatrolStatus.pending;
+        } else if (searchLower.startsWith('s')) {
+          return PatrolStatus.scheduled;
+        } else if (searchLower.startsWith('o')) {
+          return PatrolStatus.on_going;
+        } else if (searchLower.startsWith('c')) {
+          return PatrolStatus.completed;
+        }
+
+        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+        return null;
+      }
+
+      const mappedStatus = mapSearchToStatus(search as string);
+
+      const orConditions = [];
+
+      if (!isNaN(searchId)) {
+        orConditions.push({ id: searchId });
+      }
+
+      // ถ้า mappedStatus มีค่า (ค้นหาตรงกับสถานะ)
+      if (mappedStatus) {
+        orConditions.push({ status: mappedStatus as PatrolStatus });
+      }
+
+      // ถ้ามีค่า preset title
+      orConditions.push({
+        preset: {
+          title: {
+            contains: search as string,
           },
         },
-      },
+      });
+
+      orConditions.push({
+        patrolChecklists: {
+          some: {
+            inspector: {
+              profile: {
+                name: {
+                  contains: search as string,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // ถ้ามีเงื่อนไขใน OR ให้เพิ่มเข้าไปใน AND
+      if (orConditions.length > 0) {
+        andConditions.push({ OR: orConditions });
+      }
+    }
+
+    // ถ้ามีเงื่อนไขเพิ่มเติมให้เพิ่มเข้าไปใน AND
+    if (andConditions.length > 0) {
+      whereConditions.AND = andConditions;
+    }
+
+    // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
+    // console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
+
+    const allPatrols = await prisma.patrol.findMany({
+      where: whereConditions,
       select: {
-        pt_id: true,
-        pt_date: true,
-        pt_status: true,
+        id: true,
+        date: true,
+        status: true,
         preset: {
           select: {
-            ps_title: true,
+            id: true,
+            title: true,
           },
         },
-        patrolChecklist: {
+        patrolChecklists: {
           include: {
             checklist: {
               select: {
-                cl_id: true,
-                cl_title: true,
-                item: {
+                id: true,
+                title: true,
+                items: {
                   include: {
-                    itemZone: {
+                    itemZones: {
                       select: {
                         zone: {
                           select: {
-                            ze_id: true,
-                            ze_name: true,
+                            id: true,
+                            name: true,
                           },
                         },
                       },
@@ -182,8 +305,8 @@ export async function getAllPatrols(req: Request, res: Response) {
             },
             inspector: {
               select: {
-                us_id: true,
-                us_email: true,
+                id: true,
+                email: true,
                 profile: {
                   include: {
                     image: true,
@@ -196,21 +319,66 @@ export async function getAllPatrols(req: Request, res: Response) {
       },
     });
 
-    let result = allPatrols.map((patrol: any) => transformKeys(patrol, keyMap));
+    // จัดกลุ่ม patrols โดยใช้ id และรวม Inspectors และ Item Counts
+    const groupedPatrols: Record<number, any> = {};
+
+    allPatrols.forEach(patrol => {
+      if (!groupedPatrols[patrol.id]) {
+        groupedPatrols[patrol.id] = {
+          id: patrol.id,
+          date: patrol.date,
+          status: patrol.status,
+          preset: patrol.preset,
+          itemCounts: {},
+          inspectors: []
+        };
+      }
+
+      let count = 0
+      patrol.patrolChecklists.forEach(patrolChecklist => {
+        // นับจำนวน item แต่ละประเภท
+        patrolChecklist.checklist.items.forEach(item => {
+          item.itemZones.forEach(itemZone => {
+            count++
+          })
+        });
+        groupedPatrols[patrol.id].itemCounts = count;
+
+        // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
+        const inspector = patrolChecklist.inspector;
+        if (inspector && !groupedPatrols[patrol.id].inspectors.some((ins: any) => ins.id === inspector.id)) {
+          groupedPatrols[patrol.id].inspectors.push(inspector);
+        }
+      });
+    });
+
+    // แปลงกลุ่ม patrols เป็น array
+    const result = Object.values(groupedPatrols)
 
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ message: "Internal server error" });
     return;
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Patrol ใหม่
+ * Input:
+ * - req.body: {
+ *     date: String,
+ *     presetId: number,
+ *     checklists: Array<{ checklistId: number, userId: number }>
+ *   } (ข้อมูล Patrol ที่ต้องการสร้าง)
+ * - req.user: { role: String } (บทบาทของผู้ใช้งาน เช่น "admin", "inspector")
+ * Output: JSON object ข้อมูล Patrol ที่ถูกสร้าง
+**/
 export async function createPatrol(req: Request, res: Response) {
   try {
     const userRole = (req as any).user.role;
     if (userRole !== "admin" && userRole !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
+      res.status(403).json({ message: "Access Denied: Admins or Inspector only" });
       return;
     }
 
@@ -231,9 +399,9 @@ export async function createPatrol(req: Request, res: Response) {
 
     const newPatrol = await prisma.patrol.create({
       data: {
-        pt_date: patrolDate,
-        pt_status: status,
-        pt_ps_id: parseInt(presetId, 10),
+        date: patrolDate,
+        status: status,
+        presetId: parseInt(presetId, 10),
       },
     });
 
@@ -248,39 +416,51 @@ export async function createPatrol(req: Request, res: Response) {
 
       await prisma.patrolChecklist.create({
         data: {
-          ptcl_pt_id: newPatrol.pt_id,
-          ptcl_cl_id: checklistId,
-          ptcl_us_id: userId,
+          patrolId: newPatrol.id,
+          checklistId: checklistId,
+          userId: userId,
         },
       });
 
       if (!notifiedInspectors.has(userId)) {
         const message = `patrol_assigned-${new Date(patrolDate).toISOString()}`;
         await createNotification({
-          nt_message: message,
-          nt_type: "request" as NotificationType,
-          nt_url: `/patrol/${newPatrol.pt_id}`,
-          nt_us_id: userId,
+          message: message,
+          type: "request" as NotificationType,
+          url: `/patrol/${newPatrol.id}`,
+          userId: userId,
         });
 
         notifiedInspectors.add(userId);
       }
     }
-    let result = transformKeys(newPatrol, keyMap);
+    let result = newPatrol;
     res.status(201).json(result);
   } catch (error) {
-     console.error(error)
+    res.status(500).json({ message: "Internal server error" });
+    console.error(error)
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับเริ่มต้น Patrol
+ * Input:
+ * - req.params.id: number (ID ของ Patrol ที่ต้องการเริ่ม)
+ * - req.body: {
+ *     status: String,
+ *     checklists: Array<{ checklist: { items: Array<{ itemZones: Array<{ zone: { id: number } }> }> }, inspector: { id: number } }>
+ *   } (สถานะและรายการ Checklist)
+ * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON object ข้อมูล Patrol หลังจากเริ่มต้น
+**/
 export async function startPatrol(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
-    const { status, checklist } = req.body;
+    const { status, checklists } = req.body;
 
-    const isUserInspector = checklist.some((checklistObj: any) => {
+    const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
     });
 
@@ -297,7 +477,7 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (!status || !checklist) {
+    if (!status || !checklists) {
       res.status(400);
       return;
     }
@@ -309,36 +489,36 @@ export async function startPatrol(req: Request, res: Response) {
 
     const updatePatrol = await prisma.patrol.update({
       where: {
-        pt_id: patrolId,
+        id: patrolId,
       },
       data: {
-        pt_status: "on_going",
-        pt_start_time: new Date(),
+        status: "on_going",
+        startTime: new Date(),
       },
     });
 
     const notifiedInspectors = new Set<number>();
 
-    for (const checklistObj of checklist) {
+    for (const checklistObj of checklists) {
       const inspectorId = checklistObj.inspector.id;
 
-      for (const item of checklistObj.checklist.item) {
-        for (const zone of item.itemZone) {
+      for (const items of checklistObj.checklist.items) {
+        for (const zones of items.itemZones) {
           await prisma.patrolResult.create({
             data: {
-              pr_status: null,
-              pr_itze_it_id: item.id,
-              pr_itze_ze_id: zone.zone.id,
-              pr_pt_id: updatePatrol.pt_id,
+              status: null,
+              itemId: items.id,
+              zoneId: zones.zone.id,
+              patrolId: updatePatrol.id,
             },
           });
           if (!notifiedInspectors.has(inspectorId)) {
             const message = `start_patrol`;
             await createNotification({
-              nt_message: message,
-              nt_type: "information" as NotificationType,
-              nt_url: `/patrol/${updatePatrol.pt_id}`,
-              nt_us_id: inspectorId,
+              message: message,
+              type: "information" as NotificationType,
+              url: `/patrol/${updatePatrol.id}`,
+              userId: inspectorId,
             });
 
             notifiedInspectors.add(inspectorId);
@@ -347,7 +527,7 @@ export async function startPatrol(req: Request, res: Response) {
       }
     }
 
-    let result = transformKeys(updatePatrol, keyMap);
+    let result = updatePatrol;
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -356,19 +536,32 @@ export async function startPatrol(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับสิ้นสุด Patrol
+ * Input:
+ * - req.params.id: number (ID ของ Patrol ที่ต้องการสิ้นสุด)
+ * - req.body: {
+ *     status: String,
+ *     checklist: Array<{ inspector: { id: number } }>,
+ *     result: Array<{ id: number, status: String }>,
+ *     startTime: String
+ *   } (สถานะ, Checklist, ผลลัพธ์, และเวลาเริ่มต้น)
+ * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON object ข้อมูล Patrol หลังจากสิ้นสุด
+**/
 export async function finishPatrol(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
-    const { status, checklist, result, startTime } = req.body;
+    const { status, checklists, results, startTime } = req.body;
 
     if (role !== "admin" && role !== "inspector") {
       res.status(403).json({ message: "Access Denied" });
       return;
     }
 
-    const isUserInspector = checklist.some((checklistObj: any) => {
+    const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
     });
 
@@ -380,7 +573,7 @@ export async function finishPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (!checklist || !result) {
+    if (!checklists || !results) {
       res.status(400).json({ message: "Invalid Data" });
       return;
     }
@@ -393,45 +586,45 @@ export async function finishPatrol(req: Request, res: Response) {
 
     const updatePatrol = await prisma.patrol.update({
       where: {
-        pt_id: patrolId,
+        id: patrolId,
       },
       data: {
-        pt_status: "completed",
-        pt_end_time: new Date(),
-        pt_duration: duration,
+        status: "completed",
+        endTime: new Date(),
+        duration: duration,
       },
     });
 
-    for (const resultObj of result) {
+    for (const resultObj of results) {
       const { id, status } = resultObj;
 
       await prisma.patrolResult.update({
         where: {
-          pr_id: id,
+          id: id,
         },
         data: {
-          pr_status: status,
+          status: status,
         },
       });
     }
 
     const notifiedInspectors = new Set<number>();
-    for (const checklistObj of checklist) {
+    for (const checklistObj of checklists) {
       const inspectorId = checklistObj.inspector.id;
 
       if (!notifiedInspectors.has(inspectorId)) {
         const message = `finish_patrol`;
         await createNotification({
-          nt_message: message,
-          nt_type: "information" as NotificationType,
-          nt_url: `/patrol/${updatePatrol.pt_id}`,
-          nt_us_id: inspectorId,
+          message: message,
+          type: "information" as NotificationType,
+          url: `/patrol/${updatePatrol.id}`,
+          userId: inspectorId,
         });
         notifiedInspectors.add(inspectorId);
       }
     }
 
-    let json = transformKeys(updatePatrol, keyMap);
+    let json = updatePatrol;
 
     res.status(200).json(json);
     return;
@@ -441,25 +634,31 @@ export async function finishPatrol(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ Patrol และข้อมูลที่เกี่ยวข้อง
+ * Input:
+ * - req.params.id: number (ID ของ Patrol ที่ต้องการลบ)
+ * Output: JSON message ยืนยันการลบ Patrol และข้อมูลที่เกี่ยวข้องสำเร็จ
+**/
 export async function removePatrol(req: Request, res: Response) {
   try {
     const patrolId = parseInt(req.params.id, 10);
 
     await prisma.patrolChecklist.deleteMany({
       where: {
-        ptcl_pt_id: patrolId,
+        patrolId: patrolId,
       },
     });
 
     await prisma.patrolResult.deleteMany({
       where: {
-        pr_pt_id: patrolId,
+        patrolId: patrolId,
       },
     });
 
     await prisma.patrol.delete({
       where: {
-        pt_id: patrolId,
+        id: patrolId,
       },
     });
 
@@ -476,35 +675,14 @@ export async function removePatrol(req: Request, res: Response) {
   }
 }
 
-export async function updatePatrolStatus(req: Request, res: Response) {
-  try {
-    const { patrolId, status } = req.body; // Destructure patrolId and status from the request body
-
-    // Validate input
-    if (!patrolId || !status) {
-      return res
-        .status(400)
-        .json({ message: "Patrol ID and status are required." });
-    }
-
-    // Update the patrol status in the database
-    const updatedPatrol = await prisma.patrol.update({
-      where: { pt_id: patrolId },
-      data: { pt_status: status },
-    });
-    let result = transformKeys(updatedPatrol, keyMap);
-    res.status(200).json(result);
-    return;
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while updating the patrol status." });
-    return;
-  }
-}
-
-export async function getAllPatrolDefect(req: Request, res: Response) {
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมดใน Patrol
+ * Input:
+ * - req.params.id: number (ID ของ Patrol)
+ * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON array ข้อมูล Defect และข้อมูลที่เกี่ยวข้อง
+**/
+export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
     const userId = (req as any).user.userId;
@@ -519,10 +697,10 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
     const patrolId = parseInt(req.params.id, 10);
     const validPatrol = await prisma.patrol.findFirst({
       where: {
-        pt_id: patrolId,
-        patrolChecklist: {
+        id: patrolId,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -538,22 +716,30 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
     const defects = await prisma.defect.findMany({
       where: {
         patrolResult: {
-          pr_pt_id: patrolId,
+          patrolId: patrolId,
         },
       },
       include: {
         patrolResult: {
           select: {
-            pr_itze_ze_id: true,
+            zoneId: true,
           },
         },
-        image: {
+        images: {
           select: {
             image: {
               select: {
-                im_id: true,
-                im_path: true,
-                user: true,
+                id: true,
+                path: true,
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    department: true,
+                    createdAt: true
+                  }
+                },
               },
             },
           },
@@ -561,7 +747,7 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
       },
     });
 
-    let result = defects.map((defect: any) => transformKeys(defect, keyMap));
+    let result = defects;
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -570,6 +756,14 @@ export async function getAllPatrolDefect(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับเพิ่มความคิดเห็นใน Patrol
+ * Input:
+ * - req.params.id: number (ID ของ Patrol)
+ * - req.body: { message: String, patrolResultId: number } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
+ * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: JSON object ข้อมูลความคิดเห็นที่ถูกบันทึก
+**/
 export async function commentPatrol(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
@@ -591,12 +785,12 @@ export async function commentPatrol(req: Request, res: Response) {
     }
 
     // ตรวจสอบว่าผู้ใช้เกี่ยวข้องกับ Patrol นี้หรือไม่
-    const validPatrol = await prisma.patrol.findUnique({
+    const validPatrol = await prisma.patrol.findFirst({
       where: {
-        pt_id: patrolId,
-        patrolChecklist: {
+        id: patrolId,
+        patrolChecklists: {
           some: {
-            ptcl_us_id: userId,
+            userId: userId,
           },
         },
       },
@@ -609,15 +803,15 @@ export async function commentPatrol(req: Request, res: Response) {
     // // รับ message เข้ามา และเชื่อมกับ PatrolResult
     const newComment = await prisma.comment.create({
       data: {
-        cm_message: message,
-        cm_timestamp: new Date(),
-        cm_us_id: userId,
-        cm_pr_id: parseInt(patrolResultId, 10),
+        message: message,
+        timestamp: new Date(),
+        userId: userId,
+        patrolResultId: parseInt(patrolResultId, 10),
       },
     });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
-    let result = transformKeys(newComment, keyMap);
+    let result = newComment;
     res.status(201).json(result);
     return;
   } catch (error) {
@@ -627,27 +821,12 @@ export async function commentPatrol(req: Request, res: Response) {
   }
 }
 
-export async function getCommentPatrol(req: Request, res: Response) {
-  try {
-    const commentId = parseInt(req.params.id, 10);
-
-    const comments = await prisma.comment.findMany({
-      where: {
-        cm_id: commentId,
-      },
-    });
-
-    let result = transformKeys(comments, keyMap);
-    res.status(200).json(result);
-    return;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-    return;
-  }
-}
-
-// ฟังก์ชันสำหรับตรวจสอบและอัปเดต patrols ที่มีสถานะ pending
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับตรวจสอบและอัปเดตสถานะ Patrol ที่เป็น "pending" ให้เป็น "scheduled"
+ * Input:
+ * - ไม่มี Input (ฟังก์ชันทำงานอัตโนมัติ)
+ * Output: ไม่มี Output ที่ส่งกลับ แต่จะทำการอัปเดตสถานะในฐานข้อมูล
+**/
 export async function checkAndUpdatePendingPatrols() {
   try {
     const response = await axios.get(
@@ -683,7 +862,6 @@ export async function checkAndUpdatePendingPatrols() {
         }
       }
     }
-
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
@@ -696,7 +874,12 @@ export async function checkAndUpdatePendingPatrols() {
   }
 }
 
-// ฟังก์ชันสำหรับ schedule การ update status ของ patrol ทุกเที่ยงคืน
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับกำหนดเวลาอัปเดตสถานะของ Patrol อัตโนมัติทุกเที่ยงคืน
+ * Input:
+ * - ไม่มี Input
+ * Output: ไม่มี Output ที่ส่งกลับ (ฟังก์ชันทำงานเบื้องหลัง)
+**/
 export function schedulePatrolStatusUpdate() {
   const now = new Date();
   const nextMidnight = new Date();
@@ -709,7 +892,12 @@ export function schedulePatrolStatusUpdate() {
   }, timeUntilMidnight);
 }
 
-// ฟังก์ชันสำหรับ คำนวณ Duration ของ patrol
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับคำนวณระยะเวลา (Duration) ของ Patrol
+ * Input:
+ * - startTime: String (เวลาเริ่มต้นของ Patrol ในรูปแบบ ISO 8601)
+ * Output: String (ระยะเวลาในรูปแบบ "xh ym zs" เช่น "2h 15m 30s")
+**/
 const calculateDuration = (startTime: string): string => {
   // แปลง startTime เป็น Date object
   const start = new Date(startTime);
@@ -728,3 +916,4 @@ const calculateDuration = (startTime: string): string => {
   // แสดงผลในรูปแบบที่อ่านง่าย เช่น "2h 15m 30s"
   return `${hours}h ${minutes}m ${seconds}s`;
 };
+

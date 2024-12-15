@@ -2,11 +2,71 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { IPatrol, FilterPatrol, IPatrolResult, defectStatus, patrolStatus, itemType } from "@/app/type";
 import { badgeVariants } from "@/components/badge-custom";
+import { LoginSchema } from '@/app/type';
+import axios, { AxiosRequestConfig } from "axios";
+import { z } from "zod";
+
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+export async function login(values: z.infer<typeof LoginSchema>) {
+  const validatedFields = LoginSchema.safeParse(values)
+  if (!validatedFields.success) {
+      return { error: "Invalid field!" }
+  }
+  try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
+      return response.data
+  } catch (error: any) {
+      return { error: error.response?.data?.message || "Login failed" };
+  }
+}
+
+
+export async function logout() {
+  try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
+  } catch (error: any) {
+      throw new Error("Logout failed",error);
+  }
+}
+
+
+export async function fetchData(
+  type: "get" | "delete" | "post" | "put",
+  endpoint: string,
+  credential: boolean,
+  value?: any,
+  form?: boolean
+) {
+  try {
+      const config: AxiosRequestConfig = {
+          withCredentials: credential,
+          headers:
+              form ? {
+                  "Content-Type": "multipart/form-data",
+              }
+                  : {
+                      'Content-Type': 'application/json',
+                  }
+      };
+
+      let response;
+      if (type === "get" || type === "delete") {
+          response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, config);
+      } else if (type === "post" || type === "put") {
+          response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, value, config);
+      }
+
+      return response?.data; // response.data will contain the response body
+  } catch (error) {
+      console.error("Failed to fetch data:", error);
+      return null; // Returning null on error
+  }
+}
+
 
 export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
@@ -36,7 +96,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     let totalDefects = 0;
 
     // วนลูปผ่าน patrolChecklist
-    for (const patrolChecklist of patrol.patrolChecklist) {
+    for (const patrolChecklist of patrol.patrolChecklists) {
       const inspectorName = patrolChecklist.inspector.profile.name;
       const checklist = patrolChecklist.checklist;
 
@@ -45,9 +105,9 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       worksheet.addRow(["Checklist:", checklist.title]);
 
       // วนลูปผ่านรายการใน Checklist
-      for (const item of checklist.item) {
+      for (const item of checklist.items) {
         // วนลูปผ่าน itemZone
-        for (const itemZone of item.itemZone) {
+        for (const itemZone of item.itemZones) {
           const zoneName = itemZone.zone.name;
 
           // หา result ที่ตรงกับ item และ zone นี้
@@ -145,46 +205,6 @@ export const sortData = (patrolData: any, sort: { by: string; order: string }) =
   }
   return sortedData
 }
-
-export function filterPatrol(filter: FilterPatrol | null, patrols: IPatrol[]) {
-  if (filter?.presetTitle === "All" && JSON.stringify(filter?.patrolStatus) === JSON.stringify(["pending", "on_going", "scheduled"]) && filter?.dateRange.start === null && filter?.dateRange.end === null) {
-    return patrols
-  }
-  else if (filter?.patrolStatus.length === 0) {
-    return []
-  }
-  else {
-    const newFilteredPatrolData = patrols.filter((patrol) => {
-      // Convert patrol.date from string to ISO string
-      const patrolDateISOString = new Date(patrol.date).toISOString();
-
-      // Convert filter dateRange.start and dateRange.end to ISO strings if they exist
-      const filterStartISOString = filter?.dateRange.start ? new Date(filter.dateRange.start).toISOString() : null;
-      const filterEndISOString = filter?.dateRange.end ? new Date(filter.dateRange.end).toISOString() : null;
-
-      // Check if the presetTitle matches
-      let matchesPreset: boolean;
-      if (filter?.presetTitle === 'All') {
-        matchesPreset = true;
-      } else {
-        matchesPreset = !filter?.presetTitle || patrol.preset?.title === filter?.presetTitle;
-      }
-
-      // Check if the status matches
-      const matchesStatus = filter?.patrolStatus.length === 0 || filter?.patrolStatus.includes(patrol.status);
-
-      // Check if the date is within the selected range using ISO string comparison
-      const matchesDateRange =
-        (!filterStartISOString || patrolDateISOString >= filterStartISOString) &&  // Compare ISO strings
-        (!filterEndISOString || patrolDateISOString <= filterEndISOString);        // Compare ISO strings
-
-      // Return true if all conditions match
-      return matchesPreset && matchesStatus && matchesDateRange;
-    });
-    return newFilteredPatrolData
-  }
-}
-
 
 // Function to calculate time ago
 export function timeAgo(timestamp: string, t: any): string {

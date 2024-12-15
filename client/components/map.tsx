@@ -2,7 +2,7 @@
 import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useState } from 'react';
 import { IZone, ILocation } from '@/app/type';
-import { fetchData } from '@/lib/api';
+import { fetchData } from '@/lib/utils';
 import zonePath from '@/lib/zonePath.json'
 import wallPath from '@/lib/wallPath.json'
 import React from 'react';
@@ -19,7 +19,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
-  const z = useTranslations('Zone')
+  const m = useTranslations('Map')
 
   useEffect(() => {
     if (disable && initialSelectedZones) {
@@ -41,7 +41,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
     setWalls(wallPath)
 
     if (location) {
-      const updatedZones = location.zone.map(zone => {
+      const updatedZones = location.zones.map(zone => {
         const matchedZonePath = zonePath.find(path => path.id === zone.id);
         return {
           ...zone,
@@ -84,7 +84,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
 
     setSelectedZones(updatedSelectedZones);
 
-    const selectedZoneObjects = location?.zone.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
+    const selectedZoneObjects = location?.zones.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
 
     // ตรวจสอบว่า onZoneSelect ไม่เป็น undefined ก่อนเรียกใช้งาน
     if (onZoneSelect) {
@@ -141,7 +141,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
                   <Text
                     x={zone.text.x} // ตำแหน่ง x
                     y={zone.text.y} // ตำแหน่ง y
-                    text={z(zone.name)} // ข้อความที่จะแสดง
+                    text={m(zone.name)} // ข้อความที่จะแสดง
                     fontSize={zone.text.fontSize} // ขนาดฟอนต์
                     fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
                     fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor

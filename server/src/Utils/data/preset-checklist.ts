@@ -1,14 +1,14 @@
 import { PresetChecklist } from "@prisma/client";
 
 export const preset_checklists: PresetChecklist[] = [
-    { pscl_ps_id: 1, pscl_cl_id: 3 },
-    { pscl_ps_id: 1, pscl_cl_id: 4 },
-    { pscl_ps_id: 2, pscl_cl_id: 2 },
-    { pscl_ps_id: 2, pscl_cl_id: 5 },
-    { pscl_ps_id: 3, pscl_cl_id: 1 },
-    { pscl_ps_id: 3, pscl_cl_id: 4 },
-    { pscl_ps_id: 4, pscl_cl_id: 1 },
-    { pscl_ps_id: 4, pscl_cl_id: 2 },
-    { pscl_ps_id: 4, pscl_cl_id: 3 },
-    { pscl_ps_id: 4, pscl_cl_id: 5 },
+    { presetId: 1, checklistId: 3 },
+    { presetId: 1, checklistId: 4 },
+    { presetId: 2, checklistId: 2 },
+    { presetId: 2, checklistId: 5 },
+    { presetId: 3, checklistId: 1 },
+    { presetId: 3, checklistId: 4 },
+    { presetId: 4, checklistId: 1 },
+    { presetId: 4, checklistId: 2 },
+    { presetId: 4, checklistId: 3 },
+    { presetId: 4, checklistId: 5 },
 ];
