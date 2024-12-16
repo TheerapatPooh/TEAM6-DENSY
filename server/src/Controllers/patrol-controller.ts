@@ -1,6 +1,5 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import axios from "axios";
 import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
 
@@ -9,7 +8,7 @@ import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
  * Input:
  * - req.query: { preset: "true" | "false", result: "true" | "false" } (optional)
  * - req.params.id: number (ID ของ Patrol ที่ต้องการดึงข้อมูล)
- * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol รวมถึง preset และ result หากร้องขอ
 **/
 export async function getPatrol(req: Request, res: Response) {
@@ -17,17 +16,8 @@ export async function getPatrol(req: Request, res: Response) {
     const includePreset = req.query.preset === "true";
     const includeResult = req.query.result === "true";
 
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
-
-    if (role !== "admin" && role !== "inspector") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Inspectors only" });
-      return;
-    }
-
     let patrol: any;
 
     patrol = await prisma.patrol.findFirst({
@@ -129,8 +119,7 @@ export async function getPatrol(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500);
     return;
   }
 }
@@ -139,19 +128,13 @@ export async function getPatrol(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ทั้งหมดตามสถานะ
  * Input:
  * - req.query: { status, preset, startDate, endDate, search } ("status", "preset", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
- * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Patrol และข้อมูลที่เกี่ยวข้อง
 **/
 export async function getAllPatrols(req: Request, res: Response) {
   try {
     const { status, preset, startDate, endDate, search } = req.query;
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
-    if (role !== "admin" && role !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Admins or Inspectors only" });
-      return;
-    }
-
     // สร้างเงื่อนไขหลัก
     const whereConditions: any = {
       patrolChecklists: {
@@ -358,7 +341,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500);
     return;
   }
 }
@@ -371,17 +354,10 @@ export async function getAllPatrols(req: Request, res: Response) {
  *     presetId: number,
  *     checklists: Array<{ checklistId: number, userId: number }>
  *   } (ข้อมูล Patrol ที่ต้องการสร้าง)
- * - req.user: { role: String } (บทบาทของผู้ใช้งาน เช่น "admin", "inspector")
  * Output: JSON object ข้อมูล Patrol ที่ถูกสร้าง
 **/
 export async function createPatrol(req: Request, res: Response) {
   try {
-    const userRole = (req as any).user.role;
-    if (userRole !== "admin" && userRole !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Admins or Inspector only" });
-      return;
-    }
-
     const { date, presetId, checklists } = req.body;
 
     if (!date || !presetId || !checklists) {
@@ -519,8 +495,7 @@ export async function createPatrol(req: Request, res: Response) {
     }
 
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-    console.error(error)
+    res.status(500);
   }
 }
 
@@ -532,12 +507,11 @@ export async function createPatrol(req: Request, res: Response) {
  *     status: String,
  *     checklists: Array<{ checklist: { items: Array<{ itemZones: Array<{ zone: { id: number } }> }> }, inspector: { id: number } }>
  *   } (สถานะและรายการ Checklist)
- * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number } (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol หลังจากเริ่มต้น
 **/
 export async function startPatrol(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     const { status, checklists } = req.body;
@@ -554,18 +528,13 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (role !== "admin" && role !== "inspector") {
-      res.status(403).json({ message: "Access Denied" });
-      return;
-    }
-
     if (!status || !checklists) {
       res.status(400);
       return;
     }
 
     if (status !== "scheduled") {
-      res.status(403).json({ message: "Cannot start patrol." });
+      res.status(400)
       return;
     }
 
@@ -613,7 +582,7 @@ export async function startPatrol(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500);
     return;
   }
 }
@@ -628,20 +597,14 @@ export async function startPatrol(req: Request, res: Response) {
  *     result: Array<{ id: number, status: String }>,
  *     startTime: String
  *   } (สถานะ, Checklist, ผลลัพธ์, และเวลาเริ่มต้น)
- * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol หลังจากสิ้นสุด
 **/
 export async function finishPatrol(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     const { status, checklists, results, startTime } = req.body;
-
-    if (role !== "admin" && role !== "inspector") {
-      res.status(403).json({ message: "Access Denied" });
-      return;
-    }
 
     const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
@@ -661,7 +624,7 @@ export async function finishPatrol(req: Request, res: Response) {
     }
 
     if (status !== "on_going") {
-      res.status(403).json({ message: "Cannot finish patrol." });
+      res.status(400).json({ message: "Cannot finish patrol." });
       return;
     }
     const duration = calculateDuration(startTime);
@@ -711,7 +674,7 @@ export async function finishPatrol(req: Request, res: Response) {
     res.status(200).json(json);
     return;
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500);
     return;
   }
 }
@@ -749,10 +712,7 @@ export async function removePatrol(req: Request, res: Response) {
     });
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Failed to delete patrol",
-    });
+    res.status(500)
     return;
   }
 }
@@ -761,20 +721,12 @@ export async function removePatrol(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมดใน Patrol
  * Input:
  * - req.params.id: number (ID ของ Patrol)
- * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect และข้อมูลที่เกี่ยวข้อง
 **/
 export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
-
-    if (role !== "admin" && role !== "inspector") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Inspectors only" });
-      return;
-    }
 
     const patrolId = parseInt(req.params.id, 10);
     const validPatrol = await prisma.patrol.findFirst({
@@ -790,7 +742,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
 
     if (!validPatrol) {
       res
-        .status(404)
+        .status(403)
         .json({ message: "You are not associated with this Patrol" });
       return;
     }
@@ -833,7 +785,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500)
     return;
   }
 }
@@ -843,20 +795,13 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
  * Input:
  * - req.params.id: number (ID ของ Patrol)
  * - req.body: { message: String, patrolResultId: number } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
- * - req.user: { role: String, userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูลความคิดเห็นที่ถูกบันทึก
 **/
 export async function commentPatrol(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
-    // ตรวจสอบสิทธิ์ว่าเป็น Inspector หรือไม่
-    if (role !== "inspector") {
-      res.status(403).json({ message: "Access Denied: Inspectors only" });
-      return;
-    }
-
     // รับข้อมูลจาก request body
     const { message, patrolResultId } = req.body;
 
@@ -878,7 +823,7 @@ export async function commentPatrol(req: Request, res: Response) {
       },
     });
     if (!validPatrol) {
-      res.status(404).json({ message: "Patrol or checklist not found" });
+      res.status(403).json({ message: "Patrol or checklist not found" });
       return;
     }
 
@@ -897,8 +842,7 @@ export async function commentPatrol(req: Request, res: Response) {
     res.status(201).json(result);
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500)
     return;
   }
 }
@@ -911,10 +855,11 @@ export async function commentPatrol(req: Request, res: Response) {
 **/
 export async function checkAndUpdatePendingPatrols() {
   try {
-    const response = await axios.get(
-      `${process.env.SERVER_URL}/patrols?status=pending`
-    );
-    const patrols = response.data;
+    const patrols = await prisma.patrol.findMany({
+      where: {
+        status: "pending" as PatrolStatus,
+      },
+    });
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -925,34 +870,21 @@ export async function checkAndUpdatePendingPatrols() {
 
       if (patrolDate.getTime() === today.getTime()) {
         try {
-          await axios.put(
-            `${process.env.SERVER_URL}/patrol/${patrol.id}/status`,
-            {
-              patrolId: patrol.id,
+          await prisma.patrol.update({
+            where: {
+              id: patrol.id,
+            },
+            data: {
               status: "scheduled",
-            }
-          );
+            },
+          });
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            console.error(
-              `Error updating patrol ${patrol.id}:`,
-              error.response?.data || error.message
-            );
-          } else {
-            console.error(`Unknown error updating patrol ${patrol.id}:`, error);
-          }
+          console.error(`Error updating patrol ${patrol.id}:`, error);
         }
       }
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error fetching patrol:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("Unknown error fetching or updating patrols:", error);
-    }
+    console.error("Error fetching or updating patrols:", error);
   }
 }
 

@@ -1,19 +1,20 @@
-import { createDefect,getDefect, getAllDefects, deleteDefect, updateDefect,} from "@Controllers/defect-controller.js";
+import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
-import { authenticateUser, upload } from "@Controllers/util-controller.js";
+import { authenticateUser, authorzied, upload } from "@Controllers/util-controller.js";
 
 const router = Router()
 
-router.post('/defect', (req, res, next) => {
-    next();
+router.post('/defect', authorzied(['admin', 'inspector']), (req, res, next) => {
+  next();
 }, upload.array('imageFiles', 10), authenticateUser, createDefect);
 router.get('/defect/:id', authenticateUser, getDefect)
-router.get('/defects', authenticateUser, getAllDefects)
+router.get('/defects', authenticateUser, authorzied(['admin', 'supervisor']), getAllDefects)
 router.put('/defect/:id',
-    upload.array('imageFiles', 10),
-    authenticateUser,
-    updateDefect
-  );
-  router.delete('/defect/:id', authenticateUser, deleteDefect)
+  authorzied(['admin', 'inspector']),
+  upload.array('imageFiles', 10),
+  authenticateUser,
+  updateDefect
+);
+router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']), deleteDefect)
 
 export default router

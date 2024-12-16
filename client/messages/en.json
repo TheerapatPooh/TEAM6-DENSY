@@ -138,8 +138,22 @@
     "report_defect": "An issue has been reported in your assigned zone. Please check immediately."
   },
   "Sidebar": {
-    "Dashboard" : "Dashboard",
-    "Employees" : "Employees",
-    "Settings" : "Settings"
+    "Dashboard": "Dashboard",
+    "Employees": "Employees",
+    "Settings": "Settings"
+  },
+  "Alert": {
+    "UnreadNotificationTitle": "You've got {count} new notifications!",
+    "UnreadNotificationDescription": "Don’t miss out, check your notifications.",
+    "LoginSuccessTitle": "Welcome back!",
+    "LoginSuccessDescription": "You have successfully logged in.",
+    "LoginErrorTitle": "Login failed!",
+    "LoginErrorDescription": "The username or password you entered is incorrect. Please try again.",
+    "LogoutSuccessTitle": "Goodbye!",
+    "LogoutSuccessDescription": "You have successfully logged out.",
+    "LoginUsernameRequire": "Please enter a username.",
+    "LoginPasswordRequire": "Please enter a password.",
+    "PatrolCreateTitle": "Patrol Created",
+    "PatrolCreateDescription": "The patrol has been successfully scheduled."
   }
 }

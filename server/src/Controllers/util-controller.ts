@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import  prisma  from "@Utils/database.js";
+import prisma from "@Utils/database.js";
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import multer from 'multer';
@@ -29,7 +29,7 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      res.status(401).json({ message: "Invalid username or password" });
+      res.status(401).json({ message: "Invalid username" });
       return;
     }
 
@@ -37,7 +37,7 @@ export async function login(req: Request, res: Response) {
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      res.status(401).json({ message: "Invalid username or password" });
+      res.status(401).json({ message: "Invalid password" });
       return;
     }
 
@@ -57,7 +57,7 @@ export async function login(req: Request, res: Response) {
 
     res.status(200).json({ message: "Login Success", token });
   } catch (error) {
-    res.status(500).json({ message: "Login failed", error });
+    res.status(500)
   }
 }
 
@@ -77,7 +77,7 @@ export async function logout(req: Request, res: Response) {
     });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
-    res.status(500).json({ message: "Logout failed", error });
+    res.status(500)
   }
 }
 
@@ -148,7 +148,7 @@ export async function getNotifications(req: Request, res: Response) {
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching notifications", error });
+    res.status(500)
   }
 }
 
@@ -211,7 +211,7 @@ export async function updateNotification(req: Request, res: Response) {
     });
     res.status(200).json(notification);
   } catch (error) {
-    res.status(500).json({ message: "Error updating notification", error });
+    res.status(500)
   }
 }
 
@@ -231,7 +231,7 @@ export async function markAllAsRead(req: Request, res: Response) {
     });
     res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
-    res.status(500).json({ message: "Error updating notifications", error });
+    res.status(500)
   }
 }
 
@@ -260,7 +260,7 @@ export async function markAsRead(req: Request, res: Response) {
 
     res.status(200).json({ message: "Notification marked as read" });
   } catch (error) {
-    res.status(500).json({ message: "Error updating notification", error });
+    res.status(500)
   }
 }
 
@@ -331,4 +331,23 @@ export async function sendEmail(email: string, subject: string, message: string)
   } catch (error) {
     console.error('Error sending email:', error);
   }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับตรวจสอบสิทธิ์การเข้าถึง
+ * Input: 
+ * - allowedRoles: string[] (role ที่อณุญาติให้เข้าถึงข้อมูล)
+ * Output: 
+ * - ทำ Function  ต่อไป
+**/
+export function authorzied(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const userRole = (req as any).user.role;
+
+    if (!allowedRoles.includes(userRole)) {
+      res.status(403).json({ message: `Access Denied: Required roles are ${allowedRoles.join(", ")}` });
+      return;
+    }
+    next();
+  };
 }

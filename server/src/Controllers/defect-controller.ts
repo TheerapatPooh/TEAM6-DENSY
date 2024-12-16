@@ -10,7 +10,6 @@ import { users } from '../Utils/data/users';
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
  * Input: 
- * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * - req.body: { name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int, supervisorId: Int }
  * - req.files: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
@@ -18,7 +17,6 @@ import { users } from '../Utils/data/users';
 **/
 export async function createDefect(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
     const {
       name,
@@ -29,13 +27,6 @@ export async function createDefect(req: Request, res: Response) {
       supervisorId,
     } = req.body;
     const imageFiles = req.files as Express.Multer.File[]; // Cast to an array of Multer files
-
-    if (role !== "admin" && role !== "inspector") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Inspectors only" });
-      return;
-    }
 
     const validPatrol = await prisma.patrol.findFirst({
       where: {
@@ -136,30 +127,19 @@ export async function createDefect(req: Request, res: Response) {
 
     res.status(201).json(result);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500)
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect 
  * Input: 
- * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * - req.params: { id: Int} (ID ของ Defect)
  * Output: JSON object ข้อมูล Defect และข้อมูล patrolResult ที่เกี่ยวข้อง
 **/
 export async function getDefect(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
-
-    if (role !== "admin" && role !== "supervisor") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Supervisor only" });
-      return;
-    }
-
     const { id } = req.params;
 
     const defect = await prisma.defect.findUnique({
@@ -214,7 +194,7 @@ export async function getDefect(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500)
     return;
   }
 }
@@ -222,21 +202,12 @@ export async function getDefect(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมด
  * Input: 
- * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง 
 **/
 export async function getAllDefects(req: Request, res: Response) {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
-
-    if (role !== "admin" && role !== "supervisor") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Supervisor only" });
-      return;
-    }
 
     const defects = await prisma.defect.findMany({
       where: {
@@ -290,7 +261,7 @@ export async function getAllDefects(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500)
     return;
   }
 }
@@ -305,7 +276,6 @@ const uploadsPath = getUploadsPath();
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect 
  * Input: 
- * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * - req.params: { id: Int} (ID ของ Defect ที่จะอัปเดต)
  * - req.body: {name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int }
@@ -314,7 +284,7 @@ const uploadsPath = getUploadsPath();
 **/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
-    const { role, userId } = (req as any).user;
+    const { userId } = (req as any).user;
     const { id } = req.params;
     const {
       name,
@@ -325,11 +295,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       patrolResultId,
     } = req.body;
     const newImageFiles = req.files as Express.Multer.File[];
-
-    if (role !== 'admin' && role !== 'inspector' && role !== 'supervisor') {
-      res.status(403).json({ message: 'Access Denied: Admins or Inspectors only' });
-      return;
-    }
 
     const defect = await prisma.defect.findUnique({
       where: { id: Number(id) },
@@ -415,30 +380,20 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       defect: updatedDefect,
     });
   } catch (err) {
-    console.error('Error updating defect:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500)
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับลบ Defect 
  * Input: 
- * - (req as any).user.role: String (ต้องเป็น "admin" หรือ "inspector")
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * - req.params: { id: Int} (ID ของ Defect ที่จะลบ)
  * Output: JSON message ยืนยันการลบ Defect สำเร็จ
 **/
 export async function deleteDefect(req: Request, res: Response): Promise<void> {
   try {
-    const role = (req as any).user.role;
     const userId = (req as any).user.userId;
-
-    if (role !== "admin" && role !== "inspector") {
-      res
-        .status(403)
-        .json({ message: "Access Denied: Admins or Inspectors only" });
-      return;
-    }
 
     const { id } = req.params;
 

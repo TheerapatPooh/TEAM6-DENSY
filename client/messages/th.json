@@ -138,8 +138,22 @@
     "report_defect": "มีการแจ้งปัญหาในโซนที่คุณรับผิดชอบ กรุณาตรวจสอบทันที"
   },
   "Sidebar": {
-    "Dashboard" : "แดชบอร์ด",
-    "Employees" : "จัดการพนักงาน",
-    "Settings" : "การตั้งค่า"
+    "Dashboard": "แดชบอร์ด",
+    "Employees": "จัดการพนักงาน",
+    "Settings": "การตั้งค่า"
+  },
+  "Alert": {
+    "UnreadNotificationTitle": "คุณมี {count} การแจ้งเตือนใหม่!",
+    "UnreadNotificationDescription": "อย่าพลาด! เช็กการแจ้งเตือนของคุณเลย",
+    "LoginSuccessTitle": "ยินดีต้อนรับกลับ!",
+    "LoginSuccessDescription": "คุณเข้าสู่ระบบเรียบร้อยแล้ว.",
+    "LoginErrorTitle": "เข้าสู่ระบบไม่สำเร็จ!",
+    "LoginErrorDescription": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง.",
+    "LogoutSuccessTitle": "ลาก่อน!",
+    "LogoutSuccessDescription": "คุณออกจากระบบเรียบร้อยแล้ว.",
+    "LoginUsernameRequire": "กรุณากรอกชื่อผู้ใช้.",
+    "LoginPasswordRequire": "กรุณากรอกรหัสผ่าน.",
+    "PatrolCreateTitle": "สร้างรายการตรวจ Patrol สำเร็จ",
+    "PatrolCreateDescription": "รายการตรวจ Patrol กำหนดเวลาเรียบร้อยแล้ว."
   }
 }

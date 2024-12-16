@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { IPatrol, FilterPatrol, IPatrolResult, defectStatus, patrolStatus, itemType } from "@/app/type";
+import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType } from "@/app/type";
 import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
@@ -14,22 +14,22 @@ export function cn(...inputs: ClassValue[]) {
 export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values)
   if (!validatedFields.success) {
-      return { error: "Invalid field!" }
+    return { error: "Invalid field!" }
   }
   try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
-      return response.data
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
+    return response.data
   } catch (error: any) {
-      return { error: error.response?.data?.message || "Login failed" };
+    return { error: error.response?.data?.message || "Login failed" };
   }
 }
 
 
 export async function logout() {
   try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
   } catch (error: any) {
-      throw new Error("Logout failed",error);
+    throw new Error("Logout failed", error);
   }
 }
 
@@ -42,28 +42,28 @@ export async function fetchData(
   form?: boolean
 ) {
   try {
-      const config: AxiosRequestConfig = {
-          withCredentials: credential,
-          headers:
-              form ? {
-                  "Content-Type": "multipart/form-data",
-              }
-                  : {
-                      'Content-Type': 'application/json',
-                  }
-      };
+    const config: AxiosRequestConfig = {
+      withCredentials: credential,
+      headers:
+        form ? {
+          "Content-Type": "multipart/form-data",
+        }
+          : {
+            'Content-Type': 'application/json',
+          }
+    };
 
-      let response;
-      if (type === "get" || type === "delete") {
-          response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, config);
-      } else if (type === "post" || type === "put") {
-          response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, value, config);
-      }
+    let response;
+    if (type === "get" || type === "delete") {
+      response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, config);
+    } else if (type === "post" || type === "put") {
+      response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, value, config);
+    }
 
-      return response?.data; // response.data will contain the response body
+    return response?.data; // response.data will contain the response body
   } catch (error) {
-      console.error("Failed to fetch data:", error);
-      return null; // Returning null on error
+    console.error("Failed to fetch data:", error);
+    return null; // Returning null on error
   }
 }
 

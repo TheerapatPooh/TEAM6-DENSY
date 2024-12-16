@@ -25,12 +25,13 @@ import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { INotification, notificationType, IUser } from '@/app/type'
-import { fetchData } from '@/lib/utils'
+import { fetchData, formatTime } from '@/lib/utils'
 import { useSocket } from '@/components/socket-provider'
 import BadgeCustom from '@/components/badge-custom'
 import { useRouter } from 'next/navigation'
 import { timeAgo } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { toast } from '@/hooks/use-toast'
 
 
 export default function Notification() {
@@ -38,6 +39,7 @@ export default function Notification() {
     const s = useTranslations("Status");
     const d = useTranslations('DateTime');
     const n = useTranslations('Notification');
+    const a = useTranslations('Alert');
 
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
@@ -49,8 +51,8 @@ export default function Notification() {
 
     function formatMessage(message: string) {
         const [key, ...dynamicParts] = message.split('-');
-        const dynamicData = dynamicParts.join('-');
-        return { key, dynamicData };
+        const date = dynamicParts.join('-');
+        return { key, date };
     }
 
 
@@ -122,6 +124,21 @@ export default function Notification() {
     }, [])
 
     useEffect(() => {
+        if (unreadCount > 0) {
+            const timer = setTimeout(() => {
+                toast({
+                    variant: "default",
+                    title: a("UnreadNotificationTitle", { count: unreadCount }),
+                    description: a("UnreadNotificationDescription"),
+                });
+            }, 5000); // 5000 มิลลิวินาที = 5 วินาที
+
+            // ล้าง Timer เมื่อ Component ถูก Unmount หรือ unreadCount เปลี่ยน
+            return () => clearTimeout(timer);
+        }
+    }, [unreadCount])
+
+    useEffect(() => {
         if (socket && isConnected && user?.id) {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
@@ -163,7 +180,7 @@ export default function Notification() {
                                     <DropdownMenuContent align="end" className="p-0">
                                         <DropdownMenuItem>
                                             <h1 className='text-destructive'>{t("DeleteAllNotifications")}</h1>
-                                        </DropdownMenuItem>                     
+                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -173,7 +190,7 @@ export default function Notification() {
                     <div className='h-full w-full flex flex-col gap-6'>
                         <ScrollArea className="flex-1 p-0 pr-4 overflow-y-auto">
                             {getRecentNotifications().map((notification, index) => {
-                                const { key, dynamicData } = formatMessage(notification.message);
+                                const { key, date } = formatMessage(notification.message);
                                 return (
                                     <Button
                                         key={index}
@@ -187,7 +204,7 @@ export default function Notification() {
                                                 className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                 readOnly
                                             >
-                                                {n(key, { date: dynamicData })}
+                                                {n(key, { date: formatTime(date) })}
                                             </textarea>
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs font-normal text-muted-foreground text-start">
