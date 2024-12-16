@@ -4,9 +4,14 @@ import { useEffect, useState } from 'react';
 import { IZone, ILocation } from '@/app/type';
 import { fetchData } from '@/lib/utils';
 import zonePath from '@/lib/zonePath.json'
+import zonePathMd from '@/lib/zonePath-md.json'
+import zonePathSm from '@/lib/zonePath-sm.json'
 import wallPath from '@/lib/wallPath.json'
+import wallPathMd from '@/lib/wallPath-md.json'
+import wallPathSm from '@/lib/wallPath-sm.json'
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+
 
 interface MapProps {
   onZoneSelect?: (selectedZones: IZone[]) => void;
@@ -19,7 +24,36 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
+  const [paths, setPaths] = useState<{ text: any, id: number, pathData: string }[]>([])
   const m = useTranslations('Map')
+  const [stageDimensions, setStageDimensions] = useState({ width: 1350, height: 895, size: "LG"});
+  const locale = useLocale(); 
+  const [language, setLanguage] = useState('en');
+
+  useEffect(() => {
+    const currentLanguage = locale; // ภาษาที่ใช้อยู่ในปัจจุบัน
+    setLanguage(currentLanguage || 'en');
+  }, []);
+
+  const responsiveStage = () => {
+    const screenWidth = window.innerWidth; // ความกว้างของหน้าจอปัจจุบัน
+    
+    if (screenWidth <= 800) { // ความกว้างของหน้าจอสำหรับจอมือถือ
+      setStageDimensions({ width: 800, height: 600, size: "SM" });
+    } else if (screenWidth <= 1024) { // ความกว้างของหน้าจอสำหรับจอไอแพต
+      setStageDimensions({ width: 800, height: 600, size: "MD" });
+    } else { // ความกว้างของหน้าจอสำหรับจอคอมพิวเตอร์
+      setStageDimensions({ width: 1350, height: 895, size: "LG" });
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => responsiveStage();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (disable && initialSelectedZones) {
@@ -37,12 +71,21 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   }
 
   useEffect(() => {
-    fetch();
-    setWalls(wallPath)
+    fetch()
+    if (stageDimensions.size === "SM") {
+      setWalls(wallPath)
+      setPaths(zonePath) 
+    } else if (stageDimensions.size === "MD") {
+      setWalls(wallPath)
+      setPaths(zonePath) 
+    } else {
+      setWalls(wallPath)
+      setPaths(zonePath) 
+    }
 
     if (location) {
       const updatedZones = location.zones.map(zone => {
-        const matchedZonePath = zonePath.find(path => path.id === zone.id);
+        const matchedZonePath = paths.find(path => path.id === zone.id);
         return {
           ...zone,
           pathData: matchedZonePath ? matchedZonePath.pathData : '',
@@ -122,11 +165,12 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   }
 
   return (
-      <Stage width={1350} height={895}>
+      <Stage width={stageDimensions.width} height={stageDimensions.height}>
         <Layer>
           {zones.map((zone) => {
             const isSelected = selectedZones.includes(zone.id);
-            const startPointY = zone.text?.y ? zone.text.y - 80 : 0;
+            const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
+            const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;
             const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point
             return (
               <React.Fragment key={zone.id}>
@@ -137,15 +181,15 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
                   fillLinearGradientColorStops={getGradientColors(isSelected)} // ใช้ gradient ที่กำหนด
                   onClick={() => handleZoneSelect(zone.id)}
                 />
-                {zone.text && (
+                {textLanguage && (
                   <Text
-                    x={zone.text.x} // ตำแหน่ง x
-                    y={zone.text.y} // ตำแหน่ง y
+                    x={textLanguage.x} // ตำแหน่ง x
+                    y={textLanguage.y} // ตำแหน่ง y
                     text={m(zone.name)} // ข้อความที่จะแสดง
-                    fontSize={zone.text.fontSize} // ขนาดฟอนต์
+                    fontSize={textLanguage.fontSize} // ขนาดฟอนต์
                     fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
                     fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
-                    rotation={zone.text.rotation} // การหมุนของข้อความ
+                    rotation={textLanguage.rotation} // การหมุนของข้อความ
                     align="center"
                   />
                 )}
