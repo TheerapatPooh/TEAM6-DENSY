@@ -8,17 +8,11 @@ import path from "path";
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
  * Input: 
- * - (req as any).user.role: String (ต้องเป็น "admin")
  * - req.body: { username: String, email: String | null, password: String, role: String, department: String | null }
  * Output: JSON object ข้อมูล User ที่ถูกสร้าง
 **/
 export async function createUser(req: Request, res: Response) {
   try {
-    const userRole = (req as any).user.role;
-    if (userRole !== "admin") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
-      return;
-    }
     let { username, email, password, role, department } = req.body;
     const hashPassword = await bcrypt.hash(password, 10);
 
@@ -70,7 +64,7 @@ export async function createUser(req: Request, res: Response) {
     res.status(201).json(result);
     return;
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500)
     return;
   }
 }
@@ -154,8 +148,7 @@ export async function updateProfile(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update user profile" }); // Improved error handling
+    res.status(500)
     return;
   }
 }
@@ -174,9 +167,16 @@ export async function getUser(req: Request, res: Response) {
     const includePassword = req.query.password === "true";
 
     const userId = (req as any).user.userId;
+    const userRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
     let user = null;
-    if (!id) {
+    if (id && userRole !== "admin" && userId !== id && includePassword) {
+      res
+        .status(403)
+        .json({ message: "Access Denied: Only admins can access other users' data" });
+      return
+    }
+    if (!id || id === userId) {
       user = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -185,25 +185,32 @@ export async function getUser(req: Request, res: Response) {
           password: includePassword ? true : false,
           role: true,
           createdAt: true,
+          active: true,
           profile: includeProfile
             ? {
-                include: {
-                  image: includeImage,
-                },
-              }
+              include: {
+                image: includeImage,
+              },
+            }
             : undefined,
         },
       });
     } else {
       user = await prisma.user.findUnique({
         where: { id: id },
-        include: {
+        select: {
+          id: true,
+          email: true,
+          password: includePassword ? true : false,
+          role: true,
+          createdAt: true,
+          active: true,
           profile: includeProfile
             ? {
-                include: {
-                  image: includeImage,
-                },
-              }
+              include: {
+                image: includeImage,
+              },
+            }
             : undefined,
         },
       });
@@ -218,8 +225,7 @@ export async function getUser(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch user profile" });
+    res.status(500)
     return;
   }
 }
@@ -241,12 +247,13 @@ export async function getAllUsers(req: Request, res: Response) {
         email: true,
         role: true,
         createdAt: true,
+        active: true,
         profile: includeProfile
           ? {
-              include: {
-                image: includeImage,
-              },
-            }
+            include: {
+              image: includeImage,
+            },
+          }
           : undefined,
       },
     });
@@ -260,8 +267,7 @@ export async function getAllUsers(req: Request, res: Response) {
       return;
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch user profile" });
+    res.status(500)
     return;
   }
 }
@@ -320,8 +326,7 @@ export async function updateUser(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update user" });
+    res.status(500)
     return;
   }
 }
@@ -334,12 +339,6 @@ export async function updateUser(req: Request, res: Response) {
 export async function removeUser(req: Request, res: Response) {
   try {
     const id = parseInt(req.params.id, 10);
-    const role = (req as any).user.role;
-
-    if (role !== "admin") {
-      res.status(403).json({ message: "Access Denied: Admin only" });
-      return;
-    }
 
     const user = await prisma.user.findUnique({
       where: { id: id },
@@ -361,8 +360,7 @@ export async function removeUser(req: Request, res: Response) {
     res.status(200).json({ message: "User has been deactivated successfully" });
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to deactivated  user" });
+    res.status(500)
     return;
   }
 }

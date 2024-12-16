@@ -10,17 +10,10 @@ import { Request, Response } from "express";
  *     checklists: Array<{ checklist: { id: number } }>,
  *     userId: number
  *   } (ข้อมูลของ Preset ที่ต้องการสร้าง)
- * - req.user: { role: String } (บทบาทของผู้ใช้งาน เช่น "admin")
  * Output: JSON object { message: String, preset: Object } ยืนยันการสร้าง Preset สำเร็จ
 **/
 export async function createPreset(req: Request, res: Response) {
   try {
-    const userRole = (req as any).user.role;
-    if (userRole !== "admin") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
-      return;
-    }
-
     const { title, description, checklists, userId } = req.body;
 
     if (!title || !description || !checklists || !userId) {
@@ -65,17 +58,10 @@ export async function createPreset(req: Request, res: Response) {
  *     checklists: Array<{ checklist: { id: number } }>,
  *     userId: number
  *   } (ข้อมูลของ Preset ที่ต้องการอัปเดต)
- * - req.user: { role: String } (บทบาทของผู้ใช้งาน เช่น "admin")
  * Output: JSON object { message: String, preset: Object } ยืนยันการอัปเดต Preset สำเร็จ
 **/
 export async function updatePreset(req: Request, res: Response) {
   try {
-    const userRole = (req as any).user.role;
-    if (userRole !== "admin") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
-      return;
-    }
-
     const { title, description, checklists, userId } = req.body;
     const presetId = parseInt(req.params.id, 10);
 
@@ -176,7 +162,7 @@ export async function getPreset(req: Request, res: Response) {
     let result = preset;
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500)
   }
 }
 
@@ -188,7 +174,10 @@ export async function getPreset(req: Request, res: Response) {
 **/
 export async function getAllPresets(req: Request, res: Response) {
   try {
-    const latest = req.query.latest === "true";
+    let latest = true
+    if(req.query.latest && req.query.latest === "true") {
+      latest = false
+    }
     const presets = await prisma.preset.findMany({
       where: latest ? { latest: latest } : undefined,
       select: {
@@ -253,7 +242,7 @@ export async function getAllPresets(req: Request, res: Response) {
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500)
   }
 }
 
@@ -265,12 +254,6 @@ export async function getAllPresets(req: Request, res: Response) {
 **/
 export async function removePreset(req: Request, res: Response) {
   try {
-    const userRole = (req as any).user.role;
-    if (userRole !== 'admin') {
-      res.status(403).json({ message: "Access Denied: Admins only" });
-      return;
-    }
-
     const presetId = parseInt(req.params.id, 10);
     if (isNaN(presetId)) {
       res.status(400).json({ message: "Invalid Preset ID" });
@@ -301,8 +284,7 @@ export async function removePreset(req: Request, res: Response) {
 
     res.status(200).json({ message: "Preset removed successfully" });
   } catch (error) {
-    console.error("Error removing preset:", error);
-    res.status(500).json({ message: "Internal server error", error });
+    res.status(500)
   }
 }
 
@@ -368,7 +350,7 @@ export async function getChecklist(req: Request, res: Response) {
     let result = checklists;
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500)
   }
 }
 
@@ -419,7 +401,7 @@ export async function getAllChecklists(req: Request, res: Response) {
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500)
   }
 }
 
@@ -437,14 +419,7 @@ export async function getAllChecklists(req: Request, res: Response) {
  **/
 export async function createChecklist(req: Request, res: Response) {
   try {
-    const userRole = (req as any).user.role;
     const userId = (req as any).user.userId;
-
-    // ตรวจสอบสิทธิ์ว่าเป็น admin
-    if (userRole !== "admin") {
-      res.status(403).json({ message: "Access Denied: Admins only" });
-      return;
-    }
 
     // รับค่าจาก body
     const { title, items } = req.body;
@@ -513,13 +488,6 @@ export async function createChecklist(req: Request, res: Response) {
 export async function removeChecklist(req: Request, res: Response) {
   try {
     const id = parseInt(req.params.id, 10);
-    const role = (req as any).user.role;
-
-    if (role !== "admin") {
-      res.status(403).json({ message: "Access Denied: Admin only" });
-      return;
-    }
-
     const checklist = await prisma.checklist.findUnique({
       where: { id: id },
     });
@@ -539,8 +507,7 @@ export async function removeChecklist(req: Request, res: Response) {
     res.status(200).json({ message: "Checklist has been deactivated successfully" });
     return;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to deactivated checklist" });
+    res.status(500)
     return;
   }
 }
