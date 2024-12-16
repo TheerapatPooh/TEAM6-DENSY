@@ -316,3 +316,8 @@ export function formatTime(timestamp: string) {
   );
   return date + " " + time
 }
+
+export function formattedPatrolId(id: number): string {
+  let newId = id.toString().padStart(4, '0'); // ทำให้เป็นเลข 4 หลัก เติมศูนย์ข้างหน้า
+  return `P${newId}`; // ใส่ P ด้านหน้า
+}

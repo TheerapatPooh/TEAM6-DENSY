@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { getInitials } from "@/lib/utils";
+import { formattedPatrolId, getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import {
   AlertDialog,
@@ -51,14 +51,6 @@ export function PatrolCard({
   itemCounts,
   inspectors = [],
 }: IPatrolCard) {
-  const formattedDate =
-    date instanceof Date
-      ? date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      : "N/A"; // Fallback if date is not valid
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [items, setItems] = useState(0);
@@ -69,6 +61,16 @@ export function PatrolCard({
 
   const router = useRouter()
   const locale = useLocale()
+
+  const formattedDate =
+    date instanceof Date
+      ? date.toLocaleDateString(`${locale}-GB`, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      : "N/A"; // Fallback if date is not valid
+
 
   const getPatrolData = async () => {
     try {
@@ -120,13 +122,6 @@ export function PatrolCard({
     router.push(`/${locale}/patrol/${id}`)
   }
 
-  const uniqueInspectors: Partial<IUser[]> = inspectors.reduce((acc, insp) => {
-    // เช็คว่าชื่อยังไม่อยู่ใน accumulator หรือไม่
-    if (!acc.some(item => item.profile.name === insp.profile.name)) {
-      acc.push(insp); // ถ้าไม่ซ้ำก็เพิ่มเข้าไป
-    }
-    return acc;
-  }, []);
 
   if (!mounted) {
     return (
@@ -137,7 +132,7 @@ export function PatrolCard({
   return (
     <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="flex flex-row gap-0 p-0">
-        <div className="flex flex-col justify-between items-start gap-1 truncate">
+        <div className="flex flex-col justify-between items-start gap-4 truncate">
           <CardDescription className="text-lg font-semibold text-muted-foreground">
             {formattedDate}
           </CardDescription>
@@ -181,7 +176,7 @@ export function PatrolCard({
       <CardContent className="flex flex-col gap-2 p-0">
         <div className="flex text-muted-foreground items-center gap-1">
           <span className="material-symbols-outlined">description</span>
-          <p className="text-lg font-normal">{id}</p>
+          <p className="text-lg font-normal">{formattedPatrolId(id)}</p>
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
@@ -197,12 +192,12 @@ export function PatrolCard({
               <span className="material-symbols-outlined me-1">
                 person_search
               </span>
-              {uniqueInspectors.length > 0 && (
+              {inspectors.length > 0 && (
                 <div className="flex items-center me-1 truncate max-w-[190px]">
-                  <p className="text-xl me-2.5 truncate">{uniqueInspectors[0].profile.name}</p>
+                  <p className="text-xl me-2.5 truncate">{inspectors[0].profile.name}</p>
                 </div>
               )}
-              {uniqueInspectors.map((inspector, idx) => {
+              {inspectors.map((inspector, idx) => {
                 return (
                   <Avatar key={idx} className="custom-shadow ms-[-10px]">
                     <AvatarImage
@@ -215,11 +210,11 @@ export function PatrolCard({
                 );
               })}
 
-              {uniqueInspectors.length > 5 && (
+              {inspectors.length > 5 && (
                 <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                   <AvatarImage src="" />
                   <span className="absolute text-card-foreground text-[16px] font-semibold">
-                    +{uniqueInspectors.length - 5}
+                    +{inspectors.length - 5}
                   </span>
                   <AvatarFallback></AvatarFallback>
                 </Avatar>
@@ -235,7 +230,7 @@ export function PatrolCard({
                 {t("InspectorList")}
               </p>
             </div>
-            {uniqueInspectors.map((inspector, idx) => {
+            {inspectors.map((inspector, idx) => {
               return (
                 <div key={idx} className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary">
                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
@@ -255,7 +250,7 @@ export function PatrolCard({
                 {t("Total")}
               </p>
               <p className="text-lg font-semibold">
-                {uniqueInspectors.length}
+                {inspectors.length}
               </p>
             </div>
           </HoverCardContent>

@@ -77,7 +77,7 @@ export default function Page() {
     !selectedPreset ||
     patrolChecklist.length !== selectedPreset.presetChecklists.length;
 
-  const onSubmit = async () => {
+  const createPatrol = async () => {
     if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
       console.error("Not Empty Fields");
       return;
@@ -90,9 +90,11 @@ export default function Page() {
     };
 
     try {
-      await fetchData("post", "/patrol", true, data);
+      const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
-      window.location.reload();
+      console.log(data)
+      console.log("res: ",response)
+      setAllPatrols((prev) => [...prev, response]);
     } catch (error) {
       console.error(error)
     }
@@ -572,7 +574,7 @@ export default function Page() {
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className="gap-2"
-                  onClick={onSubmit}
+                  onClick={createPatrol}
                   disabled={isSubmitDisabled}
                 >
                   <span className="material-symbols-outlined text-2xl">

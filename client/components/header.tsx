@@ -50,19 +50,21 @@ export default function Header({ variant }: IHeader) {
   const isActive = (path) => pathname.startsWith(path);
 
   return (
-    <header className="px-6 py-0 bg-card h-[70px] flex justify-between items-center custom-shadow sticky top-0 z-50">
+    <header className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === 'admin' ? "justify-end" : "justify-between custom-shadow"}`}>
       <div className="flex gap-4">
-        <div className="flex justify-between items-center">
-          <Image
-            className="flex items-center cursor-pointer"
-            src={resolvedTheme === "dark" ? darkLogo : lightLogo}
-            alt="Logo"
-            width={130}
-            height={112}
-            priority
-            onClick={() => router.push(`/${locale}`)}
-          />
-        </div>
+        {variant !== 'admin' && (
+          <div className="flex justify-between items-center">
+            <Image
+              className="flex items-center cursor-pointer"
+              src={resolvedTheme === "dark" ? darkLogo : lightLogo}
+              alt="Logo"
+              width={130}
+              height={112}
+              priority
+              onClick={() => router.push(`/${locale}`)}
+            />
+          </div>
+        )}
 
         {variant === 'inspector' && (
           <div className="flex justify-between items-center ms-2">

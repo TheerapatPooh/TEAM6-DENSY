@@ -2,7 +2,7 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import axios from "axios";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, Patrol, PatrolStatus } from "@prisma/client";
+import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -434,8 +434,90 @@ export async function createPatrol(req: Request, res: Response) {
         notifiedInspectors.add(userId);
       }
     }
-    let result = newPatrol;
-    res.status(201).json(result);
+
+    // Fetch the created patrol with the desired format
+    const createdPatrol = await prisma.patrol.findUnique({
+      where: { id: newPatrol.id },
+      select: {
+        id: true,
+        date: true,
+        status: true,
+        preset: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              select: {
+                id: true,
+                email: true,
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (createdPatrol) {
+      // Process data to group inspectors and count items
+      const result = {
+        id: createdPatrol.id,
+        date: createdPatrol.date,
+        status: createdPatrol.status,
+        preset: createdPatrol.preset,
+        itemCounts: 0,
+        inspectors: [] as any,
+      };
+
+      // Count items and group inspectors
+      createdPatrol.patrolChecklists.forEach((patrolChecklist) => {
+        // Count items
+        patrolChecklist.checklist.items.forEach((item) => {
+          result.itemCounts += item.itemZones.length;
+        });
+
+        // Add unique inspectors
+        const inspector = patrolChecklist.inspector;
+        if (
+          inspector &&
+          !result.inspectors.some((ins: User) => ins.id === inspector.id)
+        ) {
+          result.inspectors.push(inspector); // TypeScript จะเข้าใจประเภท inspector ชัดเจน
+        }
+
+
+      });
+      res.status(201).json(result);
+    }
+
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
     console.error(error)

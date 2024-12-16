@@ -7,6 +7,7 @@ import "./globals.css";
 import "./globalicons.css";
 import { Roboto, Manrope } from 'next/font/google';
 import { SocketProvider } from "@/components/socket-provider";
+import { Toaster } from "@/components/ui/toaster"
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,8 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <SocketProvider>
               {children}
-            </SocketProvider>
+              <Toaster />
+              </SocketProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

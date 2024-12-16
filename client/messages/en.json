@@ -10,7 +10,7 @@
     "Delete": "Delete",
     "Profile": "Profile",
     "Logout": "Logout",
-    "MyAccount": "MyAccount",
+    "MyAccount": "My Account",
     "Login": "Login",
     "EnterCredentials": "Enter your username and password to login to your account",
     "Username": "Username",
@@ -136,5 +136,10 @@
     "start_patrol": "Your patrol has started. Please proceed with the inspection.",
     "finish_patrol": "Your patrol has finished. Thank you for your effort.",
     "report_defect": "An issue has been reported in your assigned zone. Please check immediately."
+  },
+  "Sidebar": {
+    "Dashboard" : "Dashboard",
+    "Employees" : "Employees",
+    "Settings" : "Settings"
   }
 }
