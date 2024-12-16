@@ -55,8 +55,10 @@ import { sortData } from "@/lib/utils";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
 import Loading from "@/components/loading";
+import { toast } from "@/hooks/use-toast";
 
 export default function Page() {
+  const a = useTranslations("Alert");
   const t = useTranslations("General");
   const z = useTranslations('Zone')
   const [loading, setLoading] = useState<boolean>(true);
@@ -93,8 +95,13 @@ export default function Page() {
       const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
       console.log(data)
-      console.log("res: ",response)
+      console.log("res: ", response)
       setAllPatrols((prev) => [...prev, response]);
+      toast({
+        variant: "success",
+        title: a("PatrolCreateTitle"),
+        description: a("PatrolCreateDescription"),
+      });
     } catch (error) {
       console.error(error)
     }
@@ -549,7 +556,7 @@ export default function Page() {
               </div>
             </AlertDialogHeader>
             <div className="flex flex-col gap-1">
-              <p className="font-semibold text-muted-foreground"> {t('Checklist')}</p>
+              <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <div className="grid grid-cols-1">
                 <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 ">

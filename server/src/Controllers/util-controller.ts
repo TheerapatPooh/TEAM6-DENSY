@@ -29,7 +29,7 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      res.status(401).json({ message: "Invalid username or password" });
+      res.status(401).json({ message: "Invalid username" });
       return;
     }
 
@@ -37,7 +37,7 @@ export async function login(req: Request, res: Response) {
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      res.status(401).json({ message: "Invalid username or password" });
+      res.status(401).json({ message: "Invalid password" });
       return;
     }
 

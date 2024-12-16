@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { timeStamp } from 'console';
+import { useTranslations } from "next-intl";
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type role = "admin" | "inspector" | "supervisor"
@@ -82,7 +83,7 @@ export interface IPatrol {
     patrolChecklists: IPatrolChecklist[];
     preset: IPreset;
     results: IPatrolResult[];
-    itemCounts: number; 
+    itemCounts: number;
     inspectors?: IUser[]
 }
 
@@ -115,7 +116,7 @@ export interface IPreset {
 export interface IPresetChecklist {
     presetId: number;
     checklistId: number;
-    
+
     checklist: IChecklist;
     preset: IPreset;
 }
@@ -206,7 +207,7 @@ export interface IImage {
     id: number;
     path: string;
     timestamp?: string;
-    updateBy? :number;
+    updateBy?: number;
 
     user?: IUser;
     profiles: IProfile[];
@@ -243,8 +244,9 @@ export interface FilterPatrol {
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
 
+
 export const LoginSchema = z.object({
-    username: z.string(),
-    password: z.string(),
+    username: z.string().min(1, { message: "LoginUsernameRequire" }),
+    password: z.string().min(1, { message: "LoginPasswordRequire" }),
     rememberMe: z.boolean().optional()
 })
