@@ -49,7 +49,12 @@ const config: Config = {
 					'3': 'hsl(var(--chart-3))',
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
-				}
+				},
+				green: 'hsl(var(--green))',
+				mint: 'hsl(var(--mint))',
+				yellow: 'hsl(var(--yellow))',
+				purple: 'hsl(var(--purple))',
+				orange: 'hsl(var(--orange))',
 			},
 			backgroundImage: {
 				'accent-gradient': 'linear-gradient(to bottom, #C16975, #FB0023)',
@@ -87,7 +92,7 @@ const config: Config = {
 				md: '768px',
 				lg: '1024px',
 				xl: '1280px',
-			  }
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

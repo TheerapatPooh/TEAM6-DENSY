@@ -2,7 +2,7 @@
 import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useState } from 'react';
 import { IZone, ILocation } from '@/app/type';
-import { fetchData } from '@/lib/api';
+import { fetchData } from '@/lib/utils';
 import zonePath from '@/lib/zonePath.json'
 import zonePathMd from '@/lib/zonePath-md.json'
 import zonePathSm from '@/lib/zonePath-sm.json'
@@ -66,7 +66,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
       const data = await fetchData('get', '/location/1', true)
       setLocation(data)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -127,7 +127,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
 
     setSelectedZones(updatedSelectedZones);
 
-    const selectedZoneObjects = location?.zone.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
+    const selectedZoneObjects = location?.zones.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
 
     // ตรวจสอบว่า onZoneSelect ไม่เป็น undefined ก่อนเรียกใช้งาน
     if (onZoneSelect) {
@@ -167,7 +167,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   return (
       <Stage width={stageDimensions.width} height={stageDimensions.height}>
         <Layer>
-          {zones.map((zone, index) => {
+          {zones.map((zone) => {
             const isSelected = selectedZones.includes(zone.id);
             const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
             const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;

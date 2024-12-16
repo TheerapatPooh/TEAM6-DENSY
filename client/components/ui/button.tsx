@@ -14,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm hover:bg-destructive/80",
         success:
-          "bg-[#27BC31] text-destructive-foreground font-medium text-lg shadow-sm",
+          "bg-green text-destructive-foreground font-medium text-lg shadow-sm",
         fail:
           "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm",
         outline:
@@ -26,9 +26,9 @@ const buttonVariants = cva(
         link: "text-muted-foreground underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-4",
+        default: "h-9 rounded-md px-4 text-lg font-bold",
+        sm: "h-8 rounded-md px-4 text-sm font-normal",
+        lg: "h-10 rounded-md px-4 text-lg font-bold",
         icon: "h-9 w-9",
       },
     },

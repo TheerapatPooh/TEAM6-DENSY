@@ -1,18 +1,18 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { IDefect, defectStatus, itemType, IZone } from "@/app/type";
+import React, { useState } from "react";
+import { IDefect } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "./ui/carousel";
-import { Card, CardContent } from "./ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatTime, getDefectStatusVariant } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -30,12 +30,12 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
     }
   };
 
-  const beforeImage = defect.image.filter((image) => image.image.user.id === defect.userId)
+  const beforeImage = defect.images.filter((image) => image.image.user.id === defect.userId)
     .map((image: any) => ({
       path: image.image.path,
     })) || null
 
-  const afterImage = defect.image.filter((image) => image.image.user.id !== defect.userId)
+  const afterImage = defect.images.filter((image) => image.image.user.id !== defect.userId)
     .map((image: any) => ({
       path: image.image.path,
     })) || null
@@ -93,7 +93,7 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
               schedule
             </span>
             <span className="text-lg font-bold text-muted-foreground cursor-default ">
-              {formatTime(defect.timestamp)}
+              {formatTime(defect.startTime)}
             </span>
             <h2 className="text-lg font-bold text-card-foreground cursor-default ">
               {defect.name}
@@ -179,6 +179,7 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
                           width={130}
                           height={130}
                           className="object-cover cursor-pointer"
+                          unoptimized 
                         />
                       ) : (
                         <p>No image available.</p>
@@ -202,6 +203,7 @@ export default function ReportDefect({ defect }: { defect: IDefect }) {
                                             width={800}
                                             height={500}
                                             priority
+                                            unoptimized 
                                           />
                                         </div>
                                       </CardContent>

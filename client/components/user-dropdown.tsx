@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { IUser, IPatrolChecklist } from "@/app/type";
+import React, { useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { IUser} from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,14 +24,10 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
   };
   const t = useTranslations("General");
 
-
-  useEffect(() => {
-    console.log(selectedUser)
-  }, [selectedUser])
   return (
     <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
       <DropdownMenuTrigger className="w-[300px] h-[65px]">
-        <Button variant="outline" className="w-full h-full justify-between bg-card hover:bg-background">
+        <Button variant="outline" className="w-full h-full justify-between bg-card hover:bg-background border-none">
           <div className="flex items-center gap-2">
             {selectedUser && (
               <Avatar>
@@ -51,7 +47,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-0">
-        <ScrollArea className="h-72 w-full rounded-md border">
+        <ScrollArea className="h-72 w-full rounded-md">
           {userData.map((user) => {
             return (
               <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
@@ -59,7 +55,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect }) =
                   <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`} />
                   <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
                 </Avatar>
-                <p className="font-normal text-muted-foreground">{user.profile.name}</p>
+                <p className="font-normal text-lg text-muted-foreground">{user.profile.name}</p>
               </DropdownMenuItem>)
           })}
         </ScrollArea>

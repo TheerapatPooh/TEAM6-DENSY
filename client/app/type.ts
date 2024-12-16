@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { timeStamp } from 'console';
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type role = "admin" | "inspector" | "supervisor"
@@ -14,16 +15,17 @@ export interface IUser {
     role: role;
     department?: string | null;
     createdAt?: string;
+    active?: boolean;
 
-    updatePreset?: IPreset[];
-    updateChecklist?: IChecklist[]
-    comment?: IComment[]
+    presets?: IPreset[];
+    checklists?: IChecklist[]
+    comments?: IComment[]
     profile: IProfile;
-    notification?: INotification[]
-    defect?: IDefect[]
+    notifications?: INotification[]
+    defects?: IDefect[]
     zone?: IZone;
-    checklist?: IPatrolChecklist[]
-    image?: IImage[]
+    patrolChecklists?: IPatrolChecklist[]
+    images?: IImage[]
 }
 
 export interface IDefect {
@@ -32,13 +34,14 @@ export interface IDefect {
     description: string;
     type: itemType;
     status: defectStatus;
-    timestamp: string;
+    startTime: string;
+    endTime: string;
     userId?: number;
-    patrolId?: number;
-
+    patrolResultId?: number;
+    timeStamp: Date;
     user?: IUser;
     patrolResult: IPatrolResult;
-    image: IDefectIImage[];
+    images: IDefectIImage[];
 }
 
 export interface INotification {
@@ -70,15 +73,17 @@ export interface IProfile {
 export interface IPatrol {
     id: number;
     date: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    duration?: string | null;
+    startTime: string | null;
+    endTime: string | null;
+    duration: string | null;
     status: patrolStatus;
-    presetId?: number
+    presetId: number;
 
-    patrolChecklist: IPatrolChecklist[];
+    patrolChecklists: IPatrolChecklist[];
     preset: IPreset;
-    result: IPatrolResult[];
+    results: IPatrolResult[];
+    itemCounts: number; 
+    inspectors?: IUser[]
 }
 
 export interface IPatrolChecklist {
@@ -99,11 +104,12 @@ export interface IPreset {
     version: number;
     latest: boolean;
     updatedAt: string;
-    updateBy: number;
+    updatedBy: number;
 
     user?: IUser;
-    presetChecklist?: IPresetChecklist[];
-    patrol?: IPatrol[];
+    presetChecklists?: IPresetChecklist[];
+    patrols?: IPatrol[];
+    zones?: IZone[];
 }
 
 export interface IPresetChecklist {
@@ -122,10 +128,10 @@ export interface IChecklist {
     updatedAt: string;
     updatedBy: number;
 
-    patrol?: IPatrolChecklist[];
+    patrols?: IPatrolChecklist[];
     user: IUser;
-    presetChecklist?: IPresetChecklist;
-    item: IItem[];
+    presetChecklists?: IPresetChecklist[];
+    items: IItem[];
 }
 
 export interface IPatrolResult {
@@ -136,7 +142,7 @@ export interface IPatrolResult {
     zoneId: number;
     patrolId?: number;
 
-    comment?: IComment[];
+    comments?: IComment[];
     defects?: IDefect[]
     itemIZone?: IItemZone;
     patrol?: IPatrol;
@@ -148,7 +154,7 @@ export interface IItem {
     type: string;
     checklistId: number;
 
-    itemZone: IItemZone[];
+    itemZones: IItemZone[];
     checklist?: IChecklist
 }
 
@@ -171,16 +177,17 @@ export interface IZone {
 export interface IItemZone {
     itemId: number;
     zoneId: number;
-    zone: IZone;
+
+    results?: IPatrolResult;
     item: IItem;
-    result?: IPatrolResult;
+    zone: IZone;
 }
 
 export interface ILocation {
     id: number
     name: string
 
-    zone: IZone[]
+    zones: IZone[]
 }
 
 export interface IComment {
@@ -203,7 +210,7 @@ export interface IImage {
 
     user?: IUser;
     profiles: IProfile[];
-    defect: IDefectIImage[];
+    defects: IDefectIImage[];
 }
 
 export interface IDefectIImage {

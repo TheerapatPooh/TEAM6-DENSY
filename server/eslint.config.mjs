@@ -49,9 +49,15 @@ export default [
     },
   },
   {
-    files: ['eslint-report.ts'], // ระบุไฟล์ที่ต้องการยกเว้น
+    files: ['eslint-report.ts','src/index.ts','src/Utils/seed.ts'], // ระบุไฟล์ที่ต้องการยกเว้น
     rules: {
       'no-console': 'off', // ปิดการตรวจสอบ no-console สำหรับไฟล์นี้
     },
   },
+  {
+    files: ['src/Utils/key-map.ts'], // ระบุไฟล์ที่ต้องการยกเว้น
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off', // ปิดการตรวจสอบ no-console สำหรับไฟล์นี้
+    },
+  }
 ];

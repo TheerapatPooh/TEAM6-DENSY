@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTranslations } from "next-intl";
-import { DatePickerWithRange, } from "@/components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Select,
@@ -26,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import Defect from "@/components/defect";
 import { IDefect } from "@/app/type";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import Loading from "@/components/loading";
 
 
@@ -56,9 +55,8 @@ export default function Page() {
     return <Loading />
   }
 
-  console.log(defects)
   return (
-    <div className="flex flex-col p-4">
+    <div className="flex flex-col">
 
       <div className="flex items-center gap-2">
         <Textfield
@@ -110,7 +108,6 @@ export default function Page() {
           <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
             <div>
               <DropdownMenuLabel>Date</DropdownMenuLabel>
-              <DatePickerWithRange />
             </div>
 
             <div>

@@ -1,3 +1,18 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Notification ใช้สำหรับแสดงและจัดการรายการแจ้งเตือนของผู้ใช้งาน รวมถึงการเปลี่ยนสถานะการแจ้งเตือน 
+ *   และแสดงรายการแจ้งเตือนล่าสุดในรูปแบบ Dropdown
+ *
+ * Input:
+ *   - ไม่มี props ที่รับเข้ามาโดยตรง
+ *   - ใช้ข้อมูลแจ้งเตือน (notifications) และข้อมูลผู้ใช้ (user) ที่ดึงมาจาก API
+ *
+ * Output:
+ *   - Dropdown แสดงรายการแจ้งเตือนล่าสุดสูงสุด 8 รายการ
+ *   - ปุ่ม "Mark All As Read" สำหรับเปลี่ยนสถานะแจ้งเตือนทั้งหมดให้เป็น "อ่านแล้ว"
+ *   - การคลิกแจ้งเตือนเปลี่ยนสถานะเป็น "อ่านแล้ว" และนำทางไปยัง URL ถ้ามี
+**/
+
 'use client'
 import React, { useEffect, useState } from 'react'
 import {
@@ -8,20 +23,21 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { INotification, notificationType, IUser } from '@/app/type'
-import { fetchData } from '@/lib/api'
-import { useSocket } from './socket-provider'
-import BadgeCustom from './badge-custom'
+import { fetchData } from '@/lib/utils'
+import { useSocket } from '@/components/socket-provider'
+import BadgeCustom from '@/components/badge-custom'
 import { useRouter } from 'next/navigation'
 import { timeAgo } from '@/lib/utils'
-import { ScrollArea } from './ui/scroll-area'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 
 export default function Notification() {
     const t = useTranslations('General'); // ฟังก์ชันแปลข้อความจาก 'General'
     const s = useTranslations("Status");
     const d = useTranslations('DateTime');
+    const n = useTranslations('Notification');
 
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
@@ -30,6 +46,13 @@ export default function Notification() {
     const router = useRouter()
 
     const unreadCount = notifications.filter(notification => !notification.read).length;
+
+    function formatMessage(message: string) {
+        const [key, ...dynamicParts] = message.split('-');
+        const dynamicData = dynamicParts.join('-');
+        return { key, dynamicData };
+    }
+
 
     const fetchNotifications = async () => {
         try {
@@ -93,7 +116,6 @@ export default function Notification() {
         return recentNotifications;
     };
 
-
     useEffect(() => {
         fetchNotifications();
         fetchUser();
@@ -101,15 +123,10 @@ export default function Notification() {
 
     useEffect(() => {
         if (socket && isConnected && user?.id) {
-            // ถ้าการเชื่อมต่อสำเร็จ
-            console.log('Connected to socket!');
-
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
             socket.on('new_notification', (data: any) => {
-                console.log('Received new notification:', data);
                 setNotifications((prevNotifications) => [...prevNotifications, data]);
-                console.log(notifications)
             });
 
             return () => {
@@ -124,65 +141,89 @@ export default function Notification() {
                 <Button variant='ghost' className="w-[45px] h-[45px] text-input relative">
                     <span className="material-symbols-outlined">notifications</span>
                     {unreadCount > 0 && (
-                        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-sky-500" />
+                        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className='p-0'>
-                <Card className="w-[300px] border-none" >
-                    <CardHeader>
-                        <CardTitle>{t('Notifications')}</CardTitle>
-                        <CardDescription>{t('YouHaveUnreadMessages', { count: unreadCount })}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col">
-                        <ScrollArea className="p-0 h-[300px] w-full pr-4 overflow-y-auto">
-                            {getRecentNotifications().map((notification, index) => (
-                                <Button
-                                    key={index}
-                                    variant={'ghost'}
-                                    className="justify-between items-center space-x-2 w-full h-fit gap-2 truncate"
-                                    onClick={() => handleNotificationClick(notification)}
-                                >
-                                    <span className={`p-1 h-2 w-2 rounded-full ${notification.read ? 'bg-gray-400' : 'bg-sky-500'}`} />
-                                    <div className="flex flex-col justify-start w-full truncate gap-1">
-                                        <p className="text-sm font-medium text-start truncate">
-                                            {notification.message}
-                                        </p>
-                                        <div className='flex items-center justify-between'>
-                                            <p className="text-xs text-muted-foreground text-start">
-                                                <p>{timeAgo(notification.timestamp, d)}</p>
-                                            </p>
-                                            {(() => {
-                                                let status: string
-                                                let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
-                                                switch (notification.type as notificationType) {
-                                                    case "information":
-                                                        variant = "blue";
-                                                        break;
-                                                    case "request":
-                                                        variant = "orange";
-                                                        break;
-                                                    default:
-                                                        variant = "purple";
-                                                        break;
-                                                }
-                                                return (
-                                                    <BadgeCustom height='20' width='100' variant={variant}><p className='text-sm'>{s(notification.type)}</p></BadgeCustom>
-                                                )
-                                            })()}
-                                        </div>
+            <DropdownMenuContent align="start" className='p-0'>
+                <Card className="flex flex-col w-[480px] h-[580px] border-none px-6 py-4 gap-4" >
+                    <CardHeader className='p-0 flex gap-0'>
+                        <CardTitle className='flex flex-col'>
+                            <div className='flex text-2xl w-full justify-between items-center'>
+                                {t('Notifications')}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" className="w-[45px] h-[45px]">
+                                            <span className="material-symbols-outlined items-center text-muted-foreground">
+                                                more_vert
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
 
-                                    </div>
-                                </Button>
-                            ))}
+                                    <DropdownMenuContent align="end" className="p-0">
+                                        <DropdownMenuItem>
+                                            <h1 className='text-destructive'>{t("DeleteAllNotifications")}</h1>
+                                        </DropdownMenuItem>                     
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <p className='p-0 text-base font-normal text-muted-foreground'>{t('YouHaveUnreadMessages', { count: unreadCount })}</p>
+                        </CardTitle>
+                    </CardHeader>
+                    <div className='h-full w-full flex flex-col gap-6'>
+                        <ScrollArea className="flex-1 p-0 pr-4 overflow-y-auto">
+                            {getRecentNotifications().map((notification, index) => {
+                                const { key, dynamicData } = formatMessage(notification.message);
+                                return (
+                                    <Button
+                                        key={index}
+                                        variant={'ghost'}
+                                        className="justify-between items-center w-full h-fit gap-6 px-6 py-4 truncate mb-4"
+                                        onClick={() => handleNotificationClick(notification)}
+                                    >
+                                        <span className={`h-3 w-3 rounded-full ${notification.read ? 'bg-input' : 'bg-primary'}`} />
+                                        <div className="flex flex-col justify-start w-full truncate gap-1">
+                                            <textarea
+                                                className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
+                                                readOnly
+                                            >
+                                                {n(key, { date: dynamicData })}
+                                            </textarea>
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs font-normal text-muted-foreground text-start">
+                                                    {timeAgo(notification.timestamp, d)}
+                                                </p>
+                                                {(() => {
+                                                    let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
+                                                    switch (notification.type as notificationType) {
+                                                        case "information":
+                                                            variant = "blue";
+                                                            break;
+                                                        case "request":
+                                                            variant = "orange";
+                                                            break;
+                                                        default:
+                                                            variant = "purple";
+                                                            break;
+                                                    }
+                                                    return (
+                                                        <BadgeCustom variant={variant}>
+                                                            {s(notification.type)}
+                                                        </BadgeCustom>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </Button>
+                                );
+                            })}
                         </ScrollArea>
-                    </CardContent>
-                    <CardFooter>
                         <Button variant={'primary'} size={'lg'} className="w-full"
                             onClick={markAllAsRead}>
                             {t('MarkAllAsRead')}
                         </Button>
-                    </CardFooter>
+                    </div>
+
                 </Card>
             </DropdownMenuContent>
         </DropdownMenu>

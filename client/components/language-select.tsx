@@ -7,8 +7,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter, usePathname, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter, usePathname } from 'next/navigation'
 
 
 export default function LanguageSelect() {

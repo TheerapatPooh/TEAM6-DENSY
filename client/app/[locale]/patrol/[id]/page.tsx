@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import {
@@ -19,8 +19,7 @@ import { exportData, getPatrolStatusVariant } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useSocket } from "@/components/socket-provider";
 import { Progress } from "@/components/ui/progress";
-import { SocketIndicator } from "@/components/socket-indicator";
-import Loading from "../../../../components/loading";
+import Loading from "@/components/loading";
 
 export default function Page() {
   const [mounted, setMounted] = useState(false);
@@ -50,9 +49,7 @@ export default function Page() {
       try {
         const data = await fetchData("get", `/patrol/${params.id}?preset=true`, true);
         const result = await fetchData("get", `/patrol/${params.id}?result=true`, true);
-        console.log("patrolID : " + data.id);
         const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
-        console.log("saveresult : " + savedResults);
         const otherResults = localStorage.getItem(`otherResults_${data.id}`);
         if (savedResults) {
           setResults(JSON.parse(savedResults));
@@ -61,7 +58,7 @@ export default function Page() {
           setOtherResults(JSON.parse(otherResults));
         }
         setPatrol(data);
-        setPatrolResults(result.result)
+        setPatrolResults(result.results)
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -80,7 +77,6 @@ export default function Page() {
 
   const mergeResults = (newResults: IPatrolResult[]) => {
     setPatrolResults((prevPatrolResult = []) => {
-      console.log('prevPatrolResult', prevPatrolResult);
       const updatedResults = prevPatrolResult.map((res) => {
         const matchingResult = newResults.find(
           (newRes) =>
@@ -126,20 +122,16 @@ export default function Page() {
     const patrolId = patrol.id;
     const data = {
       status: patrol?.status,
-      checklist: patrol?.patrolChecklist,
+      checklists: patrol?.patrolChecklists,
     };
-    console.log(data)
 
     try {
-      const response = await fetchData(
+      await fetchData(
         "put",
         `/patrol/${patrolId}/start`,
         true,
         data
       );
-      if (response) {
-        console.log("Patrol started successfully:", response);
-      }
     } catch (error) {
       console.error("Error starting patrol:", error);
     }
@@ -148,6 +140,8 @@ export default function Page() {
 
   const handleFinishPatrol = async () => {
     if (!patrol) return;
+
+
     const updatedResults = patrolResults.map((result) => {
       const matchedResult = patrolResults.find(
         (res) => res.itemId === result.itemId && res.zoneId === result.zoneId
@@ -165,31 +159,31 @@ export default function Page() {
 
     const data = {
       status: patrol.status,
-      checklist: patrol.patrolChecklist,
-      result: updatedResults,
+      checklists: patrol.patrolChecklists,
+      results: updatedResults,
       startTime: patrol.startTime
     };
 
     let resultCount = 0;
-    for (const checklist of patrol.patrolChecklist) {
-      for (const item of checklist.checklist.item) {
-        for (const zone of item.itemZone) {
+    for (const checklist of patrol.patrolChecklists) {
+      for (const item of checklist.checklist.items) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const zone of item.itemZones) {
           resultCount++;
         }
       }
     }
 
-    if (data.result.length === resultCount) {
+    if (data.results.length === resultCount) {
       try {
-        const response = await fetchData(
+        localStorage.removeItem(`patrolResults_${patrol.id}`);
+        localStorage.removeItem(`otherResults_${patrol.id}`);
+        await fetchData(
           "put",
           `/patrol/${patrol.id}/finish`,
           true,
           data
         );
-        if (response) {
-          console.log("Patrol finished successfully:", response);
-        }
       } catch (error) {
         console.error("Error finishing patrol:", error);
       }
@@ -230,12 +224,6 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (patrol) {
-      console.log("patrolID", patrol.id); // Only log when patrol data is available
-    }
-  }, [patrol]); // This will run when `patrol` state is updated
-
-  useEffect(() => {
     if (otherResults) {
       mergeResults(otherResults);
     }
@@ -243,7 +231,6 @@ export default function Page() {
 
   useEffect(() => {
     if (socket && isConnected && patrol?.id && user?.id) {
-      console.log("Connected to socket and joining room:", patrol.id);
       socket.emit("join_room", patrol.id);
 
       const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
@@ -307,21 +294,17 @@ export default function Page() {
 
   useEffect(() => {
     if (socket && patrol?.id) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const handleNewUserJoin = (userId: string) => {
-        console.log("New user joined:", userId);
 
         const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
         if (savedResults) {
           try {
             const parsedResults: IPatrolResult[] = JSON.parse(savedResults);
-
-            console.log("Emitting saved results:", parsedResults);
             socket.emit("patrol_result_update", parsedResults, patrol.id);
           } catch (error) {
             console.error("Error parsing saved results:", error);
           }
-        } else {
-          console.log("No saved results found in localStorage.");
         }
       };
 
@@ -356,7 +339,6 @@ export default function Page() {
         );
 
       if (hasChanged) {
-        console.log("Emitting result update:", uniqueResults);
         socket.emit("patrol_result_update", uniqueResults, patrol.id);
         mergeResults([...results, ...uniqueResults]);
         localStorage.setItem(
@@ -409,7 +391,7 @@ export default function Page() {
                   iconName={iconName}
                   showIcon={true}
                   showTime={false}
-                  variant={variant }
+                  variant={variant}
                 >
                   {s(patrol.status)}
                 </BadgeCustom>
@@ -545,7 +527,7 @@ export default function Page() {
             </div>
             <TabsContent value="detail">
               <div className="py-2">
-                {patrol.patrolChecklist.map((pc: IPatrolChecklist) => (
+                {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
                   <div className="mb-4">
                     {user?.profile.name === pc.inspector.profile.name ? (
                       <PatrolChecklist
@@ -568,7 +550,6 @@ export default function Page() {
             <TabsContent value="report">
               <div className="py-2">
                 {defects.map((defect: IDefect) => {
-                  console.log("defect log:", defect);
                   return (
                     <div className="py-2">
                       <ReportDefect

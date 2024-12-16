@@ -10,7 +10,7 @@
     "Delete": "Delete",
     "Profile": "Profile",
     "Logout": "Logout",
-    "MyAccount": "MyAccount",
+    "MyAccount": "My Account",
     "Login": "Login",
     "EnterCredentials": "Enter your username and password to login to your account",
     "Username": "Username",
@@ -59,7 +59,9 @@
     "Finish": "Finish",
     "Export": "Export",
     "Lock": "Lock",
-    "Unlock": "Unlock"
+    "Unlock": "Unlock",
+    "DeleteAllNotifications": "Delete All Notifications",
+    "Total": "Total"
   },
   "Status": {
     "pending": "Pending",
@@ -88,6 +90,27 @@
     "yearAgo": "{count} years ago"
   },
   "Zone": {
+    "r&d_zone": "R&D Zone",
+    "assembly_line_zone": "Assembly Line Zone",
+    "raw_materials_storage_zone": "Raw Materials Storage Zone",
+    "quality_control_zone": "Quality Control Zone",
+    "it_zone": "IT Zone",
+    "customer_service_zone": "Customer Service Zone",
+    "prototype_zone": "Prototype Zone",
+    "manager_office": "Manager Office",
+    "water_supply": "Water Supply",
+    "maintenance_zone": "Maintenance Zone",
+    "warehouse": "Warehouse",
+    "storage_zone": "Storage Zone",
+    "server_room": "Server Room",
+    "electrical_zone": "Electrical Zone",
+    "engineering_zone": "Engineering Zone",
+    "training_simulation_zone": "Training Simulation Zone",
+    "workstation_a": "Work Station A",
+    "workstation_b": "Work Station B",
+    "testing_lab": "Testing Lab"
+  },
+  "Map": {
     "r&d_zone": "R&D ZONE",
     "assembly_line_zone": "ASSEMBLY LINE\nZONE",
     "raw_materials_storage_zone": "RAW MATERIALS\nSTORAGE ZONE",
@@ -107,5 +130,11 @@
     "workstation_a": "WORK\nSTATION A",
     "workstation_b": "WORK\nSTATION B",
     "testing_lab": "TESTING\nLAB"
+  },
+  "Notification": {
+    "patrol_assigned": "You have been assigned to a patrol scheduled for {date}.",
+    "start_patrol": "Your patrol has started. Please proceed with the inspection.",
+    "finish_patrol": "Your patrol has finished. Thank you for your effort.",
+    "report_defect": "An issue has been reported in your assigned zone. Please check immediately."
   }
 }
