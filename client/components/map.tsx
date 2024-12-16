@@ -25,7 +25,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [zones, setZones] = useState<IZone[]>([]);
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
   const [paths, setPaths] = useState<{ text: any, id: number, pathData: string }[]>([])
-  const z = useTranslations('Zone')
+  const m = useTranslations('Map')
   const [stageDimensions, setStageDimensions] = useState({ width: 1350, height: 895, size: "LG"});
   const locale = useLocale(); 
   const [language, setLanguage] = useState('en');
@@ -84,7 +84,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
     }
 
     if (location) {
-      const updatedZones = location.zone.map(zone => {
+      const updatedZones = location.zones.map(zone => {
         const matchedZonePath = paths.find(path => path.id === zone.id);
         return {
           ...zone,
@@ -185,7 +185,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
                   <Text
                     x={textLanguage.x} // ตำแหน่ง x
                     y={textLanguage.y} // ตำแหน่ง y
-                    text={z(zone.name)} // ข้อความที่จะแสดง
+                    text={m(zone.name)} // ข้อความที่จะแสดง
                     fontSize={textLanguage.fontSize} // ขนาดฟอนต์
                     fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
                     fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
