@@ -5,6 +5,7 @@ import { DefectStatus, NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
 import { fileURLToPath } from "url";
+import { users } from '../Utils/data/users';
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -151,12 +152,11 @@ export async function createDefect(req: Request, res: Response) {
 export async function getDefect(req: Request, res: Response) {
   try {
     const role = (req as any).user.role;
-    const userId = (req as any).user.userId;
 
-    if (role !== "admin" && role !== "inspector") {
+    if (role !== "admin" && role !== "supervisor") {
       res
         .status(403)
-        .json({ message: "Access Denied: Admins or Inspectors only" });
+        .json({ message: "Access Denied: Admins or Supervisor only" });
       return;
     }
 
@@ -166,32 +166,46 @@ export async function getDefect(req: Request, res: Response) {
       where: {
         id: Number(id),
       },
+      include: {
+        images: {
+          include: {
+            image: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    role: true,
+                    email: true,
+                    createdAt: true,
+                    profile: {
+                      include: {
+                        image: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            role: true,
+            email: true,
+            createdAt: true,
+            profile: {
+              include: {
+                image: true
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!defect) {
       res.status(404).json({ message: "Defect not found" });
-      return;
-    }
-
-    const validPatrol = await prisma.patrol.findFirst({
-      where: {
-        results: {
-          some: {
-            id: defect.patrolResultId,
-          },
-        },
-        patrolChecklists: {
-          some: {
-            userId: userId,
-          },
-        },
-      },
-    });
-
-    if (!validPatrol) {
-      res
-        .status(404)
-        .json({ message: "You are not associated with this Patrol" });
       return;
     }
 
@@ -312,7 +326,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     } = req.body;
     const newImageFiles = req.files as Express.Multer.File[];
 
-    if (role !== 'admin' && role !== 'inspector') {
+    if (role !== 'admin' && role !== 'inspector' && role !== 'supervisor') {
       res.status(403).json({ message: 'Access Denied: Admins or Inspectors only' });
       return;
     }
@@ -324,17 +338,19 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       res.status(404).json({ message: 'Defect not found' });
       return;
     }
-
-    const validPatrol = await prisma.patrol.findFirst({
-      where: {
-        results: { some: { id: defect.patrolResultId } },
-        patrolChecklists: { some: { userId: userId } },
-      },
-    });
-    if (!validPatrol) {
-      res.status(403).json({ message: 'You are not associated with this Patrol' });
-      return;
+    if(role === "inspector") {
+      const validPatrol = await prisma.patrol.findFirst({
+        where: {
+          results: { some: { id: defect.patrolResultId } },
+          patrolChecklists: { some: { userId: userId } },
+        },
+      });
+      if (!validPatrol) {
+        res.status(403).json({ message: 'You are not associated with this Patrol' });
+        return;
+      }
     }
+    
 
     if (newImageFiles?.length) {
       const existingDefectImages = await prisma.defectImage.findMany({

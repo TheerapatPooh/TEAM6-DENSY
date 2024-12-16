@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { timeStamp } from 'console';
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type role = "admin" | "inspector" | "supervisor"
@@ -37,7 +38,7 @@ export interface IDefect {
     endTime: string;
     userId?: number;
     patrolResultId?: number;
-
+    timeStamp: Date;
     user?: IUser;
     patrolResult: IPatrolResult;
     images: IDefectIImage[];

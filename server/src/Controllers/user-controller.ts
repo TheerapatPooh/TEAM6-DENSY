@@ -242,6 +242,7 @@ export async function getAllUsers(req: Request, res: Response) {
         email: true,
         role: true,
         createdAt: true,
+        active:true,
         profile: includeProfile
           ? {
               include: {
@@ -280,7 +281,7 @@ export async function updateUser(req: Request, res: Response) {
     const loggedInUserId = (req as any).user.userId;
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
-    const { username, email, password, role, department } = req.body;
+    const { username, email, password, role, department,active } = req.body;
 
     // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
     if (loggedInUserId !== id && loggedInUserRole !== "admin") {
@@ -292,15 +293,17 @@ export async function updateUser(req: Request, res: Response) {
     }
 
     const updateData: any = {
-      us_email: email,
-      us_password: password ? await bcrypt.hash(password, 10) : undefined,
-      us_department: department,
+      email: email,
+      password: password ? await bcrypt.hash(password, 10) : undefined,
+      role:role,
+      department: department,
+      active:active,
     };
 
     // เฉพาะ admin เท่านั้นที่สามารถเปลี่ยน username และ role ได้
     if (loggedInUserRole === "admin") {
-      updateData.us_username = username;
-      updateData.us_role = role;
+      updateData.username = username;
+      updateData.role = role;
     }
 
     // อัปเดตข้อมูลผู้ใช้
@@ -315,6 +318,7 @@ export async function updateUser(req: Request, res: Response) {
       email: updatedUser.email,
       role: updatedUser.role,
       department: updatedUser.department,
+      active: updatedUser.active,
       createdAt: updatedUser.createdAt.toISOString(),
     };
 
