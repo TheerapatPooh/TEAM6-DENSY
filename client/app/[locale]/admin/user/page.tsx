@@ -128,31 +128,59 @@ export default function Page() {
       );
     });
   };
-  
-const handleInactiveUser = (userId: number) => {
-  setPendingAction(() => () => handleUserUpdateActive(userId));
-  setDialogType("deactivate"); // Set the dialog type as "deactivate"
-  handleOpenDialog();
-};
 
-const handleEditUser = (index: number, userId: number) => {
-  setPendingAction(() => () => handleSave(index,userId));
-  setDialogType("edit"); // Set the dialog type as "edit"
-  handleOpenDialog();
-};
+  let userCreate = useRef<editedUser>({
+    username: "",
+    password: "",
+    role: "inspector", // Set a default role
+  });
 
-const handleOpenDialog = () => {
-  setIsDialogOpen(true);
-};
 
-const handleDialogResult = (result: boolean) => {
-  setIsDialogOpen(false);
-  if (result && pendingAction) {
-    pendingAction(); // Execute the pending action
-    setPendingAction(null); // Clear the pending action
-    setDialogType(""); // Reset the dialog type after action is completed
-  }
-};
+  const handleUserCreate = async (
+    username: string,
+    password: string,
+    role: role
+  ) => {
+    const data = { username: username, password: password, role: role, active: true };
+    try {
+      await fetchData("post", `/user`, true, data);
+    } catch (error) {
+      console.error("Update failed", error);
+    }
+
+  };
+
+  const handleCreateUserDialog = () => {
+    console.log("user " + userCreate.current.username, "pass " + userCreate.current.password, userCreate.current.role)
+    setPendingAction(() => () => handleUserCreate(userCreate.current.username, userCreate.current.password, userCreate.current.role));
+    setDialogType("create"); // Set the dialog type as "edit"
+    handleOpenDialog();
+  };
+
+  const handleInactiveUserDialog = (userId: number) => {
+    setPendingAction(() => () => handleUserUpdateActive(userId));
+    setDialogType("deactivate"); // Set the dialog type as "deactivate"
+    handleOpenDialog();
+  };
+
+  const handleEditUserDialog = (index: number, userId: number) => {
+    setPendingAction(() => () => handleSave(index, userId));
+    setDialogType("edit"); // Set the dialog type as "edit"
+    handleOpenDialog();
+  };
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+      setDialogType(""); // Reset the dialog type after action is completed
+    }
+  };
 
   type editedUser = {
     username: string;
@@ -173,7 +201,7 @@ const handleDialogResult = (result: boolean) => {
 
   // Handler to save the updated user data
   const handleSave = (index: number, userId: number) => {
-    
+
     const updatedUser = userRefs.current[index];
     if (updatedUser) {
       handleUserUpdate(
@@ -210,7 +238,10 @@ const handleDialogResult = (result: boolean) => {
           <h1 className="font-bold text-2xl">Manage Employees</h1>
           <Dialog>
             <DialogTrigger asChild>
-              <Button size="default">+ New Employee</Button>
+              <Button onClick={() => {
+                userCreate.current = { username: "", password: "", role: "inspector" }; // Default values
+                console.log("userCreate initialized:", userCreate.current);
+              }} size="default">+ New Employee</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -229,10 +260,14 @@ const handleDialogResult = (result: boolean) => {
                       showIcon={true}
                       iconName="person"
                       placeholder="Username"
-                      {...register("username", {
-                        required:
-                          "Please provide a valid username in the fields.",
-                      })}
+
+                      onChange={(e) => {
+                        if (userCreate.current) {
+                          console.log(e.target.value)
+                          userCreate.current.username = e.target.value;
+                        }
+                      }}
+                      
                     />
                   </div>
 
@@ -240,20 +275,28 @@ const handleDialogResult = (result: boolean) => {
                     <label>Password</label>
                     <Textfield
                       className="bg-secondary"
-                      type=""
+                      type="password"
                       showIcon={true}
                       iconName="lock"
                       placeholder="Password"
-                      {...register("password", {
-                        required: "Password is required.",
-                      })}
+                      onChange={(e) => {
+                        if (userCreate.current) {
+                          userCreate.current.password = e.target.value;
+                        }
+                      }}
+                      
                     />
+
                   </div>
 
                   <div className="mt-6">
                     <label>Role</label>
                     <div className="relative bg-secondary rounded-md ">
-                      <Select>
+                      <Select
+                        defaultValue="inspector"
+                        onValueChange={(value) => {
+                          userCreate.current.role = value as role;
+                        }}>
                         <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
                           <SelectValue placeholder="" />
                         </SelectTrigger>
@@ -298,7 +341,24 @@ const handleDialogResult = (result: boolean) => {
                         Back
                       </Button>
                     </DialogClose>
-                    <Button>+ New Employee</Button>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent click event from bubbling up
+                        handleCreateUserDialog()
+                      }}
+                    >+ New Employee</Button>
+                    {isDialogOpen && dialogType === "create" && (
+                      <AlertCustom
+                        title={"Are you sure to add new employee?"}
+                        description={
+                          "Please confirm to add new employee."
+                        }
+                        primaryBottonText={"Confirm"}
+                        primaryIcon="check"
+                        secondaryBottonText={"Cancel"}
+                        backResult={handleDialogResult}
+                      />
+                    )}
                   </div>
                 </form>
               </FormProvider>
@@ -330,19 +390,19 @@ const handleDialogResult = (result: boolean) => {
                       employee.role === "supervisor"
                         ? "yellow"
                         : employee.role === "admin"
-                        ? "blue"
-                        : employee.role === "inspector"
-                        ? "red"
-                        : "mint"
+                          ? "blue"
+                          : employee.role === "inspector"
+                            ? "red"
+                            : "mint"
                     }
                     iconName={
                       employee.role === "supervisor"
                         ? "engineering"
                         : employee.role === "inspector"
-                        ? "person_search"
-                        : employee.role === "admin"
-                        ? "manage_accounts"
-                        : "account_circle"
+                          ? "person_search"
+                          : employee.role === "admin"
+                            ? "manage_accounts"
+                            : "account_circle"
                     }
                     showIcon={true}
                   >
@@ -481,7 +541,7 @@ const handleDialogResult = (result: boolean) => {
                                 size="lg"
                                 onClick={(e) => {
                                   e.stopPropagation(); // Prevent click event from bubbling up
-                                  handleEditUser(index, employee.id);
+                                  handleEditUserDialog(index, employee.id);
                                 }}
                               >
                                 Save
@@ -506,7 +566,7 @@ const handleDialogResult = (result: boolean) => {
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleInactiveUser(employee.id); // Toggle status
+                            handleInactiveUserDialog(employee.id); // Toggle status
                           }}
                           className="flex w-full text-[18px] text-destructive"
                         >
@@ -538,6 +598,6 @@ const handleDialogResult = (result: boolean) => {
             ))}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
