@@ -1,5 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
+import { checklists } from '../Utils/data/checklists';
+import { title } from 'process';
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่
@@ -113,6 +115,109 @@ export async function updatePreset(req: Request, res: Response) {
   }
 }
 
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Checklist
+ * Input:
+ * - req.params.id: number (ID ของ Checklist ที่ต้องการอัปเดต)
+ * - userId: number
+ * - checklistId: number (ID ของ Checklist ที่ต้องการอัปเดต)
+ * - title: string (ชื่อของ Checklist)
+ * - items: Array (รายการไอเทมใน Checklist)</
+ * Output: JSON object { message: String, checklist: Object } ยืนยันการอัปเดต Checklistสำเร็จ
+**/
+export async function updateChecklist(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user.userId;
+    const checklistId = parseInt(req.params.id, 10)
+    const { title, items } = req.body;
+
+    // ตรวจสอบข้อมูล
+    if (!title || !items) {
+      res.status(400).json({ message: "Missing required fields" });
+      return;
+    }
+
+    const currentChecklist = await prisma.checklist.findUnique({
+      where: { id: checklistId },
+    });
+
+    if (!currentChecklist) {
+      res.status(404).json({ message: "Preset not found" });
+      return;
+    }
+
+    if (currentChecklist.latest === true) {
+      const now = new Date();
+      const localTime = new Date(
+        now.getTime() - now.getTimezoneOffset() * 60000
+      ).toISOString();
+
+      if (title === currentChecklist.title) {
+        await prisma.checklist.update({
+          where: { id: checklistId },
+          data: { latest: false, updatedAt: localTime, updatedBy: userId },
+        });
+
+        // สร้าง Checklist ใหม่
+        const newChecklist = await prisma.checklist.create({
+          data: {
+            title: title,
+            version: currentChecklist.version + 1,
+            latest: true,
+            updatedAt: localTime, // อัปเดตใหม่ที่ใช้ในการตรวจสอบใหม่
+            updatedBy: userId, // ID ของผู้ใช้งานที่สร้าง
+          },
+        });
+        // สร้างไอเทมและเชื่อมโยงโซน
+        for (const item of items) {
+          const { name, type, zoneId } = item;
+
+          // สร้างไอเทมใหม่
+          const newItem = await prisma.item.create({
+            data: {
+              name: name,
+              type: type,
+              checklistId: newChecklist.id,
+            },
+          });
+
+          // เชื่อมโยงไอเทมกับโซนโดยใช้ Zone ID
+          for (const id of zoneId) {
+            const zone = await prisma.zone.findUnique({
+              where: { id: id },
+            });
+
+            if (!zone) {
+              res.status(404).json({ message: `Zone ID "${id}" not found` });
+              return;
+            }
+
+            // สร้าง itemZone
+            await prisma.itemZone.create({
+              data: {
+                itemId: newItem.id,
+                zoneId: zone.id,
+              },
+            });
+          }
+        }
+
+        res.status(201).json({ message: "Checklist update successfully", checklists: newChecklist });
+      } else {
+        res.status(500).json({ message: "Title does not match the existing checklist" })//ชื่อมีการเปลี่ยนแปลง
+      }
+    } else {
+      res.status(500).json({ message: "Update restricted to the latest checklist only" })//ไม่ใช่ล่าสุด
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Preset ตาม ID
  * Input:
@@ -175,7 +280,7 @@ export async function getPreset(req: Request, res: Response) {
 export async function getAllPresets(req: Request, res: Response) {
   try {
     let latest = true
-    if(req.query.latest && req.query.latest === "true") {
+    if (req.query.latest && req.query.latest === "true") {
       latest = false
     }
     const presets = await prisma.preset.findMany({
@@ -225,7 +330,7 @@ export async function getAllPresets(req: Request, res: Response) {
           }))
         )
       );
-      
+
       // ใช้ Set เพื่อกรองค่าที่ซ้ำกัน
       const uniqueZones = Array.from(
         new Map(zones.map((zone) => [`${zone.id}-${zone.name}`, zone])).values()
