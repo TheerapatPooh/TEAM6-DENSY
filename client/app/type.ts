@@ -145,7 +145,7 @@ export interface IPatrolResult {
 
     comments?: IComment[];
     defects?: IDefect[]
-    itemIZone?: IItemZone;
+    itemZone?: IItemZone;
     patrol?: IPatrol;
 }
 

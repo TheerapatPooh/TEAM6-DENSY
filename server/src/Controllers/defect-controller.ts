@@ -1,7 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { DefectStatus, NotificationType } from "@prisma/client";
+import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
 import { fileURLToPath } from "url";
@@ -208,23 +208,154 @@ export async function getDefect(req: Request, res: Response) {
 export async function getAllDefects(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
-
-    const defects = await prisma.defect.findMany({
-      where: {
-        patrolResult: {
-          itemZone: {
-            zone: {
-              supervisor: {
-                id: userId,
+    const { status, type, startDate, endDate, search } = req.query;
+    // สร้างเงื่อนไขหลัก
+        const whereConditions: any = {
+          patrolResult: {
+            itemZone: {
+              zone: {
+                supervisor: {
+                  id: userId,
+                },
               },
             },
           },
-        },
-      },
+        };
+    
+        const andConditions: any[] = [];
+    
+        // เงื่อนไขการกรองตาม status
+        if (status) {
+          const statusArray = (status as string).split(","); // แยกค่าด้วย comma
+          const orStatusConditions = statusArray.map((s) => ({ status: s })); // สร้าง array ของ OR เงื่อนไข
+    
+          andConditions.push({ OR: orStatusConditions });
+        }
+    
+        // เงื่อนไขการกรองตาม preset
+        if (type) {
+          andConditions.push(
+            {type:type}
+          );
+        }
+    
+        // เงื่อนไขการกรองตามช่วงเวลา
+        if (startDate && endDate) {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+    
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            andConditions.push({
+              startTime: {
+                gte: start,
+                lte: end,
+              },
+            });
+          } else {
+            console.error('Invalid date range:', startDate, endDate);
+          }
+        }
+    
+        // เงื่อนไขการค้นหา (search)
+        if (search) {
+          const searchId = parseInt(search as string, 10);
+    
+          function mapSearchToStatus(search: string): DefectStatus | null {
+            const searchLower = search.toLowerCase();
+    
+            // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+            if (searchLower.startsWith('rep')) {
+              return DefectStatus.reported;
+            } else if (searchLower.startsWith('i')) {
+              return DefectStatus.in_progress;
+            } else if (searchLower.startsWith('p')) {
+              return DefectStatus.pending_inspection;
+            } else if (searchLower.startsWith('res')) {
+              return DefectStatus.resolved;
+            } else if (searchLower.startsWith('c')) {
+              return DefectStatus.completed; 
+            }
+            // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+            return null;
+          }
+
+          function mapSearchToType(search: string): ItemType | null {
+            const searchLower = search.toLowerCase();
+    
+            // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+            if (searchLower.startsWith('s')) {
+              return ItemType.safety;
+            } else if (searchLower.startsWith('e')) {
+              return ItemType.environment;
+            } else if (searchLower.startsWith('m')) {
+              return ItemType.maintenance;
+            }
+
+            // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+            return null;
+          }
+    
+          const mappedStatus = mapSearchToStatus(search as string);
+          const mappedTypes = mapSearchToType(search as string);
+    
+          const orConditions = [];
+    
+          if (!isNaN(searchId)) {
+            orConditions.push({ id: searchId });
+          }
+    
+          // ถ้า mappedStatus มีค่า (ค้นหาตรงกับสถานะ)
+          if (mappedStatus) {
+            orConditions.push({ status: mappedStatus as DefectStatus });
+          }
+
+           // ถ้า mappedTypes มีค่า (ค้นหาตรงกับชนิด)
+           if (mappedTypes) {
+            orConditions.push({ type: mappedTypes as ItemType });
+          }
+    
+          // ถ้ามีค่า preset title
+          orConditions.push({
+              name: {
+                contains: search as string,
+              },
+          });
+    
+          orConditions.push({
+            user: {
+              profile: {
+                name: {
+                  contains: search as string,
+                },
+              },
+            },
+          });
+    
+          // ถ้ามีเงื่อนไขใน OR ให้เพิ่มเข้าไปใน AND
+          if (orConditions.length > 0) {
+            andConditions.push({ OR: orConditions });
+          }
+        }
+    
+        // ถ้ามีเงื่อนไขเพิ่มเติมให้เพิ่มเข้าไปใน AND
+        if (andConditions.length > 0) {
+          whereConditions.AND = andConditions;
+        }
+    
+        // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
+        console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
+    
+    const defects = await prisma.defect.findMany({
+      where: whereConditions,
       include: {
         patrolResult: {
           select: {
             zoneId: true,
+            itemZone: {
+              select: {
+                zone: true,
+              }
+            }
           },
         },
         user: {
@@ -249,7 +380,22 @@ export async function getAllDefects(req: Request, res: Response) {
               select: {
                 id: true,
                 path: true,
-                user: true,
+                user: {
+                  select: {
+                    id: true,
+                    role: true,
+                    email: true,
+                    createdAt: true,
+                    profile: {
+                      select: {
+                        id: true,
+                        name: true,
+                        tel: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -303,20 +449,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       res.status(404).json({ message: 'Defect not found' });
       return;
     }
-    if(role === "inspector") {
-      const validPatrol = await prisma.patrol.findFirst({
-        where: {
-          results: { some: { id: defect.patrolResultId } },
-          patrolChecklists: { some: { userId: userId } },
-        },
-      });
-      if (!validPatrol) {
-        res.status(403).json({ message: 'You are not associated with this Patrol' });
-        return;
-      }
-    }
     
-
     if (newImageFiles?.length) {
       const existingDefectImages = await prisma.defectImage.findMany({
         where: { defectId: Number(id) },

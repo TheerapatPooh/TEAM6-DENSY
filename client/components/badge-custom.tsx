@@ -25,7 +25,7 @@ export const badgeVariants = {
     mint: "bg-mint/20 text-mint hover:bg-mint/10",
     blue: "bg-primary/20 text-primary hover:bg-primary/10",
     yellow: "bg-yellow/20 text-yellow hover:bg-yellow/10",
-    red: "bg-desctructive/20 text-desctructive hover:bg-desctructive/10",
+    red: "bg-destructive/20 text-destructive hover:bg-destructive/10",
     orange: "bg-orange/20 text-orange hover:bg-orange/10",
     purple: "bg-purple/20 text-purple hover:bg-purple/10",
     green: "bg-green/20 text-green hover:bg-green/10",
