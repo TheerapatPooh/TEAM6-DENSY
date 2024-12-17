@@ -160,6 +160,7 @@ export default function PatrolChecklist({
     files.forEach((file) => {
       formData.append("imageFiles", file);
     });
+
     try {
       await fetchData(
         "post",

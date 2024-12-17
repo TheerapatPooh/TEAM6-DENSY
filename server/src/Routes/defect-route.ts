@@ -4,15 +4,15 @@ import { authenticateUser, authorzied, upload } from "@Controllers/util-controll
 
 const router = Router()
 
-router.post('/defect', authorzied(['admin', 'inspector']), (req, res, next) => {
+router.post('/defect', (req, res, next) => {
   next();
-}, upload.array('imageFiles', 10), authenticateUser, createDefect);
-router.get('/defect/:id', authenticateUser, getDefect)
+}, upload.array('imageFiles', 10), authenticateUser, authorzied(['admin', 'inspector']), createDefect);
+router.get('/defect/:id', authenticateUser, authorzied(['admin', 'supervisor']), getDefect)
 router.get('/defects', authenticateUser, authorzied(['admin', 'supervisor']), getAllDefects)
 router.put('/defect/:id',
-  authorzied(['admin', 'inspector']),
   upload.array('imageFiles', 10),
   authenticateUser,
+  authorzied(['admin', 'inspector']),
   updateDefect
 );
 router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']), deleteDefect)
