@@ -269,7 +269,7 @@ export const getDefectStatusVariant = (status: defectStatus) => {
       variant = 'blue'
       break;
     case "in_progress":
-      iconName = 'cache'
+      iconName = 'cached'
       variant = 'yellow'
       break;
     case "pending_inspection":

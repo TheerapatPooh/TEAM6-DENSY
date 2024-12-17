@@ -21,7 +21,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
             case "safety":
                 return "green"
             case "environment":
-                return "blue"
+                return "primary"
             default:
                 return "destructive"
         }
