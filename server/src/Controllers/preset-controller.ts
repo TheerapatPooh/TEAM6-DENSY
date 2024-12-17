@@ -383,12 +383,18 @@ export async function createChecklist(req: Request, res: Response) {
       return;
     }
 
+    const now = new Date();
+    const localTime = new Date(
+      now.getTime() - now.getTimezoneOffset() * 60000
+    ).toISOString();
+    
     // สร้าง Checklist ใหม่
     const newChecklist = await prisma.checklist.create({
       data: {
         title: title,
         version: 1,
         latest: true,
+        updatedAt: localTime,
         updatedBy: userId, // ID ของผู้ใช้งานที่สร้าง
       },
     });
