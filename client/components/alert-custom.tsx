@@ -33,13 +33,12 @@ export function AlertCustom({
 
   const handleAction = (result: boolean) => {
     backResult(result);
-    setIsOpen(false); // Close the dialog after action
+    setIsOpen(false); 
   };
 
-  // Prevent closing when clicking anywhere inside the dialog content
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsOpen(false)
+    
   };
 
   return (
