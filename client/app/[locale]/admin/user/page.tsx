@@ -656,11 +656,12 @@ export default function Page() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Dialog>
+                        <Dialog open={isDialogOpen}>
                             <DialogTrigger
                               asChild
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setIsDialogOpen(true)
                                 setPasswordErrorForEdit(null);
                               }}
                             >
@@ -826,7 +827,7 @@ export default function Page() {
                                 backResult={handleDialogResult}
                               />
                             )}
-                          </Dialog>
+                        </Dialog>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <div
