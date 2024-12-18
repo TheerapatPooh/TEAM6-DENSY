@@ -408,6 +408,10 @@ export default function Page() {
                   console.log("userCreate initialized:", userCreate.current);
                   setDialogType("add_user_menu");
                   setIsDialogOpen(true);
+                  setErrorsForCreateUser({
+                    username: "",
+                    password: "",
+                  });
                 }}
                 size="default"
               >
@@ -527,12 +531,14 @@ export default function Page() {
                       </Button>
                     </DialogClose>
                     <Button
+                    className="  flex gap-2"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent click event from bubbling up
                         handleCreateUserDialog();
                       }}
                     >
-                      + New Employee
+                      <span className="material-symbols-outlined">add</span>
+                      New Employee
                     </Button>
                     {isDialogOpen && dialogType === "create" && (
                       <AlertCustom
