@@ -39,6 +39,7 @@ export function AlertCustom({
   // Prevent closing when clicking anywhere inside the dialog content
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsOpen(false)
   };
 
   return (
