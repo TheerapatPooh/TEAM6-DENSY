@@ -36,7 +36,7 @@ export function AdminSidebar() {
         },
         {
             title: t("Employees"),
-            url: "#",
+            url: "user",
             icon: "manage_accounts",
         },
         {

@@ -9,13 +9,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { DialogClose } from "./ui/dialog";
 export interface alertProps {
   title: String;
   description: String;
   primaryBottonText: String;
   secondaryBottonText: String;
-  primaryIcon?:string,
-  secondaryIcon?:string,
+  primaryIcon?: string;
+  secondaryIcon?: string;
   backResult: (result: boolean) => void;
 }
 
@@ -40,14 +41,22 @@ export function AlertCustom({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="gap-2" onClick={() => handleAction(false)}>
-          <span className="material-symbols-outlined">{secondaryIcon}</span>
-            {secondaryBottonText}
-          </AlertDialogCancel>
-          <AlertDialogAction className="gap-2"  onClick={() => handleAction(true)}>
-            <span className="material-symbols-outlined">{primaryIcon}</span>
-            {primaryBottonText}
-          </AlertDialogAction>
+            <AlertDialogCancel
+              className="gap-2"
+              onClick={() => handleAction(false)}
+            >
+              <span className="material-symbols-outlined">{secondaryIcon}</span>
+              {secondaryBottonText}
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              className="gap-2"
+              onClick={() => handleAction(true)}
+            >
+              <span className="material-symbols-outlined">{primaryIcon}</span>
+              {primaryBottonText}
+            </AlertDialogAction>
+
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
