@@ -269,30 +269,39 @@ export const getDefectStatusVariant = (status: defectStatus) => {
       variant = 'blue'
       break;
     case "in_progress":
-      iconName = 'cache'
+      iconName = 'cached'
       variant = 'yellow'
       break;
     case "pending_inspection":
       iconName = 'pending_actions'
-      variant = 'orange'
+      variant = 'red'
       break;
     default:
       iconName = 'campaign'
-      variant = 'mint'
+      variant = 'orange'
       break;
   }
   return { iconName, variant };
 };
 
 export const getItemTypeVariant = (type: itemType) => {
+  let iconName: string
+  let variant: keyof typeof badgeVariants
   switch (type) {
     case "safety":
-      return "mint";
-    case "maintenance":
-      return "purple"
+      iconName = 'verified_user'
+      variant = 'green'
+      break;
+    case "environment":
+      iconName = 'psychiatry'
+      variant = 'blue'
+      break;
     default:
-      return "orange";
+      iconName = 'build'
+      variant = 'red'
+      break;
   }
+  return { iconName, variant };
 };
 
 export function formatTime(timestamp: string) {
