@@ -656,13 +656,14 @@ export default function Page() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                        <Dialog open={isDialogOpen}>
+                        <Dialog open={isDialogOpen && dialogType === "editform" || dialogType === "edit"}>
                             <DialogTrigger
                               asChild
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setIsDialogOpen(true)
                                 setPasswordErrorForEdit(null);
+                                setDialogType("editform")
                               }}
                             >
                               <div
