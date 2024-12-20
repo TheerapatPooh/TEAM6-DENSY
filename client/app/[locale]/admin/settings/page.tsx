@@ -77,10 +77,36 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@radix-ui/react-tooltip";
+import UserDropdown from "@/components/user-dropdown";
+import Map from "@/components/map";
+import { Save } from "lucide-react";
 
 export default function Page() {
   const a = useTranslations("Alert");
+  const t = useTranslations("General");
   const [selectedChecklist, setSelectedChecklist] = useState(null);
+  const [userData, setUserData] = useState<IUser[]>([]);
+  const [selectUser, setSelectUser] = useState<IUser | null>(null);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const users = await fetchData(
+          "get",
+          "/users?profile=true&image=true&user=true",
+          true
+        );
+        setUserData(users);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getData();
+  }, []);
+
+  const handleUserSelect = (dropdownUser: IUser) => {
+    setSelectUser(dropdownUser);
+  };
   interface IChecklistWithExtras extends IChecklist {
     updateByUserName: string;
     imagePath: string;
@@ -238,7 +264,9 @@ export default function Page() {
                                   </span>
                                   <div className="flex flex-col justify-start items-start ">
                                     <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                      <div className="text-muted-foreground">Update By</div>
+                                      <div className="text-muted-foreground">
+                                        Update By
+                                      </div>
                                       {checklist.imagePath === "" ? (
                                         <Avatar>
                                           <AvatarImage
@@ -256,15 +284,21 @@ export default function Page() {
 
                                       {checklist.updateByUserName}
                                     </div>
-                                    <div className="flex gap-2 text-muted-foreground" >
-                                      <div className="text-muted-foreground" >Update At</div>
+                                    <div className="flex gap-2 text-muted-foreground">
+                                      <div className="text-muted-foreground">
+                                        Update At
+                                      </div>
                                       {formatTime(checklist.updatedAt)}
                                     </div>
                                   </div>
 
                                   <div className="flex justify-between  w-full">
-                                    <div className="font-bold text-lg text-muted-foreground">Total</div>
-                                    <div className="font-bold text-lg text-muted-foreground">{checklist.versionCount}</div>
+                                    <div className="font-bold text-lg text-muted-foreground">
+                                      Total
+                                    </div>
+                                    <div className="font-bold text-lg text-muted-foreground">
+                                      {checklist.versionCount}
+                                    </div>
                                   </div>
                                 </div>
                               </TooltipContent>
@@ -350,7 +384,78 @@ export default function Page() {
               ))}
             </div>
           </TabsContent>
-          <TabsContent value="location_n_zone"></TabsContent>
+          <TabsContent
+            value="location_n_zone"
+            className="bg-card px-6 py-4 gap-4 rounded-md"
+          >
+            <div className="flex justify-between items-center">
+              <p className="text-2xl font-bold">{t("Choose Zone and Supervisor")}</p>
+              <Button variant="primary" size="lg" className="flex gap-2">
+                <span className="material-symbols-outlined">save</span>
+                {t("Save")}
+              </Button>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="material-symbols-outlined text-muted-foreground">
+                location_on
+              </span>
+              <p className="text-base font-semibold text-muted-foreground">
+                {t("Zone")}
+              </p>
+            </div>
+
+            <div className="bg-secondary w-full rounded-md ">
+              <Map disable={false} />
+            </div>
+
+            <div className="flex gap-2 justify-between w-fit">
+              <div className="flex gap-1 items-center ">
+                <span className="material-symbols-outlined text-muted-foreground">
+                  engineering
+                </span>
+                <p className="text-muted-foreground text-base font-semibold">
+                  {t("Supervisor")}
+                </p>
+              </div>
+              <UserDropdown
+                userData={userData}
+                onUserSelect={handleUserSelect}
+              />
+            </div>
+
+            <div>
+              <p className="text-2xl font-bold">{t("Zone")} & {t("Assigned Supervisor")}</p>
+              <Table>
+                <TableHeader>
+                  <TableRow className="">
+                    <TableHead>
+                      <div className="flex gap-3 items-center">
+                      {t("Zone")}
+                        <span className="material-symbols-outlined">
+                          location_on
+                        </span>
+                      </div>
+                    </TableHead>
+                    <TableHead>
+                      <div className="flex gap-3 items-center">
+                      {t("Supervisor")}
+                        <span className="material-symbols-outlined">
+                          engineering
+                        </span>
+                      </div>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>ASSEMBLY LINE ZONE</TableCell>
+                    <TableCell>Michael Johnson</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

@@ -61,7 +61,10 @@
     "Lock": "Lock",
     "Unlock": "Unlock",
     "DeleteAllNotifications": "Delete All Notifications",
-    "Total": "Total"
+    "Total": "Total",
+    "Save": "Save",
+    "Assigned Supervisor": "Assigned Supervisor",
+    "Choose Zone and Supervisor": "Choose Zone and Supervisor"
   },
   "Status": {
     "pending": "Pending",

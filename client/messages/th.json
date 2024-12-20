@@ -61,7 +61,10 @@
     "Lock": "ล็อก",
     "Unlock": "ปลดล็อก",
     "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด",
-    "Total": "ทั้งหมด"
+    "Total": "ทั้งหมด",
+    "Save": "บันทึก",
+    "Assigned Supervisor": "ผู้รับผิดชอบส่วนงานที่ได้รับมอบหมาย",
+    "Choose Zone and Supervisor": "เลือกโซนและผู้รับผิดชอบส่วนงาน"
   },
   "Status": {
     "pending": "รอดำเนินการ",
