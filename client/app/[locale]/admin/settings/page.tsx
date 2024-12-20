@@ -38,6 +38,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import {
   Select,
@@ -61,7 +62,16 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { fetchData, formatTime, getInitials } from "@/lib/utils";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import {
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, FormProvider } from "react-hook-form";
@@ -77,6 +87,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@radix-ui/react-tooltip";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -147,7 +158,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="min-h-screen  p-6">
+    <div className=" p-6">
       {/* Top Section */}
       <div className=" justify-between items-center mb-6">
         <Tabs defaultValue="patrol_preset">
@@ -198,160 +209,163 @@ export default function Page() {
                   <div className="text-lg">Create Checklist</div>
                 </Button>
               </div>
-              {allChecklists.map((checklist) => (
-                <div key={checklist.id}>
-                  <div>
-                    <div
-                      onClick={() => {
-                        console.log("FUCK");
-                      }}
-                      className={`flex flex-row border-l-[10px] cursor-pointer  ${getChecklistColor(
-                        checklist
-                      )} border-destructive h-[166px]  bg-secondary rounded-lg shadow p-2  justify-between`}
-                    >
-                      <div className="flex flex-col gap-4 ">
-                        {/* Left Section */}
-                        <div className="gap-1">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className="text-card-foreground text-[16px] flex items-center hover:bg-secondary m-0 p-0"
-                                >
-                                  <span className="material-symbols-outlined mr-1">
-                                    history
-                                  </span>
-                                  Version {checklist.version}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent
-                                side="bottom"
-                                className="ml-[129px]"
-                              >
-                                <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                                  <span className="text-card-foreground text-lg font-bold flex items-center ">
+
+              <ScrollArea className="w-full h-[810px] flex gap-4 flex-col rounded-md bg-destructive ">
+                {allChecklists.map((checklist) => (
+                  <div key={checklist.id}>
+                    <div>
+                      <div
+                        onClick={() => {
+                          console.log("FUCK");
+                        }}
+                        className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer  ${getChecklistColor(
+                          checklist
+                        )} border-destructive h-[166px]  bg-secondary rounded-lg shadow p-2  justify-between`}
+                      >
+                        <div className="flex flex-col gap-4 ">
+                          {/* Left Section */}
+                          <div className="gap-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="text-card-foreground text-[16px] flex items-center hover:bg-secondary m-0 p-0"
+                                  >
                                     <span className="material-symbols-outlined mr-1">
                                       history
                                     </span>
                                     Version {checklist.version}
-                                  </span>
-                                  <div className="flex flex-col justify-start items-start ">
-                                    <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                      <div className="text-muted-foreground">Update By</div>
-                                      {checklist.imagePath === "" ? (
-                                        <Avatar>
-                                          <AvatarImage
-                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.imagePath}`}
-                                          />
-                                          <AvatarFallback>
-                                            {getInitials(
-                                              checklist.updateByUserName
-                                            )}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                      ) : (
-                                        <Skeleton className="h-12 w-12 rounded-full" />
-                                      )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  side="bottom"
+                                  className="ml-[129px]"
+                                >
+                                  <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
+                                    <span className="text-card-foreground text-lg font-bold flex items-center ">
+                                      <span className="material-symbols-outlined mr-1">
+                                        history
+                                      </span>
+                                      Version {checklist.version}
+                                    </span>
+                                    <div className="flex flex-col justify-start items-start ">
+                                      <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
+                                        <div className="text-muted-foreground">
+                                          Update By
+                                        </div>
+                                        {checklist.imagePath === "" ? (
+                                          <Avatar>
+                                            <AvatarImage
+                                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.imagePath}`}
+                                            />
+                                            <AvatarFallback>
+                                              {getInitials(
+                                                checklist.updateByUserName
+                                              )}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                        ) : (
+                                          <Skeleton className="h-12 w-12 rounded-full" />
+                                        )}
 
-                                      {checklist.updateByUserName}
+                                        {checklist.updateByUserName}
+                                      </div>
+                                      <div className="flex gap-2 text-muted-foreground">
+                                        <div className="text-muted-foreground">
+                                          Update At
+                                        </div>
+                                        {formatTime(checklist.updatedAt)}
+                                      </div>
                                     </div>
-                                    <div className="flex gap-2 text-muted-foreground" >
-                                      <div className="text-muted-foreground" >Update At</div>
-                                      {formatTime(checklist.updatedAt)}
+
+                                    <div className="flex justify-between  w-full">
+                                      <div className="font-bold text-lg text-muted-foreground">
+                                        Total
+                                      </div>
+                                      <div className="font-bold text-lg text-muted-foreground">
+                                        {checklist.versionCount}
+                                      </div>
                                     </div>
                                   </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
 
-                                  <div className="flex justify-between  w-full">
-                                    <div className="font-bold text-lg text-muted-foreground">Total</div>
-                                    <div className="font-bold text-lg text-muted-foreground">{checklist.versionCount}</div>
-                                  </div>
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <h2 className="text-2xl font-semibold">
-                            {checklist.title}
-                          </h2>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="flex flex-col gap-2 text-gray-500">
-                          <div className="flex flex-row gap-2">
-                            <span className="material-symbols-outlined  text-muted-foreground">
-                              location_on
-                            </span>
-                            <p className="text-[16px] text-muted-foreground truncate">
-                              {checklist.zones.join(", ")}
-                            </p>
+                            <h2 className="text-2xl font-semibold">
+                              {checklist.title}
+                            </h2>
                           </div>
-                          <div className="flex gap-2">
-                            <div className="flex items-center">
-                              <span className="material-symbols-outlined text-green text-xl">
-                                verified_user
+
+                          {/* Stats */}
+                          <div className="flex flex-col gap-2 text-gray-500">
+                            <div className="flex flex-row gap-2">
+                              <span className="material-symbols-outlined  text-muted-foreground">
+                                location_on
                               </span>
-                              <span className="ml-1 text-green text-xl">
-                                {checklist.itemCounts.safety || 0}
-                              </span>
+                              <p className="text-[16px] text-muted-foreground truncate">
+                                {checklist.zones.join(", ")}
+                              </p>
                             </div>
-                            <div className="flex items-center">
-                              <span className="material-symbols-outlined text-blue-500 text-xl">
-                                psychiatry
-                              </span>
-                              <span className="ml-1 text-blue-500 text-xl">
-                                {checklist.itemCounts.environment || 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="material-symbols-outlined text-destructive text-xl">
-                                build
-                              </span>
-                              <span className="ml-1 text-destructive text-xl">
-                                {checklist.itemCounts.maintenance || 0}
-                              </span>
+                            <div className="flex gap-2">
+                              <div className="flex items-center">
+                                <span className="material-symbols-outlined text-green text-xl">
+                                  verified_user
+                                </span>
+                                <span className="ml-1 text-green text-xl">
+                                  {checklist.itemCounts.safety || 0}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <span className="material-symbols-outlined text-blue-500 text-xl">
+                                  psychiatry
+                                </span>
+                                <span className="ml-1 text-blue-500 text-xl">
+                                  {checklist.itemCounts.environment || 0}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <span className="material-symbols-outlined text-destructive text-xl">
+                                  build
+                                </span>
+                                <span className="ml-1 text-destructive text-xl">
+                                  {checklist.itemCounts.maintenance || 0}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div className=" flex flex-row items-end ">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="rounded-full"
-                            >
+                        <div className=" flex flex-row items-end ">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
                               <span className="material-symbols-outlined">
                                 more_vert
                               </span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="p-4">
-                            <h3 className="text-lg font-semibold">Version 1</h3>
-                            <p className="text-sm text-gray-500">
-                              {a("UpdatedBy")} 😎 {checklist.updatedBy}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {a("UpdatedAt")} {checklist.updatedAt}
-                            </p>
-                            <div className="mt-4">
-                              <Button variant="secondary" className="mr-2">
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              className="w-[80px]"
+                              side="bottom"
+                            >
+                              <DropdownMenuItem className="text-lg">
                                 Detail
-                              </Button>
-                              <Button variant="destructive">Delete</Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive text-lg">
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </ScrollArea>
             </div>
+          
           </TabsContent>
           <TabsContent value="location_n_zone"></TabsContent>
         </Tabs>
+        
       </div>
     </div>
   );
