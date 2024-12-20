@@ -128,7 +128,7 @@ export interface IChecklist {
     latest: boolean;
     updatedAt: string;
     updatedBy: number;
-
+    
     patrols?: IPatrolChecklist[];
     user: IUser;
     presetChecklists?: IPresetChecklist[];

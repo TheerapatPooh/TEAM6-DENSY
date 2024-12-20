@@ -36,12 +36,12 @@ export function AdminSidebar() {
         },
         {
             title: t("Employees"),
-            url: "user",
+            url: "employees",
             icon: "manage_accounts",
         },
         {
             title: t("Settings"),
-            url: "#",
+            url: "settings",
             icon: "manufacturing",
         },
     ]
@@ -58,8 +58,8 @@ export function AdminSidebar() {
     };
 
     return (
-        <SidebarProvider className={`sticky transition-all duration-300 ${isExpanded ? "w-[240px]" : "w-[70px]"}`}>
-             <Sidebar className={`w-[240px] border-none ${isExpanded ? "w-[240px]" : "w-[70px]"}`}>
+        <SidebarProvider className={`sticky transition-all duration-300 ${isExpanded ? "w-[240px]" : "w-[70px] pointer-events-none"}`}>
+             <Sidebar className={`w-[240px] border-none ${isExpanded ? "w-[240px]" : "w-[70px] "}`}>
                 <SidebarContent className="p-[8px] pt-[8px] bg-card overflow-x-hidden">
                 <SidebarGroup className="p-0">
                     <SidebarGroupLabel className="mb-[16px]">
@@ -75,7 +75,7 @@ export function AdminSidebar() {
                                     onClick={() => router.push(`/${locale}`)}
                                 />
                             )}
-                            <Button variant="ghost" className="size-[45px] text-muted-foreground transition-all duration-300 ms-[-4px]" onClick={toggleSidebar}>
+                            <Button variant="ghost" className="size-[45px] text-muted-foreground transition-all duration-300 ms-[-4px] pointer-events-auto" onClick={toggleSidebar}>
                                 <span className="material-symbols-outlined text-10">menu</span>
                             </Button>
                         </div>
@@ -85,7 +85,7 @@ export function AdminSidebar() {
                         {sidebarItems.map((item) => (
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton asChild>
-                                <div onClick={() => router.push(`/${locale}/admin/${item.url}`)} className={`w-[224px] h-[50px] transition-all duration-300 text-muted-foreground hover:bg-accent-gradient hover:text-secondary cursor-pointer ${isExpanded ? "justify-start" : "justify-center"}`}>
+                                <div onClick={() => router.push(`/${locale}/admin/${item.url}`)} className={`w-[224px] h-[50px] transition-all pointer-events-auto duration-300 text-muted-foreground hover:bg-accent-gradient hover:text-secondary cursor-pointer ${isExpanded ? "justify-start" : "justify-center"}`}>
                                     <span className="material-symbols-outlined">{item.icon}</span>
                                     {isExpanded && (
                                         <span className="text-lg w-auto">{item.title}</span>

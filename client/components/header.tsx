@@ -12,7 +12,7 @@
  *   - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
  *     การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
  *   - การนำทางจะเกิดขึ้นเมื่อกดปุ่มต่าง ๆ โดยใช้ Next.js router
-**/
+ **/
 
 "use client";
 import React, { useEffect, useState } from "react";
@@ -27,11 +27,10 @@ import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 
-type HeaderVariant = 'inspector' | 'supervisor' | 'admin';
+type HeaderVariant = "inspector" | "supervisor" | "admin";
 interface IHeader {
   variant: HeaderVariant;
 }
-
 
 export default function Header({ variant }: IHeader) {
   const [mounted, setMounted] = useState(false);
@@ -49,10 +48,35 @@ export default function Header({ variant }: IHeader) {
 
   const isActive = (path) => pathname.startsWith(path);
 
+  function getPathWord(pathname: string | null) {
+    const pathMap: { [key: string]: string } = {
+      "/admin/dashboard": "Dashboard",
+      "/admin/settings": "Settings",
+      "/admin/employees": "Employees",
+    };
+  
+    if (!pathname) return "Unknown Path";
+  
+    // Remove the language prefix (e.g., "/en")
+    const normalizedPath = pathname.replace(/^\/[a-z]{2}/, "");
+  
+    return pathMap[normalizedPath] || "Unknown Path";
+  }
+  
+
   return (
-    <header className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === 'admin' ? "justify-end" : "justify-between custom-shadow"}`}>
+    <header
+      className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${
+        variant === "admin"
+          ? "justify-between"
+          : "justify-between custom-shadow"
+      }`}
+    >
       <div className="flex gap-4">
-        {variant !== 'admin' && (
+        {variant === "admin" && (
+          <div className="flex items-center text-2xl font-medium">{getPathWord(usePathname())}</div>
+        )}
+        {variant !== "admin" && (
           <div className="flex justify-between items-center">
             <Image
               className="flex items-center cursor-pointer"
@@ -65,19 +89,25 @@ export default function Header({ variant }: IHeader) {
             />
           </div>
         )}
-
-        {variant === 'inspector' && (
+        {variant === "inspector" && (
           <div className="flex justify-between items-center ms-2">
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-red-500" : "text-gray-400"
-                }`}
+              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${
+                isActive(`/${locale}/patrol`)
+                  ? "border-b-4 border-red-500"
+                  : "text-gray-400"
+              }`}
               onClick={() => router.push(`/${locale}/patrol`)}
             >
-              <span className="material-symbols-outlined">list_alt_check</span> Patrol
+              <span className="material-symbols-outlined">list_alt_check</span>{" "}
+              Patrol
             </button>
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/defect`) ? "border-b-4 border-red-500" : "text-gray-400"
-                }`}
+              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${
+                isActive(`/${locale}/defect`)
+                  ? "border-b-4 border-red-500"
+                  : "text-gray-400"
+              }`}
               onClick={() => router.push(`/${locale}/defect`)}
             >
               <span className="material-symbols-outlined">build</span> Defect
