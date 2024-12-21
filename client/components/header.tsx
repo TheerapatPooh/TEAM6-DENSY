@@ -47,7 +47,9 @@ export default function Header({ variant }: IHeader) {
     return null;
   }
 
-  const isActive = (path) => pathname.startsWith(path);
+  const isActive = (path: string): boolean => {
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
 
   return (
     <header className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === 'admin' ? "justify-end" : "justify-between custom-shadow"}`}>
@@ -76,9 +78,9 @@ export default function Header({ variant }: IHeader) {
               <span className="material-symbols-outlined">list_alt_check</span> Patrol
             </button>
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/defect`) ? "border-b-4 border-red-500" : "text-gray-400"
+              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-red-500" : "text-gray-400"
                 }`}
-              onClick={() => router.push(`/${locale}/defect`)}
+              onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
               <span className="material-symbols-outlined">build</span> Defect
             </button>
