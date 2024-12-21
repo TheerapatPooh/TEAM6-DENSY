@@ -728,17 +728,18 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
 
-    const patrolId = parseInt(req.params.id, 10);
-    const validPatrol = await prisma.patrol.findFirst({
-      where: {
-        id: patrolId,
-        patrolChecklists: {
-          some: {
-            userId: userId,
+    if (req.params.id) {
+      const patrolId = parseInt(req.params.id, 10);
+      const validPatrol = await prisma.patrol.findFirst({
+        where: {
+          id: patrolId,
+          patrolChecklists: {
+            some: {
+              userId: userId,
+            },
           },
         },
-      },
-    });
+      });
 
     if (!validPatrol) {
       res
@@ -747,43 +748,132 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
       return;
     }
 
-    const defects = await prisma.defect.findMany({
-      where: {
-        patrolResult: {
-          patrolId: patrolId,
-        },
-      },
-      include: {
-        patrolResult: {
-          select: {
-            zoneId: true,
+      const defects = await prisma.defect.findMany({
+        where: {
+          patrolResult: {
+            patrolId: patrolId,
           },
         },
-        images: {
-          select: {
-            image: {
-              select: {
-                id: true,
-                path: true,
-                user: {
-                  select: {
-                    id: true,
-                    email: true,
-                    role: true,
-                    department: true,
-                    createdAt: true
+        include: {
+          patrolResult: {
+            select: {
+              zoneId: true,
+              itemZone: {
+                select: {
+                  zone: {
+                    select: {
+                      name: true,
+                      supervisor: {
+                        select: {
+                          id: true,
+                          profile: {
+                            include: {
+                              image: true
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
+                }
+              }
+            },
+          },
+          images: {
+            select: {
+              image: {
+                select: {
+                  id: true,
+                  path: true,
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      role: true,
+                      department: true,
+                      createdAt: true
+                    }
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    let result = defects;
-    res.status(200).json(result);
-    return;
+      let result = defects;
+      res.status(200).json(result);
+      return;
+    }
+    else {
+
+      const defects = await prisma.defect.findMany({
+        where: {
+          userId: userId,
+        },
+        include: {
+          patrolResult: {
+            select: {
+              patrol: {
+                select: {
+                  id: true,
+                  preset: {
+                    select: {
+                      title: true
+                    }
+                  }
+                }
+              },
+              zoneId: true,
+              itemZone: {
+                select: {
+                  zone: {
+                    select: {
+                      name: true,
+                      supervisor: {
+                        select: {
+                          id: true,
+                          profile: {
+                            include: {
+                              image: true
+                            }
+                          }
+                        }
+                      }
+
+                    }
+                  }
+
+                }
+              }
+            },
+          },
+          images: {
+            select: {
+              image: {
+                select: {
+                  id: true,
+                  path: true,
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      role: true,
+                      department: true,
+                      createdAt: true
+                    }
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      let result = defects;
+      res.status(200).json(result);
+      return;
+    }
   } catch (error) {
     res.status(500)
     return;
