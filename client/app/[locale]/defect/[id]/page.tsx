@@ -254,7 +254,7 @@ const [isDialogOpen, setIsDialogOpen] = useState(false);
               </BadgeCustom>
 
               <BadgeCustom
-                shape="squre"
+                shape="square"
                 variant={typeColorDefect}
                 showIcon={true}
               >
