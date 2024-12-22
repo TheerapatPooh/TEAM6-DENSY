@@ -30,6 +30,7 @@ export interface IUser {
 }
 
 export interface IDefect {
+    title: string;
     id: number;
     name: string;
     description: string;
@@ -241,6 +242,12 @@ export interface IDefectIImage {
 export interface FilterPatrol {
     presetTitle: string | null;
     patrolStatus: string[];
+    dateRange: { start: Date | undefined; end: Date | undefined };
+}
+
+export interface FilterDefect {
+    defectStatus: string | null;
+    defectType: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
 

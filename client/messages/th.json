@@ -61,7 +61,8 @@
     "Lock": "ล็อก",
     "Unlock": "ปลดล็อก",
     "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด",
-    "Total": "ทั้งหมด"
+    "Total": "ทั้งหมด",
+    "Type": "ชนิด"
   },
   "Status": {
     "pending": "รอดำเนินการ",

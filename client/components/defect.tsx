@@ -55,7 +55,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
                             variant={variant}
                             iconName={iconName}
                             showIcon={true}
-                            shape={'squre'}
+                            shape={'square'}
                         >
                             {s(defect.type)}
                         </BadgeCustom>
