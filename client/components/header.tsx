@@ -27,7 +27,7 @@ import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 
-type HeaderVariant = 'inspector' | 'supervisor' | 'admin';
+type HeaderVariant = 'inspector' | 'supervisor' | 'admin' | 'profile';
 interface IHeader {
   variant: HeaderVariant;
 }

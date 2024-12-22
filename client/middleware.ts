@@ -14,6 +14,9 @@ export function middleware(req: NextRequest) {
   const localeMatch = currentPathname.match(/^\/(en|th)(\/|$)/)
   const locale = localeMatch ? localeMatch[1] : 'en'
   const isLoginPage = req.nextUrl.pathname === `/${locale}/login`
+  const isProfilePage = currentPathname.startsWith(`/${locale}/profile`);
+
+
   if (!authToken && !isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
   }
@@ -26,6 +29,11 @@ export function middleware(req: NextRequest) {
       const decodedToken: any = jwtDecode(authToken); // ถอดรหัส token
       const userRole = decodedToken.role; // ดึง role จาก token
 
+      // อนุญาตทุก role เข้าถึง /profile
+      if (isProfilePage) {
+        return response;
+      }
+      
       if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
         return NextResponse.redirect(new URL(`/${locale}/admin`, req.url));
       }
@@ -37,11 +45,6 @@ export function middleware(req: NextRequest) {
       if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`)) {
         return NextResponse.redirect(new URL(`/${locale}/defect`, req.url));
       }
-
-      if (userRole !== "admin" && userRole !== "inspector" && !currentPathname.startsWith(`/${locale}`)) {
-        return NextResponse.redirect(new URL(`/${locale}`, req.url));
-      }
-
     } catch (error) {
       console.error("Invalid token", error);
       return NextResponse.redirect(new URL(`/${locale}/login`, req.url));
