@@ -24,7 +24,6 @@ model User {
   active      Boolean @default(true)@map("us_active")
           
   presets        Preset[]
-  checklists     Checklist[]       @relation("user")
   comments       Comment[]
   profile        Profile?
   notifications  Notification[]
@@ -153,7 +152,6 @@ model Checklist {
   user             User              @relation(fields: [updatedBy], references: [id])
   presetChecklists PresetChecklist[]
   items            Item[]
-  Users            User[]            @relation("user")
 
   @@map("checklists")
 }
