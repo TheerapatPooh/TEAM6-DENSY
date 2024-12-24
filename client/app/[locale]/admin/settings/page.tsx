@@ -1,5 +1,5 @@
 "use client";
-import { IChecklist, IUser, role } from "@/app/type";
+import { IChecklist, IItem, IUser, role } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
 import BadgeCustom, { badgeVariants } from "@/components/badge-custom";
 import Textfield from "@/components/textfield";
@@ -79,7 +79,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import {
   TooltipProvider,
@@ -87,9 +87,11 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@radix-ui/react-tooltip";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
+  const locale = useLocale();
   const a = useTranslations("Alert");
   const [selectedChecklist, setSelectedChecklist] = useState(null);
   interface IChecklistWithExtras extends IChecklist {
@@ -100,9 +102,57 @@ export default function Page() {
     versionCount: number;
   }
 
-  const [allChecklists, setAllChecklistss] = useState<IChecklistWithExtras[]>(
+  const [allChecklists, setAllChecklists] = useState<IChecklistWithExtras[]>(
     []
   );
+  const [selectedChecklistsName, setselectedChecklistsName] =
+    useState<string>("");
+  const handleCreateChecklist = (title: string) => {
+    const data: { title?: string; items?: IItem[] } = {
+      title,
+      items: [], // Empty array for now
+    };
+
+    (async () => {
+      try {
+        // Simulate a success toast
+        toast({
+          variant: "success",
+          title: "Create Successful",
+          description: "The checklist has been successfully created.",
+        });
+
+        // Send POST request to create a new checklist
+        const response = await fetchData("post", `/checklist`, true, data);
+
+        // Extract the newly created checklist from the API response
+        const createdChecklist = response.checklist;
+
+        // Map the API response to match IChecklistWithExtras
+        const newChecklist: IChecklistWithExtras = {
+          ...createdChecklist,
+          updateByUserName: "", // Add appropriate logic if needed
+          imagePath: "", // Add appropriate logic if needed
+          zones: [], // Add appropriate zones if needed
+          itemCounts: {}, // Add appropriate counts if needed
+          versionCount: 1, // Defaulting to 1 since it's a new checklist
+        };
+
+        // Update state by adding the new checklist to the existing list
+        setAllChecklists((prevChecklists) => [newChecklist, ...prevChecklists]);
+      } catch (error) {
+        console.error("Create failed", error);
+
+        // Show an error toast
+        toast({
+          variant: "error",
+          title: "Create Failed",
+          description: "There was an error while creating the checklist.",
+        });
+      }
+    })();
+  };
+
   const getChecklistColor = (checklist: IChecklistWithExtras): string => {
     let safety = checklist.itemCounts.safety || 0;
     let environment = checklist.itemCounts.environment || 0;
@@ -145,11 +195,15 @@ export default function Page() {
     return ""; // Default color when none of the above conditions are met
   };
 
+  const handleChecklist = (id: number) => {
+    router.push(`/${locale}/admin/settings/checklistview/${id}`);
+  };
+
   useEffect(() => {
     const getData = async () => {
       try {
         const data = await fetchData("get", "/checklists?item=true", true);
-        setAllChecklistss(data);
+        setAllChecklists(data);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -181,6 +235,42 @@ export default function Page() {
 
           <TabsContent value="patrol_preset"></TabsContent>
           <TabsContent value="patrol_checklist" className="flex flex-col gap-4">
+            <div className="flex flex-row justify-between pt-2">
+              <div className="text-2xl font-bold">Checklists</div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="flex flex-row gap-2">
+                    <span className="material-symbols-outlined text-2xl">
+                      add
+                    </span>
+                    <div className="text-lg">Create Checklist</div>
+                  </Button>
+                </AlertDialogTrigger>
+
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Create Checklist</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Enter a title for your checklist.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <Input
+                    onChange={(e) => setselectedChecklistsName(e.target.value)}
+                  />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        handleCreateChecklist(selectedChecklistsName)
+                      }
+                    >
+                      Confirm
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
             <div className="flex items-center gap-2">
               <Textfield
                 iconName="search"
@@ -199,173 +289,159 @@ export default function Page() {
 
             {/* Checklist Cards */}
 
-            <div className="space-y-4 bg-card p-4 rounded-lg">
-              <div className="flex flex-row justify-between">
-                <div className="text-2xl font-bold">Checklists</div>
-                <Button className="flex flex-row gap-2">
-                  <span className="material-symbols-outlined text-2xl">
-                    add
-                  </span>
-                  <div className="text-lg">Create Checklist</div>
-                </Button>
-              </div>
-
-              <ScrollArea className="w-full h-[810px] flex gap-4 flex-col rounded-md bg-destructive ">
-                {allChecklists.map((checklist) => (
-                  <div key={checklist.id}>
-                    <div>
-                      <div
-                        onClick={() => {
-                          console.log("FUCK");
-                        }}
-                        className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer  ${getChecklistColor(
-                          checklist
-                        )} border-destructive h-[166px]  bg-secondary rounded-lg shadow p-2  justify-between`}
-                      >
-                        <div className="flex flex-col gap-4 ">
-                          {/* Left Section */}
-                          <div className="gap-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    className="text-card-foreground text-[16px] flex items-center hover:bg-secondary m-0 p-0"
-                                  >
+            <div className="space-y-4 p-4 rounded-lg">
+              {allChecklists.map((checklist) => (
+                <div key={checklist.id}>
+                  <div>
+                    <div
+                      onClick={() => {
+                        handleChecklist(checklist.id);
+                      }}
+                      className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer ${getChecklistColor(
+                        checklist
+                      )} border-destructive h-[166px] bg-secondary rounded-lg shadow p-2 justify-between`}
+                    >
+                      <div className="flex flex-col gap-4 ">
+                        {/* Left Section */}
+                        <div className="gap-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className="text-card-foreground text-[16px] flex items-center hover:bg-secondary m-0 p-0"
+                                >
+                                  <span className="material-symbols-outlined mr-1">
+                                    history
+                                  </span>
+                                  Version {checklist.version}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="bottom"
+                                className="ml-[129px]"
+                              >
+                                <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
+                                  <span className="text-card-foreground text-lg font-bold flex items-center ">
                                     <span className="material-symbols-outlined mr-1">
                                       history
                                     </span>
                                     Version {checklist.version}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  side="bottom"
-                                  className="ml-[129px]"
-                                >
-                                  <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                                    <span className="text-card-foreground text-lg font-bold flex items-center ">
-                                      <span className="material-symbols-outlined mr-1">
-                                        history
-                                      </span>
-                                      Version {checklist.version}
-                                    </span>
-                                    <div className="flex flex-col justify-start items-start ">
-                                      <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                        <div className="text-muted-foreground">
-                                          Update By
-                                        </div>
-                                        {checklist.imagePath === "" ? (
-                                          <Avatar>
-                                            <AvatarImage
-                                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.imagePath}`}
-                                            />
-                                            <AvatarFallback>
-                                              {getInitials(
-                                                checklist.updateByUserName
-                                              )}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                        ) : (
-                                          <Skeleton className="h-12 w-12 rounded-full" />
-                                        )}
+                                  </span>
+                                  <div className="flex flex-col justify-start items-start ">
+                                    <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
+                                      <div className="text-muted-foreground">
+                                        Update By
+                                      </div>
+                                      {checklist.imagePath === "" ? (
+                                        <Avatar>
+                                          <AvatarImage
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.imagePath}`}
+                                          />
+                                          <AvatarFallback>
+                                            {getInitials(
+                                              checklist.updateByUserName
+                                            )}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      ) : (
+                                        <Skeleton className="h-12 w-12 rounded-full" />
+                                      )}
 
-                                        {checklist.updateByUserName}
-                                      </div>
-                                      <div className="flex gap-2 text-muted-foreground">
-                                        <div className="text-muted-foreground">
-                                          Update At
-                                        </div>
-                                        {formatTime(checklist.updatedAt)}
-                                      </div>
+                                      {checklist.updateByUserName}
                                     </div>
-
-                                    <div className="flex justify-between  w-full">
-                                      <div className="font-bold text-lg text-muted-foreground">
-                                        Total
+                                    <div className="flex gap-2 text-muted-foreground">
+                                      <div className="text-muted-foreground">
+                                        Update At
                                       </div>
-                                      <div className="font-bold text-lg text-muted-foreground">
-                                        {checklist.versionCount}
-                                      </div>
+                                      {formatTime(checklist.updatedAt)}
                                     </div>
                                   </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
 
-                            <h2 className="text-2xl font-semibold">
-                              {checklist.title}
-                            </h2>
+                                  <div className="flex justify-between  w-full">
+                                    <div className="font-bold text-lg text-muted-foreground">
+                                      Total
+                                    </div>
+                                    <div className="font-bold text-lg text-muted-foreground">
+                                      {checklist.versionCount}
+                                    </div>
+                                  </div>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <h2 className="text-2xl font-semibold">
+                            {checklist.title}
+                          </h2>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex flex-col gap-2 text-gray-500">
+                          <div className="flex flex-row gap-2">
+                            <span className="material-symbols-outlined  text-muted-foreground">
+                              location_on
+                            </span>
+                            <p className="text-[16px] text-muted-foreground truncate">
+                              {checklist.zones.join(", ")}
+                            </p>
                           </div>
-
-                          {/* Stats */}
-                          <div className="flex flex-col gap-2 text-gray-500">
-                            <div className="flex flex-row gap-2">
-                              <span className="material-symbols-outlined  text-muted-foreground">
-                                location_on
+                          <div className="flex gap-2">
+                            <div className="flex items-center">
+                              <span className="material-symbols-outlined text-green text-xl">
+                                verified_user
                               </span>
-                              <p className="text-[16px] text-muted-foreground truncate">
-                                {checklist.zones.join(", ")}
-                              </p>
+                              <span className="ml-1 text-green text-xl">
+                                {checklist.itemCounts.safety || 0}
+                              </span>
                             </div>
-                            <div className="flex gap-2">
-                              <div className="flex items-center">
-                                <span className="material-symbols-outlined text-green text-xl">
-                                  verified_user
-                                </span>
-                                <span className="ml-1 text-green text-xl">
-                                  {checklist.itemCounts.safety || 0}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <span className="material-symbols-outlined text-blue-500 text-xl">
-                                  psychiatry
-                                </span>
-                                <span className="ml-1 text-blue-500 text-xl">
-                                  {checklist.itemCounts.environment || 0}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <span className="material-symbols-outlined text-destructive text-xl">
-                                  build
-                                </span>
-                                <span className="ml-1 text-destructive text-xl">
-                                  {checklist.itemCounts.maintenance || 0}
-                                </span>
-                              </div>
+                            <div className="flex items-center">
+                              <span className="material-symbols-outlined text-blue-500 text-xl">
+                                psychiatry
+                              </span>
+                              <span className="ml-1 text-blue-500 text-xl">
+                                {checklist.itemCounts.environment || 0}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="material-symbols-outlined text-destructive text-xl">
+                                build
+                              </span>
+                              <span className="ml-1 text-destructive text-xl">
+                                {checklist.itemCounts.maintenance || 0}
+                              </span>
                             </div>
                           </div>
                         </div>
-                        <div className=" flex flex-row items-end ">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <span className="material-symbols-outlined">
-                                more_vert
-                              </span>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              className="w-[80px]"
-                              side="bottom"
-                            >
-                              <DropdownMenuItem className="text-lg">
-                                Detail
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive text-lg">
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                      </div>
+                      <div className=" flex flex-row items-end ">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <span className="material-symbols-outlined">
+                              more_vert
+                            </span>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            className="w-[80px]"
+                            side="bottom"
+                          >
+                            <DropdownMenuItem className="text-lg">
+                              Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive text-lg">
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
-                ))}
-              </ScrollArea>
+                </div>
+              ))}
             </div>
-          
           </TabsContent>
           <TabsContent value="location_n_zone"></TabsContent>
         </Tabs>
-        
       </div>
     </div>
   );

@@ -37,6 +37,27 @@ export async function getZone(req: Request, res: Response) {
         return
     }
 }
+export async function getAllZone(req: Request, res: Response) {
+    try {
+        const zone = await prisma.zone.findMany({
+            select: {
+               id:true,
+               name:true,
+            }
+        })
+        if (!zone) {
+            res.status(404)
+            return
+        }
+        let result = zone;
+
+        res.status(200).send(result)
+        return
+    } catch (error) {
+        res.status(500)
+        return
+    }
+}
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Location
