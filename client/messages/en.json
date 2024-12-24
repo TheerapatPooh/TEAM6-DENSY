@@ -61,7 +61,8 @@
     "Lock": "Lock",
     "Unlock": "Unlock",
     "DeleteAllNotifications": "Delete All Notifications",
-    "Total": "Total"
+    "Total": "Total",
+    "Type": "Type"
   },
   "Status": {
     "pending": "Pending",

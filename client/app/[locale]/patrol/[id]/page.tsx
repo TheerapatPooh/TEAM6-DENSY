@@ -43,7 +43,6 @@ export default function Page() {
     patrolResults.filter((res) => res.status !== null).length || 0;
   const canFinish = checkedResults === totalResults;
 
-
   const getPatrolData = async () => {
     if (params.id) {
       try {
@@ -206,6 +205,23 @@ export default function Page() {
       setDefects(defectFetch);
     } catch (error) {
       console.error("Failed to fetch defects data:", error);
+    }
+  };
+
+  const fetchRealtimeData = (defect: IDefect, actionType: string) => {
+    if (actionType === "create") {
+      setDefects((prevDefects) => {
+        // ตรวจสอบว่ามี defects ก่อนหน้าหรือไม่
+        if (prevDefects && prevDefects.length > 0) {
+          return [...prevDefects, defect]; // เพิ่ม defect ไปต่อท้าย
+        } else {
+          return [defect]; // ถ้าไม่มี defect ก่อนหน้า ให้เริ่มต้นใหม่ด้วย defect ตัวแรก
+        }
+      });
+    } else {
+      setDefects((prevDefects) =>
+        prevDefects.map((d) => (d.id === defect.id ? defect : d))
+      );
     }
   };
 
@@ -539,6 +555,9 @@ export default function Page() {
                         }
                         patrolResult={patrolResults}
                         user={user}
+                        response={(defect: IDefect) => (
+                          fetchRealtimeData(defect, "create")
+                        )}
                       />
                     ) : (
                       <div></div>
@@ -554,6 +573,10 @@ export default function Page() {
                     <div className="py-2">
                       <ReportDefect
                         defect={defect}
+                        page={"patrol-view-report"}
+                        response={(defect: IDefect) => {
+                          fetchRealtimeData(defect, "edit");
+                        }}
                       />
                     </div>
                   )

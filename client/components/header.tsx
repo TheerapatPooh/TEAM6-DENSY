@@ -46,7 +46,9 @@ export default function Header({ variant }: IHeader) {
     return null;
   }
 
-  const isActive = (path) => pathname.startsWith(path);
+  const isActive = (path: string): boolean => {
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
 
   function getPathWord(pathname: string | null) {
     const pathMap: { [key: string]: string } = {
@@ -103,12 +105,9 @@ export default function Header({ variant }: IHeader) {
               Patrol
             </button>
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${
-                isActive(`/${locale}/defect`)
-                  ? "border-b-4 border-red-500"
-                  : "text-gray-400"
-              }`}
-              onClick={() => router.push(`/${locale}/defect`)}
+              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-red-500" : "text-gray-400"
+                }`}
+              onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
               <span className="material-symbols-outlined">build</span> Defect
             </button>

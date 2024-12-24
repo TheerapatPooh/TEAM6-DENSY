@@ -3,6 +3,7 @@ import { Router } from 'express'
 import { authenticateUser, authorzied } from "@Controllers/util-controller.js";
 const router = Router()
 
+router.get('/patrol/:id?/defects', authenticateUser, getAllPatrolDefects)
 router.get('/patrols', authenticateUser, authorzied(['admin', 'inspector']), getAllPatrols)
 router.get('/patrol/:id', authenticateUser, authorzied(['admin', 'inspector']), getPatrol)
 router.post('/patrol', authenticateUser, authorzied(['admin', 'inspector']), createPatrol)
