@@ -299,6 +299,20 @@ export default function Page() {
     const updatedUser = userRefs.current[index];
 
     if (
+      updatedUser.username === allUsers[index].username &&
+      updatedUser.role === allUsers[index].role &&
+      updatedUser.password === ""
+    ) {
+      toast({
+        variant: "default",
+        title: "No Updates Applied",
+        description: "The provided details were either blank or unchanged",
+      });
+      setIsDialogOpen(false);
+      return;
+    }
+
+    if (
       updatedUser &&
       updatedUser.password.length < 8 &&
       updatedUser.password !== ""
@@ -385,7 +399,7 @@ export default function Page() {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="font-bold text-2xl">Manage Employees</h1>
-          <Dialog
+          <AlertDialog
             open={
               isDialogOpen &&
               (dialogType === "add_user_menu" || dialogType === "create")
@@ -396,7 +410,7 @@ export default function Page() {
               }
             }}
           >
-            <DialogTrigger asChild>
+            <AlertDialogTrigger asChild>
               <Button
                 className="gap-2"
                 onClick={() => {
@@ -418,145 +432,147 @@ export default function Page() {
                 <span className="material-symbols-outlined">add</span>
                 New Employee
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Employee</DialogTitle>
-                  <DialogDescription>
-                    Enter the username, password, and assign a role for the new
-                    employee.
-                  </DialogDescription>
-                </DialogHeader>
-                <FormProvider {...form}>
-                  <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="mt-6">
-                      <label>Username</label>
-                      <Textfield
-                        className="bg-secondary"
-                        showIcon={true}
-                        iconName="person"
-                        placeholder="Username"
-                        onChange={(e) => {
-                          if (userCreate.current) {
-                            userCreate.current.username = e.target.value;
-                          }
-                          setErrorsForCreateUser((prev) => ({
-                            ...prev,
-                            username: "",
-                          })); // Clear error on input change
-                        }}
-                      />
-                      {errorsForCreateUser.username && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errorsForCreateUser.username}
-                        </p>
-                      )}
-                    </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <AlertDialogHeader>
+                <AlertDialogTitle>Add New Employee</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Enter the username, password, and assign a role for the new
+                  employee.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <FormProvider {...form}>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="mt-6">
+                    <label>Username</label>
+                    <Textfield
+                      className="bg-secondary"
+                      showIcon={true}
+                      iconName="person"
+                      placeholder="Username"
+                      onChange={(e) => {
+                        if (userCreate.current) {
+                          userCreate.current.username = e.target.value;
+                        }
+                        setErrorsForCreateUser((prev) => ({
+                          ...prev,
+                          username: "",
+                        })); // Clear error on input change
+                      }}
+                    />
+                    {errorsForCreateUser.username && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errorsForCreateUser.username}
+                      </p>
+                    )}
+                  </div>
 
-                    <div className="mt-6">
-                      <label>Password</label>
-                      <Textfield
-                        className="bg-secondary"
-                        showIcon={true}
-                        iconName="lock"
-                        placeholder="Password"
-                        onChange={(e) => {
-                          if (userCreate.current) {
-                            userCreate.current.password = e.target.value;
-                          }
-                          setErrorsForCreateUser((prev) => ({
-                            ...prev,
-                            password: "",
-                          })); // Clear error on input change
-                        }}
-                      />
-                      {errorsForCreateUser.password && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errorsForCreateUser.password}
-                        </p>
-                      )}
-                    </div>
+                  <div className="mt-6">
+                    <label>Password</label>
+                    <Textfield
+                      className="bg-secondary"
+                      showIcon={true}
+                      iconName="lock"
+                      placeholder="Password"
+                      onChange={(e) => {
+                        if (userCreate.current) {
+                          userCreate.current.password = e.target.value;
+                        }
+                        setErrorsForCreateUser((prev) => ({
+                          ...prev,
+                          password: "",
+                        })); // Clear error on input change
+                      }}
+                    />
+                    {errorsForCreateUser.password && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errorsForCreateUser.password}
+                      </p>
+                    )}
+                  </div>
 
-                    <div className="mt-6">
-                      <label>Role</label>
-                      <div className="relative bg-secondary rounded-md ">
-                        <Select
-                          defaultValue="inspector"
-                          onValueChange={(value) => {
-                            userCreate.current.role = value as role;
-                          }}
-                        >
-                          <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
-                            <SelectValue placeholder="" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="supervisor">
-                                <BadgeCustom
-                                  variant={"yellow"}
-                                  iconName="engineering"
-                                  showIcon={true}
-                                >
-                                  supervisor
-                                </BadgeCustom>
-                              </SelectItem>
-                              <SelectItem value="inspector">
-                                <BadgeCustom
-                                  variant={"red"}
-                                  iconName="person_search"
-                                  showIcon={true}
-                                >
-                                  inspector
-                                </BadgeCustom>
-                              </SelectItem>
-                              <SelectItem value="admin">
-                                <BadgeCustom
-                                  variant={"blue"}
-                                  iconName="manage_accounts"
-                                  showIcon={true}
-                                >
-                                  admin
-                                </BadgeCustom>
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-end items-center gap-4">
-                      <DialogClose asChild>
-                        <Button variant="secondary" type="button">
-                          Back
-                        </Button>
-                      </DialogClose>
-                      <Button
-                        className="  flex gap-2"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent click event from bubbling up
-                          handleCreateUserDialog();
+                  <div className="mt-6">
+                    <label>Role</label>
+                    <div className="relative bg-secondary rounded-md ">
+                      <Select
+                        defaultValue="inspector"
+                        onValueChange={(value) => {
+                          userCreate.current.role = value as role;
                         }}
                       >
-                        <span className="material-symbols-outlined">add</span>
-                        New Employee
-                      </Button>
-                      {isDialogOpen && dialogType === "create" && (
-                        <AlertCustom
-                          title={"Are you sure to add new employee?"}
-                          description={"Please confirm to add new employee."}
-                          primaryBottonText={"Confirm"}
-                          primaryIcon="check"
-                          secondaryBottonText={"Cancel"}
-                          backResult={(result) => handleDialogResult(result)}
-                        />
-                      )}
+                        <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                          <SelectValue placeholder="" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="supervisor">
+                              <BadgeCustom
+                                variant={"yellow"}
+                                iconName="engineering"
+                                showIcon={true}
+                              >
+                                supervisor
+                              </BadgeCustom>
+                            </SelectItem>
+                            <SelectItem value="inspector">
+                              <BadgeCustom
+                                variant={"red"}
+                                iconName="person_search"
+                                showIcon={true}
+                              >
+                                inspector
+                              </BadgeCustom>
+                            </SelectItem>
+                            <SelectItem value="admin">
+                              <BadgeCustom
+                                variant={"blue"}
+                                iconName="manage_accounts"
+                                showIcon={true}
+                              >
+                                admin
+                              </BadgeCustom>
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </form>
-                </FormProvider>
-              </DialogContent>
-            </DialogContent>
-          </Dialog>
+                  </div>
+
+                  <div className="mt-6 flex justify-end items-center gap-4">
+                    <AlertDialogCancel asChild>
+                      <Button variant="secondary" type="button">
+                        Back
+                      </Button>
+                    </AlertDialogCancel>
+                    <Button
+                      className="flex gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent click event from bubbling up
+                        handleCreateUserDialog();
+                      }}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      New Employee
+                    </Button>
+                    {isDialogOpen && dialogType === "create" && (
+                      <AlertCustom
+                        title={"Are you sure to add new employee?"}
+                        description={"Please confirm to add new employee."}
+                        primaryBottonText={"Confirm"}
+                        primaryIcon="check"
+                        secondaryBottonText={"Cancel"}
+                        backResult={(result) => handleDialogResult(result)}
+                      />
+                    )}
+                  </div>
+                </form>
+              </FormProvider>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <div className="bg-secondary rounded-lg shadow border border-gray-300">
@@ -654,16 +670,21 @@ export default function Page() {
                           </span>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                        <Dialog open={isDialogOpen && dialogType === "editform" || dialogType === "edit"}>
-                            <DialogTrigger
+                      <DropdownMenuContent align="end" className="px-4 py-2">
+                        <div className=" cursor-pointer">
+                          <AlertDialog
+                            open={
+                              (isDialogOpen && dialogType === "editform") ||
+                              dialogType === "edit"
+                            }
+                          >
+                            <AlertDialogTrigger
                               asChild
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setIsDialogOpen(true)
+                                setIsDialogOpen(true);
                                 setPasswordErrorForEdit(null);
-                                setDialogType("editform")
+                                setDialogType("editform");
                               }}
                             >
                               <div
@@ -672,151 +693,149 @@ export default function Page() {
                               >
                                 {"Edit"}
                               </div>
-                            </DialogTrigger>
-                            <DialogContent onClick={(e) => e.stopPropagation()}>
-                              <DialogContent
-                                className="w-full "
+                            </AlertDialogTrigger>
+                            <AlertDialogContent
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Edit Employee
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Enter the username, password, and assign a
+                                  role for the employee.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+
+                              <div
+                                className="mt-6"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <DialogHeader>
-                                  <DialogTitle>Edit Employee</DialogTitle>
-                                  <DialogDescription>
-                                    Enter the username, password, and assign a
-                                    role for the employee.
-                                  </DialogDescription>
-                                </DialogHeader>
+                                <label>Username</label>
+                                <Textfield
+                                  className="bg-secondary"
+                                  showIcon={true}
+                                  iconName="person"
+                                  placeholder={employee.username}
+                                  onChange={(e) => {
+                                    if (userRefs.current[index]) {
+                                      userRefs.current[index].username =
+                                        e.target.value;
+                                    }
+                                  }}
+                                />
+                              </div>
 
-                                <div
-                                  className="mt-6"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <label>Username</label>
+                              <div
+                                className="mt-6 flex flex-col gap-4"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div>
+                                  <label>Password</label>
                                   <Textfield
                                     className="bg-secondary"
                                     showIcon={true}
-                                    iconName="person"
-                                    placeholder={employee.username}
+                                    iconName="lock"
+                                    placeholder={employee.password}
                                     onChange={(e) => {
                                       if (userRefs.current[index]) {
-                                        userRefs.current[index].username =
+                                        userRefs.current[index].password =
                                           e.target.value;
+                                      }
+
+                                      // Check if the password length is less than 8 characters
+                                      if (e.target.value.length < 8) {
+                                        setPasswordErrorForEdit(
+                                          "Password must be at least 8 characters long."
+                                        );
+                                      } else {
+                                        setPasswordErrorForEdit(null); // Clear error if valid
                                       }
                                     }}
                                   />
                                 </div>
 
-                                <div
-                                  className="mt-6 flex flex-col gap-4"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <div>
-                                    <label>Password</label>
-                                    <Textfield
-                                      className="bg-secondary"
-                                      showIcon={true}
-                                      iconName="lock"
-                                      placeholder={employee.password}
-                                      onChange={(e) => {
-                                        if (userRefs.current[index]) {
-                                          userRefs.current[index].password =
-                                            e.target.value;
-                                        }
+                                {passwordErrorForEdit && (
+                                  <p className="text-red-500 text-sm mt-1">
+                                    {passwordErrorForEdit}
+                                  </p>
+                                )}
+                              </div>
 
-                                        // Check if the password length is less than 8 characters
-                                        if (e.target.value.length < 8) {
-                                          setPasswordErrorForEdit(
-                                            "Password must be at least 8 characters long."
-                                          );
-                                        } else {
-                                          setPasswordErrorForEdit(null); // Clear error if valid
-                                        }
-                                      }}
-                                    />
-                                  </div>
-
-                                  {passwordErrorForEdit && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                      {passwordErrorForEdit}
-                                    </p>
-                                  )}
-                                </div>
-
-                                <div className="mt-6">
-                                  <label>Role</label>
-                                  <div className="relative bg-secondary rounded-md">
-                                    <Select
-                                      defaultValue={employee.role}
-                                      onValueChange={(value) => {
-                                        if (userRefs.current[index]) {
-                                          userRefs.current[index].role =
-                                            value as role; // Ensure the value matches the type
-                                        }
-                                      }}
-                                    >
-                                      <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
-                                        <SelectValue placeholder="" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectGroup>
-                                          <SelectItem value="supervisor">
-                                            <BadgeCustom
-                                              variant="yellow"
-                                              iconName="engineering"
-                                              showIcon={true}
-                                            >
-                                              supervisor
-                                            </BadgeCustom>
-                                          </SelectItem>
-                                          <SelectItem value="inspector">
-                                            <BadgeCustom
-                                              variant="red"
-                                              iconName="person_search"
-                                              showIcon={true}
-                                            >
-                                              inspector
-                                            </BadgeCustom>
-                                          </SelectItem>
-                                          <SelectItem value="admin">
-                                            <BadgeCustom
-                                              variant="blue"
-                                              iconName="manage_accounts"
-                                              showIcon={true}
-                                            >
-                                              admin
-                                            </BadgeCustom>
-                                          </SelectItem>
-                                        </SelectGroup>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-
-                                <div className="flex justify-end mt-6">
-                                  <DialogClose className="mr-4">
-                                    <Button
-                                      variant="secondary"
-                                      onClick={() => handleDialogResult(false)}
-                                    >
-                                      Back
-                                    </Button>
-                                  </DialogClose>
-                                  <Button
-                                    className=" flex  justify-center gap-2"
-                                    variant="primary"
-                                    size="lg"
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // Prevent click event from bubbling up
-                                      handleEditUserDialog(employee.id, index);
+                              <div className="mt-6">
+                                <label>Role</label>
+                                <div className="relative bg-secondary rounded-md">
+                                  <Select
+                                    defaultValue={employee.role}
+                                    onValueChange={(value) => {
+                                      if (userRefs.current[index]) {
+                                        userRefs.current[index].role =
+                                          value as role; // Ensure the value matches the type
+                                      }
                                     }}
                                   >
-                                    <span className="material-symbols-outlined">
-                                      save
-                                    </span>
-                                    Save
-                                  </Button>
+                                    <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                                      <SelectValue placeholder="" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectGroup>
+                                        <SelectItem value="supervisor">
+                                          <BadgeCustom
+                                            variant="yellow"
+                                            iconName="engineering"
+                                            showIcon={true}
+                                          >
+                                            supervisor
+                                          </BadgeCustom>
+                                        </SelectItem>
+                                        <SelectItem value="inspector">
+                                          <BadgeCustom
+                                            variant="red"
+                                            iconName="person_search"
+                                            showIcon={true}
+                                          >
+                                            inspector
+                                          </BadgeCustom>
+                                        </SelectItem>
+                                        <SelectItem value="admin">
+                                          <BadgeCustom
+                                            variant="blue"
+                                            iconName="manage_accounts"
+                                            showIcon={true}
+                                          >
+                                            admin
+                                          </BadgeCustom>
+                                        </SelectItem>
+                                      </SelectGroup>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
-                              </DialogContent>
-                            </DialogContent>
+                              </div>
+
+                              <AlertDialogFooter>
+                                <Button
+                                  variant="secondary"
+                                  size="lg"
+                                  onClick={() => handleDialogResult(false)}
+                                >
+                                  Back
+                                </Button>
+                                <Button
+                                  className=" flex  justify-center gap-2"
+                                  variant="primary"
+                                  size="lg"
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent click event from bubbling up
+                                    handleEditUserDialog(employee.id, index);
+                                  }}
+                                >
+                                  <span className="material-symbols-outlined">
+                                    save
+                                  </span>
+                                  Save
+                                </Button>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
 
                             {isDialogOpen === true && dialogType === "edit" && (
                               <AlertCustom
@@ -828,9 +847,9 @@ export default function Page() {
                                 backResult={handleDialogResult}
                               />
                             )}
-                        </Dialog>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
+                          </AlertDialog>
+                        </div>
+                        <div className=" cursor-pointer">
                           <div
                             onClick={(e) => {
                               e.stopPropagation();
@@ -859,7 +878,7 @@ export default function Page() {
                                 backResult={handleDialogResult}
                               />
                             )}
-                        </DropdownMenuItem>
+                        </div>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

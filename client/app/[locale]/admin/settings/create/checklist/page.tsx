@@ -235,18 +235,46 @@ export default function Page() {
     return combinedData;
   };
 
+  const [error, setError] = useState<{
+    title: boolean;
+    items: boolean;
+    itemsField: boolean;
+  }>({
+    title: false,
+    items: false,
+    itemsField: false,
+  });
+
   const validateChecklistData = (data: any) => {
-    // Validate the title
+    let hasError = false;
+
+    // Validate title
     if (!data.title || data.title.trim() === "") {
       toast({
         variant: "error",
         title: "Validation Error",
         description: "The title field must not be empty.",
       });
-      return false;
+      setError((prev) => ({ ...prev, title: true }));
+      hasError = true;
+    } else {
+      setError((prev) => ({ ...prev, title: false }));
     }
 
-    // Validate the items
+    // Validate items list
+    if (!data.items || data.items.length === 0) {
+      toast({
+        variant: "error",
+        title: "Validation Error",
+        description: "The items list must not be empty.",
+      });
+      setError((prev) => ({ ...prev, items: true }));
+      hasError = true;
+    } else {
+      setError((prev) => ({ ...prev, items: false }));
+    }
+
+    // Validate individual items
     for (const item of data.items) {
       if (!item.name || item.name.trim() === "") {
         toast({
@@ -254,7 +282,9 @@ export default function Page() {
           title: "Validation Error",
           description: "Each item must have a name.",
         });
-        return false;
+        setError((prev) => ({ ...prev, itemsField: true }));
+        hasError = true;
+        break;
       }
       if (!item.type || item.type.trim() === "") {
         toast({
@@ -262,7 +292,9 @@ export default function Page() {
           title: "Validation Error",
           description: "Each item must have a type.",
         });
-        return false;
+        setError((prev) => ({ ...prev, itemsField: true }));
+        hasError = true;
+        break;
       }
       if (!Array.isArray(item.zoneId) || item.zoneId.length === 0) {
         toast({
@@ -270,22 +302,48 @@ export default function Page() {
           title: "Validation Error",
           description: "Each item must have at least one zone selected.",
         });
-        return false;
+        setError((prev) => ({ ...prev, itemsField: true }));
+        hasError = true;
+        break;
       }
     }
 
-    return true;
+    if (!hasError) {
+      setError({ title: false, items: false, itemsField: false });
+    }
+
+    return !hasError; // Return true if there are no errors
   };
 
-  const handleCreateChecklist = async () => {
+  const handleCreatePatrolChecklistDialog = async () => {
     const dataToUpdate = combineChecklistData();
     console.log("Data to Update:", dataToUpdate);
 
     // Validate combined data
     if (!validateChecklistData(dataToUpdate)) {
-      return; // Stop execution if validation fails
+      return;
     }
+    setPendingAction(() => () => handleCreateChecklist());
+    setDialogType("create");
+    setIsDialogOpen(true);
+  };
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [dialogType, setDialogType] = useState<string>("");
+
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+      setDialogType(""); // Reset the dialog type after action is completed
+    }
+  };
+
+  const handleCreateChecklist = async () => {
+    const dataToUpdate = combineChecklistData();
+    console.log("Data to Update:", dataToUpdate);
     try {
       const response = await fetchData(
         "post",
@@ -316,25 +374,6 @@ export default function Page() {
     } catch (error: any) {
       console.error("Unexpected Error:", error);
     }
-  };
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const [dialogType, setDialogType] = useState<string>("");
-
-  const handleDialogResult = (result: boolean) => {
-    setIsDialogOpen(false);
-    if (result && pendingAction) {
-      pendingAction(); // Execute the pending action
-      setPendingAction(null); // Clear the pending action
-      setDialogType(""); // Reset the dialog type after action is completed
-    }
-  };
-
-  const handleCreatePatrolChecklistDialog = () => {
-    setPendingAction(() => () => handleCreateChecklist());
-    setDialogType("create");
-    setIsDialogOpen(true);
   };
 
   return (
@@ -379,9 +418,14 @@ export default function Page() {
             className="w-[360px] mt-1 p-2 bg-secondary text-base font-semibold text-muted-foreground rounded-md"
             placeholder="Enter Checklist title"
           />
+          {error.title && (
+            <div className="text-destructive">
+              Please provide a title for the checklist.
+            </div>
+          )}
         </div>
         <div>
-          <div className="flex flex-row  gap-2 p-2">
+          <div className="flex flex-row items-center gap-2 p-2">
             <div className="text-2xl font-semibold">List</div>
             <Button
               onClick={handleAddChecklistItem}
@@ -389,6 +433,17 @@ export default function Page() {
             >
               <span className="material-symbols-outlined">add</span>
             </Button>
+            {error.items && (
+              <div className="text-destructive">
+                Please add at least one item to the checklist.
+              </div>
+            )}
+            {error.itemsField && (
+              <div className="text-destructive">
+                Please ensure all items have a name, type, and at least one zone
+                selected.
+              </div>
+            )}
           </div>
         </div>
         <Table>
@@ -401,7 +456,7 @@ export default function Page() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <input

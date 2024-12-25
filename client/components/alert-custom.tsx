@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
@@ -42,6 +43,8 @@ export function AlertCustom({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+       <AlertDialogTrigger asChild>
+      </AlertDialogTrigger>
       <AlertDialogContent onClick={handleContentClick}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

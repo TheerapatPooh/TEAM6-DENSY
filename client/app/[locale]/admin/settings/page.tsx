@@ -106,71 +106,39 @@ export default function Page() {
     []
   );
 
-  const [selectedChecklistsName, setselectedChecklistsName] =
-    useState<string>("");
   const handleDeleteChecklist = async (id: number) => {
     try {
-      // Call the API to delete the checklist
       const response = await fetchData("delete", `/checklist/${id}`, true);
 
-      // Check if the response was successful (optional)
-      if (response.ok) {
-        // Update the state to remove the deleted checklist
+      if (response) {
         setAllChecklists((prevChecklists) =>
           prevChecklists.filter((checklist) => checklist.id !== id)
         );
       } else {
-        console.error("Failed to delete the checklist");
+        console.error("Failed to delete checklist: No response from API");
       }
     } catch (error) {
       console.error("An error occurred while deleting the checklist:", error);
     }
   };
 
-  const handleCreateChecklist = (title: string) => {
-    const data: { title?: string; items?: IItem[] } = {
-      title,
-      items: [], // Empty array for now
-    };
+  const handleDeletePatrolChecklistDialog = async (id: number) => {
+    setPendingAction(() => () => handleDeleteChecklist(id));
+    setDialogType("delete");
+    setIsDialogOpen(true);
+  };
 
-    (async () => {
-      try {
-        // Simulate a success toast
-        toast({
-          variant: "success",
-          title: "Create Successful",
-          description: "The checklist has been successfully created.",
-        });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [dialogType, setDialogType] = useState<string>("");
 
-        // Send POST request to create a new checklist
-        const response = await fetchData("post", `/checklist`, true, data);
-
-        // Extract the newly created checklist from the API response
-        const createdChecklist = response.checklist;
-
-        // Map the API response to match IChecklistWithExtras
-        const newChecklist: IChecklistWithExtras = {
-          ...createdChecklist,
-          updateByUserName: "", // Add appropriate logic if needed
-          imagePath: "", // Add appropriate logic if needed
-          zones: [], // Add appropriate zones if needed
-          itemCounts: {}, // Add appropriate counts if needed
-          versionCount: 1, // Defaulting to 1 since it's a new checklist
-        };
-
-        // Update state by adding the new checklist to the existing list
-        setAllChecklists((prevChecklists) => [newChecklist, ...prevChecklists]);
-      } catch (error) {
-        console.error("Create failed", error);
-
-        // Show an error toast
-        toast({
-          variant: "error",
-          title: "Create Failed",
-          description: "There was an error while creating the checklist.",
-        });
-      }
-    })();
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+      setDialogType(""); // Reset the dialog type after action is completed
+    }
   };
 
   const getChecklistColor = (checklist: IChecklistWithExtras): string => {
@@ -241,18 +209,16 @@ export default function Page() {
       <div className=" justify-between items-center mb-6">
         <Tabs defaultValue="patrol_preset">
           <TabsList className="bg-secondary p-1 h-fit ">
-            <TabsTrigger value="detail">
-              <span className="material-symbols-outlined mr-2">
-                data_info_alert
-              </span>
+            <TabsTrigger value="detail" className="gap-2">
+              <span className="material-symbols-outlined">deployed_code</span>
               <p className="font-semibold">Patrol Preset</p>
             </TabsTrigger>
-            <TabsTrigger value="patrol_checklist">
-              <span className="material-symbols-outlined mr-2">Campaign</span>
+            <TabsTrigger value="patrol_checklist" className="gap-2">
+              <span className="material-symbols-outlined">checklist</span>{" "}
               <p className="font-semibold">Patrol Checklist</p>
             </TabsTrigger>
-            <TabsTrigger value="location_n_zone">
-              <span className="material-symbols-outlined mr-2">Campaign</span>
+            <TabsTrigger value="location_n_zone" className="gap-2">
+              <span className="material-symbols-outlined">location_on</span>{" "}
               <p className="font-semibold">Location & Zone</p>
             </TabsTrigger>
           </TabsList>
@@ -262,7 +228,12 @@ export default function Page() {
             <div className="flex flex-row justify-between pt-2">
               <div className="text-2xl font-bold">Checklists</div>
 
-              <Button onClick={()=>{handleGoToCreateChecklist()}} className="flex flex-row gap-2">
+              <Button
+                onClick={() => {
+                  handleGoToCreateChecklist();
+                }}
+                className="flex flex-row gap-2"
+              >
                 <span className="material-symbols-outlined text-2xl">add</span>
                 <div className="text-lg">Create Checklist</div>
               </Button>
@@ -418,20 +389,41 @@ export default function Page() {
                             </span>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
-                            className="w-[80px]"
+                            align="end"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="w-[80px] px-4 py-2"
                             side="bottom"
                           >
-                            <DropdownMenuItem className="text-lg">
+                            <div className="text-lg cursor-pointer ">
                               Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                handleDeleteChecklist(checklist.id);
+                            </div>
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePatrolChecklistDialog(checklist.id);
                               }}
-                              className="text-destructive text-lg"
+                              className="text-destructive text-lg cursor-pointer hover:text-transparent-50"
                             >
                               Delete
-                            </DropdownMenuItem>
+                            </div>
+                            {isDialogOpen && dialogType === "delete" && (
+                              <AlertCustom
+                                title={
+                                  "Are you sure to delete this Patrol Checklist?"
+                                }
+                                description={
+                                  "Please confirm to delete this Patrol Checklist."
+                                }
+                                primaryBottonText={"Confirm"}
+                                primaryIcon="check"
+                                secondaryBottonText={"Cancel"}
+                                backResult={(result) =>
+                                  handleDialogResult(result)
+                                }
+                              />
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
