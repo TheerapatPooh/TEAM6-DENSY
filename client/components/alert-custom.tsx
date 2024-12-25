@@ -33,43 +33,36 @@ export function AlertCustom({
 
   const handleAction = (result: boolean) => {
     backResult(result);
-    setIsOpen(false); 
+    setIsOpen(false);
   };
 
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
   };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       <AlertDialogContent onClick={handleContentClick}>
-        <AlertDialog open={isOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{title}</AlertDialogTitle>
-              <AlertDialogDescription>{description}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                className="gap-2"
-                onClick={() => handleAction(false)}
-              >
-                <span className="material-symbols-outlined">
-                  {secondaryIcon}
-                </span>
-                {secondaryBottonText}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className="gap-2"
-                onClick={() => handleAction(true)}
-              >
-                <span className="material-symbols-outlined">{primaryIcon}</span>
-                {primaryBottonText}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            className="gap-2"
+            onClick={() => handleAction(false)}
+          >
+            <span className="material-symbols-outlined">{secondaryIcon}</span>
+            {secondaryBottonText}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="gap-2"
+            onClick={() => handleAction(true)}
+          >
+            <span className="material-symbols-outlined">{primaryIcon}</span>
+            {primaryBottonText}
+          </AlertDialogAction>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

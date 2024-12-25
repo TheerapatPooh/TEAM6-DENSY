@@ -46,10 +46,15 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { tree } from "next/dist/build/templates/app-page";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "@/hooks/use-toast";
 
 export default function Page() {
   const params = useParams();
-  const [checklistData, setChecklistData] = useState<IChecklist>();
+  const router = useRouter();
+  const locale = useLocale();
+
   const [allZone, setAllZone] = useState([]);
   const [openStatesZone, setOpenStatesZone] = useState<{
     [key: number]: boolean;
@@ -73,6 +78,20 @@ export default function Page() {
   interface itemWithZonesName extends IItem {
     zones?: any[];
   }
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const zonesData = await fetchData("get", `/zones`, true);
+
+        setAllZone(zonesData);
+      } catch (error) {
+        console.error("Failed to fetch patrol data:", error);
+      }
+    };
+
+    getData();
+  }, [params.id]);
+
   const handleOpenChangeZone = (itemId: number, isOpen: boolean) => {
     setOpenStatesZone((prev) => ({
       ...prev,
@@ -118,28 +137,26 @@ export default function Page() {
   };
   const generateUniqueId = () => {
     let newId;
-    const existingIds = items.map(item => item.id); // Collect all existing IDs
-  
+    const existingIds = items.map((item) => item.id); // Collect all existing IDs
+
     do {
       newId = Math.floor(Math.random() * 1000) + 1; // Generate a random number between 1 and 1000
     } while (existingIds.includes(newId)); // Ensure the ID is not a duplicate
-  
+
     return newId;
   };
 
   const handleAddChecklistItem = () => {
-    const newItemId = generateUniqueId()
+    const newItemId = generateUniqueId();
     const newItem: itemWithZonesName = {
       id: newItemId,
       name: "",
       type: "",
       zones: [],
       checklistId: newItemId,
-      itemZones: []
+      itemZones: [],
     };
 
-   
-  
     setItems((prev) => [...prev, newItem]); // Add the new item to the items list
     setSelectedChecklistName((prev) => ({
       ...prev,
@@ -154,76 +171,29 @@ export default function Page() {
       [newItemId]: "",
     })); // Initialize type state
   };
-  
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const checklistData = await fetchData(
-          "get",
-          `/checklist/${params.id}`,
-          true
-        );
-        const zonesData = await fetchData("get", `/zones`, true);
-
-        setAllZone(zonesData);
-        setChecklistData(checklistData);
-        setTitle(checklistData.title);
-        setItems(checklistData.items || []);
-
-        const defaultSelectedType: { [itemId: number]: string } = {};
-        const defaultSelectedZones: { [itemId: number]: number[] } = {};
-        const defaultSelectedName: { [itemId: number]: string } = {};
-        checklistData.items.forEach((item: any) => {
-          if (item.itemZones) {
-            defaultSelectedZones[item.id] = item.itemZones.map(
-              (itemZone: any) => itemZone.zone.id
-            );
-          }
-          if (item.name) {
-            defaultSelectedName[item.id] = item.name;
-          }
-          // Set default type for each item
-          if (item.type) {
-            defaultSelectedType[item.id] = item.type;
-          }
-        });
-
-        setSelectedZones(defaultSelectedZones);
-        setSelectedType(defaultSelectedType);
-        setSelectedChecklistName(defaultSelectedName);
-        console.log("Default Selected Zones:", defaultSelectedZones);
-      } catch (error) {
-        console.error("Failed to fetch patrol data:", error);
-      }
-    };
-
-    getData();
-  }, [params.id]);
-
 
   const handleDeleteItem = (id: number) => {
     // Remove the item from the `items` array
-    setItems(prevItems => prevItems.filter(item => item.id !== id));
-  
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+
     // Remove the corresponding entry from `selectedChecklistName`
-    setSelectedChecklistName(prevChecklistName => {
+    setSelectedChecklistName((prevChecklistName) => {
       const { [id]: _, ...remaining } = prevChecklistName;
       return remaining;
     });
-  
+
     // Remove the corresponding entry from `selectedZones`
-    setSelectedZones(prevZones => {
+    setSelectedZones((prevZones) => {
       const { [id]: _, ...remaining } = prevZones;
       return remaining;
     });
-  
+
     // Remove the corresponding entry from `selectedType`
-    setSelectedType(prevType => {
+    setSelectedType((prevType) => {
       const { [id]: _, ...remaining } = prevType;
       return remaining;
     });
   };
-  
 
   const getBadgeVariant = (type: string) => {
     switch (type) {
@@ -260,31 +230,141 @@ export default function Page() {
         zoneId: selectedZones[item.id] || [], // Retrieve zoneId array based on item.id
       })),
     };
-  
+
     console.log(combinedData); // This will give you the combined structure
     return combinedData;
   };
-  
-  const handleUpdateChecklist = () => {
+
+  const validateChecklistData = (data: any) => {
+    // Validate the title
+    if (!data.title || data.title.trim() === "") {
+      toast({
+        variant: "error",
+        title: "Validation Error",
+        description: "The title field must not be empty.",
+      });
+      return false;
+    }
+
+    // Validate the items
+    for (const item of data.items) {
+      if (!item.name || item.name.trim() === "") {
+        toast({
+          variant: "error",
+          title: "Validation Error",
+          description: "Each item must have a name.",
+        });
+        return false;
+      }
+      if (!item.type || item.type.trim() === "") {
+        toast({
+          variant: "error",
+          title: "Validation Error",
+          description: "Each item must have a type.",
+        });
+        return false;
+      }
+      if (!Array.isArray(item.zoneId) || item.zoneId.length === 0) {
+        toast({
+          variant: "error",
+          title: "Validation Error",
+          description: "Each item must have at least one zone selected.",
+        });
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleCreateChecklist = async () => {
     const dataToUpdate = combineChecklistData();
-    console.log(dataToUpdate)
+    console.log("Data to Update:", dataToUpdate);
+
+    // Validate combined data
+    if (!validateChecklistData(dataToUpdate)) {
+      return; // Stop execution if validation fails
+    }
+
     try {
-       fetchData("put", `/checklist/${params.id}`, true, dataToUpdate);
-      console.log("Checklist updated successfully");
-    } catch (error) {
-      console.error("Failed to update checklist:", error);
+      const response = await fetchData(
+        "post",
+        `/checklist`,
+        true,
+        dataToUpdate
+      );
+
+      if (response?.error) {
+        // Handle API error
+        console.error("API Error:", response.status, response.data);
+        toast({
+          variant: "error",
+          title: "Fail to Create Patrol Checklist",
+          description: `${response.data.message}`,
+        });
+        return;
+      }
+
+      // Handle successful response
+      console.log("Success Response:", response);
+      toast({
+        variant: "success",
+        title: "Create Patrol Checklist Successfully",
+        description: `Patrol Checklist ${dataToUpdate.title} has been created`,
+      });
+      router.push(`/${locale}/admin/settings`);
+    } catch (error: any) {
+      console.error("Unexpected Error:", error);
     }
   };
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [dialogType, setDialogType] = useState<string>("");
+
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+      setDialogType(""); // Reset the dialog type after action is completed
+    }
+  };
+
+  const handleCreatePatrolChecklistDialog = () => {
+    setPendingAction(() => () => handleCreateChecklist());
+    setDialogType("create");
+    setIsDialogOpen(true);
+  };
+
   return (
     <div className=" p-4 ">
       <div className="m bg-white p-6 rounded-lg shadow-lg">
         <div className="flex flex-row justify-between">
-          <h1 className="text-2xl font-bold mb-4">Edit Patrol Checklist</h1>
+          <h1 className="text-2xl font-bold mb-4">Create Patrol Checklist</h1>
           <div className="flex gap-2">
-            <Button onClick={() => window.history.back()} variant="secondary">Cancel</Button>
-            <Button onClick={()=>{handleUpdateChecklist()}} className="flex gap-2 justify-center items-center" variant="primary">
-              <span className="material-symbols-outlined">save</span>Save
+            <Button onClick={() => window.history.back()} variant="secondary">
+              Cancel
             </Button>
+            <Button
+              onClick={() => {
+                handleCreatePatrolChecklistDialog();
+              }}
+              className="flex gap-2 justify-center items-center"
+              variant="primary"
+            >
+              <span className="material-symbols-outlined">add</span>Create
+            </Button>
+            {isDialogOpen && dialogType === "create" && (
+              <AlertCustom
+                title={"Are you sure to add new Patrol Checklist?"}
+                description={"Please confirm to add new Patrol Checklist."}
+                primaryBottonText={"Confirm"}
+                primaryIcon="check"
+                secondaryBottonText={"Cancel"}
+                backResult={(result) => handleDialogResult(result)}
+              />
+            )}
           </div>
         </div>
 
@@ -303,7 +383,10 @@ export default function Page() {
         <div>
           <div className="flex flex-row  gap-2 p-2">
             <div className="text-2xl font-semibold">List</div>
-            <Button onClick={handleAddChecklistItem} className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            <Button
+              onClick={handleAddChecklistItem}
+              className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
               <span className="material-symbols-outlined">add</span>
             </Button>
           </div>
@@ -318,7 +401,7 @@ export default function Page() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item,index) => (
+            {items.map((item, index) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <input
@@ -459,7 +542,12 @@ export default function Page() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell onClick={()=>{handleDeleteItem(item.id)}} className=" cursor-pointer">
+                <TableCell
+                  onClick={() => {
+                    handleDeleteItem(item.id);
+                  }}
+                  className=" cursor-pointer"
+                >
                   <span className="material-symbols-outlined text-destructive ">
                     delete
                   </span>

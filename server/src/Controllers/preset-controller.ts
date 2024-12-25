@@ -430,8 +430,8 @@ export async function getChecklist(req: Request, res: Response) {
               select: {
                 zone: {
                   select: {
-                    id:true,
-                    name: true, 
+                    id: true,
+                    name: true,
                     supervisor: includeSupervisor
                       ? {
                           select: {
@@ -469,8 +469,6 @@ export async function getChecklist(req: Request, res: Response) {
       ...checklist,
       items: checklist.items.map((item) => ({
         ...item,
-       
-      
       })),
     };
 
@@ -621,8 +619,13 @@ export async function createChecklist(req: Request, res: Response) {
     const { title, items } = req.body;
 
     // ตรวจสอบข้อมูล
-    if (!title || !items) {
-      res.status(400).json({ message: "Missing required fields" });
+    if (!title) {
+      res.status(400).json({ message: "Missing required field title" });
+      return;
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ message: "Items must not be empty" });
       return;
     }
 

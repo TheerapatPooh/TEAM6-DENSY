@@ -44,13 +44,13 @@ export async function fetchData(
   try {
     const config: AxiosRequestConfig = {
       withCredentials: credential,
-      headers:
-        form ? {
-          "Content-Type": "multipart/form-data",
-        }
-          : {
-            'Content-Type': 'application/json',
+      headers: form
+        ? {
+            "Content-Type": "multipart/form-data",
           }
+        : {
+            "Content-Type": "application/json",
+          },
     };
 
     let response;
@@ -60,10 +60,24 @@ export async function fetchData(
       response = await axios[type](`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, value, config);
     }
 
-    return response?.data; // response.data will contain the response body
-  } catch (error) {
+    return response?.data; // Return the response body
+  } catch (error: any) {
     console.error("Failed to fetch data:", error);
-    return null; // Returning null on error
+
+    // Return more detailed error information
+    if (error.response) {
+      return {
+        error: true,
+        status: error.response.status,
+        data: error.response.data,
+      };
+    }
+
+    // For unexpected errors
+    return {
+      error: true,
+      message: error.message || "Unexpected error occurred",
+    };
   }
 }
 

@@ -105,8 +105,28 @@ export default function Page() {
   const [allChecklists, setAllChecklists] = useState<IChecklistWithExtras[]>(
     []
   );
+
   const [selectedChecklistsName, setselectedChecklistsName] =
     useState<string>("");
+  const handleDeleteChecklist = async (id: number) => {
+    try {
+      // Call the API to delete the checklist
+      const response = await fetchData("delete", `/checklist/${id}`, true);
+
+      // Check if the response was successful (optional)
+      if (response.ok) {
+        // Update the state to remove the deleted checklist
+        setAllChecklists((prevChecklists) =>
+          prevChecklists.filter((checklist) => checklist.id !== id)
+        );
+      } else {
+        console.error("Failed to delete the checklist");
+      }
+    } catch (error) {
+      console.error("An error occurred while deleting the checklist:", error);
+    }
+  };
+
   const handleCreateChecklist = (title: string) => {
     const data: { title?: string; items?: IItem[] } = {
       title,
@@ -199,6 +219,10 @@ export default function Page() {
     router.push(`/${locale}/admin/settings/checklistview/${id}`);
   };
 
+  const handleGoToCreateChecklist = () => {
+    router.push(`/${locale}/admin/settings/create/checklist`);
+  };
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -237,39 +261,11 @@ export default function Page() {
           <TabsContent value="patrol_checklist" className="flex flex-col gap-4">
             <div className="flex flex-row justify-between pt-2">
               <div className="text-2xl font-bold">Checklists</div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button className="flex flex-row gap-2">
-                    <span className="material-symbols-outlined text-2xl">
-                      add
-                    </span>
-                    <div className="text-lg">Create Checklist</div>
-                  </Button>
-                </AlertDialogTrigger>
 
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Create Checklist</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Enter a title for your checklist.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
-                  <Input
-                    onChange={(e) => setselectedChecklistsName(e.target.value)}
-                  />
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        handleCreateChecklist(selectedChecklistsName)
-                      }
-                    >
-                      Confirm
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button onClick={()=>{handleGoToCreateChecklist()}} className="flex flex-row gap-2">
+                <span className="material-symbols-outlined text-2xl">add</span>
+                <div className="text-lg">Create Checklist</div>
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               <Textfield
@@ -428,7 +424,12 @@ export default function Page() {
                             <DropdownMenuItem className="text-lg">
                               Detail
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive text-lg">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                handleDeleteChecklist(checklist.id);
+                              }}
+                              className="text-destructive text-lg"
+                            >
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
