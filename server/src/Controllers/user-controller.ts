@@ -81,9 +81,9 @@ export async function createUser(req: Request, res: Response) {
 export async function updateProfile(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
-    const imagePath = req.file?.filename || ""; // ใช้ filename ที่ multer สร้างให้
+    const imagePath = req.file?.filename || ""; // Use the filename created by multer
 
-    // ค้นหาผู้ใช้ในฐานข้อมูล
+    // Find the user in the database
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -97,7 +97,7 @@ export async function updateProfile(req: Request, res: Response) {
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
-      return;
+      return 
     }
 
     function getUploadsPath(): string {
@@ -107,12 +107,12 @@ export async function updateProfile(req: Request, res: Response) {
 
     const uploadsPath = getUploadsPath();
 
-    console.log("imagePath : ", imagePath);
-    console.log("user.profile.image : ", user.profile?.image?.path)
+    console.log("imagePath: ", imagePath);
+    console.log("user.profile.image: ", user.profile?.image?.path);
 
-    // ลบไฟล์เก่าหากมี
+    // Delete old image file if it exists
     if (imagePath && user.profile?.image) {
-      const oldImagePath = path.join(__dirname, "..", "uploads", user.profile.image.path);
+      const oldImagePath = path.join(uploadsPath, user.profile.image.path);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -120,11 +120,12 @@ export async function updateProfile(req: Request, res: Response) {
 
     let image = null;
     if (imagePath) {
-      // บันทึกหรืออัปเดตข้อมูลไฟล์ภาพในฐานข้อมูล
+      // Upsert image (update if exists, create if not)
       image = await prisma.image.upsert({
         where: { id: user.profile?.image?.id || 0 },
         update: {
           path: imagePath,
+          updatedBy: userId,
           profiles: {
             connect: { id: user.profile?.id },
           },
@@ -139,22 +140,21 @@ export async function updateProfile(req: Request, res: Response) {
       });
     }
 
-    // อัปเดตข้อมูลโปรไฟล์ในฐานข้อมูล
+    // Update profile in the database
     const updatedProfile = await prisma.profile.update({
       where: { userId: userId },
       data: {
-        imageId: image?.id, // เชื่อมโยงไฟล์ภาพหากมี
+        imageId: image?.id || null, // Link the image if available
       },
     });
 
     res.status(200).json(updatedProfile);
-    return;
+    return 
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
-    return;
+    return
   }
 }
-
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล User 
