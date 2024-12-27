@@ -285,17 +285,17 @@ export async function getAllDefects(req: Request, res: Response) {
 
     // เงื่อนไขการกรองตาม status
     if (status) {
-      const statusArray = (status as string).split(","); // แยกค่าด้วย comma
-      const orStatusConditions = statusArray.map((s) => ({ status: s })); // สร้าง array ของ OR เงื่อนไข
-
-      andConditions.push({ OR: orStatusConditions });
+      andConditions.push(
+        { status: status }
+      );
     }
 
     // เงื่อนไขการกรองตาม preset
     if (type) {
-      andConditions.push(
-        { type: type }
-      );
+      const typeArray = (type as string).split(","); // แยกค่าด้วย comma
+      const orTypeConditions = typeArray.map((t) => ({ type: t })); // สร้าง array ของ OR เงื่อนไข
+
+      andConditions.push({ OR: orTypeConditions });
     }
 
     // เงื่อนไขการกรองตามช่วงเวลา
@@ -325,13 +325,13 @@ export async function getAllDefects(req: Request, res: Response) {
         // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
         if (searchLower.startsWith('rep')) {
           return DefectStatus.reported;
-        } else if (searchLower.startsWith('i')) {
+        } else if (searchLower.startsWith('in')) {
           return DefectStatus.in_progress;
-        } else if (searchLower.startsWith('p')) {
+        } else if (searchLower.startsWith('pe')) {
           return DefectStatus.pending_inspection;
         } else if (searchLower.startsWith('res')) {
           return DefectStatus.resolved;
-        } else if (searchLower.startsWith('c')) {
+        } else if (searchLower.startsWith('co')) {
           return DefectStatus.completed;
         }
         // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
@@ -342,11 +342,11 @@ export async function getAllDefects(req: Request, res: Response) {
         const searchLower = search.toLowerCase();
 
         // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
-        if (searchLower.startsWith('s')) {
+        if (searchLower.startsWith('sa')) {
           return ItemType.safety;
-        } else if (searchLower.startsWith('e')) {
+        } else if (searchLower.startsWith('en')) {
           return ItemType.environment;
-        } else if (searchLower.startsWith('m')) {
+        } else if (searchLower.startsWith('ma')) {
           return ItemType.maintenance;
         }
 
