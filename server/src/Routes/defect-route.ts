@@ -1,4 +1,4 @@
-import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, } from "@Controllers/defect-controller.js";
+import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment, } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorzied, upload } from "@Controllers/util-controller.js";
 
@@ -16,5 +16,8 @@ router.put('/defect/:id',
   updateDefect
 );
 router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']), deleteDefect)
+
+router.get('/comments', authenticateUser, authorzied(['admin', 'supervisor']), getAllComments)
+router.put('/comment/:id', authenticateUser, authorzied(['admin', 'supervisor']), confirmComment)
 
 export default router
