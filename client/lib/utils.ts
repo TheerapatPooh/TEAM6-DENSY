@@ -202,11 +202,11 @@ export const sortData = (data: any, sort: { by: string; order: string }) => {
         ? new Date(a.date).getTime() - new Date(b.date).getTime()
         : new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-  }else if (sort.by === "Status") {
+  } else if (sort.by === "Status") {
     sortedData.sort((a, b) =>
       sort.order === "Ascending"
-        ? a.status.localeCompare(b.status) // เรียงจาก A-Z
-        : b.status.localeCompare(a.status) // เรียงจาก Z-A
+        ? String(a.status).localeCompare(String(b.status)) // เรียงจาก "false" -> "true"
+        : String(b.status).localeCompare(String(a.status)) // เรียงจาก "true" -> "false"
     );
   }
   return sortedData
