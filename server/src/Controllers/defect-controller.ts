@@ -401,9 +401,6 @@ export async function getAllDefects(req: Request, res: Response) {
       whereConditions.AND = andConditions;
     }
 
-    // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
-    console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
-
     const defects = await prisma.defect.findMany({
       where: whereConditions,
       include: {
@@ -780,16 +777,11 @@ export async function getAllComments(req: Request, res: Response) {
 
         // ตรวจสอบความใกล้เคียงกับค่าของ CommentStatus
         if (searchLower.startsWith('pe')) {
-          console.log('false')
-
           return false;
         } else if (searchLower.startsWith('co')) {
-          console.log('true')
           return true;
         }
         // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
-        console.log('null')
-
         return null;
       }
 
@@ -858,7 +850,7 @@ export async function getAllComments(req: Request, res: Response) {
     }
 
     // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
-    console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
+    // console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
 
     const comments = await prisma.comment.findMany({
       where: whereConditions,
