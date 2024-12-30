@@ -602,7 +602,7 @@ export default function Page() {
                   </TableCell>
                   <TableCell className="font-medium">
                     <BadgeCustom
-                      shape="squre"
+                      shape="square"
                       variant={
                         employee.role === "supervisor"
                           ? "yellow"

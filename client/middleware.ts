@@ -34,12 +34,8 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL(`/${locale}/patrol`, req.url));
       }
 
-      if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`)) {
+      if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`) && !currentPathname.startsWith(`/${locale}/comment`)) {
         return NextResponse.redirect(new URL(`/${locale}/defect`, req.url));
-      }
-
-      if (userRole !== "admin" && userRole !== "inspector" && !currentPathname.startsWith(`/${locale}`)) {
-        return NextResponse.redirect(new URL(`/${locale}`, req.url));
       }
 
     } catch (error) {

@@ -62,7 +62,11 @@
     "Unlock": "Unlock",
     "DeleteAllNotifications": "Delete All Notifications",
     "Total": "Total",
-    "Type": "Type"
+    "Type": "Type",
+    "Resolve": "Resolve",
+    "Close": "Close",
+    "Confirm": "Confirm",
+    "Message": "Message"
   },
   "Status": {
     "pending": "Pending",
@@ -136,7 +140,9 @@
     "patrol_assigned": "You have been assigned to a patrol scheduled for {date}.",
     "start_patrol": "Your patrol has started. Please proceed with the inspection.",
     "finish_patrol": "Your patrol has finished. Thank you for your effort.",
-    "report_defect": "An issue has been reported in your assigned zone. Please check immediately."
+    "report_defect": "An issue has been reported in your assigned zone. Please check immediately.",
+    "new_comment": "A new comment has been added. Please review it.",
+    "confirm_comment": "The comment has been confirmed successfully."
   },
   "Sidebar": {
     "Dashboard": "Dashboard",
