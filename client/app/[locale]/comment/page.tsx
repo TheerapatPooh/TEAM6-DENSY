@@ -377,15 +377,16 @@ export default function Page() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem className="p-0">
                                             <AlertDialog>
-                                                <AlertDialogTrigger asChild className="pl-2 py-2" onClick={(e) => e.stopPropagation()}>
-                                                    <div
+                                                <AlertDialogTrigger disabled={comment.status === true}
+                                                    asChild className="pl-2 py-2" onClick={(e) => e.stopPropagation()}>
+                                                    <button
                                                         className="text-primary cursor-pointer w-full h-full flex"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                         }}
                                                     >
                                                         {t("Resolve")}
-                                                    </div>
+                                                    </button>
                                                 </AlertDialogTrigger>
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
