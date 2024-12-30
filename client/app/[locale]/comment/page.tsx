@@ -37,6 +37,23 @@ export default function Page() {
         }
     };
 
+    const handleConfirmComment = async (id) => {
+        try {
+            const comment = await fetchData(
+                "put",
+                `/comment/${id}`,
+                true
+            );
+            setAllComments((prev) =>
+                prev.map((comment) =>
+                    comment.id === id ? { ...comment, status: true } : comment
+                )
+            );
+        } catch (error) {
+            console.error("Error deleting patrol:", error);
+        }
+    }
+
     const handleSortChange = (type: string, value: string) => {
         setSort((prevSort) => ({
             ...prevSort,
@@ -382,20 +399,8 @@ export default function Page() {
                                                     <AlertDialogFooter>
                                                         <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t('Cancel')}</AlertDialogCancel>
                                                         <AlertDialogAction
-                                                        className={(buttonVariants({variant: 'primary',size: "lg"}))}
-                                                            onClick={async (e) => {
-                                                                try {
-                                                                    await fetchData(
-                                                                        "put",
-                                                                        `/comment/${comment.id}`,
-                                                                        true
-                                                                    );
-                                                                    e.stopPropagation()
-                                                                    window.location.reload();
-                                                                } catch (error) {
-                                                                    console.error("Error deleting patrol:", error);
-                                                                }
-                                                            }}
+                                                            className={(buttonVariants({ variant: 'primary', size: "lg" }))}
+                                                            onClick={async (e) => handleConfirmComment(comment.id)}
                                                         >
                                                             <span className="material-symbols-outlined">
                                                                 check
