@@ -66,7 +66,10 @@
     "Resolve": "Resolve",
     "Close": "Close",
     "Confirm": "Confirm",
-    "Message": "Message"
+    "Message": "Message",
+    "Save": "Save",
+    "Assigned Supervisor": "Assigned Supervisor",
+    "Choose Zone and Supervisor": "Choose Zone and Supervisor"
   },
   "Status": {
     "pending": "Pending",
