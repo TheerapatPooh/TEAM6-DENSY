@@ -38,6 +38,7 @@ export default function Header({ variant }: IHeader) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const pathAfterLang = pathname.replace(/^\/(en|th)\/admin/, "");
 
   useEffect(() => {
     setMounted(true);
@@ -50,33 +51,35 @@ export default function Header({ variant }: IHeader) {
     return pathname === path || pathname.startsWith(`${path}/`);
   };
 
-  function getPathWord(pathname: string | null) {
-    const pathMap: { [key: string]: string } = {
-      "/admin/dashboard": "Dashboard",
-      "/admin/settings": "Settings",
-      "/admin/employees": "Employees",
+  function getPathWord() {
+    // แยก path ด้วย "/"
+    const pathSegments = pathAfterLang.split("/");
+
+    // ดึง segment แรกที่ไม่ว่าง
+    const mainSegment = pathSegments.find(segment => segment !== "");
+
+    // Map เป็นชื่อที่ต้องการแสดง
+    const pathMap = {
+      "settings": "Settings",
+      "dashboard": "Dashboard",
+      "employees": "Employees"
     };
-  
-    if (!pathname) return "Unknown Path";
-  
-    // Remove the language prefix (e.g., "/en")
-    const normalizedPath = pathname.replace(/^\/[a-z]{2}/, "");
-  
-    return pathMap[normalizedPath] || "Unknown Path";
+
+    // คืนค่า หรือ Unknown Path หากไม่ตรงกับ map
+    return pathMap[mainSegment] || "Unknown Path";
   }
-  
+
 
   return (
     <header
-      className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${
-        variant === "admin"
+      className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === "admin"
           ? "justify-between"
           : "justify-between custom-shadow"
-      }`}
+        }`}
     >
       <div className="flex gap-4">
         {variant === "admin" && (
-          <div className="flex items-center text-2xl font-medium">{getPathWord(usePathname())}</div>
+          <div className="flex items-center text-2xl font-medium">{getPathWord()}</div>
         )}
         {variant !== "admin" && (
           <div className="flex justify-between items-center">
