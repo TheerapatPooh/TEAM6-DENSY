@@ -741,12 +741,12 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
         },
       });
 
-    if (!validPatrol) {
-      res
-        .status(403)
-        .json({ message: "You are not associated with this Patrol" });
-      return;
-    }
+      if (!validPatrol) {
+        res
+          .status(403)
+          .json({ message: "You are not associated with this Patrol" });
+        return;
+      }
 
       const defects = await prisma.defect.findMany({
         where: {
@@ -893,7 +893,7 @@ export async function commentPatrol(req: Request, res: Response) {
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     // รับข้อมูลจาก request body
-    const { message, patrolResultId } = req.body;
+    const { message, patrolResultId, supervisorId } = req.body;
 
     // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
     if (!message || !patrolResultId) {
@@ -925,6 +925,14 @@ export async function commentPatrol(req: Request, res: Response) {
         userId: userId,
         patrolResultId: parseInt(patrolResultId, 10),
       },
+    });
+
+    const notification = `new_comment`;
+    await createNotification({
+      message: notification,
+      type: "information" as NotificationType,
+      url: `/comment/${newComment.id}`,
+      userId: supervisorId,
     });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป

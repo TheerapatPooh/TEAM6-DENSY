@@ -26,8 +26,8 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
   const [paths, setPaths] = useState<{ text: any, id: number, pathData: string }[]>([])
   const m = useTranslations('Map')
-  const [stageDimensions, setStageDimensions] = useState({ width: 1350, height: 895, size: "LG"});
-  const locale = useLocale(); 
+  const [stageDimensions, setStageDimensions] = useState({ width: 780, height: 518, size: "LG" });
+  const locale = useLocale();
   const [language, setLanguage] = useState('en');
 
   useEffect(() => {
@@ -35,25 +35,25 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
     setLanguage(currentLanguage || 'en');
   }, []);
 
-  const responsiveStage = () => {
-    const screenWidth = window.innerWidth; // ความกว้างของหน้าจอปัจจุบัน
-    
-    if (screenWidth <= 800) { // ความกว้างของหน้าจอสำหรับจอมือถือ
-      setStageDimensions({ width: 800, height: 600, size: "SM" });
-    } else if (screenWidth <= 1024) { // ความกว้างของหน้าจอสำหรับจอไอแพต
-      setStageDimensions({ width: 800, height: 600, size: "MD" });
-    } else { // ความกว้างของหน้าจอสำหรับจอคอมพิวเตอร์
-      setStageDimensions({ width: 1350, height: 895, size: "LG" });
-    }
-  };
+  // const responsiveStage = () => {
+  //   const screenWidth = window.innerWidth; // ความกว้างของหน้าจอปัจจุบัน
 
-  useEffect(() => {
-    const handleResize = () => responsiveStage();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  //   if (screenWidth <= 800) { // ความกว้างของหน้าจอสำหรับจอมือถือ
+  //     setStageDimensions({ width: 800, height: 600, size: "SM" });
+  //   } else if (screenWidth <= 1024) { // ความกว้างของหน้าจอสำหรับจอไอแพต
+  //     setStageDimensions({ width: 800, height: 600, size: "MD" });
+  //   } else { // ความกว้างของหน้าจอสำหรับจอคอมพิวเตอร์
+  //     setStageDimensions({ width: 1350, height: 895, size: "LG" });
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const handleResize = () => responsiveStage();
+  //   window.addEventListener('resize', handleResize);
+  //   return () => {
+  //     window.removeEventListener('resize', handleResize);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (disable && initialSelectedZones) {
@@ -74,13 +74,13 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
     fetch()
     if (stageDimensions.size === "SM") {
       setWalls(wallPath)
-      setPaths(zonePath) 
+      setPaths(zonePath)
     } else if (stageDimensions.size === "MD") {
       setWalls(wallPath)
-      setPaths(zonePath) 
+      setPaths(zonePath)
     } else {
       setWalls(wallPath)
-      setPaths(zonePath) 
+      setPaths(zonePath)
     }
 
     if (location) {
@@ -165,43 +165,43 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
   }
 
   return (
-      <Stage width={stageDimensions.width} height={stageDimensions.height}>
-        <Layer>
-          {zones.map((zone) => {
-            const isSelected = selectedZones.includes(zone.id);
-            const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
-            const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;
-            const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point
-            return (
-              <React.Fragment key={zone.id}>
-                <Path
-                  data={zone.pathData}
-                  fillLinearGradientStartPoint={{ x: 0, y: startPointY }} // จุดเริ่มต้นของ gradient
-                  fillLinearGradientEndPoint={{ x: 0, y: endPointY }} // จุดสิ้นสุดของ gradient
-                  fillLinearGradientColorStops={getGradientColors(isSelected)} // ใช้ gradient ที่กำหนด
-                  onClick={() => handleZoneSelect(zone.id)}
+    <Stage width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md'>
+      <Layer x={8} y={8}>
+        {zones.map((zone) => {
+          const isSelected = selectedZones.includes(zone.id);
+          const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
+          const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;
+          const endPointY = calculatePoint(startPointY); // ใช้ฟังก์ชันคำนวณ end point
+          return (
+            <React.Fragment key={zone.id}>
+              <Path
+                data={zone.pathData}
+                fillLinearGradientStartPoint={{ x: 0, y: startPointY }} // จุดเริ่มต้นของ gradient
+                fillLinearGradientEndPoint={{ x: 0, y: endPointY }} // จุดสิ้นสุดของ gradient
+                fillLinearGradientColorStops={getGradientColors(isSelected)} // ใช้ gradient ที่กำหนด
+                onClick={() => handleZoneSelect(zone.id)}
+              />
+              {textLanguage && (
+                <Text
+                  x={textLanguage.x} // ตำแหน่ง x
+                  y={textLanguage.y} // ตำแหน่ง y
+                  text={m(zone.name)} // ข้อความที่จะแสดง
+                  fontSize={textLanguage.fontSize} // ขนาดฟอนต์
+                  fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
+                  fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
+                  rotation={textLanguage.rotation} // การหมุนของข้อความ
+                  align="center"
                 />
-                {textLanguage && (
-                  <Text
-                    x={textLanguage.x} // ตำแหน่ง x
-                    y={textLanguage.y} // ตำแหน่ง y
-                    text={m(zone.name)} // ข้อความที่จะแสดง
-                    fontSize={textLanguage.fontSize} // ขนาดฟอนต์
-                    fontStyle="bold" // ทำให้ข้อความเป็นตัวหนา
-                    fill={getTextColor(isSelected)} // สีของข้อความ ใช้ฟังก์ชัน getTextColor
-                    rotation={textLanguage.rotation} // การหมุนของข้อความ
-                    align="center"
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </Layer>
-        <Layer>
-          {walls.map((wall) => (
-            <Path key={wall.id} data={wall.pathData} fill={getCSSVariableValue('--input')} />
-          ))}
-        </Layer>
-      </Stage>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </Layer>
+      <Layer  x={8} y={8}>
+        {walls.map((wall) => (
+          <Path key={wall.id} data={wall.pathData} fill={getCSSVariableValue('--input')} />
+        ))}
+      </Layer>
+    </Stage >
   );
 }

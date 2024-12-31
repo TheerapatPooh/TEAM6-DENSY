@@ -81,10 +81,12 @@ export default function PatrolChecklist({
   const handleCreateComment = async (
     message: string,
     patrolResultId: number,
+    supervisorId: number
   ) => {
     const data = {
       message: message,
       patrolResultId: patrolResultId,
+      supervisorId: supervisorId
     };
     try {
       await fetchData(
@@ -175,20 +177,14 @@ export default function PatrolChecklist({
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center justify-between w-full pe-2">
                         <p className="text-xl font-semibold">{item.name}</p>
-
-                        {(() => {
-                          const { iconName, variant } = getItemTypeVariant(item.type as itemType)
-                          return (
-                            <BadgeCustom
-                              variant={variant}
-                              iconName={iconName}
-                              showIcon={true}
-                              shape="square"
-                            >
-                              {s(item.type)}
-                            </BadgeCustom>
-                          )
-                        })()}
+                        <BadgeCustom
+                          variant={getItemTypeVariant(item.type as itemType).variant}
+                          iconName={getItemTypeVariant(item.type as itemType).iconName}
+                          showIcon={true}
+                          shape="square"
+                        >
+                          {s(item.type)}
+                        </BadgeCustom>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col py-2 gap-2">
@@ -330,7 +326,7 @@ export default function PatrolChecklist({
                                     onChange={(e) => setComment(e.target.value)}
                                   />
                                   <div className="flex justify-end w-full mt-2">
-                                    <Button variant={"primary"} size={"lg"} disabled={disabled} onClick={() => handleCreateComment(comment, existingResult.id)}>
+                                    <Button variant={"primary"} size={"lg"} disabled={disabled} onClick={() => handleCreateComment(comment, existingResult.id, itemZones.zone.supervisor.id)}>
                                       <span className="material-symbols-outlined me-2">
                                         send
                                       </span>

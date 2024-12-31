@@ -19,6 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AlertDefect from "./alert-defect";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import Map from "@/components/map";
 
 interface ReportDefectProps {
   defect: IDefect,
@@ -246,8 +247,10 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
                 </div>
               </div>
 
-              <div className="p-2 rounded-md bg-background flex items-center justify-center h-48 w-full cursor-default user-select-none ">
-                {defect.patrolResult.zoneId}
+              <div className="p-2 rounded-md bg-background map-container cursor-default user-select-none ">
+                <Map disable={true} initialSelectedZones={[defect.patrolResult.zoneId]}>
+
+                </Map>
               </div>
             </div>
 
