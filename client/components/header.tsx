@@ -46,7 +46,9 @@ export default function Header({ variant }: IHeader) {
     return null;
   }
 
-  const isActive = (path) => pathname.startsWith(path);
+  const isActive = (path: string): boolean => {
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
 
   function getPathWord(pathname: string | null) {
     const pathMap: { [key: string]: string } = {
@@ -89,28 +91,42 @@ export default function Header({ variant }: IHeader) {
             />
           </div>
         )}
-        {variant === "inspector" && (
-          <div className="flex justify-between items-center ms-2">
+
+        {variant === 'inspector' && (
+          <div className="flex justify-between items-center ms-2 gap-4">
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${
-                isActive(`/${locale}/patrol`)
-                  ? "border-b-4 border-red-500"
-                  : "text-gray-400"
-              }`}
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-destructive" : "text-input"
+                }`}
               onClick={() => router.push(`/${locale}/patrol`)}
             >
               <span className="material-symbols-outlined">list_alt_check</span>{" "}
               Patrol
             </button>
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${
-                isActive(`/${locale}/defect`)
-                  ? "border-b-4 border-red-500"
-                  : "text-gray-400"
-              }`}
-              onClick={() => router.push(`/${locale}/defect`)}
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-destructive" : "text-input"
+                }`}
+              onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
               <span className="material-symbols-outlined">build</span> Defect
+            </button>
+          </div>
+        )}
+
+        {variant === 'supervisor' && (
+          <div className="flex justify-between items-center ms-2 gap-4">
+            <button
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/defect`) ? "border-b-4 border-destructive" : "text-input"
+                }`}
+              onClick={() => router.push(`/${locale}/defect`)}
+            >
+              <span className="material-symbols-outlined">gpp_maybe</span> Defect
+            </button>
+            <button
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/comment`) ? "border-b-4 border-destructive" : "text-input"
+                }`}
+              onClick={() => router.push(`/${locale}/comment`)}
+            >
+              <span className="material-symbols-outlined">chat</span> Comment
             </button>
           </div>
         )}

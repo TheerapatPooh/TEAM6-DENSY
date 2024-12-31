@@ -16,7 +16,7 @@ interface BadgeCustomProps {
 
 export const shapeVariants = {
     default: "rounded-full",
-    squre: "rounded-lg",
+    square: "rounded-lg",
 }
 
 export const badgeVariants = {
@@ -48,7 +48,7 @@ export default function BadgeCustom({
     return (
         <Badge className={cn(
             `${badgeClass} ${shape} cursor-pointer align-center h-[30px] py-4`,
-            width ? width : ("w-[180px]"),
+            width ? width : ("w-fit"),
             showTime ? "justify-between" : showIcon ? "justify-center" : "justify-center" 
         )}>
             <div className='flex gap-2 items-center'>

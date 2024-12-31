@@ -220,3 +220,10 @@ body {
     transform: translateY(8px) scaleY(0.8) scaleX(0.8);
   }
 }
+.map-container {
+  display: flex;
+  align-items: center;     
+  justify-content: center;    
+  overflow: hidden;        
+  position: relative;      
+}

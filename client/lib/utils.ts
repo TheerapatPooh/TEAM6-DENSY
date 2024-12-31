@@ -188,8 +188,8 @@ export const getInitials = (name: string) => {
   }
 };
 
-export const sortData = (patrolData: any, sort: { by: string; order: string }) => {
-  const sortedData = [...patrolData];
+export const sortData = (data: any, sort: { by: string; order: string }) => {
+  const sortedData = [...data];
   if (sort.by === "Doc No.") {
     sortedData.sort((a, b) =>
       sort.order === "Ascending"
@@ -201,6 +201,12 @@ export const sortData = (patrolData: any, sort: { by: string; order: string }) =
       sort.order === "Ascending"
         ? new Date(a.date).getTime() - new Date(b.date).getTime()
         : new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  } else if (sort.by === "Status") {
+    sortedData.sort((a, b) =>
+      sort.order === "Ascending"
+        ? String(a.status).localeCompare(String(b.status)) // เรียงจาก "false" -> "true"
+        : String(b.status).localeCompare(String(a.status)) // เรียงจาก "true" -> "false"
     );
   }
   return sortedData
