@@ -40,6 +40,7 @@ export default function Notification() {
     const d = useTranslations('DateTime');
     const n = useTranslations('Notification');
     const a = useTranslations('Alert');
+    const z = useTranslations('Zone');
 
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
@@ -50,11 +51,26 @@ export default function Notification() {
     const unreadCount = notifications.filter(notification => !notification.read).length;
 
     function formatMessage(message: string) {
-        const [key, ...dynamicParts] = message.split('-');
-        const date = dynamicParts.join('-');
-        return { key, date };
+        const [key, param] = message.split("-", 2);
+
+        return { key, param };
     }
 
+    function getNotificationMessage(notification: INotification) {
+        const { key, param } = formatMessage(notification.message);
+
+        switch (key) {
+            case "patrol_assigned":
+                return n(key, { date: formatTime(param) });
+
+            case "update_supervisor":
+                const zone = z(param)
+                return n(key, { zone: zone });
+
+            default:
+                return n(notification.message); 
+        }
+    }
 
     const fetchNotifications = async () => {
         try {
@@ -190,7 +206,7 @@ export default function Notification() {
                     <div className='h-full w-full flex flex-col gap-6'>
                         <ScrollArea className="flex-1 p-0 pr-4 overflow-y-auto">
                             {getRecentNotifications().map((notification, index) => {
-                                const { key, date } = formatMessage(notification.message);
+                                const message = getNotificationMessage(notification);
                                 return (
                                     <Button
                                         key={index}
@@ -204,7 +220,7 @@ export default function Notification() {
                                                 className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                 readOnly
                                             >
-                                                {n(key, { date: formatTime(date) })}
+                                                {message}
                                             </textarea>
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs font-normal text-muted-foreground text-start">

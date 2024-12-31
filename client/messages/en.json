@@ -145,7 +145,8 @@
     "finish_patrol": "Your patrol has finished. Thank you for your effort.",
     "report_defect": "An issue has been reported in your assigned zone. Please check immediately.",
     "new_comment": "A new comment has been added. Please review it.",
-    "confirm_comment": "The comment has been confirmed successfully."
+    "confirm_comment": "The comment has been confirmed successfully.",
+    "update_supervisor": "You have been assigned to the zone {zone}. Please check for further instructions."
   },
   "Sidebar": {
     "Dashboard": "Dashboard",
