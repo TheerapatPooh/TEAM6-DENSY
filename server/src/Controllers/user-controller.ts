@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
+import { profile } from "console";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
@@ -80,9 +81,9 @@ export async function createUser(req: Request, res: Response) {
 export async function updateProfile(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
-    const { name, age, tel, address } = req.body;
-    const imagePath = req.file?.filename || "";
+    const imagePath = req.file?.filename || ""; // Use the filename created by multer
 
+    // Find the user in the database
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -96,16 +97,22 @@ export async function updateProfile(req: Request, res: Response) {
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
-      return;
+      return 
     }
 
+    function getUploadsPath(): string {
+      const currentDir = process.cwd();
+      return path.join(currentDir, 'uploads'); // Adjust path as needed
+    }
+
+    const uploadsPath = getUploadsPath();
+
+    console.log("imagePath: ", imagePath);
+    console.log("user.profile.image: ", user.profile?.image?.path);
+
+    // Delete old image file if it exists
     if (imagePath && user.profile?.image) {
-      const oldImagePath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        user.profile.image.path
-      );
+      const oldImagePath = path.join(uploadsPath, user.profile.image.path);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -113,10 +120,12 @@ export async function updateProfile(req: Request, res: Response) {
 
     let image = null;
     if (imagePath) {
+      // Upsert image (update if exists, create if not)
       image = await prisma.image.upsert({
         where: { id: user.profile?.image?.id || 0 },
         update: {
           path: imagePath,
+          updatedBy: userId,
           profiles: {
             connect: { id: user.profile?.id },
           },
@@ -131,25 +140,19 @@ export async function updateProfile(req: Request, res: Response) {
       });
     }
 
-    // Update profile data
+    // Update profile in the database
     const updatedProfile = await prisma.profile.update({
       where: { userId: userId },
       data: {
-        name: name,
-        age: parseInt(age, 10),
-        tel: tel,
-        address: address,
-        imageId: image?.id, // Connect image if it exists
+        imageId: image?.id || null, // Link the image if available
       },
     });
 
-    // Prepare result response
-    let result = updatedProfile;
-    res.status(200).json(result);
-    return;
+    res.status(200).json(updatedProfile);
+    return 
   } catch (error) {
-    res.status(500)
-    return;
+    res.status(500).json({ error: "Internal server error" });
+    return
   }
 }
 
@@ -181,6 +184,7 @@ export async function getUser(req: Request, res: Response) {
         where: { id: userId },
         select: {
           id: true,
+          username: true,
           email: true,
           password: includePassword ? true : false,
           role: true,
@@ -193,6 +197,7 @@ export async function getUser(req: Request, res: Response) {
               },
             }
             : undefined,
+          zone: true
         },
       });
     } else {
@@ -200,6 +205,7 @@ export async function getUser(req: Request, res: Response) {
         where: { id: id },
         select: {
           id: true,
+          username: true,
           email: true,
           password: includePassword ? true : false,
           role: true,
@@ -212,6 +218,7 @@ export async function getUser(req: Request, res: Response) {
               },
             }
             : undefined,
+          zone: true
         },
       });
     }
@@ -245,7 +252,7 @@ export async function getAllUsers(req: Request, res: Response) {
     const allUsers = await prisma.user.findMany({
       select: {
         id: true,
-        username:includeUsername,
+        username: includeUsername,
         email: true,
         role: true,
         createdAt: true,
@@ -287,7 +294,9 @@ export async function updateUser(req: Request, res: Response) {
     const loggedInUserId = (req as any).user.userId;
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
-    const { username, email, password, role, department ,active} = req.body;
+    const { username, name, email, tel, address, password, role, department } = req.body;
+    const active = JSON.parse(req.body.active)
+    const age = parseInt(req.body.age)
 
     // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
     if (loggedInUserId !== id && loggedInUserRole !== "admin") {
@@ -297,33 +306,64 @@ export async function updateUser(req: Request, res: Response) {
       });
       return;
     }
+    // อัปเดตข้อมูลผู้ใช้
+    if (loggedInUserRole !== "admin") {
+      if (username || email || password || role || department) {
+        await prisma.user.update({
+          where: { id: id },
+          data: {
+            email: email,
+            password: password ? await bcrypt.hash(password, 10) : undefined,
+            active: active
+          },
+        });
+      }
+      await prisma.profile.update({
+        where: { id: id },
+        data: {
+          name: name,
+          age: age,
+          tel: tel,
+          address: address,
+        },
+      })
 
-    const updateData: any = {
-      us_email: email,
-      us_password: password ? await bcrypt.hash(password, 10) : undefined,
-      us_department: department,
-      active:active
-    };
+    } else {
+      if (username || email || password || role || department) {
+        await prisma.user.update({
+          where: { id: id },
+          data: {
+            email: email,
+            password: password ? await bcrypt.hash(password, 10) : undefined,
+            department: department,
+            active: active,
+            role: role
+          },
+        });
+      }
 
-    // เฉพาะ admin เท่านั้นที่สามารถเปลี่ยน username และ role ได้
-    if (loggedInUserRole === "admin") {
-      updateData.username = username;
-      updateData.role = role;
+      await prisma.profile.update({
+        where: { id: id },
+        data: {
+          name: name,
+          age: age,
+          tel: tel,
+          address: address,
+        },
+      })
+
     }
 
-    // อัปเดตข้อมูลผู้ใช้
-    const updatedUser = await prisma.user.update({
-      where: { id: id },
-      data: updateData,
-    });
-
     const result = {
-      id: updatedUser.id,
-      username: updatedUser.username,
-      email: updatedUser.email,
-      role: updatedUser.role,
-      department: updatedUser.department,
-      createdAt: updatedUser.createdAt.toISOString(),
+      id: id,
+      username: username,
+      email: email,
+      age: age,
+      tel: tel,
+      address: address,
+      role: role,
+      department: department,
+      active: active,
     };
 
     res.status(200).json(result);
@@ -347,6 +387,7 @@ export async function removeUser(req: Request, res: Response) {
       where: { id: id },
       include: { profile: true, zone: true },
     });
+
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
