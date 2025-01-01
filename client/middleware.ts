@@ -42,7 +42,7 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL(`/${locale}/patrol`, req.url));
       }
 
-      if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`)) {
+      if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`) && !currentPathname.startsWith(`/${locale}/comment`)) {
         return NextResponse.redirect(new URL(`/${locale}/defect`, req.url));
       }
     } catch (error) {

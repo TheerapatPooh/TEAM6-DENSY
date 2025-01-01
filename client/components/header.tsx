@@ -12,7 +12,7 @@
  *   - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
  *     การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
  *   - การนำทางจะเกิดขึ้นเมื่อกดปุ่มต่าง ๆ โดยใช้ Next.js router
-**/
+ **/
 
 "use client";
 import React, { useEffect, useState } from "react";
@@ -32,13 +32,13 @@ interface IHeader {
   variant: HeaderVariant;
 }
 
-
 export default function Header({ variant }: IHeader) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const pathAfterLang = pathname.replace(/^\/(en|th)\/admin/, "");
 
   useEffect(() => {
     setMounted(true);
@@ -51,10 +51,37 @@ export default function Header({ variant }: IHeader) {
     return pathname === path || pathname.startsWith(`${path}/`);
   };
 
+  function getPathWord() {
+    // แยก path ด้วย "/"
+    const pathSegments = pathAfterLang.split("/");
+
+    // ดึง segment แรกที่ไม่ว่าง
+    const mainSegment = pathSegments.find(segment => segment !== "");
+
+    // Map เป็นชื่อที่ต้องการแสดง
+    const pathMap = {
+      "settings": "Settings",
+      "dashboard": "Dashboard",
+      "employees": "Employees"
+    };
+
+    // คืนค่า หรือ Unknown Path หากไม่ตรงกับ map
+    return pathMap[mainSegment] || "Unknown Path";
+  }
+
+
   return (
-    <header className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === 'admin' ? "justify-end" : "justify-between custom-shadow"}`}>
+    <header
+      className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === "admin"
+          ? "justify-between"
+          : "justify-between custom-shadow"
+        }`}
+    >
       <div className="flex gap-4">
-        {variant !== 'admin' && (
+        {variant === "admin" && (
+          <div className="flex items-center text-2xl font-medium">{getPathWord()}</div>
+        )}
+        {variant !== "admin" && (
           <div className="flex justify-between items-center">
             <Image
               className="flex items-center cursor-pointer"
@@ -69,20 +96,40 @@ export default function Header({ variant }: IHeader) {
         )}
 
         {variant === 'inspector' && (
-          <div className="flex justify-between items-center ms-2">
+          <div className="flex justify-between items-center ms-2 gap-4">
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-red-500" : "text-gray-400"
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/patrol`)}
             >
-              <span className="material-symbols-outlined">list_alt_check</span> Patrol
+              <span className="material-symbols-outlined">list_alt_check</span>{" "}
+              Patrol
             </button>
             <button
-              className={`w-[103px] h-[70px] gap-2 text-[18px] flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-red-500" : "text-gray-400"
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
               <span className="material-symbols-outlined">build</span> Defect
+            </button>
+          </div>
+        )}
+
+        {variant === 'supervisor' && (
+          <div className="flex justify-between items-center ms-2 gap-4">
+            <button
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/defect`) ? "border-b-4 border-destructive" : "text-input"
+                }`}
+              onClick={() => router.push(`/${locale}/defect`)}
+            >
+              <span className="material-symbols-outlined">gpp_maybe</span> Defect
+            </button>
+            <button
+              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/comment`) ? "border-b-4 border-destructive" : "text-input"
+                }`}
+              onClick={() => router.push(`/${locale}/comment`)}
+            >
+              <span className="material-symbols-outlined">chat</span> Comment
             </button>
           </div>
         )}

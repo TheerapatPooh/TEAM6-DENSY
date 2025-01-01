@@ -129,7 +129,7 @@ export interface IChecklist {
     latest: boolean;
     updatedAt: string;
     updatedBy: number;
-
+    
     patrols?: IPatrolChecklist[];
     user: IUser;
     presetChecklists?: IPresetChecklist[];
@@ -196,6 +196,7 @@ export interface IComment {
     id: number;
     message: string;
     timestamp: string;
+    status: boolean;
     userId: number;
     patrolResultId: number;
 
@@ -248,6 +249,10 @@ export interface FilterPatrol {
 export interface FilterDefect {
     defectStatus: string | null;
     defectType: string[];
+    dateRange: { start: Date | undefined; end: Date | undefined };
+}
+export interface FilterComment {
+    commentStatus: string | null;
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
 

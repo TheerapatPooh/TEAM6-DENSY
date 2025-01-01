@@ -221,6 +221,7 @@ model Comment {
   id             Int      @id @default(autoincrement()) @map("cm_id")
   message        String   @map("cm_message")
   timestamp      DateTime @default(now()) @map("cm_timestamp")
+  status         Boolean  @default(false)
   userId         Int      @map("cm_us_id")
   patrolResultId Int      @map("cm_pr_id")
 

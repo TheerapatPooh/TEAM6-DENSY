@@ -14,7 +14,13 @@ export async function getZone(req: Request, res: Response) {
             where: { id: zoneId },
             include: {
                 supervisor: {
-                    include: {
+                    select: {
+                        id: true,
+                        username: true,
+                        email: true,
+                        role: true,
+                        department: true,
+                        createdAt: true,
                         profile: {
                             include: {
                                 image: true
@@ -50,7 +56,25 @@ export async function getLocation(req: Request, res: Response) {
         const location = await prisma.location.findUnique({
             where: { id: id },
             include: {
-                zones: true
+                zones: {
+                    include: {
+                        supervisor: {
+                            select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                role: true,
+                                department: true,
+                                createdAt: true,
+                                profile: {
+                                    include: {
+                                        image: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             }
         })
 
