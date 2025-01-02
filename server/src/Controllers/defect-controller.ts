@@ -651,6 +651,131 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 }
 
 /**
+ * คำอธิบาย: ฟังก์ชันสำหรับการแก้ไข Defect 
+ * Input: 
+ * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.params: { id: Int} (ID ของ Defect ที่จะ resolved)
+ * - req.body: { defectUserId: Int }
+ * - req.file: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
+ * Output: JSON object ข้อมูล Defect หลังการอัปเดต
+**/
+export async function resolveDefect(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { defectUserId } = req.body;
+    const newImageFiles = req.files as Express.Multer.File[];
+
+    const defect = await prisma.defect.findUnique({
+      where: { id: Number(id) },
+    });
+    if (!defect) {
+      res.status(404).json({ message: 'Defect not found' });
+      return;
+    }
+
+      for (const file of newImageFiles) {
+        const image = await prisma.image.create({
+          data: {
+            path: file.filename,
+            updatedBy: parseInt(defectUserId, 10),
+          },
+        });
+        await prisma.defectImage.create({
+          data: {
+            defectId: Number(id),
+            imageId: image.id,
+          },
+        });
+      }
+    
+
+    await prisma.defect.update({
+      where: { id: Number(id) },
+      data: {
+        status: 'resolved' as DefectStatus,
+      },
+    });
+
+    const result = await prisma.defect.findUnique({
+      where: { id: Number(id) },
+      include: {
+        patrolResult: {
+          select: {
+            patrol: {
+              select: {
+                id: true,
+                preset: {
+                  select: {
+                    title: true
+                  }
+                }
+              }
+            },
+            zoneId: true,
+            itemZone: {
+              select: {
+                zone: {
+                  select: {
+                    name: true,
+                    supervisor: {
+                      select: {
+                        id: true,
+                        profile: {
+                          include: {
+                            image: true
+                          }
+                        }
+                      }
+                    }
+
+                  }
+                }
+              }
+            }
+          },
+        },
+        images: {
+          select: {
+            image: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    department: true,
+                    createdAt: true
+                  }
+                },
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            role: true,
+            email: true,
+            createdAt: true,
+            profile: {
+              include: {
+                image: true
+              }
+            }
+          }
+        }
+      },
+    })
+  
+
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500)
+  }
+}
+
+
+/**
  * คำอธิบาย: ฟังก์ชันสำหรับลบ Defect 
  * Input: 
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
