@@ -100,7 +100,6 @@ export default function Notification() {
     const removeAllNotifications = async () => {
         try {
             await fetchData("delete", `/notifications`, true);
-            setNotifications([])
         } catch (error) {
             console.error("Failed to delete notification:", error);
         }
@@ -118,6 +117,16 @@ export default function Notification() {
         if (notification.url) {
             router.push(`/${locale}/${notification.url}`); // ถ้ามี URL ให้ redirect ไป
         }
+    };
+
+    const handleRemoveAllNotification = () => {
+        removeAllNotifications()
+        setNotifications([])
+        toast({
+            variant: 'success',
+            title: a("DeleteAllNotificationTitle"),
+            description: a("DeleteAllNotificationDescription"),
+        });
     };
 
     const markAllAsRead = async () => {
@@ -218,7 +227,7 @@ export default function Notification() {
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent align="end" className="p-0">
-                                        <DropdownMenuItem onClick={() => removeAllNotifications()}>
+                                        <DropdownMenuItem onClick={() => handleRemoveAllNotification()}>
                                             <h1 className='text-destructive'>{t("DeleteAllNotifications")}</h1>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>

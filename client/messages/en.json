@@ -164,6 +164,8 @@
     "LoginUsernameRequire": "Please enter a username.",
     "LoginPasswordRequire": "Please enter a password.",
     "PatrolCreateTitle": "Patrol Created",
-    "PatrolCreateDescription": "The patrol has been successfully scheduled."
+    "PatrolCreateDescription": "The patrol has been successfully scheduled.",
+    "DeleteAllNotificationTitle": "Notifications Cleared!",
+    "DeleteAllNotificationDescription": "All notifications have been successfully cleared."
   }
 }

@@ -165,6 +165,8 @@
     "LoginUsernameRequire": "กรุณากรอกชื่อผู้ใช้.",
     "LoginPasswordRequire": "กรุณากรอกรหัสผ่าน.",
     "PatrolCreateTitle": "สร้างรายการตรวจ Patrol สำเร็จ",
-    "PatrolCreateDescription": "รายการตรวจ Patrol กำหนดเวลาเรียบร้อยแล้ว."
+    "PatrolCreateDescription": "รายการตรวจ Patrol กำหนดเวลาเรียบร้อยแล้ว.",
+    "DeleteAllNotificationTitle": "ล้างการแจ้งเตือนแล้ว!",
+    "DeleteAllNotificationDescription": "การแจ้งเตือนทั้งหมดถูกล้างออกเรียบร้อยแล้ว"
   }
 }

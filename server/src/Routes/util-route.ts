@@ -8,7 +8,7 @@ router.post("/logout", logout);
 router.get("/notifications", authenticateUser, getNotifications);
 router.put("/notification/:id", authenticateUser, updateNotification);
 router.delete("/notification/:id", authenticateUser, removeNotification);
-router.delete("notifications", authenticateUser, removeAllNotifications);
+router.delete("/notifications", authenticateUser, removeAllNotifications);
 router.put("/notifications/mark-all-read", authenticateUser, markAllAsRead);
 removeOldNotifications()
 

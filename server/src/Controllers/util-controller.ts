@@ -320,9 +320,11 @@ export async function removeAllNotifications(req: Request, res: Response) {
   try {
     await prisma.notification.deleteMany({
       where: {
-        userId: parseInt(userId),
+        userId: userId,
       },
     });
+    res.status(200)
+    return
   } catch (error) {
     console.error("Error deleting notification:", error);
   }
