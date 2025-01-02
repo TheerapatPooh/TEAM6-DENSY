@@ -239,6 +239,15 @@ export async function getDefect(req: Request, res: Response) {
               }
             }
           }
+        },
+        patrolResult: {
+          select: {
+            itemZone: {
+              select: {
+                zone: true
+              }
+            }
+          }
         }
       }
     });

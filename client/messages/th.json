@@ -62,6 +62,8 @@
     "Unlock": "ปลดล็อก",
     "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด",
     "Total": "ทั้งหมด",
+    "Before": "ก่อน",
+    "After" : "หลัง",
     "Type": "ชนิด",
     "Resolve": "แก้ไขปัญหา",
     "Close": "ปิด",

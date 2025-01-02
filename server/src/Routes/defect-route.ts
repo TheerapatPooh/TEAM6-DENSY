@@ -12,7 +12,7 @@ router.get('/defects', authenticateUser, authorzied(['admin', 'supervisor']), ge
 router.put('/defect/:id',
   upload.array('imageFiles', 10),
   authenticateUser,
-  authorzied(['admin', 'inspector']),
+  authorzied(['admin', 'inspector', 'supervisor']),
   updateDefect
 );
 router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']), deleteDefect)

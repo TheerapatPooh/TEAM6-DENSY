@@ -19,11 +19,9 @@ import { IDefect } from "@/app/type";
 import { useParams } from "next/navigation";
 import { getInitials } from "@/lib/utils";
 import { defectStatus } from "../../../type";
-import { AlertCustom } from '../../../../components/alert-custom';
-import { title } from "process";
-import { badgeVariants } from '../../../../components/badge-custom';
-import { timeStamp } from "console";
-
+import { AlertCustom } from "../../../../components/alert-custom";
+import { useTranslations } from "next-intl";
+import { response } from 'express';
 
 export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -33,6 +31,9 @@ export default function Page() {
   const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
   const [beforeSlideIndex, setBeforeSlideIndex] = useState(0);
   const [afterSlideIndex, setAfterSlideIndex] = useState(0);
+  const t = useTranslations("General");
+  const s = useTranslations("Status");
+  const z = useTranslations("Zone");
 
   // Handle before image click
   const handleBeforeImageClick = (index: number) => {
@@ -74,7 +75,7 @@ export default function Page() {
     const getData = async () => {
       try {
         const dataDefect = await fetchData("get", `/defect/${param.id}`, true);
-        console.log(dataDefect)
+        console.log(dataDefect);
         setDefect(dataDefect);
         setStatusColorDefect(statusColor[dataDefect.status]);
         setTypeColorDefect(typeColor[dataDefect.type]);
@@ -89,7 +90,6 @@ export default function Page() {
   }, []);
   console.log(defect);
 
-  
   let beforeImage =
     defect?.images
       .filter((image) => image.image.user.id === defect.userId)
@@ -150,32 +150,31 @@ export default function Page() {
   };
   const [typeIconDefect, setTypeIconDefect] = useState();
 
-
-const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
-  
   const handleDefectUpdate = async (status: string) => {
     const data = {
-      status: status, 
-      defectUserId: defect.userId, 
+      status: status,
+      defectUserId: defect.userId,
       patrolResultId: defect.patrolResultId,
-    }
-    console.log(data)
+    };
+    console.log(data);
 
     try {
-      await fetchData(
-        'put', 
-        `/defect/${defect.id}`,
-         true, 
-         data
-        );
+      const response = await fetchData("put", `/defect/${defect.id}`, true, data);
+      return response;
     } catch (error) {
-      console.error("Accept Fail", error);
+      console.error("Update Fail", error);
     }
-    
   };
+  
   const handleAcceptDefect = () => {
+    setPendingAction(() => () => handleDefectUpdate("in_progress"));
+    handleOpenDialog();
+  };
+
+  const handleResolvedDefect = () => {
     setPendingAction(() => () => handleDefectUpdate("in_progress"));
     handleOpenDialog();
   };
@@ -196,289 +195,362 @@ const [isDialogOpen, setIsDialogOpen] = useState(false);
     return <Loading />;
   }
 
-
-
   return (
-
-    <div className="min-h-screen ">
-      <div className="p-4 ">
-        <div className="bg-card rounded-lg shadow-lg p-4 ">
-          {/* Title section */}
-          <div className="h-[64px] w-full  flex justify-between ">
-            <div>
-              <h1 className="text-xl font-bold flex items-center">
-                <span className="material-symbols-outlined text-2xl mr-2">
-                  schedule
-                </span>
-                {formatTime(defect.startTime)}
-              </h1>
-              <div>{defect.name}</div>
+    <div className="bg-card rounded-md shadow-md p-4 ">
+      {/* Title section */}
+      <div className="w-full  flex justify-between ">
+        <div>
+          <div className="text-xl font-semibold text-muted-foreground flex items-center">
+            <span className="material-symbols-outlined text-2xl mr-1">
+              schedule
+            </span>
+            <p>{formatTime(defect.startTime)}</p>
+          </div>
+          <h1 className="text-2xl font-bold text-card-foreground">
+            {defect.name}
+          </h1>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <span className="material-symbols-outlined text-2xl ">
+                location_on
+              </span>
+              <h1 className="text-base font-semibold">{t("Zone")}</h1>
             </div>
-            <div className="flex gap-2 ">
-              <Button variant={"secondary"} className="h-[45px] w-[100px]">
-                Back
+            <h1 className="">{z(defect.patrolResult.itemZone.zone.name)}</h1>
+          </div>
+        </div>
+        <div className="flex gap-2 ">
+          <Button variant={"secondary"}>{t("Back")}</Button>
+
+          {(() => {
+            let iconName: string;
+            let text: string;
+            let variant:
+              | "link"
+              | "default"
+              | "secondary"
+              | "destructive"
+              | "success"
+              | "fail"
+              | "outline"
+              | "ghost"
+              | "primary"
+              | null
+              | undefined;
+            let disabled: boolean;
+            let handleFunction: any;
+            switch (defect.status as defectStatus) {
+              case "completed":
+                variant = "primary";
+                iconName = "published_with_changes";
+                text = "Resolved";
+                disabled = true;
+                break;
+              case "pending_inspection":
+                variant = "primary";
+                iconName = "update";
+                text = "Accept";
+                disabled = false;
+                handleFunction = () => {
+                  // handleFinishPatrol();
+                };
+                break;
+              case "in_progress":
+                variant = "primary";
+                iconName = "published_with_changes";
+                text = "Resolved";
+                disabled = false;
+                handleFunction = () => {
+                  // handleStartPatrol();
+                };
+                break;
+              case "resolved":
+                variant = "primary";
+                iconName = "published_with_changes";
+                text = "Resolved";
+                disabled = true;
+                break;
+              default:
+                variant = "primary";
+                iconName = "update";
+                text = "Accept";
+                disabled = false;
+                handleFunction = () => {
+                  handleAcceptDefect();
+                };
+                break;
+            }
+            return (
+              <Button
+                variant={variant}
+                onClick={handleFunction}
+                disabled={disabled}
+              >
+                <span className="material-symbols-outlined">{iconName}</span>
+                {t(text)}
               </Button>
-              
-              <Button onClick={handleAcceptDefect} variant={"primary"} className="h-[45px] w-[132px]">
-                <span className="material-symbols-outlined">update</span>
-                Accept
-              </Button>
-              {isDialogOpen && (
-                <AlertCustom 
-              title={"Are you sure to accept defect?"} 
-              description={"Please confirm to accept defect."} 
-              primaryBottonText={"Confirm"} 
+            );
+          })()}
+
+          {isDialogOpen && (
+            <AlertCustom
+              title={"Are you sure to accept defect?"}
+              description={"Please confirm to accept defect."}
+              primaryBottonText={"Confirm"}
               primaryIcon="check"
-              secondaryBottonText={"Cancel"} 
-              backResult={handleDialogResult} >
-              </AlertCustom>)}
-              
-
-              
-              
-              
+              secondaryBottonText={"Cancel"}
+              backResult={handleDialogResult}
+            ></AlertCustom>
+          )}
+        </div>
+      </div>
+      <div className="flex justify-between items-center ">
+        <div className="flex gap-2">
+          <BadgeCustom variant={statusColorDefect} showIcon={true}>
+            <div className="flex justify-center gap-2">
+              <span className="material-symbols-outlined">
+                {statusIconDefect}
+              </span>
+              {defect.status}
             </div>
-          </div>
-          <div className="flex justify-between items-center ">
+          </BadgeCustom>
+
+          <BadgeCustom shape="square" variant={typeColorDefect} showIcon={true}>
+            <div className="flex justify-center gap-2">
+              <span className="material-symbols-outlined">
+                {typeIconDefect}
+              </span>
+              {defect.type}
+            </div>
+          </BadgeCustom>
+        </div>
+
+        <div className="flex items-center mt-2 justify-between gap-[100px]">
+          <div className="flex-col items-center gap-2">
             <div className="flex gap-2">
-              <BadgeCustom
-                variant={statusColorDefect}
-                showIcon={true}
-              >
-                <div className="flex justify-center gap-2">
-                  <span className="material-symbols-outlined">
-                    {statusIconDefect}
-                  </span>
-                  {defect.status}
+              <div className="flex">
+                <span className="material-symbols-outlined ">person_alert</span>
+                <div className="ml-2 text-sm text-gray-500">
+                  {t("Inspector")}
                 </div>
-              </BadgeCustom>
-
-              <BadgeCustom
-                shape="square"
-                variant={typeColorDefect}
-                showIcon={true}
-              >
-                <div className="flex justify-center gap-2">
-                  <span className="material-symbols-outlined">
-                    {typeIconDefect}
-                  </span>
-                  {defect.type}
-                </div>
-              </BadgeCustom>
-            </div>
-
-            <div className="flex items-center mt-2 justify-between gap-[100px]">
-              <div className="flex-col items-center gap-2">
-                <div className="flex gap-2">
-                  <div className="flex">
-                    <span className="material-symbols-outlined ">
-                      person_alert
-                    </span>
-                    <div className="ml-2 text-sm text-gray-500">Reporter</div>
-                  </div>
-                  <div className="flex justify-start items-center gap-2">
-                    <Avatar className="h-[24px] w-[24px]">
-                      <AvatarImage
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
-                      />
-                      <AvatarFallback>
-                        {getInitials(defect.user.profile.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className=" text-sm text-gray-500">Joe Dohn</div>
-                  </div>
-                </div>
+              </div>
+              <div className="flex justify-start items-center gap-2">
+                <Avatar className="h-[24px] w-[24px]">
+                  <AvatarImage
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
+                  />
+                  <AvatarFallback>
+                    {getInitials(defect.user.profile.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className=" text-sm text-gray-500">Joe Dohn</div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Details */}
-          <div>
-            <div className="grid grid-cols-12 gap-6 ">
-              
-              <div className="col-span-full text-gray-500 ">
-                <p className="text-[16px]">
-                  Detail
-                  </p>
-                
-                <div className="bg-secondary rounded-lg  h-40 w-full items-center p-4">
-                  <p className="text-[20px] text-card-foreground" >{defect.description}</p>
-                </div>
-                
-              </div>
+      {/* Details */}
+      <div>
+        <div className="grid grid-cols-12 gap-6 ">
+          <div className="col-span-full text-gray-500 ">
+            <p className="text-[16px] font-semibold">{t("Detail")}</p>
+
+            <div className="bg-secondary rounded-lg h-40 w-full items-center p-4">
+              <p className="text-[20px] text-card-foreground">
+                {defect.description}
+              </p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Before After */}
+      <div className="flex w-full space-x-4 mb-4">
+        <div className="flex space-x-4 w-full">
+          {/* before */}
+          <div className="w-full">
+            <div className="flex items-center">
+              <p className="text-[16px] font-semibold text-gray-500 mb-1 cursor-default user-select-none">
+                {t("Before")}
+              </p>
+            </div>
+
             <div>
-              {/* Right section - takes 5 columns */}
-              <div className="col-span-full">
-                <div className="flex items-center">
-                  <span className="material-symbols-outlined text-gray-500">location_on</span>
-                  <div className=" text-sm text-gray-500 text-[16px]" >Zone</div>
-                </div>
-
-                <div className="bg-secondary rounded-lg p-4 w-full h-[894px] flex items-center justify-center">
-                  {/* Display image */}
-                </div>
+              <div
+                className="p-4 rounded-md bg-secondary h-96 flex items-center justify-center cursor-default user-select-none"
+                onClick={() => handleBeforeImageClick(0)}
+              >
+                {beforeImage &&
+                beforeImage.length > 0 &&
+                beforeImage[0].path ? (
+                  <Image
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
+                    alt="First Image"
+                    width={270}
+                    height={250}
+                    className="object-contain cursor-pointer w-full h-full"
+                    unoptimized
+                  />
+                ) : (
+                  <p>Waiting for the results.</p>
+                )}
               </div>
+              {isBeforeCarouselOpen &&
+                beforeImage &&
+                beforeImage?.length > 0 && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="relative">
+                      <Carousel
+                        setApi={setApi}
+                        className="w-full max-w-screen-lg"
+                      >
+                        <CarouselContent>
+                          {Array.from({ length: beforeImage.length }).map(
+                            (_, index) => (
+                              <CarouselItem key={index}>
+                                <div className="flex justify-center">
+                                  <Card>
+                                    <CardContent className="flex items-center justify-center h-[600px] w-[900px] overflow-hidden p-4">
+                                      <div className="flex items-center justify-center h-full w-full">
+                                        <Image
+                                          className="object-contain w-full h-full"
+                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[index].path}`}
+                                          alt={`${beforeImage[index].path}`}
+                                          width={800}
+                                          height={500}
+                                          priority
+                                          unoptimized
+                                        />
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+                              </CarouselItem>
+                            )
+                          )}
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </Carousel>
+                      <div className="flex justify-center mt-4">
+                        {beforeImage.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setBeforeSlideIndex(index);
+                            }}
+                            disabled
+                            className={`h-3 w-3 rounded-full mx-1 ${
+                              beforeSlideIndex === index
+                                ? "bg-white"
+                                : "bg-gray-400"
+                            }`}
+                            aria-label={`Slide ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleCloseBeforeCarousel}
+                      className="absolute top-4 right-4 text-white"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
 
-          {/* Before After */}
-          <div className="flex w-full space-x-4 mb-4">
-              <div className="flex space-x-4 w-full">
-                {/* before */}
-                <div className="w-full">
-                  <div className="flex items-center">
-                    <p className="text-base font-semibold text-gray-500 mb-1 cursor-default user-select-none">
-                      Before
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="p-4 rounded-md bg-background h-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleBeforeImageClick(0)}>
-                      {beforeImage && beforeImage.length > 0 && beforeImage[0].path ? (
-                        <Image
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
-                          alt="First Image"
-                          width={270}
-                          height={250}
-                          className="object-contain cursor-pointer w-full h-full"
-                          unoptimized
-                        />
-                      ) : (
-                        <p>Waiting for the results.</p>
-                      )}
-                    </div>
-                    {isBeforeCarouselOpen && beforeImage && beforeImage?.length > 0 && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div className="relative">
-                          <Carousel setApi={setApi} className="w-full max-w-screen-lg">
-                            <CarouselContent>
-                              {Array.from({ length: beforeImage.length }).map((_, index) => (
-                                <CarouselItem key={index}>
-                                  <div className="flex justify-center">
-                                    <Card>
-                                      <CardContent className="flex items-center justify-center h-[600px] w-[900px] overflow-hidden p-4">
-                                        <div className="flex items-center justify-center h-full w-full">
-                                          <Image
-                                            className="object-contain w-full h-full"
-                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[index].path}`}
-                                            alt={`${beforeImage[index].path}`}
-                                            width={800}
-                                            height={500}
-                                            priority
-                                            unoptimized
-                                          />
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                          </Carousel>
-                          <div className="flex justify-center mt-4">
-                            {beforeImage.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => {
-                                  setBeforeSlideIndex(index);
-                                }}
-                                disabled
-                                className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index ? 'bg-white' : 'bg-gray-400'}`}
-                                aria-label={`Slide ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <button onClick={handleCloseBeforeCarousel} className="absolute top-4 right-4 text-white">
-                          Close
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* after */}
-                <div className="w-full">
-                  <div className="flex items-center">
-                    <p className="text-base font-semibold text-gray-500 mb-1 cursor-default user-select-none">
-                      After
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="p-4 rounded-md bg-background h-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
-                      {afterImage && afterImage.length > 0 && afterImage[0].path ? (
-                        <Image
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
-                          alt="First Image"
-                          width={270}
-                          height={250}
-                          className="object-contain cursor-pointer w-full h-full"
-                          unoptimized
-                        />
-                      ) : (
-                        <p>Waiting for the results.</p>
-                      )}
-                    </div>
-                    {isAfterCarouselOpen && afterImage && afterImage?.length > 0 && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div className="relative">
-                          <Carousel setApi={setApi} className="w-full max-w-screen-lg">
-                            <CarouselContent>
-                              {Array.from({ length: afterImage.length }).map((_, index) => (
-                                <CarouselItem key={index}>
-                                  <div className="flex justify-center">
-                                    <Card>
-                                      <CardContent className="flex items-center justify-center h-[600px] w-[900px] overflow-hidden p-4">
-                                        <div className="flex items-center justify-center h-full w-full">
-                                          <Image
-                                            className="object-contain w-full h-full"
-                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[index].path}`}
-                                            alt={`${afterImage[index].path}`}
-                                            width={800}
-                                            height={500}
-                                            priority
-                                            unoptimized
-                                          />
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                          </Carousel>
-                          <div className="flex justify-center mt-4">
-                            {afterImage.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => {
-                                  setAfterSlideIndex(index);
-                                }}
-                                disabled
-                                className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index ? 'bg-white' : 'bg-gray-400'}`}
-                                aria-label={`Slide ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <button onClick={handleCloseAfterCarousel} className="absolute top-4 right-4 text-white">
-                          Close
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-              </div>
+          {/* after */}
+          <div className="w-full">
+            <div className="flex items-center">
+              <p className="text-[16px] font-semibold text-gray-500 mb-1 cursor-default user-select-none">
+                {t("After")}
+              </p>
             </div>
-          
-          
+
+            <div>
+              <div
+                className="p-4 rounded-md bg-secondary h-96 flex items-center justify-center cursor-default user-select-none"
+                onClick={() => handleAfterImageClick(0)}
+              >
+                {afterImage && afterImage.length > 0 && afterImage[0].path ? (
+                  <Image
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
+                    alt="First Image"
+                    width={270}
+                    height={250}
+                    className="object-contain cursor-pointer w-full h-full"
+                    unoptimized
+                  />
+                ) : (
+                  <p>Waiting for the results.</p>
+                )}
+              </div>
+              {isAfterCarouselOpen && afterImage && afterImage?.length > 0 && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="relative">
+                    <Carousel
+                      setApi={setApi}
+                      className="w-full max-w-screen-lg"
+                    >
+                      <CarouselContent>
+                        {Array.from({ length: afterImage.length }).map(
+                          (_, index) => (
+                            <CarouselItem key={index}>
+                              <div className="flex justify-center">
+                                <Card>
+                                  <CardContent className="flex items-center justify-center h-[600px] w-[900px] overflow-hidden p-4">
+                                    <div className="flex items-center justify-center h-full w-full">
+                                      <Image
+                                        className="object-contain w-full h-full"
+                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[index].path}`}
+                                        alt={`${afterImage[index].path}`}
+                                        width={800}
+                                        height={500}
+                                        priority
+                                        unoptimized
+                                      />
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </CarouselItem>
+                          )
+                        )}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                    <div className="flex justify-center mt-4">
+                      {afterImage.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setAfterSlideIndex(index);
+                          }}
+                          disabled
+                          className={`h-3 w-3 rounded-full mx-1 ${
+                            afterSlideIndex === index
+                              ? "bg-white"
+                              : "bg-gray-400"
+                          }`}
+                          aria-label={`Slide ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleCloseAfterCarousel}
+                    className="absolute top-4 right-4 text-white"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
