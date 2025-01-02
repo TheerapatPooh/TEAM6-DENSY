@@ -607,7 +607,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
                   }
                 }
-
               }
             }
           },
@@ -615,9 +614,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         images: {
           select: {
             image: {
-              select: {
-                id: true,
-                path: true,
+              include: {
                 user: {
                   select: {
                     id: true,
@@ -631,6 +628,19 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
             },
           },
         },
+        user: {
+          select: {
+            id: true,
+            role: true,
+            email: true,
+            createdAt: true,
+            profile: {
+              include: {
+                image: true
+              }
+            }
+          }
+        }
       },
     })
 

@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import Loading from "@/components/loading";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
-import { fetchData, formatTime } from "@/lib/utils";
+import { fetchData, formatTime, getDefectStatusVariant, getItemTypeVariant } from "@/lib/utils";
 import { IDefect } from "@/app/type";
 import { useParams } from "next/navigation";
 import { getInitials } from "@/lib/utils";
@@ -75,12 +75,7 @@ export default function Page() {
     const getData = async () => {
       try {
         const dataDefect = await fetchData("get", `/defect/${param.id}`, true);
-        console.log(dataDefect);
         setDefect(dataDefect);
-        setStatusColorDefect(statusColor[dataDefect.status]);
-        setTypeColorDefect(typeColor[dataDefect.type]);
-        setstatusIconDefect(statusIcon[dataDefect.status]);
-        setTypeIconDefect(typeIcon[dataDefect.type]);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -104,51 +99,6 @@ export default function Page() {
         path: image.image.path,
       })) || null;
 
-  const statusColor: Record<
-    | "reported"
-    | "in_progress"
-    | "pending_inspection"
-    | "resolved"
-    | "completed",
-    string
-  > = {
-    reported: "orange",
-    in_progress: "yellow",
-    pending_inspection: "red",
-    resolved: "blue",
-    completed: "green",
-  };
-  const [statusColorDefect, setStatusColorDefect] = useState();
-
-  const typeColor: Record<"safety" | "environment" | "maintenance", string> = {
-    safety: "green",
-    environment: "cyan",
-    maintenance: "purple",
-  };
-  const [typeColorDefect, setTypeColorDefect] = useState();
-
-  const statusIcon: Record<
-    | "reported"
-    | "in_progress"
-    | "pending_inspection"
-    | "resolved"
-    | "completed",
-    string
-  > = {
-    reported: "campaign",
-    in_progress: "cached",
-    pending_inspection: "pending_actions",
-    resolved: "published_with_changes",
-    completed: "check_circle",
-  };
-  const [statusIconDefect, setstatusIconDefect] = useState();
-
-  const typeIcon: Record<"safety" | "environment" | "maintenance", string> = {
-    safety: "verified_user",
-    environment: "source_environment",
-    maintenance: "manufacturing",
-  };
-  const [typeIconDefect, setTypeIconDefect] = useState();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -163,7 +113,9 @@ export default function Page() {
 
     try {
       const response = await fetchData("put", `/defect/${defect.id}`, true, data);
-      return response;
+      if (response) {
+        setDefect(response)
+      };
     } catch (error) {
       console.error("Update Fail", error);
     }
@@ -306,19 +258,19 @@ export default function Page() {
       </div>
       <div className="flex justify-between items-center ">
         <div className="flex gap-2">
-          <BadgeCustom variant={statusColorDefect} showIcon={true}>
+          <BadgeCustom variant={getDefectStatusVariant(defect.status).variant} showIcon={true}>
             <div className="flex justify-center gap-2">
               <span className="material-symbols-outlined">
-                {statusIconDefect}
+                {getDefectStatusVariant(defect.status).iconName}
               </span>
               {defect.status}
             </div>
           </BadgeCustom>
 
-          <BadgeCustom shape="square" variant={typeColorDefect} showIcon={true}>
+          <BadgeCustom shape="square" variant={getItemTypeVariant(defect.type).variant} showIcon={true}>
             <div className="flex justify-center gap-2">
               <span className="material-symbols-outlined">
-                {typeIconDefect}
+                {getItemTypeVariant(defect.type).iconName}
               </span>
               {defect.type}
             </div>
