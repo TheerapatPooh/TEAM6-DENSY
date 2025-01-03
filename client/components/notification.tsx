@@ -191,7 +191,7 @@ export default function Notification() {
                 destructive={true}
                 onClick={() => removeNotification(id)}
             >
-                <div className="flex items-center justify-center gap-1 p-16 w-full h-full bg-destructive text-card">
+                <div className="flex items-center justify-center gap-1 px-24 w-full h-[110px] bg-destructive text-card rounded-r-md">
                     <span className="material-symbols-outlined">
                         delete
                     </span>

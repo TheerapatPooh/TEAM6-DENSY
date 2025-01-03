@@ -19,12 +19,13 @@ import {
   IDefect,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
-import { fetchData, getItemTypeVariant } from "@/lib/utils";
+import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "./ui/skeleton";
 import { formatTime } from "@/lib/utils";
 import AlertDefect from "./alert-defect";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface PatrolChecklistProps {
   user: IUser;
@@ -38,7 +39,7 @@ interface PatrolChecklistProps {
   }) => void;
   results: Array<{ itemId: number; zoneId: number; status: boolean }>;
   patrolResult: IPatrolResult[];
-  response: (defect: IDefect) => void
+  response?: (defect: IDefect) => void
 }
 
 export default function PatrolChecklist({
@@ -157,17 +158,30 @@ export default function PatrolChecklist({
   }
 
   return (
-    <div className="bg-secondary rounded-md px-4 py-2">
+    <div className="bg-card rounded-md px-4 py-2">
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1" className="border-none">
-          <AccordionTrigger className="hover:no-underline text-2xl font-semibold py-2">
+          <AccordionTrigger className="hover:no-underline text-2xl font-bold py-2">
             {patrolChecklist.checklist.title}
           </AccordionTrigger>
           <AccordionContent>
-            <div className="flex flex-rows items-center gap-2 text-muted-foreground text-base ps-4 py-2  border-t-2 ">
-              <span className="material-symbols-outlined">engineering</span>
-              <p className="font-semibold">{t("Inspector")}</p>
-              <p className="text-card-foreground">{patrolChecklist.inspector.profile.name}</p>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <span className="material-symbols-outlined">person_search</span>
+                <p className="text-lg font-semibold">{t("Inspector")}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Avatar className="custom-shadow h-[35px] w-[35px]">
+                  <AvatarImage
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
+                  />
+                  <AvatarFallback>
+                    {getInitials(patrolChecklist.inspector.profile.name)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <p className="text-card-foreground text-lg">{patrolChecklist.inspector.profile.name}</p>
+              </div>
             </div>
             <div className="ps-2">
               {patrolChecklist.checklist.items?.map((item: IItem) => (
@@ -195,28 +209,35 @@ export default function PatrolChecklist({
                           itemZones.zone.id
                         );
                         return (
-                          <div key={itemZones.zone.id} className="bg-card rounded-md p-2">
+                          <div key={itemZones.zone.id} className="bg-background rounded-md p-2">
                             <div className="flex flex-row justify-between items-center">
                               <div className="flex flex-col">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="material-symbols-outlined">
+                                <div className="flex items-center gap-1 mb-2">
+                                  <span className="material-symbols-outlined text-muted-foreground">
                                     location_on
                                   </span>
-                                  <p className="font-semibold text-lg">
+                                  <p className="font-semibold text-lg text-muted-foreground me-1">
                                     {t("Zone")}
                                   </p>
                                   <p className="text-lg">{z(itemZones.zone.name)}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined">
-                                    badge
-                                  </span>
-                                  <p className="font-semibold text-lg">
-                                    {t("Supervisor")}
-                                  </p>
-                                  <p className="text-lg">
-                                    {itemZones.zone.supervisor.profile.name}
-                                  </p>
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <span className="material-symbols-outlined">engineering</span>
+                                    <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Avatar className="custom-shadow h-[35px] w-[35px]">
+                                      <AvatarImage
+                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZones.zone.supervisor.profile.image?.path}`}
+                                      />
+                                      <AvatarFallback>
+                                        {getInitials(itemZones.zone.supervisor.profile.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+
+                                    <p className="text-card-foreground text-lg">{patrolChecklist.inspector.profile.name}</p>
+                                  </div>
                                 </div>
                               </div>
                               <div className="flex gap-2 pe-2">
