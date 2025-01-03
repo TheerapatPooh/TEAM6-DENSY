@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CreatePatrolCard, PatrolCard } from "@/components/patrol-card";
 import Textfield from "@/components/textfield";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -523,6 +523,7 @@ export default function Page() {
               <div className="flex items-end justify-end gap-2">
                 <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                 <AlertDialogAction
+                  className={buttonVariants({ variant: 'primary', size: 'lg' })}
                   onClick={() => setSecondDialog(true)}
                   disabled={isNextButtonDisabled}
                 >
@@ -580,7 +581,7 @@ export default function Page() {
                   {t('Cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  className="gap-2"
+                  className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
                   onClick={createPatrol}
                   disabled={isSubmitDisabled}
                 >
