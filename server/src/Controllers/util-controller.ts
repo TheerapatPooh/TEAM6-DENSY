@@ -303,6 +303,8 @@ export async function removeNotification(req: Request, res: Response) {
         id: parseInt(id),
       },
     });
+    res.status(200)
+    return
   } catch (error) {
     console.error("Error deleting notification:", error);
   }

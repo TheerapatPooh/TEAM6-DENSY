@@ -236,7 +236,7 @@ export default function PatrolChecklist({
                                       </AvatarFallback>
                                     </Avatar>
 
-                                    <p className="text-card-foreground text-lg">{patrolChecklist.inspector.profile.name}</p>
+                                    <p className="text-card-foreground text-lg">{itemZones.zone.supervisor.profile.name}</p>
                                   </div>
                                 </div>
                               </div>

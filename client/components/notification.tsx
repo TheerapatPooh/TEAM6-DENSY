@@ -52,9 +52,11 @@ export default function Notification() {
     const [notifications, setNotifications] = useState<INotification[]>([])
     const [user, setUser] = useState<IUser>()
     const { socket, isConnected } = useSocket()
-    const router = useRouter()
+    const [unreadCount, setUnreadCount] = useState(0);
 
-    const unreadCount = notifications.filter(notification => !notification.read).length;
+    // const unreadCount = notifications.filter(notification => !notification.read).length
+
+    const router = useRouter()
 
     function formatMessage(message: string) {
         const [key, ...dynamicParts] = message.split('-');
@@ -91,7 +93,11 @@ export default function Notification() {
 
     const removeNotification = async (id: number) => {
         try {
+            setNotifications((prevNotifications) =>
+                prevNotifications.filter((notification) => notification.id !== id)
+            );
             await fetchData("delete", `/notification/${id}`, true);
+            
         } catch (error) {
             console.error("Failed to delete notification:", error);
         }
@@ -99,7 +105,8 @@ export default function Notification() {
 
     const removeAllNotifications = async () => {
         try {
-            await fetchData("delete", `/notifications`, true);
+            const response = await fetchData("delete", `/notifications`, true);
+            return response
         } catch (error) {
             console.error("Failed to delete notification:", error);
         }
@@ -119,9 +126,9 @@ export default function Notification() {
         }
     };
 
-    const handleRemoveAllNotification = () => {
-        removeAllNotifications()
-        setNotifications([])
+    const handleRemoveAllNotifications = async () => {
+        removeAllNotifications();
+        setNotifications([]);
         toast({
             variant: 'success',
             title: a("DeleteAllNotificationTitle"),
@@ -157,6 +164,26 @@ export default function Notification() {
     }, [])
 
     useEffect(() => {
+        if (socket && isConnected && user?.id) {
+            socket.emit('join_room', user.id);
+            // ฟังก์ชันรับ event 'new_notification'
+            socket.on('new_notification', (data: any) => {
+                setNotifications((prevNotifications) => [...prevNotifications, data]);
+            });
+
+            return () => {
+                socket.off('new_notification');
+            };
+        }
+    }, [socket, isConnected]);
+
+    useEffect(() => {
+        console.log("Notifications Updated:", notifications); // ตรวจสอบการเปลี่ยนแปลง State
+
+        setUnreadCount(notifications.filter(notification => !notification.read).length);
+    }, [notifications]);
+
+    useEffect(() => {
         if (unreadCount > 0) {
             const timer = setTimeout(() => {
                 toast({
@@ -170,20 +197,6 @@ export default function Notification() {
             return () => clearTimeout(timer);
         }
     }, [unreadCount])
-
-    useEffect(() => {
-        if (socket && isConnected && user?.id) {
-            socket.emit('join_room', user.id);
-            // ฟังก์ชันรับ event 'new_notification'
-            socket.on('new_notification', (data: any) => {
-                setNotifications((prevNotifications) => [...prevNotifications, data]);
-            });
-
-            return () => {
-                socket.off('new_notification');
-            };
-        }
-    }, [socket, isConnected]);
 
     const trailingActions = (id: number) => (
         <TrailingActions>
@@ -227,7 +240,7 @@ export default function Notification() {
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent align="end" className="p-0">
-                                        <DropdownMenuItem onClick={() => handleRemoveAllNotification()}>
+                                        <DropdownMenuItem onClick={() => handleRemoveAllNotifications()}>
                                             <h1 className='text-destructive'>{t("DeleteAllNotifications")}</h1>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
