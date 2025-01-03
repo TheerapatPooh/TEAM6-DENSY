@@ -7,6 +7,7 @@ import { zones } from "../Utils/data/zones";
 import { items } from "../Utils/data/items";
 import { Checklist } from "@prisma/client";
 import path from "path";
+import { any } from "zod";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่
@@ -15,45 +16,49 @@ import path from "path";
  *     title: String,
  *     description: String,
  *     checklists: Array<{ checklist: { id: number } }>,
- *     userId: number
  *   } (ข้อมูลของ Preset ที่ต้องการสร้าง)
  * Output: JSON object { message: String, preset: Object } ยืนยันการสร้าง Preset สำเร็จ
  **/
 export async function createPreset(req: Request, res: Response) {
   try {
-    const { title, description, checklists, userId } = req.body;
+    const { title, description, checklists } = req.body;
+    const userId = (req as any).user.userId;
+    const intChecklists: number[] = checklists.map(Number)
 
-    if (!title || !description || !checklists || !userId) {
+    if (!title || !description || !Array.isArray(checklists) || !userId) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
 
     const newPreset = await prisma.preset.create({
       data: {
-        title: title,
-        description: description,
+        title,
+        description,
         version: 1,
         latest: true,
         updatedAt: new Date(),
         updatedBy: userId,
       },
     });
-    for (const checklist of checklists) {
-      const { id } = checklist.checklist;
+
+    for (const checklistId of intChecklists) {
       await prisma.presetChecklist.create({
         data: {
           presetId: newPreset.id,
-          checklistId: id,
+          checklistId,
         },
       });
     }
+
     res
       .status(201)
       .json({ message: "Preset created successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Preset
@@ -69,10 +74,12 @@ export async function createPreset(req: Request, res: Response) {
  **/
 export async function updatePreset(req: Request, res: Response) {
   try {
-    const { title, description, checklists, userId } = req.body;
+    const { title, description, checklists } = req.body;
+    const userId = (req as any).user.userId;
     const presetId = parseInt(req.params.id, 10);
+    const intChecklists: number[] = checklists.map(Number)
 
-    if (!presetId || !title || !description || !checklists || !userId) {
+    if (!presetId || !title || !description || !Array.isArray(checklists) || !userId) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -102,16 +109,15 @@ export async function updatePreset(req: Request, res: Response) {
       },
     });
 
-    for (const checklist of checklists) {
-      const { id } = checklist.checklist;
+    for (const checklistId of intChecklists) {
       await prisma.presetChecklist.create({
         data: {
           presetId: newPreset.id,
-          checklistId: id,
+          checklistId: checklistId,
         },
       });
     }
-
+    
     res
       .status(200)
       .json({ message: "Preset updated successfully", preset: newPreset });
@@ -434,20 +440,20 @@ export async function getChecklist(req: Request, res: Response) {
                   include: {
                     supervisor: includeSupervisor
                       ? {
-                          select: {
-                            id: true,
-                            role: true,
-                            profile: {
-                              select: {
-                                id: true,
-                                name: true,
-                                age: true,
-                                tel: true,
-                                address: true,
-                              },
+                        select: {
+                          id: true,
+                          role: true,
+                          profile: {
+                            select: {
+                              id: true,
+                              name: true,
+                              age: true,
+                              tel: true,
+                              address: true,
                             },
                           },
-                        }
+                        },
+                      }
                       : undefined,
                   },
                 },
@@ -484,18 +490,43 @@ export async function getAllChecklists(req: Request, res: Response) {
         latest: true,
       },
       include: {
+        // items: {
+        //   include: {
+        //     itemZones: {
+        //       include: {
+        //         zone: {
+        //           include: {
+        //             supervisor: {
+        //               include: {
+        //                 profile: true
+        //               }
+        //             }
+        //           }
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
         items: {
           select: {
+            id: true,
+            name: true,
+            type: true, // Fetch item types
+            checklistId: true,
             itemZones: {
               select: {
                 zone: {
                   select: {
-                    name: true, // Fetch zone names
+                    name: true,
+                    supervisor: {
+                      select: {
+                        profile: true
+                      }
+                    } // Fetch zone names
                   },
                 },
               },
             },
-            type: true, // Fetch item types
           },
         },
       },
@@ -531,21 +562,21 @@ export async function getAllChecklists(req: Request, res: Response) {
       });
 
       const findImage = findUser?.profile?.imageId
-      ? await prisma.image.findUnique({
+        ? await prisma.image.findUnique({
           where: {
             id: findUser.profile.imageId,
           },
         })
-      : null;
-    
+        : null;
+
 
       const results = {
-        username:findUser?.profile?.name || findUser?.username ||"Unknown User",
-        profileImage:findImage?.path
+        username: findUser?.profile?.name || findUser?.username || "Unknown User",
+        profileImage: findImage?.path
       }
 
       // Safely determine the name or fallback to username
-      return (results );
+      return (results);
     };
 
     // Transform the result
@@ -567,6 +598,8 @@ export async function getAllChecklists(req: Request, res: Response) {
 
         const userdata = await findUser(checklist);
 
+        const items = checklist.items.filter((name, index, self) => self.indexOf(name) === index)
+
         return {
           id: checklist.id,
           title: checklist.title,
@@ -574,11 +607,12 @@ export async function getAllChecklists(req: Request, res: Response) {
           latest: checklist.latest,
           updatedAt: checklist.updatedAt,
           updateBy: checklist.updatedBy,
-          updateByUserName:userdata.username,
-          imagePath:userdata.profileImage || "",
+          updateByUserName: userdata.username,
+          imagePath: userdata.profileImage || "",
           itemCounts,
           zones: zoneNames,
           versionCount: versionCounts[checklist.title] || 0, // Attach the version count
+          items: items
         };
       })
     );
