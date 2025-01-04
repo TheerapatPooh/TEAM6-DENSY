@@ -30,6 +30,17 @@ import {
   Table,
 } from "@/components/ui/table";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -49,8 +60,12 @@ import { tree } from "next/dist/build/templates/app-page";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
+import dynamic from "next/dynamic";
+const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
+    const z = useTranslations("Zone");
+  
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
@@ -104,14 +119,12 @@ export default function Page() {
       [itemId]: isOpen, // Update the open state for the specific item
     }));
   };
-  const handleZoneChange = (itemId: number, zoneId: number) => {
+  const handleZoneChange = (itemId: number, zones: IZone[]) => {
     setSelectedZones((prev) => {
-      const currentZones = prev[itemId] || [];
+      const zoneIds = zones.map((zone) => zone.id); // Get only the IDs
       return {
         ...prev,
-        [itemId]: currentZones.includes(zoneId)
-          ? currentZones.filter((id) => id !== zoneId)
-          : [...currentZones, zoneId],
+        [itemId]: zoneIds, // Update only for the relevant itemId
       };
     });
   };
@@ -151,7 +164,7 @@ export default function Page() {
     const newItem: itemWithZonesName = {
       id: newItemId,
       name: "",
-      type: "",
+      type: undefined,
       zones: [],
       checklistId: newItemId,
       itemZones: [],
@@ -370,7 +383,7 @@ export default function Page() {
         title: "Create Patrol Checklist Successfully",
         description: `Patrol Checklist ${dataToUpdate.title} has been created`,
       });
-      router.push(`/${locale}/admin/settings`);
+      router.push(`/${locale}/admin/settings/patrol-checklist`);
     } catch (error: any) {
       console.error("Unexpected Error:", error);
     }
@@ -449,48 +462,53 @@ export default function Page() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className=" w-5/16">Item</TableHead>
-              <TableHead className=" w-5/16">Type</TableHead>
-              <TableHead className=" w-5/16">Zone</TableHead>
-              <TableHead className=" w-3/16 "></TableHead>
+              <TableHead className=" w-[30%] ">Item</TableHead>
+              <TableHead className=" w-[30%]">Type</TableHead>
+              <TableHead className=" w-[30%]">Zone</TableHead>
+              <TableHead className=" w-[10%] "></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>
+                <TableCell className="">
                   <input
-                    type="text"
                     value={selectedChecklistName[item.id]}
                     onChange={(e) => handleNameChange(item.id, e.target.value)}
-                    className="w-[360px] mt-1 p-2 bg-secondary rounded-md text-base font-semibold text-muted-foreground"
+                    className="max-w-[350px] w-full p-2 bg-card border-none rounded-md text-base font-semibold text-muted-foreground"
                     placeholder="Enter Item title"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className="flex justify-start  px-4 ">
                   <DropdownMenu
                     open={openStatesType[item.id] || false} // Open state for this dropdown
                     onOpenChange={(isOpen) =>
                       handleOpenChangeType(item.id, isOpen)
                     } // Update open state on change
                   >
-                    <DropdownMenuTrigger className="flex items-center gap-2 w-full px-4 py-2 rounded cursor-pointer">
+                    <DropdownMenuTrigger className="flex items-center gap-2  max-w-[350px] w-full py-2 rounded cursor-pointer">
                       <ChevronDownIcon
                         className={`transition-transform duration-200 ${
                           openStatesType[item.id] ? "rotate-180" : "rotate-0"
                         }`}
                       />
-                      <BadgeCustom
-                        shape="square"
-                        iconName={getBadgeIcon(selectedType[item.id])}
-                        variant={getBadgeVariant(selectedType[item.id])}
-                        showIcon
-                      >
+                      <span className="text-base font-semibold text-muted-foreground ">
                         {selectedType[item.id]
-                          ? selectedType[item.id]
-                          : "Selected an Type"}
-                      </BadgeCustom>
+                          ? ""
+                          : "Select a Type"}
+                      </span>
+                      {selectedType[item.id] && (
+                        <BadgeCustom
+                          shape="square"
+                          iconName={getBadgeIcon(selectedType[item.id])}
+                          variant={getBadgeVariant(selectedType[item.id])}
+                          showIcon
+                        >
+                          {selectedType[item.id]}
+                        </BadgeCustom>
+                      )}
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent
                       align="start"
                       side="bottom"
@@ -542,7 +560,61 @@ export default function Page() {
                   </DropdownMenu>
                 </TableCell>
                 <TableCell>
-                  <DropdownMenu
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      asChild
+                      className="flex items-center gap-2 rounded cursor-pointer  max-w-[350px] w-full"
+                    >
+                      <div className=" overflow-hidden text-center">
+                        <p className="text-base font-semibold text-muted-foreground truncate whitespace-nowrap ">
+                          {selectedZones[item.id]?.length > 0
+                            ? selectedZones[item.id]
+                                .map(
+                                  (zoneId) => z(allZone.find((zone) => zone.id === zoneId)
+                                  ?.name)
+                                    
+                                )
+                                .join(", ")
+                            : "Select Zones"}
+                        </p>
+                      </div>
+                    </AlertDialogTrigger>
+
+                    <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-2xl">
+                          Choose Inspection Zone
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-base">
+                          Please select zones for inspection.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div>
+                        <div className="text-muted-foreground flex items-center">
+                          <span className="material-symbols-outlined">
+                            location_on
+                          </span>
+                          Zone
+                        </div>
+                        <div className=" flex justify-center bg-secondary rounded-lg py-4">
+                          <Map
+                            disable={false}
+                            onZoneSelect={(zones: IZone[]) =>
+                              handleZoneChange(item.id, zones)
+                            }
+                            initialSelectedZones={selectedZones[item.id] || []} // Pass only zone IDs for this itemId
+                          />
+                        </div>
+                      </div>
+
+                      <AlertDialogFooter>
+                        <AlertDialogAction className="bg-primary">
+                          Done
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  {/* <DropdownMenu
                     key={item.id}
                     open={openStatesZone[item.id] || false} // Open state for this dropdown
                     onOpenChange={(isOpen) =>
@@ -595,7 +667,7 @@ export default function Page() {
                         ))}
                       </ScrollArea>
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu> */}
                 </TableCell>
                 <TableCell
                   onClick={() => {
