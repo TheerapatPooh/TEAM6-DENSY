@@ -85,19 +85,22 @@ export default function Page() {
   }, []);
   console.log(defect);
 
-  let beforeImage =
-    defect?.images
-      .filter((image) => image.image.user.id === defect.userId)
-      .map((image: any) => ({
-        path: image.image.path,
-      })) || null;
 
-  let afterImage =
-    defect?.images
-      .filter((image) => image.image.user.id !== defect.userId)
-      .map((image: any) => ({
-        path: image.image.path,
-      })) || null;
+
+  const beforeImage = defect?.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id === defect.userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null;
+
+  const afterImage = defect?.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id !== defect.userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null;
+
 
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -120,7 +123,7 @@ export default function Page() {
       console.error("Update Fail", error);
     }
   };
-  
+
   const handleAcceptDefect = () => {
     setPendingAction(() => () => handleDefectUpdate("in_progress"));
     handleOpenDialog();
@@ -287,7 +290,7 @@ export default function Page() {
                 </div>
               </div>
               <div className="flex justify-start items-center gap-2">
-                <Avatar className="h-[24px] w-[24px]">
+                <Avatar className="h-[35px] w-[35px]">
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                   />
@@ -295,7 +298,7 @@ export default function Page() {
                     {getInitials(defect.user.profile.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className=" text-sm text-gray-500">Joe Dohn</div>
+                <div className=" text-sm text-gray-500">{defect.user.profile.name}</div>
               </div>
             </div>
           </div>
@@ -334,8 +337,8 @@ export default function Page() {
                 onClick={() => handleBeforeImageClick(0)}
               >
                 {beforeImage &&
-                beforeImage.length > 0 &&
-                beforeImage[0].path ? (
+                  beforeImage.length > 0 &&
+                  beforeImage[0].path ? (
                   <Image
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
                     alt="First Image"
@@ -393,11 +396,10 @@ export default function Page() {
                               setBeforeSlideIndex(index);
                             }}
                             disabled
-                            className={`h-3 w-3 rounded-full mx-1 ${
-                              beforeSlideIndex === index
+                            className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index
                                 ? "bg-white"
                                 : "bg-gray-400"
-                            }`}
+                              }`}
                             aria-label={`Slide ${index + 1}`}
                           />
                         ))}
@@ -483,11 +485,10 @@ export default function Page() {
                             setAfterSlideIndex(index);
                           }}
                           disabled
-                          className={`h-3 w-3 rounded-full mx-1 ${
-                            afterSlideIndex === index
+                          className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index
                               ? "bg-white"
                               : "bg-gray-400"
-                          }`}
+                            }`}
                           aria-label={`Slide ${index + 1}`}
                         />
                       ))}

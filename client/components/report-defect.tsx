@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { IDefect } from "@/app/type";
+import { defectStatus, IDefect } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { formattedPatrolId, formatTime, getDefectStatusVariant, getItemTypeVariant } from "@/lib/utils";
+import { fetchData, formattedPatrolId, formatTime, getDefectStatusVariant, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AlertDefect from "./alert-defect";
@@ -29,16 +29,21 @@ interface ReportDefectProps {
 
 export default function ReportDefect({ defect, page, response }: ReportDefectProps) {
   const s = useTranslations("Status");
+  const t = useTranslations("General")
 
-  const beforeImage = defect.images.filter((image) => image.image.user.id === defect.userId)
+  const beforeImage = defect.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id === defect.userId)
     .map((image: any) => ({
       path: image.image.path,
-    })) || null
+    })) || null;
 
-  const afterImage = defect.images.filter((image) => image.image.user.id !== defect.userId)
+  const afterImage = defect.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id !== defect.userId)
     .map((image: any) => ({
       path: image.image.path,
-    })) || null
+    })) || null;
 
   const [isBeforeCarouselOpen, setIsBeforeCarouselOpen] = useState(false);
   const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
@@ -46,7 +51,7 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
   const [afterSlideIndex, setAfterSlideIndex] = useState(0);
   const router = useRouter();
   const locale = useLocale();
-  
+
   // Handle before image click
   const handleBeforeImageClick = (index: number) => {
     setBeforeSlideIndex(index);
@@ -70,6 +75,26 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
     setIsAfterCarouselOpen(false);
     setAfterSlideIndex(0);
   };
+  const handleReworkOrVerifyDefect = async (
+    id: number,
+    status: defectStatus,
+  ) => {
+    const data = {
+      status: status
+    }
+
+    try {
+      const updateStatusDefect = await fetchData(
+        "put",
+        `/defect/${id}`,
+        true,
+        data,
+      );
+      response(updateStatusDefect)
+    } catch (error) {
+      console.error("Error creating defect:", error);
+    }
+  };
 
   const [api, setApi] = React.useState<CarouselApi>()
 
@@ -88,14 +113,14 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
   }
 
   const navigateToPatrol = (patrolId: number) => {
-    router.push(`/${locale}/patrol/${patrolId}`)
+    router.push(`/${locale}/patrol/${patrolId}/detail`)
   }
 
   return (
     <Accordion type="single" collapsible>
       <AccordionItem
         value="item-1"
-        className="bg-secondary rounded-md w-full px-4 py-2 border-none"
+        className="bg-card rounded-md w-full px-4 py-2 border-none"
       >
         <AccordionTrigger className="hover:no-underline">
           <div className="flex items-center space-x-2">
@@ -144,31 +169,26 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
         {/* หลังจากกดเปิด */}
         <AccordionContent>
           <div className="flex flex-col p-1">
-
             {/* supervisor */}
             <div className="flex flex-row justify-between w-full h-9 mb-4">
-              <div className="flex flex-row">
-                <div className="flex flex-row pr-2 items-center pt-1">
-                  <span className="material-symbols-outlined text-gray-500 cursor-default user-select-none mr-1">
-                    engineering
-                  </span>
-                  <p className="text-base font-semibold text-gray-500 cursor-default user-select-none">
-                    Supervisor
-                  </p>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <span className="material-symbols-outlined">engineering</span>
+                  <p className="text-lg font-semibold">{t("Supervisor")}</p>
                 </div>
-
-                <div className="flex flex-row items-center pt-1">
-                  <Avatar className="mr-1 h-6 w-6" >
-                    <AvatarImage />
+                <div className="flex items-center gap-1">
+                  <Avatar className="custom-shadow h-[35px] w-[35px]">
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
+                    />
                     <AvatarFallback>
+                      {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-base font-semibold text-gray-500 cursor-default user-select-none">
-                    {defect.patrolResult.itemZone.zone.supervisor.profile.name}
-                  </p>
+
+                  <p className="text-card-foreground text-lg">{defect.patrolResult.itemZone.zone.supervisor.profile.name}</p>
                 </div>
               </div>
-
               <div>
                 <AlertDefect
                   defect={defect}
@@ -184,26 +204,26 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
             {page === "patrol-defect" && (<div className="flex flex-col mb-4">
               <div className="flex flex-row mb-1">
                 <div className="flex flex-row pr-2 items-center pt-1">
-                  <span className="material-symbols-outlined text-gray-500 cursor-default user-select-none mr-1">
+                  <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none mr-1">
                     task
                   </span>
-                  <p className="text-base font-semibold text-gray-500  cursor-default user-select-none">
+                  <p className="text-base font-semibold text-muted-foreground  cursor-default user-select-none">
                     Patrol
                   </p>
                 </div>
               </div>
 
-              <Button className="w-fit h-fit bg-background" variant="ghost" onClick={() => navigateToPatrol(defect.patrolResult.patrol.id)}>
+              <Button className="w-fit h-fit bg-secondary" variant="ghost" onClick={() => navigateToPatrol(defect.patrolResult.patrol.id)}>
                 <div className="flex flex-col items-start py-4 px-6">
                   <p className="text-xl font-semibold text-card-foreground mb-2 cursor-default user-select-none ">
                     {defect.patrolResult.patrol.preset.title}
                   </p>
 
                   <div className="flex flex-row items-center">
-                    <span className="material-symbols-outlined text-gray-500 cursor-default user-select-none pr-2">
+                    <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none pr-2">
                       description
                     </span>
-                    <p className="text-gray-500 cursor-default user-select-none">
+                    <p className="text-muted-foreground cursor-default user-select-none">
                       {formattedPatrolId(defect.patrolResult.patrol.id)}
                     </p>
                   </div>
@@ -215,10 +235,10 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
             <div className="flex flex-col mb-4">
               <div className="flex flex-row mb-1">
                 <div className="flex flex-row pr-2 items-center pt-1">
-                  <span className="material-symbols-outlined text-gray-500 cursor-default user-select-none mr-1">
+                  <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none mr-1">
                     data_info_alert
                   </span>
-                  <p className="text-base font-semibold text-gray-500 cursor-default user-select-none">
+                  <p className="text-base font-semibold text-muted-foreground cursor-default user-select-none">
                     Detail
                   </p>
                 </div>
@@ -226,7 +246,7 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
 
               <div>
                 <Textarea
-                  className="text-xl text-text w-full h-40 border-none bg-background"
+                  className="text-xl text-text w-full h-40 border-none bg-secondary pointer-events-none"
                   placeholder="Description"
                   value={defect.description}
                   readOnly
@@ -238,19 +258,17 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
             <div className="flex flex-col mb-4">
               <div className="flex flex-row mb-1">
                 <div className="flex flex-row pr-2 items-center pt-1">
-                  <span className="material-symbols-outlined text-gray-500 cursor-default user-select-none mr-1">
+                  <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none mr-1">
                     location_on
                   </span>
-                  <p className="text-base font-semibold text-gray-500 cursor-default user-select-none">
+                  <p className="text-base font-semibold text-muted-foreground cursor-default user-select-none">
                     Zone
                   </p>
                 </div>
               </div>
 
-              <div className="p-2 rounded-md bg-background map-container cursor-default user-select-none ">
-                <Map disable={true} initialSelectedZones={[defect.patrolResult.zoneId]}>
-
-                </Map>
+              <div className="p-2 rounded-md bg-secondary map-container cursor-default user-select-none ">
+                <Map disable={true} initialSelectedZones={[defect.patrolResult.zoneId]} />
               </div>
             </div>
 
@@ -260,13 +278,13 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
                 {/* before */}
                 <div className="w-full">
                   <div className="flex items-center">
-                    <p className="text-base font-semibold text-gray-500 mb-1 cursor-default user-select-none">
+                    <p className="text-base font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
                       Before
                     </p>
                   </div>
 
                   <div>
-                    <div className="p-4 rounded-md bg-background h-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleBeforeImageClick(0)}>
+                    <div className="p-4 rounded-md bg-secondary h-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleBeforeImageClick(0)}>
                       {beforeImage && beforeImage.length > 0 && beforeImage[0].path ? (
                         <Image
                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
@@ -335,13 +353,13 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
                 {/* after */}
                 <div className="w-full">
                   <div className="flex items-center">
-                    <p className="text-base font-semibold text-gray-500 mb-1 cursor-default user-select-none">
+                    <p className="text-base font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
                       After
                     </p>
                   </div>
 
                   <div>
-                    <div className="p-4 rounded-md bg-background h-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
+                    <div className="p-4 rounded-md bg-secondary h-40 flex items-center justify-center cursor-default user-select-none" onClick={() => handleAfterImageClick(0)}>
                       {afterImage && afterImage.length > 0 && afterImage[0].path ? (
                         <Image
                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
@@ -410,17 +428,16 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
               </div>
             </div>
 
-            {/* แสดงปุ่ม Verify และ Rework เฉพาะเมื่อ status เป็น Resolved */}
             <div>
-              {defect.status === "resolved" && (
+              {defect.status === "resolved" && page === "patrol-defect" && (
                 <div className="flex space-x-2 justify-end">
-                  <Button variant="destructive" size={"lg"}>
+                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection")}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       cancel
                     </span>
                     Rework
                   </Button>
-                  <Button variant="success" size={"lg"}>
+                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed")}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       check_circle
                     </span>
