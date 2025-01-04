@@ -288,7 +288,13 @@ export async function removeOldNotifications() {
   }
 }
 
-// Function to delete a specific notification by ID
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบการแจ้งเตือนที่ต้องการ
+ * Input: 
+ * - req.param = id
+ * Output: 
+ * - ไม่มี Output ที่ส่งกลับ แต่จะลบการแจ้งเตือนออกจากฐานข้อมูล
+**/
 export async function removeNotification(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -297,6 +303,30 @@ export async function removeNotification(req: Request, res: Response) {
         id: parseInt(id),
       },
     });
+    res.status(200)
+    return
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+  }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบการแจ้งเตือนที่ต้องการ
+ * Input: 
+ * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * Output: 
+ * - ไม่มี Output ที่ส่งกลับ แต่จะลบการแจ้งเตือนทั้งหมดของผู้ใช้ออกจากฐานข้อมูล
+**/
+export async function removeAllNotifications(req: Request, res: Response) {
+  const userId = (req as any).user.userId;
+  try {
+    await prisma.notification.deleteMany({
+      where: {
+        userId: userId,
+      },
+    });
+    res.status(200)
+    return
   } catch (error) {
     console.error("Error deleting notification:", error);
   }

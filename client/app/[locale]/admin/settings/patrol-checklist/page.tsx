@@ -1,5 +1,6 @@
 'use client'
 import { IChecklist, IUser } from '@/app/type';
+import TabMenu from '@/components/tab-menu';
 import Textfield from '@/components/textfield';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -83,7 +84,12 @@ export default function Page() {
 
   return (
     <div>
+      <div className='mb-4'>
+        <TabMenu />
+      </div>
+
       <div className="flex items-center gap-2">
+
         <Textfield
           iconName="search"
           showIcon={true}

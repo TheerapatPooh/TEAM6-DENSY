@@ -8,7 +8,7 @@ router.get('/users', authenticateUser, getAllUsers)
 router.get('/user', authenticateUser, getUser)
 router.get('/user/:id', authenticateUser, getUser)
 router.post('/user', authenticateUser, authorzied(['admin']), createUser)
-router.put('/profile', authenticateUser, upload.single('image'), updateProfile)
+router.put('/profile', authenticateUser, upload.single('imageProfile'), updateProfile)
 router.put('/user/:id', authenticateUser, updateUser)
 router.delete('/user/:id', authenticateUser, authorzied(['admin']), removeUser)
 
