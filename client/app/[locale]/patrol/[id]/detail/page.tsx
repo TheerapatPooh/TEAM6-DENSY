@@ -1,5 +1,5 @@
 'use client'
-import { IDefect, IPatrolChecklist } from '@/app/type';
+import { IDefect, IPatrolChecklist, patrolStatus } from '@/app/type';
 import BadgeCustom from '@/components/badge-custom';
 import Loading from '@/components/loading';
 import PatrolChecklist from '@/components/patrol-checklist';

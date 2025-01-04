@@ -62,6 +62,8 @@
     "Unlock": "Unlock",
     "DeleteAllNotifications": "Delete All Notifications",
     "Total": "Total",
+    "Before": "Before",
+    "After" : "After",
     "Type": "Type",
     "Resolve": "Resolve",
     "Close": "Close",

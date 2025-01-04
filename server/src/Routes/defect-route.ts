@@ -1,4 +1,4 @@
-import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment, } from "@Controllers/defect-controller.js";
+import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorzied, upload } from "@Controllers/util-controller.js";
 
@@ -12,7 +12,7 @@ router.get('/defects', authenticateUser, authorzied(['admin', 'supervisor']), ge
 router.put('/defect/:id',
   upload.array('imageFiles', 10),
   authenticateUser,
-  authorzied(['admin', 'inspector']),
+  authorzied(['admin', 'inspector', 'supervisor']),
   updateDefect
 );
 router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']), deleteDefect)
