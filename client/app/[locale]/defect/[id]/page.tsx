@@ -22,6 +22,7 @@ import { defectStatus } from "../../../type";
 import { AlertCustom } from "../../../../components/alert-custom";
 import { useTranslations } from "next-intl";
 import { response } from 'express';
+import AlertDefect from "@/components/alert-defect";
 
 export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -146,6 +147,10 @@ export default function Page() {
     }
   };
 
+  const fetchRealtimeData = (defect: IDefect) => {
+    setDefect(defect)
+  }
+
   if (!defect) {
     return <Loading />;
   }
@@ -236,14 +241,24 @@ export default function Page() {
                 break;
             }
             return (
-              <Button
-                variant={variant}
-                onClick={handleFunction}
-                disabled={disabled}
-              >
-                <span className="material-symbols-outlined">{iconName}</span>
-                {t(text)}
-              </Button>
+              <>
+                {defect.status === "in_progress" ? <AlertDefect
+                  defect={defect}
+                  type={"resolve"}
+                  response={(defect: IDefect) => {
+                    fetchRealtimeData(defect)
+                  }}/> :
+
+                  <Button
+                    variant={variant}
+                    onClick={handleFunction}
+                    disabled={disabled}
+                  >
+                    <span className="material-symbols-outlined">{iconName}</span>
+                    {t(text)}
+                  </Button>
+                }
+              </>
             );
           })()}
 
@@ -397,8 +412,8 @@ export default function Page() {
                             }}
                             disabled
                             className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index
-                                ? "bg-white"
-                                : "bg-gray-400"
+                              ? "bg-white"
+                              : "bg-gray-400"
                               }`}
                             aria-label={`Slide ${index + 1}`}
                           />
@@ -486,8 +501,8 @@ export default function Page() {
                           }}
                           disabled
                           className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index
-                              ? "bg-white"
-                              : "bg-gray-400"
+                            ? "bg-white"
+                            : "bg-gray-400"
                             }`}
                           aria-label={`Slide ${index + 1}`}
                         />
