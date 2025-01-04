@@ -119,7 +119,7 @@ export function PatrolCard({
   };
 
   const handleDetail = () => {
-    router.push(`/${locale}/patrol/${id}`)
+    router.push(`/${locale}/patrol/${id}/detail`)
   }
 
 

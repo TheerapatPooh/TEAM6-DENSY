@@ -153,7 +153,7 @@ export interface IPatrolResult {
 export interface IItem {
     id: number;
     name: string;
-    type: string;
+    type: itemType;
     checklistId: number;
 
     itemZones: IItemZone[];

@@ -3,18 +3,21 @@ import BadgeCustom from './badge-custom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatTime, getDefectStatusVariant, getInitials, getItemTypeVariant } from '@/lib/utils'
 import { IDefect, itemType } from '@/app/type'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import {
     HoverCard,
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { useRouter } from 'next/navigation'
 
 
 export default function Defect({ defect }: { defect: IDefect }) {
     const s = useTranslations("Status");
     const t = useTranslations('General');
     const z = useTranslations('Zone');
+    const router = useRouter()
+    const locale = useLocale()
     const { variant, iconName } = getDefectStatusVariant(defect.status)
     const color = (type: itemType) => {
         switch (type) {
@@ -26,8 +29,9 @@ export default function Defect({ defect }: { defect: IDefect }) {
                 return "destructive"
         }
     }
+
     return (
-        <div className={`bg-card p-4 rounded-lg shadow-md border-l-8 border-${color(defect.type)} cursor-pointer`}>
+        <div className={`bg-card p-4 rounded-lg shadow-md border-l-8 border-${color(defect.type)} cursor-pointer`} onClick={() => router.push(`/${locale}/defect/${defect.id}`) }>
             <div className="flex items-center justify-between">
                 <div className="flex items-center text-black-500 space-x-2">
                     <span className="material-symbols-outlined text-muted-foreground cursor-default ">schedule</span>

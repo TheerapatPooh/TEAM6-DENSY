@@ -7,6 +7,7 @@ import { fetchData } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useState } from 'react'
 import Map from '@/components/map'
+import TabMenu from '@/components/tab-menu'
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -36,6 +37,10 @@ export default function Page() {
 
   return (
     <div>
+      <div className='mb-2'>
+        <TabMenu />
+      </div>
+
       <div className="flex justify-between items-center">
         <p className="text-2xl font-bold">{t("Choose Zone and Supervisor")}</p>
         <Button variant="primary" size="lg" className="flex gap-2">

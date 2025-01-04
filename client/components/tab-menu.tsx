@@ -5,7 +5,7 @@ import React from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLocale } from 'next-intl'
 
-export default function TabMenu() {
+export default function TabMenu({ id }: { id?: string }) {
     const router = useRouter()
     const pathname = usePathname()
     const locale = useLocale()
@@ -19,16 +19,16 @@ export default function TabMenu() {
     });
 
     const handleTabClick = (link: string) => {
-        router.push(`/${locale}/${link}`);
+        router.push(`/${locale}${link.replace("${id}", id || "")}`);
     };
 
     return (
         <div>
             {currentSubMenu ? (
-                <Tabs defaultValue={`/`} value={pathname}>
+                <Tabs defaultValue={`/${locale}`} value={pathname}>
                     <TabsList className="bg-secondary p-1 h-fit ">
                         {currentSubMenu.items.map((item, index) => (
-                            <TabsTrigger key={index} value={`/${locale}${item.link}`} onClick={() => handleTabClick(item.link)}>
+                            <TabsTrigger key={index} value={`/${locale}${item.link.replace("${id}", id || "")}`} onClick={() => handleTabClick(item.link)}>
                                 <span className="material-symbols-outlined mr-2">
                                     {item.icon}
                                 </span>
