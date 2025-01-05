@@ -130,11 +130,6 @@ export default function Page() {
     handleOpenDialog();
   };
 
-  const handleResolvedDefect = () => {
-    setPendingAction(() => () => handleDefectUpdate("in_progress"));
-    handleOpenDialog();
-  };
-
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
   };
@@ -266,9 +261,9 @@ export default function Page() {
             <AlertCustom
               title={"Are you sure to accept defect?"}
               description={"Please confirm to accept defect."}
-              primaryBottonText={"Confirm"}
+              primaryButtonText={"Confirm"}
               primaryIcon="check"
-              secondaryBottonText={"Cancel"}
+              secondaryButtonText={"Cancel"}
               backResult={handleDialogResult}
             ></AlertCustom>
           )}

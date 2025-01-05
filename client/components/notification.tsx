@@ -14,7 +14,7 @@
 **/
 
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { INotification, notificationType, IUser } from '@/app/type'
-import { fetchData, formatTime } from '@/lib/utils'
+import { fetchData, formatTime, getNotificationToast } from '@/lib/utils'
 import { useSocket } from '@/components/socket-provider'
 import BadgeCustom from '@/components/badge-custom'
 import { useRouter } from 'next/navigation'
@@ -40,7 +40,6 @@ import {
 } from 'react-swipeable-list';
 import 'react-swipeable-list/dist/styles.css';
 
-
 export default function Notification() {
     const t = useTranslations('General'); // ฟังก์ชันแปลข้อความจาก 'General'
     const s = useTranslations("Status");
@@ -48,6 +47,7 @@ export default function Notification() {
     const n = useTranslations('Notification');
     const a = useTranslations('Alert');
 
+    const prevUnreadCountRef = useRef<number>(0);
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
     const [user, setUser] = useState<IUser>()
@@ -60,10 +60,12 @@ export default function Notification() {
 
     function formatMessage(message: string) {
         const [key, ...dynamicParts] = message.split('-');
-        const date = dynamicParts.join('-');
+        console.log(key)
+        let date = dynamicParts.join('-');
+        date = formatTime(date)
+
         return { key, date };
     }
-
 
     const fetchNotifications = async () => {
         try {
@@ -97,7 +99,7 @@ export default function Notification() {
                 prevNotifications.filter((notification) => notification.id !== id)
             );
             await fetchData("delete", `/notification/${id}`, true);
-            
+
         } catch (error) {
             console.error("Failed to delete notification:", error);
         }
@@ -167,8 +169,21 @@ export default function Notification() {
         if (socket && isConnected && user?.id) {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
-            socket.on('new_notification', (data: any) => {
+            socket.on('new_notification', (data: INotification) => {
                 setNotifications((prevNotifications) => [...prevNotifications, data]);
+
+                const notification = formatMessage(data.message)
+                const toastData = getNotificationToast(notification.key)
+
+                if (toastData) {
+                    toast({
+                        variant: toastData.variant,
+                        title: a(toastData.title),
+                        description: a(toastData.description, { date: notification.date }),
+                    });
+                } else {
+                    console.error(`Notification not found for key: ${notification.key}`);
+                }
             });
 
             return () => {
@@ -178,25 +193,22 @@ export default function Notification() {
     }, [socket, isConnected]);
 
     useEffect(() => {
-        console.log("Notifications Updated:", notifications); // ตรวจสอบการเปลี่ยนแปลง State
-
         setUnreadCount(notifications.filter(notification => !notification.read).length);
     }, [notifications]);
 
     useEffect(() => {
-        if (unreadCount > 0) {
-            const timer = setTimeout(() => {
-                toast({
-                    variant: "default",
-                    title: a("UnreadNotificationTitle", { count: unreadCount }),
-                    description: a("UnreadNotificationDescription"),
-                });
-            }, 5000); // 5000 มิลลิวินาที = 5 วินาที
-
-            // ล้าง Timer เมื่อ Component ถูก Unmount หรือ unreadCount เปลี่ยน
-            return () => clearTimeout(timer);
+        const prevUnreadCount = prevUnreadCountRef.current;
+        // ตรวจสอบว่า unreadCount ปัจจุบัน > 0 และก่อนหน้าเป็น 0
+        if (unreadCount > 0 && prevUnreadCount === 0) {
+            toast({
+                variant: "default",
+                title: a("UnreadNotificationTitle", { count: unreadCount }),
+                description: a("UnreadNotificationDescription"),
+            });
         }
-    }, [unreadCount])
+        // อัปเดตค่า previousUnreadCount เป็นค่าปัจจุบัน
+        prevUnreadCountRef.current = unreadCount;
+    }, [unreadCount]);
 
     const trailingActions = (id: number) => (
         <TrailingActions>
@@ -270,7 +282,7 @@ export default function Notification() {
                                                         className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                         readOnly
                                                     >
-                                                        {n(key, { date: formatTime(date) })}
+                                                        {n(key, { date: date })}
                                                     </textarea>
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-xs font-normal text-muted-foreground text-start">
