@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { INotification, notificationType, IUser } from '@/app/type'
-import { fetchData, formatTime } from '@/lib/utils'
+import { fetchData, formatTime, getNotificationToast } from '@/lib/utils'
 import { useSocket } from '@/components/socket-provider'
 import BadgeCustom from '@/components/badge-custom'
 import { useRouter } from 'next/navigation'
@@ -39,7 +39,6 @@ import {
     TrailingActions,
 } from 'react-swipeable-list';
 import 'react-swipeable-list/dist/styles.css';
-
 
 export default function Notification() {
     const t = useTranslations('General'); // ฟังก์ชันแปลข้อความจาก 'General'
@@ -60,10 +59,12 @@ export default function Notification() {
 
     function formatMessage(message: string) {
         const [key, ...dynamicParts] = message.split('-');
-        const date = dynamicParts.join('-');
+        console.log(key)
+        let date = dynamicParts.join('-');
+        date = formatTime(date)
+
         return { key, date };
     }
-
 
     const fetchNotifications = async () => {
         try {
@@ -97,7 +98,7 @@ export default function Notification() {
                 prevNotifications.filter((notification) => notification.id !== id)
             );
             await fetchData("delete", `/notification/${id}`, true);
-            
+
         } catch (error) {
             console.error("Failed to delete notification:", error);
         }
@@ -167,8 +168,21 @@ export default function Notification() {
         if (socket && isConnected && user?.id) {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
-            socket.on('new_notification', (data: any) => {
+            socket.on('new_notification', (data: INotification) => {
                 setNotifications((prevNotifications) => [...prevNotifications, data]);
+
+                const notification = formatMessage(data.message)
+                const toastData = getNotificationToast(notification.key)
+
+                if (notification) {
+                    toast({
+                        variant: toastData.variant,
+                        title: a(toastData.title),
+                        description: a(toastData.description, { date: notification.date }),
+                    });
+                } else {
+                    console.error(`Notification not found for key: ${notification.key}`);
+                }
             });
 
             return () => {
@@ -178,8 +192,6 @@ export default function Notification() {
     }, [socket, isConnected]);
 
     useEffect(() => {
-        console.log("Notifications Updated:", notifications); // ตรวจสอบการเปลี่ยนแปลง State
-
         setUnreadCount(notifications.filter(notification => !notification.read).length);
     }, [notifications]);
 
@@ -270,7 +282,7 @@ export default function Notification() {
                                                         className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                         readOnly
                                                     >
-                                                        {n(key, { date: formatTime(date) })}
+                                                        {n(key, { date: date })}
                                                     </textarea>
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-xs font-normal text-muted-foreground text-start">

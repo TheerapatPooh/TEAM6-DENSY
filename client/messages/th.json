@@ -63,7 +63,7 @@
     "DeleteAllNotifications": "ลบการแจ้งเตือนทั้งหมด",
     "Total": "ทั้งหมด",
     "Before": "ก่อน",
-    "After" : "หลัง",
+    "After": "หลัง",
     "Type": "ชนิด",
     "Resolve": "แก้ไขปัญหา",
     "Close": "ปิด",
@@ -148,7 +148,6 @@
     "report_defect": "มีการแจ้งปัญหาในโซนที่คุณรับผิดชอบ กรุณาตรวจสอบทันที",
     "new_comment": "มีคำแนะนำใหม่เพิ่มเข้ามา โปรดตรวจสอบ",
     "confirm_comment": "คำแนะนำได้รับการรับรู้เรียบร้อยแล้ว"
-
   },
   "Sidebar": {
     "Dashboard": "แดชบอร์ด",
@@ -169,6 +168,14 @@
     "PatrolCreateTitle": "สร้างรายการตรวจ Patrol สำเร็จ",
     "PatrolCreateDescription": "รายการตรวจ Patrol กำหนดเวลาเรียบร้อยแล้ว.",
     "DeleteAllNotificationTitle": "ล้างการแจ้งเตือนแล้ว!",
-    "DeleteAllNotificationDescription": "การแจ้งเตือนทั้งหมดถูกล้างออกเรียบร้อยแล้ว"
+    "DeleteAllNotificationDescription": "การแจ้งเตือนทั้งหมดถูกล้างออกเรียบร้อยแล้ว.",
+    "PatrolCreateErrorMissingInspectorTitle": "ไม่มีผู้ตรวจสอบ",
+    "PatrolCreateErrorMissingInspectorDescription": "โปรดตรวจสอบให้แน่ใจว่าคุณได้เลือกผู้ตรวจสอบสำหรับการตรวจตราแล้ว.",
+    "PatrolCreateInvalidDateTitle": "วันที่ไม่ถูกต้อง",
+    "PatrolCreateInvalidDateDescription": "โปรดระบุวันที่ให้ถูกต้องสำหรับการตรวจตรา.",
+    "PatrolInvalidDate": "วันที่ไม่ถูกต้อง กรุณาเลือกวันที่ปัจจุบันหรือวันที่ในอนาคต.",
+    "PatrolUnselectDate": "กรุณาเลือกวันที่สำหรับการตรวจตรา.",
+    "PatrolAssignTitle": "การตรวจตราถูกกำหนดแล้ว",
+    "PatrolAssignDescription": "การตรวจตราของคุณถูกกำหนดไว้สำหรับวันที่ {date}"
   }
 }

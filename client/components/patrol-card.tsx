@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { formattedPatrolId, getInitials } from "@/lib/utils";
+import { formatPatrolId, getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import {
   AlertDialog,
@@ -176,7 +176,7 @@ export function PatrolCard({
       <CardContent className="flex flex-col gap-2 p-0">
         <div className="flex text-muted-foreground items-center gap-1">
           <span className="material-symbols-outlined">description</span>
-          <p className="text-lg font-normal">{formattedPatrolId(id)}</p>
+          <p className="text-lg font-normal">{formatPatrolId(id)}</p>
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger

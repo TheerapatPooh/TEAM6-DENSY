@@ -262,3 +262,9 @@ export const LoginSchema = z.object({
     password: z.string().min(1, { message: "LoginPasswordRequire" }),
     rememberMe: z.boolean().optional()
 })
+
+export interface IToast {
+    variant: "default" | "error" | "success"; 
+    title: string;
+    description: string;
+}

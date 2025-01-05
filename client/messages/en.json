@@ -168,6 +168,14 @@
     "PatrolCreateTitle": "Patrol Created",
     "PatrolCreateDescription": "The patrol has been successfully scheduled.",
     "DeleteAllNotificationTitle": "Notifications Cleared!",
-    "DeleteAllNotificationDescription": "All notifications have been successfully cleared."
+    "DeleteAllNotificationDescription": "All notifications have been successfully cleared.",
+    "PatrolCreateErrorMissingInspectorTitle": "Missing Inspector",
+    "PatrolCreateErrorMissingInspectorDescription": "Make sure to select inspector for the patrol.",
+    "PatrolCreateInvalidDateTitle": "Invalid Date",
+    "PatrolCreateInvalidDateDescription": "Please select a valid date for the patrol.",
+    "PatrolInvalidDate": "Invalid date selected. Please choose a current or future date.",
+    "PatrolUnselectDate": "Please select date for patrol.",
+    "PatrolAssignTitle": "Patrol Assigned",
+    "PatrolAssignDescription": "Your patrol is scheduled for {date}"
   }
 }

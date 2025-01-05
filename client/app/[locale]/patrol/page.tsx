@@ -72,17 +72,43 @@ export default function Page() {
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const isNextButtonDisabled = !selectedPreset;
-  const isSubmitDisabled =
-    !selectedDate ||
-    !selectedPreset ||
-    patrolChecklist.length !== selectedPreset.presetChecklists.length;
 
   const createPatrol = async () => {
-    if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
-      console.error("Not Empty Fields");
+    if (!selectedDate) {
+      setDateError("PatrolUnselectDate");
       return;
+    } else {
+      setDateError(null);
+    }
+
+    // ตรวจสอบว่าวันที่เลือกน้อยกว่าวันปัจจุบันหรือไม่
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0); 
+
+    if (selected < today) {
+      setDateError("PatrolInvalidDate");
+      toast({
+        variant: "error",
+        title: a("PatrolCreateInvalidDateTitle"),
+        description: a("PatrolCreateInvalidDateDescription"),
+      });
+      return;
+    }
+
+    if (patrolChecklist.length !== selectedPreset.presetChecklists.length ||
+      !patrolChecklist.every((item) => item.userId !== null)) {
+      toast({
+        variant: "error",
+        title: a("PatrolCreateErrorMissingInspectorTitle"),
+        description: a("PatrolCreateErrorMissingInspectorDescription"),
+      });
+      return
     }
 
     const data = {
@@ -94,14 +120,15 @@ export default function Page() {
     try {
       const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
-      console.log(data)
-      console.log("res: ", response)
       setAllPatrols((prev) => [...prev, response]);
       toast({
         variant: "success",
         title: a("PatrolCreateTitle"),
         description: a("PatrolCreateDescription"),
       });
+      setPatrolChecklist([])
+      setSelectedDate(null)
+      setSelectedPreset(null)
     } catch (error) {
       console.error(error)
     }
@@ -124,6 +151,7 @@ export default function Page() {
       }
     });
   };
+
 
   const handleSortChange = (type: string, value: string) => {
     setSort((prevSort) => ({
@@ -283,6 +311,11 @@ export default function Page() {
     }
   }, [sort, allPatrols]);
 
+  useEffect(() => {
+    if(selectedDate !== null || selectedDate !== undefined) {
+      setDateError(null)
+    }
+  }, [selectedDate])
   if (loading) {
     return <Loading />
   }
@@ -354,6 +387,9 @@ export default function Page() {
                 onSelect={handleDateSelect}
                 className="my-date-picker"
               />
+              {dateError && (
+                <p className="ttext-sm font-light text-destructive italic mt-1">{dateError}</p>
+              )}
             </div>
             <div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
@@ -554,6 +590,9 @@ export default function Page() {
                 <DatePicker
                   handleSelectedTime={(time: string) => setSelectedDate(time)}
                 />
+                {dateError && (
+                  <p className="text-sm font-light italic text-destructive mt-1">{a(dateError)}</p>
+                )}
               </div>
             </AlertDialogHeader>
             <div className="flex flex-col gap-1">
@@ -583,7 +622,6 @@ export default function Page() {
                 <AlertDialogAction
                   className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
                   onClick={createPatrol}
-                  disabled={isSubmitDisabled}
                 >
                   <span className="material-symbols-outlined text-2xl">
                     note_add
