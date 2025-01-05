@@ -176,6 +176,10 @@
     "PatrolInvalidDate": "วันที่ไม่ถูกต้อง กรุณาเลือกวันที่ปัจจุบันหรือวันที่ในอนาคต.",
     "PatrolUnselectDate": "กรุณาเลือกวันที่สำหรับการตรวจตรา.",
     "PatrolAssignTitle": "การตรวจตราถูกกำหนดแล้ว",
-    "PatrolAssignDescription": "การตรวจตราของคุณถูกกำหนดไว้สำหรับวันที่ {date}"
+    "PatrolAssignDescription": "การตรวจตราของคุณถูกกำหนดไว้สำหรับวันที่ {date}",
+    "PatrolCreateConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการสร้างการตรวจตรา?",
+    "PatrolCreateConfirmDescription": "กรุณายืนยันเพื่อสร้างการตรวจตรา",
+    "PatrolMissingDateTitle": "ยังไม่ได้เลือกวันที่",
+    "PatrolMissingDateDescription": "โปรดเลือกวันที่สำหรับการตรวจตรา"
   }
 }

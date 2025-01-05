@@ -63,7 +63,7 @@
     "DeleteAllNotifications": "Delete All Notifications",
     "Total": "Total",
     "Before": "Before",
-    "After" : "After",
+    "After": "After",
     "Type": "Type",
     "Resolve": "Resolve",
     "Close": "Close",
@@ -176,6 +176,10 @@
     "PatrolInvalidDate": "Invalid date selected. Please choose a current or future date.",
     "PatrolUnselectDate": "Please select date for patrol.",
     "PatrolAssignTitle": "Patrol Assigned",
-    "PatrolAssignDescription": "Your patrol is scheduled for {date}"
+    "PatrolAssignDescription": "Your patrol is scheduled for {date}",
+    "PatrolCreateConfirmTitle": "Are you sure to create patrol?",
+    "PatrolCreateConfirmDescription": "Please confirm to create patrol.",
+    "PatrolMissingDateTitle": "Missing Date!",
+    "PatrolMissingDateDescription": "Please select a date for the patrol."
   }
 }

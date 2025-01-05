@@ -56,6 +56,7 @@ import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
 import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
+import { AlertCustom } from "@/components/alert-custom";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -65,6 +66,9 @@ export default function Page() {
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
@@ -76,9 +80,31 @@ export default function Page() {
 
   const isNextButtonDisabled = !selectedPreset;
 
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+    }
+  };
+
+  const handlecreatePatrol = () => {
+    setPendingAction(() => () => createPatrol());
+    handleOpenDialog();
+  };
+
   const createPatrol = async () => {
     if (!selectedDate) {
       setDateError("PatrolUnselectDate");
+      toast({
+        variant: "error",
+        title: a("PatrolMissingDateTitle"),
+        description: a("PatrolMissingDateDescription"),
+      });
       return;
     } else {
       setDateError(null);
@@ -86,10 +112,10 @@ export default function Page() {
 
     // ตรวจสอบว่าวันที่เลือกน้อยกว่าวันปัจจุบันหรือไม่
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
-    
+    today.setHours(0, 0, 0, 0);
+
     const selected = new Date(selectedDate);
-    selected.setHours(0, 0, 0, 0); 
+    selected.setHours(0, 0, 0, 0);
 
     if (selected < today) {
       setDateError("PatrolInvalidDate");
@@ -312,7 +338,7 @@ export default function Page() {
   }, [sort, allPatrols]);
 
   useEffect(() => {
-    if(selectedDate !== null || selectedDate !== undefined) {
+    if (selectedDate !== null || selectedDate !== undefined) {
       setDateError(null)
     }
   }, [selectedDate])
@@ -621,7 +647,7 @@ export default function Page() {
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
-                  onClick={createPatrol}
+                  onClick={handlecreatePatrol}
                 >
                   <span className="material-symbols-outlined text-2xl">
                     note_add
@@ -633,6 +659,16 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {isDialogOpen && (
+          <AlertCustom
+            title={a("PatrolCreateConfirmTitle")}
+            description={a("PatrolCreateConfirmDescription")}
+            primaryButtonText={t("Confirm")}
+            primaryIcon="check"
+            secondaryButtonText={t("Cancel")}
+            backResult={handleDialogResult}
+          ></AlertCustom>
+        )}
         {allPatrols &&
           allPatrols.map((patrol: IPatrol) => {
             return (
