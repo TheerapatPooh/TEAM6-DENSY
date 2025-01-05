@@ -189,7 +189,7 @@
     "DefectRecieveDescription": "มีการแจ้งข้อบกพร่องใหม่ กรุณาดำเนินการแก้ไขโดยด่วน",
     "CommentRecieveTitle": "ได้รับความคิดเห็นใหม่",
     "CommentRecieveDescription": "มีความคิดเห็นใหม่เข้ามา กรุณาตรวจสอบ",
-    "PatrolRemoveSuccessTitle": "กการตรวจตราถูกลบแล้ว",
+    "PatrolRemoveSuccessTitle": "การตรวจตราถูกลบแล้ว",
     "PatrolRemoveSuccessDescription": "การตรวจตราถูกลบเรียบร้อยแล้ว"
   }
 }

@@ -175,7 +175,7 @@ export default function Notification() {
                 const notification = formatMessage(data.message)
                 const toastData = getNotificationToast(notification.key)
 
-                if (notification) {
+                if (toastData) {
                     toast({
                         variant: toastData.variant,
                         title: a(toastData.title),
