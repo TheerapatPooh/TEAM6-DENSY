@@ -92,7 +92,7 @@ export default function Page() {
     }
   };
 
-  const handlecreatePatrol = () => {
+  const handleCreatePatrol = () => {
     setPendingAction(() => () => createPatrol());
     handleOpenDialog();
   };
@@ -158,6 +158,15 @@ export default function Page() {
     } catch (error) {
       console.error(error)
     }
+  };
+
+  const handleRemoveSuccess = (id: number) => {
+    setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== id));
+    toast({
+      variant: "success",
+      title: a("PatrolRemoveSuccessTitle"),
+      description: a("PatrolRemoveSuccessDescription"),
+    });
   };
 
   const handleSelectUser = (checklistId: number, userId: number) => {
@@ -647,7 +656,7 @@ export default function Page() {
                 </AlertDialogCancel>
                 <AlertDialogAction
                   className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
-                  onClick={handlecreatePatrol}
+                  onClick={handleCreatePatrol}
                 >
                   <span className="material-symbols-outlined text-2xl">
                     note_add
@@ -680,6 +689,7 @@ export default function Page() {
                 id={patrol.id}
                 itemCounts={patrol.itemCounts}
                 inspectors={patrol.inspectors}
+                onRemoveSuccess={handleRemoveSuccess}
               />
             );
           })}

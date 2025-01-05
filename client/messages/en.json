@@ -180,6 +180,16 @@
     "PatrolCreateConfirmTitle": "Are you sure to create patrol?",
     "PatrolCreateConfirmDescription": "Please confirm to create patrol.",
     "PatrolMissingDateTitle": "Missing Date!",
-    "PatrolMissingDateDescription": "Please select a date for the patrol."
+    "PatrolMissingDateDescription": "Please select a date for the patrol.",
+    "PatrolRemoveConfirmTitle": "Are you sure to delete patrol?",
+    "PatrolRemoveConfirmDescription": "Please confirm to delete patrol.",
+    "PatrolRemoveErrorTitle": "Delete Not Allowed",
+    "PatrolRemoveErrorDescription": "You can only delete patrols in \"Pending\" status.",
+    "DefectRecieveTitle": "New Defect Reported",
+    "DefectRecieveDescription": "A new defect has been reported. Please address it immediately.",
+    "CommentRecieveTitle": "New Comment Received",
+    "CommentRecieveDescription": "A new comment has been received. Please review it.",
+    "PatrolRemoveSuccessTitle": "Patrol Deleted",
+    "PatrolRemoveSuccessDescription": "The patrol has been successfully removed."
   }
 }

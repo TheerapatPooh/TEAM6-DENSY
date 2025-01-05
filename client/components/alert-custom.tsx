@@ -46,7 +46,7 @@ export function AlertCustom({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <AlertDialogContent className="flex flex-col px-6 py-4 gap-6 max-w-[600px]">
+      <AlertDialogContent onClick={(e) => e.stopPropagation()} className="flex flex-col px-6 py-4 gap-6 max-w-[600px]">
         <AlertDialogHeader className="flex gap-2">
           <AlertDialogTitle className="text-xl font-semibold text-card-foreground">{title}</AlertDialogTitle>
           <AlertDialogDescription className="text-base font-medium text-card-foreground">{description}</AlertDialogDescription>

@@ -14,7 +14,7 @@
 **/
 
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -47,6 +47,7 @@ export default function Notification() {
     const n = useTranslations('Notification');
     const a = useTranslations('Alert');
 
+    const prevUnreadCountRef = useRef<number>(0);
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
     const [user, setUser] = useState<IUser>()
@@ -196,19 +197,18 @@ export default function Notification() {
     }, [notifications]);
 
     useEffect(() => {
-        if (unreadCount > 0) {
-            const timer = setTimeout(() => {
-                toast({
-                    variant: "default",
-                    title: a("UnreadNotificationTitle", { count: unreadCount }),
-                    description: a("UnreadNotificationDescription"),
-                });
-            }, 5000); // 5000 มิลลิวินาที = 5 วินาที
-
-            // ล้าง Timer เมื่อ Component ถูก Unmount หรือ unreadCount เปลี่ยน
-            return () => clearTimeout(timer);
+        const prevUnreadCount = prevUnreadCountRef.current;
+        // ตรวจสอบว่า unreadCount ปัจจุบัน > 0 และก่อนหน้าเป็น 0
+        if (unreadCount > 0 && prevUnreadCount === 0) {
+            toast({
+                variant: "default",
+                title: a("UnreadNotificationTitle", { count: unreadCount }),
+                description: a("UnreadNotificationDescription"),
+            });
         }
-    }, [unreadCount])
+        // อัปเดตค่า previousUnreadCount เป็นค่าปัจจุบัน
+        prevUnreadCountRef.current = unreadCount;
+    }, [unreadCount]);
 
     const trailingActions = (id: number) => (
         <TrailingActions>

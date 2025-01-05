@@ -345,6 +345,18 @@ export function getNotificationToast(key: string): IToast | null {
         title: "PatrolAssignTitle",
         description: "PatrolAssignDescription",
       };
+    case "report_defect":
+      return {
+        variant: "default",
+        title: "DefectRecieveTitle",
+        description: "DefectRecieveDescription",
+      };
+    case "new_comment":
+      return {
+        variant: "default",
+        title: "CommentRecieveTitle",
+        description: "CommentRecieveDescription",
+      };
     default:
       return null;
   }
