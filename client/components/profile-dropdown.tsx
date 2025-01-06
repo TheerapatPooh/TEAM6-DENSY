@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { fetchData, logout } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +38,8 @@ export default function ProfileDropdown() {
   const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<IUser>();
   const router = useRouter();
+  const locale = useLocale();
+
 
   const hadleLogout = async () => {
     await logout();
@@ -115,7 +117,6 @@ export default function ProfileDropdown() {
                 </Avatar>
               ) : (
                 <Skeleton className="h-12 w-12 rounded-full" />
-
               )}
               <div className="w-[97px] h-[27px] font-normal text-lg truncate">
                 {profile ? (
@@ -137,7 +138,8 @@ export default function ProfileDropdown() {
           <DropdownMenuLabel className="w-[226px] text-lg font-semibold">
             {t("MyAccount")}
           </DropdownMenuLabel>
-          <DropdownMenuItem className="rounded-md">
+          <DropdownMenuItem className="rounded-md" onClick={() => router.push(`/${locale}/profile`)}
+          >
             <div className="flex gap-1 w-full items-center">
               <span className="material-symbols-outlined">account_circle</span>
               <div>{t("Profile")}</div>

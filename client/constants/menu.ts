@@ -9,6 +9,13 @@ export const menuList = [
 //ตัวแปรค่าคงที่,Path และ Icon สำหรับ SubMenu 
 export const subMenuList = [
     {
+        group: "patrol",
+        items: [
+            { link: "/patrol/${id}/detail", text: "Detail", icon: "data_info_alert" },
+            { link: "/patrol/${id}/report", text: "Report", icon: "Campaign" },
+        ]
+    },
+    {
         group: "admin/dashboard",
         items: [
             { link: "/admin/dashboard/overview", text: "Overview", icon: "layers" },

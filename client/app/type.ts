@@ -153,7 +153,7 @@ export interface IPatrolResult {
 export interface IItem {
     id: number;
     name: string;
-    type: string;
+    type: itemType;
     checklistId: number;
 
     itemZones: IItemZone[];
@@ -262,3 +262,9 @@ export const LoginSchema = z.object({
     password: z.string().min(1, { message: "LoginPasswordRequire" }),
     rememberMe: z.boolean().optional()
 })
+
+export interface IToast {
+    variant: "default" | "error" | "success"; 
+    title: string;
+    description: string;
+}

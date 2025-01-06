@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CreatePatrolCard, PatrolCard } from "@/components/patrol-card";
 import Textfield from "@/components/textfield";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -56,6 +56,7 @@ import { sortData } from "@/lib/utils";
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
 import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
+import { AlertCustom } from "@/components/alert-custom";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -66,23 +67,74 @@ export default function Page() {
   const [allPresets, setAllPresets] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
   const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
   const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>([]);
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const isNextButtonDisabled = !selectedPreset;
-  const isSubmitDisabled =
-    !selectedDate ||
-    !selectedPreset ||
-    patrolChecklist.length !== selectedPreset.presetChecklists.length;
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+    }
+  };
+
+  const handleCreatePatrol = () => {
+    setPendingAction(() => () => createPatrol());
+    handleOpenDialog();
+  };
 
   const createPatrol = async () => {
-    if (!selectedDate || !selectedPreset || patrolChecklist.length === 0) {
-      console.error("Not Empty Fields");
+    if (!selectedDate) {
+      setDateError("PatrolUnselectDate");
+      toast({
+        variant: "error",
+        title: a("PatrolMissingDateTitle"),
+        description: a("PatrolMissingDateDescription"),
+      });
       return;
+    } else {
+      setDateError(null);
+    }
+
+    // ตรวจสอบว่าวันที่เลือกน้อยกว่าวันปัจจุบันหรือไม่
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0);
+
+    if (selected < today) {
+      setDateError("PatrolInvalidDate");
+      toast({
+        variant: "error",
+        title: a("PatrolCreateInvalidDateTitle"),
+        description: a("PatrolCreateInvalidDateDescription"),
+      });
+      return;
+    }
+
+    if (patrolChecklist.length !== selectedPreset.presetChecklists.length ||
+      !patrolChecklist.every((item) => item.userId !== null)) {
+      toast({
+        variant: "error",
+        title: a("PatrolCreateErrorMissingInspectorTitle"),
+        description: a("PatrolCreateErrorMissingInspectorDescription"),
+      });
+      return
     }
 
     const data = {
@@ -94,17 +146,27 @@ export default function Page() {
     try {
       const response = await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
-      console.log(data)
-      console.log("res: ", response)
       setAllPatrols((prev) => [...prev, response]);
       toast({
         variant: "success",
         title: a("PatrolCreateTitle"),
         description: a("PatrolCreateDescription"),
       });
+      setPatrolChecklist([])
+      setSelectedDate(null)
+      setSelectedPreset(null)
     } catch (error) {
       console.error(error)
     }
+  };
+
+  const handleRemoveSuccess = (id: number) => {
+    setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== id));
+    toast({
+      variant: "success",
+      title: a("PatrolRemoveSuccessTitle"),
+      description: a("PatrolRemoveSuccessDescription"),
+    });
   };
 
   const handleSelectUser = (checklistId: number, userId: number) => {
@@ -124,6 +186,7 @@ export default function Page() {
       }
     });
   };
+
 
   const handleSortChange = (type: string, value: string) => {
     setSort((prevSort) => ({
@@ -283,6 +346,11 @@ export default function Page() {
     }
   }, [sort, allPatrols]);
 
+  useEffect(() => {
+    if (selectedDate !== null || selectedDate !== undefined) {
+      setDateError(null)
+    }
+  }, [selectedDate])
   if (loading) {
     return <Loading />
   }
@@ -354,6 +422,9 @@ export default function Page() {
                 onSelect={handleDateSelect}
                 className="my-date-picker"
               />
+              {dateError && (
+                <p className="ttext-sm font-light text-destructive italic mt-1">{dateError}</p>
+              )}
             </div>
             <div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
@@ -523,6 +594,7 @@ export default function Page() {
               <div className="flex items-end justify-end gap-2">
                 <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                 <AlertDialogAction
+                  className={buttonVariants({ variant: 'primary', size: 'lg' })}
                   onClick={() => setSecondDialog(true)}
                   disabled={isNextButtonDisabled}
                 >
@@ -553,6 +625,9 @@ export default function Page() {
                 <DatePicker
                   handleSelectedTime={(time: string) => setSelectedDate(time)}
                 />
+                {dateError && (
+                  <p className="text-sm font-light italic text-destructive mt-1">{a(dateError)}</p>
+                )}
               </div>
             </AlertDialogHeader>
             <div className="flex flex-col gap-1">
@@ -580,9 +655,8 @@ export default function Page() {
                   {t('Cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  className="gap-2"
-                  onClick={createPatrol}
-                  disabled={isSubmitDisabled}
+                  className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
+                  onClick={handleCreatePatrol}
                 >
                   <span className="material-symbols-outlined text-2xl">
                     note_add
@@ -594,6 +668,16 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {isDialogOpen && (
+          <AlertCustom
+            title={a("PatrolCreateConfirmTitle")}
+            description={a("PatrolCreateConfirmDescription")}
+            primaryButtonText={t("Confirm")}
+            primaryIcon="check"
+            secondaryButtonText={t("Cancel")}
+            backResult={handleDialogResult}
+          ></AlertCustom>
+        )}
         {allPatrols &&
           allPatrols.map((patrol: IPatrol) => {
             return (
@@ -605,6 +689,7 @@ export default function Page() {
                 id={patrol.id}
                 itemCounts={patrol.itemCounts}
                 inspectors={patrol.inspectors}
+                onRemoveSuccess={handleRemoveSuccess}
               />
             );
           })}

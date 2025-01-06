@@ -403,7 +403,7 @@ export async function createPatrol(req: Request, res: Response) {
         await createNotification({
           message: message,
           type: "request" as NotificationType,
-          url: `/patrol/${newPatrol.id}`,
+          url: `/patrol/${newPatrol.id}/detail`,
           userId: userId,
         });
 
@@ -568,7 +568,7 @@ export async function startPatrol(req: Request, res: Response) {
             await createNotification({
               message: message,
               type: "information" as NotificationType,
-              url: `/patrol/${updatePatrol.id}`,
+              url: `/patrol/${updatePatrol.id}/detail`,
               userId: inspectorId,
             });
 
@@ -662,7 +662,7 @@ export async function finishPatrol(req: Request, res: Response) {
         await createNotification({
           message: message,
           type: "information" as NotificationType,
-          url: `/patrol/${updatePatrol.id}`,
+          url: `/patrol/${updatePatrol.id}/detail`,
           userId: inspectorId,
         });
         notifiedInspectors.add(inspectorId);

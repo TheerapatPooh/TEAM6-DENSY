@@ -14,7 +14,7 @@
 **/
 
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,14 +25,20 @@ import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { INotification, notificationType, IUser } from '@/app/type'
-import { fetchData, formatTime } from '@/lib/utils'
+import { fetchData, formatTime, getNotificationToast } from '@/lib/utils'
 import { useSocket } from '@/components/socket-provider'
 import BadgeCustom from '@/components/badge-custom'
 import { useRouter } from 'next/navigation'
 import { timeAgo } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from '@/hooks/use-toast'
-
+import {
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
+} from 'react-swipeable-list';
+import 'react-swipeable-list/dist/styles.css';
 
 export default function Notification() {
     const t = useTranslations('General'); // ฟังก์ชันแปลข้อความจาก 'General'
@@ -42,34 +48,24 @@ export default function Notification() {
     const a = useTranslations('Alert');
     const z = useTranslations('Zone');
 
+    const prevUnreadCountRef = useRef<number>(0);
     const locale = useLocale()
     const [notifications, setNotifications] = useState<INotification[]>([])
     const [user, setUser] = useState<IUser>()
     const { socket, isConnected } = useSocket()
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    // const unreadCount = notifications.filter(notification => !notification.read).length
+
     const router = useRouter()
 
-    const unreadCount = notifications.filter(notification => !notification.read).length;
-
     function formatMessage(message: string) {
-        const [key, param] = message.split("-", 2);
+        const [key, ...dynamicParts] = message.split('-');
+        console.log(key)
+        let date = dynamicParts.join('-');
+        date = formatTime(date)
 
-        return { key, param };
-    }
-
-    function getNotificationMessage(notification: INotification) {
-        const { key, param } = formatMessage(notification.message);
-
-        switch (key) {
-            case "patrol_assigned":
-                return n(key, { date: formatTime(param) });
-
-            case "update_supervisor":
-                const zone = z(param)
-                return n(key, { zone: zone });
-
-            default:
-                return n(notification.message); 
-        }
+        return { key, date };
     }
 
     const fetchNotifications = async () => {
@@ -98,6 +94,27 @@ export default function Notification() {
         }
     };
 
+    const removeNotification = async (id: number) => {
+        try {
+            setNotifications((prevNotifications) =>
+                prevNotifications.filter((notification) => notification.id !== id)
+            );
+            await fetchData("delete", `/notification/${id}`, true);
+
+        } catch (error) {
+            console.error("Failed to delete notification:", error);
+        }
+    };
+
+    const removeAllNotifications = async () => {
+        try {
+            const response = await fetchData("delete", `/notifications`, true);
+            return response
+        } catch (error) {
+            console.error("Failed to delete notification:", error);
+        }
+    };
+
     const handleNotificationClick = (notification: INotification) => {
         if (!notification.read) {
             setNotifications(prevNotifications =>
@@ -110,6 +127,16 @@ export default function Notification() {
         if (notification.url) {
             router.push(`/${locale}/${notification.url}`); // ถ้ามี URL ให้ redirect ไป
         }
+    };
+
+    const handleRemoveAllNotifications = async () => {
+        removeAllNotifications();
+        setNotifications([]);
+        toast({
+            variant: 'success',
+            title: a("DeleteAllNotificationTitle"),
+            description: a("DeleteAllNotificationDescription"),
+        });
     };
 
     const markAllAsRead = async () => {
@@ -140,26 +167,24 @@ export default function Notification() {
     }, [])
 
     useEffect(() => {
-        if (unreadCount > 0) {
-            const timer = setTimeout(() => {
-                toast({
-                    variant: "default",
-                    title: a("UnreadNotificationTitle", { count: unreadCount }),
-                    description: a("UnreadNotificationDescription"),
-                });
-            }, 5000); // 5000 มิลลิวินาที = 5 วินาที
-
-            // ล้าง Timer เมื่อ Component ถูก Unmount หรือ unreadCount เปลี่ยน
-            return () => clearTimeout(timer);
-        }
-    }, [unreadCount])
-
-    useEffect(() => {
         if (socket && isConnected && user?.id) {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
-            socket.on('new_notification', (data: any) => {
+            socket.on('new_notification', (data: INotification) => {
                 setNotifications((prevNotifications) => [...prevNotifications, data]);
+
+                const notification = formatMessage(data.message)
+                const toastData = getNotificationToast(notification.key)
+
+                if (toastData) {
+                    toast({
+                        variant: toastData.variant,
+                        title: a(toastData.title),
+                        description: a(toastData.description, { date: notification.date }),
+                    });
+                } else {
+                    console.error(`Notification not found for key: ${notification.key}`);
+                }
             });
 
             return () => {
@@ -167,6 +192,40 @@ export default function Notification() {
             };
         }
     }, [socket, isConnected]);
+
+    useEffect(() => {
+        setUnreadCount(notifications.filter(notification => !notification.read).length);
+    }, [notifications]);
+
+    useEffect(() => {
+        const prevUnreadCount = prevUnreadCountRef.current;
+        // ตรวจสอบว่า unreadCount ปัจจุบัน > 0 และก่อนหน้าเป็น 0
+        if (unreadCount > 0 && prevUnreadCount === 0) {
+            toast({
+                variant: "default",
+                title: a("UnreadNotificationTitle", { count: unreadCount }),
+                description: a("UnreadNotificationDescription"),
+            });
+        }
+        // อัปเดตค่า previousUnreadCount เป็นค่าปัจจุบัน
+        prevUnreadCountRef.current = unreadCount;
+    }, [unreadCount]);
+
+    const trailingActions = (id: number) => (
+        <TrailingActions>
+            <SwipeAction
+                destructive={true}
+                onClick={() => removeNotification(id)}
+            >
+                <div className="flex items-center justify-center gap-1 px-24 w-full h-[110px] bg-destructive text-card rounded-r-md">
+                    <span className="material-symbols-outlined">
+                        delete
+                    </span>
+                    <p className='text-lg font-semibold'>{t("Delete")}</p>
+                </div>
+            </SwipeAction>
+        </TrailingActions>
+    );
 
     return (
         <DropdownMenu>
@@ -194,7 +253,7 @@ export default function Notification() {
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent align="end" className="p-0">
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRemoveAllNotifications()}>
                                             <h1 className='text-destructive'>{t("DeleteAllNotifications")}</h1>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -203,53 +262,59 @@ export default function Notification() {
                             <p className='p-0 text-base font-normal text-muted-foreground'>{t('YouHaveUnreadMessages', { count: unreadCount })}</p>
                         </CardTitle>
                     </CardHeader>
-                    <div className='h-full w-full flex flex-col gap-6'>
-                        <ScrollArea className="flex-1 p-0 pr-4 overflow-y-auto">
-                            {getRecentNotifications().map((notification, index) => {
-                                const message = getNotificationMessage(notification);
-                                return (
-                                    <Button
-                                        key={index}
-                                        variant={'ghost'}
-                                        className="justify-between items-center w-full h-fit gap-6 px-6 py-4 truncate mb-4"
-                                        onClick={() => handleNotificationClick(notification)}
-                                    >
-                                        <span className={`h-3 w-3 rounded-full ${notification.read ? 'bg-input' : 'bg-primary'}`} />
-                                        <div className="flex flex-col justify-start w-full truncate gap-1">
-                                            <textarea
-                                                className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
-                                                readOnly
+                    <div className='h-full overflow-y-auto flex flex-col gap-6'>
+                        <ScrollArea className="flex-1 p-0 pr-4">
+                            <SwipeableList style={{ overflow: 'visible' }}>
+                                {getRecentNotifications().map((notification, index) => {
+                                    const { key, date } = formatMessage(notification.message);
+                                    return (
+                                        <SwipeableListItem
+                                            key={index}
+                                            trailingActions={trailingActions(notification.id)}>
+                                            <Button
+                                                key={index}
+                                                variant={'ghost'}
+                                                className="justify-between items-center w-full h-fit gap-6 px-6 py-4 truncate mb-4"
+                                                onClick={() => handleNotificationClick(notification)}
                                             >
-                                                {message}
-                                            </textarea>
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-xs font-normal text-muted-foreground text-start">
-                                                    {timeAgo(notification.timestamp, d)}
-                                                </p>
-                                                {(() => {
-                                                    let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
-                                                    switch (notification.type as notificationType) {
-                                                        case "information":
-                                                            variant = "blue";
-                                                            break;
-                                                        case "request":
-                                                            variant = "orange";
-                                                            break;
-                                                        default:
-                                                            variant = "purple";
-                                                            break;
-                                                    }
-                                                    return (
-                                                        <BadgeCustom variant={variant}>
-                                                            {s(notification.type)}
-                                                        </BadgeCustom>
-                                                    );
-                                                })()}
-                                            </div>
-                                        </div>
-                                    </Button>
-                                );
-                            })}
+                                                <span className={`h-3 w-3 rounded-full ${notification.read ? 'bg-input' : 'bg-primary'}`} />
+                                                <div className="flex flex-col justify-start w-full truncate gap-1">
+                                                    <textarea
+                                                        className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
+                                                        readOnly
+                                                    >
+                                                        {n(key, { date: date })}
+                                                    </textarea>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-xs font-normal text-muted-foreground text-start">
+                                                            {timeAgo(notification.timestamp, d)}
+                                                        </p>
+                                                        {(() => {
+                                                            let variant: "green" | "red" | "yellow" | "blue" | "default" | "purple" | "secondary" | "mint" | "orange" | "cyan" | undefined;
+                                                            switch (notification.type as notificationType) {
+                                                                case "information":
+                                                                    variant = "blue";
+                                                                    break;
+                                                                case "request":
+                                                                    variant = "orange";
+                                                                    break;
+                                                                default:
+                                                                    variant = "purple";
+                                                                    break;
+                                                            }
+                                                            return (
+                                                                <BadgeCustom variant={variant}>
+                                                                    {s(notification.type)}
+                                                                </BadgeCustom>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            </Button>
+                                        </SwipeableListItem>
+                                    );
+                                })}
+                            </SwipeableList>
                         </ScrollArea>
                         <Button variant={'primary'} size={'lg'} className="w-full"
                             onClick={markAllAsRead}>

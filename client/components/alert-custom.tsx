@@ -9,67 +9,66 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { buttonVariants } from "./ui/button";
 
 export interface alertProps {
-  title: String;
-  description: String;
-  primaryBottonText: String;
-  secondaryBottonText: String;
+  title: string;
+  description: string;
+  primaryButtonText: string;
+  secondaryButtonText: string;
   primaryIcon?: string;
   secondaryIcon?: string;
+  primaryVariant?: 'default' | 'destructive' | 'success' | 'fail' | 'outline' | 'secondary' | 'ghost' | 'link' | 'primary';
   backResult: (result: boolean) => void;
 }
 
 export function AlertCustom({
   title,
   description,
-  primaryBottonText,
-  secondaryBottonText,
+  primaryButtonText,
+  secondaryButtonText,
   primaryIcon,
   secondaryIcon,
+  primaryVariant,
   backResult,
 }: alertProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleAction = (result: boolean) => {
     backResult(result);
-    setIsOpen(false); 
+    setIsOpen(false);
   };
 
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
   };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <AlertDialogContent onClick={handleContentClick}>
-        <AlertDialog open={isOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{title}</AlertDialogTitle>
-              <AlertDialogDescription>{description}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                className="gap-2"
-                onClick={() => handleAction(false)}
-              >
-                <span className="material-symbols-outlined">
-                  {secondaryIcon}
-                </span>
-                {secondaryBottonText}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className="gap-2"
-                onClick={() => handleAction(true)}
-              >
-                <span className="material-symbols-outlined">{primaryIcon}</span>
-                {primaryBottonText}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      <AlertDialogContent onClick={(e) => e.stopPropagation()} className="flex flex-col px-6 py-4 gap-6 max-w-[600px]">
+        <AlertDialogHeader className="flex gap-2">
+          <AlertDialogTitle className="text-xl font-semibold text-card-foreground">{title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-base font-medium text-card-foreground">{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            className={buttonVariants({ variant: "secondary", size: "lg" })}
+            onClick={() => handleAction(false)}
+          >
+            <span className="material-symbols-outlined">
+              {secondaryIcon}
+            </span>
+            {secondaryButtonText}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className={buttonVariants({ variant: primaryVariant ? primaryVariant : 'destructive', size: "lg" })}
+            onClick={() => handleAction(true)}
+          >
+            <span className="material-symbols-outlined">{primaryIcon}</span>
+            {primaryButtonText}
+          </AlertDialogAction>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

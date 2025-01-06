@@ -239,6 +239,23 @@ export async function getDefect(req: Request, res: Response) {
               }
             }
           }
+        },
+        patrolResult: {
+          select: {
+            itemZone: {
+              select: {
+                zone: {
+                  include: {
+                    supervisor: {
+                      select: {
+                        profile: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });
@@ -494,6 +511,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       type,
       status,
       defectUserId,
+      supervisorId,
       patrolResultId,
     } = req.body;
     const newImageFiles = req.files as Express.Multer.File[];
@@ -512,35 +530,36 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         select: { imageId: true },
       });
 
-      const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
+      if (defectUserId) {
+        const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
 
-      const imagesToDelete = await prisma.image.findMany({
-        where: { id: { in: imageIdsToDelete } },
-        select: { path: true },
-      });
+        const imagesToDelete = await prisma.image.findMany({
+          where: { id: { in: imageIdsToDelete } },
+          select: { path: true },
+        });
 
-      for (const image of imagesToDelete) {
-        const filePath = path.join(uploadsPath, image.path);
-        try {
-          fs.unlinkSync(filePath);
-          console.log(`File at ${filePath} deleted successfully.`);
-        } catch (err) {
-          console.error(`Failed to delete file at ${filePath}:`, err);
+        for (const image of imagesToDelete) {
+          const filePath = path.join(uploadsPath, image.path);
+          try {
+            fs.unlinkSync(filePath);
+            console.log(`File at ${filePath} deleted successfully.`);
+          } catch (err) {
+            console.error(`Failed to delete file at ${filePath}:`, err);
+          }
         }
+        await prisma.defectImage.deleteMany({
+          where: { defectId: Number(id) },
+        });
+        await prisma.image.deleteMany({
+          where: { id: { in: imageIdsToDelete } },
+        });
       }
-
-      await prisma.defectImage.deleteMany({
-        where: { defectId: Number(id) },
-      });
-      await prisma.image.deleteMany({
-        where: { id: { in: imageIdsToDelete } },
-      });
 
       for (const file of newImageFiles) {
         const image = await prisma.image.create({
           data: {
             path: file.filename,
-            updatedBy: parseInt(defectUserId, 10),
+            updatedBy: parseInt(defectUserId ? defectUserId : supervisorId, 10),
           },
         });
         await prisma.defectImage.create({
@@ -552,16 +571,25 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       }
     }
 
+    const updateData: any = {};
+
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (type !== undefined) updateData.type = type;
+    if (status !== undefined) updateData.status = status;
+
+    if (defectUserId !== undefined) {
+      updateData.user = { connect: { id: parseInt(defectUserId, 10) } };
+    }
+
+    if (patrolResultId !== undefined) {
+      updateData.patrolResult = { connect: { id: parseInt(patrolResultId, 10) } };
+    }
+
+    // ทำการอัปเดต Defect ด้วยข้อมูลที่มี
     await prisma.defect.update({
       where: { id: Number(id) },
-      data: {
-        name: name,
-        description: description,
-        type: type,
-        status: status,
-        user: { connect: { id: parseInt(defectUserId) } },
-        patrolResult: { connect: { id: parseInt(patrolResultId) } },
-      },
+      data: updateData,
     });
 
     const result = await prisma.defect.findUnique({
@@ -598,7 +626,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
                   }
                 }
-
               }
             }
           },
@@ -606,9 +633,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         images: {
           select: {
             image: {
-              select: {
-                id: true,
-                path: true,
+              include: {
                 user: {
                   select: {
                     id: true,
@@ -622,6 +647,19 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
             },
           },
         },
+        user: {
+          select: {
+            id: true,
+            role: true,
+            email: true,
+            createdAt: true,
+            profile: {
+              include: {
+                image: true
+              }
+            }
+          }
+        }
       },
     })
 

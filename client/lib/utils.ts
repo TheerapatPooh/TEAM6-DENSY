@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType } from "@/app/type";
+import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast } from "@/app/type";
 import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
@@ -332,7 +332,32 @@ export function formatTime(timestamp: string) {
   return date + " " + time
 }
 
-export function formattedPatrolId(id: number): string {
+export function formatPatrolId(id: number): string {
   let newId = id.toString().padStart(4, '0'); // ทำให้เป็นเลข 4 หลัก เติมศูนย์ข้างหน้า
   return `P${newId}`; // ใส่ P ด้านหน้า
+}
+
+export function getNotificationToast(key: string): IToast | null {
+  switch (key) {
+    case "patrol_assigned":
+      return {
+        variant: "default",
+        title: "PatrolAssignTitle",
+        description: "PatrolAssignDescription",
+      };
+    case "report_defect":
+      return {
+        variant: "default",
+        title: "DefectRecieveTitle",
+        description: "DefectRecieveDescription",
+      };
+    case "new_comment":
+      return {
+        variant: "default",
+        title: "CommentRecieveTitle",
+        description: "CommentRecieveDescription",
+      };
+    default:
+      return null;
+  }
 }

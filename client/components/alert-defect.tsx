@@ -29,6 +29,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "./ui/tooltip";
+import { Skeleton } from './ui/skeleton';
 
 interface AlertDefectProps {
     defect?: IDefect,
@@ -127,6 +128,34 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         }
     };
 
+    const handleResolveDefect = async (
+        id: number,
+        files: File[]
+    ) => {
+        const formData = new FormData();
+
+        formData.append("supervisorId",
+            defect.patrolResult.itemZone.zone.supervisor.profile.userId.toString()
+        );
+        formData.append("status", "resolved")
+        files.forEach((file) => {
+            formData.append("imageFiles", file);
+        });
+        try {
+            const resolveDefect = await fetchData(
+                "put",
+                `/defect/${id}`,
+                true,
+                formData,
+                true
+            );
+            response(resolveDefect)
+        } catch (error) {
+            console.error("Error resolve defect:", error);
+        }
+    }
+
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             setSelectedFiles([...selectedFiles, ...Array.from(event.target.files)]);
@@ -153,6 +182,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
     };
+    
+    if(!patrolResults && type === "report"){
+        return <Skeleton/>
+    }
 
     return (
         <div>
@@ -160,7 +193,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 <AlertDialogTrigger
                     disabled={disabled}
                 >
-                    <Button variant={"outline"} size={"lg"} >
+                    <Button variant={type === "resolve" ? "primary" : type === "edit" ? "primary" : "outline"} size={"lg"} >
                         <span className="material-symbols-outlined pr-2 ">
                             {type === "edit" ? "edit" : type === "resolve" ? "published_with_changes" : "campaign"}
                         </span>
@@ -213,102 +246,121 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 ? itemZone.zone.supervisor.profile.name
                                                 : null; // 
                                         })
-                                        : defect.patrolResult.itemZone.zone.supervisor.profile.name}
+                                        :
+                                        defect.patrolResult.itemZone.zone.supervisor.profile.name
+                                    }
                                 </p>
                             </div>
                         </div>
                     </AlertDialogHeader>
-                    <Textarea
-                        onChange={handleDefectDescription}
-                        className="h-[100px] mt-3 bg-secondary border-none"
-                        placeholder="Details..."
-                    />
-                    <div className="flex flex-row justify-between gap-2">
-                        <div
-                            className="flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center"
-                            onDragOver={handleDragOver}
-                            onDrop={handleDrop}
-                        >
-                            <div className="flex p-8 flex-col items-center justify-center">
-                                <span className="material-symbols-outlined text-[48px] font-normal">
-                                    upload
-                                </span>
-                                <div className="text-center mt-2">
-                                    Drag & Drop file
-                                </div>
-                                <div className="text-center mt-1">
-                                    Or
-                                </div>
-                                <div className="mt-2">
-                                    <input
-                                        type="file"
-                                        id="file-input"
-                                        style={{ display: "none" }}
-                                        multiple
-                                        onChange={handleFileChange}
-                                    />
-                                    <Button
-                                        variant={"outline"}
-                                        onClick={handleButtonClick}
-                                    >
-                                        <span className="material-symbols-outlined mr-1">
-                                            browser_updated
-                                        </span>
-                                        Browse
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                        <ScrollArea className="  h-72 overflow-y-auto gap-5 rounded-md w-full">
-                            <div className="flex flex-col gap-2 w-[215px]">
-                                {selectedFiles.map((file, index) => (
-                                    <div
-                                        key={index}
-                                        className=" flex p-2 w-full bg-secondary rounded-md"
-                                    >
-                                        <span className="material-symbols-outlined">
-                                            image
-                                        </span>
-                                        <div className="flex items-center gap-2 ">
-                                            <div className="flex flex-col">
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <div className=" truncate w-[145px]">
-                                                                {file.name}
-                                                            </div>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent className="bg-foreground">
-                                                            <div className=" w-full ">
-                                                                {file.name}
-                                                            </div>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
 
-                                                <p className="text-sm font-semibold text-muted-foreground">
-                                                    {(file.size / 1024).toFixed(
-                                                        2
-                                                    )}{" "}
-                                                    KB
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            variant={"ghost"}
-                                            className="w-[40px] h-[40px]"
-                                            onClick={() =>
-                                                handleRemoveFile(index)
-                                            }
-                                        >
-                                            <span className="material-symbols-outlined text-destructive">
-                                                delete
-                                            </span>
-                                        </Button>
-                                    </div>
-                                ))}
+                    {type === "resolve" ? null :
+                        <div className='flex flex-col gap-1'>
+                            <div className='text-sm font-semibold'>
+                                Detail
                             </div>
-                        </ScrollArea>
+                            <Textarea
+                                onChange={handleDefectDescription}
+                                className="h-[100px] bg-secondary border-none"
+                                placeholder="Details..."
+                            />
+                        </div>
+                    }
+
+                    <div className="flex flex-col justify-between w-full">
+                        <div className='text-sm font-semibold'>
+                            Image
+                        </div>
+                        <div className='flex flex-row py-1 pr-2 gap-4'>
+                            <div className='flex flex-col gap-1 flex-1'>
+                                <div
+                                    className="flex h-full w-full rounded-[10px] bg-secondary justify-center items-center"
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                >
+                                    <div className="flex p-8 flex-col items-center justify-center">
+                                        <span className="material-symbols-outlined text-[48px] font-normal">
+                                            upload
+                                        </span>
+                                        <div className="text-center mt-2">
+                                            Drag & Drop file
+                                        </div>
+                                        <div className="text-center mt-1">
+                                            Or
+                                        </div>
+                                        <div className="mt-2">
+                                            <input
+                                                type="file"
+                                                id="file-input"
+                                                style={{ display: "none" }}
+                                                multiple
+                                                onChange={handleFileChange}
+                                            />
+                                            <Button
+                                                variant={"outline"}
+                                                onClick={handleButtonClick}
+                                            >
+                                                <span className="material-symbols-outlined mr-1">
+                                                    browser_updated
+                                                </span>
+                                                Browse
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <ScrollArea className="h-72 overflow-y-auto gap-5 rounded-md flex-1">
+                                <div className="flex flex-col gap-2 w-full">
+                                    {selectedFiles.map((file, index) => (
+                                        <div key={index} className=" flex flex-row justify-between px-4 py-2 w-full bg-secondary rounded-md">
+                                            <div className='flex flex-row gap-3'>
+                                                <div className='flex flex-col justify-center items-center'>
+                                                    <span className="material-symbols-outlined">
+                                                        image
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2 ">
+                                                    <div className="flex flex-col">
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <div className=" truncate w-[145px]">
+                                                                        {file.name}
+                                                                    </div>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent className="bg-foreground">
+                                                                    <div className=" w-full ">
+                                                                        {file.name}
+                                                                    </div>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+
+                                                        <p className="text-sm font-semibold text-muted-foreground">
+                                                            {(file.size / 1024).toFixed(
+                                                                2
+                                                            )}{" "}
+                                                            KB
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                variant={"ghost"}
+                                                className="flex flex-col justify-center items-center w-[40px] h-[40px]"
+                                                onClick={() =>
+                                                    handleRemoveFile(index)
+                                                }
+                                            >
+                                                <span className="material-symbols-outlined text-destructive">
+                                                    delete
+                                                </span>
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </ScrollArea>
+                        </div>
                     </div>
 
                     <AlertDialogFooter>
@@ -318,43 +370,54 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                             </AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={() => {
-                                    type === "report" ?
-                                        handleCreateDefect(
-                                            item.name,
-                                            defectDescription,
-                                            item.type,
-                                            result.inspectorId,
-                                            patrolResults.find((patrolResult: IPatrolResult) =>
-                                                result.itemId === patrolResult.itemId && result.zoneId === patrolResult.zoneId
-                                            )?.id || null,
-                                            item.itemZones.find((itemZone: IItemZone) =>
-                                                result.zoneId === itemZone.zone.id
-                                            )?.zone.supervisor.id || null,
-                                            selectedFiles
-                                        )
-                                        :
-                                        handleEditDefect(
-                                            defect.id,
-                                            defect.name,
-                                            defectDescription,
-                                            defect.type,
-                                            defect.status,
-                                            defect.userId,
-                                            defect.patrolResultId,
-                                            defect.patrolResult.itemZone.zone.supervisor.id,
-                                            selectedFiles
-                                        )
-                                }
-                                }
+                                    switch (type) {
+                                        case "report":
+                                            handleCreateDefect(
+                                                item.name,
+                                                defectDescription,
+                                                item.type,
+                                                result.inspectorId,
+                                                patrolResults.find((patrolResult: IPatrolResult) =>
+                                                    result.itemId === patrolResult.itemId && result.zoneId === patrolResult.zoneId
+                                                )?.id || null,
+                                                item.itemZones.find((itemZone: IItemZone) =>
+                                                    result.zoneId === itemZone.zone.id
+                                                )?.zone.supervisor.id || null,
+                                                selectedFiles
+                                            );
+                                            break;
+
+                                        case "resolve":
+                                            handleResolveDefect(defect.id, selectedFiles);
+                                            break;
+
+                                        case "edit":
+                                            handleEditDefect(
+                                                defect.id,
+                                                defect.name,
+                                                defectDescription,
+                                                defect.type,
+                                                defect.status,
+                                                defect.userId,
+                                                defect.patrolResultId,
+                                                defect.patrolResult.itemZone.zone.supervisor.id,
+                                                selectedFiles
+                                            );
+                                            break;
+
+                                        default:
+                                            console.error("Invalid type");
+                                    }
+                                }}
                                 disabled={
-                                    !defectDescription ||
-                                    selectedFiles.length === 0 ||
-                                    disabled
+                                    (type === "resolve" && (selectedFiles.length === 0 || disabled)) ||
+                                    (type !== "resolve" && (!defectDescription || selectedFiles.length === 0 || disabled))
                                 }
-                                className={`bg-primary hover:bg-primary/70 ${!defectDescription ||
-                                    selectedFiles.length === 0
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
+                                className={`bg-primary hover:bg-primary/70 
+        ${(type === "resolve" && selectedFiles.length === 0) ||
+                                        (type !== "resolve" && (!defectDescription || selectedFiles.length === 0))
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
                                     }`}
                             >
                                 <span className="material-symbols-outlined text-2xl me-2">
@@ -366,6 +429,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+        </div >
     )
 }
