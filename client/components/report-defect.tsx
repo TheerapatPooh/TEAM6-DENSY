@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchData, formattedPatrolId, formatTime, getDefectStatusVariant, getInitials, getItemTypeVariant } from "@/lib/utils";
+import { fetchData, formatPatrolId, formatTime, getDefectStatusVariant, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AlertDefect from "./alert-defect";
@@ -224,7 +224,7 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
                       description
                     </span>
                     <p className="text-muted-foreground cursor-default user-select-none">
-                      {formattedPatrolId(defect.patrolResult.patrol.id)}
+                      {formatPatrolId(defect.patrolResult.patrol.id)}
                     </p>
                   </div>
                 </div>
