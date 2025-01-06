@@ -488,34 +488,59 @@ export async function getChecklist(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ทั้งหมด
  * Input:
- * - ไม่มี Input
+ * - zones, startDate, endDate, search
  * Output: JSON array ข้อมูลของ Checklist รวมถึงการนับจำนวน Item แต่ละประเภท
  **/
 export async function getAllChecklists(req: Request, res: Response) {
   try {
-    // Fetch all checklists where latest = true
+    // Fetch query parameters
+    const { zones, startDate, endDate, search } = req.query;
+
+    // Initialize where clause for filtering
+    const whereClause: any = {
+      latest: true,
+    };
+
+    // Filter by zones if provided
+    if (zones) {
+      whereClause.items = {
+        some: {
+          itemZones: {
+            some: {
+              zone: {
+                name: {
+                  in: (zones as string).split(","), // Allow multiple zones separated by commas
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    // Filter by date range if provided
+    if (startDate || endDate) {
+      whereClause.updatedAt = {};
+      if (startDate) {
+        whereClause.updatedAt.gte = new Date(startDate as string); // greater than or equal to startDate
+      }
+      if (endDate) {
+        whereClause.updatedAt.lte = new Date(endDate as string); // less than or equal to endDate
+      }
+    }
+
+    // Search by title if provided (search only the checklist title)
+    if (search) {
+      whereClause.title = {
+        contains: search as string,
+       
+      };
+    }
+    
+    // Fetch filtered checklists with item and zone details
     const checklists = await prisma.checklist.findMany({
-      where: {
-        latest: true,
-      },
+      where: whereClause,
       include: {
-        // items: {
-        //   include: {
-        //     itemZones: {
-        //       include: {
-        //         zone: {
-        //           include: {
-        //             supervisor: {
-        //               include: {
-        //                 profile: true
-        //               }
-        //             }
-        //           }
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
         items: {
           select: {
             id: true,
@@ -529,9 +554,9 @@ export async function getAllChecklists(req: Request, res: Response) {
                     name: true,
                     supervisor: {
                       select: {
-                        profile: true
-                      }
-                    } // Fetch zone names
+                        profile: true,
+                      },
+                    }, // Fetch zone names
                   },
                 },
               },
@@ -540,7 +565,8 @@ export async function getAllChecklists(req: Request, res: Response) {
         },
       },
     });
-
+    
+    
     if (!checklists.length) {
       res.status(404).json({ message: "No checklists found" });
       return;
@@ -559,6 +585,7 @@ export async function getAllChecklists(req: Request, res: Response) {
       return acc;
     }, {} as Record<string, number>);
 
+    // Fetch user information for the updatedBy field
     const findUser = async (checklist: Checklist) => {
       const findUser = await prisma.user.findUnique({
         where: {
@@ -572,20 +599,16 @@ export async function getAllChecklists(req: Request, res: Response) {
 
       const findImage = findUser?.profile?.imageId
         ? await prisma.image.findUnique({
-          where: {
-            id: findUser.profile.imageId,
-          },
-        })
+            where: {
+              id: findUser.profile.imageId,
+            },
+          })
         : null;
 
-
-      const results = {
+      return {
         username: findUser?.profile?.name || findUser?.username || "Unknown User",
-        profileImage: findImage?.path
-      }
-
-      // Safely determine the name or fallback to username
-      return (results);
+        profileImage: findImage?.path,
+      };
     };
 
     // Transform the result
@@ -607,7 +630,7 @@ export async function getAllChecklists(req: Request, res: Response) {
 
         const userdata = await findUser(checklist);
 
-        const items = checklist.items.filter((name, index, self) => self.indexOf(name) === index)
+        const items = checklist.items.filter((name, index, self) => self.indexOf(name) === index);
 
         return {
           id: checklist.id,
@@ -621,7 +644,7 @@ export async function getAllChecklists(req: Request, res: Response) {
           itemCounts,
           zones: zoneNames,
           versionCount: versionCounts[checklist.title] || 0, // Attach the version count
-          items: items
+          items: items,
         };
       })
     );
@@ -632,6 +655,7 @@ export async function getAllChecklists(req: Request, res: Response) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Checklist ใหม่

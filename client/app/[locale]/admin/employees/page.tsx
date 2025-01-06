@@ -104,6 +104,7 @@ export default function Page() {
 
       const updatedStatus = !user.active; // Toggle the status
       const data = { active: updatedStatus };
+      
       if (updatedStatus === true) {
         toast({
           variant: "success",
@@ -136,8 +137,8 @@ export default function Page() {
   };
   const handleUserUpdate = async (
     userId: number,
-    username: string,
     password: string,
+    active:boolean,
     role: role
   ) => {
     setAllUsers((prevUsers) => {
@@ -147,32 +148,22 @@ export default function Page() {
         return prevUsers;
       }
 
-      const data: { username?: string; password?: string; role: role } = {
+      const data: {active:boolean; password?: string; role: role } = {
+        active,
         role,
       };
-
-      if (username && username.trim() !== "") {
-        data.username = username;
-      }
 
       if (password && password.trim() !== "") {
         data.password = password;
       }
 
-      if (user.username === username && role === user.role && password === "") {
+      if (role === user.role && password === "") {
         console.log("No change were made");
         toast({
           variant: "default",
           title: "No Updates Applied",
           description: "The provided details were either blank or unchanged",
         });
-        return prevUsers;
-      }
-
-      if (!data.username && !data.password) {
-        console.error(
-          "Both username and password are blank. No update will be made."
-        );
         return prevUsers;
       }
 
@@ -195,7 +186,6 @@ export default function Page() {
         user.id === userId
           ? {
               ...user,
-              ...(data.username && { username: data.username }),
               ...(data.role && { role: data.role }),
             }
           : user
@@ -366,13 +356,10 @@ export default function Page() {
   // Handler to save the updated user data
   const handleSave = (userId: number, index: number) => {
     const updatedUser = userRefs.current[index];
+    const user = allUsers.find((user) => user.id === userId);
+
     if (updatedUser) {
-      handleUserUpdate(
-        userId,
-        updatedUser.username,
-        updatedUser.password,
-        updatedUser.role
-      );
+      handleUserUpdate(userId, updatedUser.password,user.active, updatedUser.role);
       console.log(updatedUser);
     } else {
       console.error(`User at index ${userId} is undefined`);
@@ -707,22 +694,13 @@ export default function Page() {
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
 
-                              <div
-                                className="mt-6"
-                                onClick={(e) => e.stopPropagation()}
-                              >
+                              <div className="mt-6 pointer-events-none">
                                 <label>Username</label>
                                 <Textfield
-                                  className="bg-secondary"
+                                  className="bg-secondary cursor-not-allowed"
                                   showIcon={true}
                                   iconName="person"
                                   placeholder={employee.username}
-                                  onChange={(e) => {
-                                    if (userRefs.current[index]) {
-                                      userRefs.current[index].username =
-                                        e.target.value;
-                                    }
-                                  }}
                                 />
                               </div>
 

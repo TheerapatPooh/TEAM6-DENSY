@@ -1,5 +1,5 @@
 "use client";
-import { IChecklist, IItem, IUser, role } from "@/app/type";
+import { IChecklist, IItem, IUser, IZone, role } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
 import BadgeCustom, { badgeVariants } from "@/components/badge-custom";
 import Textfield from "@/components/textfield";
@@ -84,6 +84,10 @@ import {
   TooltipContent,
 } from "@radix-ui/react-tooltip";
 import { useRouter } from "next/navigation";
+import { DatePickerWithRange } from "@/components/date-picker";
+import { DateRange } from "react-day-picker";
+import dynamic from "next/dynamic";
+const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
   const z = useTranslations("Zone");
@@ -104,11 +108,16 @@ export default function Page() {
   );
 
   const handleDeleteChecklist = async (id: number) => {
+    toast({
+      variant: "success",
+      title: "Deletion Successful",
+      description: "The checklist has been deleted successfully.",
+    });
     try {
       const response = await fetchData("delete", `/checklist/${id}`, true);
 
       if (response) {
-        setAllChecklists((prevChecklists) =>
+        setFilteredChecklists((prevChecklists) =>
           prevChecklists.filter((checklist) => checklist.id !== id)
         );
       } else {
@@ -187,53 +196,171 @@ export default function Page() {
   const handleGoToCreateChecklist = () => {
     router.push(`/${locale}/admin/settings/create/checklist`);
   };
+  // Modify the getData function to use fetchData
+  const getData = async () => {
+    try {
+      console.log("Fetching data...");
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const data = await fetchData("get", "/checklists?item=true", true);
-        setAllChecklists(data);
-      } catch (error) {
-        console.error("Failed to fetch patrol data:", error);
+      // Construct query params for the filters
+      const params = new URLSearchParams(); 
+
+      // Add search term to params
+      if (searchTerm) {
+        console.log(searchTerm)
+        params.append("search", searchTerm);
       }
-    };
+
+      // Add selected zones to params
+      if (selectedZones.length > 0) {
+        params.append(
+          "zones",
+          selectedZones.map((zone) => zone.name).join(",")
+        );
+      }
+
+      // Add date range to params
+      if (selectedDateRange?.from) {
+        params.append("startDate", selectedDateRange.from.toISOString());
+      }
+      if (selectedDateRange?.to) {
+        params.append("endDate", selectedDateRange.to.toISOString());
+      }
+
+      // Fetch data using fetchData utility with query params
+      const data = await fetchData(
+        "get",
+        `/checklists?${params.toString()}`,
+        true
+      );
+
+      // Validate data format
+      if (!Array.isArray(data)) {
+        console.error("Invalid data format:", data);
+        return []; // Return empty array if data format is incorrect
+      }
+
+      console.log("Fetched data successfully:", data);
+      setAllChecklists(data); // Update state with the fetched data
+      setFilteredChecklists(data); // Initially set filtered data to all data
+
+      return data; // Return fetched data
+    } catch (error) {
+      console.error("Failed to fetch checklist data:", error); // Log error
+      return []; // Return empty array on error
+    }
+  };
+
+  // Trigger the fetch on component mount using useEffect
+  useEffect(() => {
     getData();
-  }, []);
+  }, []); // Initial fetch when the component mounts
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<
     "Name" | "ModifiedDate" | "Type"
   >("Name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [selectedZones, setSelectedZones] = useState<IZone[]>([]);
+  const [tempSelectedZones, setTempSelectedZones] = useState<IZone[]>([]);
+  const [selectedDateRange, setSelectedDateRange] = useState<{
+    from?: Date;
+    to?: Date;
+  }>({});
+  const [tempDateRange, setTempDateRange] = useState<{
+    from?: Date;
+    to?: Date;
+  }>({});
+  const [filteredChecklists, setFilteredChecklists] = useState<
+    IChecklistWithExtras[]
+  >([]);
 
-  // Filtered Checklists
-  const filteredChecklists = allChecklists.filter(
-    (checklist) =>
-      checklist.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      checklist.zones.some((zone) =>
-        zone.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
+  // Filter by search term
+  const filterBySearchTerm = (checklists: IChecklistWithExtras[]) => {
+    if (!searchTerm) return checklists; // If no search term, return all checklists
+    return checklists.filter((checklist) =>
+      checklist.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
 
-  const sortedChecklists = [...filteredChecklists].sort((a, b) => {
-    let comparison = 0;
+  // Fetch and apply search filter on search term change
+  useEffect(() => {
+    const fetchAndFilter = async () => {
+      const freshData = await getData(); // Fetch fresh data
+      const filtered = filterBySearchTerm(freshData); // Apply search term filter
+      setFilteredChecklists(filtered); // Update state with filtered data
+    };
 
-    if (sortOption === "Name") {
-      comparison = a.title.localeCompare(b.title);
-    } else if (sortOption === "ModifiedDate") {
-      comparison =
-        new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-    } else if (sortOption === "Type") {
-      // Use `getChecklistColor` to determine type-based sorting
-      const typeA = getChecklistColor(a);
-      const typeB = getChecklistColor(b);
+    fetchAndFilter();
+  }, [searchTerm]); // Trigger fetch when search term changes
 
-      comparison = typeA.localeCompare(typeB); // Compare the colors (or types)
-    }
+  // Apply filters (zones, date range, and search term)
+  const applyFilters = async () => {
+    const freshData = await getData(); // Fetch fresh data
 
-    return sortOrder === "asc" ? comparison : -comparison;
-  });
+    // Update selected filters
+    setSelectedZones(tempSelectedZones);
+    setSelectedDateRange(tempDateRange);
 
+    // Apply filters for zones and date range
+    const filtered = freshData.filter((checklist) => {
+      const matchesZones =
+        tempSelectedZones.length === 0 || // If no zones are selected, show all
+        checklist.zones.some((zone) =>
+          tempSelectedZones.some(
+            (selectedZone) =>
+              selectedZone.name.toLowerCase() === zone.toLowerCase()
+          )
+        );
+
+      const matchesDateRange =
+        (!tempDateRange?.from ||
+          new Date(checklist.updatedAt) >= tempDateRange.from) &&
+        (!tempDateRange?.to ||
+          new Date(checklist.updatedAt) <= tempDateRange.to);
+
+      return matchesZones && matchesDateRange;
+    });
+
+    // Apply search term filter
+    const filteredWithSearch = filterBySearchTerm(filtered);
+    setFilteredChecklists(filteredWithSearch); // Update the filtered state
+  };
+
+  // Reset filters to default
+  const resetFilters = async () => {
+    await getData()
+    setTempSelectedZones([]); // Reset temp selected zones
+    setTempDateRange({}); // Reset temp date range
+    setSelectedZones([]); // Clear applied zones
+    setSelectedDateRange({}); // Clear applied date range
+    setFilteredChecklists(allChecklists); // Reset to all checklists
+  };
+
+  const [sortedChecklists, setSortedChecklists] = useState<
+    IChecklistWithExtras[]
+  >([]);
+
+  useEffect(() => {
+    const sorted = [...filteredChecklists].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortOption === "Name") {
+        comparison = a.title.localeCompare(b.title);
+      } else if (sortOption === "ModifiedDate") {
+        comparison =
+          new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      } else if (sortOption === "Type") {
+        const typeA = getChecklistColor(a);
+        const typeB = getChecklistColor(b);
+
+        comparison = typeA.localeCompare(typeB);
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    setSortedChecklists(sorted); // Update sorted checklists state
+  }, [filteredChecklists, sortOption, sortOrder]); // Dependencies to trigger the effect
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row justify-between pt-2">
@@ -337,46 +464,89 @@ export default function Page() {
             align="end"
           >
             <div>
+              <div>
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                  Date
+                </DropdownMenuLabel>
+                <DatePickerWithRange
+                  className="my-date-picker"
+                  startDate={tempDateRange?.from || selectedDateRange?.from}
+                  endDate={tempDateRange?.to || selectedDateRange?.to}
+                  onSelect={(range) => {
+                    if (range?.from || range?.to) {
+                      setTempDateRange(range);
+                    }
+                  }}
+                />
+              </div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                Type
+                Zone
               </DropdownMenuLabel>
-              <DropdownMenuCheckboxItem onSelect={(e) => e.preventDefault()}>
-                <BadgeCustom
-                  width="w-full"
-                  variant="green"
-                  shape="square"
-                  showIcon={true}
-                  iconName="hourglass_top"
-                  children="Pending"
-                />
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem onSelect={(e) => e.preventDefault()}>
-                <BadgeCustom
-                  width="w-full"
-                  variant="blue"
-                  shape="square"
-                  showIcon={true}
-                  iconName="hourglass_top"
-                  children="Pending"
-                />
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem onSelect={(e) => e.preventDefault()}>
-                <BadgeCustom
-                  width="w-full"
-                  variant="red"
-                  shape="square"
-                  showIcon={true}
-                  iconName="hourglass_top"
-                  children="Pending"
-                />
-              </DropdownMenuCheckboxItem>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  asChild
+                  className="flex items-center gap-2 rounded cursor-pointer"
+                >
+                  <Button
+                    variant={"secondary"}
+                    className="w-full h-[36px] rounded-md bg-secondary justify-start text-left gap-[2px] font-normal text-base"
+                  >
+                    <span className="material-symbols-outlined">
+                      location_on
+                    </span>
+                    {selectedZones.length > 0
+                      ? selectedZones.map((zone) => zone.name).join(", ")
+                      : "Select Zones"}
+                  </Button>
+                </AlertDialogTrigger>
+
+                <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-2xl">
+                      Filter by Zone
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-base">
+                      Please select the zones to display only the relevant data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div>
+                    <div className="text-muted-foreground flex items-center">
+                      <span className="material-symbols-outlined">
+                        location_on
+                      </span>
+                      Zone
+                    </div>
+                    <div className="flex justify-center bg-secondary rounded-lg py-4">
+                      <Map
+                        disable={false}
+                        onZoneSelect={(zones: IZone[]) =>
+                          setTempSelectedZones(zones)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      className="bg-primary"
+                      onClick={() => {
+                        setSelectedZones(tempSelectedZones); // Apply selected zones
+                      }}
+                    >
+                      Done
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
 
             <div className="flex w-full justify-end mt-4 gap-2">
-              <Button size="sm" variant="secondary">
+              <Button size="sm" variant="secondary" onClick={resetFilters}>
                 Reset
               </Button>
-              <Button size="sm">Apply</Button>
+              <Button size="sm" onClick={applyFilters}>
+                Apply
+              </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
