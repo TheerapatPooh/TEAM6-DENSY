@@ -328,12 +328,16 @@ export default function Page() {
 
   // Reset filters to default
   const resetFilters = async () => {
-    await getData()
+    const data = await fetchData(
+      "get",
+      `/checklists`,
+      true
+    );
     setTempSelectedZones([]); // Reset temp selected zones
     setTempDateRange({}); // Reset temp date range
     setSelectedZones([]); // Clear applied zones
     setSelectedDateRange({}); // Clear applied date range
-    setFilteredChecklists(allChecklists); // Reset to all checklists
+    setFilteredChecklists(data); // Reset to all checklists
   };
 
   const [sortedChecklists, setSortedChecklists] = useState<
@@ -710,9 +714,9 @@ export default function Page() {
                             description={
                               "Please confirm to delete this Patrol Checklist."
                             }
-                            primaryBottonText={"Confirm"}
+                            primaryButtonText={"Confirm"}
                             primaryIcon="check"
-                            secondaryBottonText={"Cancel"}
+                            secondaryButtonText={"Cancel"}
                             backResult={(result) => handleDialogResult(result)}
                           />
                         )}

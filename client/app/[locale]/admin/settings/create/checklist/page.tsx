@@ -411,9 +411,9 @@ export default function Page() {
               <AlertCustom
                 title={"Are you sure to add new Patrol Checklist?"}
                 description={"Please confirm to add new Patrol Checklist."}
-                primaryBottonText={"Confirm"}
+                primaryButtonText={"Confirm"}
                 primaryIcon="check"
-                secondaryBottonText={"Cancel"}
+                secondaryButtonText={"Cancel"}
                 backResult={(result) => handleDialogResult(result)}
               />
             )}
