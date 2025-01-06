@@ -21,11 +21,12 @@ interface Props {
 export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
   const [userData, setUserData] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
+  const [accordionValue, setAccordionValue] = useState<string | null>();
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const users = await fetchData("get", "/users?profile=true&image=true", true);
+        const users = await fetchData("get", "/users?profile=true&image=true&role=inspector", true);
         setUserData(users);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -37,12 +38,18 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
   const handleUserSelect = (dropdownUser: IUser) => {
     setSelectUser(dropdownUser);
     handleselectUser(dropdownUser);
+    setAccordionValue(null);
   };
   const t = useTranslations("General");
 
   return (
     <div>
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        value={accordionValue}
+        onValueChange={setAccordionValue}>
         <AccordionItem
           value="item-1"
           className="bg-secondary rounded-md w-full px-4 py-2 border-none "
@@ -78,7 +85,7 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
                 {t("Inspector")}
               </p>
             </div>
-            <UserDropdown userData={userData} onUserSelect={handleUserSelect} />
+            <UserDropdown userData={userData} onUserSelect={handleUserSelect} selectUser={selectUser} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

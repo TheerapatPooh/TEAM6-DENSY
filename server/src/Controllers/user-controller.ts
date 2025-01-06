@@ -5,6 +5,7 @@ import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
 import { profile } from "console";
+import { Role } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
@@ -97,7 +98,7 @@ export async function updateProfile(req: Request, res: Response) {
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
-      return 
+      return
     }
 
     function getUploadsPath(): string {
@@ -149,7 +150,7 @@ export async function updateProfile(req: Request, res: Response) {
     });
 
     res.status(200).json(updatedProfile);
-    return 
+    return
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
     return
@@ -240,7 +241,7 @@ export async function getUser(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล User ทั้งหมด
  * Input: 
- * - req.query: { profile: "true" | "false", image: "true" | "false" } (optional)
+ * - req.query: { profile: "true" | "false", image: "true" | "false", "role": "admin" | "inspector" | "supervisor" } (optional)
  * Output: JSON array ข้อมูล User รวมถึง profile และ image หากมีการร้องขอ
 **/
 export async function getAllUsers(req: Request, res: Response) {
@@ -248,8 +249,15 @@ export async function getAllUsers(req: Request, res: Response) {
     const includeProfile = req.query.profile === "true";
     const includeImage = req.query.image === "true";
     const includeUsername = req.query.user === "true";
+    const role = req.query.role as string;
 
+    const validRoles = ["admin", "inspector", "supervisor"]; // Adjust based on your Role enum
+    const roleFilter = validRoles.includes(role) ? (role as Role) : undefined;
+    
     const allUsers = await prisma.user.findMany({
+      where: {
+        role: roleFilter
+      },
       select: {
         id: true,
         username: includeUsername,

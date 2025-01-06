@@ -549,9 +549,9 @@ export default function Page() {
                       <AlertCustom
                         title={"Are you sure to add new employee?"}
                         description={"Please confirm to add new employee."}
-                        primaryBottonText={"Confirm"}
+                        primaryButtonText={"Confirm"}
                         primaryIcon="check"
-                        secondaryBottonText={"Cancel"}
+                        secondaryButtonText={"Cancel"}
                         backResult={(result) => handleDialogResult(result)}
                       />
                     )}
@@ -819,9 +819,9 @@ export default function Page() {
                               <AlertCustom
                                 title={"Are you sure to edit employee?"}
                                 description={"Please confirm to edit employee."}
-                                primaryBottonText={"Confirm"}
+                                primaryButtonText={"Confirm"}
                                 primaryIcon="check"
-                                secondaryBottonText={"Cancel"}
+                                secondaryButtonText={"Cancel"}
                                 backResult={handleDialogResult}
                               />
                             )}
@@ -850,9 +850,9 @@ export default function Page() {
                                     ? "Please confirm to deactivate employee."
                                     : "Please confirm to activate employee."
                                 }
-                                primaryBottonText={"Confirm"}
+                                primaryButtonText={"Confirm"}
                                 primaryIcon="check"
-                                secondaryBottonText={"Cancel"}
+                                secondaryButtonText={"Cancel"}
                                 backResult={handleDialogResult}
                               />
                             )}

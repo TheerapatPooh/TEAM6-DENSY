@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { formattedPatrolId, getInitials } from "@/lib/utils";
+import { formatPatrolId, getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import {
   AlertDialog,
@@ -33,6 +33,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import { AlertCustom } from "@/components/alert-custom";
+import { toast } from "@/hooks/use-toast";
 
 export interface IPatrolCard {
   id: number;
@@ -41,6 +43,7 @@ export interface IPatrolCard {
   preset: IPreset;
   itemCounts: number;
   inspectors: IUser[];
+  onRemoveSuccess,
 }
 
 export function PatrolCard({
@@ -50,6 +53,7 @@ export function PatrolCard({
   preset,
   itemCounts,
   inspectors = [],
+  onRemoveSuccess
 }: IPatrolCard) {
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -58,6 +62,9 @@ export function PatrolCard({
   const [defects, setDefects] = useState(0);
 
   const [mounted, setMounted] = useState(false);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const router = useRouter()
   const locale = useLocale()
@@ -105,6 +112,7 @@ export function PatrolCard({
   }, []);
 
   const t = useTranslations("General");
+  const a = useTranslations("Alert");
 
   const handleClick = () => {
     setIsClicked((prev) => !prev);
@@ -122,6 +130,41 @@ export function PatrolCard({
     router.push(`/${locale}/patrol/${id}/detail`)
   }
 
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+    }
+  };
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleRemovePatrol = () => {
+    setPendingAction(() => () => removePatrol());
+    handleOpenDialog();
+  };
+
+  const removePatrol = async () => {
+    if (status !== 'pending') {
+      toast({
+        variant: "error",
+        title: a("PatrolRemoveErrorTitle"),
+        description: a("PatrolRemoveErrorDescription"),
+      });
+      return;
+    }
+    try {
+      await fetchData("delete", `/patrol/${id}`, true);
+    } catch (error) {
+      console.error(error)
+    }
+    if (onRemoveSuccess) {
+      onRemoveSuccess(id); // เรียก Callback หลังลบสำเร็จ
+    }
+  }
 
   if (!mounted) {
     return (
@@ -176,7 +219,7 @@ export function PatrolCard({
       <CardContent className="flex flex-col gap-2 p-0">
         <div className="flex text-muted-foreground items-center gap-1">
           <span className="material-symbols-outlined">description</span>
-          <p className="text-lg font-normal">{formattedPatrolId(id)}</p>
+          <p className="text-lg font-normal">{formatPatrolId(id)}</p>
         </div>
         <HoverCard open={isClicked || isHovered}>
           <HoverCardTrigger
@@ -283,58 +326,30 @@ export function PatrolCard({
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="p-0">
-                <DropdownMenuItem onClick={() => handleDetail()}>
+                <DropdownMenuItem onClick={(e) => {
+                  handleDetail()
+                }}>
                   <h1>{t("Detail")}</h1>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="p-0">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild className="pl-2 py-2" onClick={(e) => e.stopPropagation()}>
-                      <div
-                        className=" text-destructive cursor-pointer w-full h-full flex"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        {t("Delete")}
-                      </div>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete your patrol and remove your data from our
-                          servers.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t('Cancel')}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={async (e) => {
-                            try {
-                              await fetchData(
-                                "delete",
-                                `/patrol/${id}`,
-                                true
-                              );
-                              e.stopPropagation()
-                              window.location.reload();
-                            } catch (error) {
-                              console.error("Error deleting patrol:", error);
-                            }
-                          }}
-                        >
-                          {t("Delete")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation()
+                  handleRemovePatrol()
+                }}>
+                  <h1 className="text-destructive cursor-pointer">{t("Delete")}</h1>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          {isDialogOpen && (
+            <AlertCustom
+              title={a("PatrolRemoveConfirmTitle")}
+              description={a("PatrolRemoveConfirmDescription")}
+              primaryButtonText={t("Confirm")}
+              primaryIcon="check"
+              secondaryButtonText={t("Cancel")}
+              backResult={handleDialogResult}
+            ></AlertCustom>
+          )}
         </div>
       </CardFooter>
     </Card>

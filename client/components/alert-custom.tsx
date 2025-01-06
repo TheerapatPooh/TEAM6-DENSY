@@ -10,24 +10,27 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { buttonVariants } from "./ui/button";
 
 export interface alertProps {
-  title: String;
-  description: String;
-  primaryBottonText: String;
-  secondaryBottonText: String;
+  title: string;
+  description: string;
+  primaryButtonText: string;
+  secondaryButtonText: string;
   primaryIcon?: string;
   secondaryIcon?: string;
+  primaryVariant?: 'default' | 'destructive' | 'success' | 'fail' | 'outline' | 'secondary' | 'ghost' | 'link' | 'primary';
   backResult: (result: boolean) => void;
 }
 
 export function AlertCustom({
   title,
   description,
-  primaryBottonText,
-  secondaryBottonText,
+  primaryButtonText,
+  secondaryButtonText,
   primaryIcon,
   secondaryIcon,
+  primaryVariant,
   backResult,
 }: alertProps) {
   const [isOpen, setIsOpen] = useState(true);
@@ -56,14 +59,14 @@ export function AlertCustom({
             onClick={() => handleAction(false)}
           >
             <span className="material-symbols-outlined">{secondaryIcon}</span>
-            {secondaryBottonText}
+            {secondaryButtonText}
           </AlertDialogCancel>
           <AlertDialogAction
             className="gap-2"
             onClick={() => handleAction(true)}
           >
             <span className="material-symbols-outlined">{primaryIcon}</span>
-            {primaryBottonText}
+            {primaryButtonText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
