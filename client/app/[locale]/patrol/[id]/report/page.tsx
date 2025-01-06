@@ -43,17 +43,17 @@ export default function Page() {
     <div className="flex flex-col gap-4">
       {/* TabList และ Title */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center p-0 justify-center text-center gap-2">
+        <div className="flex items-center p-0 justify-center text-center">
           <Button
             variant="ghost"
-            className="flex hover:bg-secondary w-[40px] h-[40px]"
+            className="flex hover:bg-secondary p-2"
           >
-            <span className="material-symbols-outlined text-card-foreground">
+            <span className="material-symbols-outlined text-card-foreground w-[22px] h-[22px]">
               error
             </span>
           </Button>
           <div className="flex flex-col h-full justify-start w-full">
-            <p className="text-2xl font-bold">{patrol.preset.title}</p>
+            <p className="text-2xl font-bold mb-1">{patrol.preset.title}</p>
             <Progress value={calculateProgress()} />
           </div>
         </div>
