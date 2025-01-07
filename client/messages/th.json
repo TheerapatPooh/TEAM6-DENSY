@@ -142,12 +142,13 @@
     "testing_lab": "ห้องทดลอง\nและทดสอบ"
   },
   "Notification": {
-    "patrol_assigned": "คุณได้รับมอบหมายให้ทำการตรวจสอบที่กำหนดไว้ในวันที่ {date}",
+    "patrol_assigned": "คุณได้รับมอบหมายให้ทำการตรวจสอบที่กำหนดไว้ในวันที่ {content}",
     "start_patrol": "การตรวจของคุณได้เริ่มต้นแล้ว กรุณาดำเนินการตรวจสอบ",
     "finish_patrol": "การตรวจของคุณเสร็จสิ้นแล้ว ขอบคุณสำหรับความร่วมมือ",
     "report_defect": "มีการแจ้งปัญหาในโซนที่คุณรับผิดชอบ กรุณาตรวจสอบทันที",
     "new_comment": "มีคำแนะนำใหม่เพิ่มเข้ามา โปรดตรวจสอบ",
-    "confirm_comment": "คำแนะนำได้รับการรับรู้เรียบร้อยแล้ว"
+    "confirm_comment": "คำแนะนำได้รับการรับรู้เรียบร้อยแล้ว",
+    "update_supervisor": "คุณได้รับมอบหมายให้ดูแลโซน {content} กรุณาตรวจสอบคำแนะนำเพิ่มเติม"
   },
   "Sidebar": {
     "Dashboard": "แดชบอร์ด",
@@ -176,7 +177,7 @@
     "PatrolInvalidDate": "วันที่ไม่ถูกต้อง กรุณาเลือกวันที่ปัจจุบันหรือวันที่ในอนาคต",
     "PatrolUnselectDate": "กรุณาเลือกวันที่สำหรับการตรวจตรา",
     "PatrolAssignTitle": "การตรวจตราถูกกำหนดแล้ว",
-    "PatrolAssignDescription": "การตรวจตราของคุณถูกกำหนดไว้สำหรับวันที่ {date}",
+    "PatrolAssignDescription": "การตรวจตราของคุณถูกกำหนดไว้สำหรับวันที่ {content}",
     "PatrolCreateConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการสร้างการตรวจตรา?",
     "PatrolCreateConfirmDescription": "กรุณายืนยันเพื่อสร้างการตรวจตรา",
     "PatrolMissingDateTitle": "ยังไม่ได้เลือกวันที่",
@@ -190,6 +191,14 @@
     "CommentRecieveTitle": "ได้รับความคิดเห็นใหม่",
     "CommentRecieveDescription": "มีความคิดเห็นใหม่เข้ามา กรุณาตรวจสอบ",
     "PatrolRemoveSuccessTitle": "การตรวจตราถูกลบแล้ว",
-    "PatrolRemoveSuccessDescription": "การตรวจตราถูกลบเรียบร้อยแล้ว"
+    "PatrolRemoveSuccessDescription": "การตรวจตราถูกลบเรียบร้อยแล้ว",
+    "ZoneUpdateConfirmTitle": "ยืนยันการอัปเดตโซน",
+    "ZoneUpdateConfirmDescription": "คุณแน่ใจหรือไม่ว่าต้องการอัปเดตโซนนี้กับผู้รับผิดชอบคนนี้",
+    "ZoneUpdateErrorTitle": "ไม่ได้เลือกโซนหรือผู้รับผิดชอบ",
+    "ZoneUpdateErrorDescription": "กรุณาเลือกโซนและผู้รับผิดชอบก่อนดำเนินการ",
+    "ZoneUpdateSuccessTitle": "อัปเดตสำเร็จ",
+    "ZoneUpdateSuccessDescription": "โซนถูกกำหนดผู้รับผิดชอบเรียบร้อยแล้ว",
+    "UpdateSupervisorTitle": "แจ้งเตือนการอัปเดตผู้รับผิดชอบ",
+    "UpdateSupervisorDescription": "คุณได้รับการมอบหมายให้เป็นผู้รับผิดชอบโซน {content} เรียบร้อยแล้ว"
   }
 }

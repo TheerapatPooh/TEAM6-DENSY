@@ -207,6 +207,7 @@ export default function Page() {
         setSelectedZones(defaultSelectedZones);
         setSelectedType(defaultSelectedType);
         setSelectedChecklistName(defaultSelectedName);
+        setMounted(true)
         console.log("Default Selected Zones:", defaultSelectedZones);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);

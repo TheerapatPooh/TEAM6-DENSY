@@ -35,7 +35,7 @@ export function middleware(req: NextRequest) {
       }
       
       if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
-        return NextResponse.redirect(new URL(`/${locale}/admin`, req.url));
+        return NextResponse.redirect(new URL(`/${locale}/admin/dashboard/overview`, req.url));
       }
 
       if (userRole === "inspector" && !currentPathname.startsWith(`/${locale}/patrol`)) {

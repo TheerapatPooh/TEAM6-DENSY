@@ -26,7 +26,7 @@ import { useTranslations } from "next-intl";
 import { Skeleton } from "./ui/skeleton";
 import { formatTime } from "@/lib/utils";
 import AlertDefect from "./alert-defect";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PatrolChecklistProps {
   user: IUser;

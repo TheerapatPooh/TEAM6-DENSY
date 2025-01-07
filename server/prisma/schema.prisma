@@ -187,11 +187,11 @@ model Zone {
   id         Int    @id @default(autoincrement()) @map("ze_id")
   name       String @map("ze_name")
   locationId Int    @map("ze_lt_id")
-  userId     Int    @unique @map("ze_us_id")
+  userId     Int?    @unique @map("ze_us_id")
 
   itemZones  ItemZone[]
   location   Location   @relation(fields: [locationId], references: [id])
-  supervisor User       @relation(fields: [userId], references: [id])
+  supervisor User?       @relation(fields: [userId], references: [id])
 
   @@map("zones")
 }
