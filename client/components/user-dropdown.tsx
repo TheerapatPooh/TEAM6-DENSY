@@ -25,12 +25,19 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
   return (
     <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
       <DropdownMenuTrigger className="w-[300px] h-[65px]">
-        <Button variant="outline" className="w-full h-full justify-between bg-card hover:bg-background border-none">
+        <Button
+          variant="outline"
+          className="w-full h-full justify-between bg-card hover:bg-background border-none"
+        >
           <div className="flex items-center gap-2">
             {selectUser && (
               <Avatar>
-                <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser?.profile?.image?.path}`} />
-                <AvatarFallback>{getInitials(selectUser.profile.name)}</AvatarFallback>
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser?.profile?.image?.path}`}
+                />
+                <AvatarFallback>
+                  {getInitials(selectUser.profile.name)}
+                </AvatarFallback>
               </Avatar>
             )}
             <p className="font-normal text-muted-foreground">
@@ -38,23 +45,36 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
             </p>
           </div>
           <span
-            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"}`}
+            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${
+              isOpen ? "rotate-180" : "rotate-0"
+            }`}
           >
             expand_more
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="p-0">
-        <ScrollArea className="max-h-72 w-full rounded-md">
+      <DropdownMenuContent className="p-0 h-auto max-h-72">
+        <ScrollArea className="max-h-72 w-full overflow-auto rounded-md">
           {userData.map((user) => {
             return (
-              <DropdownMenuItem key={user.id} className="flex items-center w-[300px] gap-2" onClick={() => handleSelectUser(user)}>
+              <DropdownMenuItem
+                key={user.id}
+                className="flex items-center w-[300px] gap-2"
+                onClick={() => handleSelectUser(user)}
+              >
                 <Avatar>
-                  <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`} />
-                  <AvatarFallback>{getInitials(user.profile.name)}</AvatarFallback>
+                  <AvatarImage
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`}
+                  />
+                  <AvatarFallback>
+                    {getInitials(user.profile.name)}
+                  </AvatarFallback>
                 </Avatar>
-                <p className="font-normal text-lg text-muted-foreground">{user.profile.name}</p>
-              </DropdownMenuItem>)
+                <p className="font-normal text-lg text-muted-foreground">
+                  {user.profile.name}
+                </p>
+              </DropdownMenuItem>
+            );
           })}
         </ScrollArea>
       </DropdownMenuContent>
