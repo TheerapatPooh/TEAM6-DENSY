@@ -57,10 +57,10 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
   // }, []);
 
   useEffect(() => {
-    if (disable && initialSelectedZones) {
+    if ( initialSelectedZones) {
       setSelectedZones(initialSelectedZones);
     }
-  }, [disable, initialSelectedZones]);
+  }, [ initialSelectedZones]);
 
   const fetch = async () => {
     try {
