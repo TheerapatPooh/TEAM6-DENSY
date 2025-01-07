@@ -16,12 +16,19 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import Map from "@/components/map";
 import TabMenu from "@/components/tab-menu";
+import Loading from "@/components/loading";
+import { AlertCustom } from "@/components/alert-custom";
+import { toast } from "@/hooks/use-toast";
 
 export default function Page() {
   const t = useTranslations("General");
   const z = useTranslations("Zone");
   const a = useTranslations("Alert");
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+  const [mounted, setMounted] = useState<boolean>(false);
   const [userData, setUserData] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
   const [zones, setZones] = useState<IZone[]>([]); // Zones state
@@ -45,8 +52,20 @@ export default function Page() {
       }
     };
     getData();
+    setMounted(true)
   }, []);
 
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+    }
+  };
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
 
   const handleUserSelect = (dropdownUser: IUser) => {
     setSelectUser(dropdownUser); // Set Select user
@@ -56,10 +75,18 @@ export default function Page() {
     setSelectZone(zone); // Set Select Zone
   };
 
+  const handleSave = () => {
+    setPendingAction(() => () => updateSupervisor());
+    handleOpenDialog();
+  };
 
-  const handleSave = async () => {
+  const updateSupervisor = async () => {
     if (!selectZone || !selectUser) {
-      alert("Please select a zone, a supervisor, and a location.");
+      toast({
+        variant: "error",
+        title: a("ZoneUpdateErrorTitle"),
+        description: a("ZoneUpdateErrorDescription"),
+      });
       return;
     }
 
@@ -74,25 +101,42 @@ export default function Page() {
         // Update zones state with the new response
         setZones((prevZones) => {
           return prevZones.map((zone) =>
-            zone.id === res.id ? res : zone 
+            zone.id === res.id ? res : zone
           );
         });
-
+        toast({
+          variant: "success",
+          title: a("ZoneUpdateSuccessTitle"),
+          description: a("ZoneUpdateSuccessDescription"),
+        });
         // Reset selections
         setSelectUser(null);
         setSelectZone(null);
 
-      } 
+      }
       setSelectUser(null)
       setSelectZone(null)
-      alert("Data saved successfully!");
     } catch (error) {
       alert("Failed to save data. Please try again.");
     }
   };
 
+  if (!mounted) {
+    return <Loading />
+  }
+
   return (
     <div className="flex flex-col gap-4">
+      {isDialogOpen && (
+        <AlertCustom
+          title={a("ZoneUpdateConfirmTitle")}
+          description={a("ZoneUpdateConfirmDescription")}
+          primaryButtonText={t("Confirm")}
+          primaryIcon="check"
+          secondaryButtonText={t("Cancel")}
+          backResult={handleDialogResult}
+        ></AlertCustom>
+      )}
       <div className="flex flex-col gap-4 py-4 px-6 bg-card rounded-md custom-shadow">
         <div className="flex justify-between items-center">
           <p className="text-2xl font-bold">

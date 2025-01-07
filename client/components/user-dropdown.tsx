@@ -53,8 +53,8 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className={`p-0 h-auto max-h-72 bg-${color}`}>
-        <ScrollArea className="max-h-72 w-full overflow-auto rounded-md">
+      <DropdownMenuContent className={`p-0`}>
+        <ScrollArea className="w-full h-72 rounded-md">
           {userData.map((user) => {
             return (
               <DropdownMenuItem

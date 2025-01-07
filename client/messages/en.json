@@ -142,13 +142,13 @@
     "testing_lab": "TESTING\nLAB"
   },
   "Notification": {
-    "patrol_assigned": "You have been assigned to a patrol scheduled for {date}.",
+    "patrol_assigned": "You have been assigned to a patrol scheduled for {content}.",
     "start_patrol": "Your patrol has started. Please proceed with the inspection.",
     "finish_patrol": "Your patrol has finished. Thank you for your effort.",
     "report_defect": "An issue has been reported in your assigned zone. Please check immediately.",
     "new_comment": "A new comment has been added. Please review it.",
     "confirm_comment": "The comment has been confirmed successfully.",
-    "update_supervisor": "You have been assigned to the zone {zone}. Please check for further instructions."
+    "update_supervisor": "You have been assigned to the zone {content}. Please check for further instructions."
   },
   "Sidebar": {
     "Dashboard": "Dashboard",
@@ -177,7 +177,7 @@
     "PatrolInvalidDate": "Invalid date selected. Please choose a current or future date.",
     "PatrolUnselectDate": "Please select date for patrol.",
     "PatrolAssignTitle": "Patrol Assigned",
-    "PatrolAssignDescription": "Your patrol is scheduled for {date}",
+    "PatrolAssignDescription": "Your patrol is scheduled for {content}",
     "PatrolCreateConfirmTitle": "Are you sure to create patrol?",
     "PatrolCreateConfirmDescription": "Please confirm to create patrol.",
     "PatrolMissingDateTitle": "Missing Date!",
@@ -191,6 +191,14 @@
     "CommentRecieveTitle": "New Comment Received",
     "CommentRecieveDescription": "A new comment has been received. Please review it.",
     "PatrolRemoveSuccessTitle": "Patrol Deleted",
-    "PatrolRemoveSuccessDescription": "The patrol has been successfully removed."
+    "PatrolRemoveSuccessDescription": "The patrol has been successfully removed.",
+    "ZoneUpdateConfirmTitle": "Update Zone Confirmation",
+    "ZoneUpdateConfirmDescription": "Are you sure you want to update this zone and assign it to this supervisor?",
+    "ZoneUpdateErrorTitle": "Missing Selection",
+    "ZoneUpdateErrorDescription": "Please select both a zone and a supervisor before proceeding.",
+    "ZoneUpdateSuccessTitle": "Update Successful",
+    "ZoneUpdateSuccessDescription": "The zone has been successfully assigned to the supervisor.",
+    "UpdateSupervisorTitle": "Supervisor Update Notification",
+    "UpdateSupervisorDescription": "You have been successfully assigned as the supervisor for the zone {content}."
   }
 }
