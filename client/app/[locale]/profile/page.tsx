@@ -377,7 +377,12 @@ export default function page() {
                 {/* Button Back And Save    */}
                 <div className='flex justify-end items-end gap-2'>
                     <Button variant='secondary'>Back</Button>
-                    <Button variant='primary' onClick={handleUpdateUserData}>Save</Button>
+                    <Button variant='primary' onClick={handleUpdateUserData} className='flex flex-row items-center'>
+                        <span className="material-symbols-outlined me-2">
+                            save
+                        </span>
+                        <p>Save</p>
+                    </Button>
                 </div>
             </div>
         </div >

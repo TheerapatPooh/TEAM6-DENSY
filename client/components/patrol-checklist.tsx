@@ -379,10 +379,10 @@ export default function PatrolChecklist({
                                       comment.patrolResultId === existingResult.id ?
                                         (
                                           <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
-                                            <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-yellow'}`} />
+                                            <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
                                             <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp)}</p>
                                             <div className="flex items-end">
-                                              <p className="text-xl">{comment.message}</p>
+                                              <p className="text-xl">{comment.message}</p>  
                                             </div>
                                           </div>
                                         )
