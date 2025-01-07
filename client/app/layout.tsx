@@ -59,7 +59,6 @@ export default async function RootLayout({
               </SocketProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
-        <Toaster></Toaster>
       </body>
     </html>
   );

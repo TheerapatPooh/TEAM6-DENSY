@@ -930,7 +930,7 @@ export async function commentPatrol(req: Request, res: Response) {
     const notification = `new_comment`;
     await createNotification({
       message: notification,
-      type: "information" as NotificationType,
+      type: "request" as NotificationType,
       url: `/comment/${newComment.id}`,
       userId: supervisorId,
     });

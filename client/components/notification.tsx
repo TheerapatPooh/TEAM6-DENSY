@@ -46,6 +46,7 @@ export default function Notification() {
     const d = useTranslations('DateTime');
     const n = useTranslations('Notification');
     const a = useTranslations('Alert');
+    const z = useTranslations('Zone');
 
     const prevUnreadCountRef = useRef<number>(0);
     const locale = useLocale()
@@ -58,13 +59,23 @@ export default function Notification() {
 
     const router = useRouter()
 
-    function formatMessage(message: string) {
+    function isValidDateFormat(date: string): boolean {
+        const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+        return iso8601Regex.test(date) && !isNaN(Date.parse(date));
+    }
+
+    function formatMessage(message) {
         const [key, ...dynamicParts] = message.split('-');
         console.log(key)
-        let date = dynamicParts.join('-');
-        date = formatTime(date)
+        let content = dynamicParts.join('-');
+        if (isValidDateFormat(content)) {
+            content = formatTime(content)
+        }
+        else {
+            content = z(content)
+        }
 
-        return { key, date };
+        return { key, content };
     }
 
     const fetchNotifications = async () => {
@@ -171,15 +182,14 @@ export default function Notification() {
             // ฟังก์ชันรับ event 'new_notification'
             socket.on('new_notification', (data: INotification) => {
                 setNotifications((prevNotifications) => [...prevNotifications, data]);
-
                 const notification = formatMessage(data.message)
                 const toastData = getNotificationToast(notification.key)
-
+        
                 if (toastData) {
                     toast({
                         variant: toastData.variant,
                         title: a(toastData.title),
-                        description: a(toastData.description, { date: notification.date }),
+                        description: a(toastData.description, { content: notification.content}),
                     });
                 } else {
                     console.error(`Notification not found for key: ${notification.key}`);
@@ -265,7 +275,7 @@ export default function Notification() {
                         <ScrollArea className="flex-1 p-0 pr-4">
                             <SwipeableList style={{ overflow: 'visible' }}>
                                 {getRecentNotifications().map((notification, index) => {
-                                    const { key, date } = formatMessage(notification.message);
+                                    const { key, content } = formatMessage(notification.message);
                                     return (
                                         <SwipeableListItem
                                             key={index}
@@ -282,7 +292,7 @@ export default function Notification() {
                                                         className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                         readOnly
                                                     >
-                                                        {n(key, { date: date })}
+                                                        {n(key, { content: content})}
                                                     </textarea>
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-xs font-normal text-muted-foreground text-start">

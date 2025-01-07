@@ -371,6 +371,12 @@ export function getNotificationToast(key: string): IToast | null {
         title: "CommentRecieveTitle",
         description: "CommentRecieveDescription",
       };
+    case "update_supervisor":
+      return {
+        variant: "default",
+        title: "UpdateSupervisorTitle",
+        description: "UpdateSupervisorDescription",
+      };
     default:
       return null;
   }

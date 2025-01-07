@@ -17,9 +17,10 @@ interface MapProps {
   onZoneSelect?: (selectedZones: IZone[]) => void;
   disable: boolean;
   initialSelectedZones?: number[];
+  toggle?: boolean;
 }
 
-export default function Map({ onZoneSelect, disable, initialSelectedZones }: MapProps) {
+export default function Map({ onZoneSelect, disable, initialSelectedZones, toggle = false }: MapProps) {
   const [location, setLocation] = useState<ILocation>();
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);
@@ -114,27 +115,27 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones }: Map
 
 
   const handleZoneSelect = (zoneId: number) => {
-    if (disable) return; // ถ้า disable เป็น true ห้ามเลือกโซนใหม่
-
-    const isSelected = selectedZones.includes(zoneId);
+    if (disable) return;
 
     let updatedSelectedZones;
-    if (isSelected) {
-      updatedSelectedZones = selectedZones.filter(id => id !== zoneId);
+    if (toggle) {
+      // เลือกได้แค่โซนเดียว
+      updatedSelectedZones = selectedZones.includes(zoneId) ? [] : [zoneId];
     } else {
-      updatedSelectedZones = [...selectedZones, zoneId];
+      // เลือกหลายโซนได้
+      const isSelected = selectedZones.includes(zoneId);
+      updatedSelectedZones = isSelected
+        ? selectedZones.filter(id => id !== zoneId)
+        : [...selectedZones, zoneId];
     }
 
     setSelectedZones(updatedSelectedZones);
 
     const selectedZoneObjects = location?.zones.filter(zone => updatedSelectedZones.includes(zone.id)) || [];
-
-    // ตรวจสอบว่า onZoneSelect ไม่เป็น undefined ก่อนเรียกใช้งาน
     if (onZoneSelect) {
       onZoneSelect(selectedZoneObjects);
     }
   };
-
 
   const calculatePoint = (textY: number | undefined) => {
     return (textY || 0) + 200; // ปรับค่าให้สัมพันธ์กับความสูงของ path แต่ละโซน

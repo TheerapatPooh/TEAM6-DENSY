@@ -118,7 +118,7 @@ export async function createDefect(req: Request, res: Response) {
 
     await createNotification({
       message: message,
-      type: "information" as NotificationType,
+      type: "request" as NotificationType,
       url: `/defect/${newDefect.id}`,
       userId: supervisor,
     });

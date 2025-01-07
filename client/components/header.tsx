@@ -24,7 +24,7 @@ import LanguageSelect from "@/components/language-select";
 import ModeToggle from "@/components/mode-toggle";
 import Notification from "@/components/notification";
 import { useTheme } from "next-themes";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 
 type HeaderVariant = 'inspector' | 'supervisor' | 'admin' | 'profile';
@@ -39,6 +39,7 @@ export default function Header({ variant }: IHeader) {
   const router = useRouter();
   const pathname = usePathname();
   const pathAfterLang = pathname.replace(/^\/(en|th)\/admin/, "");
+  const s = useTranslations("Sidebar");
 
   useEffect(() => {
     setMounted(true);
@@ -79,7 +80,7 @@ export default function Header({ variant }: IHeader) {
     >
       <div className="flex gap-4">
         {variant === "admin" && (
-          <div className="flex items-center text-2xl font-medium">{getPathWord()}</div>
+          <div className="flex items-center text-2xl font-medium">{s(getPathWord())}</div>
         )}
         {variant !== "admin" && (
           <div className="flex justify-between items-center">
