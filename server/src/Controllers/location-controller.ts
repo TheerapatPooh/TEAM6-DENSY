@@ -108,21 +108,24 @@ export async function updateSupervisor(req: Request, res: Response) {
         const zoneId = parseInt(req.params.id, 10);
         const { userId } = req.body;
 
-        if (!userId) {
+        const oldZone = await prisma.zone.findUnique({
+            where: { userId: userId },
+        });
+
+        if (oldZone && oldZone.id !== zoneId) {
             await prisma.zone.update({
-                where: { id: zoneId },
-                data: {
-                    userId: null, 
-                },
-            });
-        } else {
-            await prisma.zone.update({
-                where: { id: zoneId },
-                data: {
-                    userId: userId
-                },
+                where: { id: oldZone.id },
+                data: { userId: null },
             });
         }
+
+        // อัปเดต zone
+        await prisma.zone.update({
+            where: { id: zoneId },
+            data: {
+                userId: userId ? parseInt(userId, 10) : null,
+            },
+        });
 
         let result = await prisma.zone.findUnique({
             where: {

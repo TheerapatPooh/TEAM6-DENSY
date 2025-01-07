@@ -84,10 +84,6 @@ export default function Page() {
 
   return (
     <div>
-      <div className='mb-4'>
-        <TabMenu />
-      </div>
-
       <div className="flex items-center gap-2">
 
         <Textfield

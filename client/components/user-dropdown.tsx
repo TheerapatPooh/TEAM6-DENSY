@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { IUser} from "@/app/type";
+import { IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,10 +10,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface UserDropdownProps {
   userData: IUser[];
   onUserSelect: (selectUser: IUser) => void;
-  selectUser: IUser | null; 
+  selectUser: IUser | null;
+  color?: string;
 }
 
-const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, selectUser }) => {
+const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, selectUser, color = "card", }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelectUser = (user: IUser) => {
@@ -27,7 +28,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
       <DropdownMenuTrigger className="w-[300px] h-[65px]">
         <Button
           variant="outline"
-          className="w-full h-full justify-between bg-card hover:bg-background border-none"
+          className={`w-full h-full justify-between bg-${color} hover:bg-background border-none`}
         >
           <div className="flex items-center gap-2">
             {selectUser && (
@@ -45,15 +46,14 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
             </p>
           </div>
           <span
-            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
+            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"
+              }`}
           >
             expand_more
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="p-0 h-auto max-h-72">
+      <DropdownMenuContent className={`p-0 h-auto max-h-72 bg-${color}`}>
         <ScrollArea className="max-h-72 w-full overflow-auto rounded-md">
           {userData.map((user) => {
             return (

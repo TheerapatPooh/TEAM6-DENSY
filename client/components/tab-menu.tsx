@@ -11,7 +11,6 @@ export default function TabMenu({ id }: { id?: string }) {
     const locale = useLocale()
 
     const pathAfterLang = pathname.replace(/^\/(en|th)/, "");
-    console.log("path",pathAfterLang)
 
     const currentSubMenu = subMenuList.find(menu => {
         const groupPath = `/${menu.group.toLowerCase()}`;
@@ -22,6 +21,11 @@ export default function TabMenu({ id }: { id?: string }) {
         router.push(`/${locale}${link.replace("${id}", id || "")}`);
     };
 
+    // ถ้า path เป็น /en/admin/employees ให้ return null
+    if (pathname === `/${locale}/admin/employees`) {
+        return null;
+    }
+    
     return (
         <div>
             {currentSubMenu ? (

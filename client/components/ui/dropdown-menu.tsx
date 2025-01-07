@@ -18,7 +18,7 @@ const DropdownMenuTrigger = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Trigger
     ref={ref}
-    className={cn("outline-none transition-all duration-300 cursor-pointer hover:bg-secondary rounded-md", className)}
+    className={cn("outline-none transition-all duration-300 cursor-pointer hover:bg-background rounded-md", className)}
     {...props}
   />
 ))
@@ -99,7 +99,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative hover:bg-card flex cursor-pointer select-none items-center px-2 py-1.5 text-md font-medium outline-none transition-colors focus:bg-secondary focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-pointer select-none items-center px-2 py-1.5 text-md font-medium outline-none transition-colors focus:bg-secondary focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
       className
     )}
