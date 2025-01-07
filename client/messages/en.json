@@ -199,6 +199,10 @@
     "ZoneUpdateSuccessTitle": "Update Successful",
     "ZoneUpdateSuccessDescription": "The zone has been successfully assigned to the supervisor.",
     "UpdateSupervisorTitle": "Supervisor Update Notification",
-    "UpdateSupervisorDescription": "You have been successfully assigned as the supervisor for the zone {content}."
+    "UpdateSupervisorDescription": "You have been successfully assigned as the supervisor for the zone {content}.",
+    "ConfirmCommentTitle": "Confirm Acknowledgment?",
+    "ConfirmCommentDescription": "Are you sure you want to acknowledge this comment?",
+    "ConmmentConfirmSuccessTitle": "Acknowledged Successfully",
+    "ConmmentConfirmSuccessDescription": "The comment has been marked as acknowledged."
   }
 }
