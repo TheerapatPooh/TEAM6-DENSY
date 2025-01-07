@@ -46,8 +46,7 @@ export function AlertCustom({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-       <AlertDialogTrigger asChild>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild></AlertDialogTrigger>
       <AlertDialogContent onClick={handleContentClick}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -62,7 +61,7 @@ export function AlertCustom({
             {secondaryButtonText}
           </AlertDialogCancel>
           <AlertDialogAction
-            className="gap-2"
+            className={`gap-2 ${buttonVariants({ variant: primaryVariant })}`}
             onClick={() => handleAction(true)}
           >
             <span className="material-symbols-outlined">{primaryIcon}</span>

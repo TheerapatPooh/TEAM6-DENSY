@@ -199,6 +199,10 @@
     "ZoneUpdateSuccessTitle": "อัปเดตสำเร็จ",
     "ZoneUpdateSuccessDescription": "โซนถูกกำหนดผู้รับผิดชอบเรียบร้อยแล้ว",
     "UpdateSupervisorTitle": "แจ้งเตือนการอัปเดตผู้รับผิดชอบ",
-    "UpdateSupervisorDescription": "คุณได้รับการมอบหมายให้เป็นผู้รับผิดชอบโซน {content} เรียบร้อยแล้ว"
+    "UpdateSupervisorDescription": "คุณได้รับการมอบหมายให้เป็นผู้รับผิดชอบโซน {content} เรียบร้อยแล้ว",
+    "ConfirmCommentTitle": "ยืนยันการรับทราบ?",
+    "ConfirmCommentDescription": "คุณแน่ใจหรือไม่ว่าต้องการรับทราบความคิดเห็นนี้?",
+    "ConmmentConfirmSuccessTitle": "รับทราบเรียบร้อยแล้ว",
+    "ConmmentConfirmSuccessDescription": "ความคิดเห็นนี้ถูกทำเครื่องหมายว่าได้รับทราบแล้ว."
   }
 }
