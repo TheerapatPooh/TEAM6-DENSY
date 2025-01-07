@@ -18,14 +18,13 @@ import Map from "@/components/map";
 import TabMenu from "@/components/tab-menu";
 
 export default function Page() {
-  const a = useTranslations("Alert");
   const t = useTranslations("General");
   const z = useTranslations("Zone");
+  const a = useTranslations("Alert");
 
   const [userData, setUserData] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
   const [zones, setZones] = useState<IZone[]>([]); // Zones state
-
   const [selectZone, setSelectZone] = useState<IZone | null>(null); // Select zone state
 
   useEffect(() => {
@@ -48,6 +47,7 @@ export default function Page() {
     getData();
   }, []);
 
+
   const handleUserSelect = (dropdownUser: IUser) => {
     setSelectUser(dropdownUser); // Set Select user
   };
@@ -63,7 +63,6 @@ export default function Page() {
     const data = {
       supervisorId: selectUser.id,
     };
-
     try {
       // Make API request to save the data
       await fetchData("put", `/zone/${selectZone.id}`, true, data);
@@ -71,7 +70,6 @@ export default function Page() {
       setSelectZone(null)
       alert("Data saved successfully!");
     } catch (error) {
-      console.error("Error saving data:", error);
       alert("Failed to save data. Please try again.");
     }
   };
@@ -98,26 +96,18 @@ export default function Page() {
       </div>
 
       <div className="flex gap-2 ">
-        <span className="material-symbols-outlined text-muted-foreground">
-          location_on
-        </span>
-        <p className="text-base font-semibold text-muted-foreground ">
-          {t("Zone")}
-        </p>
+        <span className="material-symbols-outlined text-muted-foreground">location_on</span>
+        <p className="text-base font-semibold text-muted-foreground">{t("Zone")}</p>
       </div>
 
-      <div className="flex justify-center items-center bg-secondary w-full rounded-md py-8  ">
-        <Map disable={false} />
+      <div className="flex justify-center items-center bg-secondary w-full rounded-md py-8">
+        <Map disable={false}/>
       </div>
 
       <div className="flex gap-2 justify-between w-fit mt-5 mb-5">
         <div className="flex gap-1 items-center ">
-          <span className="material-symbols-outlined text-muted-foreground">
-            engineering
-          </span>
-          <p className="text-muted-foreground text-base font-semibold">
-            {t("Supervisor")}
-          </p>
+          <span className="material-symbols-outlined text-muted-foreground">engineering</span>
+          <p className="text-muted-foreground text-base font-semibold">{t("Supervisor")}</p>
         </div>
         <UserDropdown
           userData={userData}
