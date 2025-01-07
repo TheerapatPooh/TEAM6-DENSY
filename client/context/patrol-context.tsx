@@ -1,9 +1,11 @@
 import { IDefect, IPatrol, IPatrolResult, IUser } from "@/app/type";
 import Loading from "@/components/loading";
 import { useSocket } from "@/components/socket-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { fetchData } from "@/lib/utils";
 import { useParams } from "next/navigation";
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useDebugValue } from "react";
+import { boolean } from "zod";
 
 interface PatrolContextProps {
     patrol: IPatrol | null;
@@ -134,12 +136,13 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         };
 
         try {
-            await fetchData(
+            const startPatrol = await fetchData(
                 "put",
                 `/patrol/${patrolId}/start`,
                 true,
                 data
             );
+            setPatrol(startPatrol)
         } catch (error) {
             console.error("Error starting patrol:", error);
         }
@@ -148,7 +151,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handleFinishPatrol = async () => {
         if (!patrol) return;
-
 
         const updatedResults = patrolResults.map((result) => {
             const matchedResult = patrolResults.find(
@@ -186,12 +188,13 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
             try {
                 localStorage.removeItem(`patrolResults_${patrol.id}`);
                 localStorage.removeItem(`otherResults_${patrol.id}`);
-                await fetchData(
+                const finishPatrol = await fetchData(
                     "put",
                     `/patrol/${patrol.id}/finish`,
                     true,
                     data
                 );
+                setPatrol(finishPatrol)
             } catch (error) {
                 console.error("Error finishing patrol:", error);
             }
@@ -224,7 +227,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
             );
         }
     };
-
 
     useEffect(() => {
         const fetchData = async () => {

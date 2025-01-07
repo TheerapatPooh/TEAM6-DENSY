@@ -2,6 +2,7 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
+import { number } from "zod";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -538,13 +539,94 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    const updatePatrol = await prisma.patrol.update({
+    await prisma.patrol.update({
       where: {
         id: patrolId,
       },
       data: {
         status: "on_going",
         startTime: new Date(),
+      },
+    });
+
+    const updatePatrol = await prisma.patrol.findFirst({
+      where: {
+        id: patrolId,
+      },
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              include: {
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          include: {
+            defects: true,
+            comments: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    department: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -560,7 +642,7 @@ export async function startPatrol(req: Request, res: Response) {
               status: null,
               itemId: items.id,
               zoneId: zones.zone.id,
-              patrolId: updatePatrol.id,
+              patrolId: patrolId,
             },
           });
           if (!notifiedInspectors.has(inspectorId)) {
@@ -568,7 +650,7 @@ export async function startPatrol(req: Request, res: Response) {
             await createNotification({
               message: message,
               type: "information" as NotificationType,
-              url: `/patrol/${updatePatrol.id}/detail`,
+              url: `/patrol/${patrolId}/detail`,
               userId: inspectorId,
             });
 
@@ -629,7 +711,7 @@ export async function finishPatrol(req: Request, res: Response) {
     }
     const duration = calculateDuration(startTime);
 
-    const updatePatrol = await prisma.patrol.update({
+    await prisma.patrol.update({
       where: {
         id: patrolId,
       },
@@ -637,6 +719,87 @@ export async function finishPatrol(req: Request, res: Response) {
         status: "completed",
         endTime: new Date(),
         duration: duration,
+      },
+    });
+
+    const updatePatrol = await prisma.patrol.findFirst({
+      where: {
+        id: patrolId,
+      },
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              include: {
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          include: {
+            defects: true,
+            comments: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    department: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -662,16 +825,15 @@ export async function finishPatrol(req: Request, res: Response) {
         await createNotification({
           message: message,
           type: "information" as NotificationType,
-          url: `/patrol/${updatePatrol.id}/detail`,
+          url: `/patrol/${patrolId}/detail`,
           userId: inspectorId,
         });
         notifiedInspectors.add(inspectorId);
       }
     }
 
-    let json = updatePatrol;
-
-    res.status(200).json(json);
+    let result = updatePatrol;
+    res.status(200).json(result);
     return;
   } catch (error) {
     res.status(500);

@@ -113,7 +113,6 @@ export default function Page() {
       defectUserId: defect.userId,
       patrolResultId: defect.patrolResultId,
     };
-    console.log(data);
 
     try {
       const response = await fetchData("put", `/defect/${defect.id}`, true, data);

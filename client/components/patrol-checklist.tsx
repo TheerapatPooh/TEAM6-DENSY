@@ -99,7 +99,6 @@ export default function PatrolChecklist({
         data,
       );
       fetchRealtimeComment(comment, patrolResultId)
-      console.log("commment create", comment)
     } catch (error) {
       console.error("Error creating Comment:", error);
     }
@@ -160,15 +159,11 @@ export default function PatrolChecklist({
     }
   };
 
-
-
   useEffect(() => {
     if (patrolChecklist) {
       setMounted(true)
     }
   }, [])
-
-
 
   if (!mounted) {
     return (

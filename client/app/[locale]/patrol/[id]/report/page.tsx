@@ -2,6 +2,7 @@
 import { IDefect, patrolStatus } from '@/app/type';
 import BadgeCustom from '@/components/badge-custom';
 import Loading from '@/components/loading';
+import PatrolTimer from '@/components/patrol-timer';
 import ReportDefect from '@/components/report-defect';
 import TabMenu from '@/components/tab-menu';
 import { Button } from '@/components/ui/button';
@@ -57,14 +58,19 @@ export default function Page() {
             <Progress value={calculateProgress()} />
           </div>
         </div>
-        <BadgeCustom
-          iconName={getPatrolStatusVariant(patrol.status).iconName}
-          showIcon={true}
-          showTime={false}
-          variant={getPatrolStatusVariant(patrol.status).variant}
-        >
-          {s(patrol.status)}
-        </BadgeCustom>
+
+        <div className='flex flex-row items-center gap-2'>
+          <PatrolTimer launchDate={patrol.startTime} patrolStatus={patrol.status} patrolDuration={patrol.duration} />
+
+          <BadgeCustom
+            iconName={getPatrolStatusVariant(patrol.status).iconName}
+            showIcon={true}
+            showTime={false}
+            variant={getPatrolStatusVariant(patrol.status).variant}
+          >
+            {s(patrol.status)}
+          </BadgeCustom>
+        </div>
       </div>
       <div className="flex w-full justify-between items-center">
         <TabMenu id={id.toString()} />
