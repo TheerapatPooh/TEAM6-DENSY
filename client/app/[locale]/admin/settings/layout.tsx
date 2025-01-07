@@ -8,6 +8,7 @@ export default function Layout({
 }) {
   return (
     <section className="flex flex-col px-6 py-4 gap-4">
+      <TabMenu></TabMenu>
       {children}
     </section>
   )

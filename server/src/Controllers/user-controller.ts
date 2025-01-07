@@ -337,18 +337,15 @@ export async function updateUser(req: Request, res: Response) {
       })
 
     } else {
-      if (username || email || password || role || department) {
         await prisma.user.update({
           where: { id: id },
           data: {
-            email: email,
             password: password ? await bcrypt.hash(password, 10) : undefined,
-            department: department,
             active: active,
             role: role
           },
         });
-      }
+      
 
       await prisma.profile.update({
         where: { id: id },
