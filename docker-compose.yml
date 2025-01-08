@@ -1,7 +1,8 @@
 services:
   db:
-    image: mysql:latest
     container_name: densy_db
+    image: mysql:latest
+    restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
@@ -16,10 +17,10 @@ services:
 
   app:
     container_name: densy_app
+    restart: always
     build:
       context: .
       dockerfile: .dockerfile
-    restart: always
     environment:
       NODE_ENV: production
     env_file:

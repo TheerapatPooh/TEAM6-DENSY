@@ -1,50 +1,40 @@
 # Base image
-FROM node:18-alpine AS base
+FROM node:20-alpine3.21 AS base
 
-# ติดตั้ง Python 
-RUN apk add --no-cache python3 make g++ pkgconfig pixman-dev cairo-dev pango-dev
-
-# สร้าง symlink สำหรับ python ให้ชี้ไปที่ python3
+# ติดตั้ง dependencies
+RUN apk add --no-cache python3 make g++ pkgconfig pixman-dev cairo-dev pango-dev 
 RUN ln -sf python3 /usr/bin/python
+RUN ln -s /usr/lib/libssl.so.3 /lib/libssl.so.3
 
 # Set working directory
 WORKDIR /app
 
 # Client
-COPY client/package*.json ./client/
 WORKDIR /app/client
+COPY client/package*.json ./
 RUN npm install
-RUN mkdir -p ./public
-COPY client ./
+COPY client/ ./
 RUN npm run build
 
 # Server
-WORKDIR /app                       
-COPY server/package*.json ./server/
-WORKDIR /app/server
+WORKDIR /app/server                       
+COPY server/package*.json ./
 RUN npm install
-COPY server ./
+COPY server/ ./
 COPY server/prisma ./prisma/
 RUN npx prisma generate
 RUN npm run build
 
 # Final production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine3.20 AS production
 WORKDIR /app
 
 # Install global dependencies
 RUN npm install -g concurrently
 
-# Copy node_modules and built files from base stage
-COPY --from=base /app/client/.next ./client/.next
-COPY --from=base /app/client/public ./client/public
-COPY --from=base /app/client/node_modules ./client/node_modules
-COPY --from=base /app/client/package.json ./client/ 
-
-COPY --from=base /app/server/dist ./server/dist
-COPY --from=base /app/server/node_modules ./server/node_modules
-COPY --from=base /app/server/prisma ./server/prisma
-COPY --from=base /app/server/package.json ./server/ 
+# Copy built files from base stage
+COPY --from=base /app/client /app/client
+COPY --from=base /app/server /app/server
 
 # Copy the entrypoint script
 COPY entrypoint.sh /app/
