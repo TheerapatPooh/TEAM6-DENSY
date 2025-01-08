@@ -1,5 +1,9 @@
 pipeline {
     agent any
+
+    triggers {
+        pollSCM('H/3 * * * *')
+    }
    
     stages {
         stage('Check Docker') {
@@ -11,7 +15,7 @@ pipeline {
         stage('Pull Latest Code') {
             steps {
                 dir('/workspace/TEAM6-DENSY') {
-                    sh 'git pull origin jenkins'
+                    sh 'git pull origin main'
                 }
             }
         }
