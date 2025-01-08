@@ -1,6 +1,6 @@
 import prisma from '@Utils/database.js'
 import { Request, Response } from 'express'
-import { createNotification } from '@Controllers/util-controller'
+import { createNotification } from '@Controllers/util-controller.js'
 import { NotificationType } from '@prisma/client'
 
 /**

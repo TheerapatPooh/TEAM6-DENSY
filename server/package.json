@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
-    "seed": "tsx src/Utils/seed.ts",
+    "seed": "node dist/Utils/seed.js",
     "lint": "node -e \"const fs = require('fs'); const date = new Date(); const dateString = date.toISOString().split('T')[0].replace(/-/g, '_'); const timeString = date.toTimeString().split(' ')[0].replace(/:/g, '_'); const fileName = `lintReports/lintReport_${dateString}_${timeString}.json`; fs.mkdirSync('lintReports', { recursive: true }); require('child_process').execSync(`eslint . --format json -o ${fileName}`);\" && tsx eslint-report.ts"
   },
   "author": "TEAM-6",
