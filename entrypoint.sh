@@ -1,7 +1,7 @@
 #!/bin/sh
-cd server
+cd /app/server
 npx prisma migrate deploy
 npm run seed
 node dist/index.js &
-cd ../client
+cd /app/client
 npm start
