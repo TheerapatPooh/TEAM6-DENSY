@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { role } from "@/app/type";
+import { AlertCustom } from '@/components/alert-custom';
 
 
 export default function page() {
@@ -37,6 +38,9 @@ export default function page() {
     const [currentPassError, setCurrentPassError] = useState<string | null>(null);
     const [newPassError, setNewPassError] = useState<string | null>(null);
     const [confirmPassError, setConfirmPassError] = useState<string | null>(null);
+    const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+    const [isProfileImageDialogOpen, setIsProfileImageDialogOpen] = useState(false);
+    const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
     const [imageProfile, setImageProfile] = useState<File | null>(null);
     const [userData, setUserData] = useState<IUser>(null);
     const [formData, setFormData] = useState({
@@ -53,6 +57,7 @@ export default function page() {
     });
     const z = useTranslations("Zone")
     const a = useTranslations("Alert")
+    const t = useTranslations("General");
     const getUserData = async () => {
         try {
             const data = await fetchData("get", "/user?profile=true&image=true&password=true", true);
@@ -83,7 +88,32 @@ export default function page() {
         return <Loading />;
     }
 
+    const handleOpenDialog = (dialogType: String) => {
+        if (dialogType === "SaveProfileDialog") {
+            setIsProfileDialogOpen(true);
+        } else if (dialogType === "SaveProfileImageDialog") {
+            setIsProfileImageDialogOpen(true);
+        }
+    };
 
+    const handleDialogResult = (result: boolean) => {
+        setIsProfileDialogOpen(false);
+        setIsProfileImageDialogOpen(false);
+        if (result && pendingAction) {
+          pendingAction(); // Execute the pending action
+          setPendingAction(null); // Clear the pending action
+        }
+    };
+
+    const handleSaveProfile = () => {
+        setPendingAction(() => () => handleUpdateUserData());
+        handleOpenDialog("SaveProfileDialog");
+    };
+
+    const handleSaveProfileImage = () => {
+        setPendingAction(() => () => handleUpdateImageProfile());
+        handleOpenDialog("SaveProfileImageDialog");
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -99,7 +129,7 @@ export default function page() {
         const passwordMatch = await bcrypt.compare(formData.password, userData.password);
         let showErrorToast = false;
 
-        if (formData.password !== '' || !formData.password !== null && passwordMatch !== false) {
+        if (formData.password !== '' || (!formData.password !== null && passwordMatch !== false)) {
             if (!passwordMatch) {
                 setCurrentPassError(a("ProfileCurrentPassInvalid"));
                 showErrorToast = true;
@@ -113,17 +143,16 @@ export default function page() {
 
         if (formData.newPassword != formData.confirmPassword) {
             setConfirmPassError(a("ProfileConfirmPassInvalid"));
-            showErrorToast = true;
-        } else if (formData.newPassword.trim()) {
-            setNewPassError(null);
-            if (!formData.confirmPassword.trim()) {
-                setConfirmPassError(a("ProfileConfrimPassRequire"));
-            }
-            showErrorToast = true;
-        } else if (formData.confirmPassword.trim()) {
-            setNewPassError(null);
-            if (!formData.newPassword.trim()) {
-                setNewPassError(a("ProfileNewPassRequire"));
+            if (formData.newPassword.trim()) {
+                setNewPassError(null);
+                if (!formData.confirmPassword.trim()) {
+                    setConfirmPassError(a("ProfileConfrimPassRequire"));
+                }
+            } else if (formData.confirmPassword.trim()) {
+                setConfirmPassError(null);
+                if (!formData.newPassword.trim()) {
+                    setNewPassError(a("ProfileNewPassRequire"));
+                }
             }
             showErrorToast = true;
         }
@@ -361,7 +390,7 @@ export default function page() {
                                         <AlertDialogAction
                                             className={`bg-primary hover:bg-primary/70 
                 ${!imageProfile ? "opacity-50 cursor-not-allowed" : ""}`}
-                                            onClick={handleUpdateImageProfile}
+                                            onClick={handleSaveProfileImage}
                                         >
                                             <span className="material-symbols-outlined text-2xl">
                                                 save
@@ -501,9 +530,29 @@ export default function page() {
                 {/* Button Back And Save    */}
                 <div className='flex justify-end items-end gap-2'>
                     <Button variant='secondary'>Back</Button>
-                    <Button variant='primary' onClick={handleUpdateUserData}>Save</Button>
+                    <Button variant='primary' onClick={handleSaveProfile}>Save</Button>
                 </div>
             </div>
+            {isProfileDialogOpen && (
+                <AlertCustom
+                    title={a("ProfileUpdateConfirmTitle")}
+                    description={a("ProfileUpdateConfirmDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={handleDialogResult}
+                ></AlertCustom>
+            )}
+            {isProfileImageDialogOpen && (
+                <AlertCustom
+                    title={a("ProfileImageUpdateConfirmTitle")}
+                    description={a("ProfileImageUpdateConfirmDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={handleDialogResult}
+                ></AlertCustom>
+            )}
         </div >
     )
 }

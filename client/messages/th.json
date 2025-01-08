@@ -223,6 +223,10 @@
     "ProfileCurrentPassRequire" : "กรุณากรอกรหัสผ่านปัจจุบัน",
     "ProfileConfirmPassInvalid" : "รหัสผ่านใหม่ไม่ตรงกัน กรุณาลองใหม่อีกครั้ง",
     "ProfileConfrimPassRequire" : "กรุณากรอกยืนยันรหัสผ่านใหม่",
-    "ProfileNewPassRequire" : "กรุณากรอกรหัสผ่านใหม่"
+    "ProfileNewPassRequire" : "กรุณากรอกรหัสผ่านใหม่",
+    "ProfileUpdateConfirmTitle" : "คุณแน่ใจหรือไม่ว่าต้องการบันทึกข้อมูลโปรไฟล์",
+    "ProfileUpdateConfirmDescription" : "กรุณายืนยันเพื่อบันทึกข้อมูลโปรไฟล์",
+    "ProfileImageUpdateConfirmTitle" : "คุณแน่ใจหรือไม่ว่าต้องการบันทึกรูปโปรไฟล์",
+    "ProfileImageUpdateConfirmDescription" : "กรุณายืนยันเพื่อบันทึกรูปโปรไฟล์"
   }
 }

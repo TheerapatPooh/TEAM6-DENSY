@@ -223,6 +223,10 @@
     "ProfileCurrentPassRequire" : "Please enter a current password.",
     "ProfileConfirmPassInvalid" : "New passwords do not match. Please try again.",
     "ProfileConfrimPassRequire" : "Please enter a confirm new password.",
-    "ProfileNewPassRequire" : "Please enter a new password."
+    "ProfileNewPassRequire" : "Please enter a new password.",
+    "ProfileUpdateConfirmTitle" : "Are you sure to save profile?",
+    "ProfileUpdateConfirmDescription" : "Please confirm to save profile.",
+    "ProfileImageUpdateConfirmTitle" : "Are you sure to save profile image?",
+    "ProfileImageUpdateConfirmDescription" : "Please confirm to save profile."
   }
 }
