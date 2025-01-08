@@ -40,6 +40,7 @@ export default function page() {
     const [confirmPassError, setConfirmPassError] = useState<string | null>(null);
     const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
     const [isProfileImageDialogOpen, setIsProfileImageDialogOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
     const [imageProfile, setImageProfile] = useState<File | null>(null);
     const [userData, setUserData] = useState<IUser>(null);
@@ -55,6 +56,11 @@ export default function page() {
         newPassword: '',
         confirmPassword: '',
     });
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+    
     const z = useTranslations("Zone")
     const a = useTranslations("Alert")
     const t = useTranslations("General");
@@ -302,6 +308,10 @@ export default function page() {
         setImageProfile(null); // Reset the image if no file is selected
     }
 
+    if (!mounted) {
+        return null
+    }
+
     return (
         <div className='flex flex-col py-4 px-6'>
 
@@ -350,7 +360,7 @@ export default function page() {
 
                                 <div className='flex gap-2'>
                                     <div>
-                                        <input name='image' id="file-input" type="file" style={{ display: "none" }} onChange={handleFileChange} />
+                                        <input name='image' id="file-input" placeholder={null} type="file" className='hidden' onChange={handleFileChange} />
                                         <Button className='flex justify-center items-center w-10 h-10' variant='primary' onClick={handleButtonClick}>
                                             <span className="material-symbols-outlined text-2xl">
                                                 download
@@ -391,6 +401,7 @@ export default function page() {
                                             className={`bg-primary hover:bg-primary/70 
                 ${!imageProfile ? "opacity-50 cursor-not-allowed" : ""}`}
                                             onClick={handleSaveProfileImage}
+                                            disabled={!imageProfile ? true : false}
                                         >
                                             <span className="material-symbols-outlined text-2xl">
                                                 save
