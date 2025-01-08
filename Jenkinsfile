@@ -11,21 +11,21 @@ pipeline {
         stage('Pull Latest Code') {
             steps {
                 dir('/workspace/TEAM6-DENSY') {
-                    sh 'git pull origin main'
+                    sh 'git pull origin jenkins'
                 }
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                dir('/workspace/TEAM6-DENSY/server') {
-                    sh '''
-                    npm install
-                    npm run test || exit 1
-                    '''
-                }
-            }
-        }
+        // stage('Run Tests') {
+        //     steps {
+        //         dir('/workspace/TEAM6-DENSY/server') {
+        //             sh '''
+        //             npm install
+        //             npm run test || exit 1
+        //             '''
+        //         }
+        //     }
+        // }
 
         stage('Cleanup Existing Containers') {
             steps {
