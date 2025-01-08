@@ -203,6 +203,14 @@
     "ConfirmCommentTitle": "ยืนยันการรับทราบ?",
     "ConfirmCommentDescription": "คุณแน่ใจหรือไม่ว่าต้องการรับทราบความคิดเห็นนี้?",
     "ConmmentConfirmSuccessTitle": "รับทราบเรียบร้อยแล้ว",
-    "ConmmentConfirmSuccessDescription": "ความคิดเห็นนี้ถูกทำเครื่องหมายว่าได้รับทราบแล้ว."
+    "ConmmentConfirmSuccessDescription": "ความคิดเห็นนี้ถูกทำเครื่องหมายว่าได้รับทราบแล้ว.",
+    "ProfileImageUpdateSuccessTitle" : "บันทึกรูปภาพ",
+    "ProfileImageUpdateSuccessDescription" : "รูปโปรไฟล์ของคุณได้รับการอัปเดตเรียบร้อยแล้ว",
+    "ProfileUpdateSuccessTitle" : "บันทึกสำเร็จ",
+    "ProfileUpdateSuccessDescription" : "บันทึกการเปลี่ยนแปลงโปรไฟล์ของคุณแล้ว",
+    "ProfileImageUpdateErrorTitle" : "อัปโหลดรูปไม่สำเร็จ",
+    "ProfileImageUpdateErrorDescription" : "ไม่สามารถอัปเดตรูปโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง",
+    "ProfileUpdateErrorTitle" : "บันทึกล้มเหลว",
+    "ProfileUpdateErrorDescription" : "โปรดแก้ไขข้อมูลแล้วลองอีกครั้ง"
   }
 }

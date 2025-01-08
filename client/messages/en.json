@@ -203,6 +203,14 @@
     "ConfirmCommentTitle": "Confirm Acknowledgment?",
     "ConfirmCommentDescription": "Are you sure you want to acknowledge this comment?",
     "ConmmentConfirmSuccessTitle": "Acknowledged Successfully",
-    "ConmmentConfirmSuccessDescription": "The comment has been marked as acknowledged."
+    "ConmmentConfirmSuccessDescription": "The comment has been marked as acknowledged.",
+    "ProfileImageUpdateSuccessTitle" : "Image Save",
+    "ProfileImageUpdateSuccessDescription" : "Your profile image has been sucessful updated.",
+    "ProfileUpdateSuccessTitle" : "Saved Successfully",
+    "ProfileUpdateSuccessDescription" : "Your profile changes have been saved.",
+    "ProfileImageUpdateErrorTitle" : "Unable to Save Image",
+    "ProfileImageUpdateErrorDescription" : "Failed to update profile image. Please try again.",
+    "ProfileUpdateErrorTitle" : "Save Failed",
+    "ProfileUpdateErrorDescription" : "Please correct the information and try again."
   }
 }

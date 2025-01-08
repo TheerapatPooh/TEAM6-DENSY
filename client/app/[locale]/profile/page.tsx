@@ -44,6 +44,7 @@ export default function page() {
         confirmPassword: '',
     });
     const z = useTranslations("Zone")
+    const a = useTranslations("Alert")
     const getUserData = async () => {
         try {
             const data = await fetchData("get", "/user?profile=true&image=true&password=true", true);
@@ -124,11 +125,19 @@ export default function page() {
             if (imageProfile) {
                 await fetchData("put", "/profile", true, imageForm, true);
             }
-            alert("Profile updated successfully!");
+            toast({
+                variant: "success",
+                title: a("ProfileUpdateSuccessTitle"),
+                description: a("ProfileUpdateSuccessDescription"),
+            });
             getUserData()
         } catch (error) {
             console.error("Error updating profile:", error);
-            alert("Failed to update profile.");
+            toast({
+                variant: "error",
+                title: a("ProfileUpdateErrorTitle"),
+                description: a("ProfileUpdateErrorDescription"),
+            });
         }
     };
 
@@ -139,11 +148,19 @@ export default function page() {
             if (imageProfile) {
                 await fetchData("put", "/profile", true, imageForm, true);
             }
-            alert("Image profile updated successfully!");
+            toast({
+                variant: "success",
+                title: a("ProfileImageUpdateSuccessTitle"),
+                description: a("ProfileImageUpdateSuccessDescription"),
+            });
             getUserData()
         } catch (error) {
             console.error("Error updating image profile:", error);
-            alert("Failed to update image profile.");
+            toast({
+                variant: "error",
+                title: a("ProfileImageUpdateErrorTitle"),
+                description: a("ProfileImageUpdateErrorDescription"),
+            });
         }
     }
 
