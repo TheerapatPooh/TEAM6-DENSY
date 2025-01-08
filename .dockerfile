@@ -1,9 +1,14 @@
 # Base image
 FROM node:18-alpine AS base
 
+# ติดตั้ง Python 
+RUN apk add --no-cache python3 make g++ pkgconfig pixman-dev cairo-dev pango-dev
+
+# สร้าง symlink สำหรับ python ให้ชี้ไปที่ python3
+RUN ln -sf python3 /usr/bin/python
+
 # Set working directory
 WORKDIR /app
-
 
 # Client
 COPY client/package*.json ./client/
