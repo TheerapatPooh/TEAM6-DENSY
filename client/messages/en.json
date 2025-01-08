@@ -211,6 +211,18 @@
     "ProfileImageUpdateErrorTitle" : "Unable to Save Image",
     "ProfileImageUpdateErrorDescription" : "Failed to update profile image. Please try again.",
     "ProfileUpdateErrorTitle" : "Save Failed",
-    "ProfileUpdateErrorDescription" : "Please correct the information and try again."
+    "ProfileUpdateErrorDescription" : "Please correct the information and try again.",
+    "ProfileNameRequire" : "Please enter a name.",
+    "ProfileEmailInvalid" : "Please enter a valid email address.",
+    "ProfileAgeInvalid" : "Please enter a valid age.",
+    "ProfileAgeRequire" : "Please enter your age.",
+    "ProfileTelInvalid" : "Please enter a valid telephone number.",
+    "ProfileTelRequire" : "Please enter a telephone number.",
+    "ProfileAddressRequire" : "Please enter an address.",
+    "ProfileCurrentPassInvalid" : "Current Password do not match.",
+    "ProfileCurrentPassRequire" : "Please enter a current password.",
+    "ProfileConfirmPassInvalid" : "New passwords do not match. Please try again.",
+    "ProfileConfrimPassRequire" : "Please enter a confirm new password.",
+    "ProfileNewPassRequire" : "Please enter a new password."
   }
 }

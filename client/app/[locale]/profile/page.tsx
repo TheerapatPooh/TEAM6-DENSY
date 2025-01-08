@@ -29,6 +29,14 @@ import { role } from "@/app/type";
 
 
 export default function page() {
+    const [nameError, setNameError] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [ageError, setAgeError] = useState<string | null>(null);
+    const [telError, setTelError] = useState<string | null>(null);
+    const [addressError, setAddressError] = useState<string | null>(null);
+    const [currentPassError, setCurrentPassError] = useState<string | null>(null);
+    const [newPassError, setNewPassError] = useState<string | null>(null);
+    const [confirmPassError, setConfirmPassError] = useState<string | null>(null);
     const [imageProfile, setImageProfile] = useState<File | null>(null);
     const [userData, setUserData] = useState<IUser>(null);
     const [formData, setFormData] = useState({
@@ -89,18 +97,93 @@ export default function page() {
 
     const handleUpdateUserData = async () => {
         const passwordMatch = await bcrypt.compare(formData.password, userData.password);
+        let showErrorToast = false;
 
         if (formData.password !== '' || !formData.password !== null && passwordMatch !== false) {
             if (!passwordMatch) {
-                alert("Current Password do not match.")
-                return
+                setCurrentPassError(a("ProfileCurrentPassInvalid"));
+                showErrorToast = true;
+            } else {
+                setCurrentPassError(null);
             }
+        } else if (!formData.password.trim()) {
+            setCurrentPassError(a("ProfileCurrentPassRequire"));
+            showErrorToast = true;
         }
 
         if (formData.newPassword != formData.confirmPassword) {
-            alert("Passwords do not match. Please try again.");
+            setConfirmPassError(a("ProfileConfirmPassInvalid"));
+            showErrorToast = true;
+        } else if (formData.newPassword.trim()) {
+            setNewPassError(null);
+            if (!formData.confirmPassword.trim()) {
+                setConfirmPassError(a("ProfileConfrimPassRequire"));
+            }
+            showErrorToast = true;
+        } else if (formData.confirmPassword.trim()) {
+            setNewPassError(null);
+            if (!formData.newPassword.trim()) {
+                setNewPassError(a("ProfileNewPassRequire"));
+            }
+            showErrorToast = true;
+        }
+
+        if (!formData.name.trim()) {
+            setNameError(a("ProfileNameRequire"));
+            showErrorToast = true;
+        } else {
+            setNameError(null);
+        }
+
+        if (formData.email.trim() && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+            setEmailError(a("ProfileEmailInvalid"));
+            showErrorToast = true;
+        } else {
+            setEmailError(null);
+        }
+
+        if (!formData.age.trim()) {
+            setAgeError(a("ProfileAgeRequire"));
+            showErrorToast = true;
+        } else {
+            setAgeError(null);
+        }
+
+        if (!formData.age.trim()) {
+            setAgeError(a("ProfileAgeRequire"));
+            showErrorToast = true;
+        } else if (formData.age.trim() && !/^\d+$/.test(formData.age)) {
+            setAgeError(a("ProfileAgeInvalid"));
+            showErrorToast = true;
+        } else {
+            setAgeError(null);
+        }
+
+        if (!formData.tel.trim()) {
+            setTelError(a("ProfileTelRequire"));
+            showErrorToast = true;
+        } else if (formData.tel.trim() && !/^[0-9]{10}$/.test(formData.tel)) {
+            setTelError(a("ProfileTelInvalid"));
+        } else {
+            setTelError(null);
+        }
+
+        if (!formData.address.trim()) {
+            setAddressError(a("ProfileAddressRequire"));
+            showErrorToast = true;
+        } else {
+            setAddressError(null);
+        }
+
+        if (showErrorToast) {
+            toast({
+                variant: "error",
+                title: a("ProfileUpdateErrorTitle"),
+                description: a("ProfileUpdateErrorDescription"),
+            });
             return;
         }
+
         const userForm = new FormData();
         userForm.append("name", formData.name);
         userForm.append("email", formData.email);
@@ -339,26 +422,41 @@ export default function page() {
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>Name</p>
                             <Input name="name" value={formData.name} onChange={handleInputChange} placeholder={userData.profile.name ? userData.profile.name : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {nameError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{nameError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>Email</p>
                             <Input name="email" value={formData.email} onChange={handleInputChange} placeholder={userData.email ? userData.email : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {emailError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{emailError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>Age</p>
                             <Input name="age" value={formData.age} onChange={handleInputChange} placeholder={String(userData.profile.age) ? String(userData.profile.age) : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {ageError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{ageError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>tel</p>
                             <Input name="tel" value={formData.tel} onChange={handleInputChange} placeholder={userData.profile.tel ? userData.profile.tel : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {telError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{telError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>Address</p>
                             <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
+                            {addressError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{addressError}</p>
+                            )}
                         </div>
 
                     </div>
@@ -377,16 +475,25 @@ export default function page() {
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>Current Password</p>
                             <Input type='password' name="password" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            {currentPassError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{currentPassError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>New Password</p>
                             <Input type='password' name="newPassword" value={formData.newPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            {newPassError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{newPassError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>Confirm Password</p>
                             <Input type='password' name="confirmPassword" value={formData.confirmPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            {confirmPassError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
+                            )}
                         </div>
                     </div>
                 </div>
