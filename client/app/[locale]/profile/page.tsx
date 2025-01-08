@@ -60,10 +60,11 @@ export default function page() {
     useEffect(() => {
         setMounted(true)
     }, [])
-    
-    const z = useTranslations("Zone")
-    const a = useTranslations("Alert")
+
+    const z = useTranslations("Zone");
+    const a = useTranslations("Alert");
     const t = useTranslations("General");
+    
     const getUserData = async () => {
         try {
             const data = await fetchData("get", "/user?profile=true&image=true&password=true", true);
@@ -90,7 +91,7 @@ export default function page() {
     }, []); // Empty dependency array means this will only run once, when the component mounts.
 
 
-    if (!userData) {
+    if (!mounted || !userData) {
         return <Loading />;
     }
 
@@ -308,15 +309,11 @@ export default function page() {
         setImageProfile(null); // Reset the image if no file is selected
     }
 
-    if (!mounted) {
-        return null
-    }
-
     return (
         <div className='flex flex-col py-4 px-6'>
 
             <div className='text-2xl font-bold mb-4'>
-                View Profile
+                {t("ViewProfile")}
             </div>
 
             {/* first block */}
@@ -337,23 +334,23 @@ export default function page() {
 
                     <div className='flex flex-col justify-center items-start'>
                         <div className='text-2xl font-bold py-4'>
-                            Welcome back, {userData.profile.name}
+                            {t("WelcomeBack")}, {userData.profile.name}
                         </div>
 
                         <AlertDialog>
                             <AlertDialogTrigger>
                                 <Button variant='outline' size='default'>
-                                    Upload new photo
+                                    {t("UploadNewPhoto")}
                                 </Button>
                             </AlertDialogTrigger>
 
                             <AlertDialogContent className='w-[400px] h-fit' >
                                 <AlertDialogHeader>
                                     <AlertDialogTitle className="text-2xl font-semibold">
-                                        Profile Image
+                                        {t("ProfileImage")}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                        Upload a new image for your profile.
+                                        {t("ProfileImageDescription")}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
 
@@ -395,7 +392,7 @@ export default function page() {
                                 <AlertDialogFooter>
                                     <div className="flex items-end justify-end gap-2">
                                         <AlertDialogCancel onClick={handCancelImageProfile}>
-                                            Cancel
+                                            {t("Cancel")}
                                         </AlertDialogCancel>
                                         <AlertDialogAction
                                             className={`bg-primary hover:bg-primary/70 
@@ -406,7 +403,7 @@ export default function page() {
                                             <span className="material-symbols-outlined text-2xl">
                                                 save
                                             </span>
-                                            Send
+                                            {t("Send")}
                                         </AlertDialogAction>
                                     </div>
                                 </AlertDialogFooter>
@@ -435,7 +432,7 @@ export default function page() {
                                         location_on
                                     </span>
                                     <div className='pr-2'>
-                                        Zone
+                                        {t("ZoneText")}
                                     </div>
                                     <div className='text-center'>
                                         {z(userData.zone.name)}
@@ -456,11 +453,11 @@ export default function page() {
                     {/* edit profile */}
                     <div className='flex flex-col w-full'>
                         <div className='text-2xl font-bold mb-4'>
-                            Edit Profile
+                            {t("EditProfile")}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Name</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Name")}</p>
                             <Input name="name" value={formData.name} onChange={handleInputChange} placeholder={userData.profile.name ? userData.profile.name : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {nameError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{nameError}</p>
@@ -468,7 +465,7 @@ export default function page() {
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Email</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Email")}</p>
                             <Input name="email" value={formData.email} onChange={handleInputChange} placeholder={userData.email ? userData.email : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {emailError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{emailError}</p>
@@ -476,7 +473,7 @@ export default function page() {
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Age</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Age")}</p>
                             <Input name="age" value={formData.age} onChange={handleInputChange} placeholder={String(userData.profile.age) ? String(userData.profile.age) : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {ageError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{ageError}</p>
@@ -484,7 +481,7 @@ export default function page() {
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>tel</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Tel")}</p>
                             <Input name="tel" value={formData.tel} onChange={handleInputChange} placeholder={userData.profile.tel ? userData.profile.tel : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {telError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{telError}</p>
@@ -492,7 +489,7 @@ export default function page() {
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Address</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Address")}</p>
                             <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
                             {addressError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{addressError}</p>
@@ -504,16 +501,16 @@ export default function page() {
                     {/* manage account */}
                     <div className='flex flex-col w-full'>
                         <div className='text-2xl font-bold mb-4'>
-                            Manage Account
+                            {t("ManageAccount")}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Username</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Username")}</p>
                             <Input name="username" value={formData.username} onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Current Password</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("CurrentPassword")}</p>
                             <Input type='password' name="password" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
                             {currentPassError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{currentPassError}</p>
@@ -521,7 +518,7 @@ export default function page() {
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>New Password</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("NewPassword")}</p>
                             <Input type='password' name="newPassword" value={formData.newPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
                             {newPassError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{newPassError}</p>
@@ -529,7 +526,7 @@ export default function page() {
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Confirm Password</p>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("ConfirmPassword")}</p>
                             <Input type='password' name="confirmPassword" value={formData.confirmPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
                             {confirmPassError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
@@ -540,8 +537,8 @@ export default function page() {
 
                 {/* Button Back And Save    */}
                 <div className='flex justify-end items-end gap-2'>
-                    <Button variant='secondary'>Back</Button>
-                    <Button variant='primary' onClick={handleSaveProfile}>Save</Button>
+                    <Button variant='secondary'>{t("Back")}</Button>
+                    <Button variant='primary' onClick={handleSaveProfile}>{t("Save")}</Button>
                 </div>
             </div>
             {isProfileDialogOpen && (
