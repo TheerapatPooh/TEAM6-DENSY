@@ -374,7 +374,7 @@ export default function Page() {
             <TableHead>{t("Message")}</TableHead>
             <TableHead className="w-[180px]">{t("Date")}</TableHead>
             <TableHead className="w-[240px]">{t("Status")}</TableHead>
-            <TableHead className="w-[240px]">{t("Inspector")}</TableHead>
+            <TableHead className="w-[240px]">{t("inspector")}</TableHead>
             <TableHead className="text-end w-[10px]"></TableHead>
           </TableRow>
         </TableHeader>

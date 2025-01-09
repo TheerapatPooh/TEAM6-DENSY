@@ -39,7 +39,7 @@
     "Checklist": "Checklist",
     "NewPatrol": " New Patrol",
     "PickADate": "Pick a date",
-    "Inspector": "Inspector",
+    "inspector": "Inspector",
     "SelectAnInspector": "Select an Inspector",
     "SelectAUser": "Select a User",
     "InspectorList": "Inspector List",
@@ -48,7 +48,7 @@
     "YourDefectHasBeenUpdated": " Your Defect has been update",
     "MarkAllAsRead": "Mark all as read",
     "Zone": "Zone",
-    "Supervisor": "Supervisor",
+    "supervisor": "Supervisor",
     "Yes": "Yes",
     "No": "No",
     "Report": "Report",
@@ -88,7 +88,8 @@
     "CurrentPassword" : "Current Password",
     "NewPassword" : "New Password",
     "ConfirmPassword" : "Confirm Password",
-    "Accept" : "Accept"
+    "Accept" : "Accept",
+    "admin": "Admin"
   },
   "Status": {
     "pending": "Pending",
@@ -230,16 +231,16 @@
     "ProfileUpdateErrorTitle" : "Save Failed",
     "ProfileUpdateErrorDescription" : "Please correct the information and try again.",
     "ProfileNameRequire" : "Please enter a name.",
-    "ProfileEmailInvalid" : "Please enter a valid email address.",
-    "ProfileAgeInvalid" : "Please enter a valid age.",
+    "ProfileEmailInvalid" : "Invalid email format. Please use example@domain.com.",
+    "ProfileAgeInvalid" : "Invalid age. Enter a number no more than 120.",
     "ProfileAgeRequire" : "Please enter your age.",
-    "ProfileTelInvalid" : "Please enter a valid telephone number.",
+    "ProfileTelInvalid" : "Invalid phone number. Must be 10 digits.",
     "ProfileTelRequire" : "Please enter a telephone number.",
     "ProfileAddressRequire" : "Please enter an address.",
     "ProfileCurrentPassInvalid" : "Current Password do not match.",
     "ProfileCurrentPassRequire" : "Please enter a current password.",
     "ProfileConfirmPassInvalid" : "New passwords do not match. Please try again.",
-    "ProfileConfrimPassRequire" : "Please enter a confirm new password.",
+    "ProfileConfirmPassRequire" : "Please enter a confirm new password.",
     "ProfileNewPassRequire" : "Please enter a new password.",
     "ProfileUpdateConfirmTitle" : "Are you sure to save profile?",
     "ProfileUpdateConfirmDescription" : "Please confirm to save profile.",
@@ -248,6 +249,8 @@
     "AcceptDefectConfirmTitle" : "Are you sure to accept defect?",
     "AcceptDefectConfirmDescription" : "Please confirm to accept defect.",
     "DefectAcceptTitle" : "Defect Accepted",
-    "DefectAcceptDescription" : "The defect is now in progress."
+    "DefectAcceptDescription" : "The defect is now in progress.",
+    "ProfileNoChangeTitle": "No Changes Made",
+    "ProfileNoChangeDescription": "You have not made any changes to your profile"
   }
 }

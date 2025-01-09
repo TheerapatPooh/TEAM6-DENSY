@@ -82,7 +82,7 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
                 person_search
               </span>
               <p className="font-semibold text-lg text-muted-foreground">
-                {t("Inspector")}
+                {t("inspector")}
               </p>
             </div>
             <UserDropdown userData={userData} onUserSelect={handleUserSelect} selectUser={selectUser} />

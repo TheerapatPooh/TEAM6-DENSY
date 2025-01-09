@@ -157,7 +157,7 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-card rounded-md shadow-md flex flex-col px-6 py-4 gap-4">
+    <div className="bg-card rounded-md custom-shadow flex flex-col px-6 py-4 gap-4">
       {/* Title section */}
       <div className="w-full  flex justify-between">
         <div>
@@ -304,7 +304,7 @@ export default function Page() {
             <div className="flex gap-2">
               <div className="flex items-center gap-1 text-base font-semibold text-muted-foreground">
                 <span className="material-symbols-outlined ">person_search</span>
-                <p>{t("Inspector")}</p>
+                <p>{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Avatar className="h-[35px] w-[35px]">

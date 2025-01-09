@@ -168,7 +168,7 @@ export default function PatrolChecklist({
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span className="material-symbols-outlined">person_search</span>
-                <p className="text-lg font-semibold">{t("Inspector")}</p>
+                <p className="text-lg font-semibold">{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Avatar className="custom-shadow h-[35px] w-[35px]">
@@ -224,7 +224,7 @@ export default function PatrolChecklist({
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1 text-muted-foreground">
                                     <span className="material-symbols-outlined">engineering</span>
-                                    <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                                    <p className="text-lg font-semibold">{t("supervisor")}</p>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Avatar className="custom-shadow h-[35px] w-[35px]">
