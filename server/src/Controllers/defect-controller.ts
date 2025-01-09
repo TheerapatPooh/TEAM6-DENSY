@@ -530,7 +530,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         select: { imageId: true },
       });
 
-      if (defectUserId) {
+      if (status === 'edit' as DefectStatus) {
         const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
 
         const imagesToDelete = await prisma.image.findMany({
@@ -559,7 +559,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         const image = await prisma.image.create({
           data: {
             path: file.filename,
-            updatedBy: parseInt(defectUserId ? defectUserId : supervisorId, 10),
+            updatedBy: parseInt(status === 'edit' as DefectStatus ? defectUserId : supervisorId, 10),
           },
         });
         await prisma.defectImage.create({
@@ -591,6 +591,46 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       where: { id: Number(id) },
       data: updateData,
     });
+
+    console.log(status)
+
+
+    let message = null;
+    let notiType = null;
+    let url = null;
+    let receive = null;
+
+    if (status === 'in_progress' as DefectStatus) {
+      message = 'defect_accept',
+      notiType = "information" as NotificationType
+      url = `/patrol-defect`
+      receive = defectUserId
+    } else if (status === 'resolved' as DefectStatus) {
+      message = 'defect_resolved'
+      notiType = "information" as NotificationType
+      url = `/patrol-defect`
+      receive = defectUserId
+    } else if (status === 'pending_inspection' as DefectStatus) {
+      message = 'defect_pending_inspection'
+      notiType = "request" as NotificationType
+      url = `/defect/${id}`
+      receive = supervisorId
+    } else if (status === 'completed' as DefectStatus) {
+      message = 'defect_completed'
+      notiType = "information" as NotificationType
+      url = `/defect/${id}`
+      receive = supervisorId
+    }
+    console.log("status", status)
+    console.log("message", message)
+    if (message) {
+      await createNotification({
+        message,
+        type: notiType,
+        url,
+        userId: parseInt(receive),
+      });
+    }
 
     const result = await prisma.defect.findUnique({
       where: { id: Number(id) },

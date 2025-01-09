@@ -219,6 +219,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         formData.append("supervisorId",
             defect.patrolResult.itemZone.zone.supervisor.profile.userId.toString()
         );
+        formData.append("defectUserId",
+            defect.userId.toString()
+        );
         formData.append("status", "resolved")
         files.forEach((file) => {
             formData.append("imageFiles", file);

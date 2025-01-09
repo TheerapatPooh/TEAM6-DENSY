@@ -167,12 +167,19 @@
     "report_defect": "มีการแจ้งปัญหาในโซนที่คุณรับผิดชอบ กรุณาตรวจสอบทันที",
     "new_comment": "มีคำแนะนำใหม่เพิ่มเข้ามา โปรดตรวจสอบ",
     "confirm_comment": "คำแนะนำได้รับการรับรู้เรียบร้อยแล้ว",
-    "update_supervisor": "คุณได้รับมอบหมายให้ดูแลโซน {content} กรุณาตรวจสอบคำแนะนำเพิ่มเติม"
+    "update_supervisor": "คุณได้รับมอบหมายให้ดูแลโซน {content} กรุณาตรวจสอบคำแนะนำเพิ่มเติม",
+    "defect_resolved": "ปัญหาที่คุณแจ้งได้รับการแก้ไขเรียบร้อยแล้ว",
+    "defect_accept": "ปัญหาที่คุณแจ้งได้รับการยอมรับและอยู่ระหว่างการตรวจสอบ",
+    "defect_completed": "ปัญหาได้รับการแก้ไขเสร็จสมบูรณ์แล้ว กรุณาตรวจสอบผลการแก้ไข",
+    "defect_pending_inspection": "ปัญหาอยู่ระหว่างการตรวจสอบ กรุณาดำเนินการตรวจสอบโดยเร็วที่สุด"
   },
   "Sidebar": {
     "Dashboard": "แดชบอร์ด",
     "Employees": "จัดการพนักงาน",
-    "Settings": "การตั้งค่า"
+    "Settings": "การตั้งค่า",
+    "Patrol": "การตรวจตรา",
+    "Defect": "ข้อบกพร่อง",
+    "Comment": "ข้อเสนอแนะ"
   },
   "Alert": {
     "UnreadNotificationTitle": "คุณมี {count} การแจ้งเตือนใหม่!",
@@ -280,6 +287,18 @@
     "ReportDefectErrorMissingDetail": "กรุณาระบุรายละเอียดเกี่ยวกับปัญหา",
     "ReportDefectErrorMissingImage": "กรุณาอัปโหลดรูปภาพของปัญหา",
     "ExportReportPatrolTitle": "ออกรายงานผลการตรวจตราสำเร็จ",
-    "ExportReportPatrolDescription": "ผลการตรวจตราถูกส่งออกเรียบร้อยแล้ว"
+    "ExportReportPatrolDescription": "ผลการตรวจตราถูกส่งออกเรียบร้อยแล้ว",
+    "StartPatrolTitle": "เริ่มการตรวจตรา",
+    "StartPatrolDescription": "การตรวจตราได้เริ่มต้นแล้ว โปรดเตรียมพร้อมและดำเนินงานตามหน้าที่",
+    "FinishPatrolTitle": "การตรวจตราสิ้นสุด",
+    "FinishPatrolDescription": "การตรวจตราเสร็จสมบูรณ์ ขอบคุณสำหรับความทุ่มเทของคุณ",
+    "DefectResolveInfoTitle": "ข้อบกพร่องได้รับการแก้ไข",
+    "DefectResolveInfoDescription": "ข้อบกพร่องที่คุณรายงานได้รับการแก้ไขเรียบร้อยแล้ว",
+    "DefectAcceptInfoTitle": "ข้อบกพร่องได้รับการยอมรับ",
+    "DefectAcceptInfoDescription": "ข้อบกพร่องที่คุณรายงานได้รับการยอมรับเพื่อตรวจสอบแล้ว",
+    "DefectCompleteTitle": "ข้อบกพร่องเสร็จสมบูรณ์",
+    "DefectCompleteDescription": "ข้อบกพร่องได้รับการดำเนินการเสร็จสมบูรณ์ กรุณาตรวจสอบผลงานที่เสร็จแล้ว",
+    "DefectPendingInspectionTitle": "ข้อบกพร่องรอตรวจสอบใหม่",
+    "DefectPendingInspectionDescription": "ข้อบกพร่องถูกส่งกลับมาให้คุณตรวจสอบ กรุณากดยอมรับเพื่อตรวจสอบอีกครั้ง"
   }
 }
