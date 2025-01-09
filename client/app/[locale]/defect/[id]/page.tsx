@@ -16,13 +16,13 @@ import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import { fetchData, formatTime, getDefectStatusVariant, getItemTypeVariant } from "@/lib/utils";
 import { IDefect } from "@/app/type";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getInitials } from "@/lib/utils";
-import { defectStatus } from "../../../type";
-import { AlertCustom } from "../../../../components/alert-custom";
-import { useTranslations } from "next-intl";
-import { response } from 'express';
+import { defectStatus } from "@/app/type";
+import { AlertCustom } from "@/components/alert-custom";
+import { useLocale, useTranslations } from "next-intl";
 import AlertDefect from "@/components/alert-defect";
+import { toast } from "@/hooks/use-toast";
 
 export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -35,6 +35,9 @@ export default function Page() {
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
+  const a = useTranslations("Alert");
+  const router = useRouter()
+  const locale = useLocale()
 
   // Handle before image click
   const handleBeforeImageClick = (index: number) => {
@@ -84,7 +87,6 @@ export default function Page() {
     getData();
     setMounted(true);
   }, []);
-  console.log(defect);
 
 
 
@@ -101,8 +103,6 @@ export default function Page() {
     .map((image: any) => ({
       path: image.image.path,
     })) || null;
-
-
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -125,7 +125,14 @@ export default function Page() {
   };
 
   const handleAcceptDefect = () => {
-    setPendingAction(() => () => handleDefectUpdate("in_progress"));
+    setPendingAction(() => () => {
+      handleDefectUpdate("in_progress")
+      toast({
+        variant: "success",
+        title: a("DefectAcceptTitle"),
+        description: a("DefectAcceptDescription"),
+      });
+    });
     handleOpenDialog();
   };
 
@@ -145,17 +152,17 @@ export default function Page() {
     setDefect(defect)
   }
 
-  if (!defect) {
+  if (!mounted || !defect) {
     return <Loading />;
   }
 
   return (
-    <div className="bg-card rounded-md shadow-md p-4 ">
+    <div className="bg-card rounded-md custom-shadow flex flex-col px-6 py-4 gap-4">
       {/* Title section */}
-      <div className="w-full  flex justify-between ">
+      <div className="w-full  flex justify-between">
         <div>
-          <div className="text-xl font-semibold text-muted-foreground flex items-center">
-            <span className="material-symbols-outlined text-2xl mr-1">
+          <div className="text-xl font-semibold text-muted-foreground flex items-center gap-1">
+            <span className="material-symbols-outlined text-2xl">
               schedule
             </span>
             <p>{formatTime(defect.startTime)}</p>
@@ -163,19 +170,9 @@ export default function Page() {
           <h1 className="text-2xl font-bold text-card-foreground">
             {defect.name}
           </h1>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <span className="material-symbols-outlined text-2xl ">
-                location_on
-              </span>
-              <h1 className="text-base font-semibold">{t("Zone")}</h1>
-            </div>
-            <h1 className="">{z(defect.patrolResult.itemZone.zone.name)}</h1>
-          </div>
         </div>
-        <div className="flex gap-2 ">
-          <Button variant={"secondary"}>{t("Back")}</Button>
-
+        <div className="flex gap-2">
+          <Button variant={"secondary"} size="lg" onClick={() => router.push(`/${locale}/defect`)}>{t("Back")}</Button>
           {(() => {
             let iconName: string;
             let text: string;
@@ -197,7 +194,7 @@ export default function Page() {
               case "completed":
                 variant = "primary";
                 iconName = "published_with_changes";
-                text = "Resolved";
+                text = "Resolve";
                 disabled = true;
                 break;
               case "pending_inspection":
@@ -212,7 +209,7 @@ export default function Page() {
               case "in_progress":
                 variant = "primary";
                 iconName = "published_with_changes";
-                text = "Resolved";
+                text = "Resolve";
                 disabled = false;
                 handleFunction = () => {
                   // handleStartPatrol();
@@ -221,7 +218,7 @@ export default function Page() {
               case "resolved":
                 variant = "primary";
                 iconName = "published_with_changes";
-                text = "Resolved";
+                text = "Resolve";
                 disabled = true;
                 break;
               default:
@@ -236,14 +233,16 @@ export default function Page() {
             }
             return (
               <>
-                {defect.status === "in_progress" ? <AlertDefect
-                  defect={defect}
-                  type={"resolve"}
-                  response={(defect: IDefect) => {
-                    fetchRealtimeData(defect)
-                  }} /> :
+                {defect.status === "in_progress" ?
+                  <AlertDefect
+                    defect={defect}
+                    type={"resolve"}
+                    response={(defect: IDefect) => {
+                      fetchRealtimeData(defect)
+                    }} /> :
 
                   <Button
+                    size="lg"
                     variant={variant}
                     onClick={handleFunction}
                     disabled={disabled}
@@ -258,24 +257,35 @@ export default function Page() {
 
           {isDialogOpen && (
             <AlertCustom
-              title={"Are you sure to accept defect?"}
-              description={"Please confirm to accept defect."}
-              primaryButtonText={"Confirm"}
+              title={a("AcceptDefectConfirmTitle")}
+              description={a("AcceptDefectConfirmDescription")}
+              primaryButtonText={t("Confirm")}
               primaryIcon="check"
-              secondaryButtonText={"Cancel"}
+              secondaryButtonText={t("Cancel")}
               backResult={handleDialogResult}
             ></AlertCustom>
           )}
         </div>
       </div>
-      <div className="flex justify-between items-center ">
+
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 text-muted-foreground">
+          <span className="material-symbols-outlined text-2xl ">
+            location_on
+          </span>
+          <h1 className="text-base font-semibold">{t("Zone")}</h1>
+        </div>
+        <h1 className="">{z(defect.patrolResult.itemZone.zone.name)}</h1>
+      </div>
+
+      <div className="flex justify-between items-center">
         <div className="flex gap-2">
           <BadgeCustom variant={getDefectStatusVariant(defect.status).variant} showIcon={true}>
             <div className="flex justify-center gap-2">
               <span className="material-symbols-outlined">
                 {getDefectStatusVariant(defect.status).iconName}
               </span>
-              {defect.status}
+              {s(defect.status)}
             </div>
           </BadgeCustom>
 
@@ -284,30 +294,28 @@ export default function Page() {
               <span className="material-symbols-outlined">
                 {getItemTypeVariant(defect.type).iconName}
               </span>
-              {defect.type}
+              {s(defect.type)}
             </div>
           </BadgeCustom>
         </div>
 
-        <div className="flex items-center mt-2 justify-between gap-[100px]">
+        <div className="flex items-center justify-between">
           <div className="flex-col items-center gap-2">
             <div className="flex gap-2">
-              <div className="flex">
-                <span className="material-symbols-outlined ">person_alert</span>
-                <div className="ml-2 text-sm text-gray-500">
-                  {t("Inspector")}
-                </div>
+              <div className="flex items-center gap-1 text-base font-semibold text-muted-foreground">
+                <span className="material-symbols-outlined ">person_search</span>
+                <p>{t("inspector")}</p>
               </div>
-              <div className="flex justify-start items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Avatar className="h-[35px] w-[35px]">
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={defect.user.id.toString()}>
                     {getInitials(defect.user.profile.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className=" text-sm text-gray-500">{defect.user.profile.name}</div>
+                <p>{defect.user.profile.name}</p>
               </div>
             </div>
           </div>
@@ -317,7 +325,7 @@ export default function Page() {
       {/* Details */}
       <div>
         <div className="grid grid-cols-12 gap-6 ">
-          <div className="col-span-full text-gray-500 ">
+          <div className="col-span-full text-muted-foreground ">
             <p className="text-[16px] font-semibold">{t("Detail")}</p>
 
             <div className="bg-secondary rounded-lg h-40 w-full items-center p-4">
@@ -335,7 +343,7 @@ export default function Page() {
           {/* before */}
           <div className="w-full">
             <div className="flex items-center">
-              <p className="text-[16px] font-semibold text-gray-500 mb-1 cursor-default user-select-none">
+              <p className="text-[16px] font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
                 {t("Before")}
               </p>
             </div>
@@ -428,7 +436,7 @@ export default function Page() {
           {/* after */}
           <div className="w-full">
             <div className="flex items-center">
-              <p className="text-[16px] font-semibold text-gray-500 mb-1 cursor-default user-select-none">
+              <p className="text-[16px] font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
                 {t("After")}
               </p>
             </div>

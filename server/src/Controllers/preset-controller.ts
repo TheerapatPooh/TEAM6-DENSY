@@ -541,6 +541,18 @@ export async function getAllChecklists(req: Request, res: Response) {
     const checklists = await prisma.checklist.findMany({
       where: whereClause,
       include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            profile: {
+              include: {
+                image: true
+              }
+            }
+          }
+        },
         items: {
           select: {
             id: true,
@@ -642,6 +654,7 @@ export async function getAllChecklists(req: Request, res: Response) {
           updateByUserName: userdata.username,
           imagePath: userdata.profileImage || "",
           itemCounts,
+          user: checklist.user,
           zones: zoneNames,
           versionCount: versionCounts[checklist.title] || 0, // Attach the version count
           items: items,

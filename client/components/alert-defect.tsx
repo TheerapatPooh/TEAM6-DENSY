@@ -48,6 +48,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
     const a = useTranslations("Alert");
     const t = useTranslations("General");
     const z = useTranslations("Zone");
+    const t = useTranslations("General");
 
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [defectDescription, setDefectDescription] = useState<string>("");
@@ -298,7 +299,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                         <span className="material-symbols-outlined pr-2 ">
                             {type === "edit" ? "edit" : type === "resolve" ? "published_with_changes" : "campaign"}
                         </span>
-                        {type === "edit" ? "Edit" : type === "resolve" ? "Resolved" : "Report"}
+                        {t(type === "edit" ? "Edit" : type === "resolve" ? "Resolve" : "Report")}
                     </Button>
                 </AlertDialogTrigger>
                 {isAlertDefectOpen &&

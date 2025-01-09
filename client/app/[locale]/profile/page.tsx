@@ -1,17 +1,14 @@
 'use client'
-import React, { use, useEffect, useRef, useState } from 'react'
-import bcrypt from "bcryptjs";
+import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import BadgeCustom from '@/components/badge-custom';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { IUser } from '@/app/type';
-import { fetchData } from '@/lib/utils';
+import { fetchData, getInitials } from '@/lib/utils';
 import Loading from '@/components/loading';
 import { useTranslations } from 'next-intl';
-import { string } from 'zod';
-import { FormProvider } from 'react-hook-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     AlertDialog,
@@ -25,110 +22,218 @@ import {
     AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
-import { role } from "@/app/type";
+import { AlertCustom } from '@/components/alert-custom';
+import Map from '@/components/map';
 
+interface IFormProfile {
+    name?: string,
+    email?: string,
+    age?: number,
+    tel?: string,
+    address?: string,
+    image?: string,
+    username?: string,
+    password?: string,
+    currentPassword?: string,
+    newPassword?: string,
+    confirmPassword?: string,
+}
 
 export default function page() {
+    const [nameError, setNameError] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [ageError, setAgeError] = useState<string | null>(null);
+    const [telError, setTelError] = useState<string | null>(null);
+    const [addressError, setAddressError] = useState<string | null>(null);
+    const [currentPassError, setCurrentPassError] = useState<string | null>(null);
+    const [newPassError, setNewPassError] = useState<string | null>(null);
+    const [confirmPassError, setConfirmPassError] = useState<string | null>(null);
+    const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+    const [isProfileImageDialogOpen, setIsProfileImageDialogOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
     const [imageProfile, setImageProfile] = useState<File | null>(null);
     const [userData, setUserData] = useState<IUser>(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        age: '',
-        tel: '',
-        address: '',
-        image: '',
-        username: '',
-        password: '',
-        newPassword: '',
-        confirmPassword: '',
-    });
-    const z = useTranslations("Zone")
+    const [formData, setFormData] = useState<IFormProfile>();
+
+    useEffect(() => {
+        getUserData();
+        setMounted(true)
+    }, [])
+
+    const z = useTranslations("Zone");
+    const a = useTranslations("Alert");
+    const t = useTranslations("General");
+
     const getUserData = async () => {
         try {
             const data = await fetchData("get", "/user?profile=true&image=true&password=true", true);
             setUserData(data);
-            setFormData({
-                name: data.profile.name || '',
-                email: data.email || '',
-                age: data.profile.age ? String(data.profile.age) : '',
-                tel: data.profile.tel || '',
-                address: data.profile.address || '',
-                image: data.profile.image || '',
-                username: data.username || '',
-                password: '',
-                newPassword: '',
-                confirmPassword: '',
-            });
         } catch (error) {
             console.error("Failed to fetch user data: ", error);
         }
     };
 
-    useEffect(() => {
-        getUserData();
-    }, []); // Empty dependency array means this will only run once, when the component mounts.
 
 
-    if (!userData) {
+
+    if (!mounted || !userData) {
         return <Loading />;
     }
 
+    const handleOpenDialog = (dialogType: String) => {
+        if (dialogType === "SaveProfileDialog") {
+            setIsProfileDialogOpen(true);
+        } else if (dialogType === "SaveProfileImageDialog") {
+            setIsProfileImageDialogOpen(true);
+        }
+    };
 
+    const handleDialogResult = (result: boolean) => {
+        setIsProfileDialogOpen(false);
+        setIsProfileImageDialogOpen(false);
+        if (result && pendingAction) {
+            pendingAction(); // Execute the pending action
+            setPendingAction(null); // Clear the pending action
+        }
+    };
+
+    const handleSaveProfile = () => {
+        setPendingAction(() => () => handleUpdateUserData());
+        handleOpenDialog("SaveProfileDialog");
+    };
+
+    const handleSaveProfileImage = () => {
+        setPendingAction(() => () => handleUpdateImageProfile());
+        handleOpenDialog("SaveProfileImageDialog");
+        setImageProfile(null)
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setFormData((prev) => {
+            const updatedFormData = { ...prev };
+
+            if (value === "") {
+                delete updatedFormData[name];
+            } else {
+                updatedFormData[name] = value;
+            }
+
+            return updatedFormData;
+        });
     };
 
-    const active: boolean = userData.active;
-
     const handleUpdateUserData = async () => {
-        const passwordMatch = await bcrypt.compare(formData.password, userData.password);
-
-        if (formData.password !== '' || !formData.password !== null && passwordMatch !== false) {
-            if (!passwordMatch) {
-                alert("Current Password do not match.")
-                return
-            }
-        }
-
-        if (formData.newPassword != formData.confirmPassword) {
-            alert("Passwords do not match. Please try again.");
+        console.log(formData)
+        let showErrorToast = false;
+        setCurrentPassError(null)
+        setNewPassError(null)
+        setConfirmPassError(null)
+        setEmailError(null)
+        setAgeError(null)
+        setTelError(null)
+        if (!formData || Object.keys(formData).length === 0) {
+            toast({
+                variant: "default",
+                title: a("ProfileNoChangeTitle"),
+                description: a("ProfileNoChangeDescription"),
+            });
             return;
         }
+
         const userForm = new FormData();
-        userForm.append("name", formData.name);
-        userForm.append("email", formData.email);
-        userForm.append("age", formData.age);
-        userForm.append("tel", formData.tel);
-        userForm.append("address", formData.address);
-        userForm.append("username", formData.username);
-        if (passwordMatch) {
-            if (formData.newPassword === formData.confirmPassword) {
-                userForm.append("password", formData.newPassword);
+
+        if (formData?.name && formData?.name !== userData.profile.name) {
+            userForm.append("name", formData.name);
+        }
+        if (formData?.email && formData?.email !== userData.email) {
+            if (formData?.email && formData.email.trim() && /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+                userForm.append("email", formData.email);
+            }
+            else {
+                setEmailError(a("ProfileEmailInvalid"));
+                showErrorToast = true;
             }
         }
-        userForm.append("role", userData.role);
-        userForm.append("department", userData.department);
-        userForm.append('active', active.toString());
+        if (formData?.age && formData?.age !== userData.profile.age) {
+            if (formData?.age && !isNaN(Number(formData.age)) && Number(formData.age) <= 120) {
+                userForm.append("age", formData.age.toString());
+            } else {
+                setAgeError(a("ProfileAgeInvalid")); 
+                showErrorToast = true;
+            }
+        }
 
-        const imageForm = new FormData()
-        imageForm.append("imageProfile", imageProfile)
+        if (formData?.tel && formData?.tel !== userData.profile.tel) {
+            if (formData?.tel?.trim() && /^[0-9]{10}$/.test(formData.tel.trim())) {
+                userForm.append("tel", formData.tel);
+            } else {
+                setTelError(a("ProfileTelInvalid"));
+                showErrorToast = true;
+            }
+        }
+        if (formData?.address && formData?.address !== userData.profile.address) {
+            userForm.append("address", formData.address);
+        }
+
+        if (formData.currentPassword || formData.newPassword || formData.confirmPassword) {
+            if (!formData.currentPassword) {
+                setCurrentPassError(a("ProfileCurrentPassRequire"));
+                showErrorToast = true;
+            }
+            if (!formData.newPassword) {
+                setNewPassError(a("ProfileNewPassRequire"));
+                showErrorToast = true;
+            }
+            if (!formData.confirmPassword) {
+                setConfirmPassError(a("ProfileConfirmPassRequire"));
+                showErrorToast = true;
+            }
+
+            else {
+                const passwordMatch = formData.currentPassword === userData.password;
+                if (passwordMatch) {
+                    if (formData.newPassword === formData.confirmPassword) {
+                        userForm.append("password", formData.newPassword);
+                    }
+                    else {
+                        setConfirmPassError(a("ProfileConfirmPassInvalid"));
+                        showErrorToast = true;
+                    }
+                } else {
+                    setCurrentPassError(a("ProfileCurrentPassInvalid"));
+                    showErrorToast = true;
+                }
+            }
+        }
+
 
         try {
-            await fetchData("put", `/user/${userData.profile.userId}`, true, userForm)
-            if (imageProfile) {
-                await fetchData("put", "/profile", true, imageForm, true);
+            if (!showErrorToast) {
+                const response = await fetchData("put", `/user/${userData.profile.userId}`, true, userForm)
+                if (response) {
+                    setUserData(response)
+                    toast({
+                        variant: "success",
+                        title: a("ProfileUpdateSuccessTitle"),
+                        description: a("ProfileUpdateSuccessDescription"),
+                    });
+                }
+            } else {
+                toast({
+                    variant: "error",
+                    title: a("ProfileUpdateErrorTitle"),
+                    description: a("ProfileUpdateErrorDescription"),
+                });
             }
-            alert("Profile updated successfully!");
-            getUserData()
         } catch (error) {
             console.error("Error updating profile:", error);
-            alert("Failed to update profile.");
+            toast({
+                variant: "error",
+                title: a("ProfileUpdateErrorTitle"),
+                description: a("ProfileUpdateErrorDescription"),
+            });
         }
     };
 
@@ -139,22 +244,21 @@ export default function page() {
             if (imageProfile) {
                 await fetchData("put", "/profile", true, imageForm, true);
             }
-            alert("Image profile updated successfully!");
+            toast({
+                variant: "success",
+                title: a("ProfileImageUpdateSuccessTitle"),
+                description: a("ProfileImageUpdateSuccessDescription"),
+            });
             getUserData()
         } catch (error) {
             console.error("Error updating image profile:", error);
-            alert("Failed to update image profile.");
+            toast({
+                variant: "error",
+                title: a("ProfileImageUpdateErrorTitle"),
+                description: a("ProfileImageUpdateErrorDescription"),
+            });
         }
     }
-
-    const getInitials = (name: string) => {
-        if (!name) return "";
-        const nameParts = name.split(" ");
-        return nameParts.length === 1
-            ? nameParts[0].charAt(0).toUpperCase()
-            : nameParts[0].charAt(0).toUpperCase() +
-            nameParts[nameParts.length - 1].charAt(0).toUpperCase();
-    };
 
     const handleButtonClick = (event: React.FormEvent) => {
         event.preventDefault();
@@ -174,19 +278,18 @@ export default function page() {
     }
 
     return (
-        <div className='flex flex-col py-4 px-6'>
-
-            <div className='text-2xl font-bold mb-4'>
-                View Profile
+        <div className='flex flex-col py-4 px-6 gap-4'>
+            <div className='text-2xl font-bold'>
+                {t("ViewProfile")}
             </div>
 
             {/* first block */}
-            <div className='flex justify-between px-6 py-4 bg-card mb-4'>
+            <div className='flex justify-between px-6 py-4 bg-card rounded-md custom-shadow'>
                 <div className='flex flex-row'>
                     {userData.profile ? (
                         <Avatar className='h-32 w-32 mr-6'>
                             <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`} />
-                            <AvatarFallback>
+                            <AvatarFallback id={userData.id?.toString()}>
                                 <p className='text-4xl'>
                                     {getInitials(userData.profile.name)}
                                 </p>
@@ -198,31 +301,31 @@ export default function page() {
 
                     <div className='flex flex-col justify-center items-start'>
                         <div className='text-2xl font-bold py-4'>
-                            Welcome back, {userData.profile.name}
+                            {t("WelcomeBack")}, {userData.profile.name}
                         </div>
 
                         <AlertDialog>
                             <AlertDialogTrigger>
                                 <Button variant='outline' size='default'>
-                                    Upload new photo
+                                    {t("UploadNewPhoto")}
                                 </Button>
                             </AlertDialogTrigger>
 
-                            <AlertDialogContent className='w-[400px] h-fit' >
+                            <AlertDialogContent className='flex flex-col px-6 py-4 w-[400px] h-fit' >
                                 <AlertDialogHeader>
                                     <AlertDialogTitle className="text-2xl font-semibold">
-                                        Profile Image
+                                        {t("ProfileImage")}
                                     </AlertDialogTitle>
-                                    <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                        Upload a new image for your profile.
+                                    <AlertDialogDescription className="flex items-start justify-start text-base text-input">
+                                        {t("ProfileImageDescription")}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
 
 
                                 <div className='flex gap-2'>
                                     <div>
-                                        <input name='image' id="file-input" type="file" style={{ display: "none" }} onChange={handleFileChange} />
-                                        <Button className='flex justify-center items-center w-10 h-10' variant='primary' onClick={handleButtonClick}>
+                                        <input name='image' id="file-input" placeholder={null} type="file" className='hidden' onChange={handleFileChange} />
+                                        <Button className='flex justify-center items-center h-[40px] w-[40px]' variant='primary' onClick={handleButtonClick}>
                                             <span className="material-symbols-outlined text-2xl">
                                                 download
                                             </span>
@@ -235,18 +338,18 @@ export default function page() {
                                     {imageProfile ? (
                                         <Avatar className='h-80 w-80'>
                                             <AvatarImage src={URL.createObjectURL(imageProfile)} />
-                                            <AvatarFallback>
-                                                <p className='text-4xl'>
-                                                    {getInitials(formData.name)}
+                                            <AvatarFallback id={userData.id.toString()}>
+                                                <p className='text-6xl'>
+                                                    {getInitials(userData.profile.name)}
                                                 </p>
                                             </AvatarFallback>
                                         </Avatar>
                                     ) : (
                                         <Avatar className='h-80 w-80'>
                                             <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`} />
-                                            <AvatarFallback>
-                                                <p className='text-4xl'>
-                                                    {getInitials(formData.name)}
+                                            <AvatarFallback id={userData.id.toString()}>
+                                                <p className='text-6xl'>
+                                                    {getInitials(userData.profile.name)}
                                                 </p>
                                             </AvatarFallback>
                                         </Avatar>
@@ -256,17 +359,18 @@ export default function page() {
                                 <AlertDialogFooter>
                                     <div className="flex items-end justify-end gap-2">
                                         <AlertDialogCancel onClick={handCancelImageProfile}>
-                                            Cancel
+                                            {t("Cancel")}
                                         </AlertDialogCancel>
                                         <AlertDialogAction
                                             className={`bg-primary hover:bg-primary/70 
                 ${!imageProfile ? "opacity-50 cursor-not-allowed" : ""}`}
-                                            onClick={handleUpdateImageProfile}
+                                            onClick={handleSaveProfileImage}
+                                            disabled={!imageProfile ? true : false}
                                         >
                                             <span className="material-symbols-outlined text-2xl">
                                                 save
                                             </span>
-                                            Send
+                                            {t("Save")}
                                         </AlertDialogAction>
                                     </div>
                                 </AlertDialogFooter>
@@ -284,64 +388,102 @@ export default function page() {
                         shape='square'
                         iconName={userData.role === "supervisor" ? "engineering" : userData.role === "inspector" ? "person_search" : "manage_accounts"}
                     >
-                        {userData.role}
+                        {t(userData.role)}
                     </BadgeCustom>
 
                     {userData.zone ?
-                        <div className='w-72'>
-                            <div className='px-6 py-4 bg-secondary h-14 flex justify-center items-center rounded-lg'>
-                                <div className='flex flex-row items-center'>
+                        <AlertDialog>
+                            <AlertDialogTrigger
+                                className="flex justify-center items-center min-w-72 px-6 py-4 bg-secondary gap-2 rounded-md"
+                            >
+                                <div className='flex flex-row items-center gap-1 text-muted-foreground'>
                                     <span className="material-symbols-outlined text-[22px] pr-1">
                                         location_on
                                     </span>
-                                    <div className='pr-2'>
-                                        Zone
+                                    <p className='text-base font-semibold'>
+                                        {t("ZoneText")}
+                                    </p>
+                                </div>
+                                <p>
+                                    {z(userData.zone.name)}
+                                </p>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
+                                <div className='flex flex-col gap-1'>
+                                    <div className="text-muted-foreground flex items-center gap-1">
+                                        <span className="material-symbols-outlined">
+                                            location_on
+                                        </span>
+                                        <p>{t('Zone')}</p>
                                     </div>
-                                    <div className='text-center'>
-                                        {z(userData.zone.name)}
+                                    <div className=" flex justify-center bg-secondary rounded-lg py-4">
+                                        <Map
+                                            disable={true}
+                                            initialSelectedZones={[userData.zone.id]}
+                                        />
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+
+                                <AlertDialogFooter>
+                                    <AlertDialogAction className={buttonVariants({ variant: "secondary", size: "lg" })}>
+                                        {t('Close')}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                         :
                         null}
-
-
                 </div>
             </div>
 
             {/* second block */}
-            <div className='flex flex-col bg-card py-4 px-6'>
+            <div className='flex flex-col bg-card py-4 px-6 rounded-md custom-shadow'>
                 <div className='flex flex-row justify-between'>
                     {/* edit profile */}
                     <div className='flex flex-col w-full'>
                         <div className='text-2xl font-bold mb-4'>
-                            Edit Profile
+                            {t("EditProfile")}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Name</p>
-                            <Input name="name" value={formData.name} onChange={handleInputChange} placeholder={userData.profile.name ? userData.profile.name : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Name")}</p>
+                            <Input name="name" onChange={handleInputChange} placeholder={userData.profile.name ? userData.profile.name : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {nameError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{nameError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Email</p>
-                            <Input name="email" value={formData.email} onChange={handleInputChange} placeholder={userData.email ? userData.email : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Email")}</p>
+                            <Input name="email" onChange={handleInputChange} placeholder={userData.email ? userData.email : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {emailError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{emailError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Age</p>
-                            <Input name="age" value={formData.age} onChange={handleInputChange} placeholder={String(userData.profile.age) ? String(userData.profile.age) : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Age")}</p>
+                            <Input name="age" onChange={handleInputChange} placeholder={String(userData.profile.age) ? String(userData.profile.age) : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {ageError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{ageError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>tel</p>
-                            <Input name="tel" value={formData.tel} onChange={handleInputChange} placeholder={userData.profile.tel ? userData.profile.tel : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Tel")}</p>
+                            <Input name="tel" onChange={handleInputChange} placeholder={userData.profile.tel ? userData.profile.tel : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            {telError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{telError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Address</p>
-                            <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Address")}</p>
+                            <Textarea name="address" onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
+                            {addressError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{addressError}</p>
+                            )}
                         </div>
 
                     </div>
@@ -349,42 +491,70 @@ export default function page() {
                     {/* manage account */}
                     <div className='flex flex-col w-full'>
                         <div className='text-2xl font-bold mb-4'>
-                            Manage Account
+                            {t("ManageAccount")}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Username</p>
-                            <Input name="username" value={formData.username} onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Username")}</p>
+                            <Input name="username" onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Current Password</p>
-                            <Input type='password' name="password" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("CurrentPassword")}</p>
+                            <Input type='password' name="currentPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            {currentPassError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{currentPassError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>New Password</p>
-                            <Input type='password' name="newPassword" value={formData.newPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("NewPassword")}</p>
+                            <Input type='password' name="newPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            {newPassError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{newPassError}</p>
+                            )}
                         </div>
 
                         <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>Confirm Password</p>
-                            <Input type='password' name="confirmPassword" value={formData.confirmPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("ConfirmPassword")}</p>
+                            <Input type='password' name="confirmPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            {confirmPassError && (
+                                <p className="ttext-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Button Back And Save    */}
                 <div className='flex justify-end items-end gap-2'>
-                    <Button variant='secondary'>Back</Button>
-                    <Button variant='primary' onClick={handleUpdateUserData} className='flex flex-row items-center'>
-                        <span className="material-symbols-outlined me-2">
+                    <Button variant='secondary' size='lg'>{t("Back")}</Button>
+                    <Button variant='primary' size='lg' onClick={handleSaveProfile}>
+                        <span className="material-symbols-outlined text-2xl">
                             save
-                        </span>
-                        <p>Save</p>
+                        </span>{t("Save")}
                     </Button>
                 </div>
             </div>
+            {isProfileDialogOpen && (
+                <AlertCustom
+                    title={a("ProfileUpdateConfirmTitle")}
+                    description={a("ProfileUpdateConfirmDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={handleDialogResult}
+                ></AlertCustom>
+            )}
+            {isProfileImageDialogOpen && (
+                <AlertCustom
+                    title={a("ProfileImageUpdateConfirmTitle")}
+                    description={a("ProfileImageUpdateConfirmDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={handleDialogResult}
+                ></AlertCustom>
+            )}
         </div >
     )
 }

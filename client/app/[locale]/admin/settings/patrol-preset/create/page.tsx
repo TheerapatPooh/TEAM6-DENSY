@@ -305,7 +305,7 @@ export default function page() {
                                                                                                 <div className="flex flex-row items-center">
                                                                                                     <Avatar className="mr-1 h-6 w-6" >
                                                                                                         <AvatarImage />
-                                                                                                        <AvatarFallback>
+                                                                                                        <AvatarFallback id={itemZone.zone.supervisor.id.toString()}>
                                                                                                         </AvatarFallback>
                                                                                                     </Avatar>
                                                                                                     <p className="text-lg">

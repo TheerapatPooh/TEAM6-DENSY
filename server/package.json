@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
-    "seed": "tsx src/Utils/seed.ts",
+    "seed": "node dist/Utils/seed.js",
     "lint": "node -e \"const fs = require('fs'); const date = new Date(); const dateString = date.toISOString().split('T')[0].replace(/-/g, '_'); const timeString = date.toTimeString().split(' ')[0].replace(/:/g, '_'); const fileName = `lintReports/lintReport_${dateString}_${timeString}.json`; fs.mkdirSync('lintReports', { recursive: true }); require('child_process').execSync(`eslint . --format json -o ${fileName}`);\" && tsx eslint-report.ts"
   },
   "author": "TEAM-6",
@@ -16,7 +16,7 @@
   "description": "",
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.2.1",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
@@ -53,7 +53,7 @@
     "eslint-plugin-unicorn": "^55.0.0",
     "jest": "^29.7.0",
     "jest-mock-extended": "^4.0.0-beta1",
-    "prisma": "^5.19.1",
+    "prisma": "^6.2.1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
     "tsc-alias": "^1.8.10",

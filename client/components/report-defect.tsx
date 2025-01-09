@@ -174,14 +174,14 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <span className="material-symbols-outlined">engineering</span>
-                  <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                  <p className="text-lg font-semibold">{t("supervisor")}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Avatar className="custom-shadow h-[35px] w-[35px]">
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
                       {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
                     </AvatarFallback>
                   </Avatar>
