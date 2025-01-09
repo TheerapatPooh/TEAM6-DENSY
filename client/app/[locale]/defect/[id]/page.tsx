@@ -203,7 +203,7 @@ export default function Page() {
                 text = "Accept";
                 disabled = false;
                 handleFunction = () => {
-                  // handleFinishPatrol();
+                  handleAcceptDefect();
                 };
                 break;
               case "in_progress":

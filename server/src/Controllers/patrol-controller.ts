@@ -2,6 +2,8 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
+import { number } from "zod";
+import { checklists } from "../Utils/data/checklists";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -346,6 +348,52 @@ export async function getAllPatrols(req: Request, res: Response) {
   }
 }
 
+export async function getPatrolUser(req: Request, res: Response) {
+  try {
+    const patrolId = parseInt(req.params.id, 10);
+
+    const patrol = await prisma.patrol.findUnique({
+      where: {
+        id: patrolId,
+      },
+      select: {
+        patrolChecklists: {
+          select: {
+            inspector: {
+              select: {
+                username: true,
+                profile: {
+                  select: {
+                    id: true,
+                    name: true,
+                    image: true
+                  }
+                },
+              },
+            },
+          },
+        },
+      }
+    });
+
+    let result: any[] = []
+    patrol?.patrolChecklists.map((pc) => {
+      result.push(pc.inspector)
+    })
+
+    // Remove duplicates by username
+    result = result.filter((user, index, self) =>
+      index === self.findIndex((u) => u.username === user.username)
+    )
+
+    res.status(200).json(result);
+    return
+  } catch (error) {
+    res.status(500);
+    return;
+  }
+}
+
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Patrol ใหม่
  * Input:
@@ -538,7 +586,7 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    const updatePatrol = await prisma.patrol.update({
+    await prisma.patrol.update({
       where: {
         id: patrolId,
       },
@@ -560,7 +608,7 @@ export async function startPatrol(req: Request, res: Response) {
               status: null,
               itemId: items.id,
               zoneId: zones.zone.id,
-              patrolId: updatePatrol.id,
+              patrolId: patrolId,
             },
           });
           if (!notifiedInspectors.has(inspectorId)) {
@@ -568,7 +616,7 @@ export async function startPatrol(req: Request, res: Response) {
             await createNotification({
               message: message,
               type: "information" as NotificationType,
-              url: `/patrol/${updatePatrol.id}/detail`,
+              url: `/patrol/${patrolId}/detail`,
               userId: inspectorId,
             });
 
@@ -578,7 +626,89 @@ export async function startPatrol(req: Request, res: Response) {
       }
     }
 
+    const updatePatrol = await prisma.patrol.findFirst({
+      where: {
+        id: patrolId,
+      },
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              include: {
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          include: {
+            defects: true,
+            comments: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    department: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
     let result = updatePatrol;
+    console.log(result)
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -629,7 +759,7 @@ export async function finishPatrol(req: Request, res: Response) {
     }
     const duration = calculateDuration(startTime);
 
-    const updatePatrol = await prisma.patrol.update({
+    await prisma.patrol.update({
       where: {
         id: patrolId,
       },
@@ -637,6 +767,87 @@ export async function finishPatrol(req: Request, res: Response) {
         status: "completed",
         endTime: new Date(),
         duration: duration,
+      },
+    });
+
+    const updatePatrol = await prisma.patrol.findFirst({
+      where: {
+        id: patrolId,
+      },
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              include: {
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          include: {
+            defects: true,
+            comments: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    department: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -662,16 +873,15 @@ export async function finishPatrol(req: Request, res: Response) {
         await createNotification({
           message: message,
           type: "information" as NotificationType,
-          url: `/patrol/${updatePatrol.id}/detail`,
+          url: `/patrol/${patrolId}/detail`,
           userId: inspectorId,
         });
         notifiedInspectors.add(inspectorId);
       }
     }
 
-    let json = updatePatrol;
-
-    res.status(200).json(json);
+    let result = updatePatrol;
+    res.status(200).json(result);
     return;
   } catch (error) {
     res.status(500);

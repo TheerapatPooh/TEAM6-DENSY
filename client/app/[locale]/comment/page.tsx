@@ -111,8 +111,8 @@ export default function Page() {
       );
       toast({
         variant: "success",
-        title: a("ConmmentConfirmSuccessTitle"),
-        description: a("ConmmentConfirmSuccessDescription"),
+        title: a("CommentConfirmSuccessTitle"),
+        description: a("CommentConfirmSuccessDescription"),
       });
     } catch (error) {
       console.error("Error deleting patrol:", error);
