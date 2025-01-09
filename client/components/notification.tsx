@@ -60,7 +60,7 @@ export default function Notification() {
     const router = useRouter()
 
     function isValidDateFormat(date: string): boolean {
-        const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+        const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
         return iso8601Regex.test(date) && !isNaN(Date.parse(date));
     }
 
