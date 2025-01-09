@@ -211,7 +211,7 @@ export default function Page() {
                         <AvatarImage
                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile.image?.path}`}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback id={zone.supervisor.id.toString()}>
                           {getInitials(zone.supervisor.profile.name)}
                         </AvatarFallback>
                       </Avatar>

@@ -289,7 +289,7 @@ export default function page() {
                     {userData.profile ? (
                         <Avatar className='h-32 w-32 mr-6'>
                             <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`} />
-                            <AvatarFallback>
+                            <AvatarFallback id={userData.id?.toString()}>
                                 <p className='text-4xl'>
                                     {getInitials(userData.profile.name)}
                                 </p>
@@ -338,7 +338,7 @@ export default function page() {
                                     {imageProfile ? (
                                         <Avatar className='h-80 w-80'>
                                             <AvatarImage src={URL.createObjectURL(imageProfile)} />
-                                            <AvatarFallback>
+                                            <AvatarFallback id={userData.id.toString()}>
                                                 <p className='text-6xl'>
                                                     {getInitials(userData.profile.name)}
                                                 </p>
@@ -347,7 +347,7 @@ export default function page() {
                                     ) : (
                                         <Avatar className='h-80 w-80'>
                                             <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`} />
-                                            <AvatarFallback>
+                                            <AvatarFallback id={userData.id.toString()}>
                                                 <p className='text-6xl'>
                                                     {getInitials(userData.profile.name)}
                                                 </p>

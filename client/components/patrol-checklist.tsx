@@ -175,7 +175,7 @@ export default function PatrolChecklist({
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={patrolChecklist.inspector.id.toString()}>
                     {getInitials(patrolChecklist.inspector.profile.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -231,7 +231,7 @@ export default function PatrolChecklist({
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZones.zone.supervisor.profile.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={itemZones.zone.supervisor.id.toString()}>
                                         {getInitials(itemZones.zone.supervisor.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>

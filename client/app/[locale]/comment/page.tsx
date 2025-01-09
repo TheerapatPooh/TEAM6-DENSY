@@ -402,7 +402,7 @@ export default function Page() {
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={comment.user.id.toString()}>
                       {getInitials(comment.user.profile.name)}
                     </AvatarFallback>
                   </Avatar>

@@ -181,7 +181,7 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
                       {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
                     </AvatarFallback>
                   </Avatar>

@@ -311,7 +311,7 @@ export default function Page() {
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={defect.user.id.toString()}>
                     {getInitials(defect.user.profile.name)}
                   </AvatarFallback>
                 </Avatar>

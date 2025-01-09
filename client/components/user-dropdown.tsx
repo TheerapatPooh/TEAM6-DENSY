@@ -36,7 +36,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
                 <AvatarImage
                   src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser?.profile?.image?.path}`}
                 />
-                <AvatarFallback>
+                <AvatarFallback id={selectUser.id.toString()}>
                   {getInitials(selectUser.profile.name)}
                 </AvatarFallback>
               </Avatar>
@@ -66,7 +66,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={user.id.toString()}>
                     {getInitials(user.profile.name)}
                   </AvatarFallback>
                 </Avatar>

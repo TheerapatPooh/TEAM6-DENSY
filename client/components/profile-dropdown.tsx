@@ -111,7 +111,7 @@ export default function ProfileDropdown() {
               {profile ? (
                 <Avatar>
                   <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${profile.profile.image?.path}`} />
-                  <AvatarFallback>
+                  <AvatarFallback id={profile.id.toString()}>
                     {getInitials(profile.profile.name)}
                   </AvatarFallback>
                 </Avatar>
