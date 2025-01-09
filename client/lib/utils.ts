@@ -362,14 +362,14 @@ export function getNotificationToast(key: string): IToast | null {
     case "report_defect":
       return {
         variant: "default",
-        title: "DefectRecieveTitle",
-        description: "DefectRecieveDescription",
+        title: "DefectReceiveTitle",
+        description: "DefectReceiveDescription",
       };
     case "new_comment":
       return {
         variant: "default",
-        title: "CommentRecieveTitle",
-        description: "CommentRecieveDescription",
+        title: "CommentReceiveTitle",
+        description: "CommentReceiveDescription",
       };
     case "update_supervisor":
       return {
