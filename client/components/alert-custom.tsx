@@ -55,7 +55,7 @@ export function AlertCustom({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="gap-2"
+            className="gap-2 pl-2"
             onClick={() => handleAction(false)}
           >
             <span className="material-symbols-outlined">{secondaryIcon}</span>

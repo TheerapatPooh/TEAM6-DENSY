@@ -27,6 +27,8 @@ import { Skeleton } from "./ui/skeleton";
 import { formatTime } from "@/lib/utils";
 import AlertDefect from "./alert-defect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/hooks/use-toast";
+import { AlertCustom } from "@/components/alert-custom";
 
 interface PatrolChecklistProps {
   user: IUser;
@@ -58,6 +60,7 @@ export default function PatrolChecklist({
   }>({});
   const [comment, setComment] = useState<string>("")
   const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResult);
+  const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
@@ -86,11 +89,13 @@ export default function PatrolChecklist({
     patrolResultId: number,
     supervisorId: number
   ) => {
+
     const data = {
       message: message,
       patrolResultId: patrolResultId,
       supervisorId: supervisorId
     };
+
     try {
       const comment = await fetchData(
         "post",
@@ -98,6 +103,19 @@ export default function PatrolChecklist({
         true,
         data,
       );
+      if (!message) {
+        toast({
+          variant: "error",
+          title: a("PatrolMissingCreateCommentTitle"),
+          description: a("PatrolMissingCreateCommentDescription"),
+        });
+      } else {
+        toast({
+          variant: "default",
+          title: a("PatrolCreateCommentTitle"),
+          description: a("PatrolCreateCommentDescription"),
+        });
+      }
       fetchRealtimeComment(comment, patrolResultId)
     } catch (error) {
       console.error("Error creating Comment:", error);
@@ -115,8 +133,6 @@ export default function PatrolChecklist({
       return pr;
     }));
   }
-
-  console.log("pr", patrolResult)
 
   const getExistingResult = (itemId: number, zoneId: number) => {
     const result = patrolResult.find(
@@ -187,7 +203,7 @@ export default function PatrolChecklist({
 
   return (
     <div className="bg-card rounded-md px-6 py-4">
-      <Accordion type="single" collapsible>
+      <Accordion type="single" collapsible defaultValue="item-1">
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger className="flex flex-row  hover:no-underline text-2xl font-bold p-0">
             <div key={patrolChecklist.checklist.id} className="flex flex-row items-center gap-3">
@@ -199,7 +215,7 @@ export default function PatrolChecklist({
               <p>{patrolChecklist.checklist.title}</p>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="p-0">
+          <AccordionContent className="p-0" >
             <div className="flex items-center gap-2 mb-2 mt-2">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span className="material-symbols-outlined">person_search</span>
@@ -377,7 +393,7 @@ export default function PatrolChecklist({
                                             <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
                                             <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp)}</p>
                                             <div className="flex items-end">
-                                              <p className="text-xl">{comment.message}</p>  
+                                              <p className="text-xl">{comment.message}</p>
                                             </div>
                                           </div>
                                         )

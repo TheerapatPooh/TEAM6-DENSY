@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
 import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
 import { number } from "zod";
+import { checklists } from "../Utils/data/checklists";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -341,6 +342,52 @@ export async function getAllPatrols(req: Request, res: Response) {
 
     res.status(200).json(result);
     return;
+  } catch (error) {
+    res.status(500);
+    return;
+  }
+}
+
+export async function getPatrolUser(req: Request, res: Response) {
+  try {
+    const patrolId = parseInt(req.params.id, 10);
+
+    const patrol = await prisma.patrol.findUnique({
+      where: {
+        id: patrolId,
+      },
+      select: {
+        patrolChecklists: {
+          select: {
+            inspector: {
+              select: {
+                username: true,
+                profile: {
+                  select: {
+                    id: true,
+                    name: true,
+                    image: true
+                  }
+                },
+              },
+            },
+          },
+        },
+      }
+    });
+
+    let result: any[] = []
+    patrol?.patrolChecklists.map((pc) => {
+      result.push(pc.inspector)
+    })
+
+    // Remove duplicates by username
+    result = result.filter((user, index, self) =>
+      index === self.findIndex((u) => u.username === user.username)
+    )
+
+    res.status(200).json(result);
+    return
   } catch (error) {
     res.status(500);
     return;

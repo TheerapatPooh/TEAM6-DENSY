@@ -206,7 +206,7 @@ export default function Page() {
                 text = "Accept";
                 disabled = false;
                 handleFunction = () => {
-                  // handleFinishPatrol();
+                  handleAcceptDefect();
                 };
                 break;
               case "in_progress":
@@ -241,7 +241,7 @@ export default function Page() {
                   type={"resolve"}
                   response={(defect: IDefect) => {
                     fetchRealtimeData(defect)
-                  }}/> :
+                  }} /> :
 
                   <Button
                     variant={variant}
