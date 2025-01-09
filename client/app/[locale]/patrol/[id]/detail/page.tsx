@@ -84,7 +84,7 @@ export default function Page() {
         <div className='flex flex-col gap-4'>
             {/* TabList และ Title */}
             <div className="flex justify-between items-center">
-                <div className="flex items-center p-0 justify-center text-center">
+                <div className="flex items-center p-0 justify-center text-center gap-2">
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -308,7 +308,7 @@ export default function Page() {
                                                                             <AvatarImage
                                                                                 src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                                                             />
-                                                                            <AvatarFallback id={inspector?.id.toString()}>
+                                                                            <AvatarFallback id={inspector.profile.id.toString()}>
                                                                                 {getInitials(inspector.profile.name)}
                                                                             </AvatarFallback>
                                                                         </Avatar>
@@ -340,9 +340,9 @@ export default function Page() {
                                                                     <div key={idx} className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary">
                                                                         <Avatar className="custom-shadow ms-[-10px] me-2.5">
                                                                             <AvatarImage
-                                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
                                                                             />
-                                                                            <AvatarFallback id={inspector?.id.toString()}>
+                                                                            <AvatarFallback id={inspector.profile.id.toString()}>
                                                                                 {getInitials(inspector.profile.name)}
                                                                             </AvatarFallback>
                                                                         </Avatar>

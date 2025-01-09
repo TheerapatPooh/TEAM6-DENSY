@@ -596,6 +596,36 @@ export async function startPatrol(req: Request, res: Response) {
       },
     });
 
+    const notifiedInspectors = new Set<number>();
+
+    for (const checklistObj of checklists) {
+      const inspectorId = checklistObj.inspector.id;
+
+      for (const items of checklistObj.checklist.items) {
+        for (const zones of items.itemZones) {
+          await prisma.patrolResult.create({
+            data: {
+              status: null,
+              itemId: items.id,
+              zoneId: zones.zone.id,
+              patrolId: patrolId,
+            },
+          });
+          if (!notifiedInspectors.has(inspectorId)) {
+            const message = `start_patrol`;
+            await createNotification({
+              message: message,
+              type: "information" as NotificationType,
+              url: `/patrol/${patrolId}/detail`,
+              userId: inspectorId,
+            });
+
+            notifiedInspectors.add(inspectorId);
+          }
+        }
+      }
+    }
+
     const updatePatrol = await prisma.patrol.findFirst({
       where: {
         id: patrolId,
@@ -677,37 +707,8 @@ export async function startPatrol(req: Request, res: Response) {
       },
     });
 
-    const notifiedInspectors = new Set<number>();
-
-    for (const checklistObj of checklists) {
-      const inspectorId = checklistObj.inspector.id;
-
-      for (const items of checklistObj.checklist.items) {
-        for (const zones of items.itemZones) {
-          await prisma.patrolResult.create({
-            data: {
-              status: null,
-              itemId: items.id,
-              zoneId: zones.zone.id,
-              patrolId: patrolId,
-            },
-          });
-          if (!notifiedInspectors.has(inspectorId)) {
-            const message = `start_patrol`;
-            await createNotification({
-              message: message,
-              type: "information" as NotificationType,
-              url: `/patrol/${patrolId}/detail`,
-              userId: inspectorId,
-            });
-
-            notifiedInspectors.add(inspectorId);
-          }
-        }
-      }
-    }
-
     let result = updatePatrol;
+    console.log(result)
     res.status(200).json(result);
     return;
   } catch (error) {

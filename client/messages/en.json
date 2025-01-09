@@ -89,7 +89,8 @@
     "NewPassword" : "New Password",
     "ConfirmPassword" : "Confirm Password",
     "Accept" : "Accept",
-    "admin": "Admin"
+    "admin": "Admin",
+    "Edit": "Edit"
   },
   "Status": {
     "pending": "Pending",

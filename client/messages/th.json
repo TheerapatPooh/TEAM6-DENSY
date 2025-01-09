@@ -89,7 +89,8 @@
     "NewPassword": "รหัสผ่านใหม่",
     "ConfirmPassword": "ยืนยันรหัสผ่าน",
     "Accept": "ยอมรับ",
-    "admin": "ผู้ดูแลระบบ"
+    "admin": "ผู้ดูแลระบบ",
+    "Edit": "แก้ไข"
   },
   "Status": {
     "pending": "รอดำเนินการ",
