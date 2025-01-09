@@ -87,7 +87,8 @@
     "ManageAccount" : "Manage Account",
     "CurrentPassword" : "Current Password",
     "NewPassword" : "New Password",
-    "ConfirmPassword" : "Confirm Password"
+    "ConfirmPassword" : "Confirm Password",
+    "Accept" : "Accept"
   },
   "Status": {
     "pending": "Pending",
@@ -243,6 +244,10 @@
     "ProfileUpdateConfirmTitle" : "Are you sure to save profile?",
     "ProfileUpdateConfirmDescription" : "Please confirm to save profile.",
     "ProfileImageUpdateConfirmTitle" : "Are you sure to save profile image?",
-    "ProfileImageUpdateConfirmDescription" : "Please confirm to save profile."
+    "ProfileImageUpdateConfirmDescription" : "Please confirm to save profile.",
+    "AcceptDefectConfirmTitle" : "Are you sure to accept defect?",
+    "AcceptDefectConfirmDescription" : "Please confirm to accept defect.",
+    "DefectAcceptTitle" : "Defect Accepted",
+    "DefectAcceptDescription" : "The defect is now in progress."
   }
 }
