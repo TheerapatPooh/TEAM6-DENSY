@@ -583,7 +583,7 @@ export default function Page() {
                         <AvatarImage
                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback id={employee.id?.toString()}>
                           {getInitials(employee.profile.name)}
                         </AvatarFallback>
                       </Avatar>

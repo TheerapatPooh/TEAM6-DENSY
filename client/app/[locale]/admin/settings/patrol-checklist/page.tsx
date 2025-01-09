@@ -96,8 +96,6 @@ export default function Page() {
   const locale = useLocale();
   const a = useTranslations("Alert");
   interface IChecklistWithExtras extends IChecklist {
-    updateByUserName: string;
-    imagePath: string;
     zones: string[]; // New field
     itemCounts: Record<string, number>; // Another new field
     versionCount: number;
@@ -600,14 +598,14 @@ export default function Page() {
                                   <div className="text-muted-foreground">
                                     Update By
                                   </div>
-                                  {checklist.imagePath === "" ? (
+                                  {checklist.user.profile.image?.path === "" ? (
                                     <Avatar>
                                       <AvatarImage
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.imagePath}`}
+                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.user.profile.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={checklist.user.id.toString()}>
                                         {getInitials(
-                                          checklist.updateByUserName
+                                          checklist.user.profile.name
                                         )}
                                       </AvatarFallback>
                                     </Avatar>
@@ -615,7 +613,7 @@ export default function Page() {
                                     <Skeleton className="h-12 w-12 rounded-full" />
                                   )}
 
-                                  {checklist.updateByUserName}
+                                  {checklist.user.profile.name}
                                 </div>
                                 <div className="flex gap-2 text-muted-foreground">
                                   <div className="text-muted-foreground">

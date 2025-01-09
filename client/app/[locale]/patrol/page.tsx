@@ -423,7 +423,7 @@ export default function Page() {
                 className="my-date-picker"
               />
               {dateError && (
-                <p className="ttext-sm font-light text-destructive italic mt-1">{dateError}</p>
+                <p className="text-sm font-light text-destructive italic mt-1">{dateError}</p>
               )}
             </div>
             <div>

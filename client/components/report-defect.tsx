@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { defectStatus, IDefect } from "@/app/type";
+import React, { useEffect, useState } from "react";
+import { defectStatus, IDefect, IImage, IZone } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
@@ -78,9 +78,11 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
   const handleReworkOrVerifyDefect = async (
     id: number,
     status: defectStatus,
+    supervisorId: number
   ) => {
     const data = {
-      status: status
+      status: status,
+      supervisorId: supervisorId
     }
 
     try {
@@ -96,9 +98,9 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
     }
   };
 
-  const [api, setApi] = React.useState<CarouselApi>()
+  const [api, setApi] = useState<CarouselApi>()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) {
       return
     }
@@ -174,14 +176,14 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <span className="material-symbols-outlined">engineering</span>
-                  <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                  <p className="text-lg font-semibold">{t("supervisor")}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Avatar className="custom-shadow h-[35px] w-[35px]">
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
                       {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -431,13 +433,13 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
             <div>
               {defect.status === "resolved" && page === "patrol-defect" && (
                 <div className="flex space-x-2 justify-end">
-                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection")}>
+                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection", defect.patrolResult.itemZone.zone.supervisor.id)}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       cancel
                     </span>
                     Rework
                   </Button>
-                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed")}>
+                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed", defect.patrolResult.itemZone.zone.supervisor.id)}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       check_circle
                     </span>

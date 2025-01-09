@@ -253,7 +253,7 @@ export async function getAllUsers(req: Request, res: Response) {
 
     const validRoles = ["admin", "inspector", "supervisor"]; // Adjust based on your Role enum
     const roleFilter = validRoles.includes(role) ? (role as Role) : undefined;
-    
+
     const allUsers = await prisma.user.findMany({
       where: {
         role: roleFilter
@@ -303,8 +303,18 @@ export async function updateUser(req: Request, res: Response) {
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
     const { username, name, email, tel, address, password, role, department } = req.body;
-    const active = JSON.parse(req.body.active)
     const age = parseInt(req.body.age)
+    const updateUser: any = {};
+    const updateProfile: any = {};
+    if (username !== undefined) updateUser.username = username;
+    if (email !== undefined) updateUser.email = email;
+    if (password !== undefined) updateUser.password = password;
+    if (role !== undefined) updateUser.role = role;
+    if (department !== undefined) updateUser.department = department;
+    if (name !== undefined) updateProfile.name = name;
+    if (age !== undefined) updateProfile.age = age;
+    if (tel !== undefined) updateProfile.tel = tel;
+    if (address !== undefined) updateProfile.address = address;
 
     // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
     if (loggedInUserId !== id && loggedInUserRole !== "admin") {
@@ -314,62 +324,28 @@ export async function updateUser(req: Request, res: Response) {
       });
       return;
     }
+
     // อัปเดตข้อมูลผู้ใช้
-    if (loggedInUserRole !== "admin") {
-      if (username || email || password || role || department) {
-        await prisma.user.update({
-          where: { id: id },
-          data: {
-            email: email,
-            password: password ? await bcrypt.hash(password, 10) : undefined,
-            active: active
-          },
-        });
-      }
-      await prisma.profile.update({
-        where: { id: id },
-        data: {
-          name: name,
-          age: age,
-          tel: tel,
-          address: address,
+    await prisma.user.update({
+      where: { id: id },
+      data: updateUser,
+    });
+
+    await prisma.profile.update({
+      where: { id: id },
+      data: updateProfile,
+    })
+
+    const result = await prisma.user.findUnique({
+      where: { id: id },
+      include: {
+        profile: {
+          include: {
+            image: true
+          }
         },
-      })
-
-    } else {
-        await prisma.user.update({
-          where: { id: id },
-          data: {
-            password: password ? await bcrypt.hash(password, 10) : undefined,
-            active: active,
-            role: role
-          },
-        });
-      
-
-      await prisma.profile.update({
-        where: { id: id },
-        data: {
-          name: name,
-          age: age,
-          tel: tel,
-          address: address,
-        },
-      })
-
-    }
-
-    const result = {
-      id: id,
-      username: username,
-      email: email,
-      age: age,
-      tel: tel,
-      address: address,
-      role: role,
-      department: department,
-      active: active,
-    };
+      },
+    });;
 
     res.status(200).json(result);
     return;

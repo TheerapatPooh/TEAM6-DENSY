@@ -47,11 +47,11 @@ export async function fetchData(
       withCredentials: credential,
       headers: form
         ? {
-            "Content-Type": "multipart/form-data",
-          }
+          "Content-Type": "multipart/form-data",
+        }
         : {
-            "Content-Type": "application/json",
-          },
+          "Content-Type": "application/json",
+        },
     };
 
     let response;
@@ -581,20 +581,56 @@ export function getNotificationToast(key: string): IToast | null {
     case "report_defect":
       return {
         variant: "default",
-        title: "DefectRecieveTitle",
-        description: "DefectRecieveDescription",
+        title: "DefectReceiveTitle",
+        description: "DefectReceiveDescription",
       };
     case "new_comment":
       return {
         variant: "default",
-        title: "CommentRecieveTitle",
-        description: "CommentRecieveDescription",
+        title: "CommentReceiveTitle",
+        description: "CommentReceiveDescription",
       };
     case "update_supervisor":
       return {
         variant: "default",
         title: "UpdateSupervisorTitle",
         description: "UpdateSupervisorDescription",
+      };
+    case "start_patrol":
+      return {
+        variant: "default",
+        title: "StartPatrolTitle",
+        description: "StartPatrolDescription",
+      };
+    case "finish_patrol":
+      return {
+        variant: "default",
+        title: "FinishPatrolTitle",
+        description: "FinishPatrolDescription",
+      };
+    case "defect_resolved":
+      return {
+        variant: "default",
+        title: "DefectResolveInfoTitle",
+        description: "DefectResolveInfoDescription",
+      };
+    case "defect_accept":
+      return {
+        variant: "default",
+        title: "DefectAcceptInfoTitle",
+        description: "DefectAcceptInfoDescription",
+      };
+    case "defect_completed":
+      return {
+        variant: "default",
+        title: "DefectCompleteTitle",
+        description: "DefectCompleteDescription",
+      };
+    case "defect_pending_inspection":
+      return {
+        variant: "default",
+        title: "DefectPendingInspectionTitle",
+        description: "DefectPendingInspectionDescription",
       };
     default:
       return null;

@@ -172,6 +172,8 @@ export function PatrolCard({
     )
   }
 
+  console.log("inspector patrolcard", inspectors)
+
   return (
     <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="flex flex-row gap-0 p-0 justify-between ">
@@ -246,7 +248,7 @@ export function PatrolCard({
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={inspector.id.toString()}>
                       {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -259,7 +261,7 @@ export function PatrolCard({
                   <span className="absolute text-card-foreground text-[16px] font-semibold">
                     +{inspectors.length - 5}
                   </span>
-                  <AvatarFallback></AvatarFallback>
+                  <AvatarFallback id={'0'}></AvatarFallback>
                 </Avatar>
               )}
             </div>
@@ -280,7 +282,7 @@ export function PatrolCard({
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={inspector.id.toString()}>
                       {getInitials(inspector.profile.name)}
                     </AvatarFallback>
                   </Avatar>

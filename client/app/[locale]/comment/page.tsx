@@ -111,8 +111,8 @@ export default function Page() {
       );
       toast({
         variant: "success",
-        title: a("ConmmentConfirmSuccessTitle"),
-        description: a("ConmmentConfirmSuccessDescription"),
+        title: a("CommentConfirmSuccessTitle"),
+        description: a("CommentConfirmSuccessDescription"),
       });
     } catch (error) {
       console.error("Error deleting patrol:", error);
@@ -374,7 +374,7 @@ export default function Page() {
             <TableHead>{t("Message")}</TableHead>
             <TableHead className="w-[180px]">{t("Date")}</TableHead>
             <TableHead className="w-[240px]">{t("Status")}</TableHead>
-            <TableHead className="w-[240px]">{t("Inspector")}</TableHead>
+            <TableHead className="w-[240px]">{t("inspector")}</TableHead>
             <TableHead className="text-end w-[10px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -402,7 +402,7 @@ export default function Page() {
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={comment.user.id.toString()}>
                       {getInitials(comment.user.profile.name)}
                     </AvatarFallback>
                   </Avatar>

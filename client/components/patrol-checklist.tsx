@@ -17,6 +17,7 @@ import {
   IPatrolResult,
   IUser,
   IDefect,
+  IComment,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
 import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
@@ -26,6 +27,8 @@ import { Skeleton } from "./ui/skeleton";
 import { formatTime } from "@/lib/utils";
 import AlertDefect from "./alert-defect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/hooks/use-toast";
+import { AlertCustom } from "@/components/alert-custom";
 
 interface PatrolChecklistProps {
   user: IUser;
@@ -56,6 +59,8 @@ export default function PatrolChecklist({
     [key: string]: boolean | null;
   }>({});
   const [comment, setComment] = useState<string>("")
+  const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResult);
+  const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
@@ -84,23 +89,50 @@ export default function PatrolChecklist({
     patrolResultId: number,
     supervisorId: number
   ) => {
+
     const data = {
       message: message,
       patrolResultId: patrolResultId,
       supervisorId: supervisorId
     };
+
     try {
-      await fetchData(
+      const comment = await fetchData(
         "post",
         `/patrol/${param.id}/comment`,
         true,
         data,
       );
-      window.location.reload();
+      if (!message) {
+        toast({
+          variant: "error",
+          title: a("PatrolMissingCreateCommentTitle"),
+          description: a("PatrolMissingCreateCommentDescription"),
+        });
+      } else {
+        toast({
+          variant: "default",
+          title: a("PatrolCreateCommentTitle"),
+          description: a("PatrolCreateCommentDescription"),
+        });
+      }
+      fetchRealtimeComment(comment, patrolResultId)
     } catch (error) {
       console.error("Error creating Comment:", error);
     }
   };
+
+  const fetchRealtimeComment = (comment: IComment, patrolResultId: number) => {
+    setPatrolResultState(prevState => prevState.map(pr => {
+      if (pr.id === patrolResultId) {
+        return {
+          ...pr,
+          comments: pr.comments ? [...pr.comments, comment] : [comment]
+        };
+      }
+      return pr;
+    }));
+  }
 
   const getExistingResult = (itemId: number, zoneId: number) => {
     const result = patrolResult.find(
@@ -157,25 +189,44 @@ export default function PatrolChecklist({
     )
   }
 
+  const checkResultStatusChecklist = (checklistId: number): boolean => {
+    const checklistResults = patrolResult.filter(result =>
+      patrolChecklist.checklist.id === checklistId &&
+      patrolChecklist.checklist.items.some(item =>
+        item.id === result.itemId &&
+        item.itemZones.some(itemZone => itemZone.zone.id === result.zoneId)
+      )
+    );
+
+    return checklistResults.every(result => result.status !== null);
+  };
+
   return (
-    <div className="bg-card rounded-md px-4 py-2">
-      <Accordion type="single" collapsible>
+    <div className="bg-card rounded-md px-6 py-4">
+      <Accordion type="single" collapsible defaultValue="item-1">
         <AccordionItem value="item-1" className="border-none">
-          <AccordionTrigger className="hover:no-underline text-2xl font-bold py-2">
-            {patrolChecklist.checklist.title}
+          <AccordionTrigger className="flex flex-row  hover:no-underline text-2xl font-bold p-0">
+            <div key={patrolChecklist.checklist.id} className="flex flex-row items-center gap-3">
+              {checkResultStatusChecklist(patrolChecklist.checklist.id) ?
+                null
+                :
+                <span className="material-symbols-outlined text-destructive">error</span>
+              }
+              <p>{patrolChecklist.checklist.title}</p>
+            </div>
           </AccordionTrigger>
-          <AccordionContent>
-            <div className="flex items-center gap-2">
+          <AccordionContent className="p-0" >
+            <div className="flex items-center gap-2 mb-2 mt-2">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span className="material-symbols-outlined">person_search</span>
-                <p className="text-lg font-semibold">{t("Inspector")}</p>
+                <p className="text-lg font-semibold">{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Avatar className="custom-shadow h-[35px] w-[35px]">
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={patrolChecklist.inspector.id.toString()}>
                     {getInitials(patrolChecklist.inspector.profile.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -183,9 +234,8 @@ export default function PatrolChecklist({
                 <p className="text-card-foreground text-lg">{patrolChecklist.inspector.profile.name}</p>
               </div>
             </div>
-            <div className="ps-2">
+            <div>
               {patrolChecklist.checklist.items?.map((item: IItem) => (
-
                 <Accordion type="single" collapsible>
                   <AccordionItem value="item-1" className="border-none">
                     <AccordionTrigger className="hover:no-underline">
@@ -201,7 +251,7 @@ export default function PatrolChecklist({
                         </BadgeCustom>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="flex flex-col py-2 gap-2">
+                    <AccordionContent className="flex flex-col gap-4">
                       {item.itemZones.flatMap((itemZones: IItemZone) => {
                         const status = checkStatus(item.id, itemZones.zone.id);
                         const existingResult = getExistingResult(
@@ -209,38 +259,42 @@ export default function PatrolChecklist({
                           itemZones.zone.id
                         );
                         return (
-                          <div key={itemZones.zone.id} className="bg-background rounded-md p-2">
+                          <div key={itemZones.zone.id} className="bg-background rounded-md px-4 py-2">
                             <div className="flex flex-row justify-between items-center">
                               <div className="flex flex-col">
-                                <div className="flex items-center gap-1 mb-2">
-                                  <span className="material-symbols-outlined text-muted-foreground">
-                                    location_on
-                                  </span>
-                                  <p className="font-semibold text-lg text-muted-foreground me-1">
-                                    {t("Zone")}
-                                  </p>
-                                  <p className="text-lg">{z(itemZones.zone.name)}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <span className="material-symbols-outlined">engineering</span>
-                                    <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                                <div className="flex flex-row items-center gap-2">
+                                  <div className="flex flex-row items-center gap-1">
+                                    <span className="material-symbols-outlined text-muted-foreground">
+                                      location_on
+                                    </span>
+                                    <p className="font-semibold text-base text-muted-foreground">
+                                      {t("Zone")}
+                                    </p>
                                   </div>
+                                  <p className="text-base">{z(itemZones.zone.name)}</p>
+                                </div>
+
+                                <div className="flex flex-row items-center gap-2">
+                                  <div className="flex items-center text-muted-foreground gap-1">
+                                    <span className="material-symbols-outlined">engineering</span>
+                                    <p className="text-lg font-semibold">{t("supervisor")}</p>
+                                  </div>
+
                                   <div className="flex items-center gap-1">
                                     <Avatar className="custom-shadow h-[35px] w-[35px]">
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZones.zone.supervisor.profile.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={itemZones.zone.supervisor.id.toString()}>
                                         {getInitials(itemZones.zone.supervisor.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>
-
                                     <p className="text-card-foreground text-lg">{itemZones.zone.supervisor.profile.name}</p>
                                   </div>
+
                                 </div>
                               </div>
-                              <div className="flex gap-2 pe-2">
+                              <div className="flex gap-2">
                                 <Button
                                   variant={
                                     resultStatus[`${item.id}-${itemZones.zone.id}`] ===
@@ -320,17 +374,7 @@ export default function PatrolChecklist({
 
                             {(status === false ||
                               existingResult?.status === false) && (
-                                <div className="mt-4 flex flex-col items-start">
-                                  {existingResult.comments.map((comment) => (
-                                    //Comment Patrol
-                                    <div className="flex bg-secondary rounded-md w-full p-2 mb-2 gap-2">
-                                      <p className="text-muted-foreground font-bold text-lg">{formatTime(comment.timestamp)}</p>
-
-                                      <div className="flex items-end">
-                                        <p className="text-lg">{comment.message}</p>
-                                      </div>
-                                    </div>
-                                  ))}
+                                <div className="flex flex-col items-start gap-4 mt-2">
                                   <AlertDefect
                                     item={item}
                                     type={"report"}
@@ -340,14 +384,40 @@ export default function PatrolChecklist({
                                       fetchRealtimeData(defect)
                                     )}
                                   />
-                                  <Textarea
-                                    className="h-[94px] mt-3 bg-secondary border-none"
-                                    placeholder={`${t("Comment")}...`}
-                                    disabled={disabled}
-                                    onChange={(e) => setComment(e.target.value)}
-                                  />
+
+                                  <div className="flex flex-col items-start w-full gap-2">
+                                    {patrolResultState.flatMap(pr => pr.comments ?? []).map((comment: IComment) =>
+                                      comment.patrolResultId === existingResult.id ?
+                                        (
+                                          <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
+                                            <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
+                                            <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp)}</p>
+                                            <div className="flex items-end">
+                                              <p className="text-xl">{comment.message}</p>
+                                            </div>
+                                          </div>
+                                        )
+                                        : null
+                                    )}
+                                    <Textarea
+                                      className="min-h-[120px] bg-secondary border-none text-xl"
+                                      placeholder={`${t("Comment")}...`}
+                                      disabled={disabled}
+                                      value={comment}
+                                      onChange={(e) => setComment(e.target.value)}
+                                    />
+                                  </div>
+
                                   <div className="flex justify-end w-full mt-2">
-                                    <Button variant={"primary"} size={"lg"} disabled={disabled} onClick={() => handleCreateComment(comment, existingResult.id, itemZones.zone.supervisor.id)}>
+                                    <Button
+                                      variant={"primary"}
+                                      size={"lg"}
+                                      disabled={disabled}
+                                      onClick={() => {
+                                        handleCreateComment(comment, existingResult.id, itemZones.zone.supervisor.id)
+                                        setComment("")
+                                      }}
+                                    >
                                       <span className="material-symbols-outlined me-2">
                                         send
                                       </span>
