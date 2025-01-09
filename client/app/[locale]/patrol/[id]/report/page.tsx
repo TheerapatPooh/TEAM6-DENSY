@@ -235,7 +235,7 @@ export default function Page() {
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={inspector.id?.toString()}>
                                         {getInitials(inspector.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>
@@ -248,7 +248,7 @@ export default function Page() {
                                     <span className="absolute text-card-foreground text-[16px] font-semibold">
                                       +{inspectors.length - 5}
                                     </span>
-                                    <AvatarFallback></AvatarFallback>
+                                    <AvatarFallback id={'0'}></AvatarFallback>
                                   </Avatar>
                                 )}
                               </div>
@@ -269,7 +269,7 @@ export default function Page() {
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={inspector.id?.toString()}>
                                         {getInitials(inspector.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>

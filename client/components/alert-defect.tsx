@@ -48,7 +48,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
     const a = useTranslations("Alert");
     const t = useTranslations("General");
     const z = useTranslations("Zone");
-    const t = useTranslations("General");
 
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [defectDescription, setDefectDescription] = useState<string>("");
