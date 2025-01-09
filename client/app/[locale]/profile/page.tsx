@@ -1,17 +1,14 @@
 'use client'
-import React, { use, useEffect, useRef, useState } from 'react'
-import bcrypt from "bcryptjs";
+import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import BadgeCustom from '@/components/badge-custom';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { IUser } from '@/app/type';
-import { fetchData } from '@/lib/utils';
+import { fetchData, getInitials } from '@/lib/utils';
 import Loading from '@/components/loading';
 import { useTranslations } from 'next-intl';
-import { string } from 'zod';
-import { FormProvider } from 'react-hook-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     AlertDialog,
@@ -25,9 +22,22 @@ import {
     AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
-import { role } from "@/app/type";
 import { AlertCustom } from '@/components/alert-custom';
+import Map from '@/components/map';
 
+interface IFormProfile {
+    name?: string,
+    email?: string,
+    age?: number,
+    tel?: string,
+    address?: string,
+    image?: string,
+    username?: string,
+    password?: string,
+    currentPassword?: string,
+    newPassword?: string,
+    confirmPassword?: string,
+}
 
 export default function page() {
     const [nameError, setNameError] = useState<string | null>(null);
@@ -44,51 +54,27 @@ export default function page() {
     const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
     const [imageProfile, setImageProfile] = useState<File | null>(null);
     const [userData, setUserData] = useState<IUser>(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        age: '',
-        tel: '',
-        address: '',
-        image: '',
-        username: '',
-        password: '',
-        newPassword: '',
-        confirmPassword: '',
-    });
+    const [formData, setFormData] = useState<IFormProfile>();
 
     useEffect(() => {
+        getUserData();
         setMounted(true)
     }, [])
 
     const z = useTranslations("Zone");
     const a = useTranslations("Alert");
     const t = useTranslations("General");
-    
+
     const getUserData = async () => {
         try {
             const data = await fetchData("get", "/user?profile=true&image=true&password=true", true);
             setUserData(data);
-            setFormData({
-                name: data.profile.name || '',
-                email: data.email || '',
-                age: data.profile.age ? String(data.profile.age) : '',
-                tel: data.profile.tel || '',
-                address: data.profile.address || '',
-                image: data.profile.image || '',
-                username: data.username || '',
-                password: '',
-                newPassword: '',
-                confirmPassword: '',
-            });
         } catch (error) {
             console.error("Failed to fetch user data: ", error);
         }
     };
 
-    useEffect(() => {
-        getUserData();
-    }, []); // Empty dependency array means this will only run once, when the component mounts.
+
 
 
     if (!mounted || !userData) {
@@ -107,8 +93,8 @@ export default function page() {
         setIsProfileDialogOpen(false);
         setIsProfileImageDialogOpen(false);
         if (result && pendingAction) {
-          pendingAction(); // Execute the pending action
-          setPendingAction(null); // Clear the pending action
+            pendingAction(); // Execute the pending action
+            setPendingAction(null); // Clear the pending action
         }
     };
 
@@ -120,136 +106,127 @@ export default function page() {
     const handleSaveProfileImage = () => {
         setPendingAction(() => () => handleUpdateImageProfile());
         handleOpenDialog("SaveProfileImageDialog");
+        setImageProfile(null)
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setFormData((prev) => {
+            const updatedFormData = { ...prev };
+
+            if (value === "") {
+                delete updatedFormData[name];
+            } else {
+                updatedFormData[name] = value;
+            }
+
+            return updatedFormData;
+        });
     };
 
-    const active: boolean = userData.active;
-
     const handleUpdateUserData = async () => {
-        const passwordMatch = await bcrypt.compare(formData.password, userData.password);
+        console.log(formData)
         let showErrorToast = false;
-
-        if (formData.password !== '' || (!formData.password !== null && passwordMatch !== false)) {
-            if (!passwordMatch) {
-                setCurrentPassError(a("ProfileCurrentPassInvalid"));
-                showErrorToast = true;
-            } else {
-                setCurrentPassError(null);
-            }
-        } else if (!formData.password.trim()) {
-            setCurrentPassError(a("ProfileCurrentPassRequire"));
-            showErrorToast = true;
-        }
-
-        if (formData.newPassword != formData.confirmPassword) {
-            setConfirmPassError(a("ProfileConfirmPassInvalid"));
-            if (formData.newPassword.trim()) {
-                setNewPassError(null);
-                if (!formData.confirmPassword.trim()) {
-                    setConfirmPassError(a("ProfileConfrimPassRequire"));
-                }
-            } else if (formData.confirmPassword.trim()) {
-                setConfirmPassError(null);
-                if (!formData.newPassword.trim()) {
-                    setNewPassError(a("ProfileNewPassRequire"));
-                }
-            }
-            showErrorToast = true;
-        }
-
-        if (!formData.name.trim()) {
-            setNameError(a("ProfileNameRequire"));
-            showErrorToast = true;
-        } else {
-            setNameError(null);
-        }
-
-        if (formData.email.trim() && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
-            setEmailError(a("ProfileEmailInvalid"));
-            showErrorToast = true;
-        } else {
-            setEmailError(null);
-        }
-
-        if (!formData.age.trim()) {
-            setAgeError(a("ProfileAgeRequire"));
-            showErrorToast = true;
-        } else {
-            setAgeError(null);
-        }
-
-        if (!formData.age.trim()) {
-            setAgeError(a("ProfileAgeRequire"));
-            showErrorToast = true;
-        } else if (formData.age.trim() && !/^\d+$/.test(formData.age)) {
-            setAgeError(a("ProfileAgeInvalid"));
-            showErrorToast = true;
-        } else {
-            setAgeError(null);
-        }
-
-        if (!formData.tel.trim()) {
-            setTelError(a("ProfileTelRequire"));
-            showErrorToast = true;
-        } else if (formData.tel.trim() && !/^[0-9]{10}$/.test(formData.tel)) {
-            setTelError(a("ProfileTelInvalid"));
-        } else {
-            setTelError(null);
-        }
-
-        if (!formData.address.trim()) {
-            setAddressError(a("ProfileAddressRequire"));
-            showErrorToast = true;
-        } else {
-            setAddressError(null);
-        }
-
-        if (showErrorToast) {
+        setCurrentPassError(null)
+        setNewPassError(null)
+        setConfirmPassError(null)
+        setEmailError(null)
+        setAgeError(null)
+        setTelError(null)
+        if (!formData || Object.keys(formData).length === 0) {
             toast({
-                variant: "error",
-                title: a("ProfileUpdateErrorTitle"),
-                description: a("ProfileUpdateErrorDescription"),
+                variant: "default",
+                title: a("ProfileNoChangeTitle"),
+                description: a("ProfileNoChangeDescription"),
             });
             return;
         }
 
         const userForm = new FormData();
-        userForm.append("name", formData.name);
-        userForm.append("email", formData.email);
-        userForm.append("age", formData.age);
-        userForm.append("tel", formData.tel);
-        userForm.append("address", formData.address);
-        userForm.append("username", formData.username);
-        if (passwordMatch) {
-            if (formData.newPassword === formData.confirmPassword) {
-                userForm.append("password", formData.newPassword);
+
+        if (formData?.name && formData?.name !== userData.profile.name) {
+            userForm.append("name", formData.name);
+        }
+        if (formData?.email && formData?.email !== userData.email) {
+            if (formData?.email && formData.email.trim() && /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+                userForm.append("email", formData.email);
+            }
+            else {
+                setEmailError(a("ProfileEmailInvalid"));
+                showErrorToast = true;
             }
         }
-        userForm.append("role", userData.role);
-        userForm.append("department", userData.department);
-        userForm.append('active', active.toString());
+        if (formData?.age && formData?.age !== userData.profile.age) {
+            if (formData?.age && !isNaN(Number(formData.age)) && Number(formData.age) <= 120) {
+                userForm.append("age", formData.age.toString());
+            } else {
+                setAgeError(a("ProfileAgeInvalid")); 
+                showErrorToast = true;
+            }
+        }
 
-        const imageForm = new FormData()
-        imageForm.append("imageProfile", imageProfile)
+        if (formData?.tel && formData?.tel !== userData.profile.tel) {
+            if (formData?.tel?.trim() && /^[0-9]{10}$/.test(formData.tel.trim())) {
+                userForm.append("tel", formData.tel);
+            } else {
+                setTelError(a("ProfileTelInvalid"));
+                showErrorToast = true;
+            }
+        }
+        if (formData?.address && formData?.address !== userData.profile.address) {
+            userForm.append("address", formData.address);
+        }
+
+        if (formData.currentPassword || formData.newPassword || formData.confirmPassword) {
+            if (!formData.currentPassword) {
+                setCurrentPassError(a("ProfileCurrentPassRequire"));
+                showErrorToast = true;
+            }
+            if (!formData.newPassword) {
+                setNewPassError(a("ProfileNewPassRequire"));
+                showErrorToast = true;
+            }
+            if (!formData.confirmPassword) {
+                setConfirmPassError(a("ProfileConfirmPassRequire"));
+                showErrorToast = true;
+            }
+
+            else {
+                const passwordMatch = formData.currentPassword === userData.password;
+                if (passwordMatch) {
+                    if (formData.newPassword === formData.confirmPassword) {
+                        userForm.append("password", formData.newPassword);
+                    }
+                    else {
+                        setConfirmPassError(a("ProfileConfirmPassInvalid"));
+                        showErrorToast = true;
+                    }
+                } else {
+                    setCurrentPassError(a("ProfileCurrentPassInvalid"));
+                    showErrorToast = true;
+                }
+            }
+        }
+
 
         try {
-            await fetchData("put", `/user/${userData.profile.userId}`, true, userForm)
-            if (imageProfile) {
-                await fetchData("put", "/profile", true, imageForm, true);
+            if (!showErrorToast) {
+                const response = await fetchData("put", `/user/${userData.profile.userId}`, true, userForm)
+                if (response) {
+                    setUserData(response)
+                    toast({
+                        variant: "success",
+                        title: a("ProfileUpdateSuccessTitle"),
+                        description: a("ProfileUpdateSuccessDescription"),
+                    });
+                }
+            } else {
+                toast({
+                    variant: "error",
+                    title: a("ProfileUpdateErrorTitle"),
+                    description: a("ProfileUpdateErrorDescription"),
+                });
             }
-            toast({
-                variant: "success",
-                title: a("ProfileUpdateSuccessTitle"),
-                description: a("ProfileUpdateSuccessDescription"),
-            });
-            getUserData()
         } catch (error) {
             console.error("Error updating profile:", error);
             toast({
@@ -283,15 +260,6 @@ export default function page() {
         }
     }
 
-    const getInitials = (name: string) => {
-        if (!name) return "";
-        const nameParts = name.split(" ");
-        return nameParts.length === 1
-            ? nameParts[0].charAt(0).toUpperCase()
-            : nameParts[0].charAt(0).toUpperCase() +
-            nameParts[nameParts.length - 1].charAt(0).toUpperCase();
-    };
-
     const handleButtonClick = (event: React.FormEvent) => {
         event.preventDefault();
         document.getElementById("file-input")?.click();
@@ -310,19 +278,18 @@ export default function page() {
     }
 
     return (
-        <div className='flex flex-col py-4 px-6'>
-
-            <div className='text-2xl font-bold mb-4'>
+        <div className='flex flex-col py-4 px-6 gap-4'>
+            <div className='text-2xl font-bold'>
                 {t("ViewProfile")}
             </div>
 
             {/* first block */}
-            <div className='flex justify-between px-6 py-4 bg-card mb-4'>
+            <div className='flex justify-between px-6 py-4 bg-card rounded-md custom-shadow'>
                 <div className='flex flex-row'>
                     {userData.profile ? (
                         <Avatar className='h-32 w-32 mr-6'>
                             <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`} />
-                            <AvatarFallback>
+                            <AvatarFallback id={userData.id?.toString()}>
                                 <p className='text-4xl'>
                                     {getInitials(userData.profile.name)}
                                 </p>
@@ -344,12 +311,12 @@ export default function page() {
                                 </Button>
                             </AlertDialogTrigger>
 
-                            <AlertDialogContent className='w-[400px] h-fit' >
+                            <AlertDialogContent className='flex flex-col px-6 py-4 w-[400px] h-fit' >
                                 <AlertDialogHeader>
                                     <AlertDialogTitle className="text-2xl font-semibold">
                                         {t("ProfileImage")}
                                     </AlertDialogTitle>
-                                    <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                                    <AlertDialogDescription className="flex items-start justify-start text-base text-input">
                                         {t("ProfileImageDescription")}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
@@ -358,7 +325,7 @@ export default function page() {
                                 <div className='flex gap-2'>
                                     <div>
                                         <input name='image' id="file-input" placeholder={null} type="file" className='hidden' onChange={handleFileChange} />
-                                        <Button className='flex justify-center items-center w-10 h-10' variant='primary' onClick={handleButtonClick}>
+                                        <Button className='flex justify-center items-center h-[40px] w-[40px]' variant='primary' onClick={handleButtonClick}>
                                             <span className="material-symbols-outlined text-2xl">
                                                 download
                                             </span>
@@ -371,18 +338,18 @@ export default function page() {
                                     {imageProfile ? (
                                         <Avatar className='h-80 w-80'>
                                             <AvatarImage src={URL.createObjectURL(imageProfile)} />
-                                            <AvatarFallback>
-                                                <p className='text-4xl'>
-                                                    {getInitials(formData.name)}
+                                            <AvatarFallback id={userData.id.toString()}>
+                                                <p className='text-6xl'>
+                                                    {getInitials(userData.profile.name)}
                                                 </p>
                                             </AvatarFallback>
                                         </Avatar>
                                     ) : (
                                         <Avatar className='h-80 w-80'>
                                             <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`} />
-                                            <AvatarFallback>
-                                                <p className='text-4xl'>
-                                                    {getInitials(formData.name)}
+                                            <AvatarFallback id={userData.id.toString()}>
+                                                <p className='text-6xl'>
+                                                    {getInitials(userData.profile.name)}
                                                 </p>
                                             </AvatarFallback>
                                         </Avatar>
@@ -403,7 +370,7 @@ export default function page() {
                                             <span className="material-symbols-outlined text-2xl">
                                                 save
                                             </span>
-                                            {t("Send")}
+                                            {t("Save")}
                                         </AlertDialogAction>
                                     </div>
                                 </AlertDialogFooter>
@@ -421,34 +388,57 @@ export default function page() {
                         shape='square'
                         iconName={userData.role === "supervisor" ? "engineering" : userData.role === "inspector" ? "person_search" : "manage_accounts"}
                     >
-                        {userData.role}
+                        {t(userData.role)}
                     </BadgeCustom>
 
                     {userData.zone ?
-                        <div className='w-72'>
-                            <div className='px-6 py-4 bg-secondary h-14 flex justify-center items-center rounded-lg'>
-                                <div className='flex flex-row items-center'>
+                        <AlertDialog>
+                            <AlertDialogTrigger
+                                className="flex justify-center items-center min-w-72 px-6 py-4 bg-secondary gap-2 rounded-md"
+                            >
+                                <div className='flex flex-row items-center gap-1 text-muted-foreground'>
                                     <span className="material-symbols-outlined text-[22px] pr-1">
                                         location_on
                                     </span>
-                                    <div className='pr-2'>
+                                    <p className='text-base font-semibold'>
                                         {t("ZoneText")}
+                                    </p>
+                                </div>
+                                <p>
+                                    {z(userData.zone.name)}
+                                </p>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
+                                <div className='flex flex-col gap-1'>
+                                    <div className="text-muted-foreground flex items-center gap-1">
+                                        <span className="material-symbols-outlined">
+                                            location_on
+                                        </span>
+                                        <p>{t('Zone')}</p>
                                     </div>
-                                    <div className='text-center'>
-                                        {z(userData.zone.name)}
+                                    <div className=" flex justify-center bg-secondary rounded-lg py-4">
+                                        <Map
+                                            disable={true}
+                                            initialSelectedZones={[userData.zone.id]}
+                                        />
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+
+                                <AlertDialogFooter>
+                                    <AlertDialogAction className={buttonVariants({ variant: "secondary", size: "lg" })}>
+                                        {t('Close')}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                         :
                         null}
-
-
                 </div>
             </div>
 
             {/* second block */}
-            <div className='flex flex-col bg-card py-4 px-6'>
+            <div className='flex flex-col bg-card py-4 px-6 rounded-md custom-shadow'>
                 <div className='flex flex-row justify-between'>
                     {/* edit profile */}
                     <div className='flex flex-col w-full'>
@@ -458,7 +448,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Name")}</p>
-                            <Input name="name" value={formData.name} onChange={handleInputChange} placeholder={userData.profile.name ? userData.profile.name : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <Input name="name" onChange={handleInputChange} placeholder={userData.profile.name ? userData.profile.name : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {nameError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{nameError}</p>
                             )}
@@ -466,7 +456,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Email")}</p>
-                            <Input name="email" value={formData.email} onChange={handleInputChange} placeholder={userData.email ? userData.email : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <Input name="email" onChange={handleInputChange} placeholder={userData.email ? userData.email : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {emailError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{emailError}</p>
                             )}
@@ -474,7 +464,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Age")}</p>
-                            <Input name="age" value={formData.age} onChange={handleInputChange} placeholder={String(userData.profile.age) ? String(userData.profile.age) : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <Input name="age" onChange={handleInputChange} placeholder={String(userData.profile.age) ? String(userData.profile.age) : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {ageError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{ageError}</p>
                             )}
@@ -482,7 +472,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Tel")}</p>
-                            <Input name="tel" value={formData.tel} onChange={handleInputChange} placeholder={userData.profile.tel ? userData.profile.tel : "-"} className='text-xl font-normal bg-secondary'></Input>
+                            <Input name="tel" onChange={handleInputChange} placeholder={userData.profile.tel ? userData.profile.tel : "-"} className='text-xl font-normal bg-secondary'></Input>
                             {telError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{telError}</p>
                             )}
@@ -490,7 +480,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Address")}</p>
-                            <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
+                            <Textarea name="address" onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
                             {addressError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{addressError}</p>
                             )}
@@ -506,12 +496,12 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Username")}</p>
-                            <Input name="username" value={formData.username} onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
+                            <Input name="username" onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
                         </div>
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("CurrentPassword")}</p>
-                            <Input type='password' name="password" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            <Input type='password' name="currentPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
                             {currentPassError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{currentPassError}</p>
                             )}
@@ -519,7 +509,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("NewPassword")}</p>
-                            <Input type='password' name="newPassword" value={formData.newPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            <Input type='password' name="newPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
                             {newPassError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{newPassError}</p>
                             )}
@@ -527,7 +517,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("ConfirmPassword")}</p>
-                            <Input type='password' name="confirmPassword" value={formData.confirmPassword} placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                            <Input type='password' name="confirmPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
                             {confirmPassError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
                             )}
@@ -537,8 +527,12 @@ export default function page() {
 
                 {/* Button Back And Save    */}
                 <div className='flex justify-end items-end gap-2'>
-                    <Button variant='secondary'>{t("Back")}</Button>
-                    <Button variant='primary' onClick={handleSaveProfile}>{t("Save")}</Button>
+                    <Button variant='secondary' size='lg'>{t("Back")}</Button>
+                    <Button variant='primary' size='lg' onClick={handleSaveProfile}>
+                        <span className="material-symbols-outlined text-2xl">
+                            save
+                        </span>{t("Save")}
+                    </Button>
                 </div>
             </div>
             {isProfileDialogOpen && (

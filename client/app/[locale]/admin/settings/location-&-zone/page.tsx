@@ -166,7 +166,7 @@ export default function Page() {
         <div className="flex gap-2 justify-between w-fit">
           <div className="flex gap-1 items-center ">
             <span className="material-symbols-outlined text-muted-foreground">engineering</span>
-            <p className="text-muted-foreground text-base font-semibold">{t("Supervisor")}</p>
+            <p className="text-muted-foreground text-base font-semibold">{t("supervisor")}</p>
           </div>
           <UserDropdown
             color="secondary"
@@ -190,7 +190,7 @@ export default function Page() {
             </TableHead>
             <TableHead>
               <div className="flex gap-3 items-center">
-                {t("Supervisor")}
+                {t("supervisor")}
                 <span className="material-symbols-outlined">engineering</span>
               </div>
             </TableHead>
@@ -211,7 +211,7 @@ export default function Page() {
                         <AvatarImage
                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile.image?.path}`}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback id={zone.supervisor.id.toString()}>
                           {getInitials(zone.supervisor.profile.name)}
                         </AvatarFallback>
                       </Avatar>

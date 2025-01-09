@@ -168,14 +168,14 @@ export default function PatrolChecklist({
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span className="material-symbols-outlined">person_search</span>
-                <p className="text-lg font-semibold">{t("Inspector")}</p>
+                <p className="text-lg font-semibold">{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Avatar className="custom-shadow h-[35px] w-[35px]">
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={patrolChecklist.inspector.id.toString()}>
                     {getInitials(patrolChecklist.inspector.profile.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -224,14 +224,14 @@ export default function PatrolChecklist({
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1 text-muted-foreground">
                                     <span className="material-symbols-outlined">engineering</span>
-                                    <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                                    <p className="text-lg font-semibold">{t("supervisor")}</p>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Avatar className="custom-shadow h-[35px] w-[35px]">
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZones.zone.supervisor.profile.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={itemZones.zone.supervisor.id.toString()}>
                                         {getInitials(itemZones.zone.supervisor.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>
