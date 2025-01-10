@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { IUser } from '@/app/type';
 import { fetchData, getInitials } from '@/lib/utils';
 import Loading from '@/components/loading';
-import { useTranslations } from 'next-intl';
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     AlertDialog,
@@ -55,6 +56,8 @@ export default function page() {
     const [imageProfile, setImageProfile] = useState<File | null>(null);
     const [userData, setUserData] = useState<IUser>(null);
     const [formData, setFormData] = useState<IFormProfile>();
+    const router = useRouter();
+    const locale = useLocale();
 
     useEffect(() => {
         getUserData();
@@ -527,7 +530,7 @@ export default function page() {
 
                 {/* Button Back And Save    */}
                 <div className='flex justify-end items-end gap-2'>
-                    <Button variant='secondary' size='lg'>{t("Back")}</Button>
+                    <Button variant='secondary' size='lg' onClick={() => router.push(`/${locale}/`)}>{t("Back")}</Button>
                     <Button variant='primary' size='lg' onClick={handleSaveProfile}>
                         <span className="material-symbols-outlined text-2xl">
                             save

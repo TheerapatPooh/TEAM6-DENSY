@@ -193,6 +193,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 formData,
                 true
             );
+            if (description && files) {
+                closeAlertDefect()
+            }
             response(updateDefect)
         } catch (error) {
             console.error("Error edit defect:", error);
@@ -211,6 +214,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 title: a("ReportDefectMissingField"),
                 description: a("ReportDefectMissingImage"),
             });
+            if (files) {
+                closeAlertDefect()
+            }
             return;
         }
 

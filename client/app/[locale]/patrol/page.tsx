@@ -106,7 +106,7 @@ export default function Page() {
         description: a("PatrolMissingDateDescription"),
       });
       return;
-    } else {
+    } else {  
       setDateError(null);
     }
 
@@ -186,7 +186,6 @@ export default function Page() {
       }
     });
   };
-
 
   const handleSortChange = (type: string, value: string) => {
     setSort((prevSort) => ({
@@ -651,7 +650,11 @@ export default function Page() {
 
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-2">
-                <AlertDialogCancel onClick={() => setSecondDialog(false)}>
+                <AlertDialogCancel onClick={() => {
+                  setSecondDialog(false)
+                  setDateError(null)
+                }
+                }>
                   {t('Cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction
