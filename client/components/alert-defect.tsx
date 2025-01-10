@@ -240,6 +240,11 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 formData,
                 true
             );
+            toast({
+                variant: "success",
+                title: a("DefectResolveTitle"),
+                description: a("DefectResolveDescription"),
+            });
             if (files) {
                 closeAlertDefect()
             }
@@ -345,7 +350,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
                                 <div className="flex items-center">
                                     <span className="material-symbols-outlined text-2xl me-2">
-                                        badge
+                                        engineering
                                     </span>
                                     <p className="font-semibold me-2">
                                         Supervisor

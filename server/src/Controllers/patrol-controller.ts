@@ -361,6 +361,7 @@ export async function getPatrolUser(req: Request, res: Response) {
           select: {
             inspector: {
               select: {
+                id: true,
                 username: true,
                 profile: {
                   select: {
