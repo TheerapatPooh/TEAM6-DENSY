@@ -708,7 +708,6 @@ export async function startPatrol(req: Request, res: Response) {
     });
 
     let result = updatePatrol;
-    console.log(result)
     res.status(200).json(result);
     return;
   } catch (error) {

@@ -71,8 +71,6 @@ export default function Page() {
     const s = useTranslations("Status");
 
     itemCounts(patrol, patrolResults);
- 
-
     const inspectors = patrolUser
 
     if (!patrol || !mounted) {
@@ -263,6 +261,7 @@ export default function Page() {
                                                 {t(text)}
                                             </Button>
                                         </AlertDialogTrigger>
+
                                         <AlertDialogContent className="w-[400px] h-fit px-6 py-4 ">
                                             <AlertDialogHeader className='flex flex-col gap-2'>
                                                 <div className='flex flex-col gap-1'>
@@ -388,6 +387,7 @@ export default function Page() {
                                                     className='bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 rounded-md px-4 text-lg font-bold'
                                                     onClick={() => {
                                                         exportData(patrol, patrolResults)
+                                                        handleCloseDialog()
                                                         toast({
                                                             variant: "success",
                                                             title: a("ExportReportPatrolTitle"),
