@@ -78,7 +78,7 @@ export default function Page() {
     <div className="flex flex-col gap-4">
       {/* TabList และ Title */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center p-0 justify-center text-center">
+        <div className="flex items-center p-0 justify-center text-center gap-2">
           <Button
             variant="ghost"
             className="flex hover:bg-secondary p-2"

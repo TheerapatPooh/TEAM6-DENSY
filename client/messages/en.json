@@ -299,6 +299,14 @@
     "DefectCompleteTitle": "Defect Completed",
     "DefectCompleteDescription": "The defect has been successfully addressed. Please review the completed work.",
     "DefectPendingInspectionTitle": "Defect Pending Reinspection",
-    "DefectPendingInspectionDescription": "The defect has been sent back for your review. Please accept to proceed with reinspection."
+    "DefectPendingInspectionDescription": "The defect has been sent back for your review. Please accept to proceed with reinspection.",
+    "ConfirmReworkTitle": "Send for Rework?",
+    "ConfirmReworkDescription": "Are you sure you want to send this defect back for fixing? This will require the responsible person to review and resolve it again.",
+    "ConfirmCompleteTitle": "Mark as Completed?",
+    "ConfirmCompleteDescription": "Are you sure you want to mark this defect as resolved? This indicates the defect has been fixed and passed inspection.",
+    "ReworkDefectTitle": "Defect Sent for Rework",
+    "ReworkDefectDescription": "This defect has been sent back for fixing. The responsible person will need to review and resolve it again.",
+    "CompleteDefectTitle": "Defect Marked as Completed",
+    "CompleteDefectDescription": "This defect has been marked as completed, indicating it has been fixed and passed inspection."
   }
 }
