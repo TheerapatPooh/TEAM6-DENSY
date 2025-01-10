@@ -1,58 +1,33 @@
 "use client";
-import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
 import React, { useEffect, useState } from "react";
-import Loading from "@/components/loading";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
-import { fetchData, formatTime } from "@/lib/utils";
-import { IChecklist, IDefect, IItem, IZone } from "@/app/type";
+import { fetchData } from "@/lib/utils";
+import { IChecklist, IItem, IZone } from "@/app/type";
 import { useParams } from "next/navigation";
-import { getInitials } from "@/lib/utils";
 import { AlertCustom } from "@/components/alert-custom";
 import {
-  TableCaption,
   TableHeader,
   TableRow,
   TableHead,
   TableBody,
   TableCell,
-  TableFooter,
   Table,
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
-import { tree } from "next/dist/build/templates/app-page";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -71,9 +46,6 @@ export default function Page() {
   const locale = useLocale();
   const [checklistData, setChecklistData] = useState<IChecklist>();
   const [allZone, setAllZone] = useState([]);
-  const [openStatesZone, setOpenStatesZone] = useState<{
-    [key: number]: boolean;
-  }>({});
   const [openStatesType, setOpenStatesType] = useState<{
     [key: number]: boolean;
   }>({});
@@ -93,12 +65,7 @@ export default function Page() {
   interface itemWithZonesName extends IItem {
     zones?: any[];
   }
-  const handleOpenChangeZone = (itemId: number, isOpen: boolean) => {
-    setOpenStatesZone((prev) => ({
-      ...prev,
-      [itemId]: isOpen, // Update the open state for the specific item
-    }));
-  };
+
   const handleOpenChangeType = (itemId: number, isOpen: boolean) => {
     setOpenStatesType((prev) => ({
       ...prev,
@@ -207,7 +174,6 @@ export default function Page() {
         setSelectedZones(defaultSelectedZones);
         setSelectedType(defaultSelectedType);
         setSelectedChecklistName(defaultSelectedName);
-        console.log("Default Selected Zones:", defaultSelectedZones);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -355,13 +321,11 @@ export default function Page() {
       })),
     };
 
-    console.log(combinedData); // This will give you the combined structure
     return combinedData;
   };
 
   const handleEditPatrolChecklistDialog = async () => {
     const dataToUpdate = combineChecklistData();
-    console.log("Data to Update:", dataToUpdate);
 
     const normalizedChecklistItems = checklistData.items.map((item: any) => ({
       name: item.name,
@@ -404,7 +368,6 @@ export default function Page() {
 
   const handleEditChecklist = async () => {
     const dataToUpdate = combineChecklistData();
-    console.log("Data to Update:", dataToUpdate);
     try {
       const response = await fetchData(
         "put",
@@ -425,7 +388,6 @@ export default function Page() {
       }
 
       // Handle successful response
-      console.log("Success Response:", response);
       toast({
         variant: "success",
         title: "Edit Patrol Checklist Successfully",
@@ -513,7 +475,7 @@ export default function Page() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <input
