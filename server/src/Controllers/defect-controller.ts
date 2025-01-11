@@ -501,6 +501,7 @@ const uploadsPath = getUploadsPath();
  * Output: JSON object ข้อมูล Defect หลังการอัปเดต
 **/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
+  console.log("req", req.body)
   try {
     const { id } = req.params;
     const {
@@ -528,7 +529,14 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         select: { imageId: true },
       });
 
-      if (status === 'edit' as DefectStatus) {
+      const defectImagesBySupervisor = await prisma.image.findMany({
+        where: {
+          id: { in: existingDefectImages.map(img => img.imageId) },
+        },
+        select: { id: true, updatedBy: true },
+      });
+
+      if (status === 'reported' as DefectStatus) {
         const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
 
         const imagesToDelete = await prisma.image.findMany({
@@ -552,11 +560,44 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         });
       }
 
+      if (status === 'resolved' as DefectStatus) {
+        // ลบเฉพาะ imageId ที่ updatedBy เป็น supervisorId
+        const imageIdsToDelete = defectImagesBySupervisor
+          .filter(image => image.updatedBy === parseInt(supervisorId, 10))
+          .map(image => image.id);
+
+        const imagesToDelete = await prisma.image.findMany({
+          where: { id: { in: imageIdsToDelete } },
+          select: { path: true },
+        });
+
+        for (const image of imagesToDelete) {
+          const filePath = path.join(uploadsPath, image.path);
+          try {
+            fs.unlinkSync(filePath);
+          } catch (err) {
+            console.error(`Failed to delete file at ${filePath}:`, err);
+          }
+        }
+
+        // ลบข้อมูลใน defectImage และ image สำหรับ imageIds ที่เลือกไว้
+        await prisma.defectImage.deleteMany({
+          where: {
+            defectId: Number(id),
+            imageId: { in: imageIdsToDelete }
+          },
+        });
+
+        await prisma.image.deleteMany({
+          where: { id: { in: imageIdsToDelete } },
+        });
+      }
+
       for (const file of newImageFiles) {
         const image = await prisma.image.create({
           data: {
             path: file.filename,
-            updatedBy: parseInt(status === 'edit' as DefectStatus ? defectUserId : supervisorId, 10),
+            updatedBy: parseInt(status === 'reported' as DefectStatus ? defectUserId : supervisorId, 10),
           },
         });
         await prisma.defectImage.create({
@@ -583,13 +624,15 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       updateData.patrolResult = { connect: { id: parseInt(patrolResultId, 10) } };
     }
 
+    if (status === 'in_progress' as DefectStatus) {
+      updateData.status = 'resolved' as DefectStatus;
+    }
+
     // ทำการอัปเดต Defect ด้วยข้อมูลที่มี
     await prisma.defect.update({
       where: { id: Number(id) },
       data: updateData,
     });
-
-
 
     let message = null;
     let notiType = null;
@@ -598,7 +641,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     if (status === 'in_progress' as DefectStatus) {
       message = 'defect_accept',
-      notiType = "information" as NotificationType
+        notiType = "information" as NotificationType
       url = `/patrol-defect`
       receive = defectUserId
     } else if (status === 'resolved' as DefectStatus) {
