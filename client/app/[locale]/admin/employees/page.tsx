@@ -265,15 +265,14 @@ export default function Page() {
       })();
 
       try {
-        const tempRoles = selectedRoles
-        const tempStatus = selectedStatus
+        const tempRoles = selectedRoles;
+        const tempStatus = selectedStatus;
 
         setSelectedRoles([]);
         setSelectedStatus(null);
         getData();
         setSelectedRoles(tempRoles);
         setSelectedStatus(tempStatus);
-
       } catch (error) {
         console.error("Error during reset:", error);
       }
@@ -315,22 +314,24 @@ export default function Page() {
         });
         return prevUsers;
       }
+      
+      if(role !== user.role || password !== ""){
+        (async () => {
+          try {
+            toast({
+              variant: "success",
+              title: "Update Successful",
+              description:
+                "The user's information has been successfully updated.",
+            });
 
-      (async () => {
-        try {
-          toast({
-            variant: "success",
-            title: "Update Successful",
-            description:
-              "The user's information has been successfully updated.",
-          });
-
-          await fetchData("put", `/user/${userId}`, true, data);
-          await getData();
-        } catch (error) {
-          console.error("Update failed", error);
-        }
-      })();
+            await fetchData("put", `/user/${userId}`, true, data);
+            await getData();
+          } catch (error) {
+            console.error("Update failed", error);
+          }
+        })();
+      }
 
       return prevUsers.map((user) =>
         user.id === userId
@@ -435,12 +436,12 @@ export default function Page() {
     string | null
   >(null); // State for password error message
 
-  const handleEditUserDialog = (userId: number, index: number) => {
+  const handleEditUserDialog = async (userId: number, index: number) => {
     const updatedUser = userRefs.current[index];
 
     if (
-      updatedUser.username === allUsers[index].username &&
-      updatedUser.role === allUsers[index].role &&
+      updatedUser.username === sortedUser[index].username &&
+      updatedUser.role === sortedUser[index].role &&
       updatedUser.password === ""
     ) {
       toast({
@@ -448,7 +449,7 @@ export default function Page() {
         title: "No Updates Applied",
         description: "The provided details were either blank or unchanged",
       });
-      setIsDialogOpen(false);
+      await setIsDialogOpen(false);
       return;
     }
 
@@ -466,11 +467,10 @@ export default function Page() {
       return;
     } else {
       setPasswordErrorForEdit(null); // Clear error message when password is valid
+      setPendingAction(() => () => handleSave(userId, index));
+      setDialogType("edit");
+      handleOpenDialog();
     }
-
-    setPendingAction(() => () => handleSave(userId, index));
-    setDialogType("edit");
-    handleOpenDialog();
   };
 
   const handleOpenDialog = () => {
@@ -1006,7 +1006,6 @@ export default function Page() {
                       </BadgeCustom>
                     </TableCell>
                     <TableCell>
-                      
                       <DropdownMenu>
                         <DropdownMenuTrigger>
                           <Button
@@ -1022,7 +1021,6 @@ export default function Page() {
                         <DropdownMenuContent align="end" className="px-4 py-2">
                           <div className=" cursor-pointer">
                             <AlertDialog
-                            
                               open={
                                 (isDialogOpen && dialogType === "editform") ||
                                 dialogType === "edit"
@@ -1035,6 +1033,7 @@ export default function Page() {
                                   setIsDialogOpen(true);
                                   setPasswordErrorForEdit(null);
                                   setDialogType("editform");
+                                  userRefs.current[index].password = "";
                                 }}
                               >
                                 <div
@@ -1061,20 +1060,19 @@ export default function Page() {
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
 
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-1 pointer-events-none">
                                   <label>Username</label>
                                   <Textfield
                                     className="bg-secondary cursor-not-allowed "
                                     showIcon={true}
                                     iconName="person"
+                                    onChange={() => {}}
+                                    value={""}
                                     placeholder={employee.username}
                                   />
                                 </div>
 
-                                <div
-                                  className=" flex flex-col gap-4"
-                                 
-                                >
+                                <div className=" flex flex-col gap-4">
                                   <div>
                                     <label>Password</label>
                                     <Textfield
@@ -1171,10 +1169,17 @@ export default function Page() {
                                   <Button
                                     variant="secondary"
                                     size="lg"
-                                    onClick={() => handleDialogResult(false)}
+                                    onClick={async () => {
+                                      handleDialogResult(false);
+                                      try {
+                                        setPendingAction(null); // Clear the pending action
+                                        setDialogType(""); // Reset the dialog type after action is completed
+                                      } catch (error) {}
+                                    }}
                                   >
                                     Back
                                   </Button>
+
                                   <Button
                                     className=" flex  justify-center gap-2"
                                     variant="primary"
