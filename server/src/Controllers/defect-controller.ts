@@ -501,7 +501,6 @@ const uploadsPath = getUploadsPath();
  * Output: JSON object ข้อมูล Defect หลังการอัปเดต
 **/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
-  console.log("req", req.body)
   try {
     const { id } = req.params;
     const {
@@ -512,6 +511,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       defectUserId,
       supervisorId,
       patrolResultId,
+      deleteExistingImages,
     } = req.body;
     const newImageFiles = req.files as Express.Multer.File[];
 
@@ -560,7 +560,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         });
       }
 
-      if (status === 'resolved' as DefectStatus) {
+      if (status === 'resolved' as DefectStatus && deleteExistingImages === 'true') {
         // ลบเฉพาะ imageId ที่ updatedBy เป็น supervisorId
         const imageIdsToDelete = defectImagesBySupervisor
           .filter(image => image.updatedBy === parseInt(supervisorId, 10))
@@ -622,10 +622,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     if (patrolResultId !== undefined) {
       updateData.patrolResult = { connect: { id: parseInt(patrolResultId, 10) } };
-    }
-
-    if (status === 'in_progress' as DefectStatus) {
-      updateData.status = 'resolved' as DefectStatus;
     }
 
     // ทำการอัปเดต Defect ด้วยข้อมูลที่มี

@@ -73,8 +73,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
     const handleCloseDialog = () => {
         setIsAlertOpen(false)
     }
-    console.log("isOpen", isAlertOpen)
-
 
     const handleDefectDescription = (
         event: React.ChangeEvent<HTMLTextAreaElement>
@@ -211,9 +209,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
     const handleResolveDefect = async (
         id: number,
-        status: defectStatus,
         files: File[],
         type: string,
+        deleteExistingImages: boolean,
     ) => {
 
         if (!files || files?.length === 0) {
@@ -234,7 +232,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         formData.append("defectUserId",
             defect.userId.toString()
         );
-        formData.append("status", status)
+        formData.append("status", "resolved")
+        formData.append("deleteExistingImages", deleteExistingImages.toString())
 
         files?.forEach((file) => {
             formData.append("imageFiles", file);
@@ -273,11 +272,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         }
     }
 
-    console.log("defectDescription", defectDescription)
-    console.log("select", selectedFiles)
-    console.log("fileErrors", fileError)
-    console.log("detailErerors", detailError)
-
     const handleSendClick = (event: React.FormEvent) => {
         event.preventDefault();
         event.stopPropagation();
@@ -315,13 +309,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
     if (!patrolResults && type === "report") {
         return <Skeleton />
     }
-
-    // useEffect(() => {
-    //     setAlertDefectOpen(true)
-    // }, [response]);
-
-    console.log("isAlertDefctOpen", isAlertDefectOpen)
-    console.log("isAlertOpen", isAlertOpen)
 
     return (
 
@@ -561,7 +548,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 break;
 
                                             case "resolve":
-                                                handleResolveDefect(defect.id, defect.status, selectedFiles, "resolve");
+                                                handleResolveDefect(defect.id, selectedFiles, "resolve", false);
                                                 break;
 
                                             case "edit":
@@ -579,7 +566,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 break;
 
                                             case "edit-resolve":
-                                                handleResolveDefect(defect.id, defect.status ,selectedFiles, "edit");
+                                                handleResolveDefect(defect.id, selectedFiles, "edit", true);
                                                 break;
 
                                             default:

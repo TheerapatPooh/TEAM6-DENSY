@@ -172,8 +172,6 @@ export function PatrolCard({
     )
   }
 
-  console.log("inspector patrolcard", inspectors)
-
   return (
     <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
       <CardHeader className="flex flex-row gap-0 p-0 justify-between ">

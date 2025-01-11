@@ -88,7 +88,6 @@ export default function Page() {
   const getAllComments = async () => {
     try {
       const queryString = buildQueryString(filter, searchTerm);
-      console.log(queryString);
       const data = await fetchData("get", `/comments?${queryString}`, true);
       setAllComments(data);
     } catch (error) {
