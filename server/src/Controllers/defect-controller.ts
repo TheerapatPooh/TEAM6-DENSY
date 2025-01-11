@@ -4,8 +4,7 @@ import { createNotification } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
-import { fileURLToPath } from "url";
-import { users } from '../Utils/data/users';
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -503,7 +502,6 @@ const uploadsPath = getUploadsPath();
 **/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
-    const { userId } = (req as any).user;
     const { id } = req.params;
     const {
       name,
@@ -542,7 +540,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
           const filePath = path.join(uploadsPath, image.path);
           try {
             fs.unlinkSync(filePath);
-            console.log(`File at ${filePath} deleted successfully.`);
           } catch (err) {
             console.error(`Failed to delete file at ${filePath}:`, err);
           }
@@ -592,7 +589,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       data: updateData,
     });
 
-    console.log(status)
 
 
     let message = null;
@@ -621,8 +617,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       url = `/defect/${id}`
       receive = supervisorId
     }
-    console.log("status", status)
-    console.log("message", message)
+
     if (message) {
       await createNotification({
         message,
@@ -748,7 +743,6 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
       const filePath = path.join(uploadsPath, image.path);
       try {
         fs.unlinkSync(filePath);
-        console.log(`File at ${filePath} deleted successfully.`);
       } catch (err) {
         console.error(`Failed to delete file at ${filePath}:`, err);
       }
@@ -928,7 +922,6 @@ export async function getAllComments(req: Request, res: Response) {
     }
 
     // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
-    // console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
 
     const comments = await prisma.comment.findMany({
       where: whereConditions,

@@ -1,13 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { checklists } from "../Utils/data/checklists";
-import { title } from "process";
-import { item_zones } from "../Utils/data/item-zones";
-import { zones } from "../Utils/data/zones";
-import { items } from "../Utils/data/items";
 import { Checklist } from "@prisma/client";
-import path from "path";
-import { any } from "zod";
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่

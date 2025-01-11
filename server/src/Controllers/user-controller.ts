@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
-import { profile } from "console";
 import { Role } from "@prisma/client";
 
 /**
@@ -107,9 +106,6 @@ export async function updateProfile(req: Request, res: Response) {
     }
 
     const uploadsPath = getUploadsPath();
-
-    console.log("imagePath: ", imagePath);
-    console.log("user.profile.image: ", user.profile?.image?.path);
 
     // Delete old image file if it exists
     if (imagePath && user.profile?.image) {
