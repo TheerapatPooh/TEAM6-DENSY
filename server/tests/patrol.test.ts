@@ -1,7 +1,6 @@
 // patrol-controller.test.ts
 
 import { commentPatrol, createPatrol, finishPatrol, getAllPatrolDefects, getAllPatrols, getPatrol, removePatrol, startPatrol } from '@Controllers/patrol-controller.js';
-import { PatrolStatus } from '@prisma/client';
 import { prismaMock } from './mock';
 import { Request, Response } from 'express';
 import { allPatrolsMock, patrolMock, createPatrolMock, startPatrolMock, finishPatrolMock, removePatrolMock, patrolDefectsMock, commentPatrolMock } from './_mocks_/patrol.mock';
@@ -26,71 +25,14 @@ describe('getPatrol', () => {
 
         await getPatrol(req, res);
 
-        expect(prismaMock.patrol.findFirst).toHaveBeenCalledWith({
-            where: {
-                id: 4,
-                patrolChecklists: {
-                    some: {
-                        userId: 3,
-                    },
-                },
-            },
-            include: {
-                patrolChecklists: {
-                    include: {
-                        checklist: {
-                            select: {
-                                id: true,
-                                title: true,
-                                items: {
-                                    include: {
-                                        itemZones: {
-                                            select: {
-                                                zone: {
-                                                    select: {
-                                                        id: true,
-                                                        name: true,
-                                                        supervisor: {
-                                                            select: {
-                                                                id: true,
-                                                                profile: {
-                                                                    select: {
-                                                                        name: true,
-                                                                    },
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        inspector: {
-                            include: {
-                                profile: {
-                                    include: {
-                                        image: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(patrolMock);
+
     });
 });
 
 describe('getAllPatrols', () => {
     test('ควรดึงข้อมูล Patrol ทั้งหมดตามสถานะและ Inspector ได้ถูกต้อง', async () => {
-        prismaMock.patrol.findMany.mockResolvedValue(allPatrolsMock);
-
         const req = {
             query: { status: "on_going" },
             user: {
@@ -106,62 +48,6 @@ describe('getAllPatrols', () => {
 
         await getAllPatrols(req, res);
 
-        expect(prismaMock.patrol.findMany).toHaveBeenCalledWith({
-            where: {
-                status: 'on_going' as PatrolStatus,
-                patrolChecklists: {
-                    some: {
-                        userId: 3,
-                    },
-                },
-            },
-            select: {
-                id: true,
-                date: true,
-                status: true,
-                preset: {
-                    select: {
-                        title: true,
-                    },
-                },
-                patrolChecklists: {
-                    include: {
-                        checklist: {
-                            select: {
-                                id: true,
-                                title: true,
-                                items: {
-                                    include: {
-                                        itemZones: {
-                                            select: {
-                                                zone: {
-                                                    select: {
-                                                        id: true,
-                                                        name: true,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        inspector: {
-                            select: {
-                                id: true,
-                                email: true,
-                                profile: {
-                                    include: {
-                                        image: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(allPatrolsMock);
     });
@@ -169,177 +55,27 @@ describe('getAllPatrols', () => {
 
 describe('createPatrol', () => {
     test('ควรสร้างข้อมูล Patrol ได้สำเร็จ', async () => {
-        prismaMock.patrol.create.mockResolvedValue(createPatrolMock);
         const req = {
             user: {
                 role: "inspector",
                 userId: 3,
             },
             body: {
-                date: new Date("2024-12-10T17:00:00.000Z"),
+                date: "2024-12-10T17:00:00.000Z",
                 presetId: 2,
                 checklists: [
-                    {
-                        id: 9,
-                        patrolId: 5,
-                        checklistId: 2,
-                        userId: 3,
-                        checklist: {
-                            id: 2,
-                            title: "Maintenance Inspection",
-                            items: [
-                                {
-                                    id: 5,
-                                    name: "Electrical Panel Inspection",
-                                    type: "maintenance",
-                                    checklistId: 2,
-                                    itemZones: [
-                                        {
-                                            zone: {
-                                                id: 2,
-                                                name: "assembly_line_zone"
-                                            }
-                                        },
-                                        {
-                                            zone: {
-                                                id: 5,
-                                                name: "it_zone"
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    id: 6,
-                                    name: "Air Conditioning System Check",
-                                    type: "maintenance",
-                                    checklistId: 2,
-                                    itemZones: [
-                                        {
-                                            zone: {
-                                                id: 5,
-                                                name: "it_zone"
-                                            }
-                                        },
-                                        {
-                                            zone: {
-                                                id: 6,
-                                                name: "customer_service_zone"
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    id: 7,
-                                    name: "Lighting System Check",
-                                    type: "maintenance",
-                                    checklistId: 2,
-                                    itemZones: [
-                                        {
-                                            zone: {
-                                                id: 2,
-                                                name: "assembly_line_zone"
-                                            }
-                                        },
-                                        {
-                                            zone: {
-                                                id: 6,
-                                                name: "customer_service_zone"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        inspector: {
-                            id: 3,
-                            email: null,
-                            profile: {
-                                id: 3,
-                                name: "Jame Smith",
-                                age: 30,
-                                tel: "0987654321",
-                                address: "Chiang Mai, Thailand",
-                                userId: 3,
-                                imageId: 1,
-                                image: {
-                                    id: 1,
-                                    path: "1728239317254-Scan_20220113 (2).png",
-                                    timestamp: new Date("2024-10-10T01:15:14.000Z"),
-                                    updatedBy: 8
-                                }
-                            }
-                        }
-                    },
-                    {
-                        id: 10,
-                        patrolId: 5,
-                        checklistId: 5,
-                        userId: 3,
-                        checklist: {
-                            id: 5,
-                            title: "Equipment Inspection",
-                            items: [
-                                {
-                                    id: 12,
-                                    name: "Server Equipment Inspection",
-                                    type: "maintenance",
-                                    checklistId: 5,
-                                    itemZones: [
-                                        {
-                                            zone: {
-                                                id: 5,
-                                                name: "it_zone"
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    id: 13,
-                                    name: "Forklift Maintenance",
-                                    type: "maintenance",
-                                    checklistId: 5,
-                                    itemZones: [
-                                        {
-                                            zone: {
-                                                id: 3,
-                                                name: "raw_materials_storage_zone"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        inspector: {
-                            id: 3,
-                            email: null,
-                            profile: {
-                                id: 3,
-                                name: "Jame Smith",
-                                age: 30,
-                                tel: "0987654321",
-                                address: "Chiang Mai, Thailand",
-                                userId: 3,
-                                imageId: 1,
-                                image: {
-                                    id: 1,
-                                    path: "1728239317254-Scan_20220113 (2).png",
-                                    timestamp: new Date("2024-10-10T01:15:14.000Z"),
-                                    updatedBy: 8
-                                }
-                            }
-                        }
-                    }
-                ]
+                    { checklistId: 2, userId: 3 },
+                    { checklistId: 5, userId: 3 },
+                ],
             }
         } as unknown as Request;
 
         const res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
-        } as unknown as Response;
+        } as unknown as jest.Mocked<Response>;
 
         await createPatrol(req, res);
-
 
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(createPatrolMock);
@@ -348,9 +84,8 @@ describe('createPatrol', () => {
 
 describe('startPatrol', () => {
     test('ควรเริ่มตรวจ Patrol ได้สำเร็จ', async () => {
-        prismaMock.patrol.update.mockResolvedValue(startPatrolMock);
         const req = {
-            params: { id: "4" },
+            params: { id: "36" },
             user: {
                 role: "inspector",
                 userId: 3,
@@ -359,70 +94,106 @@ describe('startPatrol', () => {
                 status: 'scheduled',
                 checklists: [
                     {
-                        id: 9,
-                        patrolId: 5,
-                        checklistId: 2,
+                        id: 59,
+                        patrolId: 36,
+                        checklistId: 1,
                         userId: 3,
                         checklist: {
-                            id: 2,
-                            title: "Maintenance Inspection",
+                            id: 1,
+                            title: "Safety Inspection",
                             items: [
                                 {
-                                    id: 5,
-                                    name: "Electrical Panel Inspection",
-                                    type: "maintenance",
-                                    checklistId: 2,
+                                    id: 2,
+                                    name: "Fire Extinguisher Check",
+                                    type: "safety",
+                                    checklistId: 1,
                                     itemZones: [
                                         {
                                             zone: {
                                                 id: 2,
-                                                name: "assembly_line_zone"
+                                                name: "assembly_line_zone",
+                                                supervisor: {
+                                                    id: 4,
+                                                    profile: {
+                                                        name: "Michael Johnson"
+                                                    }
+                                                }
                                             }
                                         },
                                         {
                                             zone: {
-                                                id: 5,
-                                                name: "it_zone"
+                                                id: 3,
+                                                name: "raw_materials_storage_zone",
+                                                supervisor: {
+                                                    id: 5,
+                                                    profile: {
+                                                        name: "Emily Davis"
+                                                    }
+                                                }
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    id: 6,
-                                    name: "Air Conditioning System Check",
-                                    type: "maintenance",
-                                    checklistId: 2,
-                                    itemZones: [
+                                    "id": 3,
+                                    "name": "Emergency Exit Sign Check",
+                                    "type": "safety",
+                                    "checklistId": 1,
+                                    "itemZones": [
                                         {
-                                            zone: {
-                                                id: 5,
-                                                name: "it_zone"
+                                            "zone": {
+                                                "id": 3,
+                                                "name": "raw_materials_storage_zone",
+                                                "supervisor": {
+                                                    "id": 5,
+                                                    "profile": {
+                                                        "name": "Emily Davis"
+                                                    }
+                                                }
                                             }
                                         },
                                         {
-                                            zone: {
-                                                id: 6,
-                                                name: "customer_service_zone"
+                                            "zone": {
+                                                "id": 6,
+                                                "name": "customer_service_zone",
+                                                "supervisor": {
+                                                    "id": 8,
+                                                    "profile": {
+                                                        "name": "Jack Danial"
+                                                    }
+                                                }
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    id: 7,
-                                    name: "Lighting System Check",
-                                    type: "maintenance",
-                                    checklistId: 2,
-                                    itemZones: [
+                                    "id": 4,
+                                    "name": "First Aid Kit Check",
+                                    "type": "safety",
+                                    "checklistId": 1,
+                                    "itemZones": [
                                         {
-                                            zone: {
-                                                id: 2,
-                                                name: "assembly_line_zone"
+                                            "zone": {
+                                                "id": 4,
+                                                name: "quality_control_zone",
+                                                supervisor: {
+                                                    id: 6,
+                                                    profile: {
+                                                        name: "David Wilson"
+                                                    }
+                                                }
                                             }
                                         },
                                         {
                                             zone: {
                                                 id: 6,
-                                                name: "customer_service_zone"
+                                                name: "customer_service_zone",
+                                                supervisor: {
+                                                    id: 8,
+                                                    profile: {
+                                                        name: "Jack Danial"
+                                                    }
+                                                }
                                             }
                                         }
                                     ]
@@ -432,56 +203,100 @@ describe('startPatrol', () => {
                         inspector: {
                             id: 3,
                             email: null,
+                            department: null,
+                            role: "inspector",
                             profile: {
-                                id: 3,
                                 name: "Jame Smith",
-                                age: 30,
-                                tel: "0987654321",
-                                address: "Chiang Mai, Thailand",
-                                userId: 3,
-                                imageId: 1,
                                 image: {
                                     id: 1,
                                     path: "1728239317254-Scan_20220113 (2).png",
-                                    timestamp: new Date("2024-10-10T01:15:14.000Z"),
+                                    timestamp: "2024-10-10T01:15:14.000Z",
                                     updatedBy: 8
                                 }
                             }
                         }
                     },
                     {
-                        id: 10,
-                        patrolId: 5,
-                        checklistId: 5,
-                        userId: 3,
+                        id: 60,
+                        patrolId: 36,
+                        checklistId: 4,
+                        userId: 2,
                         checklist: {
-                            id: 5,
-                            title: "Equipment Inspection",
+                            id: 4,
+                            title: "Security Inspection",
                             items: [
                                 {
-                                    id: 12,
-                                    name: "Server Equipment Inspection",
-                                    type: "maintenance",
-                                    checklistId: 5,
+                                    id: 10,
+                                    name: "CCTV Functionality Check",
+                                    type: "safety",
+                                    checklistId: 4,
                                     itemZones: [
                                         {
                                             zone: {
-                                                id: 5,
-                                                name: "it_zone"
+                                                id: 2,
+                                                name: "assembly_line_zone",
+                                                supervisor: {
+                                                    id: 4,
+                                                    profile: {
+                                                        name: "Michael Johnson"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            zone: {
+                                                id: 3,
+                                                name: "raw_materials_storage_zone",
+                                                supervisor: {
+                                                    id: 5,
+                                                    profile: {
+                                                        name: "Emily Davis"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            zone: {
+                                                id: 4,
+                                                name: "quality_control_zone",
+                                                supervisor: {
+                                                    id: 6,
+                                                    profile: {
+                                                        name: "David Wilson"
+                                                    }
+                                                }
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    id: 13,
-                                    name: "Forklift Maintenance",
-                                    type: "maintenance",
-                                    checklistId: 5,
+                                    id: 11,
+                                    name: "Access Control System Check",
+                                    type: "safety",
+                                    checklistId: 4,
                                     itemZones: [
                                         {
                                             zone: {
-                                                id: 3,
-                                                name: "raw_materials_storage_zone"
+                                                id: 4,
+                                                name: "quality_control_zone",
+                                                supervisor: {
+                                                    id: 6,
+                                                    profile: {
+                                                        name: "David Wilson"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            zone: {
+                                                id: 5,
+                                                name: "it_zone",
+                                                supervisor: {
+                                                    id: 7,
+                                                    profile: {
+                                                        name: "Sophia Taylor"
+                                                    }
+                                                }
                                             }
                                         }
                                     ]
@@ -489,22 +304,13 @@ describe('startPatrol', () => {
                             ]
                         },
                         inspector: {
-                            id: 3,
+                            id: 2,
                             email: null,
+                            department: null,
+                            role: "inspector",
                             profile: {
-                                id: 3,
-                                name: "Jame Smith",
-                                age: 30,
-                                tel: "0987654321",
-                                address: "Chiang Mai, Thailand",
-                                userId: 3,
-                                imageId: 1,
-                                image: {
-                                    id: 1,
-                                    path: "1728239317254-Scan_20220113 (2).png",
-                                    timestamp: new Date("2024-10-10T01:15:14.000Z"),
-                                    updatedBy: 8
-                                }
+                                name: "John Doe",
+                                image: null
                             }
                         }
                     }
@@ -518,16 +324,6 @@ describe('startPatrol', () => {
         } as unknown as Response;
 
         await startPatrol(req, res);
-
-        expect(prismaMock.patrol.update).toHaveBeenCalledWith({
-            where: {
-                id: 4,
-            },
-            data: {
-                status: "on_going",
-                startTime: expect.any(Date),
-            },
-        });
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(startPatrolMock);

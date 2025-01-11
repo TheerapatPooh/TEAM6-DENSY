@@ -3,11 +3,11 @@ import { ItemType, PatrolStatus } from "@prisma/client";
 // __mocks__/patrol.mock.ts
 export const patrolMock = {
     "id": 4,
-    "date": new Date("2024-12-10T17:00:00.000Z"),
-    "startTime": new Date("2024-12-10T17:00:00.000Z"),
-    "endTime": new Date("2024-12-10T17:00:00.000Z"),
+    "date": new Date("2024-01-10T17:00:00.000Z"),
+    "startTime": new Date("2025-01-11T16:18:25.503Z"),
+    "endTime": new Date("2025-01-11T14:23:36.344Z"),
     "duration": "0h 1m 25s",
-    "status": "completed" as PatrolStatus,
+    "status": "on_going" as PatrolStatus,
     "presetId": 1,
     "patrolChecklists": [
         {
@@ -22,7 +22,7 @@ export const patrolMock = {
                     {
                         "id": 8,
                         "name": "Floor Cleanliness Check",
-                        "type": "environment",
+                        "type": "environment" as ItemType,
                         "checklistId": 3,
                         "itemZones": [
                             {
@@ -54,7 +54,7 @@ export const patrolMock = {
                     {
                         "id": 9,
                         "name": "Trash Disposal Check",
-                        "type": "environment",
+                        "type": "environment" as ItemType,
                         "checklistId": 3,
                         "itemZones": [
                             {
@@ -75,25 +75,15 @@ export const patrolMock = {
             },
             "inspector": {
                 "id": 3,
-                "username": "jameSmith",
                 "email": null,
-                "password": "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
-                "role": "inspector",
                 "department": null,
-                "createdAt": "2024-10-06T10:27:09.916Z",
-                "active": true,
+                "role": "inspector",
                 "profile": {
-                    "id": 3,
                     "name": "Jame Smith",
-                    "age": 30,
-                    "tel": "0987654321",
-                    "address": "Chiang Mai, Thailand",
-                    "userId": 3,
-                    "imageId": 1,
                     "image": {
                         "id": 1,
                         "path": "1728239317254-Scan_20220113 (2).png",
-                        "timestamp": "2024-10-10T01:15:14.000Z",
+                        "timestamp": new Date("2024-10-10T01:15:14.000Z"),
                         "updatedBy": 8
                     }
                 }
@@ -111,7 +101,7 @@ export const patrolMock = {
                     {
                         "id": 10,
                         "name": "CCTV Functionality Check",
-                        "type": "safety",
+                        "type": "safety" as ItemType,
                         "checklistId": 4,
                         "itemZones": [
                             {
@@ -155,7 +145,7 @@ export const patrolMock = {
                     {
                         "id": 11,
                         "name": "Access Control System Check",
-                        "type": "safety",
+                        "type": "safety" as ItemType,
                         "checklistId": 4,
                         "itemZones": [
                             {
@@ -188,25 +178,15 @@ export const patrolMock = {
             },
             "inspector": {
                 "id": 3,
-                "username": "jameSmith",
                 "email": null,
-                "password": "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
-                "role": "inspector",
                 "department": null,
-                "createdAt": "2024-10-06T10:27:09.916Z",
-                "active": true,
+                "role": "inspector",
                 "profile": {
-                    "id": 3,
                     "name": "Jame Smith",
-                    "age": 30,
-                    "tel": "0987654321",
-                    "address": "Chiang Mai, Thailand",
-                    "userId": 3,
-                    "imageId": 1,
                     "image": {
                         "id": 1,
                         "path": "1728239317254-Scan_20220113 (2).png",
-                        "timestamp": "2024-10-10T01:15:14.000Z",
+                        "timestamp": new Date("2024-10-10T01:15:14.000Z"),
                         "updatedBy": 8
                     }
                 }
@@ -217,78 +197,77 @@ export const patrolMock = {
 
 export const allPatrolsMock = [
     {
-        id: 3,
-        date: new Date("2024-12-10T17:00:00.000Z"),
-        startTime: null,
-        endTime: null,
-        duration: null,
-        status: "scheduled" as PatrolStatus,
-        presetId: 1,
+        id: 4,
+        date: new Date("2025-01-10T17:00:00.000Z"),
+        status: "on_going",
         preset: {
             id: 1,
             title: "Daily Cleanliness Check",
         },
-        patrolChecklists: [
+        itemCounts: 8,
+        inspectors: [
             {
-                id: 5,
-                patrolId: 3,
-                checklistId: 3,
-                userId: 3,
-                checklist: {
+                id: 3,
+                email: null,
+                profile: {
                     id: 3,
-                    title: "Cleanliness Inspection",
-                },
-                inspector: {
-                    id: 2,
-                    email: null,
-                    profile: {
-                        id: 2,
-                        name: "John Doe",
-                        age: 25,
-                        tel: "1234567890",
-                        address: "Bangkok, Thailand",
-                        image: null,
+                    name: "Jame Smith",
+                    age: 30,
+                    tel: "0987654321",
+                    address: "Chiang Mai, Thailand",
+                    userId: 3,
+                    imageId: 1,
+                    image: {
+                        id: 1,
+                        path: "1728239317254-Scan_20220113 (2).png",
+                        timestamp: new Date("2024-10-10T01:15:14.000Z"), // เปลี่ยนเป็น Date Object
+                        updatedBy: 8,
                     },
                 },
             },
         ],
     },
     {
-        id: 4,
-        date: new Date("2024-12-11T17:00:00.000Z"),
-        startTime: new Date("2024-12-11T17:30:00.000Z"),
-        endTime: null,
-        duration: null,
-        status: "on_going" as PatrolStatus,
-        presetId: 2,
+        id: 6,
+        date: new Date("2025-01-10T17:00:00.000Z"),
+        status: "on_going",
         preset: {
             id: 2,
             title: "Weekly Maintenance",
         },
-        patrolChecklists: [
+        itemCounts: 8,
+        inspectors: [
             {
-                id: 6,
-                patrolId: 4,
-                checklistId: 4,
-                userId: 3,
-                checklist: {
-                    id: 4,
-                    title: "Maintenance Inspection",
-                },
-                inspector: {
+                id: 3,
+                email: null,
+                profile: {
                     id: 3,
-                    email: null,
-                    profile: {
-                        id: 3,
-                        name: "Jame Smith",
-                        age: 30,
-                        tel: "0987654321",
-                        address: "Chiang Mai, Thailand",
-                        image: {
-                            id: 1,
-                            path: "path/to/image.png",
-                        },
+                    name: "Jame Smith",
+                    age: 30,
+                    tel: "0987654321",
+                    address: "Chiang Mai, Thailand",
+                    userId: 3,
+                    imageId: 1,
+                    image: {
+                        id: 1,
+                        path: "1728239317254-Scan_20220113 (2).png",
+                        timestamp: new Date("2024-10-10T01:15:14.000Z"), // เปลี่ยนเป็น Date Object
+                        updatedBy: 8,
                     },
+                },
+            },
+            {
+                id: 2,
+                email: null,
+                profile: {
+                    id: 2,
+                    name: "John Doe",
+                    age: 25,
+                    tel: "1234567890",
+                    address: "Bangkok, Thailand",
+                    userId: 2,
+                    imageId: null,
+                    image: null,
                 },
             },
         ],
@@ -296,164 +275,31 @@ export const allPatrolsMock = [
 ];
 
 export const createPatrolMock = {
-    id: 5,
+    id: 35,
     date: new Date("2024-12-10T17:00:00.000Z"),
-    startTime: null,
-    endTime: null,
-    duration: null,
-    status: "scheduled" as PatrolStatus,
-    presetId: 2,
+    status: "pending",
     preset: {
+        id: 2,
         title: "Weekly Maintenance"
     },
-    patrolChecklists: [
+    itemCounts: 8,
+    inspectors: [
         {
-            id: 9,
-            patrolId: 5,
-            checklistId: 2,
-            userId: 3,
-            checklist: {
-                id: 2,
-                title: "Maintenance Inspection",
-                items: [
-                    {
-                        id: 5,
-                        name: "Electrical Panel Inspection",
-                        type: "maintenance",
-                        checklistId: 2,
-                        itemZones: [
-                            {
-                                zone: {
-                                    id: 2,
-                                    name: "assembly_line_zone"
-                                }
-                            },
-                            {
-                                zone: {
-                                    id: 5,
-                                    name: "it_zone"
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        id: 6,
-                        name: "Air Conditioning System Check",
-                        type: "maintenance",
-                        checklistId: 2,
-                        itemZones: [
-                            {
-                                zone: {
-                                    id: 5,
-                                    name: "it_zone"
-                                }
-                            },
-                            {
-                                zone: {
-                                    id: 6,
-                                    name: "customer_service_zone"
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        id: 7,
-                        name: "Lighting System Check",
-                        type: "maintenance",
-                        checklistId: 2,
-                        itemZones: [
-                            {
-                                zone: {
-                                    id: 2,
-                                    name: "assembly_line_zone"
-                                }
-                            },
-                            {
-                                zone: {
-                                    id: 6,
-                                    name: "customer_service_zone"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            inspector: {
+            id: 3,
+            email: null,
+            profile: {
                 id: 3,
-                email: null,
-                profile: {
-                    id: 3,
-                    name: "Jame Smith",
-                    age: 30,
-                    tel: "0987654321",
-                    address: "Chiang Mai, Thailand",
-                    userId: 3,
-                    imageId: 1,
-                    image: {
-                        id: 1,
-                        path: "1728239317254-Scan_20220113 (2).png",
-                        timestamp: new Date("2024-10-10T01:15:14.000Z"),
-                        updatedBy: 8
-                    }
-                }
-            }
-        },
-        {
-            id: 10,
-            patrolId: 5,
-            checklistId: 5,
-            userId: 3,
-            checklist: {
-                id: 5,
-                title: "Equipment Inspection",
-                items: [
-                    {
-                        id: 12,
-                        name: "Server Equipment Inspection",
-                        type: "maintenance",
-                        checklistId: 5,
-                        itemZones: [
-                            {
-                                zone: {
-                                    id: 5,
-                                    name: "it_zone"
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        id: 13,
-                        name: "Forklift Maintenance",
-                        type: "maintenance",
-                        checklistId: 5,
-                        itemZones: [
-                            {
-                                zone: {
-                                    id: 3,
-                                    name: "raw_materials_storage_zone"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            inspector: {
-                id: 3,
-                email: null,
-                profile: {
-                    id: 3,
-                    name: "Jame Smith",
-                    age: 30,
-                    tel: "0987654321",
-                    address: "Chiang Mai, Thailand",
-                    userId: 3,
-                    imageId: 1,
-                    image: {
-                        id: 1,
-                        path: "1728239317254-Scan_20220113 (2).png",
-                        timestamp: new Date("2024-10-10T01:15:14.000Z"),
-                        updatedBy: 8
-                    }
+                name: "Jame Smith",
+                age: 30,
+                tel: "0987654321",
+                address: "Chiang Mai, Thailand",
+                userId: 3,
+                imageId: 1,
+                image: {
+                    id: 1,
+                    path: "1728239317254-Scan_20220113 (2).png",
+                    timestamp: new Date("2024-10-10T01:15:14.000Z"),
+                    updatedBy: 8
                 }
             }
         }

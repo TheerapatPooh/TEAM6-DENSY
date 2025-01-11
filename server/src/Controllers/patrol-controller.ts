@@ -73,9 +73,14 @@ export async function getPatrol(req: Request, res: Response) {
               },
             },
             inspector: {
-              include: {
+              select: {
+                id: true,
+                email: true,
+                department: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
                     image: true,
                   },
                 },
@@ -342,7 +347,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500);
+    res.status(500)
     return;
   }
 }
