@@ -90,7 +90,13 @@
     "ConfirmPassword": "Confirm Password",
     "Accept": "Accept",
     "admin": "Admin",
-    "Edit": "Edit"
+    "Edit": "Edit",
+    "Image": "Image",
+    "EditDefect": "Edit Defect",
+    "ResolveDefect": "Resolve Defect",
+    "EditResolveDefect": "Edit Resolve Defect",
+    "ReportDefect": "Report Defect",
+    "PleaseProvideDetailsForTheDefect": "Please provide details for the defect"
   },
   "Status": {
     "pending": "Pending",
@@ -272,6 +278,8 @@
     "PatrolCreateCommentDescription": "The issue has been noted for review.",
     "PatrolMissingCreateCommentTitle": "Send Failed",
     "PatrolMissingCreateCommentDescription": "Please provide comment.",
+    "EditReportDefectTitle": "Report Updated",
+    "EditReportDefectDescription": "Your changes have been saved successfully.",
     "ReportDefectTitle": "Report Submitted",
     "ReportDefectDescription": "Your defect report has been successfully submitted.",
     "ReportDefectConfirmTitle": "Are you sure to report defect?",
@@ -299,6 +307,20 @@
     "DefectCompleteTitle": "Defect Completed",
     "DefectCompleteDescription": "The defect has been successfully addressed. Please review the completed work.",
     "DefectPendingInspectionTitle": "Defect Pending Reinspection",
-    "DefectPendingInspectionDescription": "The defect has been sent back for your review. Please accept to proceed with reinspection."
+    "DefectPendingInspectionDescription": "The defect has been sent back for your review. Please accept to proceed with reinspection.",
+    "ConfirmReworkTitle": "Send for Rework?",
+    "ConfirmReworkDescription": "Are you sure you want to send this defect back for fixing? This will require the responsible person to review and resolve it again.",
+    "ConfirmCompleteTitle": "Mark as Completed?",
+    "ConfirmCompleteDescription": "Are you sure you want to mark this defect as resolved? This indicates the defect has been fixed and passed inspection.",
+    "ReworkDefectTitle": "Defect Sent for Rework",
+    "ReworkDefectDescription": "This defect has been sent back for fixing. The responsible person will need to review and resolve it again.",
+    "CompleteDefectTitle": "Defect Marked as Completed",
+    "CompleteDefectDescription": "This defect has been marked as completed, indicating it has been fixed and passed inspection.",
+    "DefectResolveTitle": "Defect Marked as Resolved",
+    "DefectResolveDescription": "This defect has been marked as resolved and is awaiting inspection for confirmation.",
+    "ReportEditResolveConfirmTitle": "Are you sure to edit resolve defect?",
+    "ReportEditResolveConfirmDescription": "Please confirm to edit resolve defect.",
+    "EditDefectResolveTitle": "Edit Resolved Defect",
+    "EditDefectResolveDescription": "Update the information of a defect marked as resolved and awaiting inspector review."
   }
 }

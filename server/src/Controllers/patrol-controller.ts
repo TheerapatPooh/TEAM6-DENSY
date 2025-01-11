@@ -1,9 +1,8 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
-import { number } from "zod";
-import { checklists } from "../Utils/data/checklists";
+import { NotificationType, PatrolStatus, User } from "@prisma/client";
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -323,7 +322,7 @@ export async function getAllPatrols(req: Request, res: Response) {
       patrol.patrolChecklists.forEach(patrolChecklist => {
         // นับจำนวน item แต่ละประเภท
         patrolChecklist.checklist.items.forEach(item => {
-          item.itemZones.forEach(itemZone => {
+          item.itemZones.forEach(_itemZone => {
             count++
           })
         });
@@ -361,6 +360,7 @@ export async function getPatrolUser(req: Request, res: Response) {
           select: {
             inspector: {
               select: {
+                id: true,
                 username: true,
                 profile: {
                   select: {

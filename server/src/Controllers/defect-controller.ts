@@ -4,8 +4,7 @@ import { createNotification } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from 'fs';
 import path from "path";
-import { fileURLToPath } from "url";
-import { users } from '../Utils/data/users';
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -503,7 +502,6 @@ const uploadsPath = getUploadsPath();
 **/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
-    const { userId } = (req as any).user;
     const { id } = req.params;
     const {
       name,
@@ -513,6 +511,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       defectUserId,
       supervisorId,
       patrolResultId,
+      deleteExistingImages,
     } = req.body;
     const newImageFiles = req.files as Express.Multer.File[];
 
@@ -530,7 +529,14 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         select: { imageId: true },
       });
 
-      if (status === 'edit' as DefectStatus) {
+      const defectImagesBySupervisor = await prisma.image.findMany({
+        where: {
+          id: { in: existingDefectImages.map(img => img.imageId) },
+        },
+        select: { id: true, updatedBy: true },
+      });
+
+      if (status === 'reported' as DefectStatus) {
         const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
 
         const imagesToDelete = await prisma.image.findMany({
@@ -542,7 +548,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
           const filePath = path.join(uploadsPath, image.path);
           try {
             fs.unlinkSync(filePath);
-            console.log(`File at ${filePath} deleted successfully.`);
           } catch (err) {
             console.error(`Failed to delete file at ${filePath}:`, err);
           }
@@ -555,11 +560,44 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         });
       }
 
+      if (status === 'resolved' as DefectStatus && deleteExistingImages === 'true') {
+        // ลบเฉพาะ imageId ที่ updatedBy เป็น supervisorId
+        const imageIdsToDelete = defectImagesBySupervisor
+          .filter(image => image.updatedBy === parseInt(supervisorId, 10))
+          .map(image => image.id);
+
+        const imagesToDelete = await prisma.image.findMany({
+          where: { id: { in: imageIdsToDelete } },
+          select: { path: true },
+        });
+
+        for (const image of imagesToDelete) {
+          const filePath = path.join(uploadsPath, image.path);
+          try {
+            fs.unlinkSync(filePath);
+          } catch (err) {
+            console.error(`Failed to delete file at ${filePath}:`, err);
+          }
+        }
+
+        // ลบข้อมูลใน defectImage และ image สำหรับ imageIds ที่เลือกไว้
+        await prisma.defectImage.deleteMany({
+          where: {
+            defectId: Number(id),
+            imageId: { in: imageIdsToDelete }
+          },
+        });
+
+        await prisma.image.deleteMany({
+          where: { id: { in: imageIdsToDelete } },
+        });
+      }
+
       for (const file of newImageFiles) {
         const image = await prisma.image.create({
           data: {
             path: file.filename,
-            updatedBy: parseInt(status === 'edit' as DefectStatus ? defectUserId : supervisorId, 10),
+            updatedBy: parseInt(status === 'reported' as DefectStatus ? defectUserId : supervisorId, 10),
           },
         });
         await prisma.defectImage.create({
@@ -592,9 +630,6 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       data: updateData,
     });
 
-    console.log(status)
-
-
     let message = null;
     let notiType = null;
     let url = null;
@@ -602,7 +637,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     if (status === 'in_progress' as DefectStatus) {
       message = 'defect_accept',
-      notiType = "information" as NotificationType
+        notiType = "information" as NotificationType
       url = `/patrol-defect`
       receive = defectUserId
     } else if (status === 'resolved' as DefectStatus) {
@@ -621,8 +656,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       url = `/defect/${id}`
       receive = supervisorId
     }
-    console.log("status", status)
-    console.log("message", message)
+
     if (message) {
       await createNotification({
         message,
@@ -748,7 +782,6 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
       const filePath = path.join(uploadsPath, image.path);
       try {
         fs.unlinkSync(filePath);
-        console.log(`File at ${filePath} deleted successfully.`);
       } catch (err) {
         console.error(`Failed to delete file at ${filePath}:`, err);
       }
@@ -928,7 +961,6 @@ export async function getAllComments(req: Request, res: Response) {
     }
 
     // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
-    // console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
 
     const comments = await prisma.comment.findMany({
       where: whereConditions,

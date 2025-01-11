@@ -90,7 +90,13 @@
     "ConfirmPassword": "ยืนยันรหัสผ่าน",
     "Accept": "ยอมรับ",
     "admin": "ผู้ดูแลระบบ",
-    "Edit": "แก้ไข"
+    "Edit": "แก้ไข",
+    "Image": "รูปภาพ",
+    "EditDefect": "แก้ไขการแจ้งปัญหา",
+    "ResolveDefect": "แก้ไขปัญหา",
+    "EditResolveDefect": "แก้ไขข้อมูลการแก้ไขปัญหา",
+    "ReportDefect": "แจ้งปัญหา",
+    "PleaseProvideDetailsForTheDefect": "กรุณาระบุรายละเอียดเกี่ยวกับปัญหา"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -272,6 +278,8 @@
     "PatrolCreateCommentDescription": "ปัญหานี้ได้ถูกบันทึกเพื่อการพิจารณาต่อไป",
     "PatrolMissingCreateCommentTitle": "ไม่สามารถส่งข้อเสนอแนะได้",
     "PatrolMissingCreateCommentDescription": "กรุณาระบุรายละเอียดข้อเสนอแนะ",
+    "EditReportDefectTitle": "การแจ้งปัญหาได้ถูกแก้ไขแล้ว",
+    "EditReportDefectDescription": "การเปลี่ยนแปลงของคุณถูกบันทึกเรียบร้อยแล้ว",
     "ReportDefectTitle": "การแจ้งปัญหาได้ถูกส่งแล้ว",
     "ReportDefectDescription": "การแจ้งปัญหาของคุณได้รับการส่งเรียบร้อยแล้ว",
     "ReportDefectConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการแจ้งปัญหา?",
@@ -299,6 +307,20 @@
     "DefectCompleteTitle": "ข้อบกพร่องเสร็จสมบูรณ์",
     "DefectCompleteDescription": "ข้อบกพร่องได้รับการดำเนินการเสร็จสมบูรณ์ กรุณาตรวจสอบผลงานที่เสร็จแล้ว",
     "DefectPendingInspectionTitle": "ข้อบกพร่องรอตรวจสอบใหม่",
-    "DefectPendingInspectionDescription": "ข้อบกพร่องถูกส่งกลับมาให้คุณตรวจสอบ กรุณากดยอมรับเพื่อตรวจสอบอีกครั้ง"
+    "DefectPendingInspectionDescription": "ข้อบกพร่องถูกส่งกลับมาให้คุณตรวจสอบ กรุณากดยอมรับเพื่อตรวจสอบอีกครั้ง",
+    "ConfirmReworkTitle": "ส่งกลับไปแก้ไข?",
+    "ConfirmReworkDescription": "คุณแน่ใจหรือไม่ว่าต้องการส่งข้อบกพร่องนี้กลับไปให้ผู้รับผิดชอบแก้ไข? การดำเนินการนี้จะทำให้ผู้รับผิดชอบต้องตรวจสอบและแก้ไขอีกครั้ง",
+    "ConfirmCompleteTitle": "ระบุว่าเสร็จสมบูรณ์?",
+    "ConfirmCompleteDescription": "คุณแน่ใจหรือไม่ว่าต้องการระบุข้อบกพร่องนี้ว่าได้รับการแก้ไขเรียบร้อยแล้ว? ซึ่งหมายความว่าข้อบกพร่องได้รับการตรวจสอบและผ่านการยืนยันแล้ว",
+    "ReworkDefectTitle": "ส่งข้อบกพร่องกลับไปแก้ไข",
+    "ReworkDefectDescription": "ข้อบกพร่องนี้ถูกส่งกลับไปให้ผู้รับผิดชอบแก้ไข ผู้รับผิดชอบต้องตรวจสอบและแก้ไขอีกครั้ง",
+    "CompleteDefectTitle": "ระบุว่าเสร็จสมบูรณ์แล้ว",
+    "CompleteDefectDescription": "ข้อบกพร่องนี้ได้รับการระบุว่าเสร็จสมบูรณ์และผ่านการตรวจสอบเรียบร้อยแล้ว.",
+    "DefectResolveTitle": "ข้อบกพร่องถูกระบุว่าแก้ไขแล้ว",
+    "DefectResolveDescription": "ข้อบกพร่องนี้ถูกระบุว่าแก้ไขแล้วและกำลังรอการตรวจสอบจากผู้ตรวจตรา",
+    "ReportEditResolveConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการยืนยันแก้ไขข้อมูลการแก้ไขปัญหา?",
+    "ReportEditResolveConfirmDescription": "กรุณายืนยันเพื่อยืนยันแก้ไขข้อมูลการแก้ไขปัญหา",
+    "EditDefectResolveTitle": "แก้ไขข้อมูลข้อบกพร่องที่ถูกระบุว่าแก้ไขสำเร็จ",
+    "EditDefectResolveDescription": "แก้ไขข้อมูลของข้อบกพร่องที่ถูกระบุว่าแก้ไขสำเร็จและอยู่ระหว่างรอการตรวจสอบจากผู้ตรวจสอบ"
   }
 }

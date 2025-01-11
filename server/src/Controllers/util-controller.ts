@@ -50,15 +50,17 @@ export async function login(req: Request, res: Response) {
 
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
       maxAge: maxAge,
     });
 
     res.status(200).json({ message: "Login Success", token });
+    return
   } catch (error) {
-    res.status(500)
+    res.status(500).json({ message: "Internal Server Error", error });
   }
+  
 }
 
 /**
@@ -72,12 +74,12 @@ export async function logout(req: Request, res: Response) {
     // Clear the cookie named "authToken"
     res.clearCookie("authToken", {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax'
     });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
-    res.status(500)
+    res.status(500).json({ message: "Internal Server Error", error });
   }
 }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { IDefect } from '@/app/type'
+import { defectStatus, IDefect } from '@/app/type'
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -37,7 +37,7 @@ import { tree } from 'next/dist/build/templates/app-page';
 interface AlertDefectProps {
     defect?: IDefect,
     item?: IItem,
-    type: "edit" | "report" | "resolve",
+    type: "edit" | "report" | "resolve" | "edit-resolve",
     patrolResults?: IPatrolResult[],
     result?: { inspectorId: number, itemId: number; zoneId: number; status: boolean },
     response: (defect: IDefect) => void;
@@ -73,8 +73,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
     const handleCloseDialog = () => {
         setIsAlertOpen(false)
     }
-    console.log("isOpen", isAlertOpen)
-
 
     const handleDefectDescription = (
         event: React.ChangeEvent<HTMLTextAreaElement>
@@ -94,13 +92,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         files: File[]
     ) => {
 
-        if (!description || files?.length === 0) {
+        if (!description || !files || files?.length === 0) {
             setDetailError(!description ? a("ReportDefectErrorMissingDetail") : null)
-            setFileError(files.length === 0 ? a("ReportDefectErrorMissingImage") : null)
+            setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
             toast({
                 variant: "error",
                 title: a("ReportDefectMissingField"),
-                description: !description && files?.length === 0
+                description: !description && !files || files?.length === 0
                     ? a("ReportDefectMissingDetailAndImage")
                     : !description
                         ? a("ReportDefectMissingDetail")
@@ -115,7 +113,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         formData.append("description", description);
         formData.append("type", type);
         formData.append("status", "reported");
-        formData.append("defectUserId", userId.toString());
+        formData.append("defectUserId", userId?.toString());
         formData.append("patrolResultId", patrolResultId.toString());
         formData.append("supervisorId", supervisorId.toString());
 
@@ -130,12 +128,12 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 formData,
                 true
             );
-            toast({
-                variant: "success",
-                title: a("ReportDefectTitle"),
-                description: a("ReportDefectDescription"),
-            });
             if (description && files) {
+                toast({
+                    variant: "success",
+                    title: a("ReportDefectTitle"),
+                    description: a("ReportDefectDescription"),
+                });
                 closeAlertDefect()
             }
             setSelectedFiles(null)
@@ -157,13 +155,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         supervisorId: number,
         files: File[]
     ) => {
-        if (!description || files?.length === 0) {
+        if (!description || !files || files?.length === 0) {
             setDetailError(!description ? a("ReportDefectErrorMissingDetail") : null)
-            setFileError(files.length === 0 ? a("ReportDefectErrorMissingImage") : null)
+            setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
             toast({
                 variant: "error",
                 title: a("ReportDefectMissingField"),
-                description: !description && files?.length === 0
+                description: !description && !files || files?.length === 0
                     ? a("ReportDefectMissingDetailAndImage")
                     : !description
                         ? a("ReportDefectMissingDetail")
@@ -182,7 +180,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         formData.append("patrolResultId", patrolResultId.toString());
         formData.append("supervisorId", supervisorId.toString());
 
-        files.forEach((file) => {
+        files?.forEach((file) => {
             formData.append("imageFiles", file);
         });
         try {
@@ -194,8 +192,15 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 true
             );
             if (description && files) {
+                toast({
+                    variant: "success",
+                    title: a("EditReportDefectTitle"),
+                    description: a("EditReportDefectDescription"),
+                });
                 closeAlertDefect()
             }
+            setSelectedFiles(null)
+            setDefectDescription(null)
             response(updateDefect)
         } catch (error) {
             console.error("Error edit defect:", error);
@@ -204,19 +209,18 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
     const handleResolveDefect = async (
         id: number,
-        files: File[]
+        files: File[],
+        type: string,
+        deleteExistingImages: boolean,
     ) => {
 
-        if (files?.length === 0) {
-            setFileError(files.length === 0 ? a("ReportDefectErrorMissingImage") : null)
+        if (!files || files?.length === 0) {
+            setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
             toast({
                 variant: "error",
                 title: a("ReportDefectMissingField"),
                 description: a("ReportDefectMissingImage"),
             });
-            if (files) {
-                closeAlertDefect()
-            }
             return;
         }
 
@@ -229,9 +233,12 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
             defect.userId.toString()
         );
         formData.append("status", "resolved")
-        files.forEach((file) => {
+        formData.append("deleteExistingImages", deleteExistingImages.toString())
+
+        files?.forEach((file) => {
             formData.append("imageFiles", file);
         });
+
         try {
             const resolveDefect = await fetchData(
                 "put",
@@ -240,9 +247,25 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 formData,
                 true
             );
+
             if (files) {
+                if (type === "resolve") {
+                    toast({
+                        variant: "success",
+                        title: a("DefectResolveTitle"),
+                        description: a("DefectResolveDescription"),
+                    });
+                }
+                if (type === "edit") {
+                    toast({
+                        variant: "success",
+                        title: a("EditDefectResolveTitle"),
+                        description: a("EditDefectResolveDescription"),
+                    });
+                }
                 closeAlertDefect()
             }
+            setSelectedFiles(null)
             response(resolveDefect)
         } catch (error) {
             console.error("Error resolve defect:", error);
@@ -253,6 +276,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         event.preventDefault();
         event.stopPropagation();
         handleOpenDialog();
+
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -286,13 +310,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         return <Skeleton />
     }
 
-    // useEffect(() => {
-    //     setAlertDefectOpen(true)
-    // }, [response]);
-
-    console.log("isAlertDefctOpen", isAlertDefectOpen)
-    console.log("isAlertOpen", isAlertOpen)
-
     return (
 
         <div>
@@ -301,23 +318,23 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     disabled={disabled}
                 >
                     <Button
-                        variant={type === "resolve" ? "primary" : type === "edit" ? "primary" : "outline"} size={"lg"}
+                        variant={type === "resolve" || type === "edit-resolve" ? "primary" : type === "edit" ? "primary" : "outline"} size={"lg"}
                         onClick={() => openAlertDefect()}
                     >
                         <span className="material-symbols-outlined pr-2 ">
-                            {type === "edit" ? "edit" : type === "resolve" ? "published_with_changes" : "campaign"}
+                            {type === "edit" || type === "edit-resolve" ? "edit" : type === "resolve" ? "published_with_changes" : "campaign"}
                         </span>
-                        {t(type === "edit" ? "Edit" : type === "resolve" ? "Resolve" : "Report")}
+                        {t(type === "edit" || type === "edit-resolve" ? "Edit" : type === "resolve" ? "Resolve" : "Report")}
                     </Button>
                 </AlertDialogTrigger>
                 {isAlertDefectOpen &&
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
-                                {type === "edit" ? "Edit Defect" : type === "resolve" ? "Resolve Defect" : "Report Defect"}
+                                {type === "edit" ? t("EditDefect") : type === "resolve" ? t("ResolveDefect") : type === "edit-resolve" ? t("EditResolveDefect") : t("ReportDefect")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                Please provide details for the defect
+                                {t("PleaseProvideDetailsForTheDefect")}
                             </AlertDialogDescription>
                             <div className="flex flex-col justify-start">
                                 <p className="font-semibold">
@@ -328,7 +345,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         location_on
                                     </span>
                                     <p className="font-semibold me-2">
-                                        Zone
+                                        {t("Zone")}
                                     </p>
                                     <p>
                                         <p>
@@ -345,10 +362,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
                                 <div className="flex items-center">
                                     <span className="material-symbols-outlined text-2xl me-2">
-                                        badge
+                                        engineering
                                     </span>
                                     <p className="font-semibold me-2">
-                                        Supervisor
+                                        {t("supervisor")}
                                     </p>
                                     <p>
                                         {type === "report"
@@ -365,10 +382,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                             </div>
                         </AlertDialogHeader>
 
-                        {type === "resolve" ? null :
+                        {type === "resolve" || type === "edit-resolve" ? null :
                             <div className='flex flex-col gap-1'>
                                 <div className='text-sm font-semibold'>
-                                    Detail
+                                    {t("Detail")}
                                 </div>
                                 <Textarea
                                     onChange={handleDefectDescription}
@@ -383,7 +400,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
                         <div className="flex flex-col justify-between w-full">
                             <div className='text-sm font-semibold'>
-                                Image
+                                {t("Image")}
                             </div>
                             <div className='flex flex-row py-1 pr-2 gap-4'>
                                 <div className='flex flex-col gap-1 flex-1'>
@@ -486,8 +503,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                     onClick={() => {
                                         setDetailError(null)
                                         setFileError(null)
+                                        setSelectedFiles(null)
                                     }}>
-                                    Cancel
+                                    {t("Cancel")}
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={(event) => {
@@ -498,15 +516,15 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                     <span className="material-symbols-outlined text-2xl me-2">
                                         send
                                     </span>
-                                    Send
+                                    {t("Send")}
                                 </AlertDialogAction>
                             </div>
                         </AlertDialogFooter>
 
                         {isAlertOpen && (
                             <AlertCustom
-                                title={type === "report" ? a("ReportDefectConfirmTitle") : type === "edit" ? a("ReportEditConfirmTitle") : a("ReportResolveConfirmTitle")}
-                                description={type === "report" ? a("ReportDefectConfirmDescription") : type === "edit" ? a("ReportEditConfirmDescription") : a("ReportResolveConfirmDescription")}
+                                title={type === "report" ? a("ReportDefectConfirmTitle") : type === "edit" ? a("ReportEditConfirmTitle") : type === "edit-resolve" ? a("ReportEditResolveConfirmTitle") : a("ReportResolveConfirmTitle")}
+                                description={type === "report" ? a("ReportDefectConfirmDescription") : type === "edit" ? a("ReportEditConfirmDescription") : type === "edit-resolve" ? a("ReportEditResolveConfirmDescription") : a("ReportResolveConfirmDescription")}
                                 primaryButtonText={t("Confirm")}
                                 primaryIcon="check"
                                 secondaryButtonText={t("Cancel")}
@@ -530,7 +548,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 break;
 
                                             case "resolve":
-                                                handleResolveDefect(defect.id, selectedFiles);
+                                                handleResolveDefect(defect.id, selectedFiles, "resolve", false);
                                                 break;
 
                                             case "edit":
@@ -545,6 +563,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                     defect.patrolResult.itemZone.zone.supervisor.id,
                                                     selectedFiles
                                                 );
+                                                break;
+
+                                            case "edit-resolve":
+                                                handleResolveDefect(defect.id, selectedFiles, "edit", true);
                                                 break;
 
                                             default:

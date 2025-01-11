@@ -15,7 +15,6 @@ import { fetchData, getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import Map from "@/components/map";
-import TabMenu from "@/components/tab-menu";
 import Loading from "@/components/loading";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
@@ -117,6 +116,7 @@ export default function Page() {
       setSelectUser(null)
       setSelectZone(null)
     } catch (error) {
+      console.error(error)
       alert("Failed to save data. Please try again.");
     }
   };

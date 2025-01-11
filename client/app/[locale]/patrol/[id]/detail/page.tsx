@@ -179,7 +179,7 @@ export default function Page() {
             </div>
             <div className="flex w-full justify-between items-center">
                 <TabMenu id={id.toString()} />
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                     <Button variant={"secondary"} onClick={() => router.push(`/${locale}`)}>
                         {t("Back")}
                     </Button>

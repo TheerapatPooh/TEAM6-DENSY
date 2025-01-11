@@ -66,7 +66,6 @@ export default function Notification() {
 
     function formatMessage(message) {
         const [key, ...dynamicParts] = message.split('-');
-        console.log(key)
         let content = dynamicParts.join('-');
         if (isValidDateFormat(content)) {
             content = formatTime(content)
