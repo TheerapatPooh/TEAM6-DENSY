@@ -28,6 +28,25 @@ function summarizeLintResults(results: LintResult[]) {
     console.log(` จำนวนข้อผิดพลาดทั้งหมด: ${totalErrors}`);
     console.log(` จำนวนคำเตือนทั้งหมด: ${totalWarnings}\n`);
     console.log(`---------------------------------------------`);
+    if (filesWithWarnings.length > 0) {
+        console.log(`\nรายละเอียดไฟล์ที่มีปัญหา:\n`);
+        filesWithWarnings.forEach(file => {
+            console.log(`---------------------------------------------`);
+            console.log(` ไฟล์: ${file.filePath}`);
+            console.log(` ข้อผิดพลาด: ${file.errorCount}`);
+            console.log(` คำเตือน: ${file.warningCount}`);
+            console.log(` รายละเอียดข้อผิดพลาด/คำเตือน:`);
+            console.log(`---------------------------------------------`);
+            file.messages.forEach((msg, index) => {
+                console.log(`   ${index + 1}. [${msg.ruleId || 'unknown'}] ${msg.message}`);
+                console.log(`      ระดับความรุนแรง: ${msg.severity}`);
+            });
+            console.log(`\n`);
+        });
+    } else {
+        console.log(`ไม่มีไฟล์ที่มีข้อผิดพลาดหรือคำเตือน\n`);
+    }
+    console.log(`=============================================\n`);
 }
 
 // ฟังก์ชันสำหรับหาไฟล์ล่าสุดในโฟลเดอร์ lintReports
@@ -51,6 +70,7 @@ async function createExcelFromLintResults(
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Lint Results');
 
+    // 1) สร้างคอลัมน์ (Header) ไว้ที่ row 2
     worksheet.columns = [
         { header: 'ไฟล์', key: 'file', width: 60 },
         { header: 'ข้อผิดพลาด', key: 'errors', width: 10 },
@@ -60,6 +80,25 @@ async function createExcelFromLintResults(
         { header: 'ระดับความรุนแรง', key: 'severity', width: 20 },
     ];
 
+    // 2) เพิ่มแถว 'วันที่' ไว้ที่ row 1
+    const now = new Date();
+    const dateTimeString = now.toLocaleString('th-TH', {
+      dateStyle: 'short',
+      timeStyle: 'medium',
+    });
+
+    worksheet.insertRow(1, [`วันที่และเวลาที่ตรวจ: ${dateTimeString}`]);
+    worksheet.mergeCells(1, 1, 1, 6);
+    const dateRow = worksheet.getRow(1);
+    dateRow.height = 20;
+    dateRow.eachCell((cell) => {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.font = { bold: true, size: 14 };
+      // **ย้ายการตั้งค่าสีฟ้าออกไป** หรือไม่ตั้งค่าสีเลย
+      // cell.fill = ... => ลบ/คอมเมนต์ออก
+    });
+
+    // ข้อมูลสำหรับ Worksheet (เริ่ม row 3 หลัง Header Row = 2)
     const rowsData: {
         file: string;
         errors: number;
@@ -68,6 +107,7 @@ async function createExcelFromLintResults(
         rule: string;
         severity: number;
     }[] = [];
+
     for (const result of results) {
         const relativePath = result.filePath.includes('server')
             ? result.filePath.split('server').pop()
@@ -85,12 +125,12 @@ async function createExcelFromLintResults(
         }
     }
 
-    rowsData.forEach((row) => {
-        worksheet.addRow(row);
+    rowsData.forEach((rowData) => {
+        worksheet.addRow(rowData);
     });
 
-    // ---- ตกแต่ง Header ----
-    const headerRow = worksheet.getRow(1);
+    // **ตกแต่ง Header (Row 2)** ให้เป็นสีฟ้า
+    const headerRow = worksheet.getRow(2);
     headerRow.eachCell((cell) => {
         cell.fill = {
             type: 'pattern',
@@ -108,15 +148,15 @@ async function createExcelFromLintResults(
         };
     });
 
-    // ---- ตกแต่ง Data Rows ----
-    for (let i = 2; i <= worksheet.rowCount; i++) {
+    // ตกแต่ง Data Rows (เริ่มที่ row 3)
+    for (let i = 3; i <= worksheet.rowCount; i++) {
         const row = worksheet.getRow(i);
-        const isEvenRow = i % 2 === 0; // เช็คว่าเป็นแถวคู่หรือคี่
+        const isEvenRow = i % 2 === 0; 
         row.eachCell((cell) => {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: isEvenRow ? 'FFFFFFFF' : 'FFF2F2F2' }, // สีขาวและสีเทาอ่อน
+                fgColor: { argb: isEvenRow ? 'FFFFFFFF' : 'FFF2F2F2' },
             };
             cell.border = {
                 top: { style: 'thin' },
@@ -127,7 +167,7 @@ async function createExcelFromLintResults(
         });
     }
 
-    // ---- เพิ่มแถวสรุปผลรวม ----
+    // สรุปผลรวม
     const totalFiles = results.length;
     const filesWithIssues = results.filter(file => file.warningCount > 0 || file.errorCount > 0).length;
     const filesWithoutIssues = totalFiles - filesWithIssues;
@@ -143,7 +183,6 @@ async function createExcelFromLintResults(
         severity: '',
     });
 
-    // ---- ตกแต่ง Summary Row ----
     summaryRow.eachCell((cell) => {
         cell.font = { bold: true };
         cell.fill = {
@@ -180,7 +219,7 @@ if (latestFile) {
         // สร้างไฟล์ Excel
         const outputPath = path.join(
             'lintReports',
-            path.basename(latestFile, path.extname(latestFile)) + '.xlsx' 
+            path.basename(latestFile, path.extname(latestFile)) + '.xlsx'
         );
         createExcelFromLintResults(lintResults, outputPath);
     });
