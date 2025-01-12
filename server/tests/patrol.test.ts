@@ -712,18 +712,22 @@ describe('getAllPatrolDefects', () => {
 describe('commentPatrol', () => {
     test('ควร Comment รายการใน Patrol ได้ถูกต้อง', async () => {
         prismaMock.patrol.findFirst.mockResolvedValue(patrolCommentsMock.patrol);
-        prismaMock.defect.findMany.mockResolvedValue(patrolCommentsMock.comments);
+        prismaMock.comment.create.mockResolvedValue(patrolCommentsMock.comment);
 
         const req = mockRequest(
             {},
             { id: "9" },
-            {},
+            {
+                message: "Test Comment",
+                patrolResultId: 17,
+                supervisorId: 6,
+            },
             { role: "inspector", userId: 3 });
         const res = mockResponse();
 
-        await getAllPatrolDefects(req, res);
+        await commentPatrol(req, res);
 
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith(patrolCommentsMock.comments);
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith(patrolCommentsMock.comment);
     });
 })

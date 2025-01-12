@@ -1141,13 +1141,13 @@ export async function commentPatrol(req: Request, res: Response) {
       },
     });
 
-    const notification = `new_comment`;
-    await createNotification({
-      message: notification,
-      type: "request" as NotificationType,
-      url: `/comment/${newComment.id}`,
-      userId: supervisorId,
-    });
+    // const notification = `new_comment`;
+    // await createNotification({
+    //   message: notification,
+    //   type: "request" as NotificationType,
+    //   url: `/comment/${newComment.id}`,
+    //   userId: supervisorId,
+    // });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = newComment;
@@ -1155,6 +1155,7 @@ export async function commentPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     res.status(500)
+    console.error(error);
     return;
   }
 }

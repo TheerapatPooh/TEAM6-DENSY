@@ -1776,29 +1776,27 @@ export const patrolCommentsMock = {
             }
         ]
     },
-    "comments": [
-        {
-            "id": 1,
-            "message": "Test Comment",
-            "timestamp": "2025-01-12T15:33:25.559Z",
-            "status": false,
-            "userId": 3,
-            "patrolResultId": 17,
-            "user": {
-                "id": 3,
-                "email": null,
-                "department": null,
-                "role": "inspector",
-                "profile": {
-                    "name": "Jame Smith",
-                    "image": {
-                        "id": 1,
-                        "path": "1728239317254-Scan_20220113 (2).png",
-                        "timestamp": "2024-10-10T01:15:14.000Z",
-                        "updatedBy": 8
-                    }
+    "comment": {
+        "id": 1,
+        "message": "Test Comment",
+        "timestamp": "2025-01-12T15:33:25.559Z",
+        "status": false,
+        "userId": 3,
+        "patrolResultId": 17,
+        "user": {
+            "id": 3,
+            "email": null,
+            "department": null,
+            "role": "inspector",
+            "profile": {
+                "name": "Jame Smith",
+                "image": {
+                    "id": 1,
+                    "path": "1728239317254-Scan_20220113 (2).png",
+                    "timestamp": "2024-10-10T01:15:14.000Z",
+                    "updatedBy": 8
                 }
             }
         }
-    ]
+    }
 };
