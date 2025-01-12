@@ -1,11 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import ExcelJS from 'exceljs';
 
 interface LintResult {
     filePath: string;
     warningCount: number;
     errorCount: number;
-    messages: any[];
+    messages: {
+        ruleId: string | null;
+        message: string;
+        severity: number;
+    }[];
 }
 
 // ฟังก์ชันสรุปผลลัพธ์จากข้อมูลที่อ่านจากไฟล์ JSON
@@ -23,7 +28,6 @@ function summarizeLintResults(results: LintResult[]) {
     console.log(` จำนวนข้อผิดพลาดทั้งหมด: ${totalErrors}`);
     console.log(` จำนวนคำเตือนทั้งหมด: ${totalWarnings}\n`);
     console.log(`---------------------------------------------`);
-
     if (filesWithWarnings.length > 0) {
         console.log(`\nรายละเอียดไฟล์ที่มีปัญหา:\n`);
         filesWithWarnings.forEach(file => {
@@ -45,7 +49,6 @@ function summarizeLintResults(results: LintResult[]) {
     console.log(`=============================================\n`);
 }
 
-
 // ฟังก์ชันสำหรับหาไฟล์ล่าสุดในโฟลเดอร์ lintReports
 function getLatestLintReportFile(directory: string) {
     const files = fs.readdirSync(directory)
@@ -54,12 +57,133 @@ function getLatestLintReportFile(directory: string) {
             name: file,
             time: fs.statSync(path.join(directory, file)).mtime.getTime()
         }))
-        .sort((a, b) => b.time - a.time); // เรียงตามเวลาล่าสุด
+        .sort((a, b) => b.time - a.time);
 
     return files.length ? path.join(directory, files[0].name) : null;
 }
 
-// อ่านผลลัพธ์จากไฟล์ JSON ล่าสุด
+// ฟังก์ชันสำหรับสร้าง Excel
+async function createExcelFromLintResults(
+    results: LintResult[],
+    outputPath: string
+) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Lint Results');
+
+    worksheet.columns = [
+        { header: 'ไฟล์', key: 'file', width: 60 },
+        { header: 'ข้อผิดพลาด', key: 'errors', width: 10 },
+        { header: 'คำเตือน', key: 'warnings', width: 10 },
+        { header: 'ข้อความ', key: 'message', width: 70 },
+        { header: 'กฎที่เกี่ยวข้อง', key: 'rule', width: 20 },
+        { header: 'ระดับความรุนแรง', key: 'severity', width: 20 },
+    ];
+
+    const rowsData: {
+        file: string;
+        errors: number;
+        warnings: number;
+        message: string;
+        rule: string;
+        severity: number;
+    }[] = [];
+    for (const result of results) {
+        const relativePath = result.filePath.includes('server')
+            ? result.filePath.split('server').pop()
+            : result.filePath;
+
+        for (const msg of result.messages) {
+            rowsData.push({
+                file: `server${relativePath}`,
+                errors: result.errorCount,
+                warnings: result.warningCount,
+                message: msg.message,
+                rule: msg.ruleId || 'unknown',
+                severity: msg.severity,
+            });
+        }
+    }
+
+    rowsData.forEach((row) => {
+        worksheet.addRow(row);
+    });
+
+    // ---- ตกแต่ง Header ----
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFCCE5FF' }, // สีฟ้าอ่อน
+        };
+        cell.border = {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' },
+        };
+        cell.font = {
+            bold: true,
+        };
+    });
+
+    // ---- ตกแต่ง Data Rows ----
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+        const row = worksheet.getRow(i);
+        const isEvenRow = i % 2 === 0; // เช็คว่าเป็นแถวคู่หรือคี่
+        row.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: isEvenRow ? 'FFFFFFFF' : 'FFF2F2F2' }, // สีขาวและสีเทาอ่อน
+            };
+            cell.border = {
+                top: { style: 'thin' },
+                bottom: { style: 'thin' },
+                left: { style: 'thin' },
+                right: { style: 'thin' },
+            };
+        });
+    }
+
+    // ---- เพิ่มแถวสรุปผลรวม ----
+    const totalFiles = results.length;
+    const filesWithIssues = results.filter(file => file.warningCount > 0 || file.errorCount > 0).length;
+    const filesWithoutIssues = totalFiles - filesWithIssues;
+    const totalWarnings = results.reduce((sum, file) => sum + file.warningCount, 0);
+    const totalErrors = results.reduce((sum, file) => sum + file.errorCount, 0);
+
+    const summaryRow = worksheet.addRow({
+        file: 'สรุปผล',
+        errors: totalErrors,
+        warnings: totalWarnings,
+        message: `จำนวนไฟล์ทั้งหมด: ${totalFiles}, ไฟล์ที่ไม่มีปัญหา: ${filesWithoutIssues}, ไฟล์ที่มีปัญหา: ${filesWithIssues}`,
+        rule: '',
+        severity: '',
+    });
+
+    // ---- ตกแต่ง Summary Row ----
+    summaryRow.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFCCFFCC' }, // สีเขียวอ่อน
+        };
+        cell.border = {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' },
+        };
+    });
+
+    await workbook.xlsx.writeFile(outputPath);
+    console.log(`สร้างไฟล์ Excel เรียบร้อย: ${outputPath}`);
+}
+
+
+// อ่านผลลัพธ์จากไฟล์ JSON ล่าสุดและสร้าง Excel
 const latestFile = getLatestLintReportFile('lintReports');
 if (latestFile) {
     fs.readFile(latestFile, 'utf8', (err, data) => {
@@ -68,7 +192,16 @@ if (latestFile) {
             return;
         }
         const lintResults: LintResult[] = JSON.parse(data);
+
+        // สรุปผลใน console
         summarizeLintResults(lintResults);
+
+        // สร้างไฟล์ Excel
+        const outputPath = path.join(
+            'lintReports',
+            path.basename(latestFile, path.extname(latestFile)) + '.xlsx'
+        );
+        createExcelFromLintResults(lintResults, outputPath);
     });
 } else {
     console.log("ไม่พบไฟล์ lintReport ในโฟลเดอร์ lintReports");
