@@ -581,13 +581,8 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (!status || !checklists) {
+    if (!status || !checklists || status !== "scheduled") {
       res.status(400);
-      return;
-    }
-
-    if (status !== "scheduled") {
-      res.status(400)
       return;
     }
 
@@ -676,9 +671,14 @@ export async function startPatrol(req: Request, res: Response) {
               },
             },
             inspector: {
-              include: {
+              select: {
+                id: true,
+                email: true,
+                department: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
                     image: true,
                   },
                 },
