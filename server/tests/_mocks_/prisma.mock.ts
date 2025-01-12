@@ -90,6 +90,25 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
+    user: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+    },
+    notification: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+    },
     // Mock method อื่น ๆ ที่ใช้ในโค้ดจริง-
 };
 
@@ -102,7 +121,12 @@ jest.mock('@Utils/database.js', () => {
 });
 
 export const createNotificationMock = jest.fn();
-jest.mock('@Controllers/util-controller.js', () => ({
-    __esModule: true,
-    createNotification: createNotificationMock,
-}));
+jest.mock('@Controllers/util-controller.js', () => {
+    const originalModule = jest.requireActual('@Controllers/util-controller.js');
+    return {
+        ...originalModule,
+        createNotification: createNotificationMock,
+    };
+});
+
+
