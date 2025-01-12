@@ -999,675 +999,806 @@ export const startPatrolMock = {
     ]
 };
 
-// export const finishPatrolMock = {
-//     id: 3,
-//     date: new Date("2024-12-10T17:00:00.000Z"),
-//     startTime: new Date("2024-12-10T17:00:00.000Z"),
-//     endTime: null,
-//     duration: null,
-//     status: "completed" as PatrolStatus,
-//     presetId: 1,
-//     preset: {
-//         title: "Daily Cleanliness Check"
-//     },
-//     patrolChecklists: [
-//         {
-//             id: 5,
-//             patrolId: 3,
-//             checklistId: 3,
-//             userId: 3,
-//             checklist: {
-//                 id: 3,
-//                 title: "Cleanliness Inspection",
-//                 items: [
-//                     {
-//                         id: 8,
-//                         name: "Floor Cleanliness Check",
-//                         type: "environment",
-//                         checklistId: 3,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 4,
-//                                     name: "quality_control_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 6,
-//                                     name: "customer_service_zone"
-//                                 }
-//                             }
-//                         ]
-//                     },
-//                     {
-//                         id: 9,
-//                         name: "Trash Disposal Check",
-//                         type: "environment",
-//                         checklistId: 3,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 6,
-//                                     name: "customer_service_zone"
-//                                 }
-//                             }
-//                         ]
-//                     }
-//                 ]
-//             },
-//             inspector: {
-//                 id: 3,
-//                 email: null,
-//                 profile: {
-//                     id: 3,
-//                     name: "Jame Smith",
-//                     age: 30,
-//                     tel: "0987654321",
-//                     address: "Chiang Mai, Thailand",
-//                     userId: 3,
-//                     imageId: 1,
-//                     image: {
-//                         id: 1,
-//                         path: "1728239317254-Scan_20220113 (2).png",
-//                         timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                         updatedBy: 8
-//                     }
-//                 }
-//             }
-//         },
-//         {
-//             id: 6,
-//             patrolId: 3,
-//             checklistId: 4,
-//             userId: 3,
-//             checklist: {
-//                 id: 4,
-//                 title: "Security Inspection",
-//                 items: [
-//                     {
-//                         id: 10,
-//                         name: "CCTV Functionality Check",
-//                         type: "safety",
-//                         checklistId: 4,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 2,
-//                                     name: "assembly_line_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 3,
-//                                     name: "raw_materials_storage_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 4,
-//                                     name: "quality_control_zone"
-//                                 }
-//                             }
-//                         ]
-//                     },
-//                     {
-//                         id: 11,
-//                         name: "Access Control System Check",
-//                         type: "safety",
-//                         checklistId: 4,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 4,
-//                                     name: "quality_control_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 5,
-//                                     name: "it_zone"
-//                                 }
-//                             }
-//                         ]
-//                     }
-//                 ]
-//             },
-//             inspector: {
-//                 id: 3,
-//                 email: null,
-//                 profile: {
-//                     id: 3,
-//                     name: "Jame Smith",
-//                     age: 30,
-//                     tel: "0987654321",
-//                     address: "Chiang Mai, Thailand",
-//                     userId: 3,
-//                     imageId: 1,
-//                     image: {
-//                         id: 1,
-//                         path: "1728239317254-Scan_20220113 (2).png",
-//                         timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                         updatedBy: 8
-//                     }
-//                 }
-//             }
-//         }
-//     ]
-// };
+export const finishPatrolMock = {
+    "id": 11,
+    "date": "2025-01-11T17:00:00.000Z",
+    "startTime": "2025-01-12T15:09:40.132Z",
+    "endTime": "2025-01-12T15:14:55.207Z",
+    "duration": "0h 5m 15s",
+    "status": "completed",
+    "presetId": 2,
+    "preset": {
+        "id": 2,
+        "title": "Weekly Maintenance",
+        "description": "ตรวจสอบบำรุงรักษาเครื่องจักรและอุปกรณ์ประจำสัปดาห์ เพื่อให้แน่ใจว่าอุปกรณ์ทุกอย่างทำงานอย่างมีประสิทธิภาพ"
+    },
+    "patrolChecklists": [
+        {
+            "id": 21,
+            "patrolId": 11,
+            "checklistId": 2,
+            "userId": 3,
+            "checklist": {
+                "id": 2,
+                "title": "Maintenance Inspection",
+                "items": [
+                    {
+                        "id": 5,
+                        "name": "Electrical Panel Inspection",
+                        "type": "maintenance",
+                        "checklistId": 2,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
+                                    "supervisor": {
+                                        "id": 4,
+                                        "profile": {
+                                            "name": "Michael Johnson"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "zone": {
+                                    "id": 5,
+                                    "name": "it_zone",
+                                    "supervisor": {
+                                        "id": 7,
+                                        "profile": {
+                                            "name": "Sophia Taylor"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 6,
+                        "name": "Air Conditioning System Check",
+                        "type": "maintenance",
+                        "checklistId": 2,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 5,
+                                    "name": "it_zone",
+                                    "supervisor": {
+                                        "id": 7,
+                                        "profile": {
+                                            "name": "Sophia Taylor"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "zone": {
+                                    "id": 6,
+                                    "name": "customer_service_zone",
+                                    "supervisor": {
+                                        "id": 8,
+                                        "profile": {
+                                            "name": "Jack Danial"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 7,
+                        "name": "Lighting System Check",
+                        "type": "maintenance",
+                        "checklistId": 2,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
+                                    "supervisor": {
+                                        "id": 4,
+                                        "profile": {
+                                            "name": "Michael Johnson"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "zone": {
+                                    "id": 6,
+                                    "name": "customer_service_zone",
+                                    "supervisor": {
+                                        "id": 8,
+                                        "profile": {
+                                            "name": "Jack Danial"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "inspector": {
+                "id": 3,
+                "username": "jameSmith",
+                "email": null,
+                "password": "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
+                "role": "inspector",
+                "department": null,
+                "createdAt": "2024-10-06T10:27:09.916Z",
+                "active": true,
+                "profile": {
+                    "id": 3,
+                    "name": "Jame Smith",
+                    "age": 30,
+                    "tel": "0987654321",
+                    "address": "Chiang Mai, Thailand",
+                    "userId": 3,
+                    "imageId": 1,
+                    "image": {
+                        "id": 1,
+                        "path": "1728239317254-Scan_20220113 (2).png",
+                        "timestamp": "2024-10-10T01:15:14.000Z",
+                        "updatedBy": 8
+                    }
+                }
+            }
+        },
+        {
+            "id": 22,
+            "patrolId": 11,
+            "checklistId": 5,
+            "userId": 3,
+            "checklist": {
+                "id": 5,
+                "title": "Equipment Inspection",
+                "items": [
+                    {
+                        "id": 12,
+                        "name": "Server Equipment Inspection",
+                        "type": "maintenance",
+                        "checklistId": 5,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 5,
+                                    "name": "it_zone",
+                                    "supervisor": {
+                                        "id": 7,
+                                        "profile": {
+                                            "name": "Sophia Taylor"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 13,
+                        "name": "Forklift Maintenance",
+                        "type": "maintenance",
+                        "checklistId": 5,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 3,
+                                    "name": "raw_materials_storage_zone",
+                                    "supervisor": {
+                                        "id": 5,
+                                        "profile": {
+                                            "name": "Emily Davis"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "inspector": {
+                "id": 3,
+                "username": "jameSmith",
+                "email": null,
+                "password": "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
+                "role": "inspector",
+                "department": null,
+                "createdAt": "2024-10-06T10:27:09.916Z",
+                "active": true,
+                "profile": {
+                    "id": 3,
+                    "name": "Jame Smith",
+                    "age": 30,
+                    "tel": "0987654321",
+                    "address": "Chiang Mai, Thailand",
+                    "userId": 3,
+                    "imageId": 1,
+                    "image": {
+                        "id": 1,
+                        "path": "1728239317254-Scan_20220113 (2).png",
+                        "timestamp": "2024-10-10T01:15:14.000Z",
+                        "updatedBy": 8
+                    }
+                }
+            }
+        }
+    ],
+    "results": [
+        {
+            "id": 47,
+            "status": null,
+            "itemId": 5,
+            "zoneId": 2,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 48,
+            "status": null,
+            "itemId": 5,
+            "zoneId": 5,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 49,
+            "status": null,
+            "itemId": 6,
+            "zoneId": 5,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 50,
+            "status": null,
+            "itemId": 6,
+            "zoneId": 6,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 51,
+            "status": null,
+            "itemId": 7,
+            "zoneId": 2,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 52,
+            "status": null,
+            "itemId": 7,
+            "zoneId": 6,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 53,
+            "status": null,
+            "itemId": 12,
+            "zoneId": 5,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 54,
+            "status": null,
+            "itemId": 13,
+            "zoneId": 3,
+            "patrolId": 11,
+            "defects": [],
+            "comments": []
+        }
+    ]
+};
 
-// export const removePatrolMock = {
-//     id: 3,
-//     date: new Date("2024-12-10T17:00:00.000Z"),
-//     startTime: new Date("2024-12-10T17:00:00.000Z"),
-//     endTime: null,
-//     duration: null,
-//     status: "completed" as PatrolStatus,
-//     presetId: 1,
-//     preset: {
-//         title: "Daily Cleanliness Check"
-//     },
-//     patrolChecklists: [
-//         {
-//             id: 5,
-//             patrolId: 3,
-//             checklistId: 3,
-//             userId: 3,
-//             checklist: {
-//                 id: 3,
-//                 title: "Cleanliness Inspection",
-//                 items: [
-//                     {
-//                         id: 8,
-//                         name: "Floor Cleanliness Check",
-//                         type: "environment",
-//                         checklistId: 3,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 4,
-//                                     name: "quality_control_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 6,
-//                                     name: "customer_service_zone"
-//                                 }
-//                             }
-//                         ]
-//                     },
-//                     {
-//                         id: 9,
-//                         name: "Trash Disposal Check",
-//                         type: "environment",
-//                         checklistId: 3,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 6,
-//                                     name: "customer_service_zone"
-//                                 }
-//                             }
-//                         ]
-//                     }
-//                 ]
-//             },
-//             inspector: {
-//                 id: 3,
-//                 email: null,
-//                 profile: {
-//                     id: 3,
-//                     name: "Jame Smith",
-//                     age: 30,
-//                     tel: "0987654321",
-//                     address: "Chiang Mai, Thailand",
-//                     userId: 3,
-//                     imageId: 1,
-//                     image: {
-//                         id: 1,
-//                         path: "1728239317254-Scan_20220113 (2).png",
-//                         timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                         updatedBy: 8
-//                     }
-//                 }
-//             }
-//         },
-//         {
-//             id: 6,
-//             patrolId: 3,
-//             checklistId: 4,
-//             userId: 3,
-//             checklist: {
-//                 id: 4,
-//                 title: "Security Inspection",
-//                 items: [
-//                     {
-//                         id: 10,
-//                         name: "CCTV Functionality Check",
-//                         type: "safety",
-//                         checklistId: 4,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 2,
-//                                     name: "assembly_line_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 3,
-//                                     name: "raw_materials_storage_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 4,
-//                                     name: "quality_control_zone"
-//                                 }
-//                             }
-//                         ]
-//                     },
-//                     {
-//                         id: 11,
-//                         name: "Access Control System Check",
-//                         type: "safety",
-//                         checklistId: 4,
-//                         itemZones: [
-//                             {
-//                                 zone: {
-//                                     id: 4,
-//                                     name: "quality_control_zone"
-//                                 }
-//                             },
-//                             {
-//                                 zone: {
-//                                     id: 5,
-//                                     name: "it_zone"
-//                                 }
-//                             }
-//                         ]
-//                     }
-//                 ]
-//             },
-//             inspector: {
-//                 id: 3,
-//                 email: null,
-//                 profile: {
-//                     id: 3,
-//                     name: "Jame Smith",
-//                     age: 30,
-//                     tel: "0987654321",
-//                     address: "Chiang Mai, Thailand",
-//                     userId: 3,
-//                     imageId: 1,
-//                     image: {
-//                         id: 1,
-//                         path: "1728239317254-Scan_20220113 (2).png",
-//                         timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                         updatedBy: 8
-//                     }
-//                 }
-//             }
-//         }
-//     ]
-// };
+export const patrolDefectsMock = {
+    "patrol": {
+        "id": 9,
+        "date": "2025-01-11T17:00:00.000Z",
+        "startTime": "2025-01-12T13:58:29.746Z",
+        "endTime": null,
+        "duration": null,
+        "status": "on_going",
+        "presetId": 1,
+        "patrolChecklists": [
+            {
+                "id": 17,
+                "patrolId": 9,
+                "checklistId": 3,
+                "userId": 3,
+                "checklist": {
+                    "id": 3,
+                    "title": "Cleanliness Inspection",
+                    "items": [
+                        {
+                            "id": 8,
+                            "name": "Floor Cleanliness Check",
+                            "type": "environment",
+                            "checklistId": 3,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 4,
+                                        "name": "quality_control_zone",
+                                        "supervisor": {
+                                            "id": 6,
+                                            "profile": {
+                                                "name": "David Wilson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 6,
+                                        "name": "customer_service_zone",
+                                        "supervisor": {
+                                            "id": 8,
+                                            "profile": {
+                                                "name": "Jack Danial"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 9,
+                            "name": "Trash Disposal Check",
+                            "type": "environment",
+                            "checklistId": 3,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 6,
+                                        "name": "customer_service_zone",
+                                        "supervisor": {
+                                            "id": 8,
+                                            "profile": {
+                                                "name": "Jack Danial"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "inspector": {
+                    "id": 3,
+                    "email": null,
+                    "department": null,
+                    "role": "inspector",
+                    "profile": {
+                        "name": "Jame Smith",
+                        "image": {
+                            "id": 1,
+                            "path": "1728239317254-Scan_20220113 (2).png",
+                            "timestamp": "2024-10-10T01:15:14.000Z",
+                            "updatedBy": 8
+                        }
+                    }
+                }
+            },
+            {
+                "id": 18,
+                "patrolId": 9,
+                "checklistId": 4,
+                "userId": 2,
+                "checklist": {
+                    "id": 4,
+                    "title": "Security Inspection",
+                    "items": [
+                        {
+                            "id": 10,
+                            "name": "CCTV Functionality Check",
+                            "type": "safety",
+                            "checklistId": 4,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "supervisor": {
+                                            "id": 4,
+                                            "profile": {
+                                                "name": "Michael Johnson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "supervisor": {
+                                            "id": 5,
+                                            "profile": {
+                                                "name": "Emily Davis"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 4,
+                                        "name": "quality_control_zone",
+                                        "supervisor": {
+                                            "id": 6,
+                                            "profile": {
+                                                "name": "David Wilson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 11,
+                            "name": "Access Control System Check",
+                            "type": "safety",
+                            "checklistId": 4,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 4,
+                                        "name": "quality_control_zone",
+                                        "supervisor": {
+                                            "id": 6,
+                                            "profile": {
+                                                "name": "David Wilson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 5,
+                                        "name": "it_zone",
+                                        "supervisor": {
+                                            "id": 7,
+                                            "profile": {
+                                                "name": "Sophia Taylor"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "inspector": {
+                    "id": 2,
+                    "email": null,
+                    "department": null,
+                    "role": "inspector",
+                    "profile": {
+                        "name": "John Doe",
+                        "image": null
+                    }
+                }
+            }
+        ]
+    },
+    "defects": [
+        {
+            "id": 1,
+            "name": "Floor Cleanliness Check",
+            "description": "Test Defect",
+            "type": "environment",
+            "status": "reported",
+            "startTime": "2025-01-12T15:26:41.005Z",
+            "endTime": "2025-01-12T15:26:41.007Z",
+            "userId": 3,
+            "patrolResultId": 17,
+            "patrolResult": {
+                "zoneId": 4,
+                "itemZone": {
+                    "zone": {
+                        "name": "quality_control_zone",
+                        "supervisor": {
+                            "id": 6,
+                            "profile": {
+                                "id": 6,
+                                "name": "David Wilson",
+                                "age": 29,
+                                "tel": "5566778899",
+                                "address": "Hat Yai, Thailand",
+                                "userId": 6,
+                                "imageId": null,
+                                "image": null
+                            }
+                        }
+                    }
+                }
+            },
+            "images": [
+                {
+                    "image": {
+                        "id": 2,
+                        "path": "1736695600993-Screenshot_idp1st_takumi_fujiwara_ae86_trueno_pk_akina_21-7-124-18-35-49.jpg",
+                        "user": {
+                            "id": 3,
+                            "email": null,
+                            "role": "inspector",
+                            "department": null,
+                            "createdAt": "2024-10-06T10:27:09.916Z"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Floor Cleanliness Check",
+            "description": "Test Defect 2",
+            "type": "environment",
+            "status": "reported",
+            "startTime": "2025-01-12T15:26:58.602Z",
+            "endTime": "2025-01-12T15:26:58.603Z",
+            "userId": 3,
+            "patrolResultId": 17,
+            "patrolResult": {
+                "zoneId": 4,
+                "itemZone": {
+                    "zone": {
+                        "name": "quality_control_zone",
+                        "supervisor": {
+                            "id": 6,
+                            "profile": {
+                                "id": 6,
+                                "name": "David Wilson",
+                                "age": 29,
+                                "tel": "5566778899",
+                                "address": "Hat Yai, Thailand",
+                                "userId": 6,
+                                "imageId": null,
+                                "image": null
+                            }
+                        }
+                    }
+                }
+            },
+            "images": [
+                {
+                    "image": {
+                        "id": 3,
+                        "path": "1736695618585-Screenshot_urd_darche_cup_2021_hanoi_street_circuit_31-7-124-4-32-38.jpg",
+                        "user": {
+                            "id": 3,
+                            "email": null,
+                            "role": "inspector",
+                            "department": null,
+                            "createdAt": "2024-10-06T10:27:09.916Z"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+};
 
-// export const patrolDefectsMock = {
-//     "patrols": {
-//         id: 3,
-//         date: new Date("2024-12-10T17:00:00.000Z"),
-//         startTime: new Date("2024-12-10T17:00:00.000Z"),
-//         endTime: null,
-//         duration: null,
-//         status: "completed" as PatrolStatus,
-//         presetId: 1,
-//         preset: {
-//             title: "Daily Cleanliness Check"
-//         },
-//         patrolChecklists: [
-//             {
-//                 id: 5,
-//                 patrolId: 3,
-//                 checklistId: 3,
-//                 userId: 3,
-//                 checklist: {
-//                     id: 3,
-//                     title: "Cleanliness Inspection",
-//                     items: [
-//                         {
-//                             id: 8,
-//                             name: "Floor Cleanliness Check",
-//                             type: "environment",
-//                             checklistId: 3,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 4,
-//                                         name: "quality_control_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 6,
-//                                         name: "customer_service_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         },
-//                         {
-//                             id: 9,
-//                             name: "Trash Disposal Check",
-//                             type: "environment",
-//                             checklistId: 3,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 6,
-//                                         name: "customer_service_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     ]
-//                 },
-//                 inspector: {
-//                     id: 3,
-//                     email: null,
-//                     profile: {
-//                         id: 3,
-//                         name: "Jame Smith",
-//                         age: 30,
-//                         tel: "0987654321",
-//                         address: "Chiang Mai, Thailand",
-//                         userId: 3,
-//                         imageId: 1,
-//                         image: {
-//                             id: 1,
-//                             path: "1728239317254-Scan_20220113 (2).png",
-//                             timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                             updatedBy: 8
-//                         }
-//                     }
-//                 }
-//             },
-//             {
-//                 id: 6,
-//                 patrolId: 3,
-//                 checklistId: 4,
-//                 userId: 3,
-//                 checklist: {
-//                     id: 4,
-//                     title: "Security Inspection",
-//                     items: [
-//                         {
-//                             id: 10,
-//                             name: "CCTV Functionality Check",
-//                             type: "safety",
-//                             checklistId: 4,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 2,
-//                                         name: "assembly_line_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 3,
-//                                         name: "raw_materials_storage_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 4,
-//                                         name: "quality_control_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         },
-//                         {
-//                             id: 11,
-//                             name: "Access Control System Check",
-//                             type: "safety",
-//                             checklistId: 4,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 4,
-//                                         name: "quality_control_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 5,
-//                                         name: "it_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     ]
-//                 },
-//                 inspector: {
-//                     id: 3,
-//                     email: null,
-//                     profile: {
-//                         id: 3,
-//                         name: "Jame Smith",
-//                         age: 30,
-//                         tel: "0987654321",
-//                         address: "Chiang Mai, Thailand",
-//                         userId: 3,
-//                         imageId: 1,
-//                         image: {
-//                             id: 1,
-//                             path: "1728239317254-Scan_20220113 (2).png",
-//                             timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                             updatedBy: 8
-//                         }
-//                     }
-//                 }
-//             }
-//         ]
-//     },
-//     "defects": [
-//         {
-//             id: 1,
-//             name: "Trash Disposal Check",
-//             description: "Defect1",
-//             type: "environment",
-//             status: "reported",
-//             timestamp: new Date("2024-12-10T15:44:07.006Z"),
-//             userId: 3,
-//             patrolResultId: 3,
-//             patrolResult: {
-//                 zoneId: 6
-//             },
-//             images: [
-//                 {
-//                     image: {
-//                         id: 2,
-//                         path: "1733845446988-Screenshot_urd_darche_cup_2021_hanoi_street_circuit_31-7-124-4-32-38.jpg",
-//                         user: {
-//                             id: 3,
-//                             username: "jameSmith",
-//                             email: null,
-//                             password: "$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm",
-//                             role: "inspector",
-//                             department: null,
-//                             createdAt: new Date("2024-10-06T10:27:09.916Z"),
-//                             active: true
-//                         }
-//                     }
-//                 }
-//             ]
-//         }
-//     ]
-// };
-
-// export const commentPatrolMock = {
-//     "patrol": {
-//         id: 3,
-//         date: new Date("2024-12-10T17:00:00.000Z"),
-//         startTime: new Date("2024-12-10T17:00:00.000Z"),
-//         endTime: null,
-//         duration: null,
-//         status: "on_going" as PatrolStatus,
-//         presetId: 1,
-//         preset: {
-//             title: "Daily Cleanliness Check"
-//         },
-//         patrolChecklists: [
-//             {
-//                 id: 5,
-//                 patrolId: 3,
-//                 checklistId: 3,
-//                 userId: 3,
-//                 checklist: {
-//                     id: 3,
-//                     title: "Cleanliness Inspection",
-//                     items: [
-//                         {
-//                             id: 8,
-//                             name: "Floor Cleanliness Check",
-//                             type: "environment",
-//                             checklistId: 3,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 4,
-//                                         name: "quality_control_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 6,
-//                                         name: "customer_service_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         },
-//                         {
-//                             id: 9,
-//                             name: "Trash Disposal Check",
-//                             type: "environment",
-//                             checklistId: 3,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 6,
-//                                         name: "customer_service_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     ]
-//                 },
-//                 inspector: {
-//                     id: 3,
-//                     email: null,
-//                     profile: {
-//                         id: 3,
-//                         name: "Jame Smith",
-//                         age: 30,
-//                         tel: "0987654321",
-//                         address: "Chiang Mai, Thailand",
-//                         userId: 3,
-//                         imageId: 1,
-//                         image: {
-//                             id: 1,
-//                             path: "1728239317254-Scan_20220113 (2).png",
-//                             timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                             updatedBy: 8
-//                         }
-//                     }
-//                 }
-//             },
-//             {
-//                 id: 6,
-//                 patrolId: 3,
-//                 checklistId: 4,
-//                 userId: 3,
-//                 checklist: {
-//                     id: 4,
-//                     title: "Security Inspection",
-//                     items: [
-//                         {
-//                             id: 10,
-//                             name: "CCTV Functionality Check",
-//                             type: "safety",
-//                             checklistId: 4,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 2,
-//                                         name: "assembly_line_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 3,
-//                                         name: "raw_materials_storage_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 4,
-//                                         name: "quality_control_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         },
-//                         {
-//                             id: 11,
-//                             name: "Access Control System Check",
-//                             type: "safety",
-//                             checklistId: 4,
-//                             itemZones: [
-//                                 {
-//                                     zone: {
-//                                         id: 4,
-//                                         name: "quality_control_zone"
-//                                     }
-//                                 },
-//                                 {
-//                                     zone: {
-//                                         id: 5,
-//                                         name: "it_zone"
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     ]
-//                 },
-//                 inspector: {
-//                     id: 3,
-//                     email: null,
-//                     profile: {
-//                         id: 3,
-//                         name: "Jame Smith",
-//                         age: 30,
-//                         tel: "0987654321",
-//                         address: "Chiang Mai, Thailand",
-//                         userId: 3,
-//                         imageId: 1,
-//                         image: {
-//                             id: 1,
-//                             path: "1728239317254-Scan_20220113 (2).png",
-//                             timestamp: new Date("2024-10-10T01:15:14.000Z"),
-//                             updatedBy: 8
-//                         }
-//                     }
-//                 }
-//             }
-//         ]
-//     },
-//     "comment": {
-//         id: 1,
-//         message: "Comment",
-//         timestamp: new Date("2024-12-10T17:00:00.000Z"),
-//         status: false,
-//         userId: 3,
-//         patrolResultId: 2,
-//     }
-// };
+export const patrolCommentsMock = {
+    "patrol": {
+        "id": 9,
+        "date": "2025-01-11T17:00:00.000Z",
+        "startTime": "2025-01-12T13:58:29.746Z",
+        "endTime": null,
+        "duration": null,
+        "status": "on_going",
+        "presetId": 1,
+        "patrolChecklists": [
+            {
+                "id": 17,
+                "patrolId": 9,
+                "checklistId": 3,
+                "userId": 3,
+                "checklist": {
+                    "id": 3,
+                    "title": "Cleanliness Inspection",
+                    "items": [
+                        {
+                            "id": 8,
+                            "name": "Floor Cleanliness Check",
+                            "type": "environment",
+                            "checklistId": 3,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 4,
+                                        "name": "quality_control_zone",
+                                        "supervisor": {
+                                            "id": 6,
+                                            "profile": {
+                                                "name": "David Wilson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 6,
+                                        "name": "customer_service_zone",
+                                        "supervisor": {
+                                            "id": 8,
+                                            "profile": {
+                                                "name": "Jack Danial"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 9,
+                            "name": "Trash Disposal Check",
+                            "type": "environment",
+                            "checklistId": 3,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 6,
+                                        "name": "customer_service_zone",
+                                        "supervisor": {
+                                            "id": 8,
+                                            "profile": {
+                                                "name": "Jack Danial"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "inspector": {
+                    "id": 3,
+                    "email": null,
+                    "department": null,
+                    "role": "inspector",
+                    "profile": {
+                        "name": "Jame Smith",
+                        "image": {
+                            "id": 1,
+                            "path": "1728239317254-Scan_20220113 (2).png",
+                            "timestamp": "2024-10-10T01:15:14.000Z",
+                            "updatedBy": 8
+                        }
+                    }
+                }
+            },
+            {
+                "id": 18,
+                "patrolId": 9,
+                "checklistId": 4,
+                "userId": 2,
+                "checklist": {
+                    "id": 4,
+                    "title": "Security Inspection",
+                    "items": [
+                        {
+                            "id": 10,
+                            "name": "CCTV Functionality Check",
+                            "type": "safety",
+                            "checklistId": 4,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "supervisor": {
+                                            "id": 4,
+                                            "profile": {
+                                                "name": "Michael Johnson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "supervisor": {
+                                            "id": 5,
+                                            "profile": {
+                                                "name": "Emily Davis"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 4,
+                                        "name": "quality_control_zone",
+                                        "supervisor": {
+                                            "id": 6,
+                                            "profile": {
+                                                "name": "David Wilson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 11,
+                            "name": "Access Control System Check",
+                            "type": "safety",
+                            "checklistId": 4,
+                            "itemZones": [
+                                {
+                                    "zone": {
+                                        "id": 4,
+                                        "name": "quality_control_zone",
+                                        "supervisor": {
+                                            "id": 6,
+                                            "profile": {
+                                                "name": "David Wilson"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "zone": {
+                                        "id": 5,
+                                        "name": "it_zone",
+                                        "supervisor": {
+                                            "id": 7,
+                                            "profile": {
+                                                "name": "Sophia Taylor"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "inspector": {
+                    "id": 2,
+                    "email": null,
+                    "department": null,
+                    "role": "inspector",
+                    "profile": {
+                        "name": "John Doe",
+                        "image": null
+                    }
+                }
+            }
+        ]
+    },
+    "comments": [
+        {
+            "id": 1,
+            "message": "Test Comment",
+            "timestamp": "2025-01-12T15:33:25.559Z",
+            "status": false,
+            "userId": 3,
+            "patrolResultId": 17,
+            "user": {
+                "id": 3,
+                "email": null,
+                "department": null,
+                "role": "inspector",
+                "profile": {
+                    "name": "Jame Smith",
+                    "image": {
+                        "id": 1,
+                        "path": "1728239317254-Scan_20220113 (2).png",
+                        "timestamp": "2024-10-10T01:15:14.000Z",
+                        "updatedBy": 8
+                    }
+                }
+            }
+        }
+    ]
+};
