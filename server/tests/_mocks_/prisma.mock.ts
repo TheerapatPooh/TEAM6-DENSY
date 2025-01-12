@@ -72,6 +72,24 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
+    image: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+    },
+    defectImage: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+    },
     // Mock method อื่น ๆ ที่ใช้ในโค้ดจริง-
 };
 

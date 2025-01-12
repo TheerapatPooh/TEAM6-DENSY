@@ -1,4 +1,4 @@
-// patrol-controller.test.ts
+// location-controller.test.ts
 import './_mocks_/prisma.mock';
 
 import { Request, Response } from 'express';
