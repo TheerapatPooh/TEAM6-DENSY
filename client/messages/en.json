@@ -94,9 +94,11 @@
     "Image": "Image",
     "EditDefect": "Edit Defect",
     "ResolveDefect": "Resolve Defect",
-    "EditResolveDefect": "Edit Resolve Defect",
+    "EditResolveDefect": "Upload New Image",
     "ReportDefect": "Report Defect",
     "PleaseProvideDetailsForTheDefect": "Please provide details for the defect",
+    "PleaseProvideResolvedTheDefect": "Upload images after resolving the issue for verification.",
+    "EditResolvedTheDefect": "Upload images after resolving the issue for verification.",
     "Drag&DropFile": "Drag & Drop File",
     "Or": "Or",
     "Browse": "Browse"

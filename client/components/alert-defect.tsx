@@ -334,7 +334,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                 {t(type === "edit" ? "EditDefect" : type === "resolve" ? "ResolveDefect" : type === "edit-resolve" ? "EditResolveDefect" : "ReportDefect")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                {t("PleaseProvideDetailsForTheDefect")}
+                                {t(type === "edit" ? "PleaseProvideDetailsForTheDefect" : type === "resolve" ? "PleaseProvideResolvedTheDefect" : type === "edit-resolve" ? "EditResolvedTheDefect" : "PleaseProvideDetailsForTheDefect")}
                             </AlertDialogDescription>
                             <div className="flex flex-col justify-start">
                                 <p className="font-semibold">

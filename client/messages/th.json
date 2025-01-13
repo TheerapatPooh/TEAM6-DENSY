@@ -94,9 +94,11 @@
     "Image": "รูปภาพ",
     "EditDefect": "แก้ไขรายละเอียดปัญหา",
     "ResolveDefect": "แก้ไขปัญหา",
-    "EditResolveDefect": "แก้ไขข้อมูลการแก้ไขปัญหา",
+    "EditResolveDefect": "อัปโหลดรูปใหม่",
     "ReportDefect": "แจ้งปัญหา",
     "PleaseProvideDetailsForTheDefect": "กรุณาระบุรายละเอียดเกี่ยวกับปัญหา",
+    "PleaseProvideResolvedTheDefect": "อัปโหลดรูปภาพหลังการแก้ปัญหาเพื่อให้ผู้ตรวจสอบยืนยันผล",
+    "EditResolvedTheDefect": "อัปโหลดรูปภาพหลังการแก้ไขปัญหาเพื่อให้ผู้ตรวจสอบยืนยันผล",
     "Drag&DropFile": "ลากและวางไฟล์",
     "Or": "หรือ",
     "Browse": "เลือกไฟล์"
