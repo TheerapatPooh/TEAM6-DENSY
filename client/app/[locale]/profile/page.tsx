@@ -1,4 +1,5 @@
 'use client'
+import bcrypt from "bcryptjs";
 import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -195,7 +196,7 @@ export default function page() {
             }
 
             else {
-                const passwordMatch = formData.currentPassword === userData.password;
+                const passwordMatch = bcrypt.compare(formData.currentPassword, userData.password);
                 if (passwordMatch) {
                     if (formData.newPassword === formData.confirmPassword) {
                         userForm.append("password", formData.newPassword);
@@ -309,7 +310,7 @@ export default function page() {
 
                         <AlertDialog>
                             <AlertDialogTrigger>
-                                <Button variant='outline' size='default'>
+                                <Button className="custom-shadow" variant='outline' size='default'>
                                     {t("UploadNewPhoto")}
                                 </Button>
                             </AlertDialogTrigger>
@@ -420,7 +421,7 @@ export default function page() {
                                         </span>
                                         <p>{t('Zone')}</p>
                                     </div>
-                                    <div className=" flex justify-center bg-secondary rounded-lg py-4">
+                                    <div className=" flex justify-center bg-secondary rounded-md py-4">
                                         <Map
                                             disable={true}
                                             initialSelectedZones={[userData.zone.id]}
@@ -483,7 +484,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Address")}</p>
-                            <Textarea name="address" onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
+                            <Textarea name="address" onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary custom-shadow h-56'></Textarea>
                             {addressError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{addressError}</p>
                             )}

@@ -90,7 +90,15 @@
     "ConfirmPassword": "Confirm Password",
     "Accept": "Accept",
     "admin": "Admin",
-    "Edit": "Edit"
+    "Edit": "Edit",
+    "EditDefect": "Edit Defect",
+    "ResolveDefect": "Resolve Defect",
+    "ReportDefect": "Report Defect",
+    "EditDefectDescription": "Please provide details for the defect",
+    "Image": "Image",
+    "Drag&DropFile": "Drag & Drop File",
+    "Or": "Or",
+    "Browse": "Browse"
   },
   "Status": {
     "pending": "Pending",

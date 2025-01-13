@@ -90,7 +90,15 @@
     "ConfirmPassword": "ยืนยันรหัสผ่าน",
     "Accept": "ยอมรับ",
     "admin": "ผู้ดูแลระบบ",
-    "Edit": "แก้ไข"
+    "Edit": "แก้ไข",
+    "EditDefect": "แก้ไขรายละเอียดข้อบกพร่อง",
+    "ResolveDefect": "แก้ปัญหาข้อบกพร่อง",
+    "ReportDefect": "รายงานข้อบกพร่อง",
+    "EditDefectDescription": "โปรดระบุรายละเอียดของข้อบกพร่อง",
+    "Image": "รูปภาพ",
+    "Drag&DropFile": "ลากและวางไฟล์",
+    "Or": "หรือ",
+    "Browse": "เลือกไฟล์"
   },
   "Status": {
     "pending": "รอดำเนินการ",

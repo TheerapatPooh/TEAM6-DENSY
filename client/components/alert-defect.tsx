@@ -306,6 +306,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     disabled={disabled}
                 >
                     <Button
+                        className='custom-shadow'
                         variant={type === "resolve" ? "primary" : type === "edit" ? "primary" : "outline"} size={"lg"}
                         onClick={() => openAlertDefect()}
                     >
@@ -319,10 +320,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
-                                {type === "edit" ? "Edit Defect" : type === "resolve" ? "Resolve Defect" : "Report Defect"}
+                                {t(type === "edit" ? "EditDefect" : type === "resolve" ? "ResolveDefect" : "ReportDefect")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                Please provide details for the defect
+                                {t("EditDefectDescription")}
                             </AlertDialogDescription>
                             <div className="flex flex-col justify-start">
                                 <p className="font-semibold">
@@ -333,7 +334,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         location_on
                                     </span>
                                     <p className="font-semibold me-2">
-                                        Zone
+                                        {t("Zone")}
                                     </p>
                                     <p>
                                         <p>
@@ -353,7 +354,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         engineering
                                     </span>
                                     <p className="font-semibold me-2">
-                                        Supervisor
+                                        {t("supervisor")}
                                     </p>
                                     <p>
                                         {type === "report"
@@ -373,12 +374,12 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                         {type === "resolve" ? null :
                             <div className='flex flex-col gap-1'>
                                 <div className='text-sm font-semibold'>
-                                    Detail
+                                    {t("Detail")}
                                 </div>
                                 <Textarea
                                     onChange={handleDefectDescription}
                                     className="h-[100px] bg-secondary border-none"
-                                    placeholder="Details..."
+                                    placeholder={`${t("Detail")}...`}
                                 />
                                 {detailError && (
                                     <p className="text-sm font-light text-destructive italic mt-1">{detailError}</p>
@@ -388,10 +389,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
                         <div className="flex flex-col justify-between w-full">
                             <div className='text-sm font-semibold'>
-                                Image
+                                {t("Image")}
                             </div>
                             <div className='flex flex-row py-1 pr-2 gap-4'>
-                                <div className='flex flex-col gap-1 flex-1'>
+                                <div className='flex flex-col gap-1 flex-1 rounded-md custom-shadow'>
                                     <div
                                         className="flex h-full w-full rounded-[10px] bg-secondary justify-center items-center"
                                         onDragOver={handleDragOver}
@@ -402,10 +403,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 upload
                                             </span>
                                             <div className="text-center mt-2">
-                                                Drag & Drop file
+                                                {t("Drag&DropFile")}
                                             </div>
                                             <div className="text-center mt-1">
-                                                Or
+                                                {t("Or")}
                                             </div>
                                             <div className="mt-2">
                                                 <input
@@ -417,12 +418,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 />
                                                 <Button
                                                     variant={"outline"}
+                                                    className='custom-shadow'
                                                     onClick={handleButtonClick}
                                                 >
                                                     <span className="material-symbols-outlined mr-1">
                                                         browser_updated
                                                     </span>
-                                                    Browse
+                                                    {t("Browse")}
                                                 </Button>
                                             </div>
                                         </div>
@@ -492,7 +494,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         setDetailError(null)
                                         setFileError(null)
                                     }}>
-                                    Cancel
+                                    {t("Cancel")}
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={(event) => {
@@ -503,7 +505,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                     <span className="material-symbols-outlined text-2xl me-2">
                                         send
                                     </span>
-                                    Send
+                                    {t("Send")}
                                 </AlertDialogAction>
                             </div>
                         </AlertDialogFooter>

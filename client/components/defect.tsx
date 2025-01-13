@@ -31,7 +31,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
     }
 
     return (
-        <div className={`bg-card p-4 rounded-lg custom-shadow border-l-8 border-${color(defect.type)} cursor-pointer`} onClick={() => router.push(`/${locale}/defect/${defect.id}`) }>
+        <div className={`bg-card p-4 rounded-md custom-shadow border-l-8 border-${color(defect.type)} cursor-pointer`} onClick={() => router.push(`/${locale}/defect/${defect.id}`) }>
             <div className="flex items-center justify-between">
                 <div className="flex items-center text-black-500 space-x-2">
                     <span className="material-symbols-outlined text-muted-foreground cursor-default ">schedule</span>

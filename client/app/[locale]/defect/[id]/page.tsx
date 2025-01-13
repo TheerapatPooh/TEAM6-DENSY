@@ -328,7 +328,7 @@ export default function Page() {
           <div className="col-span-full text-muted-foreground ">
             <p className="text-[16px] font-semibold">{t("Detail")}</p>
 
-            <div className="bg-secondary rounded-lg h-40 w-full items-center p-4">
+            <div className="bg-secondary rounded-md h-40 w-full items-center p-4">
               <p className="text-[20px] text-card-foreground">
                 {defect.description}
               </p>

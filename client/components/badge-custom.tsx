@@ -16,7 +16,7 @@ interface BadgeCustomProps {
 
 export const shapeVariants = {
     default: "rounded-full",
-    square: "rounded-lg",
+    square: "rounded-md",
 }
 
 export const badgeVariants = {

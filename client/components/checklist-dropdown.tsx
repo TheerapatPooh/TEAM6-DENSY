@@ -52,9 +52,9 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
         onValueChange={setAccordionValue}>
         <AccordionItem
           value="item-1"
-          className="bg-secondary rounded-md w-full px-4 py-2 border-none "
+          className="bg-secondary rounded-md w-full px-6 py-4 border-none custom-shadow"
         >
-          <AccordionTrigger className="hover:no-underline">
+          <AccordionTrigger className="p-0 hover:no-underline">
             <div className="flex justify-between w-full">
               <p className="text-2xl font-bold">{checklist.title}</p>
               <div className="flex  w-[200px] gap-2 items-center mr-[100px]">

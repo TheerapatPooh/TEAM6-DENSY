@@ -547,7 +547,7 @@ export default function Page() {
                         <Button
                           key={index}
                           variant={"outline"}
-                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
+                          className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
                             ? "border-destructive"
                             : "border-transparent"
                             } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
@@ -633,7 +633,7 @@ export default function Page() {
               <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <div className="grid grid-cols-1">
                 <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
-                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 ">
+                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
                     {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
                       <ChecklistDropdown
                         key={presetChecklist.checklist.id}

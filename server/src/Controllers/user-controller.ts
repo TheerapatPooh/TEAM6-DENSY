@@ -304,7 +304,7 @@ export async function updateUser(req: Request, res: Response) {
     const updateProfile: any = {};
     if (username !== undefined) updateUser.username = username;
     if (email !== undefined) updateUser.email = email;
-    if (password !== undefined) updateUser.password = password;
+    if (password !== undefined) updateUser.password = await bcrypt.hash(password, 10);
     if (role !== undefined) updateUser.role = role;
     if (department !== undefined) updateUser.department = department;
     if (name !== undefined) updateProfile.name = name;
