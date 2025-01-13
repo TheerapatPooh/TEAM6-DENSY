@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData } from "@/lib/utils";
 import UserDropdown from "@/components/user-dropdown";
 import {
   Accordion,
@@ -21,11 +21,12 @@ interface Props {
 export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
   const [userData, setUserData] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
+  const [accordionValue, setAccordionValue] = useState<string | null>();
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const users = await fetchData("get", "/users?profile=true&image=true", true);
+        const users = await fetchData("get", "/users?profile=true&image=true&role=inspector", true);
         setUserData(users);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -37,26 +38,32 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
   const handleUserSelect = (dropdownUser: IUser) => {
     setSelectUser(dropdownUser);
     handleselectUser(dropdownUser);
+    setAccordionValue(null);
   };
   const t = useTranslations("General");
 
   return (
     <div>
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        value={accordionValue}
+        onValueChange={setAccordionValue}>
         <AccordionItem
           value="item-1"
-          className="bg-secondary rounded-md w-full px-4 py-2 border-none "
+          className="bg-secondary rounded-md w-full px-6 py-4 border-none custom-shadow"
         >
-          <AccordionTrigger className="hover:no-underline">
+          <AccordionTrigger className="p-0 hover:no-underline">
             <div className="flex justify-between w-full">
-              <p className="text-2xl">{checklist.title}</p>
-              <div className="flex  w-[300px] gap-2 items-center mr-[100px]">
+              <p className="text-2xl font-bold">{checklist.title}</p>
+              <div className="flex  w-[200px] gap-2 items-center mr-[100px]">
                 {selectUser ? (
                   <Avatar>
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser.profile.image?.path}`}
-                      />
-                    <AvatarFallback>
+                    />
+                    <AvatarFallback id={selectUser.id.toString()}>
                       {getInitials(selectUser.profile.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -69,16 +76,16 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-muted-foreground">
-                engineering
+                person_search
               </span>
               <p className="font-semibold text-lg text-muted-foreground">
-                {t("Inspector")}
+                {t("inspector")}
               </p>
             </div>
-            <UserDropdown userData={userData} onUserSelect={handleUserSelect} />
+            <UserDropdown userData={userData} onUserSelect={handleUserSelect} selectUser={selectUser} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

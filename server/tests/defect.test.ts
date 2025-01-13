@@ -1,78 +1,148 @@
-import { createDefect } from '../Controllers/defect-controller';
-import { prisma } from '../Utils/database';
-import { Request, Response } from 'express';
+// defect-controller.test.ts
+import './_mocks_/prisma.mock';
 
-jest.mock('../Utils/database', () => ({
-    prisma: {
-        defect: {
-            create: jest.fn(),
-        },
-    },
-}));
+import { Request, Response } from 'express';
+import { prismaMock } from './_mocks_/prisma.mock';
+import { confirmComment, createDefect, getAllComments, getAllDefects, getDefect, updateDefect } from '@Controllers/defect-controller.js';
+import { allDefects, commentMock, defectMock, fileMock, getAllCommentsMock, updateDefectMock } from './_mocks_/defect.mock';
+
+// Mock Response object
+const mockResponse = () => {
+    const res: Partial<Response> = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res as Response;
+};
+
+// Mock Request object
+const mockRequest = (query: any, params: any, body: any, user: any) => {
+    return {
+        query,
+        params,
+        body,
+        user,
+    } as unknown as Request;
+};
 
 describe('createDefect', () => {
-    let req: Partial<Request>;
-    let res: Partial<Response>;
-    let status: jest.Mock;
-    let json: jest.Mock;
-    let send: jest.Mock;
+    test('ควรสร้างข้อมูล Defect ได้สำเร็จ', async () => {
+        prismaMock.defect.create.mockResolvedValueOnce({ id: 1 });
+        prismaMock.patrol.findFirst.mockResolvedValueOnce(defectMock.patrol);
+        prismaMock.defect.findFirst.mockResolvedValueOnce(defectMock.defect);
+        prismaMock.patrolResult.findUnique.mockResolvedValueOnce(defectMock.patrolResult);
+        prismaMock.patrolResult.update.mockResolvedValueOnce({ id: 17, status: false });
+        prismaMock.image.create.mockResolvedValueOnce(defectMock.defect.images[0].image);
+        prismaMock.defectImage.create.mockResolvedValueOnce(defectMock.defect.images[0]);
 
-    beforeEach(() => {
-        req = {
-            body: {
-                title: 'Test Defect',
-                note: 'This is a test defect',
-                type: 'Bug',
-                status: 'Open',
-                userId: 1,
+        const req = mockRequest(
+            {},
+            {},
+            {
+                "name": "Floor Cleanliness Check",
+                "description": "Test Defect",
+                "type": "environment",
+                "defectUserId": 3,
+                "patrolResult": 17,
+                "supervisorId": 6
             },
-        };
+            { role: "inspector", userId: 3 });
+        req.files = [fileMock];
 
-        status = jest.fn().mockReturnThis();
-        json = jest.fn();
-        send = jest.fn();
+        const res = mockResponse();
 
-        res = {
-            status,
-            json,
-            send,
-        };
+        await createDefect(req, res);
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith(defectMock.defect);
     });
+});
 
-    it('should create a new defect and return it', async () => {
-        const newDefect = {
-            id: 1,
-            df_title: req.body.title,
-            df_note: req.body.note,
-            df_type: req.body.type,
-            df_status: req.body.status,
-            df_us_id: req.body.userId,
-        };
+describe('getDefect', () => {
+    test('ควรดึงข้อมูล Defect ได้ถูกต้อง', async () => {
+        prismaMock.defect.findUnique.mockResolvedValueOnce(defectMock.defect);
 
-        (prisma.defect.create as jest.Mock).mockResolvedValue(newDefect);
+        const req = mockRequest(
+            {},
+            { id: 1 },
+            {},
+            { role: "inspector", userId: 3 });
 
-        await createDefect(req as Request, res as Response);
+        const res = mockResponse();
 
-        expect(prisma.defect.create).toHaveBeenCalledWith({
-            data: {
-                df_title: req.body.title,
-                df_note: req.body.note,
-                df_type: req.body.type,
-                df_status: req.body.status,
-                df_us_id: req.body.userId,
-            },
-        });
-        expect(status).toHaveBeenCalledWith(201);
-        expect(json).toHaveBeenCalledWith(newDefect);
+        await getDefect(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(defectMock.defect);
     });
+});
 
-    it('should handle errors and return a 500 status', async () => {
-        const errorMessage = 'Database error';
-        (prisma.defect.create as jest.Mock).mockRejectedValue(new Error(errorMessage));
+describe('getAllDefect', () => {
+    test('ควรดึงข้อมูล Defect ทั้งหมดที่ตัวเองเกี่ยวข้องได้ถูกต้อง', async () => {
+        prismaMock.defect.findMany.mockResolvedValueOnce(allDefects);
 
-        await createDefect(req as Request, res as Response);
+        const req = mockRequest(
+            {},
+            { status: "reported" },
+            {},
+            { role: "inspector", userId: 3 });
 
-        expect(status).toHaveBeenCalledWith(500);
-        expect(send).toHaveBeenCalledWith(expect.any(Error));
+        const res = mockResponse();
+
+        await getAllDefects(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(allDefects);
+    });
+});
+
+describe('updateDefect', () => {
+    test('ควรแก้ไขข้อมูล Defect ได้ถูกต้อง', async () => {
+        prismaMock.defect.findUnique.mockResolvedValueOnce(defectMock.defect);
+        prismaMock.defect.update.mockResolvedValueOnce({ id: 1, desciption: "Test Defect Edit" });
+        prismaMock.defect.findUnique.mockResolvedValueOnce(updateDefectMock);
+
+        const req = mockRequest(
+            {},
+            { desciption: "Test Defect Edit" },
+            { id: 1 },
+            { role: "inspector", userId: 3 });
+
+        const res = mockResponse();
+
+        await updateDefect(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(updateDefectMock);
+    });
+});
+
+describe('getAllComments', () => {
+    test('ควรดึงข้อมูล Comment ทั้งหมดที่ตัวเองเกี่ยวข้องได้ถูกต้อง', async () => {
+        prismaMock.comment.findMany.mockResolvedValueOnce(getAllCommentsMock);
+        const req = mockRequest(
+            {},
+            {},
+            {},
+            { role: "supervisor", userId: 6 });
+
+        const res = mockResponse();
+
+        await getAllComments(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(getAllCommentsMock);
+    });
+});
+
+describe('confirmComment', () => {
+    test('ควรอัปเดตสถานะ Comment ได้ถูกต้อง', async () => {
+        prismaMock.comment.update.mockResolvedValueOnce(commentMock);
+        prismaMock.comment.findUnique.mockResolvedValueOnce(commentMock);
+        const req = mockRequest(
+            {},
+            { id: 1 },
+            { status: true},
+            { role: "inspector", userId: 3 });
+
+        const res = mockResponse();
+
+        await confirmComment(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(commentMock);
     });
 });

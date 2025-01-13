@@ -1,20 +1,28 @@
-import { prisma } from '@Utils/database.js'
+import prisma from '@Utils/database.js'
 import { Request, Response } from 'express'
-import transformKeys, { keyMap } from '@Utils/key-map.js';
+import { createNotification } from '@Controllers/util-controller.js'
+import { NotificationType } from '@prisma/client'
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Zone
+ * Input: 
+ * - (req.params.id): Int (ID ของ Zone)
+ * Output: JSON object ข้อมูล Zone
+**/
 export async function getZone(req: Request, res: Response) {
     try {
-        const userRole = (req as any).user.role;
-        if (userRole !== 'admin' && userRole !== 'inspector') {
-            res.status(403).json({ message: "Access Denied: Admins only" });
-            return
-        }
         const zoneId = parseInt(req.params.id, 10)
         const zone = await prisma.zone.findUnique({
-            where: { ze_id: zoneId },
+            where: { id: zoneId },
             include: {
                 supervisor: {
-                    include: {
+                    select: {
+                        id: true,
+                        username: true,
+                        email: true,
+                        role: true,
+                        department: true,
+                        createdAt: true,
                         profile: {
                             include: {
                                 image: true
@@ -28,28 +36,69 @@ export async function getZone(req: Request, res: Response) {
             res.status(404)
             return
         }
-        let result = transformKeys(zone, keyMap);
-     
-        res.status(200).send(result)
+        let result = zone;
+
+        res.status(200).json(result)
         return
     } catch (error) {
-        res.status(500).json(error)
+        res.status(500)
         return
     }
 }
 
+export async function getAllZone(req: Request, res: Response) {
+    try {
+        const zone = await prisma.zone.findMany({
+            select: {
+               id:true,
+               name:true,
+            }
+        })
+        if (!zone) {
+            res.status(404)
+            return
+        }
+        let result = zone;
+
+        res.status(200).json(result)
+        return
+    } catch (error) {
+        res.status(500)
+        return
+    }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Location
+ * Input: 
+ * - (req.params.id): Int (ID ของ Location)
+ * Output: JSON object ข้อมูล Location
+**/
 export async function getLocation(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id, 10);
-        const userRole = (req as any).user.role;
-        if (userRole !== 'admin' && userRole !== 'inspector') {
-            res.status(403).json({ message: "Access Denied: Admins only" });
-            return
-        }
         const location = await prisma.location.findUnique({
-            where: { lt_id: id },
+            where: { id: id },
             include: {
-                zone: true
+                zones: {
+                    include: {
+                        supervisor: {
+                            select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                role: true,
+                                department: true,
+                                createdAt: true,
+                                profile: {
+                                    include: {
+                                        image: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             }
         })
 
@@ -58,12 +107,83 @@ export async function getLocation(req: Request, res: Response) {
             return
         }
 
-        let result = transformKeys(location, keyMap);
+        let result = location;
 
-        res.send(result)
+        res.status(200).json(result)
         return
     } catch (error) {
-        res.status(500).json(error)
+        res.status(500)
         return
+    }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับเปลี่ยน Supervisor
+ * Input:
+ * - req.params.id: number (ID ของ Zone ที่ต้องการเปลี่ยน Supervisor)
+ * - req.body: {
+ *     userId: number,
+ * Output: JSON object ข้อมูล Zone หลังจาก update
+**/
+export async function updateSupervisor(req: Request, res: Response) {
+    try {
+        const zoneId = parseInt(req.params.id, 10);
+        const { userId } = req.body;
+
+        const oldZone = await prisma.zone.findUnique({
+            where: { userId: userId },
+        });
+
+        if (oldZone && oldZone.id !== zoneId) {
+            await prisma.zone.update({
+                where: { id: oldZone.id },
+                data: { userId: null },
+            });
+        }
+
+        // อัปเดต zone
+        await prisma.zone.update({
+            where: { id: zoneId },
+            data: {
+                userId: userId ? parseInt(userId, 10) : null,
+            },
+        });
+
+        let result = await prisma.zone.findUnique({
+            where: {
+                id: zoneId
+            },
+            include: {
+                supervisor: {
+                    select: {
+                        id: true,
+                        username: true,
+                        email: true,
+                        role: true,
+                        department: true,
+                        createdAt: true,
+                        profile: {
+                            include: {
+                                image: true
+                            }
+                        }
+                    }
+                }
+            },
+        });
+
+        const message = `update_supervisor-${result?.name}`;
+        await createNotification({
+            message: message,
+            type: "information" as NotificationType,
+            url: `/profile`,
+            userId: userId,
+        });
+
+        res.status(200).json(result);
+        return;
+    } catch (error) {
+        res.status(500);
+        return;
     }
 }

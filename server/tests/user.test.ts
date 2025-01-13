@@ -1,190 +1,173 @@
+import "./_mocks_/prisma.mock";
 
-import { getUser, getAllUsers, createUser, getProfile } from '../Controllers/user-controller';
-import { prisma } from '../Utils/database';
-import bcrypt from 'bcryptjs';
-import { Request, Response } from 'express';
+import {
+  createUser,
+  updateProfile,
+  getUser,
+  getAllUsers,
+  updateUser,
+  removeUser,
+} from "@Controllers/user-controller.js";
+import { Request, Response } from "express";
+import { prismaMock } from "./_mocks_/prisma.mock";
+import { allUsersMock, createUserResponseMock, updateProfileMock, updateProfileOnUserUpdateMock, updateUserMock, updateUserResponseMock, userMock } from "./_mocks_/user.mock";
 
-jest.mock('../Utils/database', () => ({
-    prisma: {
-        user: {
-            findUnique: jest.fn(),
-            findMany: jest.fn(),
-            create: jest.fn(),
-        },
-    },
-}));
+// Mock Response object
+const mockResponse = () => {
+  const res: Partial<Response> = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res as unknown as Response;
+};
 
-jest.mock('bcrypt');
+// Mock Request object
+const mockRequest = (query: any, params: any, body: any, user: any) => {
+  return {
+    query,
+    params,
+    body,
+    user,
+  } as unknown as Request;
+};
 
-describe('User Controller', () => {
-    const mockRequest = (params = {}, body = {}) => {
-        return {
-            params,
-            body,
-        } as Partial<Request>;
-    };
-    const mockResponse = () => {
-        const res = {} as Response;
-        res.status = jest.fn().mockReturnValue(res);
-        res.json = jest.fn().mockReturnValue(res);
-        res.send = jest.fn().mockReturnValue(res);
-        return res;
-    };
-    describe('getUser', () => {
-        it('should return 404 if user not found', async () => {
-            const req = mockRequest({ id: '1' }); // Pass params directly
-            const res = mockResponse();
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-
-            await getUser(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
-        });
-
-        it('should return 200 and the user if found', async () => {
-            const req = mockRequest({ id: '1' }); // Pass params directly
-            const res = mockResponse();
-            const mockUser = { us_id: 1, us_username: 'testUser' };
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-
-            await getUser(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith(mockUser);
-        });
-
-        it('should return 500 on error', async () => {
-            const req = mockRequest({ id: '1' }); // Pass params directly
-            const res = mockResponse();
-
-            (prisma.user.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
-
-            await getUser(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Failed to fetch user' });
-        });
+describe("getUser", () => {
+  test("should retrieve User successfully", async () => {
+    prismaMock.user.findUnique.mockResolvedValue(userMock);
+    const req = mockRequest(
+      { profile: "false" },
+      {},
+      {},
+      { userId: 1, role: "admin" }
+    );
+    const res = mockResponse();
+    await getUser(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        password: false,
+        role: true,
+        createdAt: true,
+        active: true,
+        profile: false
+          ? {
+            include: {
+              image: false,
+            },
+          }
+          : undefined,
+        zone: true
+      },
     });
+  });
+});
+
+describe("getAllUsers", () => {
+  test("should retrieve All Users successfully", async () => {
+    prismaMock.user.findMany.mockResolvedValue(allUsersMock);
+    const req = mockRequest({ profile: "false" }, {}, { role: "admin" }, {});
+    const res = mockResponse();
+    await getAllUsers(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(allUsersMock);
+  });
+});
+
+describe("createUser", () => {
+  test("should return the created user with a 201 status", async () => {
+    prismaMock.user.create.mockResolvedValueOnce({id:1});
+    prismaMock.profile.create.mockResolvedValueOnce({id:1});
+    prismaMock.user.findUnique.mockResolvedValueOnce(createUserResponseMock);
+    const req = mockRequest(
+      {},
+      {},
+      {
+        username: "TEST12/1/68",
+        password: "12345678",
+        role: "inspector",
+      },
+      {}
+    );
+    const res = mockResponse();
+    await createUser(req, res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(createUserResponseMock);
+  });
+});
+
+describe("updateProfile", () => {
+  test("should update profile and return 200", async () => {
+    prismaMock.user.findUnique.mockResolvedValueOnce({ id: 1 });
+    prismaMock.profile.update.mockResolvedValueOnce({ id: 1 });
+
+    const req = mockRequest(
+      {},
+      {},
+      {
+        imagePath: "newImage.jpg",
+      },
+      { userId: 1 }
+    );
+    const res = mockResponse();
+
+    await updateProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(updateProfileMock);
+  });
+});
+
+describe("updateUser", () => {
 
 
-    describe('getAllUsers', () => {
-        it('should return all users', async () => {
-            const req = mockRequest();
-            const res = mockResponse();
-            const mockUsers = [{ us_id: 1, us_username: 'testUser' }];
+  test("should update user and return 200", async () => {
+        prismaMock.user.update.mockResolvedValueOnce(updateUserMock);
+        prismaMock.profile.update.mockResolvedValueOnce(updateProfileOnUserUpdateMock);
 
-            (prisma.user.findMany as jest.Mock).mockResolvedValue(mockUsers);
+    const req = mockRequest(
+      {},
+      {id: "1"},
+      {
+        username: "updatedUser",
+        email: "updated@example.com",
+        role: "admin",
+        department: "UpdatedDept",
+        name: "Updated Name",
+        age: "30",
+        tel: "123456789",
+        address: "Updated Address",
+      },
+      { userId: 1 ,role:"admin"}
+    );
+    const res = mockResponse();
 
-            await getAllUsers(req as Request, res as Response);
 
-            expect(res.send).toHaveBeenCalledWith(mockUsers);
-        });
+    await updateUser(req, res);
 
-        it('should return 500 on error', async () => {
-            const req = mockRequest();
-            const res = mockResponse();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining(updateUserResponseMock)
+    );
+  });
+});
 
-            (prisma.user.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
-
-            await getAllUsers(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.send).toHaveBeenCalledWith(expect.any(Error));
-        });
+describe("removeUser", () => {
+  it("should deactivate the user and return 200", async () => {
+    prismaMock.user.update.mockResolvedValueOnce({ id: 1 });
+    const req = mockRequest(
+      {},
+      {id: "1"},
+      {},
+      { }
+    );
+    const res = mockResponse();
+    await removeUser(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "User has been deactivated successfully",
     });
-
-    describe('createUser', () => {
-        it('should create a new user and return it', async () => {
-            const req = mockRequest();
-            req.body = {
-                username: 'testUser',
-                email: 'test@example.com',
-                password: 'password',
-                role: 'user',
-                department: 'IT',
-            };
-            const res = mockResponse();
-            const mockNewUser = { us_id: 1, us_username: 'testUser' };
-
-            (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-            (prisma.user.create as jest.Mock).mockResolvedValue(mockNewUser);
-
-            await createUser(req as Request, res as Response);
-
-            expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
-            expect(prisma.user.create).toHaveBeenCalledWith({
-                data: {
-                    us_username: 'testUser',
-                    us_email: 'test@example.com',
-                    us_password: 'hashedPassword',
-                    us_role: 'user',
-                    us_department: 'IT',
-                },
-            });
-            expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith(mockNewUser);
-        });
-
-        it('should return 500 on error', async () => {
-            const req = mockRequest();
-            req.body = {
-                username: 'testUser',
-                email: 'test@example.com',
-                password: 'password',
-            };
-            const res = mockResponse();
-
-            (bcrypt.hash as jest.Mock).mockRejectedValue(new Error('Hashing error'));
-
-            await createUser(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.send).toHaveBeenCalledWith(expect.any(Error));
-        });
-    });
-
-    describe('getProfile', () => {
-        it('should return user profile if found', async () => {
-            const req = mockRequest();
-            (req as any).user = { userId: 1 }; // Simulate authenticated user
-            const res = mockResponse();
-            const mockUserWithProfile = { us_id: 1, us_username: 'testUser', profile: {} };
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUserWithProfile);
-
-            await getProfile(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith(mockUserWithProfile);
-        });
-
-        it('should return 404 if user or profile not found', async () => {
-            const req = mockRequest();
-            (req as any).user = { userId: 1 }; // Simulate authenticated user
-            const res = mockResponse();
-
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-
-            await getProfile(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({ error: 'User or Profile not found' });
-        });
-
-        it('should return 500 on error', async () => {
-            const req = mockRequest();
-            (req as any).user = { userId: 1 }; // Simulate authenticated user
-            const res = mockResponse();
-
-            (prisma.user.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
-
-            await getProfile(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Failed to fetch user profile' });
-        });
-    });
+  });
 });

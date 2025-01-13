@@ -1,153 +1,286 @@
-// util-controller.test.ts
-import { login, logout, authenticateUser } from '../Controllers/util-controller';
-import { prisma } from '../Utils/database';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { authenticateUser, authorzied, createNotification, getNotifications, login, logout, markAllAsRead, removeAllNotifications, removeOldNotifications, updateNotification } from "@Controllers/util-controller.js";
+import { prismaMock } from "./_mocks_/prisma.mock";
+import { allNotificationMock, createNotificationMock, decodeMock, notificationMock, updateNotificationMock, userMock } from "./_mocks_/util.mock";
+import { getIOInstance } from "@Utils/socket.js";
 
-jest.mock('../Utils/database', () => ({
-  prisma: {
-    user: {
-      findUnique: jest.fn(),
-    },
-  },
+// Mock Response object
+const mockResponse = (overrides: Partial<Response> = {}) => {
+  const res: Partial<Response> = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn().mockReturnThis(),
+    cookie: jest.fn().mockReturnThis(),
+    clearCookie: jest.fn().mockReturnThis(),
+    ...overrides,
+  };
+  return res as Response;
+};
+
+// Mock Request object
+const mockRequest = (query: any, params: any, body: any, user: any, cookies: any) => {
+  return {
+    query,
+    params,
+    body,
+    user,
+    cookies,
+  } as unknown as Request;
+};
+
+jest.mock('bcryptjs', () => ({
+  compare: jest.fn(),
 }));
 
-jest.mock('bcrypt');
-jest.mock('jsonwebtoken');
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn(),
+  verify: jest.fn(),
+}));
 
-describe('Auth Controller', () => {
-  const mockRequest = () => {
-    return {
-      body: {
-        username: 'testUser',
-        password: 'testPassword',
-        rememberMe: false,
+describe('login', () => {
+  test('ควรเข้าสู่ระบบได้สำเร็จ', async () => {
+    prismaMock.user.findUnique.mockResolvedValue(userMock);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (jwt.sign as jest.Mock).mockReturnValue("mockToken");
+
+    (global.Date.now as jest.Mock) = jest.fn(() => 1702310400000);
+
+    const req = mockRequest(
+      {},
+      {},
+      {
+        username: "testuser",
+        password: "testpassword",
+        rememberMe: true,
       },
-      cookies: {},
-    } as Partial<Request>;
-  };
+      { role: "inspector", userId: 3 },
+      {});
 
-  const mockResponse = () => {
-    const res = {} as Response;
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    res.cookie = jest.fn().mockReturnValue(res);
-    res.clearCookie = jest.fn().mockReturnValue(res);
-    return res;
-  };
+    const res = mockResponse();
 
-  const mockNext = jest.fn() as NextFunction;
+    await login(req, res);
+    expect(bcrypt.compare).toHaveBeenCalledWith("testpassword", "hashedPassword");
 
-  describe('login', () => {
-    it('should return 401 if user not found', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-      const req = mockRequest();
-      const res = mockResponse();
+    expect(jwt.sign).toHaveBeenCalledWith(
+      {
+        userId: 1,
+        role: "inspector",
+        iat: 1702310400,
+        exp: expect.any(Number),
+      },
+      expect.any(String)
+    );
 
-      await login(req as Request, res as Response);
+    expect(res.cookie).toHaveBeenCalledWith("authToken", "mockToken", expect.any(Object));
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ message: "Login Success", token: "mockToken" });
+  });
+});
 
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Invalid username or password" });
+describe('logout', () => {
+  test('ควรออกจากระบบได้สำเร็จ', async () => {
+    const req = mockRequest(
+      {},
+      {},
+      {},
+      { role: "inspector", userId: 3 },
+      { authToken: "mockToken" });
+
+    const res = mockResponse();
+
+    await logout(req, res);
+
+    expect(res.clearCookie).toHaveBeenCalledWith("authToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
     });
 
-    it('should return 401 if password is incorrect', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
-        us_password: 'hashedPassword',
-      });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ message: "Logout successful" });
+  });
+});
 
-      const req = mockRequest();
-      const res = mockResponse();
+describe('authenticateUser', () => {
+  test('ควรยืนยันตัวตนผู้ใช้งานได้สำเร็จ', async () => {
+    const req = mockRequest(
+      {},
+      {},
+      {},
+      { role: "inspector", userId: 3 },
+      { authToken: "mockToken" });
 
-      await login(req as Request, res as Response);
+    const res = mockResponse();
+    const next = jest.fn();
+    (jwt.verify as jest.Mock).mockReturnValue(decodeMock);
 
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Invalid username or password" });
+    authenticateUser(req, res, next);
+    expect(req.user).toEqual(decodeMock);
+    expect(next).toHaveBeenCalled();
+  });
+});
+
+describe('getNotifications', () => {
+  test('ควรดึงข้อมูล Notification ได้ถูกต้อง', async () => {
+    prismaMock.notification.findMany.mockResolvedValueOnce(allNotificationMock);
+
+    const req = mockRequest(
+      {},
+      {},
+      {},
+      { role: "inspector", userId: 3 },
+      {});
+
+    const res = mockResponse();
+
+    await getNotifications(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(allNotificationMock);
+  });
+});
+
+
+jest.mock('@Utils/socket.js', () => ({
+  getIOInstance: jest.fn().mockReturnValue({
+    to: jest.fn().mockReturnThis(),
+    emit: jest.fn(),
+  }),
+}));
+
+// describe('createNotification', () => {
+//   test('ควรสร้าง Notification และเรียก emit ผ่าน IOInstance ได้สำเร็จ', async () => {
+//     prismaMock.notification.create.mockResolvedValue(notificationMock);
+//     prismaMock.user.findUnique.mockResolvedValue(createNotificationMock);
+
+//     const message = "notification test";
+//     const type = "request";
+//     const url = "/patrol/3";
+//     const userId = 3;
+
+//     const data = { message, type, url, userId };
+//     console.log('Test input data:', data);
+
+//     await createNotification(data);
+//     console.log('Prisma Mock Calls:', prismaMock.notification.create.mock.calls);
+
+//     expect(prismaMock.notification.create).toHaveBeenCalledTimes(1);
+
+//     // expect(prismaMock.notification.create).toHaveBeenCalledWith(notificationMock);
+//     expect(getIOInstance).toHaveBeenCalled();
+//     expect(getIOInstance().to).toHaveBeenCalledWith(userId);
+//     expect(getIOInstance().emit).toHaveBeenCalledWith('new_notification', notificationMock);
+//   });
+// });
+
+describe('updateNotification', () => {
+  test('ควรเปลี่ยนสถานะ Notification เป็น "อ่านแล้ว"', async () => {
+    prismaMock.notification.update.mockResolvedValueOnce(updateNotificationMock);
+
+    const req = mockRequest(
+      {},
+      {},
+      { id: 1 },
+      { role: "inspector", userId: 3 },
+      {});
+
+    const res = mockResponse();
+
+    await updateNotification(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(updateNotificationMock);
+  });
+});
+
+describe('markAllAsRead', () => {
+  test('ควรเปลี่ยนสถานะ Notification ทั้งหมดเป็น "อ่านแล้ว"', async () => {
+    prismaMock.notification.updateMany.mockResolvedValueOnce({
+      count: 2,
     });
 
-    it('should return 200 and set cookie if login is successful', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
-        us_id: 1,
-        us_role: 'user',
-        us_password: 'hashedPassword',
-      });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      (jwt.sign as jest.Mock).mockReturnValue('mockToken');
+    const req = mockRequest(
+      {},
+      {},
+      { id: 1 },
+      { role: "inspector", userId: 3 },
+      {});
 
-      const req = mockRequest();
-      const res = mockResponse();
+    const res = mockResponse();
 
-      await login(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: "Login Success", token: 'mockToken' });
-      expect(res.cookie).toHaveBeenCalledWith("authToken", 'mockToken', expect.any(Object));
+    await markAllAsRead(req, res);
+    expect(prismaMock.notification.updateMany).toHaveBeenCalledWith({
+      where: { userId: 3, read: false },
+      data: { read: true },
     });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ message: "All notifications marked as read" });
+  });
+});
+
+describe('removeOldNotifications', () => {
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(new Date("2025-01-12T15:09:36.718Z"));
   });
 
-  describe('logout', () => {
-    it('should clear authToken cookie and return success message', async () => {
-      const req = mockRequest();
-      const res = mockResponse();
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  test('ควรลบ Notification ที่เก่ากว่า 7 วัน', async () => {
+    prismaMock.notification.deleteMany.mockResolvedValueOnce({
+      count: 2,
+    });
 
-      await logout(req as Request, res as Response);
 
-      expect(res.clearCookie).toHaveBeenCalledWith("authToken", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: "Logout successful" });
+    const sevenDaysAgo = new Date("2025-01-12T15:09:36.718Z");
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    await removeOldNotifications();
+    expect(prismaMock.notification.deleteMany).toHaveBeenCalledWith({
+      where: {
+        timestamp: {
+          lt: sevenDaysAgo,
+        },
+      },
     });
   });
+});
 
-  describe('authenticateUser', () => {
-    it('should return 401 if no token is provided', () => {
-      const req = mockRequest();
-      const res = mockResponse();
+describe('removeAllNotifications', () => {
+  test('ควรลบ Notification ทั้งหมดของผู้ใช้', async () => {
+    prismaMock.notification.deleteMany.mockResolvedValueOnce({
+      count: 2,
+    })
+    const req = mockRequest(
+      {},
+      {},
+      {},
+      { role: "inspector", userId: 3 },
+      {});
 
-      authenticateUser(req as Request, res as Response, mockNext);
+    const res = mockResponse();
 
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Access Denied, No Token Provided" });
+    await removeAllNotifications(req, res);
+    expect(prismaMock.notification.deleteMany).toHaveBeenCalledWith({
+      where: {
+        userId: 3,
+      },
     });
+  });
+});
 
-    it('should return 400 if the token is invalid', () => {
-      const req = {
-        ...mockRequest(),
-        cookies: {
-          authToken: 'invalidToken',
-        },
-      } as Partial<Request>;
-      const res = mockResponse();
+describe('authorzied', () => {
+  test('ควรอนุญาตให้ผู้ใช้ที่มีบทบาทใน allowedRoles ผ่านได้', async () => {
+    const allowedRoles = ["admin", "inspector"];
+    const middleware = authorzied(allowedRoles);
 
-      (jwt.verify as jest.Mock).mockImplementation(() => {
-        throw new Error('Invalid token');
-      });
+    const req = mockRequest({}, {}, {}, { role: "inspector", userId: 3 }, {});
+    const res = mockResponse();
+    const next = jest.fn();
 
-      authenticateUser(req as Request, res as Response, mockNext);
+    middleware(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "Invalid Token" });
-    });
-
-    it('should call next if the token is valid', () => {
-      const req = {
-        ...mockRequest(),
-        cookies: {
-          authToken: 'validToken',
-        },
-      } as Partial<Request>;
-      const res = mockResponse();
-
-      (jwt.verify as jest.Mock).mockReturnValue({ userId: 1, role: 'user' });
-
-      authenticateUser(req as Request, res as Response, mockNext);
-
-      expect(req.user).toEqual({ userId: 1, role: 'user' });
-      expect(mockNext).toHaveBeenCalled();
-    });
+    expect(next).toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
   });
 });

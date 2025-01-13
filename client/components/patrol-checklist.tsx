@@ -10,38 +10,25 @@ import {
 } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-  AlertDialogAction,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
   IItem,
   itemType,
   IItemZone,
   IPatrolChecklist,
   IPatrolResult,
   IUser,
+  IDefect,
+  IComment,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
-import { fetchData } from "@/lib/api";
+import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { Skeleton } from "./ui/skeleton";
 import { formatTime } from "@/lib/utils";
-// TYPE
+import AlertDefect from "./alert-defect";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/hooks/use-toast";
+import { AlertCustom } from "@/components/alert-custom";
 
 interface PatrolChecklistProps {
   user: IUser;
@@ -55,6 +42,7 @@ interface PatrolChecklistProps {
   }) => void;
   results: Array<{ itemId: number; zoneId: number; status: boolean }>;
   patrolResult: IPatrolResult[];
+  response?: (defect: IDefect) => void
 }
 
 export default function PatrolChecklist({
@@ -64,14 +52,15 @@ export default function PatrolChecklist({
   handleResult,
   results = [],
   patrolResult,
+  response,
 }: PatrolChecklistProps) {
   const [mounted, setMounted] = useState<boolean>(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [resultStatus, setResultStatus] = useState<{
     [key: string]: boolean | null;
   }>({});
-  const [defectDescription, setDefectDescription] = useState<string>("");
-  const [comment, setComment] = useState<string>("")
+  const [comments, setComments] = useState<{ [key: string]: string }>({});
+  const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResult);
+  const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
@@ -95,122 +84,78 @@ export default function PatrolChecklist({
     }
   }, [results]);
 
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setSelectedFiles([...selectedFiles, ...Array.from(event.target.files)]);
-    }
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const files = event.dataTransfer.files;
-    if (files && files.length > 0) {
-      setSelectedFiles([...selectedFiles, ...Array.from(files)]);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
-
-  const handleRemoveFile = (index: number) => {
-    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-
   const handleCreateComment = async (
     message: string,
     patrolResultId: number,
+    supervisorId: number
   ) => {
+
     const data = {
       message: message,
       patrolResultId: patrolResultId,
+      supervisorId: supervisorId
     };
+
     try {
-      await fetchData(
+      const comment = await fetchData(
         "post",
         `/patrol/${param.id}/comment`,
         true,
         data,
       );
-      window.location.reload();
+      if (!message) {
+        toast({
+          variant: "error",
+          title: a("PatrolMissingCreateCommentTitle"),
+          description: a("PatrolMissingCreateCommentDescription"),
+        });
+      } else {
+        toast({
+          variant: "default",
+          title: a("PatrolCreateCommentTitle"),
+          description: a("PatrolCreateCommentDescription"),
+        });
+      }
+      fetchRealtimeComment(comment, patrolResultId)
     } catch (error) {
       console.error("Error creating Comment:", error);
     }
   };
 
-  const handleCreateDefect = async (
-    name: string,
-    description: string,
-    type: string,
-    userId: number,
-    patrolResultId: number | null,
-    supervisorId: number,
-    files: File[]
-  ) => {
-    const formData = new FormData();
+  const fetchRealtimeComment = (comment: IComment, patrolResultId: number) => {
+    setPatrolResultState(prevState => prevState.map(pr => {
+      if (pr.id === patrolResultId) {
+        return {
+          ...pr,
+          comments: pr.comments ? [...pr.comments, comment] : [comment]
+        };
+      }
+      return pr;
+    }));
+  }
 
-    formData.append("name", name);
-    formData.append("description", description);
-    formData.append("type", type);
-    formData.append("status", "reported");
-    formData.append("defectUserId", userId.toString());
-    formData.append("patrolResultId", patrolResultId.toString());
-    formData.append("supervisorId", supervisorId.toString());
-
-    files.forEach((file) => {
-      formData.append("imageFiles", file);
-    });
-    try {
-      await fetchData(
-        "post",
-        "/defect",
-        true,
-        formData,
-        true
-      );
-      window.location.reload();
-    } catch (error) {
-      console.error("Error creating defect:", error);
-    }
-  };
-
-  const handleDefectDescription = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const { value } = event.target;
-    setDefectDescription(value);
-  };
-  const handleButtonClick = (event: React.FormEvent) => {
-    event.preventDefault();
-    document.getElementById("file-input")?.click();
-  };
-
-  const getBadgeVariant = (type: itemType) => {
-    switch (type) {
-      case "safety":
-        return "mint";
-      case "environment":
-        return "orange";
-      case "maintenance":
-        return "red";
-      default:
-        return "red";
-    }
+  const handleCommentChange = (itemId: number, zoneId: number, value: string) => {
+    setComments(prev => ({
+      ...prev,
+      [`${itemId}-${zoneId}`]: value
+    }));
   };
 
   const getExistingResult = (itemId: number, zoneId: number) => {
     const result = patrolResult.find(
       (res) => res.itemId === itemId && res.zoneId === zoneId
     );
-
     return result;
   };
 
+  const fetchRealtimeData = (defect: IDefect) => {
+    response(defect)
+  }
+
   useEffect(() => {
-    if (patrolResult && patrolChecklist.checklist.item) {
-      const initialStatus = patrolChecklist.checklist.item.reduce((acc, item) => {
-        item.itemZone.flatMap((itemZone: IItemZone) => {
+    if (patrolResult && patrolChecklist.checklist.items) {
+      const initialStatus = patrolChecklist.checklist.items.reduce((acc, item) => {
+        item.itemZones.flatMap((itemZone: IItemZone) => {
           const matchingResult = patrolResult.find((result) => {
             return result.itemId === item.id && result.zoneId === itemZone.zone.id;
           });
@@ -251,69 +196,115 @@ export default function PatrolChecklist({
     )
   }
 
+  const checkResultStatusChecklist = (checklistId: number): boolean => {
+    const checklistResults = patrolResult.filter(result =>
+      patrolChecklist.checklist.id === checklistId &&
+      patrolChecklist.checklist.items.some(item =>
+        item.id === result.itemId &&
+        item.itemZones.some(itemZone => itemZone.zone.id === result.zoneId)
+      )
+    );
+
+    return checklistResults.every(result => result.status !== null);
+  };
+
   return (
-    <div className="bg-secondary rounded-md px-4 py-2">
-      <Accordion type="single" collapsible>
+    <div className="bg-card rounded-md px-6 py-4">
+      <Accordion type="single" collapsible defaultValue="item-1">
         <AccordionItem value="item-1" className="border-none">
-          <AccordionTrigger className="hover:no-underline text-2xl font-semibold py-2">
-            {patrolChecklist.checklist.title}
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="flex flex-rows items-center gap-2 text-muted-foreground text-base ps-4 py-2  border-t-2 ">
-              <span className="material-symbols-outlined">engineering</span>
-              <p className="font-semibold">{t("Inspector")}</p>
-              <p className="text-card-foreground">{patrolChecklist.inspector.profile.name}</p>
+          <AccordionTrigger className="flex flex-row  hover:no-underline text-2xl font-bold p-0">
+            <div key={patrolChecklist.checklist.id} className="flex flex-row items-center gap-3">
+              {checkResultStatusChecklist(patrolChecklist.checklist.id) ?
+                null
+                :
+                <span className="material-symbols-outlined text-destructive">error</span>
+              }
+              <p>{patrolChecklist.checklist.title}</p>
             </div>
-            <div className="ps-2">
-              {patrolChecklist.checklist.item?.map((item: IItem) => (
+          </AccordionTrigger>
+          <AccordionContent className="p-0" >
+            <div className="flex items-center gap-2 mb-2 mt-2">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <span className="material-symbols-outlined">person_search</span>
+                <p className="text-lg font-semibold">{t("inspector")}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Avatar className="custom-shadow h-[35px] w-[35px]">
+                  <AvatarImage
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
+                  />
+                  <AvatarFallback id={patrolChecklist.inspector.id.toString()}>
+                    {getInitials(patrolChecklist.inspector.profile.name)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <p className="text-card-foreground text-lg">{patrolChecklist.inspector.profile.name}</p>
+              </div>
+            </div>
+            <div>
+              {patrolChecklist.checklist.items?.map((item: IItem) => (
                 <Accordion type="single" collapsible>
                   <AccordionItem value="item-1" className="border-none">
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center justify-between w-full pe-2">
                         <p className="text-xl font-semibold">{item.name}</p>
                         <BadgeCustom
-                          variant={getBadgeVariant(item.type as itemType)}
+                          variant={getItemTypeVariant(item.type as itemType).variant}
+                          iconName={getItemTypeVariant(item.type as itemType).iconName}
+                          showIcon={true}
+                          shape="square"
                         >
                           {s(item.type)}
                         </BadgeCustom>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="flex flex-col py-2 gap-2">
-                      {item.itemZone.flatMap((itemZone: IItemZone) => {
-                        const status = checkStatus(item.id, itemZone.zone.id);
+                    <AccordionContent className="flex flex-col gap-4">
+                      {item.itemZones.flatMap((itemZones: IItemZone) => {
+                        const status = checkStatus(item.id, itemZones.zone.id);
                         const existingResult = getExistingResult(
                           item.id,
-                          itemZone.zone.id
+                          itemZones.zone.id
                         );
                         return (
-                          <div key={itemZone.zone.id} className="bg-card rounded-md p-2">
+                          <div key={itemZones.zone.id} className="bg-background rounded-md px-4 py-2">
                             <div className="flex flex-row justify-between items-center">
                               <div className="flex flex-col">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="material-symbols-outlined">
-                                    location_on
-                                  </span>
-                                  <p className="font-semibold text-lg">
-                                    {t("Zone")}
-                                  </p>
-                                  <p className="text-lg">{z(itemZone.zone.name)}</p>
+                                <div className="flex flex-row items-center gap-2">
+                                  <div className="flex flex-row items-center gap-1">
+                                    <span className="material-symbols-outlined text-muted-foreground">
+                                      location_on
+                                    </span>
+                                    <p className="font-semibold text-base text-muted-foreground">
+                                      {t("Zone")}
+                                    </p>
+                                  </div>
+                                  <p className="text-base">{z(itemZones.zone.name)}</p>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined">
-                                    badge
-                                  </span>
-                                  <p className="font-semibold text-lg">
-                                    {t("Supervisor")}
-                                  </p>
-                                  <p className="text-lg">
-                                    {itemZone.zone.supervisor.profile.name}
-                                  </p>
+
+                                <div className="flex flex-row items-center gap-2">
+                                  <div className="flex items-center text-muted-foreground gap-1">
+                                    <span className="material-symbols-outlined">engineering</span>
+                                    <p className="text-lg font-semibold">{t("supervisor")}</p>
+                                  </div>
+
+                                  <div className="flex items-center gap-1">
+                                    <Avatar className="custom-shadow h-[35px] w-[35px]">
+                                      <AvatarImage
+                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZones.zone.supervisor.profile.image?.path}`}
+                                      />
+                                      <AvatarFallback id={itemZones.zone.supervisor.id.toString()}>
+                                        {getInitials(itemZones.zone.supervisor.profile.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <p className="text-card-foreground text-lg">{itemZones.zone.supervisor.profile.name}</p>
+                                  </div>
+
                                 </div>
                               </div>
-                              <div className="flex gap-2 pe-2">
+                              <div className="flex gap-2">
                                 <Button
                                   variant={
-                                    resultStatus[`${item.id}-${itemZone.zone.id}`] ===
+                                    resultStatus[`${item.id}-${itemZones.zone.id}`] ===
                                       true
                                       ? "success"
                                       : "secondary"
@@ -339,7 +330,7 @@ export default function PatrolChecklist({
                                                                     `}
                                   onClick={() => {
                                     if (!existingResult.status === true || existingResult.status === null) {
-                                      handleClick(user.id, item.id, itemZone.zone.id, true);
+                                      handleClick(user.id, item.id, itemZones.zone.id, true);
                                     }
                                   }}
                                 >
@@ -350,7 +341,7 @@ export default function PatrolChecklist({
                                 </Button>
                                 <Button
                                   variant={
-                                    resultStatus[`${item.id}-${itemZone.zone.id}`] ===
+                                    resultStatus[`${item.id}-${itemZones.zone.id}`] ===
                                       false
                                       ? "fail"
                                       : "secondary"
@@ -376,7 +367,7 @@ export default function PatrolChecklist({
                                                                     `}
                                   onClick={() => {
                                     if (!existingResult.status === false || existingResult.status === null) {
-                                      handleClick(user.id, item.id, itemZone.zone.id, false);
+                                      handleClick(user.id, item.id, itemZones.zone.id, false);
                                     }
                                   }}
                                 >
@@ -390,203 +381,54 @@ export default function PatrolChecklist({
 
                             {(status === false ||
                               existingResult?.status === false) && (
-                                <div className="mt-4 flex flex-col items-start">
-                                  {existingResult.comment.map((comment) => (
-                                    //Comment Patrol
-                                    <div className="flex bg-secondary rounded-md w-full p-2 mb-2 gap-2">
-                                      <p className="text-muted-foreground font-bold text-lg">{formatTime(comment.timestamp)}</p>
-
-                                      <div className="flex items-end">
-                                        <p className="text-lg">{comment.message}</p>
-                                      </div>
-
-                                    </div>
-                                  ))}
-                                  <AlertDialog>
-                                    <AlertDialogTrigger
-                                      disabled={disabled}
-                                    >
-                                      <Button
-                                        variant={"outline"}
-                                        size={"lg"}
-                                        disabled={disabled}
-                                      >
-                                        <span className="material-symbols-outlined ">
-                                          campaign
-                                        </span>
-                                        {t("Report")}
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-2xl font-semibold">
-                                          Report Defect
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                          Please provide details for the defect
-                                        </AlertDialogDescription>
-                                        <div className="flex flex-col justify-start">
-                                          <p className="font-semibold">
-                                            {item.name}
-                                          </p>
-                                          <div className="flex items-center">
-                                            <span className="material-symbols-outlined text-2xl me-2">
-                                              location_on
-                                            </span>
-                                            <p className="font-semibold me-2">
-                                              Zone
-                                            </p>
-                                            <p>{itemZone.zone.name}</p>
-                                          </div>
-                                          <div className="flex items-center">
-                                            <span className="material-symbols-outlined text-2xl me-2">
-                                              badge
-                                            </span>
-                                            <p className="font-semibold me-2">
-                                              Supervisor
-                                            </p>
-                                            <p>{itemZone.zone.supervisor.profile.name}</p>
-                                          </div>
-                                        </div>
-                                      </AlertDialogHeader>
-                                      <Textarea
-                                        onChange={handleDefectDescription}
-                                        className="h-[100px] mt-3 bg-secondary border-none"
-                                        placeholder="Details..."
-                                      />
-                                      <div className="flex flex-row justify-between gap-2">
-                                        <div
-                                          className="flex h-full w-full max-w-[230px] rounded-[10px] bg-secondary justify-center items-center"
-                                          onDragOver={handleDragOver}
-                                          onDrop={handleDrop}
-                                        >
-                                          <div className="flex p-8 flex-col items-center justify-center">
-                                            <span className="material-symbols-outlined text-[48px] font-normal">
-                                              upload
-                                            </span>
-                                            <div className="text-center mt-2">
-                                              Drag & Drop file
-                                            </div>
-                                            <div className="text-center mt-1">
-                                              Or
-                                            </div>
-                                            <div className="mt-2">
-                                              <input
-                                                type="file"
-                                                id="file-input"
-                                                style={{ display: "none" }}
-                                                multiple
-                                                onChange={handleFileChange}
-                                              />
-                                              <Button
-                                                variant={"outline"}
-                                                onClick={handleButtonClick}
-                                              >
-                                                <span className="material-symbols-outlined mr-1">
-                                                  browser_updated
-                                                </span>
-                                                Browse
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <ScrollArea className="  h-72 overflow-y-auto gap-5 rounded-md w-full">
-                                          <div className="flex flex-col gap-2 w-[215px]">
-                                            {selectedFiles.map((file, index) => (
-                                              <div
-                                                key={index}
-                                                className=" flex p-2 w-full bg-secondary rounded-md"
-                                              >
-                                                <span className="material-symbols-outlined">
-                                                  image
-                                                </span>
-                                                <div className="flex items-center gap-2 ">
-                                                  <div className="flex flex-col">
-                                                    <TooltipProvider>
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <div className=" truncate w-[145px]">
-                                                            {file.name}
-                                                          </div>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent className="bg-foreground">
-                                                          <div className=" w-full ">
-                                                            {file.name}
-                                                          </div>
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                    </TooltipProvider>
-
-                                                    <p className="text-sm font-semibold text-muted-foreground">
-                                                      {(file.size / 1024).toFixed(
-                                                        2
-                                                      )}{" "}
-                                                      KB
-                                                    </p>
-                                                  </div>
-                                                </div>
-                                                <Button
-                                                  variant={"ghost"}
-                                                  className="w-[40px] h-[40px]"
-                                                  onClick={() =>
-                                                    handleRemoveFile(index)
-                                                  }
-                                                >
-                                                  <span className="material-symbols-outlined text-destructive">
-                                                    delete
-                                                  </span>
-                                                </Button>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </ScrollArea>
-                                      </div>
-
-                                      <AlertDialogFooter>
-                                        <div className="flex items-end justify-end gap-[10px]">
-                                          <AlertDialogCancel>
-                                            Cancel
-                                          </AlertDialogCancel>
-                                          <AlertDialogAction
-                                            onClick={() =>
-                                              handleCreateDefect(
-                                                item.name,
-                                                defectDescription,
-                                                item.type,
-                                                patrolChecklist.inspector.id,
-                                                existingResult?.id ?? null,
-                                                itemZone.zone.supervisor.id,
-                                                selectedFiles
-                                              )
-                                            }
-                                            disabled={
-                                              !defectDescription ||
-                                              selectedFiles.length === 0 ||
-                                              disabled
-                                            }
-                                            className={`bg-primary hover:bg-primary/70 ${!defectDescription ||
-                                              selectedFiles.length === 0
-                                              ? "opacity-50 cursor-not-allowed"
-                                              : ""
-                                              }`}
-                                          >
-                                            <span className="material-symbols-outlined text-2xl me-2">
-                                              send
-                                            </span>
-                                            Send
-                                          </AlertDialogAction>
-                                        </div>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                  <Textarea
-                                    className="h-[94px] mt-3 bg-secondary border-none"
-                                    placeholder={`${t("Comment")}...`}
-                                    disabled={disabled}
-                                    onChange={(e) => setComment(e.target.value)}
+                                <div className="flex flex-col items-start gap-4 mt-2">
+                                  <AlertDefect
+                                    item={item}
+                                    type={"report"}
+                                    result={existingResult}
+                                    patrolResults={patrolResult}
+                                    response={(defect: IDefect) => (
+                                      fetchRealtimeData(defect)
+                                    )}
                                   />
+
+                                  <div className="flex flex-col items-start w-full gap-2">
+                                    {patrolResultState.flatMap(pr => pr.comments ?? []).map((comment: IComment) =>
+                                      comment.patrolResultId === existingResult.id ?
+                                        (
+                                          <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
+                                            <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
+                                            <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp)}</p>
+                                            <div className="flex items-end">
+                                              <p className="text-xl">{comment.message}</p>
+                                            </div>
+                                          </div>
+                                        )
+                                        : null
+                                    )}
+                                    <Textarea
+                                      key={`${item.id}-${itemZones.zone.id}`}
+                                      className="min-h-[120px] bg-secondary border-none text-xl"
+                                      placeholder={`${t("Comment")}...`}
+                                      disabled={disabled}
+                                      value={comments[`${item.id}-${itemZones.zone.id}`] || ""}
+                                      onChange={(e) => handleCommentChange(item.id, itemZones.zone.id, e.target.value)}
+                                    />
+                                  </div>
+
                                   <div className="flex justify-end w-full mt-2">
-                                    <Button variant={"primary"} size={"lg"} disabled={disabled} onClick={() => handleCreateComment(comment, existingResult.id)}>
+                                    <Button
+                                      variant={"primary"}
+                                      size={"lg"}
+                                      disabled={disabled}
+                                      onClick={() => {
+                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, itemZones.zone.supervisor.id)
+                                        setComments(prev => ({
+                                          ...prev,
+                                          [`${item.id}-${itemZones.zone.id}`]: ""
+                                        }));
+                                      }}
+                                    >
                                       <span className="material-symbols-outlined me-2">
                                         send
                                       </span>

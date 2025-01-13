@@ -1,98 +1,312 @@
-// preset.test.ts
+import "./_mocks_/prisma.mock";
+import { Request, Response } from "express";
+import { prismaMock } from "./_mocks_/prisma.mock";
+import {
+  createChecklist,
+  createPreset,
+  getAllChecklists,
+  getAllPresets,
+  getChecklist,
+  getPreset,
+  removeChecklist,
+  removePreset,
+  updateChecklist,
+  updatePreset,
+} from "@Controllers/preset-controller.js";
+import {
+  allChecklistsMock,
+  allChecklistsResponseMock,
+  allPresetsMock,
+  allPresetsResponseMock,
+  checklistResponseMock,
+  createChecklistMock,
+  createChecklistResponseMock,
+  presetMock,
+  updateChecklistMock,
+  updateChecklistResponseMock,
+} from "./_mocks_/preset.mock";
 
-import { Request, Response } from 'express';
-import { prisma } from '../Utils/database';
-import { getAllPresets } from '../Controllers/preset-controller'; // Adjust the import path accordingly
+// Mock Response object
+const mockResponse = () => {
+  const res: Partial<Response> = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res as unknown as Response;
+};
 
-jest.mock('../Utils/database', () => ({
-    prisma: {
-        preset: {
-            findMany: jest.fn(),
+// Mock Request object
+const mockRequest = (query: any, params: any, body: any, user: any) => {
+  return {
+    query,
+    params,
+    body,
+    user,
+  } as unknown as Request;
+};
+
+describe("getPreset", () => {
+  test("should retrieve Preset successfully", async () => {
+    prismaMock.preset.findUnique.mockResolvedValue(presetMock);
+    const req = mockRequest({}, { id: 1 }, {}, {});
+    const res = mockResponse();
+    await getPreset(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(prismaMock.preset.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        presetChecklists: {
+          select: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-    },
-}));
-
-describe('Preset Controller', () => {
-    let req: Partial<Request>;
-    let res: Partial<Response>;
-    let json: jest.Mock;
-    let send: jest.Mock;
-
-    beforeEach(() => {
-        json = jest.fn();
-        send = jest.fn();
-        res = {
-            status: jest.fn().mockReturnValue({
-                json,
-                send,
-            }),
-            send, // Ensure send is directly on res as well
-        } as Partial<Response>;
+      },
     });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
-    describe('getAllPresets', () => {
-        it('should return all presets if found', async () => {
-            req = {} as Partial<Request>;
-
-            const mockPresets = [
-                {
-                    ps_id: 1,
-                    ps_title: 'Test Preset 1',
-                    checklist: [
-                        {
-                            cl_id: 1,
-                            checklist: {
-                                cl_title: 'Checklist 1',
-                            },
-                        },
-                    ],
-                },
-                {
-                    ps_id: 2,
-                    ps_title: 'Test Preset 2',
-                    checklist: [
-                        {
-                            cl_id: 2,
-                            checklist: {
-                                cl_title: 'Checklist 2',
-                            },
-                        },
-                    ],
-                },
-            ];
-
-            (prisma.preset.findMany as jest.Mock).mockResolvedValue(mockPresets);
-
-            await getAllPresets(req as Request, res as Response);
-
-            expect(res.send).toHaveBeenCalledWith(mockPresets); // Check if send was called with the presets
-            expect(res.status).not.toHaveBeenCalled(); // Ensure status was not called
-        });
-
-        it('should return 404 if no presets found', async () => {
-            req = {} as Partial<Request>;
-
-            (prisma.preset.findMany as jest.Mock).mockResolvedValue([]);
-
-            await getAllPresets(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(404); // Check if status was set to 404
-            expect(res.send).toHaveBeenCalledWith('No presets found'); // Check if send was called with the message
-        });
-
-        it('should return 500 on error', async () => {
-            req = {} as Partial<Request>;
-
-            (prisma.preset.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
-
-            await getAllPresets(req as Request, res as Response);
-
-            expect(res.status).toHaveBeenCalledWith(500); // Check if status was set to 500
-            expect(res.send).toHaveBeenCalledWith(expect.any(Error)); // Check if send was called with the error
-        });
-    });
+  });
 });
+
+describe("getAllPresets", () => {
+  test("should retrieve All Presets successfully", async () => {
+    prismaMock.preset.findMany.mockResolvedValue(allPresetsMock);
+    const req = mockRequest({}, {}, {}, {});
+    const res = mockResponse();
+    await getAllPresets(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(allPresetsResponseMock);
+  });
+});
+
+describe("createPreset", () => {
+  test("should Create Preset successfully", async () => {
+    prismaMock.preset.create.mockResolvedValue({ id: 1 });
+    prismaMock.presetChecklist.create.mockResolvedValue({ id: 1 });
+
+    const req = mockRequest(
+      {},
+      {},
+      {
+        title: "testPreset",
+        description: "testPresetDestcrip",
+        checklists: [1, 2, 3],
+      },
+      { userId: 1 }
+    );
+    const res = mockResponse();
+    await createPreset(req, res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Preset created successfully",
+      preset: { id: 1 },
+    });
+  });
+});
+
+describe("updatePreset", () => {
+  test("should Updated Preset successfully", async () => {
+    prismaMock.preset.findUnique.mockResolvedValue({ presetId: 1 });
+    prismaMock.preset.update.mockResolvedValue({ presetId: 1 });
+    prismaMock.preset.create.mockResolvedValue({ id: 2 });
+    prismaMock.presetChecklist.create.mockResolvedValue({ id: 1 });
+
+    const req = mockRequest(
+      {},
+      { id: 1 },
+      {
+        title: "testUpdatePreset",
+        description: "testUpdatePresetDestcrip",
+        checklists: [1, 2, 3],
+      },
+      { userId: 1 }
+    );
+    const res = mockResponse();
+    await updatePreset(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Preset updated successfully",
+      preset: { id: 2 },
+    });
+  });
+});
+
+describe("removePreset", () => {
+  test("should Remove Preset successfully", async () => {
+    prismaMock.patrol.count.mockResolvedValue({ presetId: 1 });
+    prismaMock.presetChecklist.deleteMany.mockResolvedValue({ presetId: 1 });
+    prismaMock.preset.delete.mockResolvedValue({ id: 1 });
+
+    const req = mockRequest({}, { id: 1 }, {}, {});
+    const res = mockResponse();
+    await removePreset(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Preset removed successfully",
+    });
+  });
+});
+
+describe("getChecklist", () => {
+  test("should get Checklist successfully", async () => {
+    prismaMock.checklist.findUnique.mockResolvedValue(checklistResponseMock);
+    const req = mockRequest({}, { id: 1 }, {}, {});
+    const res = mockResponse();
+    await getChecklist(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(prismaMock.checklist.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      include: {
+        items: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            checklistId: true,
+            itemZones: {
+              select: {
+                zone: {
+                  select: {
+                    id: true,
+                    name: true,
+                    supervisor: false
+                      ? {
+                          select: {
+                            id: true,
+                            role: true,
+                            profile: {
+                              select: {
+                                id: true,
+                                name: true,
+                                age: true,
+                                tel: true,
+                                address: true,
+                              },
+                            },
+                          },
+                        }
+                      : undefined,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+});
+
+describe("getAllChecklists", () => {
+  test("should get All Checklists successfully", async () => {
+    prismaMock.checklist.findMany.mockResolvedValueOnce(allChecklistsMock);
+    prismaMock.checklist.findMany.mockResolvedValueOnce(allChecklistsMock);
+
+    const req = mockRequest({}, {}, {}, {});
+    const res = mockResponse();
+
+    await getAllChecklists(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(allChecklistsResponseMock);
+  });
+});
+
+describe("createChecklist", () => {
+  test("should Create Checklist successfully", async () => {
+    prismaMock.checklist.create.mockResolvedValue(createChecklistResponseMock);
+    prismaMock.item.create.mockResolvedValue(createChecklistMock[0].items);
+    prismaMock.zone.findUnique.mockResolvedValue(createChecklistMock[0].zones);
+
+    const req = mockRequest(
+      {},
+      {},
+      {
+        title: "Security InspectionTest",
+        items: [
+          {
+            name: "sss Check",
+            type: "safety",
+            zoneId: [3, 4],
+          },
+          {
+            name: "1234 Check",
+            type: "safety",
+            zoneId: [1, 2],
+          },
+        ],
+      },
+      {userId:1}
+    );
+    const res = mockResponse();
+    await createChecklist(req, res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({"checklist": {"checklist": {"id": 25, "latest": true, "title": "Security InspectionTEST", "updatedAt": "2025-01-13T04:13:57.316Z", "updatedBy": 1, "version": 1}, "message": "Checklist created successfully"}, "message": "Checklist created successfully"}            );
+  });
+});
+
+
+
+describe("updateChecklist", () => {
+    test("should Update Checklist successfully", async () => {
+      prismaMock.checklist.create.mockResolvedValue(updateChecklistResponseMock);
+      prismaMock.item.create.mockResolvedValue(updateChecklistMock[0].items);
+      prismaMock.zone.findUnique.mockResolvedValue(updateChecklistMock[0].zones);
+  
+      const req = mockRequest(
+        {},
+        {id:1},
+        {
+          title: "Safety Inspection",
+          items: [
+            {
+              name: "sss Check",
+              type: "safety",
+              zoneId: [3, 4],
+            },
+            {
+              name: "1234 Check",
+              type: "safety",
+              zoneId: [1, 2],
+            },
+          ],
+        },
+        {userId:1}
+      );
+      const res = mockResponse();
+      await updateChecklist(req, res);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({"checklists": {"checklist": {"id": 2, "latest": true, "title": "Security InspectionTEST", "updatedAt": "2025-01-13T04:13:57.316Z", "updatedBy": 1, "version": 2}, "message": "Checklist created successfully"}, "message": "Checklist update successfully"});
+    });
+  });
+
+  describe("removeChecklist", () => {
+    test("should Remove Checklist successfully", async () => {
+      prismaMock.checklist.findUnique.mockResolvedValue({ id: 1 });
+      prismaMock.checklist.update.mockResolvedValue({ id: 1 });
+  
+      const req = mockRequest({}, { id: 1 }, {}, {});
+      const res = mockResponse();
+      await removeChecklist(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ message: "Checklist has been deactivated successfully" });
+    });
+  });
