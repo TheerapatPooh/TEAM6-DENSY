@@ -20,16 +20,16 @@ pipeline {
             }
         }
 
-        // stage('Run Tests') {
-        //     steps {
-        //         dir('/workspace/TEAM6-DENSY/server') {
-        //             sh '''
-        //             npm install
-        //             npm run test || exit 1
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Run Tests') {
+            steps {
+                dir('/workspace/TEAM6-DENSY/server') {
+                    sh '''
+                    npm install
+                    npm run test || exit 1
+                    '''
+                }
+            }
+        }
 
         stage('Cleanup Existing Containers') {
             steps {
