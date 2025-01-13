@@ -78,8 +78,10 @@ export async function logout(req: Request, res: Response) {
       sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax'
     });
     res.status(200).json({ message: "Logout successful" });
+    return
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
+    return
   }
 }
 

@@ -331,10 +331,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
-                                {type === "edit" ? t("EditDefect") : type === "resolve" ? t("ResolveDefect") : type === "edit-resolve" ? t("EditResolveDefect") : t("ReportDefect")}
+                                {t(type === "edit" ? "EditDefect" : type === "resolve" ? "ResolveDefect" : type === "edit-resolve" ? "EditResolveDefect" : "ReportDefect")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                {t("PleaseProvideDetailsForTheDefect")}
+                                {t(type === "edit" ? "PleaseProvideDetailsForTheDefect" : type === "resolve" ? "PleaseProvideResolvedTheDefect" : type === "edit-resolve" ? "EditResolvedTheDefect" : "PleaseProvideDetailsForTheDefect")}
                             </AlertDialogDescription>
                             <div className="flex flex-col justify-start">
                                 <p className="font-semibold">
@@ -390,7 +390,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                 <Textarea
                                     onChange={handleDefectDescription}
                                     className="h-[100px] bg-secondary border-none"
-                                    placeholder="Details..."
+                                    placeholder={`${t("Detail")}...`}
                                 />
                                 {detailError && (
                                     <p className="text-sm font-light text-destructive italic mt-1">{detailError}</p>
@@ -403,7 +403,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                 {t("Image")}
                             </div>
                             <div className='flex flex-row py-1 pr-2 gap-4'>
-                                <div className='flex flex-col gap-1 flex-1'>
+                                <div className='flex flex-col gap-1 flex-1 rounded-md custom-shadow'>
                                     <div
                                         className="flex h-full w-full rounded-[10px] bg-secondary justify-center items-center"
                                         onDragOver={handleDragOver}
@@ -414,10 +414,10 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 upload
                                             </span>
                                             <div className="text-center mt-2">
-                                                Drag & Drop file
+                                                {t("Drag&DropFile")}
                                             </div>
                                             <div className="text-center mt-1">
-                                                Or
+                                                {t("Or")}
                                             </div>
                                             <div className="mt-2">
                                                 <input
@@ -429,12 +429,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 />
                                                 <Button
                                                     variant={"outline"}
+                                                    className='custom-shadow'
                                                     onClick={handleButtonClick}
                                                 >
                                                     <span className="material-symbols-outlined mr-1">
                                                         browser_updated
                                                     </span>
-                                                    Browse
+                                                    {t("Browse")}
                                                 </Button>
                                             </div>
                                         </div>

@@ -25,7 +25,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
 
   return (
     <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
-      <DropdownMenuTrigger className="w-[300px] h-[65px]">
+      <DropdownMenuTrigger className="w-[300px] h-[65px] custom-shadow">
         <Button
           variant="outline"
           className={`w-full h-full justify-between bg-${color} hover:bg-background border-none`}

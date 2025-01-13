@@ -10,8 +10,8 @@
       "@uploads/*": ["src/uploads/*"],
       "@Utils/*": ["src/Utils/*"]
     },
-    "rootDir": "./src",   
-    // "rootDir": "./",                     // สำหรับ Test               
+    // "rootDir": "./src",   
+    "rootDir": "./",                     // สำหรับ Test               
     "target": "ESNext",                     // ระบุเวอร์ชัน JavaScript 
     "module": "ESNext",                     // ใช้ ESModule
     "moduleResolution": "bundler",             // ใช้การ resolve module แบบ Node.js
@@ -23,7 +23,7 @@
     "resolveJsonModule": true,
     "types": ["node", "jest", "express"],
   },
-  "include": ["src/**/*.ts"], 
-  // "include": ["src/**/*.ts", "tests/**/*.ts"],  // สำหรับ Test
+  // "include": ["src/**/*.ts"], 
+  "include": ["src/**/*.ts", "tests/**/*.ts"],  // สำหรับ Test
   "exclude": ["node_modules"]
 }

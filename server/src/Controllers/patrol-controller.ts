@@ -73,9 +73,14 @@ export async function getPatrol(req: Request, res: Response) {
               },
             },
             inspector: {
-              include: {
+              select: {
+                id: true,
+                email: true,
+                department: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
                     image: true,
                   },
                 },
@@ -342,7 +347,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500);
+    res.status(500)
     return;
   }
 }
@@ -576,13 +581,8 @@ export async function startPatrol(req: Request, res: Response) {
       return;
     }
 
-    if (!status || !checklists) {
+    if (!status || !checklists || status !== "scheduled") {
       res.status(400);
-      return;
-    }
-
-    if (status !== "scheduled") {
-      res.status(400)
       return;
     }
 
@@ -671,9 +671,14 @@ export async function startPatrol(req: Request, res: Response) {
               },
             },
             inspector: {
-              include: {
+              select: {
+                id: true,
+                email: true,
+                department: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
                     image: true,
                   },
                 },
@@ -1136,13 +1141,13 @@ export async function commentPatrol(req: Request, res: Response) {
       },
     });
 
-    const notification = `new_comment`;
-    await createNotification({
-      message: notification,
-      type: "request" as NotificationType,
-      url: `/comment/${newComment.id}`,
-      userId: supervisorId,
-    });
+    // const notification = `new_comment`;
+    // await createNotification({
+    //   message: notification,
+    //   type: "request" as NotificationType,
+    //   url: `/comment/${newComment.id}`,
+    //   userId: supervisorId,
+    // });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = newComment;
@@ -1150,6 +1155,7 @@ export async function commentPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     res.status(500)
+    console.error(error);
     return;
   }
 }

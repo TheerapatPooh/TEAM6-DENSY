@@ -38,7 +38,7 @@ export async function getZone(req: Request, res: Response) {
         }
         let result = zone;
 
-        res.status(200).send(result)
+        res.status(200).json(result)
         return
     } catch (error) {
         res.status(500)
@@ -60,7 +60,7 @@ export async function getAllZone(req: Request, res: Response) {
         }
         let result = zone;
 
-        res.status(200).send(result)
+        res.status(200).json(result)
         return
     } catch (error) {
         res.status(500)
@@ -109,7 +109,7 @@ export async function getLocation(req: Request, res: Response) {
 
         let result = location;
 
-        res.send(result)
+        res.status(200).json(result)
         return
     } catch (error) {
         res.status(500)

@@ -1,4 +1,5 @@
 'use client'
+import bcrypt from "bcryptjs";
 import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from '@/components/alert-custom';
 import Map from '@/components/map';
+import Textfield from "@/components/textfield";
 
 interface IFormProfile {
     name?: string,
@@ -194,7 +196,7 @@ export default function page() {
             }
 
             else {
-                const passwordMatch = formData.currentPassword === userData.password;
+                const passwordMatch = bcrypt.compare(formData.currentPassword, userData.password);
                 if (passwordMatch) {
                     if (formData.newPassword === formData.confirmPassword) {
                         userForm.append("password", formData.newPassword);
@@ -308,7 +310,7 @@ export default function page() {
 
                         <AlertDialog>
                             <AlertDialogTrigger>
-                                <Button variant='outline' size='default'>
+                                <Button className="custom-shadow" variant='outline' size='default'>
                                     {t("UploadNewPhoto")}
                                 </Button>
                             </AlertDialogTrigger>
@@ -419,7 +421,7 @@ export default function page() {
                                         </span>
                                         <p>{t('Zone')}</p>
                                     </div>
-                                    <div className=" flex justify-center bg-secondary rounded-lg py-4">
+                                    <div className=" flex justify-center bg-secondary rounded-md py-4">
                                         <Map
                                             disable={true}
                                             initialSelectedZones={[userData.zone.id]}
@@ -482,7 +484,7 @@ export default function page() {
 
                         <div className='w-[415px] mb-4'>
                             <p className='text-base font-semibold text-muted-foreground mb-1'>{t("Address")}</p>
-                            <Textarea name="address" onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary h-56'></Textarea>
+                            <Textarea name="address" onChange={handleInputChange} placeholder={userData.profile.address ? userData.profile.address : "-"} className='text-xl font-normal bg-secondary custom-shadow h-56'></Textarea>
                             {addressError && (
                                 <p className="ttext-sm font-light text-destructive italic mt-1">{addressError}</p>
                             )}
@@ -501,27 +503,27 @@ export default function page() {
                             <Input name="username" onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
                         </div>
 
-                        <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("CurrentPassword")}</p>
-                            <Input type='password' name="currentPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                        <div className='flex flex-col w-[415px] mb-4 gap-1'>
+                            <p className='text-base font-semibold text-muted-foreground'>{t("CurrentPassword")}</p>
+                            <Textfield name="currentPassword" className='text-xl font-normal bg-secondary'  type='password' showIcon={true} iconName='lock' placeholder='' onChange={handleInputChange} />
                             {currentPassError && (
-                                <p className="ttext-sm font-light text-destructive italic mt-1">{currentPassError}</p>
+                                <p className="text-sm font-light text-destructive italic mt-1">{currentPassError}</p>
                             )}
                         </div>
 
-                        <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("NewPassword")}</p>
-                            <Input type='password' name="newPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                        <div className='flex flex-col w-[415px] mb-4 gap-1'>
+                            <p className='text-base font-semibold text-muted-foreground'>{t("NewPassword")}</p>
+                            <Textfield name="newPassword" className='text-xl font-normal bg-secondary'  type='password' showIcon={true} iconName='key' placeholder='' onChange={handleInputChange} />
                             {newPassError && (
-                                <p className="ttext-sm font-light text-destructive italic mt-1">{newPassError}</p>
+                                <p className="text-sm font-light text-destructive italic mt-1">{newPassError}</p>
                             )}
                         </div>
 
-                        <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("ConfirmPassword")}</p>
-                            <Input type='password' name="confirmPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                        <div className='flex flex-col w-[415px] mb-4 gap-1'>
+                            <p className='text-base font-semibold text-muted-foreground'>{t("ConfirmPassword")}</p>
+                            <Textfield name="confirmPassword" className='text-xl font-normal bg-secondary'  type='password' showIcon={true} iconName='check_circle' placeholder='' onChange={handleInputChange} />
                             {confirmPassError && (
-                                <p className="ttext-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
+                                <p className="text-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
                             )}
                         </div>
                     </div>

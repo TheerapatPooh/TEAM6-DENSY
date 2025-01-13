@@ -10,19 +10,19 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-accent-gradient text-primary-foreground font-medium text-lg shadow hover:bg-accent-gradient-hover",
+          "bg-accent-gradient text-primary-foreground font-medium text-lg custom-shadow hover:bg-accent-gradient-hover",
         destructive:
-          "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm hover:bg-destructive/80",
+          "bg-destructive text-destructive-foreground font-medium text-lg custom-shadow hover:bg-destructive/80",
         success:
-          "bg-green text-destructive-foreground font-medium text-lg shadow-sm",
+          "bg-green text-destructive-foreground font-medium text-lg custom-shadow",
         fail:
-          "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm",
+          "bg-destructive text-destructive-foreground font-medium text-lg custom-shadow",
         outline:
-          "border text-card-foreground bg-card font-medium text-lg shadow-sm hover:border-destructive",
+          "border text-card-foreground bg-card font-medium text-lg v hover:border-destructive",
         secondary:
-          "bg-secondary text-secondary-foreground font-medium text-lg shadow-sm hover:bg-secondary/70",
+          "bg-secondary text-secondary-foreground font-medium text-lg custom-shadow hover:bg-secondary/70",
         ghost: "font-medium text-lg hover:bg-background",
-        primary: "bg-primary text-primary-foreground font-medium text-lg shadow hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground font-medium text-lg custom-shadow hover:bg-primary/90",
         link: "text-muted-foreground underline-offset-4 hover:underline",
       },
       size: {

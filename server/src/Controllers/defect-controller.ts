@@ -64,11 +64,11 @@ export async function createDefect(req: Request, res: Response) {
       },
     });
 
-    const updateResult = async (patrolResultId: number) => {
+    const updateResult = async (patrolResultId: string) => {
       try {
         const result = await prisma.patrolResult.findUnique({
           where: {
-            id: parseInt(patrolResultId.toString()), // Ensure it's an Integer
+            id: parseInt(patrolResultId), // Ensure it's an Integer
           },
         });
 
@@ -78,7 +78,7 @@ export async function createDefect(req: Request, res: Response) {
         }
 
         const updatedResult = await prisma.patrolResult.update({
-          where: { id: parseInt(patrolResultId.toString()) },
+          where: { id: parseInt(patrolResultId) },
           data: {
             status: false,
           },
