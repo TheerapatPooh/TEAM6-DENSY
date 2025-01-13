@@ -26,6 +26,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from '@/components/alert-custom';
 import Map from '@/components/map';
+import Textfield from "@/components/textfield";
 
 interface IFormProfile {
     name?: string,
@@ -502,27 +503,27 @@ export default function page() {
                             <Input name="username" onChange={handleInputChange} placeholder={userData.username ? userData.username : "-"} className='text-xl font-normal bg-secondary' readOnly></Input>
                         </div>
 
-                        <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("CurrentPassword")}</p>
-                            <Input type='password' name="currentPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                        <div className='flex flex-col w-[415px] mb-4 gap-1'>
+                            <p className='text-base font-semibold text-muted-foreground'>{t("CurrentPassword")}</p>
+                            <Textfield name="currentPassword" className='text-xl font-normal bg-secondary'  type='password' showIcon={true} iconName='lock' placeholder='' onChange={handleInputChange} />
                             {currentPassError && (
-                                <p className="ttext-sm font-light text-destructive italic mt-1">{currentPassError}</p>
+                                <p className="text-sm font-light text-destructive italic mt-1">{currentPassError}</p>
                             )}
                         </div>
 
-                        <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("NewPassword")}</p>
-                            <Input type='password' name="newPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                        <div className='flex flex-col w-[415px] mb-4 gap-1'>
+                            <p className='text-base font-semibold text-muted-foreground'>{t("NewPassword")}</p>
+                            <Textfield name="newPassword" className='text-xl font-normal bg-secondary'  type='password' showIcon={true} iconName='key' placeholder='' onChange={handleInputChange} />
                             {newPassError && (
-                                <p className="ttext-sm font-light text-destructive italic mt-1">{newPassError}</p>
+                                <p className="text-sm font-light text-destructive italic mt-1">{newPassError}</p>
                             )}
                         </div>
 
-                        <div className='w-[415px] mb-4'>
-                            <p className='text-base font-semibold text-muted-foreground mb-1'>{t("ConfirmPassword")}</p>
-                            <Input type='password' name="confirmPassword" placeholder='' className='text-xl font-normal bg-secondary' onChange={handleInputChange}></Input>
+                        <div className='flex flex-col w-[415px] mb-4 gap-1'>
+                            <p className='text-base font-semibold text-muted-foreground'>{t("ConfirmPassword")}</p>
+                            <Textfield name="confirmPassword" className='text-xl font-normal bg-secondary'  type='password' showIcon={true} iconName='check_circle' placeholder='' onChange={handleInputChange} />
                             {confirmPassError && (
-                                <p className="ttext-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
+                                <p className="text-sm font-light text-destructive italic mt-1">{confirmPassError}</p>
                             )}
                         </div>
                     </div>

@@ -5,46 +5,50 @@ import { cn } from "@/lib/utils"
 
 
 interface TextfieldProps {
-  placeholder?: string;  
-  iconName?: string;  
+  placeholder?: string;
+  iconName?: string;
   type?: string;
-  showIcon?: boolean;    
-  className?: string; 
-  value?: string; 
+  showIcon?: boolean;
+  className?: string;
+  value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  ref?: React.Ref<HTMLInputElement>; 
+  ref?: React.Ref<HTMLInputElement>;
+  name?: string;
 }
 
 export default function Textfield({
-  placeholder, 
-  iconName, 
+  placeholder,
+  iconName,
   showIcon = false,
   type = 'text',
   className,
   value,
   onChange,
-  ref }: TextfieldProps) {
-    const [visible, setVisible] = useState(false);
-    const toggleVisibility = () => setVisible(!visible);
+  ref,
+  name 
+}: TextfieldProps) {
+  const [visible, setVisible] = useState(false);
+  const toggleVisibility = () => setVisible(!visible);
   return (
     <div className="relative flex items-center w-full h-full" >
-      <Input 
+      <Input
         type={type === 'password' ? (visible ? 'text' : 'password') : type}
         placeholder={placeholder}
         className={cn("ps-10 h-[40px] outline-none border-none bg-card flex-1 text-card-foreground text-base placeholder:text-input", className)}
         value={value}
         onChange={onChange}
-        ref={ref} 
-        />
-          {showIcon && iconName && (
-          <span
-            className={`material-symbols-outlined absolute left-2 text-input transition-opacity duration-300 ${showIcon ? 'opacity-100' : 'opacity-0'}`}
-            style={{ visibility: showIcon ? 'visible' : 'hidden' }}
-          >
+        ref={ref}
+        name={name}
+      />
+      {showIcon && iconName && (
+        <span
+          className={`material-symbols-outlined absolute left-2 text-input transition-opacity duration-300 ${showIcon ? 'opacity-100' : 'opacity-0'}`}
+          style={{ visibility: showIcon ? 'visible' : 'hidden' }}
+        >
           {iconName}
         </span>
       )}
-        {type === 'password' && (
+      {type === 'password' && (
         <span
           className="material-symbols-outlined absolute right-2 cursor-pointer text-input"
           onClick={toggleVisibility}
