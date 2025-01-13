@@ -58,7 +58,7 @@ export default function PatrolChecklist({
   const [resultStatus, setResultStatus] = useState<{
     [key: string]: boolean | null;
   }>({});
-  const [comment, setComment] = useState<string>("")
+  const [comments, setComments] = useState<{ [key: string]: string }>({});
   const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResult);
   const a = useTranslations("Alert");
   const t = useTranslations("General");
@@ -133,6 +133,13 @@ export default function PatrolChecklist({
       return pr;
     }));
   }
+
+  const handleCommentChange = (itemId: number, zoneId: number, value: string) => {
+    setComments(prev => ({
+      ...prev,
+      [`${itemId}-${zoneId}`]: value
+    }));
+  };
 
   const getExistingResult = (itemId: number, zoneId: number) => {
     const result = patrolResult.find(
@@ -400,11 +407,12 @@ export default function PatrolChecklist({
                                         : null
                                     )}
                                     <Textarea
+                                      key={`${item.id}-${itemZones.zone.id}`}
                                       className="min-h-[120px] bg-secondary border-none text-xl"
                                       placeholder={`${t("Comment")}...`}
                                       disabled={disabled}
-                                      value={comment}
-                                      onChange={(e) => setComment(e.target.value)}
+                                      value={comments[`${item.id}-${itemZones.zone.id}`] || ""}
+                                      onChange={(e) => handleCommentChange(item.id, itemZones.zone.id, e.target.value)}
                                     />
                                   </div>
 
@@ -414,8 +422,11 @@ export default function PatrolChecklist({
                                       size={"lg"}
                                       disabled={disabled}
                                       onClick={() => {
-                                        handleCreateComment(comment, existingResult.id, itemZones.zone.supervisor.id)
-                                        setComment("")
+                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, itemZones.zone.supervisor.id)
+                                        setComments(prev => ({
+                                          ...prev,
+                                          [`${item.id}-${itemZones.zone.id}`]: ""
+                                        }));
                                       }}
                                     >
                                       <span className="material-symbols-outlined me-2">

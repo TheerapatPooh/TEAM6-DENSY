@@ -91,11 +91,12 @@
     "Accept": "Accept",
     "admin": "Admin",
     "Edit": "Edit",
+    "Image": "Image",
     "EditDefect": "Edit Defect",
     "ResolveDefect": "Resolve Defect",
+    "EditResolveDefect": "Edit Resolve Defect",
     "ReportDefect": "Report Defect",
-    "EditDefectDescription": "Please provide details for the defect",
-    "Image": "Image",
+    "PleaseProvideDetailsForTheDefect": "Please provide details for the defect",
     "Drag&DropFile": "Drag & Drop File",
     "Or": "Or",
     "Browse": "Browse"
@@ -280,6 +281,8 @@
     "PatrolCreateCommentDescription": "The issue has been noted for review.",
     "PatrolMissingCreateCommentTitle": "Send Failed",
     "PatrolMissingCreateCommentDescription": "Please provide comment.",
+    "EditReportDefectTitle": "Report Updated",
+    "EditReportDefectDescription": "Your changes have been saved successfully.",
     "ReportDefectTitle": "Report Submitted",
     "ReportDefectDescription": "Your defect report has been successfully submitted.",
     "ReportDefectConfirmTitle": "Are you sure to report defect?",
@@ -317,6 +320,10 @@
     "CompleteDefectTitle": "Defect Marked as Completed",
     "CompleteDefectDescription": "This defect has been marked as completed, indicating it has been fixed and passed inspection.",
     "DefectResolveTitle": "Defect Marked as Resolved",
-    "DefectResolveDescription": "This defect has been marked as resolved and is awaiting inspection for confirmation."
+    "DefectResolveDescription": "This defect has been marked as resolved and is awaiting inspection for confirmation.",
+    "ReportEditResolveConfirmTitle": "Are you sure to edit resolve defect?",
+    "ReportEditResolveConfirmDescription": "Please confirm to edit resolve defect.",
+    "EditDefectResolveTitle": "Edit Resolved Defect",
+    "EditDefectResolveDescription": "Update the information of a defect marked as resolved and awaiting inspector review."
   }
 }

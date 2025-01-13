@@ -42,7 +42,6 @@ export default function Page() {
   const getAllDefects = async () => {
     try {
       const queryString = buildQueryString(filter, searchTerm);
-      console.log(queryString)
       const data = await fetchData("get", `/defects?${queryString}`, true);
       setAllDefects(data);
     } catch (error) {

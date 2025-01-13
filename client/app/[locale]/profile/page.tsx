@@ -129,7 +129,6 @@ export default function page() {
     };
 
     const handleUpdateUserData = async () => {
-        console.log(formData)
         let showErrorToast = false;
         setCurrentPassError(null)
         setNewPassError(null)

@@ -217,9 +217,9 @@ export default function Page() {
                 break;
               case "resolved":
                 variant = "primary";
-                iconName = "published_with_changes";
-                text = "Resolve";
-                disabled = true;
+                iconName = "edit";
+                text = "Edit";
+                disabled = false;
                 break;
               default:
                 variant = "primary";
@@ -241,15 +241,23 @@ export default function Page() {
                       fetchRealtimeData(defect)
                     }} /> :
 
-                  <Button
-                    size="lg"
-                    variant={variant}
-                    onClick={handleFunction}
-                    disabled={disabled}
-                  >
-                    <span className="material-symbols-outlined">{iconName}</span>
-                    {t(text)}
-                  </Button>
+                  defect.status === "resolved" ?
+                    <AlertDefect
+                      defect={defect}
+                      type={"edit-resolve"}
+                      response={(defect: IDefect) => {
+                        fetchRealtimeData(defect)
+                      }} />  :
+
+                    <Button
+                      size="lg"
+                      variant={variant}
+                      onClick={handleFunction}
+                      disabled={disabled}
+                    >
+                      <span className="material-symbols-outlined">{iconName}</span>
+                      {t(text)}
+                    </Button>
                 }
               </>
             );

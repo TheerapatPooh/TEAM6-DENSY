@@ -85,7 +85,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
     }
 
     if (location) {
-      const updatedZones = location.zones.map(zone => {
+      const updatedZones = location.zones?.map(zone => {
         const matchedZonePath = paths.find(path => path.id === zone.id);
         return {
           ...zone,
@@ -168,7 +168,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
   return (
     <Stage width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md'>
       <Layer x={8} y={8}>
-        {zones.map((zone) => {
+        {zones?.map((zone) => {
           const isSelected = selectedZones.includes(zone.id);
           const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
           const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;

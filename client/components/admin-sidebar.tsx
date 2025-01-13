@@ -47,8 +47,6 @@ export function AdminSidebar() {
         return pathAfterLang === menuPath || pathAfterLang.startsWith(menuPath);
     };
 
-    console.log("path", pathAfterLang)
-
     return (
         <SidebarProvider className={`sticky transition-all duration-300 ${isExpanded ? "w-[240px]" : "w-[70px] pointer-events-none"}`}>
             <Sidebar className={`w-[240px] border-none ${isExpanded ? "w-[240px]" : "w-[70px] "}`}>
