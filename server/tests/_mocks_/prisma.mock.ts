@@ -8,6 +8,7 @@ export const prismaMock = {
         update: jest.fn(),
         delete: jest.fn(),
         deleteMany: jest.fn(),
+        count: jest.fn()
     },
     patrolChecklist: {
         findUnique: jest.fn(),
@@ -27,7 +28,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    patrolDefect: {
+    defect:{
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -36,7 +37,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    defect: {
+    user:{
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -46,6 +47,16 @@ export const prismaMock = {
         deleteMany: jest.fn(),
     },
     comment: {
+        upsert:  jest.fn(),
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+    },
+    profile:{
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -55,6 +66,16 @@ export const prismaMock = {
         deleteMany: jest.fn(),
     },
     zone: {
+        upsert:  jest.fn(),
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+    },
+    image:{
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -72,7 +93,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    image: {
+    notification:{
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -80,7 +101,60 @@ export const prismaMock = {
         update: jest.fn(),
         delete: jest.fn(),
         deleteMany: jest.fn(),
+        updateMany: jest.fn(),
     },
+    preset:{
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+        updateMany: jest.fn(),
+    },
+    presetChecklist:{
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+        updateMany: jest.fn(),
+    },
+    checklist:{
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+        updateMany: jest.fn(),
+    },
+    item:{
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+        updateMany: jest.fn(),
+    },
+    itemZone:{
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+        updateMany: jest.fn(),
+    },
+
+   
     defectImage: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
@@ -89,27 +163,9 @@ export const prismaMock = {
         update: jest.fn(),
         delete: jest.fn(),
         deleteMany: jest.fn(),
-    },
-    user: {
-        findUnique: jest.fn(),
-        findFirst: jest.fn(),
-        findMany: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-        deleteMany: jest.fn(),
-    },
-    notification: {
-        findUnique: jest.fn(),
-        findFirst: jest.fn(),
-        findMany: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        updateMany: jest.fn(),
-        delete: jest.fn(),
-        deleteMany: jest.fn(),
-    },
-    // Mock method อื่น ๆ ที่ใช้ในโค้ดจริง-
+    }
+   
+    // Mock method อื่น ๆ ที่ใช้ในโค้ดจริง
 };
 
 // ทำการ mock โมดูล prisma ใน @Utils/database.js
