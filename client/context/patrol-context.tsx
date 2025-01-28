@@ -10,7 +10,7 @@ import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import { useTranslations } from "next-intl";
 
-interface PatrolContextProps {
+interface IPatrolContext {
     patrol: IPatrol | null;
     patrolResults: IPatrolResult[];
     results: IPatrolResult[];
@@ -45,7 +45,7 @@ interface PatrolContextProps {
 
 }
 
-const PatrolContext = createContext<PatrolContextProps | undefined>(undefined);
+const PatrolContext = createContext<IPatrolContext | undefined>(undefined);
 
 export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     children,

@@ -1,10 +1,29 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Textfield ใช้สำหรับรับข้อมูลจากผู้ใช้ โดยมีคุณสมบัติดังนี้
+ * Input: 
+ * - placeholder: ข้อความที่แสดงในช่องกรอกข้อมูล
+ * - iconName: ชื่อไอคอนที่ใช้แสดงในช่องกรอกข้อมูล
+ * - type: ประเภทของช่องกรอกข้อมูล เช่น text, password
+ * - showIcon: สถานะที่ใช้สำหรับแสดงไอคอนในช่องกรอกข้อมูล
+ * - className: ชื่อคลาสที่ใช้สำหรับสร้างสไตล์ของช่องกรอกข้อมูล
+ * - value: ค่าที่ใส่ในช่องกรอกข้อมูล
+ * - onChange: ฟังก์ชันที่ใช้สำหรับเปลี่ยนค่าในช่องกรอกข้อมูล
+ * - ref: อ้างอิงของช่องกรอกข้อมูล
+ * - name: ชื่อของช่องกรอกข้อมูล
+ * Output:
+ * - JSX ของ Textfield ที่ใช้สำหรับรับข้อมูลจากผู้ใช้
+ * - แสดงช่องกรอกข้อมูลที่มีไอคอน และสามารถแสดงหรือซ่อนข้อมูลที่อยู่ในช่องกรอกข้อมูล
+ * - สามารถรับค่าจากผู้ใช้และเปลี่ยนค่าในช่องกรอกข้อมูลได้
+ **/
+
 'use client'
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input'
 import { cn } from "@/lib/utils"
 
 
-interface TextfieldProps {
+interface ITextfield {
   placeholder?: string;
   iconName?: string;
   type?: string;
@@ -26,7 +45,7 @@ export default function Textfield({
   onChange,
   ref,
   name 
-}: TextfieldProps) {
+}: ITextfield) {
   const [visible, setVisible] = useState(false);
   const toggleVisibility = () => setVisible(!visible);
   return (

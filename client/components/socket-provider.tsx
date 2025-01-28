@@ -1,3 +1,13 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ SocketProvider ใช้สำหรับเชื่อมต่อกับ Socket ของ Server และเก็บข้อมูลของ Socket ไว้ใน Context ของ React
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - JSX ของ SocketProvider ที่ใช้สำหรับเชื่อมต่อกับ Socket ของ Server และเก็บข้อมูลของ Socket ไว้ใน Context ของ React
+ * - ใช้ Hook ของ React ในการเชื่อมต่อกับ Socket ของ Server และเก็บข้อมูลของ Socket ไว้ใน Context ของ React
+ **/
+
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"

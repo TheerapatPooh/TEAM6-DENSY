@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ ModeToggle ใช้สำหรับเปลี่ยนธีมของเว็บไซต์ โดยมีฟังก์ชันที่ใช้สำหรับเปลี่ยนธีมเป็นแสงสว่าง แสงมืด หรือตามธีมของระบบปฏิบัติการ
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - JSX ของ Dropdown ที่มีธีมที่สามารถเลือกได้
+ **/
+
 'use client'
 import { useTheme } from 'next-themes'
 import React, { useEffect, useState } from 'react'

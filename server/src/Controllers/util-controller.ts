@@ -140,7 +140,7 @@ export const upload = multer({ storage: storage });
  * - (req as any).user.userId : Int (Id ของผู้ใช้ที่กำลังล็อคอิน)
  * Output: JSON message ของ notification  
 **/
-export async function getNotifications(req: Request, res: Response) {
+export async function getAllNotifications(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
 
@@ -152,6 +152,7 @@ export async function getNotifications(req: Request, res: Response) {
 
     res.status(200).json(result);
   } catch (error) {
+    console.error(error);
     res.status(500)
   }
 }
@@ -215,6 +216,7 @@ export async function updateNotification(req: Request, res: Response) {
     });
     res.status(200).json(notification);
   } catch (error) {
+    console.error(error);
     res.status(500)
   }
 }
@@ -264,6 +266,7 @@ export async function markAsRead(req: Request, res: Response) {
 
     res.status(200).json({ message: "Notification marked as read" });
   } catch (error) {
+    console.error(error);
     res.status(500)
   }
 }

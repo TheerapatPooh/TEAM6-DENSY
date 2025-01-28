@@ -44,13 +44,13 @@ const AvatarImage = React.forwardRef<
 ))
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
-interface AvatarFallbackProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> {
+interface IAvatarFallback extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> {
   id: string;
 }
 
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  AvatarFallbackProps
+  IAvatarFallback
 >(({ className,id , ...props }, ref) => {
   const bgColor = getColorFromId(id); 
   return (

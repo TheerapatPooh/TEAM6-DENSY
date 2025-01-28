@@ -1,3 +1,13 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ LanguageSelect ใช้สำหรับเปลี่ยนภาษาของเว็บไซต์
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - JSX ของ Dropdown ที่มีภาษาที่สามารถเลือกได้
+ **/
+
+
 'use client'
 import React, { useEffect, useState }  from 'react'
 import {

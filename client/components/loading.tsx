@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ loading ใช้สำหรับแสดงการโหลดข้อมูล โดยจะแสดง loader และข้อความ "Loading" ในระหว่างการโหลดข้อมูล
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - JSX ของการโหลดข้อมูล
+ **/
+
 import React from 'react'
 
 export default function loading() {
