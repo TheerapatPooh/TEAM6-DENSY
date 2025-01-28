@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *  หน้าแสดงรายการข้อบกพร่องทั้งหมด โดยสามารถค้นหา, กรอง, เรียงลำดับข้อมูลได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้าแสดงรายการข้อบกพร่องทั้งหมด โดยสามารถค้นหา, กรอง, เรียงลำดับข้อมูลได้
+ **/
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Defect from "@/components/defect";
-import { FilterDefect, IDefect, itemType, defectStatus } from "@/app/type";
+import { IFilterDefect, IDefect, itemType, defectStatus } from "@/app/type";
 import { fetchData, sortData } from "@/lib/utils";
 import Loading from "@/components/loading";
 import { DatePickerWithRange } from "@/components/date-picker";
@@ -60,7 +69,7 @@ export default function Page() {
 
   const initialFilter = {
     defectStatus: "All",
-    defectType: ["safety", "environment", "maintenance"],
+    defectTypes: ["safety", "environment", "maintenance"],
     dateRange: { start: undefined, end: undefined },
   };
 
@@ -74,7 +83,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<FilterDefect | null>(getStoredFilter())
+  const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Date",
@@ -87,12 +96,12 @@ export default function Page() {
         if (prev) {
           return {
             ...prev,
-            defectType: [...prev.defectType, type],
+            defectTypes: [...prev.defectTypes, type],
           };
         } else {
           return {
             defectStatus: "All",
-            defectType: [],
+            defectTypes: [],
             dateRange: { start: undefined, end: undefined }
           }
         }
@@ -103,7 +112,7 @@ export default function Page() {
         if (prev) {
           return {
             ...prev,
-            defectType: prev.defectType.filter((s) => s !== type),
+            defectTypes: prev.defectTypes.filter((s) => s !== type),
           };
         }
         return prev;
@@ -126,7 +135,7 @@ export default function Page() {
       : null;
     setFilter({
       defectStatus: filter?.defectStatus || null,
-      defectType: filter?.defectType || [],
+      defectTypes: filter?.defectTypes || [],
       dateRange: {
         start: startDate || undefined,
         end: endDate || undefined
@@ -140,7 +149,7 @@ export default function Page() {
     setSearchTerm(event.target.value);
   };
 
-  const buildQueryString = (filter: FilterDefect | null, searchTerm: string) => {
+  const buildQueryString = (filter: IFilterDefect | null, searchTerm: string) => {
     const params: Record<string, string | undefined> = {};
 
     // เพิ่ม search term ถ้ามี
@@ -152,8 +161,8 @@ export default function Page() {
     }
 
     // เพิ่ม type filter
-    if (filter?.defectType?.length) {
-      params.type = filter.defectType.join(",");
+    if (filter?.defectTypes?.length) {
+      params.type = filter.defectTypes.join(",");
     }
 
     // เพิ่ม startDate
@@ -269,7 +278,7 @@ export default function Page() {
                 onValueChange={(value) =>
                   setFilter({
                     defectStatus: value,
-                    defectType: filter?.defectType || [],
+                    defectTypes: filter?.defectTypes || [],
                     dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
                   })
                 }
@@ -295,7 +304,7 @@ export default function Page() {
             <div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Type')}</DropdownMenuLabel>
               <DropdownMenuCheckboxItem
-                checked={filter?.defectType.includes("safety")}
+                checked={filter?.defectTypes.includes("safety")}
                 onCheckedChange={(checked) => toggleTypeFilter("safety", checked)}
                 onSelect={(e) => e.preventDefault()}
               >
@@ -309,7 +318,7 @@ export default function Page() {
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                checked={filter?.defectType.includes("environment")}
+                checked={filter?.defectTypes.includes("environment")}
                 onCheckedChange={(checked) => toggleTypeFilter("environment", checked)}
                 onSelect={(e) => e.preventDefault()}
               >
@@ -323,7 +332,7 @@ export default function Page() {
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                checked={filter?.defectType.includes("maintenance")}
+                checked={filter?.defectTypes.includes("maintenance")}
                 onCheckedChange={(checked) => toggleTypeFilter("maintenance", checked)}
                 onSelect={(e) => e.preventDefault()}
               >

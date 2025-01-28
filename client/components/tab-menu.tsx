@@ -1,3 +1,13 @@
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ TabMenu ใช้สำหรับแสดงเมนูย่อยของเมนูหลัก โดยจะแสดงเมนูย่อยของเมนูหลักที่เกี่ยวข้องกับ path ปัจจุบัน
+ * Input: 
+ * - id: string รหัสของข้อมูลที่ต้องการใช้ในการสร้าง URL
+ * Output:
+ * - JSX ของ TabMenu ที่ใช้สำหรับแสดงเมนูย่อยของเมนูหลักที่เกี่ยวข้องกับ path ปัจจุบัน
+ * - ถ้าไม่มีเมนูย่อยที่เกี่ยวข้องกับ path ปัจจุบัน จะแสดงข้อความ "No submenu available for this path."
+ **/
+
 import { subMenuList } from '@/constants/menu'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'

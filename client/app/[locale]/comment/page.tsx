@@ -1,5 +1,17 @@
+/**
+ * คำอธิบาย:
+ *  หน้านี้แสดงรายการคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา 
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงรายละเอียดของคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
+ * - สามารถกรองข้อมูลได้ตามช่วงวันที่ และสถานะของคำแนะนำ
+ * - สามารถอัพเดทสถานะของคำแนะนำได้
+ **/
+
+
 "use client";
-import { FilterComment, IComment, itemType } from "@/app/type";
+import { IFilterComment, IComment, itemType } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import { DatePickerWithRange } from "@/components/date-picker";
 import Loading from "@/components/loading";
@@ -142,7 +154,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<FilterComment | null>(getStoredFilter());
+  const [filter, setFilter] = useState<IFilterComment | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Date",
@@ -178,7 +190,7 @@ export default function Page() {
   };
 
   const buildQueryString = (
-    filter: FilterComment | null,
+    filter: IFilterComment | null,
     searchTerm: string
   ) => {
     const params: Record<string, string | undefined> = {};

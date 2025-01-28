@@ -4,14 +4,12 @@
  *   (variant) ที่ส่งเข้ามา เช่น ถ้าเป็น "inspector" จะแสดงเมนู Patrol และ Defect ถ้าไม่ใช่จะไม่แสดงเมนูดังกล่าว
  *
  * Input:
- *   - variant: HeaderVariant ('inspector' | 'supervisor' | 'admin')
- *     - 'inspector': แสดงปุ่ม Patrol และ Defect
- *     - 'supervisor' และ 'admin': ไม่แสดงปุ่มดังกล่าว
+ * - variant: HeaderVariant ('inspector' | 'supervisor' | 'admin')
  *
  * Output:
- *   - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
- *     การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
- *   - การนำทางจะเกิดขึ้นเมื่อกดปุ่มต่าง ๆ โดยใช้ Next.js router
+ * - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
+ *   การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
+ * - UI จะแตกต่างกันตาม variant ที่ส่งเข้ามา
  **/
 
 "use client";

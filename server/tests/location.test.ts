@@ -4,7 +4,7 @@ import './_mocks_/prisma.mock';
 import { Request, Response } from 'express';
 import { prismaMock } from './_mocks_/prisma.mock';
 import { allZonesMock, locationMock, updateSupervisorMock, zoneMock } from './_mocks_/location.mock';
-import { getAllZone, getLocation, getZone, updateSupervisor } from '@Controllers/location-controller.js';
+import { getAllZones, getLocation, getZone, updateSupervisor } from '@Controllers/location-controller.js';
 
 // Mock Response object
 const mockResponse = () => {
@@ -59,14 +59,14 @@ describe('getZone', () => {
     });
 });
 
-describe('getAllZone', () => {
+describe('getAllZones', () => {
     test('ควรดึงข้อมูลทุก Zone ได้ถูกต้อง', async () => {
         prismaMock.zone.findMany.mockResolvedValue(allZonesMock);
 
         const req = mockRequest({}, { id: '1' }, {}, { userId: 3 });
         const res = mockResponse();
 
-        await getAllZone(req, res);
+        await getAllZones(req, res);
 
         expect(prismaMock.zone.findMany).toHaveBeenCalledWith({
             select: {

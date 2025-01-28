@@ -1,3 +1,18 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ PatrolCard ใช้สำหรับแสดงข้อมูลของการตรวจสอบสถานที่ โดยแสดงข้อมูลเช่น วันที่, สถานะ, รายการตรวจสอบ, ผู้ตรวจสอบ และอื่นๆ
+ * Input: 
+ * - id: รหัสการตรวจสอบ
+ * - date: วันที่ของการตรวจสอบ
+ * - status: สถานะของการตรวจสอบ
+ * - preset: รายการตรวจสอบ
+ * - itemCounts: จำนวนรายการตรวจสอบ
+ * - inspectors: ผู้ตรวจสอบ
+ * - onRemoveSuccess: Callback หลังลบสำเร็จ
+ * Output:
+ * - JSX ของ Card ที่แสดงข้อมูลของ Patrol
+ **/
+
 "use client";
 import {
   Card,
@@ -21,17 +36,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
 import { formatPatrolId, getInitials } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";

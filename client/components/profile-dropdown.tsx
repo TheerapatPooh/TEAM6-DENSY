@@ -41,7 +41,7 @@ export default function ProfileDropdown() {
   const locale = useLocale();
 
 
-  const hadleLogout = async () => {
+  const handleLogout = async () => {
     await logout();
     router.refresh();
   };
@@ -147,7 +147,7 @@ export default function ProfileDropdown() {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="rounded-md"
-            onClick={hadleLogout}
+            onClick={handleLogout}
           >
             <div className="flex gap-1 w-full h-full items-center hover:text-destructive">
               <span className="material-symbols-outlined">logout</span>

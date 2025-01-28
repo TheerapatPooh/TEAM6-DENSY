@@ -1,3 +1,19 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ PatrolChecklist ใช้สำหรับแสดงรายการตรวจสอบของ Patrol
+ * Input: 
+ * - user: ข้อมูลของผู้ใช้
+ * - patrolChecklist: ข้อมูลของ PatrolChecklist
+ * - disabled: สถานะการใช้งานของปุ่ม
+ * - handleResult: ฟังก์ชันที่ใช้สำหรับเก็บผลการตรวจสอบ
+ * - results: ผลการตรวจสอบ
+ * - patrolResult: ผลการตรวจสอบของ Patrol
+ * - response: ฟังก์ชันที่ใช้สำหรับเก็บข้อมูลของ Defect
+ * Output:
+ * - JSX ของ PatrolChecklist ที่แสดงรายการตรวจสอบและผลการตรวจสอบของ Patrol
+ * - มีปุ่มสำหรับเก็บผลการตรวจสอบ
+ **/
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +46,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 
-interface PatrolChecklistProps {
+interface IPatrolChecklistProps {
   user: IUser;
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
@@ -53,7 +69,7 @@ export default function PatrolChecklist({
   results = [],
   patrolResult,
   response,
-}: PatrolChecklistProps) {
+}: IPatrolChecklistProps) {
   const [mounted, setMounted] = useState<boolean>(false);
   const [resultStatus, setResultStatus] = useState<{
     [key: string]: boolean | null;

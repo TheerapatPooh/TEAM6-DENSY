@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงหน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ * - แสดง Zone ที่มี Supervisor ในระบบทั้งหมด
+ **/
+
+
 "use client";
 import { IUser, IZone } from "@/app/type";
 import { Button } from "@/components/ui/button";
@@ -28,7 +39,7 @@ export default function Page() {
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const [mounted, setMounted] = useState<boolean>(false);
-  const [userData, setUserData] = useState<IUser[]>([]);
+  const [allSupervisors, setAllSupervisors] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
   const [zones, setZones] = useState<IZone[]>([]); // Zones state
   const [selectZone, setSelectZone] = useState<IZone | null>(null); // Select zone state
@@ -42,7 +53,7 @@ export default function Page() {
           "/users?profile=true&image=true&user=true&role=supervisor",
           true
         );
-        setUserData(users);
+        setAllSupervisors(users);
         // Fetch zone data.
         const zoneData = await fetchData("get", `/location/1`, true);
         setZones(zoneData?.zones); // Ensure the response contains the "zones" array, or empty array if not
@@ -170,7 +181,7 @@ export default function Page() {
           </div>
           <UserDropdown
             color="secondary"
-            userData={userData}
+            users={allSupervisors}
             onUserSelect={handleUserSelect}
             selectUser={selectUser}
           />

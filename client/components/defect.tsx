@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Defect ใช้สำหรับแสดงข้อมูลของ Defect ที่ได้รับจาก API
+ * Input: 
+ * - defect: ข้อมูลของ Defect ที่ได้รับจาก API
+ * Output:
+ * - JSX ของ Defect ที่แสดงข้อมูลของ Defect ที่ได้รับจาก API
+ **/
+
 import React from 'react'
 import BadgeCustom from './badge-custom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
