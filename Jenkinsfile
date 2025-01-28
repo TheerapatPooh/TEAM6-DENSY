@@ -15,7 +15,10 @@ pipeline {
         stage('Pull Latest Code') {
             steps {
                 dir('/workspace/TEAM6-DENSY') {
-                    sh 'git pull origin main'
+                    sh '''
+                    git config --global --add safe.directory /workspace/TEAM6-DENSY
+                    git pull origin main
+                    '''
                 }
             }
         }
