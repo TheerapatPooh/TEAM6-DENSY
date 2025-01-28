@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { authenticateUser, authorzied, createNotification, getNotifications, login, logout, markAllAsRead, removeAllNotifications, removeOldNotifications, updateNotification } from "@Controllers/util-controller.js";
+import { authenticateUser, authorzied, getAllNotifications, login, logout, markAllAsRead, removeAllNotifications, removeOldNotifications, updateNotification } from "@Controllers/util-controller.js";
 import { prismaMock } from "./_mocks_/prisma.mock";
 import { allNotificationMock, createNotificationMock, decodeMock, notificationMock, updateNotificationMock, userMock } from "./_mocks_/util.mock";
-import { getIOInstance } from "@Utils/socket.js";
 
 // Mock Response object
 const mockResponse = (overrides: Partial<Response> = {}) => {
@@ -121,7 +120,7 @@ describe('authenticateUser', () => {
   });
 });
 
-describe('getNotifications', () => {
+describe('getAllNotifications', () => {
   test('ควรดึงข้อมูล Notification ได้ถูกต้อง', async () => {
     prismaMock.notification.findMany.mockResolvedValueOnce(allNotificationMock);
 
@@ -134,7 +133,7 @@ describe('getNotifications', () => {
 
     const res = mockResponse();
 
-    await getNotifications(req, res);
+    await getAllNotifications(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(allNotificationMock);
   });

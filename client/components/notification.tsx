@@ -70,7 +70,7 @@ export default function Notification() {
         if (isValidDateFormat(content)) {
             content = formatTime(content)
         }
-        else {
+        else if(content) {
             content = z(content)
         }
 

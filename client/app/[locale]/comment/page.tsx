@@ -1,5 +1,5 @@
 "use client";
-import { FilterComment, IComment, itemType } from "@/app/type";
+import { IFilterComment, IComment, itemType } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import { DatePickerWithRange } from "@/components/date-picker";
 import Loading from "@/components/loading";
@@ -142,7 +142,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<FilterComment | null>(getStoredFilter());
+  const [filter, setFilter] = useState<IFilterComment | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Date",
@@ -178,7 +178,7 @@ export default function Page() {
   };
 
   const buildQueryString = (
-    filter: FilterComment | null,
+    filter: IFilterComment | null,
     searchTerm: string
   ) => {
     const params: Record<string, string | undefined> = {};
