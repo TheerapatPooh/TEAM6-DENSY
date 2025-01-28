@@ -42,6 +42,8 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
   };
   const t = useTranslations("General");
 
+  console.log(process.env.CODECLIMATE_REPO_TOKEN);
+
   return (
     <div>
       <Accordion
