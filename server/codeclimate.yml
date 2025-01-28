@@ -1,0 +1,5 @@
+version: '2'
+test_reports:
+  - path: coverage/lcov-report/index.html
+  - path: coverage/lcov.info
+    formatter: lcov
