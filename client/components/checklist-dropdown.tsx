@@ -13,12 +13,12 @@ import { IChecklist, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-interface Props {
+interface IChecklistDropdown {
   checklist: IChecklist;
   handleselectUser: (user: IUser) => void;
 }
 
-export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
+export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDropdown) {
   const [userData, setUserData] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
   const [accordionValue, setAccordionValue] = useState<string | null>();
@@ -85,7 +85,7 @@ export function ChecklistDropdown({ checklist, handleselectUser }: Props) {
                 {t("inspector")}
               </p>
             </div>
-            <UserDropdown userData={userData} onUserSelect={handleUserSelect} selectUser={selectUser} />
+            <UserDropdown users={userData} onUserSelect={handleUserSelect} selectUser={selectUser} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

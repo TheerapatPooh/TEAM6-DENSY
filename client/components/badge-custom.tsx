@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { cn } from "@/lib/utils"
 
-interface BadgeCustomProps {
+interface IBadgeCustom {
     variant?: keyof typeof badgeVariants,
     shape?: keyof typeof shapeVariants,
     iconName?: string,
@@ -41,7 +41,7 @@ export default function BadgeCustom({
     width,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     children
-}: BadgeCustomProps) {
+}: IBadgeCustom) {
     const badgeClass = badgeVariants[variant] || badgeVariants.default;
     const shape = shapeVariants[shapeProp] || shapeVariants.default
 

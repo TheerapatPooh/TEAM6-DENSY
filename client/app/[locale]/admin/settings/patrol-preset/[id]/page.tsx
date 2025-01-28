@@ -109,7 +109,7 @@ export default function page() {
         presetForm.append("description", formPreset.description)
 
         selectChecklists.forEach((checklistId: number) => {
-            presetForm.append("checklists[]", checklistId.toString());
+            presetForm.append("checklists", checklistId.toString());
         });
 
         try {

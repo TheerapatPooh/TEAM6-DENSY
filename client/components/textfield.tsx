@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from "@/lib/utils"
 
 
-interface TextfieldProps {
+interface ITextfield {
   placeholder?: string;
   iconName?: string;
   type?: string;
@@ -26,7 +26,7 @@ export default function Textfield({
   onChange,
   ref,
   name 
-}: TextfieldProps) {
+}: ITextfield) {
   const [visible, setVisible] = useState(false);
   const toggleVisibility = () => setVisible(!visible);
   return (

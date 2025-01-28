@@ -34,7 +34,7 @@ import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
 import { tree } from 'next/dist/build/templates/app-page';
 
-interface AlertDefectProps {
+interface IAlertDefect {
     defect?: IDefect,
     item?: IItem,
     type: "edit" | "report" | "resolve" | "edit-resolve",
@@ -43,7 +43,7 @@ interface AlertDefectProps {
     response: (defect: IDefect) => void;
 }
 
-export default function AlertDefect({ defect, item, type, patrolResults, result, response }: AlertDefectProps) {
+export default function AlertDefect({ defect, item, type, patrolResults, result, response }: IAlertDefect) {
     const disabled = false
     const a = useTranslations("Alert");
     const t = useTranslations("General");

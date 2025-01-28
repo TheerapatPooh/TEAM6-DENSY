@@ -30,7 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 
-interface PatrolChecklistProps {
+interface IPatrolChecklistProps {
   user: IUser;
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
@@ -53,7 +53,7 @@ export default function PatrolChecklist({
   results = [],
   patrolResult,
   response,
-}: PatrolChecklistProps) {
+}: IPatrolChecklistProps) {
   const [mounted, setMounted] = useState<boolean>(false);
   const [resultStatus, setResultStatus] = useState<{
     [key: string]: boolean | null;

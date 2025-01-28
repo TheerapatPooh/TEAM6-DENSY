@@ -12,7 +12,7 @@ import {
 import { useState } from "react";
 import { buttonVariants } from "./ui/button";
 
-export interface alertProps {
+export interface IAlertCustom {
   title: string;
   description: string;
   primaryButtonText: string;
@@ -32,7 +32,7 @@ export function AlertCustom({
   secondaryIcon,
   primaryVariant = 'destructive',
   backResult,
-}: alertProps) {
+}: IAlertCustom) {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleAction = (result: boolean) => {

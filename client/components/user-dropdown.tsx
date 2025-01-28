@@ -7,14 +7,14 @@ import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface UserDropdownProps {
-  userData: IUser[];
+interface IUserDropdown {
+  users: IUser[];
   onUserSelect: (selectUser: IUser) => void;
   selectUser: IUser | null;
   color?: string;
 }
 
-const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, selectUser, color = "card", }) => {
+const UserDropdown: React.FC<IUserDropdown> = ({ users, onUserSelect, selectUser, color = "card", }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelectUser = (user: IUser) => {
@@ -55,7 +55,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userData, onUserSelect, sel
       </DropdownMenuTrigger>
       <DropdownMenuContent className={`p-0`}>
         <ScrollArea className="w-full h-72 rounded-md">
-          {userData.map((user) => {
+          {users.map((user) => {
             return (
               <DropdownMenuItem
                 key={user.id}

@@ -2,14 +2,14 @@
 import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 
-interface TimerProps {
+interface IPatrolTimer {
     days: string;
     hours: string;
     minutes: string;
     seconds: string;
 }
 
-const getTimeElapsed = (startTime: number): TimerProps => {
+const getTimeElapsed = (startTime: number): IPatrolTimer => {
     const difference = new Date().getTime() - startTime;
 
     if (difference <= 0) {
@@ -24,7 +24,7 @@ const getTimeElapsed = (startTime: number): TimerProps => {
     return { days, hours, minutes, seconds };
 };
 
-const formatDuration = (duration: string): TimerProps => {
+const formatDuration = (duration: string): IPatrolTimer => {
     const match = duration.match(/(?:(\d+)d\s*)?(?:(\d+)h\s*)?(?:(\d+)m\s*)?(?:(\d+)s)?/);
 
     const days = match?.[1] ? match[1].padStart(2, '0') : "00";
@@ -36,7 +36,7 @@ const formatDuration = (duration: string): TimerProps => {
 };
 
 const PatrolTimer = ({ launchDate, patrolStatus, patrolDuration }: { launchDate: string, patrolStatus: string, patrolDuration: string }) => {
-    const [timeElapsed, setTimeElapsed] = useState<TimerProps>({ days: "00", hours: "00", minutes: "00", seconds: "00" });
+    const [timeElapsed, setTimeElapsed] = useState<IPatrolTimer>({ days: "00", hours: "00", minutes: "00", seconds: "00" });
     const [startTime, setStartTime] = useState<number>(new Date(launchDate).getTime());
     const [mounted, setMounted] = useState<boolean>(false);
 

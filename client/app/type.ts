@@ -240,18 +240,18 @@ export interface IDefectIImage {
 
 // filter 
 
-export interface FilterPatrol {
+export interface IFilterPatrol {
     presetTitle: string | null;
-    patrolStatus: string[];
+    patrolStatuses: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
 
-export interface FilterDefect {
+export interface IFilterDefect {
     defectStatus: string | null;
-    defectType: string[];
+    defectTypes: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
-export interface FilterComment {
+export interface IFilterComment {
     commentStatus: string | null;
     dateRange: { start: Date | undefined; end: Date | undefined };
 }

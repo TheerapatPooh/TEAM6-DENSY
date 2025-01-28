@@ -23,13 +23,13 @@ import Map from "@/components/map";
 import { AlertCustom } from "./alert-custom";
 import { toast } from "@/hooks/use-toast";
 
-interface ReportDefectProps {
+interface IReportDefect {
   defect: IDefect,
   page: "patrol-view-detail" | "patrol-defect" | "patrol-view-report"
   response: (defect: IDefect) => void
 }
 
-export default function ReportDefect({ defect, page, response }: ReportDefectProps) {
+export default function ReportDefect({ defect, page, response }: IReportDefect) {
   const s = useTranslations("Status");
   const t = useTranslations("General")
   const a = useTranslations("Alert")

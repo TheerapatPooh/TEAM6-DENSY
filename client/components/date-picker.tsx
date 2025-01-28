@@ -15,13 +15,13 @@ import {
 import { DateRange } from "react-day-picker"
 import { useTranslations } from "next-intl"
 
-interface Props {
+interface IDatePicker {
   handleSelectedTime: (time: string) => void;
 }
 
 export function DatePicker({
   handleSelectedTime,
-}: Props) {
+}: IDatePicker) {
   const t = useTranslations("General");
 
   const [date, setDate] = React.useState<Date>()
@@ -61,14 +61,14 @@ export function DatePicker({
   )
 }
 
-interface DatePickerWithRangeProps {
+interface DatePickerWithRangeIDatePicker {
   startDate: Date | undefined; 
   endDate: Date | undefined; 
   onSelect: (date: DateRange) => void; 
   className?: string; 
 }
 
-export const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
+export const DatePickerWithRange: React.FC<DatePickerWithRangeIDatePicker> = ({
   startDate,
   endDate,
   onSelect,

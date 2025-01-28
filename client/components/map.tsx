@@ -13,14 +13,14 @@ import React from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 
 
-interface MapProps {
+interface IMap {
   onZoneSelect?: (selectedZones: IZone[]) => void;
   disable: boolean;
   initialSelectedZones?: number[];
   toggle?: boolean;
 }
 
-export default function Map({ onZoneSelect, disable, initialSelectedZones, toggle = false }: MapProps) {
+export default function Map({ onZoneSelect, disable, initialSelectedZones, toggle = false }: IMap) {
   const [location, setLocation] = useState<ILocation>();
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);

@@ -45,14 +45,14 @@ export default function Page() {
   const router = useRouter();
   const locale = useLocale();
 
-  const [allZone, setAllZone] = useState([]);
+  const [allZones, setAllZones] = useState([]);
 
   const [openStatesType, setOpenStatesType] = useState<{
     [key: number]: boolean;
   }>({});
 
   const [title, setTitle] = useState("");
-  const [items, setItems] = useState<itemWithZonesName[]>([]);
+  const [items, setItems] = useState<IItemWithZonesName[]>([]);
   const [selectedChecklistName, setSelectedChecklistName] = useState<{
     [itemId: number]: string;
   }>({});
@@ -63,7 +63,7 @@ export default function Page() {
     [itemId: number]: string;
   }>({});
 
-  interface itemWithZonesName extends IItem {
+  interface IItemWithZonesName extends IItem {
     zones?: any[];
   }
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function Page() {
       try {
         const zonesData = await fetchData("get", `/zones`, true);
 
-        setAllZone(zonesData);
+        setAllZones(zonesData);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
       }
@@ -129,7 +129,7 @@ export default function Page() {
 
   const handleAddChecklistItem = () => {
     const newItemId = generateUniqueId();
-    const newItem: itemWithZonesName = {
+    const newItem: IItemWithZonesName = {
       id: newItemId,
       name: "",
       type: undefined,
@@ -534,7 +534,7 @@ export default function Page() {
                           {selectedZones[item.id]?.length > 0
                             ? selectedZones[item.id]
                                 .map(
-                                  (zoneId) => z(allZone.find((zone) => zone.id === zoneId)
+                                  (zoneId) => z(allZones.find((zone) => zone.id === zoneId)
                                   ?.name)
                                     
                                 )
@@ -596,7 +596,7 @@ export default function Page() {
                           ? selectedZones[item.id]
                               .map(
                                 (zoneId) =>
-                                  allZone.find((zone) => zone.id === zoneId)
+                                  allZones.find((zone) => zone.id === zoneId)
                                     ?.name
                               )
                               .join(", ")
@@ -610,7 +610,7 @@ export default function Page() {
                       className="bg-white border border-gray-200 shadow-lg rounded w-64 p-2"
                     >
                       <ScrollArea className="h-72 rounded-md">
-                        {allZone.map((zone) => (
+                        {allZones.map((zone) => (
                           <DropdownMenuItem
                             key={zone.id}
                             className="flex items-center gap-2 cursor-default"

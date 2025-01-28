@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import ExcelJS from 'exceljs';
 
-interface LintResult {
+interface ILintResult {
     filePath: string;
     warningCount: number;
     errorCount: number;
@@ -14,7 +14,7 @@ interface LintResult {
 }
 
 // ฟังก์ชันสรุปผลลัพธ์จากข้อมูลที่อ่านจากไฟล์ JSON
-function summarizeLintResults(results: LintResult[]) {
+function summarizeILintResults(results: ILintResult[]) {
     const totalFiles = results.length;
     const filesWithWarnings = results.filter(file => file.warningCount > 0 || file.errorCount > 0);
     const totalWarnings = results.reduce((sum, file) => sum + file.warningCount, 0);
@@ -63,8 +63,8 @@ function getLatestLintReportFile(directory: string) {
 }
 
 // ฟังก์ชันสำหรับสร้าง Excel
-async function createExcelFromLintResults(
-    results: LintResult[],
+async function createExcelFromILintResults(
+    results: ILintResult[],
     outputPath: string
 ) {
     const workbook = new ExcelJS.Workbook();
@@ -149,9 +149,9 @@ async function createExcelFromLintResults(
     });
 
     // ตกแต่ง Data Rows (เริ่มที่ row 3)
-    for (let i = 3; i <= worksheet.rowCount; i++) {
-        const row = worksheet.getRow(i);
-        const isEvenRow = i % 2 === 0; 
+    for (let index = 3; index <= worksheet.rowCount; index++) {
+        const row = worksheet.getRow(index);
+        const isEvenRow = index % 2 === 0; 
         row.eachCell((cell) => {
             cell.fill = {
                 type: 'pattern',
@@ -211,17 +211,17 @@ if (latestFile) {
             console.error("ไม่สามารถอ่านไฟล์ผลลัพธ์ของ ESLint ได้:", err);
             return;
         }
-        const lintResults: LintResult[] = JSON.parse(data);
+        const lintResults: ILintResult[] = JSON.parse(data);
 
         // สรุปผลใน console
-        summarizeLintResults(lintResults);
+        summarizeILintResults(lintResults);
 
         // สร้างไฟล์ Excel
         const outputPath = path.join(
             'lintReports',
             path.basename(latestFile, path.extname(latestFile)) + '.xlsx'
         );
-        createExcelFromLintResults(lintResults, outputPath);
+        createExcelFromILintResults(lintResults, outputPath);
     });
 } else {
     console.log("ไม่พบไฟล์ lintReport ในโฟลเดอร์ lintReports");
