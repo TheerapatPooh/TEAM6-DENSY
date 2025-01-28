@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงหน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ * - แสดง Zone ที่มี Supervisor ในระบบทั้งหมด
+ **/
+
+
 "use client";
 import { IUser, IZone } from "@/app/type";
 import { Button } from "@/components/ui/button";

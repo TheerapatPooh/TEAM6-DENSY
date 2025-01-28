@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ DatePicker ใช้สำหรับเลือกวันที่และเวลา โดยมี Dropdown ที่สามารถเลือกวันที่และเวลาได้
+ * Input: 
+ * - handleSelectedTime: ฟังก์ชันที่ใช้สำหรับเลือกวันที่และเวลาจาก Dropdown
+ * Output:
+ * - JSX ของ Dropdown ที่มีวันที่และเวลาที่สามารถเลือกได้
+ **/
+
 "use client"
 
 import * as React from "react"

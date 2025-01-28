@@ -1,3 +1,15 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Map ใช้สำหรับแสดงแผนที่ของโซนต่างๆ ในสถานที่
+ * Input: 
+ * - onZoneSelect: ฟังก์ชันที่ใช้สำหรับเลือกโซนที่ต้องการ
+ * - disable: สถานะที่ใช้สำหรับปิดการใช้งานคอมโพเนนต์
+ * - initialSelectedZones: รายการโซนที่ต้องการเลือกในครั้งแรก
+ * - toggle: สถานะที่ใช้สำหรับเปิดหรือปิดการเลือกโซนหลายโซน
+ * Output:
+ * - JSX ของแผนที่ที่แสดงโซนต่างๆ ในสถานที่
+ **/
+
 'use client';
 import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useState } from 'react';

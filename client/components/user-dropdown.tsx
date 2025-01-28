@@ -1,4 +1,17 @@
-import React, { useEffect, useState } from "react";
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ UserDropdown ใช้สำหรับแสดง Dropdown ของ User ที่สามารถเลือกได้
+ * Input: 
+ * - users: IUser[] รายชื่อของ User ที่สามารถเลือกได้
+ * - onUserSelect: (selectUser: IUser) => void ฟังก์ชันที่ใช้สำหรับเลือก User
+ * - selectUser: IUser | null ข้อมูลของ User ที่ถูกเลือก
+ * - color?: string สีของ Dropdown
+ * Output:
+ * - JSX ของ Dropdown ที่มี User ที่สามารถเลือกได้
+ * - สามารถเลือก User ได้จาก Dropdown ที่แสดงข้อมูลของ User ที่สามารถเลือกได้
+ **/
+
+import React, { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

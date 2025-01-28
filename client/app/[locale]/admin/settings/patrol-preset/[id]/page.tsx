@@ -1,3 +1,15 @@
+/**
+ * คำอธิบาย:
+ *  หน้าตั้งค่า Preset ในระบบ โดยสามารถแก้ไข Preset ที่มีอยู่ในระบบได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงหน้าตั้งค่า Preset ในระบบ โดยสามารถแก้ไข Preset ที่มีอยู่ในระบบได้
+ * - สามารถเพิ่ม Checklist ใหม่เข้าไปใน Preset ได้
+ * - สามารถแก้ไข Title และ Description ของ Preset ได้
+ **/
+
+
 'use client'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

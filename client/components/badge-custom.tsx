@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ BadgeCustom ใช้สำหรับแสดงข้อความที่มีสีพื้นหลังและสีตัวอักษรต่างๆ ตามที่กำหนด
+ * Input: 
+ * - variant: สีพื้นหลังและสีตัวอักษรของ Badge ที่กำหนดไว้ใน badgeVariants
+ * Output:
+ * - JSX ของ Badge ที่มีสีพื้นหลังและสีตัวอักษรตามที่กำหนด
+ **/
+
 import { Badge } from '@/components/ui/badge'
 import { cn } from "@/lib/utils"
 

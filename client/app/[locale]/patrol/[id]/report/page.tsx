@@ -1,3 +1,17 @@
+/**
+ * คำอธิบาย:
+ *  หน้าที่แสดงรายการ Defect ทั้งหมดของ Patrol ที่เลือก
+ *
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้าที่แสดงรายการ Defect ทั้งหมดของ Patrol ที่เลือก
+ * - แสดงชื่อ Patrol และ Progress ของ Patrol
+ * - แสดงปุ่ม Start หรือ Finish ของ Patrol ตามสถานะของ Patrol
+ * - สามารถตรวจสอบ Defect และแก้ไข Defect ได้
+ **/
+
+
 'use client'
 import { IDefect, patrolStatus } from '@/app/type';
 import BadgeCustom from '@/components/badge-custom';

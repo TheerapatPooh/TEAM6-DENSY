@@ -1,3 +1,13 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ ReportDefect ใช้ในการแสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
+ * Input: 
+ * - defect: ข้อมูลของ Defect ที่ได้รับจาก API
+ * Output:
+ * - JSX ของ ReportDefect ที่แสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
+ * - มีข้อมูลของ Defect และมีปุ่มสำหรับการแก้ไขข้อมูลของ Defect
+ **/
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { defectStatus, IDefect, IImage, IZone } from "@/app/type";

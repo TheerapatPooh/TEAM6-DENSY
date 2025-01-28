@@ -1,3 +1,15 @@
+/**
+ * คำอธิบาย:
+ *  หน้านี้แสดงรายการคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา 
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงรายละเอียดของคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
+ * - สามารถกรองข้อมูลได้ตามช่วงวันที่ และสถานะของคำแนะนำ
+ * - สามารถอัพเดทสถานะของคำแนะนำได้
+ **/
+
+
 "use client";
 import { IFilterComment, IComment, itemType } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";

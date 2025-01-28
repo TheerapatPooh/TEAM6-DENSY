@@ -1,3 +1,16 @@
+/**
+ * คำอธิบาย:
+ *  หน้าที่แสดงรายการตรวจ Patrol ทั้งหมดของ Patrol ที่เลือก
+ *
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้าที่แสดงรายการตรวจ Patrol ทั้งหมดของ Patrol ที่เลือก
+ * - แสดง Progress Bar และ ปุ่ม "Finish" หรือ "Start" ขึ้นอยู่กับสถานะของ Patrol
+ * - แสดงระยะเวลาที่ใช้ในการตรวจสอบของ Patrol
+ * - แสดง Alert สำหรับการยืนยันการเริ่มหรือสิ้นสุด Patrol
+ **/
+
 'use client'
 import { IDefect, IPatrolChecklist, patrolStatus } from '@/app/type';
 import BadgeCustom from '@/components/badge-custom';

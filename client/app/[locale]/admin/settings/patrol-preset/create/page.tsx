@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้าสร้าง Preset ในระบบ โดยสามารถเพิ่ม Checklist ที่มีอยู่ในระบบเข้าไปใน Preset ได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้าสร้าง Preset ในระบบ โดยสามารถเพิ่ม Checklist ที่มีอยู่ในระบบเข้าไปใน Preset ได้
+ * - สามารถเพิ่ม Checklist ใหม่เข้าไปใน Preset ได้
+ * - สามารถลบ Checklist ออกจาก Preset ได้
+ **/
+
 'use client'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

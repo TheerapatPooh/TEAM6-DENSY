@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *   หน้า Patrol Defect ใช้สำหรับแสดงข้อมูลของ Defect ทั้งหมด และสามารถค้นหา และเรียงลำดับข้อมูลได้
+ *
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้า Patrol Defect ที่แสดงข้อมูลของ Defect ทั้งหมด และสามารถค้นหา และเรียงลำดับข้อมูลได้
+ * - แสดงช่องค้นหา และช่องกรองข้อมูลของ Defect ตามช่วงวันที่ และประเภทของ Defect
+ **/
+
 'use client'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";

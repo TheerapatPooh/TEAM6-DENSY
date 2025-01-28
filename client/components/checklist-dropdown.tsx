@@ -1,3 +1,13 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ ChecklistDropdown ใช้สำหรับแสดง Dropdown ของ Checklist และ Inspector ที่เป็นผู้รับผิดชอบในการตรวจสอบ
+ * Input: 
+ * - checklist: ข้อมูลของ Checklist ที่ต้องการแสดง
+ * - handleselectUser: ฟังก์ชันที่ใช้สำหรับเลือก Inspector จาก Dropdown
+ * Output:
+ * - JSX ของ Dropdown ที่มี Checklist และ Inspector ที่สามารถเลือกได้
+ **/
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { fetchData } from "@/lib/utils";

@@ -1,3 +1,19 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ AlertCustom ใช้สำหรับแสดง Alert ที่มีปุ่ม Action 2 ปุ่ม และสามารถกำหนดไอคอนและสีปุ่มได้
+ * Input: 
+ * - title: ชื่อหัวข้อของ Alert
+ * - description: คำอธิบายของ Alert
+ * - primaryButtonText: ข้อความบนปุ่ม Action 1
+ * - secondaryButtonText: ข้อความบนปุ่ม Action 2
+ * - primaryIcon: ไอคอนบนปุ่ม Action 1
+ * - secondaryIcon: ไอคอนบนปุ่ม Action 2
+ * - primaryVariant: สีของปุ่ม Action 1
+ * - backResult: ฟังก์ชันที่รับค่า boolean จากการกดปุ่ม Action 1 หรือ Action 2
+ * Output:
+ * - JSX ของ AlertCustom ที่มีหัวข้อ, คำอธิบาย, 2 ปุ่ม Action และสามารถกำหนดไอคอนและสีของปุ่มได้
+ **/
+
 import {
   AlertDialog,
   AlertDialogAction,
