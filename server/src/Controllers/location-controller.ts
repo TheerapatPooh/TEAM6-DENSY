@@ -46,7 +46,7 @@ export async function getZone(req: Request, res: Response) {
     }
 }
 
-export async function getAllZone(req: Request, res: Response) {
+export async function getAllZones(req: Request, res: Response) {
     try {
         const zone = await prisma.zone.findMany({
             select: {

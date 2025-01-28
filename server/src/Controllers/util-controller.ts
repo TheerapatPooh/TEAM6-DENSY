@@ -140,7 +140,7 @@ export const upload = multer({ storage: storage });
  * - (req as any).user.userId : Int (Id ของผู้ใช้ที่กำลังล็อคอิน)
  * Output: JSON message ของ notification  
 **/
-export async function getNotifications(req: Request, res: Response) {
+export async function getAllNotifications(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
 

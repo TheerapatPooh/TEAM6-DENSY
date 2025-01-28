@@ -352,7 +352,7 @@ export async function getAllPatrols(req: Request, res: Response) {
   }
 }
 
-export async function getPatrolUser(req: Request, res: Response) {
+export async function getPatrolUsers(req: Request, res: Response) {
   try {
     const patrolId = parseInt(req.params.id, 10);
 
