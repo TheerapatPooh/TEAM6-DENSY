@@ -50,7 +50,7 @@ export default function Notification() {
 
     const prevUnreadCountRef = useRef<number>(0);
     const locale = useLocale()
-    const [notifications, setNotifications] = useState<INotification[]>([])
+    const [allNotifications, setAllNotifications] = useState<INotification[]>([])
     const [user, setUser] = useState<IUser>()
     const { socket, isConnected } = useSocket()
     const [unreadCount, setUnreadCount] = useState(0);
@@ -80,7 +80,7 @@ export default function Notification() {
     const fetchNotifications = async () => {
         try {
             const data = await fetchData("get", "/notifications", true);
-            setNotifications(data);
+            setAllNotifications(data);
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
         }
@@ -105,7 +105,7 @@ export default function Notification() {
 
     const removeNotification = async (id: number) => {
         try {
-            setNotifications((prevNotifications) =>
+            setAllNotifications((prevNotifications) =>
                 prevNotifications.filter((notification) => notification.id !== id)
             );
             await fetchData("delete", `/notification/${id}`, true);
@@ -126,7 +126,7 @@ export default function Notification() {
 
     const handleNotificationClick = (notification: INotification) => {
         if (!notification.read) {
-            setNotifications(prevNotifications =>
+            setAllNotifications(prevNotifications =>
                 prevNotifications.map(n =>
                     n.id === notification.id ? { ...n, read: true } : n
                 )
@@ -140,7 +140,7 @@ export default function Notification() {
 
     const handleRemoveAllNotifications = async () => {
         removeAllNotifications();
-        setNotifications([]);
+        setAllNotifications([]);
         toast({
             variant: 'success',
             title: a("DeleteAllNotificationTitle"),
@@ -151,7 +151,7 @@ export default function Notification() {
     const markAllAsRead = async () => {
         try {
             await fetchData("put", "/notifications/mark-all-read", true); // เรียก API ที่สร้างใน Backend
-            setNotifications(prevNotifications =>
+            setAllNotifications(prevNotifications =>
                 prevNotifications.map(n => ({ ...n, read: true }))
             );
         } catch (error) {
@@ -161,8 +161,8 @@ export default function Notification() {
 
     const getRecentNotifications = () => {
         // แบ่งแจ้งเตือนเป็น 2 กลุ่ม: ที่ยังไม่ได้อ่านและที่อ่านแล้ว
-        const unreadNotifications = notifications.filter(n => !n.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        const readNotifications = notifications.filter(n => n.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        const unreadNotifications = allNotifications.filter(n => !n.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        const readNotifications = allNotifications.filter(n => n.read).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
         // ดึง 8 แจ้งเตือนล่าสุด
         const recentNotifications = [...unreadNotifications, ...readNotifications].slice(0, 8);
@@ -180,7 +180,7 @@ export default function Notification() {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
             socket.on('new_notification', (data: INotification) => {
-                setNotifications((prevNotifications) => [...prevNotifications, data]);
+                setAllNotifications((prevNotifications) => [...prevNotifications, data]);
                 const notification = formatMessage(data.message)
                 const toastData = getNotificationToast(notification.key)
         
@@ -202,8 +202,8 @@ export default function Notification() {
     }, [socket, isConnected]);
 
     useEffect(() => {
-        setUnreadCount(notifications.filter(notification => !notification.read).length);
-    }, [notifications]);
+        setUnreadCount(allNotifications.filter(notification => !notification.read).length);
+    }, [allNotifications]);
 
     useEffect(() => {
         const prevUnreadCount = prevUnreadCountRef.current;
