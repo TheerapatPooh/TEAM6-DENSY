@@ -2,18 +2,17 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
-import fs from 'fs';
+import fs from "fs";
 import path from "path";
-
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
- * Input: 
- * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
- * - req.body: { name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int, supervisorId: Int }
+ * Input:
+ * - req as any user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.body: { name: String, description: String, type: ItemType, defectUserId: Int, patrolResultId: Int, supervisorId: Int }
  * - req.files: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
  * Output: JSON object ข้อมูล Defect ที่ถูกสร้าง พร้อมกับอัปเดตสถานะของ patrolResult
-**/
+ **/
 export async function createDefect(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -25,9 +24,10 @@ export async function createDefect(req: Request, res: Response) {
       patrolResultId,
       supervisorId,
     } = req.body;
-    const imageFiles = req.files as Express.Multer.File[]; // Cast to an array of Multer files
+    const imageFiles = req.files as Express.Multer.File[];
 
     const validPatrol = await prisma.patrol.findFirst({
+      //เช็คว่า Patrol มีอยู่จริงหรือไม่
       where: {
         results: {
           some: {
@@ -43,16 +43,16 @@ export async function createDefect(req: Request, res: Response) {
     });
 
     if (!validPatrol) {
-      res
-        .status(404)
-        .json({
-          message:
-            "You are not associated with this Patrol or PatrolResult not found",
-        });
+      // response 404 ถ้า Patrol ไม่มีอยู่จริง
+      res.status(404).json({
+        message:
+          "You are not associated with this Patrol or PatrolResult not found",
+      });
       return;
     }
 
     const newDefect = await prisma.defect.create({
+      //สร้าง Defect
       data: {
         name: name,
         description: description,
@@ -65,10 +65,11 @@ export async function createDefect(req: Request, res: Response) {
     });
 
     const updateResult = async (patrolResultId: string) => {
+      //อัพเดต ข้อมูลที่เกี่ยวข้อง
       try {
         const result = await prisma.patrolResult.findUnique({
           where: {
-            id: parseInt(patrolResultId), // Ensure it's an Integer
+            id: parseInt(patrolResultId),
           },
         });
 
@@ -92,7 +93,7 @@ export async function createDefect(req: Request, res: Response) {
     updateResult(patrolResultId);
     if (Array.isArray(imageFiles)) {
       for (const imageFile of imageFiles) {
-        const imagePath = imageFile.filename; // Get the path of each uploaded file
+        const imagePath = imageFile.filename;
         const image = await prisma.image.create({
           data: {
             path: imagePath,
@@ -116,6 +117,7 @@ export async function createDefect(req: Request, res: Response) {
     const supervisor = parseInt(supervisorId, 10);
 
     await createNotification({
+      //สร้าง Notifications แจ้งเตือนผู้ใช้ที่เดี่ยวข้อง
       message: message,
       type: "request" as NotificationType,
       url: `/defect/${newDefect.id}`,
@@ -123,6 +125,7 @@ export async function createDefect(req: Request, res: Response) {
     });
 
     let result = await prisma.defect.findFirst({
+      // Response
       where: { id: newDefect.id },
       include: {
         patrolResult: {
@@ -132,10 +135,10 @@ export async function createDefect(req: Request, res: Response) {
                 id: true,
                 preset: {
                   select: {
-                    title: true
-                  }
-                }
-              }
+                    title: true,
+                  },
+                },
+              },
             },
             zoneId: true,
             itemZone: {
@@ -148,17 +151,15 @@ export async function createDefect(req: Request, res: Response) {
                         id: true,
                         profile: {
                           include: {
-                            image: true
-                          }
-                        }
-                      }
-                    }
-
-                  }
-                }
-
-              }
-            }
+                            image: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         images: {
@@ -173,34 +174,35 @@ export async function createDefect(req: Request, res: Response) {
                     email: true,
                     role: true,
                     department: true,
-                    createdAt: true
-                  }
+                    createdAt: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    })
+    });
 
     res.status(201).json(result);
-  } catch (err) {
-    res.status(500)
+  } catch (error) {
+    console.error(error);
+    res.status(500);
   }
 }
 
 /**
- * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect 
- * Input: 
- * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect
+ * Input:
  * - req.params: { id: Int} (ID ของ Defect)
  * Output: JSON object ข้อมูล Defect และข้อมูล patrolResult ที่เกี่ยวข้อง
-**/
+ **/
 export async function getDefect(req: Request, res: Response) {
   try {
     const { id } = req.params;
 
     const defect = await prisma.defect.findUnique({
+      // หา Defect
       where: {
         id: Number(id),
       },
@@ -217,14 +219,14 @@ export async function getDefect(req: Request, res: Response) {
                     createdAt: true,
                     profile: {
                       include: {
-                        image: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
         user: {
           select: {
@@ -234,10 +236,10 @@ export async function getDefect(req: Request, res: Response) {
             createdAt: true,
             profile: {
               include: {
-                image: true
-              }
-            }
-          }
+                image: true,
+              },
+            },
+          },
         },
         patrolResult: {
           select: {
@@ -247,16 +249,16 @@ export async function getDefect(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
-                        profile: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                        profile: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!defect) {
@@ -264,22 +266,24 @@ export async function getDefect(req: Request, res: Response) {
       return;
     }
 
-    let result = defect
+    let result = defect; // Response
 
     res.status(200).json(result);
     return;
-  } catch (err) {
-    res.status(500)
+  } catch (error) {
+    console.error(error);
+    res.status(500);
     return;
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมด
- * Input: 
- * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
- * Output: JSON array ข้อมูล Defect ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง 
-**/
+ * Input:
+ * - req as any: user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.query: { status: DefectStatus, type: ItemType, startDate: Date, endDate: Date, search:String }
+ * Output: JSON array ข้อมูล Defect ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง
+ **/
 export async function getAllDefects(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -301,9 +305,7 @@ export async function getAllDefects(req: Request, res: Response) {
 
     // เงื่อนไขการกรองตาม status
     if (status) {
-      andConditions.push(
-        { status: status }
-      );
+      andConditions.push({ status: status });
     }
 
     // เงื่อนไขการกรองตาม preset
@@ -327,7 +329,7 @@ export async function getAllDefects(req: Request, res: Response) {
           },
         });
       } else {
-        console.error('Invalid date range:', startDate, endDate);
+        console.error("Invalid date range:", startDate, endDate);
       }
     }
 
@@ -339,15 +341,15 @@ export async function getAllDefects(req: Request, res: Response) {
         const searchLower = search.toLowerCase();
 
         // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
-        if (searchLower.startsWith('rep')) {
+        if (searchLower.startsWith("rep")) {
           return DefectStatus.reported;
-        } else if (searchLower.startsWith('in')) {
+        } else if (searchLower.startsWith("in")) {
           return DefectStatus.in_progress;
-        } else if (searchLower.startsWith('pe')) {
+        } else if (searchLower.startsWith("pe")) {
           return DefectStatus.pending_inspection;
-        } else if (searchLower.startsWith('res')) {
+        } else if (searchLower.startsWith("res")) {
           return DefectStatus.resolved;
-        } else if (searchLower.startsWith('co')) {
+        } else if (searchLower.startsWith("co")) {
           return DefectStatus.completed;
         }
         // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
@@ -358,11 +360,11 @@ export async function getAllDefects(req: Request, res: Response) {
         const searchLower = search.toLowerCase();
 
         // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
-        if (searchLower.startsWith('sa')) {
+        if (searchLower.startsWith("sa")) {
           return ItemType.safety;
-        } else if (searchLower.startsWith('en')) {
+        } else if (searchLower.startsWith("en")) {
           return ItemType.environment;
-        } else if (searchLower.startsWith('ma')) {
+        } else if (searchLower.startsWith("ma")) {
           return ItemType.maintenance;
         }
 
@@ -426,8 +428,8 @@ export async function getAllDefects(req: Request, res: Response) {
             itemZone: {
               select: {
                 zone: true,
-              }
-            }
+              },
+            },
           },
         },
         user: {
@@ -475,31 +477,31 @@ export async function getAllDefects(req: Request, res: Response) {
       },
     });
 
-    let result = defects
+    let result = defects;
     res.status(200).json(result);
     return;
-  } catch (err) {
-    res.status(500)
+  } catch (error) {
+    console.error(error);
+    res.status(500);
     return;
   }
 }
 
 function getUploadsPath(): string {
   const currentDir = process.cwd();
-  return path.join(currentDir, 'uploads'); // Adjust path as needed
+  return path.join(currentDir, "uploads"); // Adjust path as needed
 }
 
 const uploadsPath = getUploadsPath();
 
 /**
- * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect 
- * Input: 
- * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect
+ * Input:
  * - req.params: { id: Int} (ID ของ Defect ที่จะอัปเดต)
- * - req.body: {name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int }
+ * - req.body: {name: String, description: String, type: ItemType, status: DefectStatus, defectUserId: Int, patrolResultId: Int , supervisorId: Int  , deleteExistingImages: boolean}
  * - req.file: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
  * Output: JSON object ข้อมูล Defect หลังการอัปเดต
-**/
+ **/
 export async function updateDefect(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
@@ -519,39 +521,44 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       where: { id: Number(id) },
     });
     if (!defect) {
-      res.status(404).json({ message: 'Defect not found' });
+      //เช็ค defect
+      res.status(404).json({ message: "Defect not found" });
       return;
     }
 
     if (newImageFiles?.length) {
+      //หารูปที่อยู่ในระบบ ค้นหาภาพที่เกี่ยวข้องกับ Defect นี้
       const existingDefectImages = await prisma.defectImage.findMany({
         where: { defectId: Number(id) },
         select: { imageId: true },
       });
 
       const defectImagesBySupervisor = await prisma.image.findMany({
+        // ค้นหาข้อมูลเกี่ยวกับภาพที่มีอยู่ในระบบ
         where: {
-          id: { in: existingDefectImages.map(img => img.imageId) },
+          id: { in: existingDefectImages.map((img) => img.imageId) },
         },
         select: { id: true, updatedBy: true },
       });
 
-      if (status === 'reported' as DefectStatus) {
+      if (status === ("reported" as DefectStatus)) {
+        // หากสถานะเป็น "reported" ให้ลบภาพทั้งหมดที่เกี่ยวข้อง
         const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
-
+        // ค้นหาภาพที่ต้องการลบ
         const imagesToDelete = await prisma.image.findMany({
           where: { id: { in: imageIdsToDelete } },
           select: { path: true },
         });
-
+        // ลบไฟล์ภาพจากที่เก็บ
         for (const image of imagesToDelete) {
           const filePath = path.join(uploadsPath, image.path);
           try {
             fs.unlinkSync(filePath);
-          } catch (err) {
-            console.error(`Failed to delete file at ${filePath}:`, err);
+          } catch (error) {
+            console.error(`Failed to delete file at ${filePath}:`, error);
           }
         }
+        // ลบข้อมูลจากฐานข้อมูล
         await prisma.defectImage.deleteMany({
           where: { defectId: Number(id) },
         });
@@ -560,11 +567,14 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         });
       }
 
-      if (status === 'resolved' as DefectStatus && deleteExistingImages === 'true') {
-        // ลบเฉพาะ imageId ที่ updatedBy เป็น supervisorId
+      if (
+        status === ("resolved" as DefectStatus) &&
+        deleteExistingImages === "true"
+      ) {
+        // หากสถานะเป็น "resolved" และต้องการลบภาพที่เกี่ยวข้องกับ supervisor
         const imageIdsToDelete = defectImagesBySupervisor
-          .filter(image => image.updatedBy === parseInt(supervisorId, 10))
-          .map(image => image.id);
+          .filter((image) => image.updatedBy === parseInt(supervisorId, 10))
+          .map((image) => image.id);
 
         const imagesToDelete = await prisma.image.findMany({
           where: { id: { in: imageIdsToDelete } },
@@ -575,8 +585,8 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
           const filePath = path.join(uploadsPath, image.path);
           try {
             fs.unlinkSync(filePath);
-          } catch (err) {
-            console.error(`Failed to delete file at ${filePath}:`, err);
+          } catch (error) {
+            console.error(`Failed to delete file at ${filePath}:`, error);
           }
         }
 
@@ -584,7 +594,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         await prisma.defectImage.deleteMany({
           where: {
             defectId: Number(id),
-            imageId: { in: imageIdsToDelete }
+            imageId: { in: imageIdsToDelete },
           },
         });
 
@@ -592,12 +602,17 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
           where: { id: { in: imageIdsToDelete } },
         });
       }
-
+      // บันทึกไฟล์ภาพใหม่ลงในฐานข้อมูล
       for (const file of newImageFiles) {
         const image = await prisma.image.create({
           data: {
             path: file.filename,
-            updatedBy: parseInt(status === 'reported' as DefectStatus ? defectUserId : supervisorId, 10),
+            updatedBy: parseInt(
+              status === ("reported" as DefectStatus)
+                ? defectUserId
+                : supervisorId,
+              10
+            ),
           },
         });
         await prisma.defectImage.create({
@@ -608,9 +623,9 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         });
       }
     }
-
+    // สร้างข้อมูลสำหรับการอัปเดต Defect
     const updateData: any = {};
-
+    // อัปเดตข้อมูลของ Defect หากมีการเปลี่ยนแปลง
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (type !== undefined) updateData.type = type;
@@ -621,7 +636,9 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     }
 
     if (patrolResultId !== undefined) {
-      updateData.patrolResult = { connect: { id: parseInt(patrolResultId, 10) } };
+      updateData.patrolResult = {
+        connect: { id: parseInt(patrolResultId, 10) },
+      };
     }
 
     // ทำการอัปเดต Defect ด้วยข้อมูลที่มี
@@ -635,26 +652,26 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     let url = null;
     let receive = null;
 
-    if (status === 'in_progress' as DefectStatus) {
-      message = 'defect_accept',
-        notiType = "information" as NotificationType
-      url = `/patrol-defect`
-      receive = defectUserId
-    } else if (status === 'resolved' as DefectStatus) {
-      message = 'defect_resolved'
-      notiType = "information" as NotificationType
-      url = `/patrol-defect`
-      receive = defectUserId
-    } else if (status === 'pending_inspection' as DefectStatus) {
-      message = 'defect_pending_inspection'
-      notiType = "request" as NotificationType
-      url = `/defect/${id}`
-      receive = supervisorId
-    } else if (status === 'completed' as DefectStatus) {
-      message = 'defect_completed'
-      notiType = "information" as NotificationType
-      url = `/defect/${id}`
-      receive = supervisorId
+    if (status === ("in_progress" as DefectStatus)) {
+      (message = "defect_accept"),
+        (notiType = "information" as NotificationType);
+      url = `/patrol-defect`;
+      receive = defectUserId;
+    } else if (status === ("resolved" as DefectStatus)) {
+      message = "defect_resolved";
+      notiType = "information" as NotificationType;
+      url = `/patrol-defect`;
+      receive = defectUserId;
+    } else if (status === ("pending_inspection" as DefectStatus)) {
+      message = "defect_pending_inspection";
+      notiType = "request" as NotificationType;
+      url = `/defect/${id}`;
+      receive = supervisorId;
+    } else if (status === ("completed" as DefectStatus)) {
+      message = "defect_completed";
+      notiType = "information" as NotificationType;
+      url = `/defect/${id}`;
+      receive = supervisorId;
     }
 
     if (message) {
@@ -667,6 +684,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     }
 
     const result = await prisma.defect.findUnique({
+      // Response
       where: { id: Number(id) },
       include: {
         patrolResult: {
@@ -676,10 +694,10 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
                 id: true,
                 preset: {
                   select: {
-                    title: true
-                  }
-                }
-              }
+                    title: true,
+                  },
+                },
+              },
             },
             zoneId: true,
             itemZone: {
@@ -692,16 +710,15 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
                         id: true,
                         profile: {
                           include: {
-                            image: true
-                          }
-                        }
-                      }
-                    }
-
-                  }
-                }
-              }
-            }
+                            image: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         images: {
@@ -714,8 +731,8 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
                     email: true,
                     role: true,
                     department: true,
-                    createdAt: true
-                  }
+                    createdAt: true,
+                  },
                 },
               },
             },
@@ -729,27 +746,28 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
             createdAt: true,
             profile: {
               include: {
-                image: true
-              }
-            }
-          }
-        }
+                image: true,
+              },
+            },
+          },
+        },
       },
-    })
+    });
 
     res.status(200).json(result);
-  } catch (err) {
-    res.status(500)
+  } catch (error) {
+    console.error(error)
+    res.status(500);
   }
 }
 
 /**
- * คำอธิบาย: ฟังก์ชันสำหรับลบ Defect 
- * Input: 
+ * คำอธิบาย: ฟังก์ชันสำหรับลบ Defect
+ * Input:
  * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * - req.params: { id: Int} (ID ของ Defect ที่จะลบ)
  * Output: JSON message ยืนยันการลบ Defect สำเร็จ
-**/
+ **/
 export async function deleteDefect(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user.userId;
@@ -763,37 +781,39 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     });
 
     if (!defect) {
+      //เช็ค defect
       res.status(404).json({ message: "Defect not found" });
       return;
     }
+    // ค้นหาภาพที่เกี่ยวข้องกับ Defect นี้
     const existingDefectImages = await prisma.defectImage.findMany({
       where: { defectId: Number(id) },
       select: { imageId: true },
     });
-
+    // ดึง IDs ของภาพที่จะลบ
     const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
-
+    // ค้นหาข้อมูลภาพที่จะลบ
     const imagesToDelete = await prisma.image.findMany({
       where: { id: { in: imageIdsToDelete } },
       select: { path: true },
     });
-
+    // ลบไฟล์ภาพจากที่เก็บในระบบ
     for (const image of imagesToDelete) {
       const filePath = path.join(uploadsPath, image.path);
       try {
         fs.unlinkSync(filePath);
-      } catch (err) {
-        console.error(`Failed to delete file at ${filePath}:`, err);
+      } catch (error) {
+        console.error(`Failed to delete file at ${filePath}:`, error);
       }
     }
-
+    // ลบข้อมูลในฐานข้อมูลที่เชื่อมโยงกับ Defect และภาพ
     await prisma.defectImage.deleteMany({
       where: { defectId: Number(id) },
     });
     await prisma.image.deleteMany({
       where: { id: { in: imageIdsToDelete } },
     });
-
+    // ตรวจสอบว่าผู้ใช้งานมีสิทธิ์ใน Patrol ที่เกี่ยวข้องกับ Defect นี้หรือไม่
     const validPatrol = await prisma.patrol.findFirst({
       where: {
         results: {
@@ -808,14 +828,14 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
         },
       },
     });
-
+    // หากไม่พบ Patrol ที่เกี่ยวข้องกับผู้ใช้งานให้แสดงข้อผิดพลาด 404
     if (!validPatrol) {
       res
         .status(404)
         .json({ message: "You are not associated with this Patrol" });
       return;
     }
-
+    // ลบข้อมูล Defect จากฐานข้อมูล
     await prisma.defect.delete({
       where: {
         id: Number(id),
@@ -823,20 +843,20 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     });
     res.status(200).json({ message: "Defect deleted successfully" });
     return;
-  } catch (err) {
+  } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }
 }
 
-
-
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Comment ทั้งหมด
- * Input: 
- * - (req as any).user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
- * Output: JSON array ข้อมูล Comment ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง 
-**/
+ * Input:
+ * - req as any:user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.query:{ status:DefectStatus, startDate:Date, endDate:Date, search:String }
+ * Output: JSON array ข้อมูล Comment ทั้งหมด รวมถึงข้อมูล patrolResult และ user ที่เกี่ยวข้อง
+ **/
 export async function getAllComments(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -858,7 +878,7 @@ export async function getAllComments(req: Request, res: Response) {
 
     // เงื่อนไขการกรองตาม status
     if (status !== undefined) {
-      const statusBoolean = status === 'true';
+      const statusBoolean = status === "true";
       andConditions.push({ status: statusBoolean });
     }
 
@@ -875,7 +895,7 @@ export async function getAllComments(req: Request, res: Response) {
           },
         });
       } else {
-        console.error('Invalid date range:', startDate, endDate);
+        console.error("Invalid date range:", startDate, endDate);
       }
     }
 
@@ -887,9 +907,9 @@ export async function getAllComments(req: Request, res: Response) {
         const searchLower = search.toLowerCase();
 
         // ตรวจสอบความใกล้เคียงกับค่าของ CommentStatus
-        if (searchLower.startsWith('pe')) {
+        if (searchLower.startsWith("pe")) {
           return false;
-        } else if (searchLower.startsWith('co')) {
+        } else if (searchLower.startsWith("co")) {
           return true;
         }
         // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
@@ -912,7 +932,7 @@ export async function getAllComments(req: Request, res: Response) {
       orConditions.push({
         message: {
           contains: search as string,
-        }
+        },
       });
 
       orConditions.push({
@@ -931,10 +951,10 @@ export async function getAllComments(req: Request, res: Response) {
             zone: {
               name: {
                 contains: search as string,
-              }
+              },
             },
-          }
-        }
+          },
+        },
       });
 
       orConditions.push({
@@ -943,10 +963,10 @@ export async function getAllComments(req: Request, res: Response) {
             item: {
               name: {
                 contains: search as string,
-              }
+              },
             },
-          }
-        }
+          },
+        },
       });
 
       // ถ้ามีเงื่อนไขใน OR ให้เพิ่มเข้าไปใน AND
@@ -973,11 +993,11 @@ export async function getAllComments(req: Request, res: Response) {
                 zone: true,
                 item: {
                   include: {
-                    checklist: true
-                  }
-                }
-              }
-            }
+                    checklist: true,
+                  },
+                },
+              },
+            },
           },
         },
         user: {
@@ -999,11 +1019,12 @@ export async function getAllComments(req: Request, res: Response) {
       },
     });
 
-    let result = comments
+    let result = comments;
     res.status(200).json(result);
     return;
-  } catch (err) {
-    res.status(500)
+  } catch (error) {
+    console.error(error)
+    res.status(500);
     return;
   }
 }
@@ -1013,7 +1034,7 @@ export async function getAllComments(req: Request, res: Response) {
  * Input:
  * - req.params.id: number (ID ของ Comment ที่ต้องการยืนยัน)
  * Output: JSON object ข้อมูล Comment หลังจากยืนยัน
-**/
+ **/
 export async function confirmComment(req: Request, res: Response) {
   try {
     const commentId = parseInt(req.params.id, 10);
@@ -1040,11 +1061,11 @@ export async function confirmComment(req: Request, res: Response) {
                 zone: true,
                 item: {
                   include: {
-                    checklist: true
-                  }
-                }
-              }
-            }
+                    checklist: true,
+                  },
+                },
+              },
+            },
           },
         },
         user: {
@@ -1077,6 +1098,7 @@ export async function confirmComment(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }
