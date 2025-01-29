@@ -46,6 +46,7 @@ export async function getZone(req: Request, res: Response) {
     return;
   }
 }
+
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล ZoneSs ทั้งหมด
  * Input: -

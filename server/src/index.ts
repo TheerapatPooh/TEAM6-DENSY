@@ -8,6 +8,8 @@ import http from 'http';
 import corsMiddleware from '@Utils/cors.js'
 import { initSocketIO } from '@Utils/socket.js';
 import { fileURLToPath } from 'url';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 
 dotenv.config()
 
@@ -20,12 +22,33 @@ app.use(cookieParser());
 app.use(corsMiddleware)
 app.use('/uploads', express.static(path.join(__dirname, '../../server/uploads')));
 app.use(bodyParse.json({ limit: '10mb' }))
-
+app.use(express.json())
 
 readdirSync(path.join(__dirname, 'Routes')).map(async (file) => {
   const route = await import(`./Routes/${file}`);
   app.use('/api', route.default || route);
 });
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'API Documentation for the API',
+    },
+
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+      }
+    ],
+  },
+  apis: ['./src/Routes/*.ts'],
+}
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const server = http.createServer(app)
 
