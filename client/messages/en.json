@@ -88,7 +88,21 @@
     "CurrentPassword" : "Current Password",
     "NewPassword" : "New Password",
     "ConfirmPassword" : "Confirm Password",
-    "Accept" : "Accept"
+    "Accept" : "Accept",
+    "Version": "Version",
+    "Update By": "Update By",
+    "Update At": "Update At",
+    "Settings Patrol Preset": "Setting Patrol Preset",
+    "Create Preset": "Create Preset",
+    "SortByDateModify": "Date modified",
+    "SortByAlphabet": "Name",
+    "Select Zones": "Select Zones",
+    "Pick a date": "Pick a date",
+    "Done": "Done",
+    "Filter by Zone": "Filter by Zone",
+    "Please select the zones to display only the relevant data": "Please select the zones to display only the relevant data."
+    
+   
   },
   "Status": {
     "pending": "Pending",
@@ -248,6 +262,10 @@
     "AcceptDefectConfirmTitle" : "Are you sure to accept defect?",
     "AcceptDefectConfirmDescription" : "Please confirm to accept defect.",
     "DefectAcceptTitle" : "Defect Accepted",
-    "DefectAcceptDescription" : "The defect is now in progress."
+    "DefectAcceptDescription" : "The defect is now in progress.",   
+    "PresetRemoveConfirmTitle": "Are you sure to delete patrol preset?",
+    "PresetRemoveConfirmDescription": "Please confirm to delete patrol preset.",
+    "PresetRemoveSuccessTitle": "Patrol Preset Deleted",
+    "PresetRemoveSuccessDescription": "The patrol preset has been successfully removed."
   }
 }

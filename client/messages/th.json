@@ -88,7 +88,19 @@
     "CurrentPassword": "รหัสผ่านปัจจุบัน",
     "NewPassword": "รหัสผ่านใหม่",
     "ConfirmPassword": "ยืนยันรหัสผ่าน",
-    "Accept": "ยอมรับ"
+    "Accept": "ยอมรับ",
+    "Version": "เวอร์ชัน",
+    "Update By": "อัปเดต โดย",
+    "Update At": "อัปเดต ณ",
+    "Settings Patrol Preset": "ตั้งค่าชุดรายการตรวจตรา",
+    "Create Preset": "สร้างชุดรายการตรวจ",
+    "SortByDateModify": "วันที่แก้ไข",
+    "SortByAlphabet": "ชื่อ",
+    "Select Zones": "เลือกพื้นที่",
+    "Pick a date": "เลือกวันที่",
+    "Done": "เสร็จแล้ว",
+    "Filter by Zone": "กรองตามพื้นที่",
+    "Please select the zones to display only the relevant data" : "กรุณาเลือกพื้นที่เพื่อแสดงเฉพาะข้อมูลที่เกี่ยวข้องเท่านั้น."
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -248,6 +260,10 @@
     "AcceptDefectConfirmTitle": "คุณแน่ใจหรือไม่ที่จะยอมรับข้อบกพร่อง?",
     "AcceptDefectConfirmDescription": "โปรดยืนยันเพื่อยอมรับข้อบกพร่อง.",
     "DefectAcceptTitle": "ยอมรับข้อบกพร่องแล้ว",
-    "DefectAcceptDescription": "ข้อบกพร่องกำลังอยู่ในระหว่างดำเนินการ."
+    "DefectAcceptDescription": "ข้อบกพร่องกำลังอยู่ในระหว่างดำเนินการ.",
+    "PresetRemoveConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการลบชุดรายการตรวจ?",
+    "PresetRemoveConfirmDescription": "กรุณายืนยันเพื่อลบชุดรายการตรวจ",
+    "PresetRemoveSuccessTitle": "ลบชุดรายการตรวจสำเร็จ",
+    "PresetRemoveSuccessDescription": "ชุดรายการตรวจถูกลบเรียบร้อยแล้ว"
   }
 }

@@ -75,7 +75,7 @@ export const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
   className,
 }) => {
   const [date, setDate] = React.useState<DateRange | undefined>(undefined); 
-
+  const t = useTranslations("General");
   React.useEffect(() => {
     setDate({
       from: startDate,
@@ -116,7 +116,7 @@ export const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{t("Pick a date")}</span>
             )}
           </Button>
         </PopoverTrigger>
