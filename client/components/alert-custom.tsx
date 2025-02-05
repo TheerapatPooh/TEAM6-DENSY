@@ -1,3 +1,19 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ AlertCustom ใช้สำหรับแสดง Alert ที่มีปุ่ม Action 2 ปุ่ม และสามารถกำหนดไอคอนและสีปุ่มได้
+ * Input: 
+ * - title: ชื่อหัวข้อของ Alert
+ * - description: คำอธิบายของ Alert
+ * - primaryButtonText: ข้อความบนปุ่ม Action 1
+ * - secondaryButtonText: ข้อความบนปุ่ม Action 2
+ * - primaryIcon: ไอคอนบนปุ่ม Action 1
+ * - secondaryIcon: ไอคอนบนปุ่ม Action 2
+ * - primaryVariant: สีของปุ่ม Action 1
+ * - backResult: ฟังก์ชันที่รับค่า boolean จากการกดปุ่ม Action 1 หรือ Action 2
+ * Output:
+ * - JSX ของ AlertCustom ที่มีหัวข้อ, คำอธิบาย, 2 ปุ่ม Action และสามารถกำหนดไอคอนและสีของปุ่มได้
+ **/
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +28,7 @@ import {
 import { useState } from "react";
 import { buttonVariants } from "./ui/button";
 
-export interface alertProps {
+export interface IAlertCustom {
   title: string;
   description: string;
   primaryButtonText: string;
@@ -30,9 +46,9 @@ export function AlertCustom({
   secondaryButtonText,
   primaryIcon,
   secondaryIcon,
-  primaryVariant,
+  primaryVariant = 'destructive',
   backResult,
-}: alertProps) {
+}: IAlertCustom) {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleAction = (result: boolean) => {
@@ -47,21 +63,21 @@ export function AlertCustom({
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       <AlertDialogTrigger asChild></AlertDialogTrigger>
-      <AlertDialogContent onClick={handleContentClick}>
+      <AlertDialogContent onClick={handleContentClick} className="flex flex-col px-6 py-4">
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle className="text-xl font-semibold text-card-foreground">{title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-card-foreground text-base">{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="gap-2"
+            className={`gap-2 ${buttonVariants({ variant: "secondary", size: "lg" })}`}
             onClick={() => handleAction(false)}
           >
             <span className="material-symbols-outlined">{secondaryIcon}</span>
             {secondaryButtonText}
           </AlertDialogCancel>
           <AlertDialogAction
-            className={`gap-2 ${buttonVariants({ variant: primaryVariant })}`}
+            className={`gap-2 ${buttonVariants({ variant: primaryVariant, size: "lg"  })}`}
             onClick={() => handleAction(true)}
           >
             <span className="material-symbols-outlined">{primaryIcon}</span>

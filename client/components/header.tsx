@@ -4,14 +4,12 @@
  *   (variant) ที่ส่งเข้ามา เช่น ถ้าเป็น "inspector" จะแสดงเมนู Patrol และ Defect ถ้าไม่ใช่จะไม่แสดงเมนูดังกล่าว
  *
  * Input:
- *   - variant: HeaderVariant ('inspector' | 'supervisor' | 'admin')
- *     - 'inspector': แสดงปุ่ม Patrol และ Defect
- *     - 'supervisor' และ 'admin': ไม่แสดงปุ่มดังกล่าว
+ * - variant: HeaderVariant ('inspector' | 'supervisor' | 'admin')
  *
  * Output:
- *   - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
- *     การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
- *   - การนำทางจะเกิดขึ้นเมื่อกดปุ่มต่าง ๆ โดยใช้ Next.js router
+ * - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
+ *   การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
+ * - UI จะแตกต่างกันตาม variant ที่ส่งเข้ามา
  **/
 
 "use client";
@@ -74,8 +72,8 @@ export default function Header({ variant }: IHeader) {
   return (
     <header
       className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === "admin"
-          ? "justify-between"
-          : "justify-between custom-shadow"
+        ? "justify-between"
+        : "justify-between custom-shadow"
         }`}
     >
       <div className="flex gap-4">
@@ -104,14 +102,15 @@ export default function Header({ variant }: IHeader) {
               onClick={() => router.push(`/${locale}/patrol`)}
             >
               <span className="material-symbols-outlined">list_alt_check</span>{" "}
-              Patrol
+              {s('Patrol')}
             </button>
             <button
               className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
-              <span className="material-symbols-outlined">build</span> Defect
+              <span className="material-symbols-outlined">build</span>
+              {s('Defect')}
             </button>
           </div>
         )}
@@ -123,14 +122,16 @@ export default function Header({ variant }: IHeader) {
                 }`}
               onClick={() => router.push(`/${locale}/defect`)}
             >
-              <span className="material-symbols-outlined">gpp_maybe</span> Defect
+              <span className="material-symbols-outlined">gpp_maybe</span>               
+              {s('Defect')}
             </button>
             <button
               className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/comment`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/comment`)}
             >
-              <span className="material-symbols-outlined">chat</span> Comment
+              <span className="material-symbols-outlined">chat</span>               
+              {s('Comment')}
             </button>
           </div>
         )}

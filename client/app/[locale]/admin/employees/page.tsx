@@ -1,21 +1,18 @@
 "use client";
 import { IUser, role } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
-import BadgeCustom, { badgeVariants } from "@/components/badge-custom";
+import BadgeCustom from "@/components/badge-custom";
 import Textfield from "@/components/textfield";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -25,15 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -48,7 +37,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -61,7 +49,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { useTranslations } from "next-intl";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -216,13 +203,10 @@ export default function Page() {
 
   const form = useForm();
   const {
-    register,
     handleSubmit,
-    formState: { errors },
   } = form;
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = () => {
   };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -233,7 +217,6 @@ export default function Page() {
     setAllUsers((prevUsers) => {
       const user = prevUsers.find((user) => user.id === userId);
       if (!user) {
-        console.error(`User with ID ${userId} not found.`);
         return prevUsers;
       }
 
@@ -258,7 +241,6 @@ export default function Page() {
       (async () => {
         try {
           await fetchData("put", `/user/${userId}`, true, data);
-          console.log(`User ${userId} status updated to ${updatedStatus}`);
         } catch (error) {
           console.error("Update failed", error);
         }
@@ -306,7 +288,6 @@ export default function Page() {
       }
 
       if (role === user.role && password === "") {
-        console.log("No change were made");
         toast({
           variant: "default",
           title: "No Updates Applied",
@@ -419,7 +400,6 @@ export default function Page() {
       return;
     }
 
-    console.log("user " + username, "pass " + password, role);
 
     setPendingAction(() => () => handleUserCreate(username, password, role));
     setDialogType("create");
@@ -573,7 +553,6 @@ export default function Page() {
                     password: "",
                     role: "inspector",
                   }; // Default values
-                  console.log("userCreate initialized:", userCreate.current);
                   setDialogType("add_user_menu");
                   setIsDialogOpen(true);
                   setErrorsForCreateUser({

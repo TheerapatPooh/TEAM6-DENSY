@@ -1,5 +1,17 @@
+/**
+ * คำอธิบาย:
+ *  หน้านี้แสดงรายการคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา 
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงรายละเอียดของคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
+ * - สามารถกรองข้อมูลได้ตามช่วงวันที่ และสถานะของคำแนะนำ
+ * - สามารถอัพเดทสถานะของคำแนะนำได้
+ **/
+
+
 "use client";
-import { FilterComment, IComment, itemType } from "@/app/type";
+import { IFilterComment, IComment, itemType } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import { DatePickerWithRange } from "@/components/date-picker";
 import Loading from "@/components/loading";
@@ -88,7 +100,6 @@ export default function Page() {
   const getAllComments = async () => {
     try {
       const queryString = buildQueryString(filter, searchTerm);
-      console.log(queryString);
       const data = await fetchData("get", `/comments?${queryString}`, true);
       setAllComments(data);
     } catch (error) {
@@ -111,8 +122,8 @@ export default function Page() {
       );
       toast({
         variant: "success",
-        title: a("ConmmentConfirmSuccessTitle"),
-        description: a("ConmmentConfirmSuccessDescription"),
+        title: a("CommentConfirmSuccessTitle"),
+        description: a("CommentConfirmSuccessDescription"),
       });
     } catch (error) {
       console.error("Error deleting patrol:", error);
@@ -143,7 +154,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<FilterComment | null>(getStoredFilter());
+  const [filter, setFilter] = useState<IFilterComment | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Date",
@@ -179,7 +190,7 @@ export default function Page() {
   };
 
   const buildQueryString = (
-    filter: FilterComment | null,
+    filter: IFilterComment | null,
     searchTerm: string
   ) => {
     const params: Record<string, string | undefined> = {};
@@ -374,7 +385,7 @@ export default function Page() {
             <TableHead>{t("Message")}</TableHead>
             <TableHead className="w-[180px]">{t("Date")}</TableHead>
             <TableHead className="w-[240px]">{t("Status")}</TableHead>
-            <TableHead className="w-[240px]">{t("Inspector")}</TableHead>
+            <TableHead className="w-[240px]">{t("inspector")}</TableHead>
             <TableHead className="text-end w-[10px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -402,7 +413,7 @@ export default function Page() {
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={comment.user.id.toString()}>
                       {getInitials(comment.user.profile.name)}
                     </AvatarFallback>
                   </Avatar>

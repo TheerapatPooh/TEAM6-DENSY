@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้า Login ใช้สำหรับเข้าสู่ระบบ โดยจะมีช่องกรอก username, password และ checkbox สำหรับการจำรหัสผ่าน
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้า Login ที่มีช่องกรอก username, password และ checkbox สำหรับการจำรหัสผ่าน
+ * - แสดง Alert หากเกิดข้อผิดพลาดในการเข้าสู่ระบบ
+ * - แสดง Alert หากเข้าสู่ระบบสำเร็จ
+ **/
+
 'use client'
 import { useTransition, useEffect, useState } from 'react';
 import lightLogo from "@/public/assets/img/system_logo_light.png"

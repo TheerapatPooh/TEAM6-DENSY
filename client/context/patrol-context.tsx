@@ -1,17 +1,23 @@
-import { IDefect, IPatrol, IPatrolResult, IUser } from "@/app/type";
+import { IDefect, IPatrol, IPatrolChecklist, IPatrolResult, IUser } from "@/app/type";
 import Loading from "@/components/loading";
 import { useSocket } from "@/components/socket-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { fetchData } from "@/lib/utils";
 import { useParams } from "next/navigation";
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useDebugValue } from "react";
+import { boolean, IpVersion } from "zod";
+import { AlertCustom } from "@/components/alert-custom";
+import { toast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
 
-interface PatrolContextProps {
+interface IPatrolContext {
     patrol: IPatrol | null;
     patrolResults: IPatrolResult[];
     results: IPatrolResult[];
     otherResults: IPatrolResult[];
     user: IUser | null;
     lock: boolean;
+    isAlertOpen: boolean;
     handleResult: (result: IPatrolResult) => void;
     mergeResults: (newResults: IPatrolResult[]) => void;
     toggleLock: () => void;
@@ -19,12 +25,27 @@ interface PatrolContextProps {
     handleFinishPatrol: () => void;
     fetchRealtimeData: (defect: IDefect, actionType: string) => void;
     calculateProgress: () => number;
+    handleOpenDialog: () => void
+    handleCloseDialog: () => void
+    itemCounts: (patrol: IPatrol, results: IPatrolResult[]) => void
     mounted: boolean;
     canFinish: boolean;
     defects: IDefect[]
+    countItems: number
+    countFails: number
+    countDefects: number
+    patrolUser: IUser[]
+    isHovered: boolean
+    handleMouseLeave: () => void
+    handleMouseEnter: () => void
+    formatZone: (patrol: IPatrol) => string
+    formatTimeDate: (dateStr: string) => string
+    formatId: (id: number) => string
+    formatDate: (dateStr: string) => string
+
 }
 
-const PatrolContext = createContext<PatrolContextProps | undefined>(undefined);
+const PatrolContext = createContext<IPatrolContext | undefined>(undefined);
 
 export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
@@ -39,6 +60,108 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const [lock, setLock] = useState(false);
     const [mounted, setMounted] = useState(false);
     const params = useParams();
+    const a = useTranslations("Alert");
+
+    const [patrolUser, setPatrolUser] = useState<IUser[] | null>([])
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const [countItems, setCountItems] = useState(0);
+    const [countFails, setCountFails] = useState(0);
+    const [countDefects, setCountDefects] = useState(0);
+
+    const itemCounts = (patrol: IPatrol, results: IPatrolResult[]) => {
+        let itemCounts = 0
+        patrol?.patrolChecklists.forEach(patrolChecklist => {
+            // นับจำนวน item แต่ละประเภท
+            patrolChecklist.checklist.items.forEach(item => {
+                item.itemZones.forEach(itemZone => {
+                    itemCounts++
+                })
+            });
+        });
+
+        let countItems = itemCounts;
+        let countFails = 0;
+        let countDefects = 0;
+
+        if (patrol?.status !== "pending" && patrol?.status !== "scheduled") {
+            if (results) {
+                for (const patrolResult of results) {
+                    if (patrolResult.status === false) {
+                        countFails++;
+                        if (patrolResult.defects && patrolResult.defects.length !== 0) {
+                            countDefects += patrolResult.defects.length;
+                        }
+                    }
+                }
+            }
+        }
+
+        setCountItems(countItems)
+        setCountFails(countFails)
+        setCountDefects(countDefects)
+
+        return {countItems, countFails, countDefects}
+    }
+
+
+    const formatDate = (dateStr: string): string => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-GB');
+    };
+
+    const formatId = (id: number): string => {
+        return `P${id.toString().padStart(4, '0')}`;
+    };
+   
+    const formatTimeDate = (dateStr: string): string => {
+        const date = new Date(dateStr);
+        const hours = date.getHours().toString().padStart(2, '0'); 
+        const minutes = date.getMinutes().toString().padStart(2, '0'); 
+        return `${hours}.${minutes}`;
+    };
+
+    const formatZone = (patrol: IPatrol) => {
+        const zones = new Set<string>();
+        patrol.patrolChecklists.forEach((checklist: any) => {
+            checklist.checklist.items.forEach((item: any) => {
+                item.itemZones.forEach((zoneObj: any) => {
+                    const zoneName = zoneObj.zone.name;
+                    if (typeof zoneName === "string") {
+                        zones.add(zoneName);
+                    }
+                });
+            });
+        });
+        return Array.from(zones)
+            .map(
+                (zone) =>
+                    zone
+                        .split("_") // แยกคำตาม `_`
+                        .map(
+                            (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        ) // ตัวอักษรตัวแรกพิมพ์ใหญ่
+                        .join(" ") // รวมคำด้วยช่องว่าง
+            )
+            .join(", "); // รวมรายการด้วยเครื่องหมายคอมมา
+    };
+
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+    };
+
+    const handleOpenDialog = () => {
+        setIsAlertOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setIsAlertOpen(false)
+    }
 
     const totalResults = patrolResults.length
     const checkedResults =
@@ -126,6 +249,8 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const handleStartPatrol = async () => {
+        setIsAlertOpen(false)
+
         if (!patrol) return;
         const patrolId = patrol.id;
         const data = {
@@ -134,21 +259,26 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         };
 
         try {
-            await fetchData(
+            const startPatrol = await fetchData(
                 "put",
                 `/patrol/${patrolId}/start`,
                 true,
                 data
             );
+            setPatrol(startPatrol)
+            setPatrolResults(startPatrol.results)
+            toast({
+                variant: "default",
+                title: a("PatrolStartTitle"),
+                description: a("PatrolStartDescription"),
+            });
         } catch (error) {
             console.error("Error starting patrol:", error);
         }
-        window.location.reload();
     };
 
     const handleFinishPatrol = async () => {
         if (!patrol) return;
-
 
         const updatedResults = patrolResults.map((result) => {
             const matchedResult = patrolResults.find(
@@ -186,23 +316,38 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
             try {
                 localStorage.removeItem(`patrolResults_${patrol.id}`);
                 localStorage.removeItem(`otherResults_${patrol.id}`);
-                await fetchData(
+                const finishPatrol = await fetchData(
                     "put",
                     `/patrol/${patrol.id}/finish`,
                     true,
                     data
                 );
+                toast({
+                    variant: "default",
+                    title: a("PatrolFinishTitle"),
+                    description: a("PatrolFinishDescription"),
+                });
+                setPatrol(finishPatrol)
             } catch (error) {
                 console.error("Error finishing patrol:", error);
             }
         }
-        window.location.reload();
+        // window.location.reload()
     };
 
     const getUserData = async () => {
         try {
             const userfetch = await fetchData("get", "/user?profile=true&image=true", true);
             setUser(userfetch);
+        } catch (error) {
+            console.error("Failed to fetch profile data:", error);
+        }
+    };
+
+    const getPatrolUserData = async () => {
+        try {
+            const patrolUserFetch = await fetchData("get", `/patrol/${params.id}/user`, true);
+            setPatrolUser(patrolUserFetch);
         } catch (error) {
             console.error("Failed to fetch profile data:", error);
         }
@@ -225,13 +370,13 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     };
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 await getUserData();
                 await getPatrolData();
                 await getDefectData()
+                await getPatrolUserData()
             } catch (error) {
                 console.error("Error loading data: ", error);
             }
@@ -376,7 +521,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     }, [patrol?.id]);
 
-
     return (
         <PatrolContext.Provider
             value={{
@@ -386,16 +530,31 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 otherResults,
                 user,
                 lock,
+                isAlertOpen,
                 mounted,
                 canFinish,
                 defects,
+                countItems,
+                countFails,
+                countDefects,
+                patrolUser,
+                isHovered,
+                formatDate,
+                formatId,
+                formatTimeDate,
+                formatZone,
+                handleMouseEnter,
+                handleMouseLeave,
+                itemCounts,
                 toggleLock,
                 calculateProgress,
                 handleResult,
                 mergeResults,
                 handleStartPatrol,
                 fetchRealtimeData,
-                handleFinishPatrol
+                handleFinishPatrol,
+                handleOpenDialog,
+                handleCloseDialog,
             }}
         >
             {children}

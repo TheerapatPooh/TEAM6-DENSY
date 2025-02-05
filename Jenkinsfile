@@ -15,21 +15,24 @@ pipeline {
         stage('Pull Latest Code') {
             steps {
                 dir('/workspace/TEAM6-DENSY') {
-                    sh 'git pull origin main'
+                    sh '''
+                    git config --global --add safe.directory /workspace/TEAM6-DENSY
+                    git pull origin main
+                    '''
                 }
             }
         }
 
-        // stage('Run Tests') {
-        //     steps {
-        //         dir('/workspace/TEAM6-DENSY/server') {
-        //             sh '''
-        //             npm install
-        //             npm run test || exit 1
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Run Tests') {
+            steps {
+                dir('/workspace/TEAM6-DENSY/server') {
+                    sh '''
+                    npm install
+                    npm run test || exit 1
+                    '''
+                }
+            }
+        }
 
         stage('Cleanup Existing Containers') {
             steps {

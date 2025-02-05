@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *   หน้า Patrol Defect ใช้สำหรับแสดงข้อมูลของ Defect ทั้งหมด และสามารถค้นหา และเรียงลำดับข้อมูลได้
+ *
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้า Patrol Defect ที่แสดงข้อมูลของ Defect ทั้งหมด และสามารถค้นหา และเรียงลำดับข้อมูลได้
+ * - แสดงช่องค้นหา และช่องกรองข้อมูลของ Defect ตามช่วงวันที่ และประเภทของ Defect
+ **/
+
 'use client'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
@@ -29,6 +40,8 @@ import {
 import { IUser } from "@/app/type";
 import Loading from "@/components/loading";
 import ReportDefect from "@/components/report-defect";
+import { DatePickerWithRange } from "@/components/date-picker";
+import { Niconne } from "next/font/google";
 
 export default function page() {
     const t = useTranslations("General");
@@ -36,6 +49,7 @@ export default function page() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [allDefects, setAllDefects] = useState<IDefect[]>([]);
+    const s = useTranslations("Status");
 
     const getAllDefects = async () => {
         try {
@@ -73,28 +87,35 @@ export default function page() {
                 <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
                     <DropdownMenuTrigger
                         className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-                            ${isSortOpen ? "border border-destructive" : "border-none"}`}
+                       ${isSortOpen ? "border border-destructive" : "border-none"}`}
                     >
                         <span className="material-symbols-outlined">swap_vert</span>
-                        <div className="text-lg	">Sort</div>
+                        <div className="text-lg">{t('Sort')}</div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="p-2">
-                        <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-                        <DropdownMenuRadioGroup value="Doc No.">
-                            <DropdownMenuRadioItem value="Doc No." className="text-base">
-                                Doc No.
+                    <DropdownMenuContent align="end" className="p-2 gap-2">
+                        <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
+                        <DropdownMenuRadioGroup
+                            value={null}
+                            onValueChange={null}
+                        >
+                            <DropdownMenuRadioItem value="Date" className="text-base" onSelect={(e) => e.preventDefault()}>
+                                {t('Date')}
                             </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Date" className="text-base">
-                                Date
+                            <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
+                                {t('Status')}
                             </DropdownMenuRadioItem>
                         </DropdownMenuRadioGroup>
-                        <DropdownMenuLabel>Order</DropdownMenuLabel>
-                        <DropdownMenuRadioGroup value="Order">
-                            <DropdownMenuRadioItem value="Order" className="text-base">
-                                Ascending
+
+                        <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
+                        <DropdownMenuRadioGroup
+                            value={null}
+                            onValueChange={null}
+                        >
+                            <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
+                                {t('Ascending')}
                             </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Date" className="text-base">
-                                Descending
+                            <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
+                                {t('Descending')}
                             </DropdownMenuRadioItem>
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
@@ -103,78 +124,99 @@ export default function page() {
                 <DropdownMenu onOpenChange={(open) => setIsFilterOpen(open)}>
                     <DropdownMenuTrigger
                         className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-                          ${isFilterOpen ? "border border-destructive" : "border-none"}`}
+                       ${isFilterOpen ? "border border-destructive" : "border-none"}`}
                     >
-                        {" "}
                         <span className="material-symbols-outlined">page_info</span>
-                        <div className="text-lg	">Filter</div>
-
-                    </DropdownMenuTrigger> {/* เมนูกรองวันที่ */}
-                    <DropdownMenuContent className="flex flex-col justify-center gap-2 p-2">
+                        <div className="text-lg">{t('Filter')}</div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        className="flex flex-col justify-center gap-2 p-2 z-50"
+                        align="end"
+                    >
                         <div>
-                            <DropdownMenuLabel>Date</DropdownMenuLabel>
-                        </div>
-
-                        <div>
-                            <DropdownMenuLabel>Status</DropdownMenuLabel> {/* เมนูกรองสถานะ */}
-                            <DropdownMenuCheckboxItem checked>
-                                <BadgeCustom
-                                    width="w-full"
-                                    variant="green"
-                                    showIcon={true}
-                                    iconName="check"
-                                    children="Safety"
-                                ></BadgeCustom>
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem>
-                                <BadgeCustom
-                                    width="w-full"
-                                    variant="blue"
-                                    showIcon={true}
-                                    iconName="campaign"
-                                    children="Environment"
-                                ></BadgeCustom>
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem>
-                                <BadgeCustom
-                                    width="w-full"
-                                    variant="orange"
-                                    showIcon={true}
-                                    iconName="chat"
-                                    children="Maintenance"
-                                ></BadgeCustom>
-                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Date')}</DropdownMenuLabel>
+                            <DatePickerWithRange
+                                startDate={null}
+                                endDate={null}
+                                onSelect={null}
+                                className="my-date-picker"
+                            />
                         </div>
                         <div>
-
-                            <DropdownMenuLabel>Defect</DropdownMenuLabel> {/* เมนูกรอง Preset */}
-                            <Select>
-                                <SelectTrigger className="">
-                                    <SelectValue placeholder="All" />
+                            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
+                            <Select
+                                value={t('All')}
+                                onValueChange={null}
+                            >
+                                <SelectTrigger className="text-card-foreground">
+                                    <SelectValue
+                                        placeholder={t('All')}
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectLabel>Defect</SelectLabel>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="09/07/2567 02:40 PM">
-                                            ตรวจสอบการจัดการและการจัดเก็บวัสดุอันตรายในแต่ละโซนให้เป็นไปตามข้อกำหนด
-                                        </SelectItem>
-                                        <SelectItem value="09/07/2567 02:35 PM">
-                                            ตรวจสอบว่าพื้นในทุกโซนสะอาด ปราศจากคราบสกปรก น้ำมัน หรือของเหลวที่อาจเป็นอันตราย
-                                        </SelectItem>
-                                        <SelectItem value="09/07/2567 02:00 PM">
-                                            ตรวจสอบการทำงานของระบบระบายอากาศและฟิลเตอร์ว่าไม่มีสิ่งสกปรก
-                                        </SelectItem>
+                                        <SelectLabel>{t('Status')}</SelectLabel>
+                                        <SelectItem value="All">{t('All')}</SelectItem>
+                                        {/* {defectStatus.map((status) => (
+                                            <SelectItem value={status} key={status}>
+                                                {s(status)}
+                                            </SelectItem>
+                                        ))} */}
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div>
+                            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Type')}</DropdownMenuLabel>
+                            <DropdownMenuCheckboxItem
+                                checked={null}
+                                onCheckedChange={null}
+                                onSelect={(e) => e.preventDefault()}
+                            >
+                                <BadgeCustom
+                                    width="w-full"
+                                    variant="green"
+                                    showIcon={true}
+                                    iconName="verified_user"
+                                    children={s('safety')}
+                                    shape="square"
+                                />
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                                checked={null}
+                                onCheckedChange={null}
+                                onSelect={(e) => e.preventDefault()}
+                            >
+                                <BadgeCustom
+                                    width="w-full"
+                                    variant="blue"
+                                    showIcon={true}
+                                    iconName="psychiatry"
+                                    children={s('environment')}
+                                    shape="square"
+                                />
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                                checked={null}
+                                onCheckedChange={null}
+                                onSelect={(e) => e.preventDefault()}
+                            >
+                                <BadgeCustom
+                                    width="w-full"
+                                    variant="red"
+                                    showIcon={true}
+                                    iconName="build"
+                                    children={s('maintenance')}
+                                    shape="square"
+                                />
+                            </DropdownMenuCheckboxItem>
+                        </div>
 
-                        <div className="flex w-full justify-end gap-2"> {/* ปุ่มสำหรับรีเซ็ตและใช้การตั้งค่า */}
-                            <Button size="sm" variant="secondary">
-                                Reset
+                        <div className="flex w-full justify-end mt-4 gap-2">
+                            <Button size="sm" variant="secondary" onClick={null}>
+                                {t('Reset')}
                             </Button>
-                            <Button size="sm">Apply</Button>
+                            <Button size="sm" variant="primary" onClick={null}>{t('Apply')}</Button>
                         </div>
                     </DropdownMenuContent>
                 </DropdownMenu>

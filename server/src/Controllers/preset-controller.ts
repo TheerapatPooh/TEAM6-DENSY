@@ -1,13 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { checklists } from "../Utils/data/checklists";
-import { title } from "process";
-import { item_zones } from "../Utils/data/item-zones";
-import { zones } from "../Utils/data/zones";
-import { items } from "../Utils/data/items";
 import { Checklist } from "@prisma/client";
-import path from "path";
-import { any } from "zod";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่
@@ -23,13 +16,13 @@ export async function createPreset(req: Request, res: Response) {
   try {
     const { title, description, checklists } = req.body;
     const userId = (req as any).user.userId;
-    const intChecklists: number[] = checklists.map(Number)
-
+    const intChecklists: number[] = checklists.map(Number); // แปลง checklists เป็น array ของตัวเลข
+    // ตรวจสอบข้อมูลที่จำเป็น
     if (!title || !description || !Array.isArray(checklists) || !userId) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
-
+    // สร้าง preset ใหม่ในฐานข้อมูล
     const newPreset = await prisma.preset.create({
       data: {
         title,
@@ -40,7 +33,7 @@ export async function createPreset(req: Request, res: Response) {
         updatedBy: userId,
       },
     });
-
+    // เชื่อมโยง preset กับ checklists ที่เลือก
     for (const checklistId of intChecklists) {
       await prisma.presetChecklist.create({
         data: {
@@ -59,16 +52,15 @@ export async function createPreset(req: Request, res: Response) {
   }
 }
 
-
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Preset
  * Input:
  * - req.params.id: number (ID ของ Preset ที่ต้องการอัปเดต)
+ * - req as any: userId: number
  * - req.body: {
  *     title: String,
  *     description: String,
- *     checklists: Array<{ checklist: { id: number } }>,
- *     userId: number
+ *     checklists: Array<{ checklist: { id: number } }>
  *   } (ข้อมูลของ Preset ที่ต้องการอัปเดต)
  * Output: JSON object { message: String, preset: Object } ยืนยันการอัปเดต Preset สำเร็จ
  **/
@@ -77,38 +69,44 @@ export async function updatePreset(req: Request, res: Response) {
     const { title, description, checklists } = req.body;
     const userId = (req as any).user.userId;
     const presetId = parseInt(req.params.id, 10);
-    const intChecklists: number[] = checklists.map(Number)
-
-    if (!presetId || !title || !description || !Array.isArray(checklists) || !userId) {
+    const intChecklists: number[] = checklists.map(Number);
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (
+      !presetId ||
+      !title ||
+      !description ||
+      !Array.isArray(checklists) ||
+      !userId
+    ) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
-
+    // ค้นหาพ preset ที่ต้องการอัปเดต
     const currentPreset = await prisma.preset.findUnique({
       where: { id: presetId },
     });
-
+    // ถ้าไม่พบ preset จะตอบกลับว่าไม่พบ preset
     if (!currentPreset) {
       res.status(404).json({ message: "Preset not found" });
       return;
     }
-
+    // อัปเดตสถานะ preset เก่าให้เป็นไม่ใช่เวอร์ชันล่าสุด
     await prisma.preset.update({
       where: { id: presetId },
       data: { latest: false },
     });
-
+    // สร้าง preset ใหม่ที่เป็นเวอร์ชันล่าสุด
     const newPreset = await prisma.preset.create({
       data: {
         title: title,
         description: description,
-        version: currentPreset.version + 1,
+        version: currentPreset.version + 1, // เพิ่มเวอร์ชันใหม่
         latest: true,
         updatedAt: new Date(),
         updatedBy: userId,
       },
     });
-
+    // เชื่อมโยง preset ใหม่กับ checklists ที่เลือก
     for (const checklistId of intChecklists) {
       await prisma.presetChecklist.create({
         data: {
@@ -117,23 +115,22 @@ export async function updatePreset(req: Request, res: Response) {
         },
       });
     }
-    
+
     res
       .status(200)
       .json({ message: "Preset updated successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
+    res.status(500);
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Checklist
  * Input:
- * - req.params.id: number (ID ของ Checklist ที่ต้องการอัปเดต)
- * - userId: number
- * - checklistId: number (ID ของ Checklist ที่ต้องการอัปเดต)
- * - title: string (ชื่อของ Checklist)
- * - items: Array (รายการไอเทมใน Checklist)</
+ * - req.params.id: checklistId: number (ID ของ Checklist ที่ต้องการอัปเดต)
+ * - req as any: userId: number
+ * - req.body:{ title: string, items: Array }
  * Output: JSON object { message: String, checklist: Object } ยืนยันการอัปเดต Checklistสำเร็จ
  **/
 export async function updateChecklist(req: Request, res: Response) {
@@ -147,6 +144,7 @@ export async function updateChecklist(req: Request, res: Response) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
+    // ดึง checklist ปัจจุบันตาม id
 
     const currentChecklist = await prisma.checklist.findUnique({
       where: { id: checklistId },
@@ -156,6 +154,7 @@ export async function updateChecklist(req: Request, res: Response) {
       res.status(404).json({ message: "Checklist not found" });
       return;
     }
+    // ตรวจสอบว่า checklist เป็นตัวล่าสุดหรือไม่
 
     if (currentChecklist.latest === true) {
       const now = new Date();
@@ -164,6 +163,8 @@ export async function updateChecklist(req: Request, res: Response) {
       ).toISOString();
 
       if (title === currentChecklist.title) {
+        // หาก title ตรงกัน ให้ทำการอัปเดต checklist เดิม
+
         await prisma.checklist.update({
           where: { id: checklistId },
           data: { latest: false, updatedAt: localTime, updatedBy: userId },
@@ -281,6 +282,7 @@ export async function getPreset(req: Request, res: Response) {
     let result = preset;
     res.status(200).json(result);
   } catch (error) {
+    console.error(error)
     res.status(500);
   }
 }
@@ -288,7 +290,7 @@ export async function getPreset(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Preset ทั้งหมด
  * Input:
- * - req.query.latest: "true" | "false" (optional, ระบุเพื่อดึงเฉพาะ Preset ที่เป็นเวอร์ชันล่าสุด)
+ * - req.query: boolean (optional, ระบุเพื่อดึงเฉพาะ Preset ที่เป็นเวอร์ชันล่าสุด)
  * Output: JSON array ข้อมูลของ Preset ทั้งหมดรวมถึงรายการ Checklist และรายการ Zone
  **/
 export async function getAllPresets(req: Request, res: Response) {
@@ -361,6 +363,7 @@ export async function getAllPresets(req: Request, res: Response) {
 
     res.status(200).json(result);
   } catch (error) {
+    console.error(error)
     res.status(500);
   }
 }
@@ -404,6 +407,7 @@ export async function removePreset(req: Request, res: Response) {
 
     res.status(200).json({ message: "Preset removed successfully" });
   } catch (error) {
+    console.error(error)
     res.status(500);
   }
 }
@@ -412,7 +416,7 @@ export async function removePreset(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ตาม ID
  * Input:
  * - req.params.id: number (ID ของ Checklist ที่ต้องการดึงข้อมูล)
- * - req.query.supervisor: "true" | "false" (optional, ระบุเพื่อดึงข้อมูล Supervisor ที่เกี่ยวข้อง)
+ * - req.query: includeSupervisor:boolean (optional, ระบุเพื่อดึงข้อมูล Supervisor ที่เกี่ยวข้อง)
  * Output: JSON object ข้อมูลของ Checklist รวมถึงรายการ Item และ Zone
  **/
 export async function getChecklist(req: Request, res: Response) {
@@ -440,20 +444,20 @@ export async function getChecklist(req: Request, res: Response) {
                     name: true,
                     supervisor: includeSupervisor
                       ? {
-                        select: {
-                          id: true,
-                          role: true,
-                          profile: {
-                            select: {
-                              id: true,
-                              name: true,
-                              age: true,
-                              tel: true,
-                              address: true,
+                          select: {
+                            id: true,
+                            role: true,
+                            profile: {
+                              select: {
+                                id: true,
+                                name: true,
+                                age: true,
+                                tel: true,
+                                address: true,
+                              },
                             },
                           },
-                        },
-                      }
+                        }
                       : undefined,
                   },
                 },
@@ -488,20 +492,19 @@ export async function getChecklist(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ทั้งหมด
  * Input:
- * - zones, startDate, endDate, search
+ * - req.query: {zones, startDate, endDate, search}
  * Output: JSON array ข้อมูลของ Checklist รวมถึงการนับจำนวน Item แต่ละประเภท
  **/
 export async function getAllChecklists(req: Request, res: Response) {
   try {
-    // Fetch query parameters
     const { zones, startDate, endDate, search } = req.query;
 
-    // Initialize where clause for filtering
+    // ตัวกรองเริ่มต้นเพื่อหา zones
     const whereClause: any = {
       latest: true,
     };
 
-    // Filter by zones if provided
+    // กรองโดย zones ถ้ามี
     if (zones) {
       whereClause.items = {
         some: {
@@ -509,7 +512,7 @@ export async function getAllChecklists(req: Request, res: Response) {
             some: {
               zone: {
                 name: {
-                  in: (zones as string).split(","), // Allow multiple zones separated by commas
+                  in: (zones as string).split(","), 
                 },
               },
             },
@@ -518,7 +521,7 @@ export async function getAllChecklists(req: Request, res: Response) {
       };
     }
 
-    // Filter by date range if provided
+    // กรองโดย ระยะวัน ถ้ามี
     if (startDate || endDate) {
       whereClause.updatedAt = {};
       if (startDate) {
@@ -529,23 +532,34 @@ export async function getAllChecklists(req: Request, res: Response) {
       }
     }
 
-    // Search by title if provided (search only the checklist title)
+    // ค้นหาตาม Title ถ้ามี
     if (search) {
       whereClause.title = {
         contains: search as string,
-       
       };
     }
-    
-    // Fetch filtered checklists with item and zone details
+
+    // Fetch ข้อมูลตาม ตัวกรอง
     const checklists = await prisma.checklist.findMany({
       where: whereClause,
       include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            profile: {
+              include: {
+                image: true,
+              },
+            },
+          },
+        },
         items: {
           select: {
             id: true,
             name: true,
-            type: true, // Fetch item types
+            type: true, 
             checklistId: true,
             itemZones: {
               select: {
@@ -556,7 +570,7 @@ export async function getAllChecklists(req: Request, res: Response) {
                       select: {
                         profile: true,
                       },
-                    }, // Fetch zone names
+                    }, 
                   },
                 },
               },
@@ -565,34 +579,33 @@ export async function getAllChecklists(req: Request, res: Response) {
         },
       },
     });
-    
-    
+
     if (!checklists.length) {
       res.status(404).json({ message: "No checklists found" });
       return;
     }
 
-    // Fetch all versions to calculate version counts
+    // Fetch versions ของ Checklist ทั้งหมด เพื่อหา versionCounts
     const allChecklists = await prisma.checklist.findMany({
       select: {
         title: true,
       },
     });
 
-    // Calculate version counts for each title
+    // คำนวณ version counts สำหรับ title ซ้ำ
     const versionCounts = allChecklists.reduce((acc, checklist) => {
       acc[checklist.title] = (acc[checklist.title] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    // Fetch user information for the updatedBy field
+  
     const findUser = async (checklist: Checklist) => {
       const findUser = await prisma.user.findUnique({
         where: {
           id: checklist.updatedBy,
         },
         select: {
-          username: true, // Include the username directly
+          username: true, 
           profile: true,
         },
       });
@@ -606,12 +619,13 @@ export async function getAllChecklists(req: Request, res: Response) {
         : null;
 
       return {
-        username: findUser?.profile?.name || findUser?.username || "Unknown User",
+        username:
+          findUser?.profile?.name || findUser?.username || "Unknown User",
         profileImage: findImage?.path,
       };
     };
 
-    // Transform the result
+    // แปลรูปแบบข้อมูล สำหรับ Response
     const result = await Promise.all(
       checklists.map(async (checklist) => {
         const itemCounts = checklist.items.reduce(
@@ -630,7 +644,9 @@ export async function getAllChecklists(req: Request, res: Response) {
 
         const userdata = await findUser(checklist);
 
-        const items = checklist.items.filter((name, index, self) => self.indexOf(name) === index);
+        const items = checklist.items.filter(
+          (name, index, self) => self.indexOf(name) === index
+        );
 
         return {
           id: checklist.id,
@@ -642,8 +658,9 @@ export async function getAllChecklists(req: Request, res: Response) {
           updateByUserName: userdata.username,
           imagePath: userdata.profileImage || "",
           itemCounts,
+          user: checklist.user,
           zones: zoneNames,
-          versionCount: versionCounts[checklist.title] || 0, // Attach the version count
+          versionCount: versionCounts[checklist.title] || 0, 
           items: items,
         };
       })
@@ -656,10 +673,10 @@ export async function getAllChecklists(req: Request, res: Response) {
   }
 }
 
-
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Checklist ใหม่
  * Input:
+ * - req as any:userId:number
  * - req.body:
  *   - title: string (ชื่อของ Checklist)
  *   - items: Array (รายการของไอเทมใน Checklist)
@@ -788,6 +805,7 @@ export async function removeChecklist(req: Request, res: Response) {
       .json({ message: "Checklist has been deactivated successfully" });
     return;
   } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }

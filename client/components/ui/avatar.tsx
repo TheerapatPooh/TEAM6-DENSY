@@ -5,7 +5,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
-function getRandomChartColor() {
+function getColorFromId(id: string): string {
   const chartColors = [
     "bg-chart-1",
     "bg-chart-2",
@@ -13,8 +13,8 @@ function getRandomChartColor() {
     "bg-chart-4",
     "bg-chart-5",
   ];
-  const randomIndex = Math.floor(Math.random() * chartColors.length);
-  return chartColors[randomIndex];
+  const index = id.charCodeAt(0) % chartColors.length;
+  return chartColors[index];
 }
 
 const Avatar = React.forwardRef<
@@ -38,26 +38,33 @@ const AvatarImage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    className={cn("object-cover h-full w-full", className)}
     {...props}
   />
 ))
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
+interface IAvatarFallback extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> {
+  id: string;
+}
+
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      "flex h-full text-card w-full items-center justify-center rounded-full",
-      getRandomChartColor(), 
-      className
-    )}
-    {...props}
-  />
-))
+  IAvatarFallback
+>(({ className,id , ...props }, ref) => {
+  const bgColor = getColorFromId(id); 
+  return (
+    <AvatarPrimitive.Fallback
+      ref={ref}
+      className={cn(
+        "flex h-full text-card w-full items-center justify-center rounded-full",
+        bgColor, 
+        className
+      )}
+      {...props}
+    />
+  );
+});
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
 export { Avatar, AvatarImage, AvatarFallback }

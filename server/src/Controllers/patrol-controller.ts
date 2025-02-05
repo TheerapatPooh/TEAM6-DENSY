@@ -1,18 +1,19 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, Patrol, PatrolStatus, User } from "@prisma/client";
+import { NotificationType, PatrolStatus, User } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
  * Input:
- * - req.query: { preset: "true" | "false", result: "true" | "false" } (optional)
+ * - req.query: { preset: boolean, result: boolean } 
  * - req.params.id: number (ID ของ Patrol ที่ต้องการดึงข้อมูล)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol รวมถึง preset และ result หากร้องขอ
-**/
+ **/
 export async function getPatrol(req: Request, res: Response) {
   try {
+    //เลือกว่าจะเอา Preset และ Result หรือไม่
     const includePreset = req.query.preset === "true";
     const includeResult = req.query.result === "true";
 
@@ -32,12 +33,12 @@ export async function getPatrol(req: Request, res: Response) {
       include: {
         preset: includePreset
           ? {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-            },
-          }
+              select: {
+                id: true,
+                title: true,
+                description: true,
+              },
+            }
           : undefined,
         patrolChecklists: {
           include: {
@@ -72,9 +73,14 @@ export async function getPatrol(req: Request, res: Response) {
               },
             },
             inspector: {
-              include: {
+              select: {
+                id: true,
+                email: true,
+                department: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
                     image: true,
                   },
                 },
@@ -84,28 +90,28 @@ export async function getPatrol(req: Request, res: Response) {
         },
         results: includeResult
           ? {
-            include: {
-              defects: true,
-              comments: {
-                include: {
-                  user: {
-                    select: {
-                      id: true,
-                      email: true,
-                      department: true,
-                      role: true,
-                      profile: {
-                        select: {
-                          name: true,
-                          image: true,
+              include: {
+                defects: true,
+                comments: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        email: true,
+                        department: true,
+                        role: true,
+                        profile: {
+                          select: {
+                            name: true,
+                            image: true,
+                          },
                         },
                       },
                     },
                   },
                 },
               },
-            },
-          }
+            }
           : undefined,
       },
     });
@@ -119,6 +125,7 @@ export async function getPatrol(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }
@@ -130,18 +137,18 @@ export async function getPatrol(req: Request, res: Response) {
  * - req.query: { status, preset, startDate, endDate, search } ("status", "preset", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Patrol และข้อมูลที่เกี่ยวข้อง
-**/
+ **/
 export async function getAllPatrols(req: Request, res: Response) {
   try {
     const { status, preset, startDate, endDate, search } = req.query;
     const userId = (req as any).user.userId;
-    // สร้างเงื่อนไขหลัก
+    // สร้างเงื่อนไขหลัก สำหรับค้นหา
     const whereConditions: any = {
       patrolChecklists: {
         some: {
           userId: userId,
         },
-      }
+      },
     };
 
     const andConditions: any[] = [];
@@ -158,8 +165,8 @@ export async function getAllPatrols(req: Request, res: Response) {
     if (preset) {
       andConditions.push({
         preset: {
-          title: { contains: preset as string }
-        }
+          title: { contains: preset as string },
+        },
       });
     }
 
@@ -176,7 +183,7 @@ export async function getAllPatrols(req: Request, res: Response) {
           },
         });
       } else {
-        console.error('Invalid date range:', startDate, endDate);
+        console.error("Invalid date range:", startDate, endDate);
       }
     }
 
@@ -188,13 +195,13 @@ export async function getAllPatrols(req: Request, res: Response) {
         const searchLower = search.toLowerCase();
 
         // ตรวจสอบความใกล้เคียงกับค่าของ PatrolStatus
-        if (searchLower.startsWith('p')) {
+        if (searchLower.startsWith("p")) {
           return PatrolStatus.pending;
-        } else if (searchLower.startsWith('s')) {
+        } else if (searchLower.startsWith("s")) {
           return PatrolStatus.scheduled;
-        } else if (searchLower.startsWith('o')) {
+        } else if (searchLower.startsWith("o")) {
           return PatrolStatus.on_going;
-        } else if (searchLower.startsWith('c')) {
+        } else if (searchLower.startsWith("c")) {
           return PatrolStatus.completed;
         }
 
@@ -305,7 +312,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     // จัดกลุ่ม patrols โดยใช้ id และรวม Inspectors และ Item Counts
     const groupedPatrols: Record<number, any> = {};
 
-    allPatrols.forEach(patrol => {
+    allPatrols.forEach((patrol) => {
       if (!groupedPatrols[patrol.id]) {
         groupedPatrols[patrol.id] = {
           id: patrol.id,
@@ -313,34 +320,95 @@ export async function getAllPatrols(req: Request, res: Response) {
           status: patrol.status,
           preset: patrol.preset,
           itemCounts: {},
-          inspectors: []
+          inspectors: [],
         };
       }
 
-      let count = 0
-      patrol.patrolChecklists.forEach(patrolChecklist => {
+      let count = 0;
+      patrol.patrolChecklists.forEach((patrolChecklist) => {
         // นับจำนวน item แต่ละประเภท
-        patrolChecklist.checklist.items.forEach(item => {
-          item.itemZones.forEach(itemZone => {
-            count++
-          })
+        patrolChecklist.checklist.items.forEach((item) => {
+          item.itemZones.forEach((_itemZone) => {
+            count++;
+          });
         });
         groupedPatrols[patrol.id].itemCounts = count;
 
         // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
         const inspector = patrolChecklist.inspector;
-        if (inspector && !groupedPatrols[patrol.id].inspectors.some((ins: any) => ins.id === inspector.id)) {
+        if (
+          inspector &&
+          !groupedPatrols[patrol.id].inspectors.some(
+            (ins: any) => ins.id === inspector.id
+          )
+        ) {
           groupedPatrols[patrol.id].inspectors.push(inspector);
         }
       });
     });
 
     // แปลงกลุ่ม patrols เป็น array
-    const result = Object.values(groupedPatrols)
+    const result = Object.values(groupedPatrols);
 
     res.status(200).json(result);
     return;
   } catch (error) {
+    console.error(error)
+    res.status(500);
+    return;
+  }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol Users ทั้งหมด
+ * Input:
+ * - req.params: { patrolId: number, }
+ * Output: JSON object ข้อมูล PatrolUsers ที่ถูกสร้าง
+ **/
+export async function getPatrolUsers(req: Request, res: Response) {
+  try {
+    const patrolId = parseInt(req.params.id, 10);
+
+    const patrol = await prisma.patrol.findUnique({
+      where: {
+        id: patrolId,
+      },
+      select: {
+        patrolChecklists: {
+          select: {
+            inspector: {
+              select: {
+                id: true,
+                username: true,
+                profile: {
+                  select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let result: any[] = [];
+    patrol?.patrolChecklists.map((pc) => {
+      result.push(pc.inspector);
+    });
+
+    // ลบชื่อผู้ใช้ที่ซ้ำ
+    result = result.filter(
+      (user, index, self) =>
+        index === self.findIndex((u) => u.username === user.username)
+    );
+
+    res.status(200).json(result);
+    return;
+  } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }
@@ -355,24 +423,24 @@ export async function getAllPatrols(req: Request, res: Response) {
  *     checklists: Array<{ checklistId: number, userId: number }>
  *   } (ข้อมูล Patrol ที่ต้องการสร้าง)
  * Output: JSON object ข้อมูล Patrol ที่ถูกสร้าง
-**/
+ **/
 export async function createPatrol(req: Request, res: Response) {
   try {
     const { date, presetId, checklists } = req.body;
-
+    // เช็คว่า fields ที่สำคัญถูกส่งมาครบหรือไม่
     if (!date || !presetId || !checklists) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
-
+    // แปลงวันที่จาก string เป็น Date object
     const patrolDate = new Date(date);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    patrolDate.setHours(0, 0, 0, 0);
-
+    today.setHours(0, 0, 0, 0); // ตั้งเวลาให้เป็น 00:00:00 ของวัน
+    patrolDate.setHours(0, 0, 0, 0); // ตั้งเวลาให้เป็น 00:00:00 ของวันที่กำหนด
+    // กำหนดสถานะของ Patrol ตามวันที่ (ถ้าวันที่เป็นวันนี้ ให้สถานะเป็น 'scheduled' ถ้าไม่ให้เป็น 'pending')
     const status =
       patrolDate.getTime() === today.getTime() ? "scheduled" : "pending";
-
+    // สร้าง Patrol ใหม่ในฐานข้อมูล
     const newPatrol = await prisma.patrol.create({
       data: {
         date: patrolDate,
@@ -380,16 +448,16 @@ export async function createPatrol(req: Request, res: Response) {
         presetId: parseInt(presetId, 10),
       },
     });
-
+    // สร้าง Set สำหรับเก็บ userId ของผู้ตรวจสอบที่ได้รับการแจ้งเตือนแล้ว
     const notifiedInspectors = new Set<number>();
-
+    // ทำการสร้าง patrolChecklist และส่งการแจ้งเตือนให้กับผู้ตรวจสอบ
     for (const checklist of checklists) {
       const { checklistId, userId } = checklist;
-
+      // ตรวจสอบว่า checklistId และ userId มีค่าหรือไม่
       if (!checklistId || !userId) {
         continue;
       }
-
+      // สร้างข้อมูล patrolChecklist ที่เชื่อมโยงกับ Patrol ใหม่
       await prisma.patrolChecklist.create({
         data: {
           patrolId: newPatrol.id,
@@ -397,7 +465,7 @@ export async function createPatrol(req: Request, res: Response) {
           userId: userId,
         },
       });
-
+      // ส่งการแจ้งเตือนให้กับผู้ตรวจสอบที่ยังไม่ได้รับการแจ้งเตือน
       if (!notifiedInspectors.has(userId)) {
         const message = `patrol_assigned-${new Date(patrolDate).toISOString()}`;
         await createNotification({
@@ -411,7 +479,7 @@ export async function createPatrol(req: Request, res: Response) {
       }
     }
 
-    // Fetch the created patrol with the desired format
+    // ดึงข้อมูล Patrol ที่สร้างขึ้น พร้อมข้อมูลที่ต้องการแสดง
     const createdPatrol = await prisma.patrol.findUnique({
       where: { id: newPatrol.id },
       select: {
@@ -463,7 +531,7 @@ export async function createPatrol(req: Request, res: Response) {
     });
 
     if (createdPatrol) {
-      // Process data to group inspectors and count items
+      // สร้างผลลัพธ์ที่ต้องการส่งกลับ
       const result = {
         id: createdPatrol.id,
         date: createdPatrol.date,
@@ -473,28 +541,26 @@ export async function createPatrol(req: Request, res: Response) {
         inspectors: [] as any,
       };
 
-      // Count items and group inspectors
+      // นับจำนวน items ใน checklists
       createdPatrol.patrolChecklists.forEach((patrolChecklist) => {
-        // Count items
+        // นับจำนวน itemZones ในแต่ละ item
         patrolChecklist.checklist.items.forEach((item) => {
           result.itemCounts += item.itemZones.length;
         });
 
-        // Add unique inspectors
+        // เพิ่มผู้ตรวจสอบใน list ถ้ายังไม่มี
         const inspector = patrolChecklist.inspector;
         if (
           inspector &&
           !result.inspectors.some((ins: User) => ins.id === inspector.id)
         ) {
-          result.inspectors.push(inspector); // TypeScript จะเข้าใจประเภท inspector ชัดเจน
+          result.inspectors.push(inspector);
         }
-
-
       });
       res.status(201).json(result);
     }
-
   } catch (error) {
+    console.error(error)
     res.status(500);
   }
 }
@@ -502,24 +568,25 @@ export async function createPatrol(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับเริ่มต้น Patrol
  * Input:
- * - req.params.id: number (ID ของ Patrol ที่ต้องการเริ่ม)
+ * - req.params.id: Int (ID ของ Patrol ที่จะเริ่ม)
  * - req.body: {
- *     status: String,
- *     checklists: Array<{ checklist: { items: Array<{ itemZones: Array<{ zone: { id: number } }> }> }, inspector: { id: number } }>
- *   } (สถานะและรายการ Checklist)
+ *     status: String (สถานะของ Patrol, ค่าที่ต้องการคือ 'scheduled')
+ *     checklists: Array<{ inspector: { id: Int }, checklist: { items: Array<ChecklistItem> } }>
+ *       (รายการตรวจสอบที่ผู้ตรวจสอบถูกมอบหมาย)
+ *   }
  * - req.user: { userId: number } (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol หลังจากเริ่มต้น
-**/
+ **/
 export async function startPatrol(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     const { status, checklists } = req.body;
-
+    // เช็คว่า userId ของผู้ใช้งานที่ล็อกอินเป็นผู้ตรวจสอบใน checklists หรือไม่
     const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
     });
-
+    // ถ้า userId ไม่ใช่ผู้ตรวจสอบที่ได้รับมอบหมาย ให้ส่งกลับ error 403
     if (!isUserInspector) {
       res.status(403).json({
         message:
@@ -527,18 +594,13 @@ export async function startPatrol(req: Request, res: Response) {
       });
       return;
     }
-
-    if (!status || !checklists) {
+    // เช็คสถานะและข้อมูลที่จำเป็นใน request body
+    if (!status || !checklists || status !== "scheduled") {
       res.status(400);
       return;
     }
-
-    if (status !== "scheduled") {
-      res.status(400)
-      return;
-    }
-
-    const updatePatrol = await prisma.patrol.update({
+    // อัปเดตสถานะของ Patrol จาก 'scheduled' เป็น 'on_going' และบันทึกเวลาเริ่มต้น
+    await prisma.patrol.update({
       where: {
         id: patrolId,
       },
@@ -547,12 +609,12 @@ export async function startPatrol(req: Request, res: Response) {
         startTime: new Date(),
       },
     });
-
+    // สร้างการแจ้งเตือนให้กับผู้ตรวจสอบที่ได้รับมอบหมาย
     const notifiedInspectors = new Set<number>();
-
+    // ทำการสร้าง patrolResult สำหรับทุกๆ items ใน checklists
     for (const checklistObj of checklists) {
       const inspectorId = checklistObj.inspector.id;
-
+      // วนลูปแต่ละ item และแต่ละ zone ของ checklist
       for (const items of checklistObj.checklist.items) {
         for (const zones of items.itemZones) {
           await prisma.patrolResult.create({
@@ -560,15 +622,16 @@ export async function startPatrol(req: Request, res: Response) {
               status: null,
               itemId: items.id,
               zoneId: zones.zone.id,
-              patrolId: updatePatrol.id,
+              patrolId: patrolId,
             },
           });
+          // ส่งการแจ้งเตือนให้กับผู้ตรวจสอบถ้ายังไม่ได้แจ้งเตือน
           if (!notifiedInspectors.has(inspectorId)) {
             const message = `start_patrol`;
             await createNotification({
               message: message,
               type: "information" as NotificationType,
-              url: `/patrol/${updatePatrol.id}/detail`,
+              url: `/patrol/${patrolId}/detail`,
               userId: inspectorId,
             });
 
@@ -577,11 +640,98 @@ export async function startPatrol(req: Request, res: Response) {
         }
       }
     }
+    // ดึงข้อมูล Patrol ที่อัปเดตจากฐานข้อมูลเพื่อส่งกลับ
+    const updatePatrol = await prisma.patrol.findFirst({
+      where: {
+        id: patrolId,
+      },
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              select: {
+                id: true,
+                email: true,
+                department: true,
+                role: true,
+                profile: {
+                  select: {
+                    name: true,
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          include: {
+            defects: true,
+            comments: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    department: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
     let result = updatePatrol;
     res.status(200).json(result);
     return;
   } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }
@@ -599,17 +749,17 @@ export async function startPatrol(req: Request, res: Response) {
  *   } (สถานะ, Checklist, ผลลัพธ์, และเวลาเริ่มต้น)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol หลังจากสิ้นสุด
-**/
+ **/
 export async function finishPatrol(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     const { status, checklists, results, startTime } = req.body;
-
+    // เช็คว่า userId เป็นผู้ตรวจสอบใน checklists หรือไม่
     const isUserInspector = checklists.some((checklistObj: any) => {
       return checklistObj.inspector.id === userId;
     });
-
+    // หากไม่ใช่ผู้ตรวจสอบที่ได้รับมอบหมาย ให้ส่งกลับ error 403
     if (!isUserInspector) {
       res.status(403).json({
         message:
@@ -617,19 +767,19 @@ export async function finishPatrol(req: Request, res: Response) {
       });
       return;
     }
-
+    // ตรวจสอบข้อมูลใน request body
     if (!checklists || !results) {
       res.status(400).json({ message: "Invalid Data" });
       return;
     }
-
+    // ตรวจสอบว่า status เป็น "on_going" หรือไม่
     if (status !== "on_going") {
       res.status(400).json({ message: "Cannot finish patrol." });
       return;
     }
-    const duration = calculateDuration(startTime);
-
-    const updatePatrol = await prisma.patrol.update({
+    const duration = calculateDuration(startTime);    // คำนวณระยะเวลาที่ใช้ในการทำ Patrol
+    // อัปเดตสถานะของ Patrol จาก 'on_going' เป็น 'completed' และบันทึกเวลาเสร็จสิ้น
+    await prisma.patrol.update({
       where: {
         id: patrolId,
       },
@@ -639,7 +789,88 @@ export async function finishPatrol(req: Request, res: Response) {
         duration: duration,
       },
     });
-
+    // ดึงข้อมูล Patrol ที่อัปเดตจากฐานข้อมูล
+    const updatePatrol = await prisma.patrol.findFirst({
+      where: {
+        id: patrolId,
+      },
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              include: {
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          include: {
+            defects: true,
+            comments: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    department: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    // อัปเดตสถานะของผลการตรวจสอบ (patrolResult)
     for (const resultObj of results) {
       const { id, status } = resultObj;
 
@@ -652,7 +883,7 @@ export async function finishPatrol(req: Request, res: Response) {
         },
       });
     }
-
+    // สร้างการแจ้งเตือนให้กับผู้ตรวจสอบที่เกี่ยวข้อง
     const notifiedInspectors = new Set<number>();
     for (const checklistObj of checklists) {
       const inspectorId = checklistObj.inspector.id;
@@ -662,18 +893,18 @@ export async function finishPatrol(req: Request, res: Response) {
         await createNotification({
           message: message,
           type: "information" as NotificationType,
-          url: `/patrol/${updatePatrol.id}/detail`,
+          url: `/patrol/${patrolId}/detail`,
           userId: inspectorId,
         });
         notifiedInspectors.add(inspectorId);
       }
     }
 
-    let json = updatePatrol;
-
-    res.status(200).json(json);
+    let result = updatePatrol;
+    res.status(200).json(result);
     return;
   } catch (error) {
+    console.error(error)
     res.status(500);
     return;
   }
@@ -684,7 +915,7 @@ export async function finishPatrol(req: Request, res: Response) {
  * Input:
  * - req.params.id: number (ID ของ Patrol ที่ต้องการลบ)
  * Output: JSON message ยืนยันการลบ Patrol และข้อมูลที่เกี่ยวข้องสำเร็จ
-**/
+ **/
 export async function removePatrol(req: Request, res: Response) {
   try {
     const patrolId = parseInt(req.params.id, 10);
@@ -712,7 +943,8 @@ export async function removePatrol(req: Request, res: Response) {
     });
     return;
   } catch (error) {
-    res.status(500)
+    console.error(error)
+    res.status(500);
     return;
   }
 }
@@ -723,7 +955,7 @@ export async function removePatrol(req: Request, res: Response) {
  * - req.params.id: number (ID ของ Patrol)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect และข้อมูลที่เกี่ยวข้อง
-**/
+ **/
 export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
@@ -768,15 +1000,15 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                           id: true,
                           profile: {
                             include: {
-                              image: true
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+                              image: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
           images: {
@@ -791,8 +1023,8 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                       email: true,
                       role: true,
                       department: true,
-                      createdAt: true
-                    }
+                      createdAt: true,
+                    },
                   },
                 },
               },
@@ -804,9 +1036,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
       let result = defects;
       res.status(200).json(result);
       return;
-    }
-    else {
-
+    } else {
       const defects = await prisma.defect.findMany({
         where: {
           userId: userId,
@@ -819,10 +1049,10 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                   id: true,
                   preset: {
                     select: {
-                      title: true
-                    }
-                  }
-                }
+                      title: true,
+                    },
+                  },
+                },
               },
               zoneId: true,
               itemZone: {
@@ -835,17 +1065,15 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                           id: true,
                           profile: {
                             include: {
-                              image: true
-                            }
-                          }
-                        }
-                      }
-
-                    }
-                  }
-
-                }
-              }
+                              image: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
           images: {
@@ -860,8 +1088,8 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                       email: true,
                       role: true,
                       department: true,
-                      createdAt: true
-                    }
+                      createdAt: true,
+                    },
                   },
                 },
               },
@@ -875,7 +1103,8 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
       return;
     }
   } catch (error) {
-    res.status(500)
+    console.error(error)
+    res.status(500);
     return;
   }
 }
@@ -887,13 +1116,13 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
  * - req.body: { message: String, patrolResultId: number } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูลความคิดเห็นที่ถูกบันทึก
-**/
+ **/
 export async function commentPatrol(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     // รับข้อมูลจาก request body
-    const { message, patrolResultId, supervisorId } = req.body;
+    const { message, patrolResultId } = req.body;
 
     // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
     if (!message || !patrolResultId) {
@@ -927,30 +1156,30 @@ export async function commentPatrol(req: Request, res: Response) {
       },
     });
 
-    const notification = `new_comment`;
-    await createNotification({
-      message: notification,
-      type: "request" as NotificationType,
-      url: `/comment/${newComment.id}`,
-      userId: supervisorId,
-    });
+    // const notification = `new_comment`;
+    // await createNotification({
+    //   message: notification,
+    //   type: "request" as NotificationType,
+    //   url: `/comment/${newComment.id}`,
+    //   userId: supervisorId,
+    // });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = newComment;
     res.status(201).json(result);
     return;
   } catch (error) {
-    res.status(500)
+    res.status(500);
+    console.error(error);
     return;
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับตรวจสอบและอัปเดตสถานะ Patrol ที่เป็น "pending" ให้เป็น "scheduled"
- * Input:
- * - ไม่มี Input (ฟังก์ชันทำงานอัตโนมัติ)
+ * Input: -
  * Output: ไม่มี Output ที่ส่งกลับ แต่จะทำการอัปเดตสถานะในฐานข้อมูล
-**/
+ **/
 export async function checkAndUpdatePendingPatrols() {
   try {
     const patrols = await prisma.patrol.findMany({
@@ -960,15 +1189,15 @@ export async function checkAndUpdatePendingPatrols() {
     });
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    today.setHours(0, 0, 0, 0);    // ตั้งเวลาเป็นเวลา 00:00:00.000 ของวันนี้
+    // วนลูปผ่านแต่ละ Patrol
     for (const patrol of patrols) {
       const patrolDate = new Date(patrol.date);
-      patrolDate.setHours(0, 0, 0, 0);
-
+      patrolDate.setHours(0, 0, 0, 0);      // ตั้งเวลาเป็น 00:00:00.000 ของวันที่ Patrol
+      // ถ้าหากวันที่ Patrol ตรงกับวันที่ปัจจุบัน
       if (patrolDate.getTime() === today.getTime()) {
         try {
-          await prisma.patrol.update({
+          await prisma.patrol.update({          // อัปเดตสถานะของ Patrol เป็น "scheduled"
             where: {
               id: patrol.id,
             },
@@ -988,10 +1217,9 @@ export async function checkAndUpdatePendingPatrols() {
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับกำหนดเวลาอัปเดตสถานะของ Patrol อัตโนมัติทุกเที่ยงคืน
- * Input:
- * - ไม่มี Input
+ * Input: - 
  * Output: ไม่มี Output ที่ส่งกลับ (ฟังก์ชันทำงานเบื้องหลัง)
-**/
+ **/
 export function schedulePatrolStatusUpdate() {
   const now = new Date();
   const nextMidnight = new Date();
@@ -1009,7 +1237,7 @@ export function schedulePatrolStatusUpdate() {
  * Input:
  * - startTime: String (เวลาเริ่มต้นของ Patrol ในรูปแบบ ISO 8601)
  * Output: String (ระยะเวลาในรูปแบบ "xh ym zs" เช่น "2h 15m 30s")
-**/
+ **/
 const calculateDuration = (startTime: string): string => {
   // แปลง startTime เป็น Date object
   const start = new Date(startTime);
@@ -1028,4 +1256,3 @@ const calculateDuration = (startTime: string): string => {
   // แสดงผลในรูปแบบที่อ่านง่าย เช่น "2h 15m 30s"
   return `${hours}h ${minutes}m ${seconds}s`;
 };
-

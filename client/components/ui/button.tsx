@@ -5,24 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 ",
+  "inline-flex gap-2 items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 ",
   {
     variants: {
       variant: {
         default:
-          "bg-accent-gradient text-primary-foreground font-medium text-lg shadow hover:bg-accent-gradient-hover",
+          "bg-accent-gradient text-primary-foreground font-medium text-lg custom-shadow hover:bg-accent-gradient-hover",
         destructive:
-          "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm hover:bg-destructive/80",
+          "bg-destructive text-destructive-foreground font-medium text-lg custom-shadow hover:bg-destructive/80",
         success:
-          "bg-green text-destructive-foreground font-medium text-lg shadow-sm",
+          "bg-green text-destructive-foreground font-medium text-lg custom-shadow",
         fail:
-          "bg-destructive text-destructive-foreground font-medium text-lg shadow-sm",
+          "bg-destructive text-destructive-foreground font-medium text-lg custom-shadow",
         outline:
-          "border text-card-foreground bg-card font-medium text-lg shadow-sm hover:border-destructive",
+          "border text-card-foreground bg-card font-medium text-lg v hover:border-destructive",
         secondary:
-          "bg-secondary text-secondary-foreground font-medium text-lg shadow-sm hover:bg-secondary/70",
+          "bg-secondary text-secondary-foreground font-medium text-lg custom-shadow hover:bg-secondary/70",
         ghost: "font-medium text-lg hover:bg-background",
-        primary: "bg-primary text-primary-foreground font-medium text-lg shadow hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground font-medium text-lg custom-shadow hover:bg-primary/90",
         link: "text-muted-foreground underline-offset-4 hover:underline",
       },
       size: {
@@ -39,13 +39,13 @@ const buttonVariants = cva(
   }
 )
 
-export interface ButtonProps
+export interface IButton
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
   VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = React.forwardRef<HTMLButtonElement, IButton>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (

@@ -1,3 +1,25 @@
+/**
+ * คำอธิบาย:
+ *  หน้าที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
+ *  โดยสามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
+ *
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - หน้า Patrol ที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
+ * - สามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
+ * - สามารถเลือก Preset และวันที่สำหรับ Patrol ใหม่
+ * - สามารถเลือก Inspector ในแต่ละ Checklist ของ Preset ที่เลือกได้
+ * - สามารถสร้าง Patrol ใหม่ได้
+ * - สามารถลบ Patrol ที่สร้างได้
+ * - แสดง Alert ในกรณีที่ต้องการสร้าง Patrol ใหม่
+ * - แสดง Alert ในกรณีที่ต้องการลบ Patrol
+ * - แสดง Alert ในกรณีที่สร้าง Patrol ใหม่เสร็จสิ้น
+ * - แสดง Alert ในกรณีที่ลบ Patrol สำเร็จ
+ * - แสดง Alert ในกรณีที่เกิดข้อผิดพลาดในการสร้าง Patrol
+ * - แสดง Alert ในกรณีที่เกิดข้อผิดพลาดในการลบ Patrol
+ **/
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -50,7 +72,7 @@ import {
   IPreset,
   IPresetChecklist,
 } from "@/app/type";
-import { IUser, FilterPatrol } from "@/app/type";
+import { IUser, IFilterPatrol } from "@/app/type";
 import { sortData } from "@/lib/utils";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
@@ -106,7 +128,7 @@ export default function Page() {
         description: a("PatrolMissingDateDescription"),
       });
       return;
-    } else {
+    } else {  
       setDateError(null);
     }
 
@@ -187,7 +209,6 @@ export default function Page() {
     });
   };
 
-
   const handleSortChange = (type: string, value: string) => {
     setSort((prevSort) => ({
       ...prevSort,
@@ -197,7 +218,7 @@ export default function Page() {
 
   const initialFilter = {
     presetTitle: "All",
-    patrolStatus: ["pending", "on_going", "scheduled"],
+    patrolStatuses: ["pending", "on_going", "scheduled"],
     dateRange: { start: undefined, end: undefined },
   };
 
@@ -211,7 +232,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<FilterPatrol | null>(getStoredFilter())
+  const [filter, setFilter] = useState<IFilterPatrol | null>(getStoredFilter())
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -224,12 +245,12 @@ export default function Page() {
         if (prev) {
           return {
             ...prev,
-            patrolStatus: [...prev.patrolStatus, status],
+            patrolStatuses: [...prev.patrolStatuses, status],
           };
         } else {
           return {
             presetTitle: "All",
-            patrolStatus: [],
+            patrolStatuses: [],
             dateRange: { start: undefined, end: undefined }
           }
         }
@@ -240,7 +261,7 @@ export default function Page() {
         if (prev) {
           return {
             ...prev,
-            patrolStatus: prev.patrolStatus.filter((s) => s !== status),
+            patrolStatuses: prev.patrolStatuses.filter((s) => s !== status),
           };
         }
         return prev;
@@ -263,7 +284,7 @@ export default function Page() {
       : null;
     setFilter({
       presetTitle: filter?.presetTitle || null,
-      patrolStatus: filter?.patrolStatus || [],
+      patrolStatuses: filter?.patrolStatuses || [],
       dateRange: {
         start: startDate || undefined,
         end: endDate || undefined
@@ -277,7 +298,7 @@ export default function Page() {
     setSearchTerm(event.target.value);
   };
 
-  const buildQueryString = (filter: FilterPatrol | null, searchTerm: string) => {
+  const buildQueryString = (filter: IFilterPatrol | null, searchTerm: string) => {
     const params: Record<string, string | undefined> = {};
 
     // เพิ่ม search term ถ้ามี
@@ -289,8 +310,8 @@ export default function Page() {
     }
 
     // เพิ่ม status filter
-    if (filter?.patrolStatus?.length) {
-      params.status = filter.patrolStatus.join(",");
+    if (filter?.patrolStatuses?.length) {
+      params.status = filter.patrolStatuses.join(",");
     }
 
     // เพิ่ม startDate
@@ -423,13 +444,13 @@ export default function Page() {
                 className="my-date-picker"
               />
               {dateError && (
-                <p className="ttext-sm font-light text-destructive italic mt-1">{dateError}</p>
+                <p className="text-sm font-light text-destructive italic mt-1">{dateError}</p>
               )}
             </div>
             <div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
               <DropdownMenuCheckboxItem
-                checked={filter?.patrolStatus.includes("pending")}
+                checked={filter?.patrolStatuses.includes("pending")}
                 onCheckedChange={(checked) => toggleStatusFilter("pending", checked)}
                 onSelect={(e) => e.preventDefault()}
               >
@@ -442,7 +463,7 @@ export default function Page() {
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                checked={filter?.patrolStatus.includes("scheduled")}
+                checked={filter?.patrolStatuses.includes("scheduled")}
                 onCheckedChange={(checked) => toggleStatusFilter("scheduled", checked)}
                 onSelect={(e) => e.preventDefault()}
               >
@@ -455,7 +476,7 @@ export default function Page() {
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                checked={filter?.patrolStatus.includes("on_going")}
+                checked={filter?.patrolStatuses.includes("on_going")}
                 onCheckedChange={(checked) => toggleStatusFilter("on_going", checked)}
                 onSelect={(e) => e.preventDefault()}
               >
@@ -468,7 +489,7 @@ export default function Page() {
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                checked={filter?.patrolStatus.includes("completed")}
+                checked={filter?.patrolStatuses.includes("completed")}
                 onCheckedChange={(checked) => toggleStatusFilter("completed", checked)}
                 onSelect={(e) => e.preventDefault()}
               >
@@ -489,7 +510,7 @@ export default function Page() {
                 onValueChange={(value) =>
                   setFilter({
                     presetTitle: value,
-                    patrolStatus: filter?.patrolStatus || [],
+                    patrolStatuses: filter?.patrolStatuses || [],
                     dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
                   })
                 }
@@ -548,7 +569,7 @@ export default function Page() {
                         <Button
                           key={index}
                           variant={"outline"}
-                          className={`bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
+                          className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
                             ? "border-destructive"
                             : "border-transparent"
                             } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
@@ -634,7 +655,7 @@ export default function Page() {
               <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
               <div className="grid grid-cols-1">
                 <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
-                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 ">
+                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
                     {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
                       <ChecklistDropdown
                         key={presetChecklist.checklist.id}
@@ -651,7 +672,11 @@ export default function Page() {
 
             <AlertDialogFooter>
               <div className="flex items-end justify-end gap-2">
-                <AlertDialogCancel onClick={() => setSecondDialog(false)}>
+                <AlertDialogCancel onClick={() => {
+                  setSecondDialog(false)
+                  setDateError(null)
+                }
+                }>
                   {t('Cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction

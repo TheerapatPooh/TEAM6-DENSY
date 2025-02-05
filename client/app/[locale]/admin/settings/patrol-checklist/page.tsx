@@ -1,22 +1,23 @@
+/**
+ * คำอธิบาย:
+ *  หน้าแสดงรายการ Checklist ทั้งหมดในระบบ โดยสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงรายการ Checklist ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Checklist แต่ละรายการ และสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
+ * - สามารถคลิกเพื่อดูรายละเอียดของ Checklist แต่ละรายการ
+ * - สามารถคลิกเพื่อสร้าง Checklist ใหม่ได้
+ **/
+
+
 "use client";
-import { IChecklist, IItem, IUser, IZone, role } from "@/app/type";
+import { IChecklist, IZone } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
-import BadgeCustom, { badgeVariants } from "@/components/badge-custom";
 import Textfield from "@/components/textfield";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -25,58 +26,25 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { fetchData, formatTime, getInitials } from "@/lib/utils";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { useLocale, useTranslations } from "next-intl";
-import { Input } from "@/components/ui/input";
 import {
   TooltipProvider,
   Tooltip,
@@ -85,7 +53,6 @@ import {
 } from "@radix-ui/react-tooltip";
 import { useRouter } from "next/navigation";
 import { DatePickerWithRange } from "@/components/date-picker";
-import { DateRange } from "react-day-picker";
 import dynamic from "next/dynamic";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
@@ -94,18 +61,13 @@ export default function Page() {
 
   const router = useRouter();
   const locale = useLocale();
-  const a = useTranslations("Alert");
   interface IChecklistWithExtras extends IChecklist {
-    updateByUserName: string;
-    imagePath: string;
     zones: string[]; // New field
     itemCounts: Record<string, number>; // Another new field
     versionCount: number;
   }
 
-  const [allChecklists, setAllChecklists] = useState<IChecklistWithExtras[]>(
-    []
-  );
+
 
   const handleDeleteChecklist = async (id: number) => {
     toast({
@@ -155,9 +117,6 @@ export default function Page() {
     // Find the highest value
     const maxValue = Math.max(safety, environment, maintenance);
 
-    // Log the values for debugging
-    console.log(`${safety}:${environment}:${maintenance}`);
-
     // Handle if all are equal
     if (safety === environment && environment === maintenance) {
       return "border-yellow"; // All are equal
@@ -199,14 +158,12 @@ export default function Page() {
   // Modify the getData function to use fetchData
   const getData = async () => {
     try {
-      console.log("Fetching data...");
 
       // Construct query params for the filters
       const params = new URLSearchParams(); 
 
       // Add search term to params
       if (searchTerm) {
-        console.log(searchTerm)
         params.append("search", searchTerm);
       }
 
@@ -239,8 +196,6 @@ export default function Page() {
         return []; // Return empty array if data format is incorrect
       }
 
-      console.log("Fetched data successfully:", data);
-      setAllChecklists(data); // Update state with the fetched data
       setFilteredChecklists(data); // Initially set filtered data to all data
 
       return data; // Return fetched data
@@ -600,14 +555,14 @@ export default function Page() {
                                   <div className="text-muted-foreground">
                                     Update By
                                   </div>
-                                  {checklist.imagePath === "" ? (
+                                  {checklist.user.profile.image?.path === "" ? (
                                     <Avatar>
                                       <AvatarImage
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.imagePath}`}
+                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.user.profile.image?.path}`}
                                       />
-                                      <AvatarFallback>
+                                      <AvatarFallback id={checklist.user.id.toString()}>
                                         {getInitials(
-                                          checklist.updateByUserName
+                                          checklist.user.profile.name
                                         )}
                                       </AvatarFallback>
                                     </Avatar>
@@ -615,7 +570,7 @@ export default function Page() {
                                     <Skeleton className="h-12 w-12 rounded-full" />
                                   )}
 
-                                  {checklist.updateByUserName}
+                                  {checklist.user.profile.name}
                                 </div>
                                 <div className="flex gap-2 text-muted-foreground">
                                   <div className="text-muted-foreground">

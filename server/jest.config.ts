@@ -13,7 +13,7 @@ const config: Config = {
   },
   extensionsToTreatAsEsm: [".ts"],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-  setupFilesAfterEnv: ['<rootDir>/tests/mock.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/tests/_mocks_/prisma.mock.ts'],
 };
 
 export default config;
