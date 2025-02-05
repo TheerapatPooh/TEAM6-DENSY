@@ -589,7 +589,7 @@ export default function Page() {
                             <Textarea
                               disabled
                               className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-semibold line-clamp-3"
-                              value={preset.zones.map((zone) => z(zone.name)).join(", ")}
+                              value={preset.zones.map((zone) => z(zone)).join(", ")}
                             />
                           </div>
                           {/* Description */}

@@ -410,6 +410,7 @@ export async function getAllPresets(req: Request, res: Response) {
           preset.user?.profile?.name || preset.user?.username || "Unknown",
         updateByUserImagePath: preset.user?.profile?.image?.path || "",
         zones: uniqueZoneNames,
+        presetChecklists: preset.presetChecklists,
         versionCount: versionCounts[preset.title] || 0,
       };
     });
