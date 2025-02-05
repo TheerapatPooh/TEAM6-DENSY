@@ -538,7 +538,7 @@ export default function Page() {
               <Button size="sm" variant="secondary" onClick={resetFilter}>
                 {t('Reset')}
               </Button>
-              <Button size="sm" onClick={applyFilter}>{t('Apply')}</Button>
+              <Button variant="primary" size="sm" onClick={applyFilter}>{t('Apply')}</Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
