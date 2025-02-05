@@ -25,7 +25,11 @@ import { Button } from "@/components/ui/button";
 
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import {
   Select,
@@ -44,25 +48,158 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
 
 export default function Page() {
+  const a = useTranslations("Alert");
+
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const roles = [
+    {
+      value: "admin",
+      label: "Admin",
+      icon: "manage_accounts",
+      variant: "blue",
+    },
+    {
+      value: "inspector",
+      label: "Inspector",
+      icon: "person_search",
+      variant: "red",
+    },
+    {
+      value: "supervisor",
+      label: "Supervisor",
+      icon: "manage_accounts",
+      variant: "yellow",
+    },
+  ];
+
+  const statuses = [
+    { value: "true", label: "Active", color: "bg-green", variant: "green" },
+    {
+      value: "false",
+      label: "Inactive",
+      color: "bg-destructive",
+      variant: "red",
+    },
+  ];
 
   const [allUsers, setAllUsers] = useState<IUser[]>([]);
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const data = await fetchData(
-          "get",
-          "/users?profile=true&image=true&user=true",
-          true
-        );
-        setAllUsers(data);
-      } catch (error) {
-        console.error("Get failed", error);
+  const getData = async () => {
+    try {
+      console.log("Fetching data...");
+
+      // Log the current values of state variables
+      console.log("Selected Roles:", selectedRoles);
+      console.log("Selected Status:", selectedStatus);
+      console.log("Search Term:", searchTerm);
+
+      // Construct query params for roles, active status, and search term
+      const params = new URLSearchParams();
+
+      // Add selected roles to params (if any)
+      if (selectedRoles.length > 0) {
+        params.append("roles", selectedRoles.join(","));
+      } else {
+        console.log("No roles selected.");
       }
-    };
+
+      // Add active status to params
+      if (selectedStatus !== null) {
+        params.append("active", selectedStatus.toString()); // Assuming `selectedStatus` is a boolean
+      } else {
+        console.log("No status selected.");
+      }
+
+      // Add search term to params (if any)
+      if (searchTerm) {
+        console.log("Search Term:", searchTerm);
+        params.append("search", searchTerm);
+      } else {
+        console.log("No search term.");
+      }
+
+      // If params are empty, log a message
+      if (!params.toString()) {
+        console.log("No query params to send.");
+      }
+
+      // Fetch data using fetchData utility with query params
+      const data = await fetchData(
+        "get",
+        `/users?profile=true&image=true&user=true&${params.toString()}`,
+        true
+      );
+
+      console.log(
+        "Endpoint URL:",
+        `/users?profile=true&image=true&user=true&${params.toString()}`
+      );
+
+      // Validate data format
+      if (!Array.isArray(data)) {
+        console.error("Invalid data format:", data);
+        return []; // Return empty array if data format is incorrect
+      }
+
+      console.log("Fetched data successfully:", data);
+      setAllUsers(data); // Update state with the fetched data
+      setFilteredUsers(data); // Initially set filtered data to all data
+
+      return data; // Return fetched data
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Failed to fetch user data:", error); // Log error
+      }
+      return []; // Return empty array on error
+    }
+  };
+
+  useEffect(() => {
     getData();
   }, []);
+
+  // Fetch and apply search filter on search term change
+  useEffect(() => {
+    const fetchAndFilter = async () => {
+      const freshData = await getData(); // Fetch fresh data
+      setFilteredUsers(freshData); // Update state with filtered data
+    };
+
+    fetchAndFilter();
+  }, [searchTerm]); // Trigger fetch when search term changes
+
+  const handleApply = async () => {
+    const freshData = await getData(); // Fetch fresh data
+    setFilteredUsers(freshData);
+  };
+
+  // Reset handler function
+  const handleReset = async () => {
+    try {
+      setSelectedRoles([]);
+      setSelectedStatus(null);
+    } catch (error) {
+      console.error("Error during reset:", error);
+    }
+  };
+
+  // useEffect to fetch fresh data whenever selectedRoles or selectedStatus changes
+  useEffect(() => {
+    const fetchDataAfterReset = async () => {
+      if (selectedRoles.length === 0 && selectedStatus === null) {
+        const freshData = await getData(); // Fetch fresh data
+        setFilteredUsers(freshData); // Reset to original data
+      }
+    };
+
+    fetchDataAfterReset(); // Call fetchDataAfterReset when either state changes
+  }, [selectedRoles, selectedStatus]); // Dependency array for state changes
 
   const form = useForm();
   const {
@@ -85,7 +222,7 @@ export default function Page() {
 
       const updatedStatus = !user.active; // Toggle the status
       const data = { active: updatedStatus };
-      
+
       if (updatedStatus === true) {
         toast({
           variant: "success",
@@ -109,6 +246,19 @@ export default function Page() {
         }
       })();
 
+      try {
+        const tempRoles = selectedRoles;
+        const tempStatus = selectedStatus;
+
+        setSelectedRoles([]);
+        setSelectedStatus(null);
+        getData();
+        setSelectedRoles(tempRoles);
+        setSelectedStatus(tempStatus);
+      } catch (error) {
+        console.error("Error during reset:", error);
+      }
+
       // Return the updated users list for optimistic rendering
       return prevUsers.map((user) =>
         user.id === userId ? { ...user, active: updatedStatus } : user
@@ -118,7 +268,7 @@ export default function Page() {
   const handleUserUpdate = async (
     userId: number,
     password: string,
-    active:boolean,
+    active: boolean,
     role: role
   ) => {
     setAllUsers((prevUsers) => {
@@ -128,7 +278,7 @@ export default function Page() {
         return prevUsers;
       }
 
-      const data: {active:boolean; password?: string; role: role } = {
+      const data: { active: boolean; password?: string; role: role } = {
         active,
         role,
       };
@@ -145,21 +295,24 @@ export default function Page() {
         });
         return prevUsers;
       }
+      
+      if(role !== user.role || password !== ""){
+        (async () => {
+          try {
+            toast({
+              variant: "success",
+              title: "Update Successful",
+              description:
+                "The user's information has been successfully updated.",
+            });
 
-      (async () => {
-        try {
-          toast({
-            variant: "success",
-            title: "Update Successful",
-            description:
-              "The user's information has been successfully updated.",
-          });
-
-          await fetchData("put", `/user/${userId}`, true, data);
-        } catch (error) {
-          console.error("Update failed", error);
-        }
-      })();
+            await fetchData("put", `/user/${userId}`, true, data);
+            await getData();
+          } catch (error) {
+            console.error("Update failed", error);
+          }
+        })();
+      }
 
       return prevUsers.map((user) =>
         user.id === userId
@@ -263,12 +416,12 @@ export default function Page() {
     string | null
   >(null); // State for password error message
 
-  const handleEditUserDialog = (userId: number, index: number) => {
+  const handleEditUserDialog = async (userId: number, index: number) => {
     const updatedUser = userRefs.current[index];
 
     if (
-      updatedUser.username === allUsers[index].username &&
-      updatedUser.role === allUsers[index].role &&
+      updatedUser.username === sortedUser[index].username &&
+      updatedUser.role === sortedUser[index].role &&
       updatedUser.password === ""
     ) {
       toast({
@@ -276,7 +429,7 @@ export default function Page() {
         title: "No Updates Applied",
         description: "The provided details were either blank or unchanged",
       });
-      setIsDialogOpen(false);
+      await setIsDialogOpen(false);
       return;
     }
 
@@ -294,11 +447,10 @@ export default function Page() {
       return;
     } else {
       setPasswordErrorForEdit(null); // Clear error message when password is valid
+      setPendingAction(() => () => handleSave(userId, index));
+      setDialogType("edit");
+      handleOpenDialog();
     }
-
-    setPendingAction(() => () => handleSave(userId, index));
-    setDialogType("edit");
-    handleOpenDialog();
   };
 
   const handleOpenDialog = () => {
@@ -323,46 +475,63 @@ export default function Page() {
   const userRefs = useRef<editedUser[]>([]);
 
   // Initialize userRefs after first render
-  useEffect(() => {
-    userRefs.current = allUsers.map((employee) => ({
-      username: employee.username,
-      password: "",
-      role: employee.role,
-    }));
-  }, [allUsers]);
 
   // Handler to save the updated user data
-  const handleSave = (userId: number, index: number) => {
+  const handleSave = async (userId: number, index: number) => {
     const updatedUser = userRefs.current[index];
     const user = allUsers.find((user) => user.id === userId);
 
     if (updatedUser) {
-      handleUserUpdate(userId, updatedUser.password,user.active, updatedUser.role);
+      handleUserUpdate(
+        userId,
+        updatedUser.password,
+        user.active,
+        updatedUser.role
+      );
     } else {
       console.error(`User at index ${userId} is undefined`);
     }
   };
+  const [sortOption, setSortOption] = useState<"Name" | "Type">("Name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortedUser, setSortedUser] = useState<IUser[]>([]);
+
+  useEffect(() => {
+    const sorted = [...filteredUsers].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortOption === "Name") {
+        // Ensure title is defined before comparing
+        const titleA = a.title || a.username || ""; // Use an empty string if title is undefined
+        const titleB = b.title || b.username || ""; // Use an empty string if title is undefined
+        comparison = titleA.localeCompare(titleB);
+      } else if (sortOption === "Type") {
+        // Assuming type is a string, handle undefined if necessary
+        const typeA = a.role || ""; // Replace 'role' with the correct property for "Type"
+        const typeB = b.role || ""; // Replace 'role' with the correct property for "Type"
+        comparison = typeA.localeCompare(typeB);
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    setSortedUser(sorted); // Update sorted checklists state
+  }, [filteredUsers, sortOption, sortOrder]); // Dependencies to trigger the effect
+
+  useEffect(() => {
+    userRefs.current = sortedUser.map((employee) => ({
+      username: employee.username,
+      password: "",
+      role: employee.role,
+    }));
+  }, [sortedUser]);
 
   return (
-    <div className="flex flex-col p-4 gap-y-4">
+    <div className="flex flex-col ">
       {/* Search and Actions */}
-      <div className="flex items-center gap-2">
-        <Textfield iconName="search" showIcon={true} placeholder="Search" />
-        <div className="custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium">
-          <span className="material-symbols-outlined">swap_vert</span>
-          <div className="text-lg">Sort</div>
-        </div>
-        <div className="custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium">
-          <span className="material-symbols-outlined">page_info</span>
-          <div className="text-lg">Filter</div>
-        </div>
-      </div>
-
-      {/* Manage Employees Section */}
-      <div className="bg-card p-6 rounded-lg">
-        {/* Header */}
+      <div className="flex justify-between">
+        <h1 className="font-bold text-2xl">Manage Employees</h1>
         <div className="flex justify-between items-center mb-4">
-          <h1 className="font-bold text-2xl">Manage Employees</h1>
           <AlertDialog
             open={
               isDialogOpen &&
@@ -377,6 +546,7 @@ export default function Page() {
             <AlertDialogTrigger asChild>
               <Button
                 className="gap-2"
+                variant="primary"
                 onClick={() => {
                   userCreate.current = {
                     username: "",
@@ -401,16 +571,20 @@ export default function Page() {
                 e.stopPropagation();
               }}
             >
+              <AlertDialogTitle></AlertDialogTitle>
               <AlertDialogHeader>
-                <AlertDialogTitle>Add New Employee</AlertDialogTitle>
+                <h1 className="text-2xl font-bold">Add New Employee</h1>
                 <AlertDialogDescription>
                   Enter the username, password, and assign a role for the new
                   employee.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <FormProvider {...form}>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <div className="mt-6">
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="flex flex-col gap-4"
+                >
+                  <div className="flex flex-col gap-1">
                     <label>Username</label>
                     <Textfield
                       className="bg-secondary"
@@ -434,7 +608,7 @@ export default function Page() {
                     )}
                   </div>
 
-                  <div className="mt-6">
+                  <div className="flex flex-col gap-1">
                     <label>Password</label>
                     <Textfield
                       className="bg-secondary"
@@ -458,7 +632,7 @@ export default function Page() {
                     )}
                   </div>
 
-                  <div className="mt-6">
+                  <div className="flex flex-col gap-1">
                     <label>Role</label>
                     <div className="relative bg-secondary rounded-md ">
                       <Select
@@ -477,6 +651,7 @@ export default function Page() {
                                 variant={"yellow"}
                                 iconName="engineering"
                                 showIcon={true}
+                                shape="square"
                               >
                                 supervisor
                               </BadgeCustom>
@@ -486,6 +661,7 @@ export default function Page() {
                                 variant={"red"}
                                 iconName="person_search"
                                 showIcon={true}
+                                shape="square"
                               >
                                 inspector
                               </BadgeCustom>
@@ -495,6 +671,7 @@ export default function Page() {
                                 variant={"blue"}
                                 iconName="manage_accounts"
                                 showIcon={true}
+                                shape="square"
                               >
                                 admin
                               </BadgeCustom>
@@ -513,6 +690,7 @@ export default function Page() {
                     </AlertDialogCancel>
                     <Button
                       className="flex gap-2"
+                      variant="primary"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent click event from bubbling up
                         handleCreateUserDialog();
@@ -537,309 +715,520 @@ export default function Page() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
+      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <Textfield
+            iconName="search"
+            showIcon={true}
+            placeholder="Search"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={`custom-shadow px-[10px]
+               bg-card w-auto h-[40px] gap-[10px] inline-flex items-center
+               justify-center rounded-md text-sm font-medium`}
+            >
+              <span className="material-symbols-outlined">swap_vert</span>
+              <div className="text-lg">Sort</div>
+            </DropdownMenuTrigger>
 
-        <div className="bg-secondary rounded-lg shadow border border-gray-300">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px] ">Id</TableHead>
-                <TableHead className="w-[300px]">Full Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-end w-[10px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allUsers.map((employee, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{employee.id}</TableCell>
-                  <TableCell className="font-medium flex flex-row gap-2 items-center">
-                    {employee.profile.name ? (
-                      <Avatar>
-                        <AvatarImage
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
-                        />
-                        <AvatarFallback id={employee.id?.toString()}>
-                          {getInitials(employee.profile.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <Skeleton className="h-12 w-12 rounded-full bg-input" />
-                    )}
-                    <div>
-                      {employee.profile.name ? (
-                        employee.profile.name
-                      ) : (
-                        <div className="text-destructive">
-                          {employee.username}
-                          <div className="text-[14px]">
-                            No profile is provided
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">
+            <DropdownMenuContent align="end" className="p-2 gap-2">
+              {/* Sort By label */}
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                Sort By
+              </DropdownMenuLabel>
+
+              <DropdownMenuRadioGroup
+                value={sortOption}
+                onValueChange={(value: string) =>
+                  setSortOption(value as "Name" | "Type")
+                }
+              >
+                <DropdownMenuRadioItem value="Name" className="text-base">
+                  Name
+                </DropdownMenuRadioItem>
+
+                <DropdownMenuRadioItem value="Type" className="text-base">
+                  Type
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+
+              {/* Order label */}
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                Order
+              </DropdownMenuLabel>
+
+              <DropdownMenuRadioGroup
+                value={sortOrder}
+                onValueChange={(value: string) =>
+                  setSortOrder(value as "asc" | "desc")
+                }
+              >
+                <DropdownMenuRadioItem value="asc" className="text-base">
+                  Ascending
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="desc" className="text-base">
+                  Descending
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium`}
+            >
+              <span className="material-symbols-outlined">page_info</span>
+              <div className="text-lg">Filter</div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="flex flex-col justify-center gap-2 p-2 z-50"
+              align="end"
+            >
+              <div>
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                  Role
+                </DropdownMenuLabel>
+
+                {roles.map((role) => (
+                  <DropdownMenuCheckboxItem
+                    key={role.value}
+                    checked={selectedRoles.includes(role.value)}
+                    className={`text-base ${
+                      selectedRoles.includes(role.value) ? "bg-muted/50" : ""
+                    }`}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      // Toggle role selection in the array
+                      setSelectedRoles((prevSelectedRoles) =>
+                        prevSelectedRoles.includes(role.value)
+                          ? prevSelectedRoles.filter(
+                              (item) => item !== role.value
+                            )
+                          : [...prevSelectedRoles, role.value]
+                      );
+                    }}
+                  >
                     <BadgeCustom
                       shape="square"
                       variant={
-                        employee.role === "supervisor"
-                          ? "yellow"
-                          : employee.role === "admin"
-                          ? "blue"
-                          : employee.role === "inspector"
-                          ? "red"
-                          : "mint"
+                        role.variant as
+                          | "blue"
+                          | "red"
+                          | "yellow"
+                          | "green"
+                          | "default"
+                          | "secondary"
+                          | "mint"
+                          | "orange"
+                          | "purple"
                       }
-                      iconName={
-                        employee.role === "supervisor"
-                          ? "engineering"
-                          : employee.role === "inspector"
-                          ? "person_search"
-                          : employee.role === "admin"
-                          ? "manage_accounts"
-                          : "account_circle"
-                      }
+                      iconName={role.icon}
                       showIcon={true}
                     >
-                      {employee.role}
+                      {role.label}
                     </BadgeCustom>
-                  </TableCell>
-                  <TableCell>
-                    <BadgeCustom
-                      variant={employee.active ? "green" : "red"}
-                      showIcon={true}
+                  </DropdownMenuCheckboxItem>
+                ))}
+
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                  Status
+                </DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={selectedStatus}>
+                  {statuses.map((status) => (
+                    <DropdownMenuRadioItem
+                      key={status.value}
+                      value={status.value}
+                      className={`text-base ${
+                        selectedStatus === status.value ? "bg-muted/50" : ""
+                      }`}
+                      onSelect={(e) => {
+                        if (
+                          status.value === "true" ||
+                          status.value === "false"
+                        ) {
+                          setSelectedStatus(null);
+                        }
+                        e.preventDefault();
+                        setSelectedStatus(status.value);
+                      }}
                     >
-                      <div className="flex flex-row justify-center items-center gap-2">
-                        <div
-                          className={` flex w-2 h-2  rounded-full ${
-                            employee.active ? "bg-green" : "bg-destructive"
-                          } `}
-                        ></div>
-                        {employee.active ? "active" : "inactive"}
+                      <BadgeCustom
+                        variant={
+                          status.variant as
+                            | "blue"
+                            | "red"
+                            | "yellow"
+                            | "green"
+                            | "default"
+                            | "secondary"
+                            | "mint"
+                            | "orange"
+                            | "purple"
+                        }
+                      >
+                        <div className="flex flex-row justify-center items-center gap-2 w-[105px]">
+                          <div
+                            className={`flex w-2 h-2 rounded-full ${status.color}`}
+                          ></div>
+                          {status.label}
+                        </div>
+                      </BadgeCustom>
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </div>
+
+              <div className="flex w-full justify-end mt-4 gap-2">
+                <Button size="sm" variant="secondary" onClick={handleReset}>
+                  Reset
+                </Button>
+                <Button size="sm" onClick={handleApply}>
+                  Apply
+                </Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Manage Employees Section */}
+        <div className="bg-card p-4 rounded-lg">
+          {/* Header */}
+
+          <div className="bg-secondary rounded-lg border-none">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[5%] ">Id</TableHead>
+                  <TableHead className="w-[30%]">Full Name</TableHead>
+                  <TableHead className="w-[30%]">Role</TableHead>
+                  <TableHead className="w-[30%]">Status</TableHead>
+                  <TableHead className=" w-[1%]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedUser.map((employee, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{employee.id}</TableCell>
+                    <TableCell className="font-medium items-center">
+                      <div className="flex items-center gap-2">
+                        <div>
+                          {employee.profile.name ? (
+                            <Avatar className="w-[22px] h-[22px]">
+                              <AvatarImage
+                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
+                              />
+                              <AvatarFallback id={employee.id.toString()} className="text-[10px] ">
+                                {getInitials(employee.profile.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <Skeleton className="w-[22px] h-[22px] rounded-full bg-input" />
+                          )}
+                        </div>
+
+                        <div>
+                          {employee.profile.name ? (
+                            employee.profile.name
+                          ) : (
+                            <div className="text-destructive">
+                              {employee.username}
+                              <div className="text-[14px]">
+                                No profile is provided
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </BadgeCustom>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button
-                          variant="ghost"
-                          className="w-[45px] h-[45px]"
-                          onClick={() => setDialogType("blank")}
-                        >
-                          <span className="material-symbols-outlined items-center text-muted-foreground">
-                            more_horiz
-                          </span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="px-4 py-2">
-                        <div className=" cursor-pointer">
-                          <AlertDialog
-                            open={
-                              (isDialogOpen && dialogType === "editform") ||
-                              dialogType === "edit"
-                            }
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <BadgeCustom
+                        shape="square"
+                        variant={
+                          employee.role === "supervisor"
+                            ? "yellow"
+                            : employee.role === "admin"
+                            ? "blue"
+                            : employee.role === "inspector"
+                            ? "red"
+                            : "mint"
+                        }
+                        iconName={
+                          employee.role === "supervisor"
+                            ? "engineering"
+                            : employee.role === "inspector"
+                            ? "person_search"
+                            : employee.role === "admin"
+                            ? "manage_accounts"
+                            : "account_circle"
+                        }
+                        showIcon={true}
+                      >
+                        {employee.role}
+                      </BadgeCustom>
+                    </TableCell>
+                    <TableCell>
+                      <BadgeCustom
+                        variant={employee.active ? "green" : "red"}
+                        showIcon={true}
+                      >
+                        <div className="flex flex-row justify-center items-center gap-2 w-[105px]">
+                          <div
+                            className={` flex w-2 h-2  rounded-full ${
+                              employee.active ? "bg-green" : "bg-destructive"
+                            } `}
+                          ></div>
+                          {employee.active ? "Active" : "Inactive"}
+                        </div>
+                      </BadgeCustom>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <Button
+                            variant="ghost"
+                            className="w-[45px] h-[45px]"
+                            onClick={() => setDialogType("blank")}
                           >
-                            <AlertDialogTrigger
-                              asChild
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsDialogOpen(true);
-                                setPasswordErrorForEdit(null);
-                                setDialogType("editform");
-                              }}
+                            <span className="material-symbols-outlined items-center text-muted-foreground">
+                              more_horiz
+                            </span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="px-4 py-2">
+                          <div className=" cursor-pointer">
+                            <AlertDialog
+                              open={
+                                (isDialogOpen && dialogType === "editform") ||
+                                dialogType === "edit"
+                              }
                             >
-                              <div
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex w-full text-[18px]"
+                              <AlertDialogTrigger
+                                asChild
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsDialogOpen(true);
+                                  setPasswordErrorForEdit(null);
+                                  setDialogType("editform");
+                                  userRefs.current[index].password = "";
+                                }}
                               >
-                                {"Edit"}
-                              </div>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Edit Employee
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Enter the username, password, and assign a
-                                  role for the employee.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-
-                              <div className="mt-6 pointer-events-none">
-                                <label>Username</label>
-                                <Textfield
-                                  className="bg-secondary cursor-not-allowed"
-                                  showIcon={true}
-                                  iconName="person"
-                                  placeholder={employee.username}
-                                />
-                              </div>
-
-                              <div
-                                className="mt-6 flex flex-col gap-4"
-                                onClick={(e) => e.stopPropagation()}
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex w-full text-[18px]"
+                                >
+                                  {"Edit"}
+                                </div>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent
+                                className="flex flex-col gap-4 "
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
                               >
-                                <div>
-                                  <label>Password</label>
+                                <AlertDialogHeader>
+                                  <h1 className="text-2xl font-bold">
+                                    Edit Employee
+                                  </h1>
+                                  <AlertDialogTitle></AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Enter the username, password, and assign a
+                                    role for the employee.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+
+                                <div className="flex flex-col gap-1 pointer-events-none">
+                                  <label>Username</label>
                                   <Textfield
-                                    className="bg-secondary"
+                                    className="bg-secondary cursor-not-allowed "
                                     showIcon={true}
-                                    iconName="lock"
-                                    placeholder={employee.password}
-                                    onChange={(e) => {
-                                      if (userRefs.current[index]) {
-                                        userRefs.current[index].password =
-                                          e.target.value;
-                                      }
-
-                                      // Check if the password length is less than 8 characters
-                                      if (e.target.value.length < 8) {
-                                        setPasswordErrorForEdit(
-                                          "Password must be at least 8 characters long."
-                                        );
-                                      } else {
-                                        setPasswordErrorForEdit(null); // Clear error if valid
-                                      }
-                                    }}
+                                    iconName="person"
+                                    onChange={() => {}}
+                                    value={""}
+                                    placeholder={employee.username}
                                   />
                                 </div>
 
-                                {passwordErrorForEdit && (
-                                  <p className="text-red-500 text-sm mt-1">
-                                    {passwordErrorForEdit}
-                                  </p>
-                                )}
-                              </div>
+                                <div className=" flex flex-col gap-4">
+                                  <div>
+                                    <label>Password</label>
+                                    <Textfield
+                                      placeholder="Password"
+                                      className={`bg-secondary`}
+                                      showIcon={true}
+                                      iconName="lock"
+                                      onChange={(e) => {
+                                        try {
+                                          if (userRefs.current[index]) {
+                                            userRefs.current[index].password =
+                                              e.target.value;
+                                          }
 
-                              <div className="mt-6">
-                                <label>Role</label>
-                                <div className="relative bg-secondary rounded-md">
-                                  <Select
-                                    defaultValue={employee.role}
-                                    onValueChange={(value) => {
-                                      if (userRefs.current[index]) {
-                                        userRefs.current[index].role =
-                                          value as role; // Ensure the value matches the type
-                                      }
+                                          // Validate password length
+                                          if (e.target.value.length < 8) {
+                                            setPasswordErrorForEdit(
+                                              "Password must be at least 8 characters long."
+                                            );
+                                          } else {
+                                            setPasswordErrorForEdit(null);
+                                          }
+                                        } catch (error) {
+                                          console.error(
+                                            "Error in onChange handler:",
+                                            error
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </div>
+
+                                  {passwordErrorForEdit && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {passwordErrorForEdit}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="">
+                                  <label>Role</label>
+                                  <div className="relative bg-secondary rounded-md">
+                                    <Select
+                                      defaultValue={employee.role}
+                                      onValueChange={(value) => {
+                                        if (userRefs.current[index]) {
+                                          userRefs.current[index].role =
+                                            value as role; // Ensure the value matches the type
+                                        }
+                                      }}
+                                    >
+                                      <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                                        <SelectValue placeholder="" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectGroup>
+                                          <SelectItem value="supervisor">
+                                            <BadgeCustom
+                                              variant="yellow"
+                                              iconName="engineering"
+                                              showIcon={true}
+                                              shape="square"
+                                            >
+                                              supervisor
+                                            </BadgeCustom>
+                                          </SelectItem>
+                                          <SelectItem value="inspector">
+                                            <BadgeCustom
+                                              variant="red"
+                                              iconName="person_search"
+                                              showIcon={true}
+                                              shape="square"
+                                            >
+                                              inspector
+                                            </BadgeCustom>
+                                          </SelectItem>
+                                          <SelectItem value="admin">
+                                            <BadgeCustom
+                                              variant="blue"
+                                              iconName="manage_accounts"
+                                              showIcon={true}
+                                              shape="square"
+                                            >
+                                              admin
+                                            </BadgeCustom>
+                                          </SelectItem>
+                                        </SelectGroup>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                <AlertDialogFooter>
+                                  <Button
+                                    variant="secondary"
+                                    size="lg"
+                                    onClick={async () => {
+                                      handleDialogResult(false);
+                                      try {
+                                        setPendingAction(null); // Clear the pending action
+                                        setDialogType(""); // Reset the dialog type after action is completed
+                                      } catch (error) {}
                                     }}
                                   >
-                                    <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
-                                      <SelectValue placeholder="" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        <SelectItem value="supervisor">
-                                          <BadgeCustom
-                                            variant="yellow"
-                                            iconName="engineering"
-                                            showIcon={true}
-                                          >
-                                            supervisor
-                                          </BadgeCustom>
-                                        </SelectItem>
-                                        <SelectItem value="inspector">
-                                          <BadgeCustom
-                                            variant="red"
-                                            iconName="person_search"
-                                            showIcon={true}
-                                          >
-                                            inspector
-                                          </BadgeCustom>
-                                        </SelectItem>
-                                        <SelectItem value="admin">
-                                          <BadgeCustom
-                                            variant="blue"
-                                            iconName="manage_accounts"
-                                            showIcon={true}
-                                          >
-                                            admin
-                                          </BadgeCustom>
-                                        </SelectItem>
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
+                                    Back
+                                  </Button>
 
-                              <AlertDialogFooter>
-                                <Button
-                                  variant="secondary"
-                                  size="lg"
-                                  onClick={() => handleDialogResult(false)}
-                                >
-                                  Back
-                                </Button>
-                                <Button
-                                  className=" flex  justify-center gap-2"
-                                  variant="primary"
-                                  size="lg"
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Prevent click event from bubbling up
-                                    handleEditUserDialog(employee.id, index);
-                                  }}
-                                >
-                                  <span className="material-symbols-outlined">
-                                    save
-                                  </span>
-                                  Save
-                                </Button>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
+                                  <Button
+                                    className=" flex  justify-center gap-2"
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent click event from bubbling up
+                                      handleEditUserDialog(employee.id, index);
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined">
+                                      save
+                                    </span>
+                                    Save
+                                  </Button>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
 
-                            {isDialogOpen === true && dialogType === "edit" && (
-                              <AlertCustom
-                                title={"Are you sure to edit employee?"}
-                                description={"Please confirm to edit employee."}
-                                primaryButtonText={"Confirm"}
-                                primaryIcon="check"
-                                secondaryButtonText={"Cancel"}
-                                backResult={handleDialogResult}
-                              />
-                            )}
-                          </AlertDialog>
-                        </div>
-                        <div className=" cursor-pointer">
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleInactiveUserDialog(employee.id);
-                            }}
-                            className="flex w-full text-[18px] text-destructive"
-                          >
-                            {employee.active ? "Deactivate" : "Activate"}
+                              {isDialogOpen === true &&
+                                dialogType === "edit" && (
+                                  <AlertCustom
+                                    title={"Are you sure to edit employee?"}
+                                    description={
+                                      "Please confirm to edit employee."
+                                    }
+                                    primaryButtonText={"Confirm"}
+                                    primaryIcon="check"
+                                    secondaryButtonText={"Cancel"}
+                                    backResult={handleDialogResult}
+                                  />
+                                )}
+                            </AlertDialog>
                           </div>
-                          {isDialogOpen === true &&
-                            dialogType === "deactivate" && (
-                              <AlertCustom
-                                title={
-                                  employee.active
-                                    ? "Are you sure to deactivate employee?"
-                                    : "Are you sure to activate employee?"
-                                }
-                                description={
-                                  employee.active
-                                    ? "Please confirm to deactivate employee."
-                                    : "Please confirm to activate employee."
-                                }
-                                primaryButtonText={"Confirm"}
-                                primaryIcon="check"
-                                secondaryButtonText={"Cancel"}
-                                backResult={handleDialogResult}
-                              />
-                            )}
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          <div className=" cursor-pointer">
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleInactiveUserDialog(employee.id);
+                              }}
+                              className="flex w-full text-[18px] text-destructive"
+                            >
+                              {employee.active ? "Deactivate" : "Activate"}
+                            </div>
+                            {isDialogOpen === true &&
+                              dialogType === "deactivate" && (
+                                <AlertCustom
+                                  title={
+                                    employee.active
+                                      ? "Are you sure to deactivate employee?"
+                                      : "Are you sure to activate employee?"
+                                  }
+                                  description={
+                                    employee.active
+                                      ? "Please confirm to deactivate employee."
+                                      : "Please confirm to activate employee."
+                                  }
+                                  primaryButtonText={"Confirm"}
+                                  primaryIcon="check"
+                                  secondaryButtonText={"Cancel"}
+                                  backResult={handleDialogResult}
+                                />
+                              )}
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </div>

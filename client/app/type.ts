@@ -112,6 +112,7 @@ export interface IPreset {
     presetChecklists?: IPresetChecklist[];
     patrols?: IPatrol[];
     zones?: IZone[];
+    versionCount?: number;
 }
 
 export interface IPresetChecklist {
@@ -161,6 +162,7 @@ export interface IItem {
 }
 
 export interface IZone {
+    toLowerCase(): unknown;
     id: number;
     name: string;
     locationId: number;

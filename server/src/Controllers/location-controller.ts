@@ -42,7 +42,7 @@ export async function getZone(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -70,7 +70,7 @@ export async function getAllZones(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -120,7 +120,7 @@ export async function getLocation(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -191,7 +191,7 @@ export async function updateSupervisor(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }

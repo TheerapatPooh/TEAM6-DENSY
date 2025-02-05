@@ -1,10 +1,9 @@
 import prisma from "@Utils/database.js";
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
-import { Role } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
@@ -75,7 +74,7 @@ export async function createUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -161,7 +160,7 @@ export async function updateProfile(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -245,7 +244,7 @@ export async function getUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -258,18 +257,39 @@ export async function getUser(req: Request, res: Response) {
  **/
 export async function getAllUsers(req: Request, res: Response) {
   try {
+    // Fetch query parameters
     const includeProfile = req.query.profile === "true";
     const includeImage = req.query.image === "true";
     const includeUsername = req.query.user === "true";
-    const role = req.query.role as string;
+    const roles = req.query.roles as string; // Comma-separated roles (e.g., "admin,inspector")
+    const active = req.query.active; // "true" or "false"
+    const search = req.query.search as string;
 
-    const validRoles = ["admin", "inspector", "supervisor"]; // Adjust based on your Role enum
-    const roleFilter = validRoles.includes(role) ? (role as Role) : undefined;
+    // Construct the where clause for filtering
+    const whereClause: any = {};
 
+    // Filter by roles (multiple roles)
+    if (roles) {
+      const roleArray = roles.split(",").map((role) => role.trim());
+      whereClause.role = { in: roleArray }; // Matches any role in the array
+    }
+
+    // Add active status filter if provided
+    if (active !== undefined) {
+      whereClause.active = active === "true"; // Convert "true"/"false" string to boolean
+    }
+
+    // Add search functionality with priority on profile.name, then username
+    if (search) {
+      whereClause.OR = [
+        { profile: { name: { contains: search } } }, // Search on profile name (case-insensitive)
+        { username: { contains: search } }, // Search on username if profile name is not found
+      ];
+    }
+
+    // Fetch users from the database with the specified filters
     const allUsers = await prisma.user.findMany({
-      where: {
-        role: roleFilter,
-      },
+      where: whereClause,
       select: {
         id: true,
         username: includeUsername,
@@ -287,20 +307,18 @@ export async function getAllUsers(req: Request, res: Response) {
       },
     });
 
-    if (allUsers) {
-      let result = allUsers;
-      res.status(200).json(result);
-      return;
+    if (allUsers.length) {
+      res.status(200).json(allUsers);
     } else {
-      response.status(404);
-      return;
+      res.status(404).json({ message: "No users found" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
-  }
+    }
 }
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดตข้อมูล User
@@ -376,7 +394,7 @@ export async function updateUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -411,7 +429,7 @@ export async function removeUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
