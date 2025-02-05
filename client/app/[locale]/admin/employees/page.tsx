@@ -49,6 +49,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -920,7 +921,7 @@ export default function Page() {
                               <AvatarImage
                                 src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
                               />
-                              <AvatarFallback className="text-[10px] ">
+                              <AvatarFallback id={employee.id.toString()} className="text-[10px] ">
                                 {getInitials(employee.profile.name)}
                               </AvatarFallback>
                             </Avatar>
