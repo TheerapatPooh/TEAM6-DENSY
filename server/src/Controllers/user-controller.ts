@@ -304,10 +304,6 @@ export async function getAllUsers(req: Request, res: Response) {
                 image: includeImage,
               },
             }
-              include: {
-                image: includeImage,
-              },
-            }
           : undefined,
       },
     });
@@ -320,7 +316,8 @@ export async function getAllUsers(req: Request, res: Response) {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
-  }
+    return;
+    }
 }
 
 
