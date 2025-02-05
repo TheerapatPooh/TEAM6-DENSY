@@ -1,10 +1,9 @@
 import prisma from "@Utils/database.js";
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
-import { Role } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
