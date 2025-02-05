@@ -218,6 +218,7 @@ export async function updateChecklist(req: Request, res: Response) {
           message: "Checklist update successfully",
           checklists: newChecklist,
         });
+        
       } else {
         res
           .status(500)
@@ -295,35 +296,79 @@ export async function getPreset(req: Request, res: Response) {
  **/
 export async function getAllPresets(req: Request, res: Response) {
   try {
-    let latest = true;
-    if (req.query.latest && req.query.latest === "true") {
-      latest = false;
-    }
-    const presets = await prisma.preset.findMany({
-      where: latest ? { latest: latest } : undefined,
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        presetChecklists: {
-          select: {
-            checklist: {
-              select: {
-                id: true,
-                title: true,
-                items: {
-                  include: {
-                    itemZones: {
-                      select: {
-                        zone: {
-                          select: {
-                            id: true,
-                            name: true,
-                          },
-                        },
+    const { zones, startDate, endDate, search, latest = "true" } = req.query;
+    const latestBoolean = latest === "true";
+
+    const whereClause: any = { latest: latestBoolean };
+
+    if (zones) {
+      whereClause.presetChecklists = {
+        some: {
+          checklist: {
+            items: {
+              some: {
+                itemZones: {
+                  some: {
+                    zone: {
+                      name: {
+                        in: (zones as string).split(","),
                       },
                     },
                   },
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (startDate || endDate) {
+      whereClause.updatedAt = {};
+      if (startDate) {
+        whereClause.updatedAt.gte = new Date(startDate as string);
+      }
+      if (endDate) {
+        whereClause.updatedAt.lte = new Date(endDate as string);
+      }
+    }
+
+    if (search) {
+      whereClause.title = {
+        contains: search as string,
+        mode: "insensitive",
+      };
+    }
+
+    const presets = await prisma.preset.findMany({
+      where: whereClause,
+      include: {
+        presetChecklists: {
+          include: {
+            checklist: {
+              include: {
+                items: {
+                  include: {
+                    itemZones: {
+                      include: {
+                        zone: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profile: {
+              select: {
+                name: true,
+                image: {
+                  select: { path: true },
                 },
               },
             },
@@ -333,40 +378,50 @@ export async function getAllPresets(req: Request, res: Response) {
     });
 
     if (!presets.length) {
-      res.status(404);
+      res.status(404).json({ message: "No presets found" });
       return;
     }
+
+    const allPresets = await prisma.preset.findMany({
+      select: { title: true },
+    });
+
+    const versionCounts = allPresets.reduce((acc, preset) => {
+      acc[preset.title] = (acc[preset.title] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
     const result = presets.map((preset) => {
       const zones = preset.presetChecklists.flatMap((checklist) =>
         checklist.checklist.items.flatMap((item) =>
-          item.itemZones.map((itemZone) => ({
-            id: itemZone.zone.id,
-            name: itemZone.zone.name,
-          }))
+          item.itemZones.map((itemZone) => itemZone.zone.name)
         )
       );
 
-      // ใช้ Set เพื่อกรองค่าที่ซ้ำกัน
-      const uniqueZones = Array.from(
-        new Map(zones.map((zone) => [`${zone.id}-${zone.name}`, zone])).values()
-      );
+      const uniqueZoneNames = Array.from(new Set(zones));
 
       return {
         id: preset.id,
         title: preset.title,
         description: preset.description,
-        presetChecklists: preset.presetChecklists,
-        zones: uniqueZones,
+        version: preset.version,
+        updatedAt: preset.updatedAt,
+        updateByUserName: preset.user?.profile?.name || preset.user?.username || "Unknown",
+        updateByUserImagePath: preset.user?.profile?.image?.path || "",
+        zones: uniqueZoneNames,
+        versionCount: versionCounts[preset.title] || 0,
       };
     });
 
     res.status(200).json(result);
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
+
+
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับลบ Preset
@@ -395,14 +450,12 @@ export async function removePreset(req: Request, res: Response) {
       return;
     }
 
-    // ลบข้อมูล PresetChecklist ที่เกี่ยวข้อง
-    await prisma.presetChecklist.deleteMany({
-      where: { presetId: presetId },
-    });
-
-    // ลบข้อมูล Preset
-    await prisma.preset.delete({
+    // เปลี่ยนสถานะเป็น unLatest
+    await prisma.preset.update({
       where: { id: presetId },
+      data: {
+        latest: false,
+      }
     });
 
     res.status(200).json({ message: "Preset removed successfully" });
@@ -616,6 +669,7 @@ export async function getAllChecklists(req: Request, res: Response) {
               id: findUser.profile.imageId,
             },
           })
+           
         : null;
 
       return {
