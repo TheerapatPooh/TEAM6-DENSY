@@ -125,7 +125,7 @@ export const DatePickerWithRange: React.FC<DatePickerWithRangeIDatePicker> = ({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>{t("Pick a date")}</span>
+              <span>{t("PickADate")}</span>
             )}
           </Button>
         </PopoverTrigger>
