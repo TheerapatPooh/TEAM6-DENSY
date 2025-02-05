@@ -1,6 +1,16 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ ReportDefect ใช้ในการแสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
+ * Input: 
+ * - defect: ข้อมูลของ Defect ที่ได้รับจาก API
+ * Output:
+ * - JSX ของ ReportDefect ที่แสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
+ * - มีข้อมูลของ Defect และมีปุ่มสำหรับการแก้ไขข้อมูลของ Defect
+ **/
+
 "use client";
-import React, { useState } from "react";
-import { defectStatus, IDefect } from "@/app/type";
+import React, { useEffect, useState } from "react";
+import { defectStatus, IDefect, IImage, IZone } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,16 +30,35 @@ import AlertDefect from "./alert-defect";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import Map from "@/components/map";
+import { AlertCustom } from "./alert-custom";
+import { toast } from "@/hooks/use-toast";
 
-interface ReportDefectProps {
+interface IReportDefect {
   defect: IDefect,
   page: "patrol-view-detail" | "patrol-defect" | "patrol-view-report"
   response: (defect: IDefect) => void
 }
 
-export default function ReportDefect({ defect, page, response }: ReportDefectProps) {
+export default function ReportDefect({ defect, page, response }: IReportDefect) {
   const s = useTranslations("Status");
   const t = useTranslations("General")
+  const a = useTranslations("Alert")
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+  const handleDialogResult = (result: boolean) => {
+    setIsDialogOpen(false);
+    if (result && pendingAction) {
+      pendingAction(); // Execute the pending action
+      setPendingAction(null); // Clear the pending action
+    }
+  };
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
 
   const beforeImage = defect.images
     .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
@@ -49,6 +78,9 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
   const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
   const [beforeSlideIndex, setBeforeSlideIndex] = useState(0);
   const [afterSlideIndex, setAfterSlideIndex] = useState(0);
+
+  const [alertBoxTitle, setAlertBoxTitle] = useState();
+  const [alertBoxDescription, setAlertBoxDescription] = useState();
   const router = useRouter();
   const locale = useLocale();
 
@@ -78,12 +110,46 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
   const handleReworkOrVerifyDefect = async (
     id: number,
     status: defectStatus,
+    supervisorId: number
+  ) => {
+    let title
+    let description
+    if (status === 'pending_inspection') {
+      title = 'ConfirmReworkTitle'
+      description = 'ConfirmReworkDescription'
+    } else if (status === 'completed') {
+      title = 'ConfirmCompleteTitle'
+      description = 'ConfirmCompleteDescription'
+    }
+
+    setPendingAction(() => () => {
+      reworkOrVerifyDefect(id, status, supervisorId)
+    });
+    setAlertBoxTitle(title)
+    setAlertBoxDescription(description)
+    handleOpenDialog();
+  };
+
+  const reworkOrVerifyDefect = async (
+    id: number,
+    status: defectStatus,
+    supervisorId: number
   ) => {
     const data = {
-      status: status
+      status: status,
+      supervisorId: supervisorId
     }
 
     try {
+      let title
+      let description
+      if (data.status === 'pending_inspection') {
+        title = 'ReworkDefectTitle'
+        description = 'ReworkDefectDescription'
+      } else if (status === 'completed') {
+        title = 'CompleteDefectTitle'
+        description = 'CompleteDefectDescription'
+      }
       const updateStatusDefect = await fetchData(
         "put",
         `/defect/${id}`,
@@ -91,14 +157,19 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
         data,
       );
       response(updateStatusDefect)
+      toast({
+        variant: "success",
+        title: a(title),
+        description: a(description),
+      });
     } catch (error) {
       console.error("Error creating defect:", error);
     }
-  };
+  }
 
-  const [api, setApi] = React.useState<CarouselApi>()
+  const [api, setApi] = useState<CarouselApi>()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) {
       return
     }
@@ -174,14 +245,14 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <span className="material-symbols-outlined">engineering</span>
-                  <p className="text-lg font-semibold">{t("Supervisor")}</p>
+                  <p className="text-lg font-semibold">{t("supervisor")}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Avatar className="custom-shadow h-[35px] w-[35px]">
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
                       {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -190,13 +261,13 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
                 </div>
               </div>
               <div>
-                <AlertDefect
-                  defect={defect}
-                  type={page == "patrol-view-detail" ? "report" : "edit"}
-                  response={(defect: IDefect) => (
-                    fetchRealtimeData(defect)
-                  )}
-                />
+                {defect.status === "reported" as defectStatus && (
+                  <AlertDefect
+                    defect={defect}
+                    type={page == "patrol-view-detail" ? "report" : "edit"}
+                    response={(defect: IDefect) => fetchRealtimeData(defect)}
+                  />
+                )}
               </div>
             </div>
 
@@ -428,16 +499,27 @@ export default function ReportDefect({ defect, page, response }: ReportDefectPro
               </div>
             </div>
 
+            {isDialogOpen && (
+              <AlertCustom
+                title={a(alertBoxTitle)}
+                description={a(alertBoxDescription)}
+                primaryButtonText={t("Confirm")}
+                primaryIcon="check"
+                primaryVariant="destructive"
+                secondaryButtonText={t("Cancel")}
+                backResult={handleDialogResult}
+              ></AlertCustom>
+            )}
             <div>
               {defect.status === "resolved" && page === "patrol-defect" && (
                 <div className="flex space-x-2 justify-end">
-                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection")}>
+                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection", defect.patrolResult.itemZone.zone.supervisor.id)}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       cancel
                     </span>
                     Rework
                   </Button>
-                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed")}>
+                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed", defect.patrolResult.itemZone.zone.supervisor.id)}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       check_circle
                     </span>

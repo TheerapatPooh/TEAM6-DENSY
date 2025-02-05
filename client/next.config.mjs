@@ -15,6 +15,9 @@ const nextConfig = {
     images: {
         domains: ['http://dekdee2.informatics.buu.ac.th/'], 
     },
+    compiler: {
+        removeConsole: process.env.NODE_ENV === "production", // ลบ console logs ใน production
+    },
 };
 
 export default withNextIntl(nextConfig);

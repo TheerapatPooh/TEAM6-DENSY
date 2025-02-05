@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้าแสดงรายละเอียดข้อบกพร่องตาม id ที่ระบุ
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงรายละเอียดข้อบกพร่องตาม id ที่ระบุ และสามารถดำเนินการต่อได้ตามสถานะของข้อบกพร่องนั้นๆ
+ * - สามารถ Accept ข้อบกพร่อง หรือ Resolve ข้อบกพร่องได้
+ * - สามารถแนบรูปภาพหลังการแก้ไขข้อบกพร่องได้
+ **/
+
 "use client";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -157,7 +168,7 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-card rounded-md shadow-md flex flex-col px-6 py-4 gap-4">
+    <div className="bg-card rounded-md custom-shadow flex flex-col px-6 py-4 gap-4">
       {/* Title section */}
       <div className="w-full  flex justify-between">
         <div>
@@ -203,7 +214,7 @@ export default function Page() {
                 text = "Accept";
                 disabled = false;
                 handleFunction = () => {
-                  // handleFinishPatrol();
+                  handleAcceptDefect();
                 };
                 break;
               case "in_progress":
@@ -217,9 +228,9 @@ export default function Page() {
                 break;
               case "resolved":
                 variant = "primary";
-                iconName = "published_with_changes";
-                text = "Resolve";
-                disabled = true;
+                iconName = "edit";
+                text = "Edit";
+                disabled = false;
                 break;
               default:
                 variant = "primary";
@@ -241,15 +252,23 @@ export default function Page() {
                       fetchRealtimeData(defect)
                     }} /> :
 
-                  <Button
-                    size="lg"
-                    variant={variant}
-                    onClick={handleFunction}
-                    disabled={disabled}
-                  >
-                    <span className="material-symbols-outlined">{iconName}</span>
-                    {t(text)}
-                  </Button>
+                  defect.status === "resolved" ?
+                    <AlertDefect
+                      defect={defect}
+                      type={"edit-resolve"}
+                      response={(defect: IDefect) => {
+                        fetchRealtimeData(defect)
+                      }} />  :
+
+                    <Button
+                      size="lg"
+                      variant={variant}
+                      onClick={handleFunction}
+                      disabled={disabled}
+                    >
+                      <span className="material-symbols-outlined">{iconName}</span>
+                      {t(text)}
+                    </Button>
                 }
               </>
             );
@@ -304,14 +323,14 @@ export default function Page() {
             <div className="flex gap-2">
               <div className="flex items-center gap-1 text-base font-semibold text-muted-foreground">
                 <span className="material-symbols-outlined ">person_search</span>
-                <p>{t("Inspector")}</p>
+                <p>{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Avatar className="h-[35px] w-[35px]">
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback id={defect.user.id.toString()}>
                     {getInitials(defect.user.profile.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -328,7 +347,7 @@ export default function Page() {
           <div className="col-span-full text-muted-foreground ">
             <p className="text-[16px] font-semibold">{t("Detail")}</p>
 
-            <div className="bg-secondary rounded-lg h-40 w-full items-center p-4">
+            <div className="bg-secondary rounded-md h-40 w-full items-center p-4">
               <p className="text-[20px] text-card-foreground">
                 {defect.description}
               </p>

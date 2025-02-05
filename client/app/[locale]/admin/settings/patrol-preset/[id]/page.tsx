@@ -1,3 +1,15 @@
+/**
+ * คำอธิบาย:
+ *  หน้าตั้งค่า Preset ในระบบ โดยสามารถแก้ไข Preset ที่มีอยู่ในระบบได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงหน้าตั้งค่า Preset ในระบบ โดยสามารถแก้ไข Preset ที่มีอยู่ในระบบได้
+ * - สามารถเพิ่ม Checklist ใหม่เข้าไปใน Preset ได้
+ * - สามารถแก้ไข Title และ Description ของ Preset ได้
+ **/
+
+
 'use client'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -109,7 +121,7 @@ export default function page() {
         presetForm.append("description", formPreset.description)
 
         selectChecklists.forEach((checklistId: number) => {
-            presetForm.append("checklists[]", checklistId.toString());
+            presetForm.append("checklists", checklistId.toString());
         });
 
         try {
@@ -329,7 +341,7 @@ export default function page() {
                                                                                                 <div className="flex flex-row items-center">
                                                                                                     <Avatar className="mr-1 h-6 w-6" >
                                                                                                         <AvatarImage />
-                                                                                                        <AvatarFallback>
+                                                                                                        <AvatarFallback id={itemZone.zone.supervisor.id.toString()}>
                                                                                                         </AvatarFallback>
                                                                                                     </Avatar>
                                                                                                     <p className="text-lg">

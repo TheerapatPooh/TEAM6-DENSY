@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ * Input: 
+ * - ไม่มี
+ * Output:
+ * - แสดงหน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ * - แสดง Zone ที่มี Supervisor ในระบบทั้งหมด
+ **/
+
+
 "use client";
 import { IUser, IZone } from "@/app/type";
 import { Button } from "@/components/ui/button";
@@ -15,7 +26,6 @@ import { fetchData, getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import Map from "@/components/map";
-import TabMenu from "@/components/tab-menu";
 import Loading from "@/components/loading";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
@@ -29,7 +39,7 @@ export default function Page() {
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const [mounted, setMounted] = useState<boolean>(false);
-  const [userData, setUserData] = useState<IUser[]>([]);
+  const [allSupervisors, setAllSupervisors] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
   const [zones, setZones] = useState<IZone[]>([]); // Zones state
   const [selectZone, setSelectZone] = useState<IZone | null>(null); // Select zone state
@@ -43,7 +53,7 @@ export default function Page() {
           "/users?profile=true&image=true&user=true&role=supervisor",
           true
         );
-        setUserData(users);
+        setAllSupervisors(users);
         // Fetch zone data.
         const zoneData = await fetchData("get", `/location/1`, true);
         setZones(zoneData?.zones); // Ensure the response contains the "zones" array, or empty array if not
@@ -117,6 +127,7 @@ export default function Page() {
       setSelectUser(null)
       setSelectZone(null)
     } catch (error) {
+      console.error(error)
       alert("Failed to save data. Please try again.");
     }
   };
@@ -166,11 +177,11 @@ export default function Page() {
         <div className="flex gap-2 justify-between w-fit">
           <div className="flex gap-1 items-center ">
             <span className="material-symbols-outlined text-muted-foreground">engineering</span>
-            <p className="text-muted-foreground text-base font-semibold">{t("Supervisor")}</p>
+            <p className="text-muted-foreground text-base font-semibold">{t("supervisor")}</p>
           </div>
           <UserDropdown
             color="secondary"
-            userData={userData}
+            users={allSupervisors}
             onUserSelect={handleUserSelect}
             selectUser={selectUser}
           />
@@ -190,7 +201,7 @@ export default function Page() {
             </TableHead>
             <TableHead>
               <div className="flex gap-3 items-center">
-                {t("Supervisor")}
+                {t("supervisor")}
                 <span className="material-symbols-outlined">engineering</span>
               </div>
             </TableHead>
@@ -211,7 +222,7 @@ export default function Page() {
                         <AvatarImage
                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile.image?.path}`}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback id={zone.supervisor.id.toString()}>
                           {getInitials(zone.supervisor.profile.name)}
                         </AvatarFallback>
                       </Avatar>

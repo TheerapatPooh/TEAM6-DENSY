@@ -1,3 +1,15 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Map ใช้สำหรับแสดงแผนที่ของโซนต่างๆ ในสถานที่
+ * Input: 
+ * - onZoneSelect: ฟังก์ชันที่ใช้สำหรับเลือกโซนที่ต้องการ
+ * - disable: สถานะที่ใช้สำหรับปิดการใช้งานคอมโพเนนต์
+ * - initialSelectedZones: รายการโซนที่ต้องการเลือกในครั้งแรก
+ * - toggle: สถานะที่ใช้สำหรับเปิดหรือปิดการเลือกโซนหลายโซน
+ * Output:
+ * - JSX ของแผนที่ที่แสดงโซนต่างๆ ในสถานที่
+ **/
+
 'use client';
 import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useState } from 'react';
@@ -13,14 +25,14 @@ import React from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 
 
-interface MapProps {
+interface IMap {
   onZoneSelect?: (selectedZones: IZone[]) => void;
   disable: boolean;
   initialSelectedZones?: number[];
   toggle?: boolean;
 }
 
-export default function Map({ onZoneSelect, disable, initialSelectedZones, toggle = false }: MapProps) {
+export default function Map({ onZoneSelect, disable, initialSelectedZones, toggle = false }: IMap) {
   const [location, setLocation] = useState<ILocation>();
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [zones, setZones] = useState<IZone[]>([]);
@@ -85,7 +97,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
     }
 
     if (location) {
-      const updatedZones = location.zones.map(zone => {
+      const updatedZones = location.zones?.map(zone => {
         const matchedZonePath = paths.find(path => path.id === zone.id);
         return {
           ...zone,
@@ -168,7 +180,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
   return (
     <Stage width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md'>
       <Layer x={8} y={8}>
-        {zones.map((zone) => {
+        {zones?.map((zone) => {
           const isSelected = selectedZones.includes(zone.id);
           const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
           const startPointY = textLanguage?.y ? textLanguage.y - 80 : 0;

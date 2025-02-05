@@ -50,15 +50,17 @@ export async function login(req: Request, res: Response) {
 
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
       maxAge: maxAge,
     });
 
     res.status(200).json({ message: "Login Success", token });
+    return
   } catch (error) {
-    res.status(500)
+    res.status(500).json({ message: "Internal Server Error", error });
   }
+  
 }
 
 /**
@@ -72,12 +74,14 @@ export async function logout(req: Request, res: Response) {
     // Clear the cookie named "authToken"
     res.clearCookie("authToken", {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax'
     });
     res.status(200).json({ message: "Logout successful" });
+    return
   } catch (error) {
-    res.status(500)
+    res.status(500).json({ message: "Internal Server Error", error });
+    return
   }
 }
 
@@ -136,7 +140,7 @@ export const upload = multer({ storage: storage });
  * - (req as any).user.userId : Int (Id ของผู้ใช้ที่กำลังล็อคอิน)
  * Output: JSON message ของ notification  
 **/
-export async function getNotifications(req: Request, res: Response) {
+export async function getAllNotifications(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
 
@@ -148,6 +152,7 @@ export async function getNotifications(req: Request, res: Response) {
 
     res.status(200).json(result);
   } catch (error) {
+    console.error(error);
     res.status(500)
   }
 }
@@ -211,6 +216,7 @@ export async function updateNotification(req: Request, res: Response) {
     });
     res.status(200).json(notification);
   } catch (error) {
+    console.error(error);
     res.status(500)
   }
 }
@@ -260,6 +266,7 @@ export async function markAsRead(req: Request, res: Response) {
 
     res.status(200).json({ message: "Notification marked as read" });
   } catch (error) {
+    console.error(error);
     res.status(500)
   }
 }

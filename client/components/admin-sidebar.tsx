@@ -1,3 +1,13 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Sidebar ใช้สำหรับแสดงส่วนหัวของหน้าเว็บ โดยสามารถปรับการแสดงผลของเมนูด้านบนได้ตามประเภทผู้ใช้งาน
+ *   (variant) ที่ส่งเข้ามา เช่น ถ้าเป็น "inspector" จะแสดงเมนู Patrol และ Defect ถ้าไม่ใช่จะไม่แสดงเมนูดังกล่าว
+ *
+ * Input: -
+ * Output:
+ * - JSX ของ Sidebar มี 3 menu คือ Dashboard, Users และ Settings และสามารถเปิด-ปิดเมนูด้วยปุ่มที่มี icon 3 เส้น
+ **/
+
 "use client"
 import {
     SidebarProvider,
@@ -46,8 +56,6 @@ export function AdminSidebar() {
         const menuPath = `/${menu.toLocaleLowerCase()}`
         return pathAfterLang === menuPath || pathAfterLang.startsWith(menuPath);
     };
-
-    console.log("path", pathAfterLang)
 
     return (
         <SidebarProvider className={`sticky transition-all duration-300 ${isExpanded ? "w-[240px]" : "w-[70px] pointer-events-none"}`}>

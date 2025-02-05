@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ Defect ใช้สำหรับแสดงข้อมูลของ Defect ที่ได้รับจาก API
+ * Input: 
+ * - defect: ข้อมูลของ Defect ที่ได้รับจาก API
+ * Output:
+ * - JSX ของ Defect ที่แสดงข้อมูลของ Defect ที่ได้รับจาก API
+ **/
+
 import React from 'react'
 import BadgeCustom from './badge-custom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -31,7 +40,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
     }
 
     return (
-        <div className={`bg-card p-4 rounded-lg shadow-md border-l-8 border-${color(defect.type)} cursor-pointer`} onClick={() => router.push(`/${locale}/defect/${defect.id}`) }>
+        <div className={`bg-card p-4 rounded-md custom-shadow border-l-8 border-${color(defect.type)} cursor-pointer`} onClick={() => router.push(`/${locale}/defect/${defect.id}`) }>
             <div className="flex items-center justify-between">
                 <div className="flex items-center text-black-500 space-x-2">
                     <span className="material-symbols-outlined text-muted-foreground cursor-default ">schedule</span>
@@ -80,7 +89,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
 
             <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-muted-foreground">person_search</span>
-                <span className="font-bold text-lg text-muted-foreground">{t('Inspector')}</span>
+                <span className="font-bold text-lg text-muted-foreground">{t('inspector')}</span>
                 <HoverCard>
                     <HoverCardTrigger>
                         <div className="flex items-center ps-2 p-2">
@@ -88,7 +97,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
                                 <AvatarImage
                                     src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                                 />
-                                <AvatarFallback>
+                                <AvatarFallback id={defect.user.id.toString()}>
                                     {getInitials(defect.user.profile.name)}
                                 </AvatarFallback>
                             </Avatar>
@@ -102,7 +111,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
                                     <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
                                     />
-                                    <AvatarFallback>
+                                    <AvatarFallback id={defect.user.id.toString()}>
                                         {getInitials(defect.user.profile.name)}
                                     </AvatarFallback>
                                 </Avatar>

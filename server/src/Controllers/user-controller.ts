@@ -4,31 +4,36 @@ import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
-import { profile } from "console";
 import { Role } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
- * Input: 
+ * Input:
  * - req.body: { username: String, email: String | null, password: String, role: String, department: String | null }
  * Output: JSON object ข้อมูล User ที่ถูกสร้าง
-**/
+ **/
 export async function createUser(req: Request, res: Response) {
   try {
     let { username, email, password, role, department } = req.body;
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashPassword = await bcrypt.hash(password, 10); // แฮชรหัสผ่านเพื่อความปลอดภัย
+
+    // หาผู้ใช้ล่าสุดจากฐานข้อมูลเพื่อคำนวณ id ถัดไป
 
     const latestUser = await prisma.user.findFirst({
       orderBy: {
         id: "desc",
       },
     });
+    // คำนวณ id ถัดไปโดยใช้ id ของผู้ใช้ล่าสุด
 
     const nextId = (latestUser?.id ?? 0) + 1;
     if (!username) {
+      // ถ้าไม่ได้ระบุ username ให้สร้างชื่อผู้ใช้ใหม่โดยใช้คำนามจาก faker
+
       const randomWord = faker.word.noun();
       username = `${randomWord}${nextId}`;
     }
+    // สร้างผู้ใช้ใหม่ในฐานข้อมูล
 
     const newUser = await prisma.user.create({
       data: {
@@ -39,6 +44,7 @@ export async function createUser(req: Request, res: Response) {
         department: department || null,
       },
     });
+    // สร้างโปรไฟล์เริ่มต้นสำหรับผู้ใช้ใหม่
 
     await prisma.profile.create({
       data: {
@@ -50,6 +56,8 @@ export async function createUser(req: Request, res: Response) {
       },
     });
     const user = await prisma.user.findUnique({
+      // ดึงข้อมูลผู้ใช้ใหม่จากฐานข้อมูลพร้อมโปรไฟล์
+
       where: {
         id: newUser.id,
       },
@@ -66,7 +74,8 @@ export async function createUser(req: Request, res: Response) {
     res.status(201).json(result);
     return;
   } catch (error) {
-    res.status(500)
+    console.error(error);
+    res.status(500);
     return;
   }
 }
@@ -75,16 +84,16 @@ export async function createUser(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดตข้อมูลส่วนตัวของ User
  * Input:
  * - (req as any).user.userId: number
- * - req.body: { name: String | null, age: number | null, tel: String | null, address: String | null }
  * - req.file?.filename: String (optional, path ของไฟล์รูปภาพ)
  * Output: JSON object ข้อมูล profile ที่ถูกอัปเดต หรือ error หากไม่พบ User
-**/
+ **/
 export async function updateProfile(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
-    const imagePath = req.file?.filename || ""; // Use the filename created by multer
+    const imagePath = req.file?.filename || ""; // ถ้าไม่มีก็เป็นสตริงว่าง
 
-    // Find the user in the database
+        // ค้นหาผู้ใช้จากฐานข้อมูลตาม userId
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -95,23 +104,22 @@ export async function updateProfile(req: Request, res: Response) {
         },
       },
     });
+    // ถ้าผู้ใช้ไม่พบ ส่งสถานะ 404 และข้อความ error
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
-      return
+      return;
     }
+    // ฟังก์ชันที่ใช้ในการหาพาธของโฟลเดอร์ที่เก็บไฟล์อัปโหลด
 
     function getUploadsPath(): string {
       const currentDir = process.cwd();
-      return path.join(currentDir, 'uploads'); // Adjust path as needed
+      return path.join(currentDir, "uploads");// คืนค่าพาธที่เก็บไฟล์
     }
 
-    const uploadsPath = getUploadsPath();
+    const uploadsPath = getUploadsPath();// กำหนดพาธของโฟลเดอร์ uploads
 
-    console.log("imagePath: ", imagePath);
-    console.log("user.profile.image: ", user.profile?.image?.path);
-
-    // Delete old image file if it exists
+    // ลบไฟล์ภาพเก่าถ้ามี (ถ้ามีไฟล์ภาพที่ผู้ใช้เคยอัปโหลด)
     if (imagePath && user.profile?.image) {
       const oldImagePath = path.join(uploadsPath, user.profile.image.path);
       if (fs.existsSync(oldImagePath)) {
@@ -121,7 +129,7 @@ export async function updateProfile(req: Request, res: Response) {
 
     let image = null;
     if (imagePath) {
-      // Upsert image (update if exists, create if not)
+      // อัปเดตหรือสร้างข้อมูลภาพใหม่ในฐานข้อมูล
       image = await prisma.image.upsert({
         where: { id: user.profile?.image?.id || 0 },
         update: {
@@ -141,29 +149,30 @@ export async function updateProfile(req: Request, res: Response) {
       });
     }
 
-    // Update profile in the database
+    // อัปเดตข้อมูลโปรไฟล์ของผู้ใช้ในฐานข้อมูล
     const updatedProfile = await prisma.profile.update({
       where: { userId: userId },
       data: {
-        imageId: image?.id || null, // Link the image if available
+        imageId: image?.id || null, // ถ้ามีภาพให้เชื่อมโยง id ของภาพเข้าไป
       },
     });
 
     res.status(200).json(updatedProfile);
-    return
+    return;
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
-    return
+    return;
   }
 }
 
 /**
- * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล User 
- * Input: 
- * - req.query: { profile: "true" | "false", image: "true" | "false", password: "true" | "false" } (optional)
- * - req.params.id: number (optional, ถ้าไม่ระบุจะดึงข้อมูล User ที่ login อยู่)
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล User
+ * Input:
+ * - req.query: { profile: boolean, image: boolean, password: boolean} (optional)
+ * - req as any:{userId:number,userRole:String}
  * Output: JSON object ข้อมูล User รวมถึง profile และ image หากมีการร้องขอ
-**/
+ **/
 export async function getUser(req: Request, res: Response) {
   try {
     const includeProfile = req.query.profile === "true";
@@ -177,8 +186,10 @@ export async function getUser(req: Request, res: Response) {
     if (id && userRole !== "admin" && userId !== id && includePassword) {
       res
         .status(403)
-        .json({ message: "Access Denied: Only admins can access other users' data" });
-      return
+        .json({
+          message: "Access Denied: Only admins can access other users' data",
+        });
+      return;
     }
     if (!id || id === userId) {
       user = await prisma.user.findUnique({
@@ -193,12 +204,12 @@ export async function getUser(req: Request, res: Response) {
           active: true,
           profile: includeProfile
             ? {
-              include: {
-                image: includeImage,
-              },
-            }
+                include: {
+                  image: includeImage,
+                },
+              }
             : undefined,
-          zone: true
+          zone: true,
         },
       });
     } else {
@@ -214,12 +225,12 @@ export async function getUser(req: Request, res: Response) {
           active: true,
           profile: includeProfile
             ? {
-              include: {
-                image: includeImage,
-              },
-            }
+                include: {
+                  image: includeImage,
+                },
+              }
             : undefined,
-          zone: true
+          zone: true,
         },
       });
     }
@@ -233,17 +244,18 @@ export async function getUser(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500)
+    console.error(error);
+    res.status(500);
     return;
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล User ทั้งหมด
- * Input: 
- * - req.query: { profile: "true" | "false", image: "true" | "false", "role": "admin" | "inspector" | "supervisor" } (optional)
+ * Input:
+ * - req.query: { profile: boolean, image: boolean, "role": "admin" | "inspector" | "supervisor" } (optional)
  * Output: JSON array ข้อมูล User รวมถึง profile และ image หากมีการร้องขอ
-**/
+ **/
 export async function getAllUsers(req: Request, res: Response) {
   try {
     const includeProfile = req.query.profile === "true";
@@ -253,10 +265,10 @@ export async function getAllUsers(req: Request, res: Response) {
 
     const validRoles = ["admin", "inspector", "supervisor"]; // Adjust based on your Role enum
     const roleFilter = validRoles.includes(role) ? (role as Role) : undefined;
-    
+
     const allUsers = await prisma.user.findMany({
       where: {
-        role: roleFilter
+        role: roleFilter,
       },
       select: {
         id: true,
@@ -267,10 +279,10 @@ export async function getAllUsers(req: Request, res: Response) {
         active: true,
         profile: includeProfile
           ? {
-            include: {
-              image: includeImage,
-            },
-          }
+              include: {
+                image: includeImage,
+              },
+            }
           : undefined,
       },
     });
@@ -284,27 +296,50 @@ export async function getAllUsers(req: Request, res: Response) {
       return;
     }
   } catch (error) {
-    res.status(500)
+    console.error(error);
+    res.status(500);
     return;
   }
 }
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดตข้อมูล User
- * Input: 
+ * Input:
  * - req.params.id: number (ID ของ User ที่จะอัปเดต)
- * - req.body: { username: String, email: String | null, password: String, role: String, department: String | null }
+ * - req.body: {
+ *     username: String,     
+ *     email: String | null,  
+ *     password: String,     
+ *     role: String,         
+ *     department: String | null,  
+ *     name: String | null,   
+ *     age: number | null,    
+ *     tel: String | null,    
+ *     address: String | null  
+ * }
  * Output: JSON object ข้อมูล User หลังการอัปเดต
  * Note: admin เท่านั้นที่สามารถอัปเดต role และ username ได้
-**/
+ **/
 export async function updateUser(req: Request, res: Response) {
   try {
     const loggedInUserId = (req as any).user.userId;
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
-    const { username, name, email, tel, address, password, role, department } = req.body;
-    const active = JSON.parse(req.body.active)
-    const age = parseInt(req.body.age)
+    const { username, name, email, tel, address, password, role, department } =
+      req.body;
+    const age = parseInt(req.body.age);
+    const updateUser: any = {};
+    const updateProfile: any = {};
+    if (username !== undefined) updateUser.username = username;
+    if (email !== undefined) updateUser.email = email;
+    if (password !== undefined)
+      updateUser.password = await bcrypt.hash(password, 10);
+    if (role !== undefined) updateUser.role = role;
+    if (department !== undefined) updateUser.department = department;
+    if (name !== undefined) updateProfile.name = name;
+    if (age !== undefined) updateProfile.age = age;
+    if (tel !== undefined) updateProfile.tel = tel;
+    if (address !== undefined) updateProfile.address = address;
 
     // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
     if (loggedInUserId !== id && loggedInUserRole !== "admin") {
@@ -314,67 +349,34 @@ export async function updateUser(req: Request, res: Response) {
       });
       return;
     }
+
     // อัปเดตข้อมูลผู้ใช้
-    if (loggedInUserRole !== "admin") {
-      if (username || email || password || role || department) {
-        await prisma.user.update({
-          where: { id: id },
-          data: {
-            email: email,
-            password: password ? await bcrypt.hash(password, 10) : undefined,
-            active: active
+    await prisma.user.update({
+      where: { id: id },
+      data: updateUser,
+    });
+
+    await prisma.profile.update({
+      where: { id: id },
+      data: updateProfile,
+    });
+
+    const result = await prisma.user.findUnique({
+      where: { id: id },
+      include: {
+        profile: {
+          include: {
+            image: true,
           },
-        });
-      }
-      await prisma.profile.update({
-        where: { id: id },
-        data: {
-          name: name,
-          age: age,
-          tel: tel,
-          address: address,
         },
-      })
-
-    } else {
-        await prisma.user.update({
-          where: { id: id },
-          data: {
-            password: password ? await bcrypt.hash(password, 10) : undefined,
-            active: active,
-            role: role
-          },
-        });
-      
-
-      await prisma.profile.update({
-        where: { id: id },
-        data: {
-          name: name,
-          age: age,
-          tel: tel,
-          address: address,
-        },
-      })
-
-    }
-
-    const result = {
-      id: id,
-      username: username,
-      email: email,
-      age: age,
-      tel: tel,
-      address: address,
-      role: role,
-      department: department,
-      active: active,
-    };
+      },
+    });
 
     res.status(200).json(result);
     return;
   } catch (error) {
-    res.status(500)
+    console.error(error);
+    res.status(500);
     return;
   }
 }
@@ -383,7 +385,7 @@ export async function updateUser(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับลบ User (เปลี่ยนสถานะเป็น inactive)
  * Input: req.params.id: Int (ID ของ User ที่จะลบ)
  * Output: JSON message ยืนยันการลบ User สำเร็จ
-**/
+ **/
 export async function removeUser(req: Request, res: Response) {
   try {
     const id = parseInt(req.params.id, 10);
@@ -392,7 +394,6 @@ export async function removeUser(req: Request, res: Response) {
       where: { id: id },
       include: { profile: true, zone: true },
     });
-
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
@@ -409,7 +410,8 @@ export async function removeUser(req: Request, res: Response) {
     res.status(200).json({ message: "User has been deactivated successfully" });
     return;
   } catch (error) {
-    res.status(500)
+    console.error(error);
+    res.status(500);
     return;
   }
 }

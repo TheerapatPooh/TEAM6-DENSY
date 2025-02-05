@@ -5,6 +5,7 @@ import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
+import Defect from "@/components/defect";
 
 const ExcelJS = require("exceljs");
 
@@ -46,11 +47,11 @@ export async function fetchData(
       withCredentials: credential,
       headers: form
         ? {
-            "Content-Type": "multipart/form-data",
-          }
+          "Content-Type": "multipart/form-data",
+        }
         : {
-            "Content-Type": "application/json",
-          },
+          "Content-Type": "application/json",
+        },
     };
 
     let response;
@@ -82,32 +83,44 @@ export async function fetchData(
 }
 
 
+
 export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Patrol Report");
 
+    const formatDateTime = (dateTime) => {
+      const date = new Date(dateTime);
+      // ฟอร์แมตวันที่
+      const formattedDate = date.toLocaleDateString('en-GB'); 
+      // ฟอร์แมตเวลา
+      const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `${formattedDate} ${formattedTime}`;
+    };
+
     // เพิ่มข้อมูล Patrol ที่ด้านบนของเอกสาร
-    worksheet.addRow(["Patrol ID:", patrol.id]);
-    worksheet.addRow(["Date:", patrol.date]);
-    worksheet.addRow(["Start Time:", patrol.startTime]);
-    worksheet.addRow(["End Time:", patrol.endTime]);
+    worksheet.addRow(["Date:", formatDateTime(patrol.date)]);
+    worksheet.addRow(["Start Time:",formatDateTime(patrol.startTime)]);
+    worksheet.addRow(["End Time:", formatDateTime(patrol.endTime)]);
     worksheet.addRow(["Status:", patrol.status]);
     worksheet.addRow(["Preset Title:", patrol.preset.title]);
+    worksheet.addRow(["Preset Version:", patrol.preset.version]);
     worksheet.addRow(["Preset Description:", patrol.preset.description]);
     worksheet.addRow([]); // เพิ่มบรรทัดว่าง
 
-    // ตั้งค่าคอลัมน์พร้อมกับหัวข้อและคีย์
+    // ขนาดของ Column
     worksheet.columns = [
-      { header: "Item Name", key: "itemName", width: 30 },
-      { header: "Zone Name", key: "zoneName", width: 20 },
-      { header: "Inspector Name", key: "inspectorName", width: 25 },
-      { header: "Status", key: "status", width: 15 },
-      { header: "Number of Defects", key: "defectCount", width: 20 },
+      { width: 30 },  
+      { width: 25},  
+      { width: 25 },  
+      { width: 15 },  
+      { width: 20 },  
     ];
 
     let totalFails = 0;
+    let totalComments = 0;
     let totalDefects = 0;
+    let totalPass = 0;
 
     // วนลูปผ่าน patrolChecklist
     for (const patrolChecklist of patrol.patrolChecklists) {
@@ -115,15 +128,41 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       const checklist = patrolChecklist.checklist;
 
       // เพิ่มชื่อ Checklist
-      worksheet.addRow([]);
-      worksheet.addRow(["Checklist:", checklist.title]);
+      const titleRow = worksheet.addRow([checklist.title + " By " + inspectorName]);
+      // หาตำแหน่งของโรวปัจจุบัน
+      const titleRowIdx = worksheet.rowCount; 
+      // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
+      worksheet.mergeCells(titleRowIdx, 0, titleRowIdx, 3);
+      // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
+      titleRow.getCell(1).font = { bold: true };
+      titleRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+      titleRow.getCell(1).border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
 
-      // วนลูปผ่านรายการใน Checklist
-      for (const item of checklist.items) {
+      // ตั้งค่าคอลัมน์พร้อมกับหัวข้อและคีย์
+      const headerRow = worksheet.addRow(["Item Name", "Zone Name", "Status"]);
+
+      // จัดกึ่งกลางหัวตาราง ตัวหนา มีกรอบ
+      headerRow.eachCell((cell) => {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.font = { bold: true };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+
+     // วนลูปผ่านรายการใน Checklist
+     for (const item of checklist.items) {
         // วนลูปผ่าน itemZone
         for (const itemZone of item.itemZones) {
           const zoneName = itemZone.zone.name;
-
           // หา result ที่ตรงกับ item และ zone นี้
           const resultItem = result.find(
             (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
@@ -133,35 +172,215 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
           let defectCount = 0;
           if (resultItem) {
             if (resultItem.status === true) {
-              statusText = "Pass";
+              statusText = "Passed";
+              totalPass++;
             } else if (resultItem.status === false) {
-              statusText = "Fail";
+              statusText = "Commented";
               totalFails++; // เพิ่มจำนวน fail
+              totalComments++; // เพิ่มจำนวน comment
             }
 
             if (resultItem.defects && resultItem.defects.length > 0) {
+              statusText = "Defected";
               defectCount = resultItem.defects.length;
               totalDefects += defectCount; // เพิ่มจำนวน defect
+              totalComments -= defectCount; // ลดจำนวน comment
             }
           }
 
           // เพิ่มแถวข้อมูลลงใน worksheet
-          worksheet.addRow({
-            itemName: item.name,
-            zoneName: zoneName,
-            inspectorName: inspectorName,
-            status: statusText,
-            defectCount: defectCount,
+          const dataRow = worksheet.addRow([item.name, zoneName, statusText]);
+
+          dataRow.eachCell((cell) => {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          
+            cell.border = {
+              left: { style: 'thin' },
+              right: { style: 'thin' }
+            };
           });
+
+         
+
+          dataRow.eachCell((cell) => {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          
+            cell.border = {
+              left: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+          });
+        }
+      }
+      const columnCount = headerRow.cellCount; 
+      const blankRow = worksheet.addRow(Array(columnCount).fill("")); // แถวว่างเพื่อเว้นช่อง
+      blankRow.eachCell((cell) => {
+        cell.border = { top: { style: 'thin' } };
+      });
+    }
+
+    // เพิ่มสรุปที่ด้านล่าง
+    const sumRow = worksheet.addRow(["Summary"]);
+    // หาตำแหน่งของโรวปัจจุบัน
+    const sumRowIdx = worksheet.rowCount; 
+    // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
+    worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 4);
+    // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
+    sumRow.getCell(1).font = { bold: true };
+    sumRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+    sumRow.getCell(1).border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' },
+    };
+    
+    // สร้าง Array เพื่อเก็บข้อมูลจำนวนของแต่ละสถานะในแต่ละโซน
+    const zoneStatusCount = [];
+
+    // สร้างตัวแปรสำหรับผลรวมของทุกโซน
+    let totalPassed = 0;
+    let totalCommented = 0;
+    let totalDefected = 0;
+
+    // วนลูปผ่าน Zone Name และ Status เพื่อเก็บข้อมูลใน zoneStatusCount
+    for (const patrolChecklist of patrol.patrolChecklists) {
+      for (const item of patrolChecklist.checklist.items) {
+        for (const itemZone of item.itemZones) {
+          const zoneName = itemZone.zone.name;
+          const resultItem = result.find(
+            (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
+          );
+
+          let statusText = "N/A"; // กำหนดค่าเริ่มต้น
+          if (resultItem) {
+            if (resultItem.status === true) {
+              statusText = "Passed";
+            } else if (resultItem.status === false) {
+              statusText = "Commented";
+            }
+
+            if (resultItem.defects && resultItem.defects.length > 0) {
+              statusText = "Defected";
+            }
+          }
+
+          // หาโซนใน zoneStatusCount หรือเพิ่มใหม่
+          let zoneEntry = zoneStatusCount.find(entry => entry.zoneName === zoneName);
+          if (!zoneEntry) {
+            zoneEntry = { zoneName, Passed: 0, Commented: 0, Defected: 0, "N/A": 0 };
+            zoneStatusCount.push(zoneEntry);
+          }
+
+          // เพิ่มจำนวนสถานะในโซนที่กำหนด
+          zoneEntry[statusText] += 1;
+
+          // เพิ่มผลรวมสำหรับทุกโซน
+          if (statusText === "Passed") totalPassed += 1;
+          if (statusText === "Commented") totalCommented += 1;
+          if (statusText === "Defected") totalDefected += 1;
         }
       }
     }
 
-    // เพิ่มสรุปที่ด้านล่าง
+    // เพิ่มส่วนหัวของตารางสำหรับสรุปผล
+    const zoneSummaryHeaderRow = worksheet.addRow(["Zone Name", "Passed", "Commented", "Defected"]);
+    zoneSummaryHeaderRow.eachCell((cell) => {
+      cell.font = { bold: true }; // ทำให้หัวตารางตัวหนา
+      cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    // เพิ่มข้อมูลสรุปของแต่ละโซนลงในตาราง
+    zoneStatusCount.forEach(zoneEntry => {
+      const summaryRow = worksheet.addRow([
+        zoneEntry.zoneName,
+        zoneEntry.Passed,
+        zoneEntry.Commented,
+        zoneEntry.Defected,
+      ]);
+
+      summaryRow.eachCell((cell) => {
+        cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
+    });
+
+    // เพิ่มแถวผลรวมของทุกโซน
+    const totalRow = worksheet.addRow([
+      "Total",
+      totalPassed,
+      totalCommented,
+      totalDefected
+    ]);
+
+    totalRow.eachCell((cell) => {
+      cell.font = { bold: true }; // ทำให้ผลรวมตัวหนา
+      cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
     worksheet.addRow([]);
-    worksheet.addRow(["Summary"]);
-    worksheet.addRow(["Total Fails", totalFails]);
-    worksheet.addRow(["Total Defects", totalDefects]);
+
+    // เพิ่มสรุปที่ด้านล่าง
+    const resultRow = worksheet.addRow(["Result"]);
+    // หาตำแหน่งของโรวปัจจุบัน
+    const resultRowIdx = worksheet.rowCount; 
+    // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
+    worksheet.mergeCells(resultRowIdx, 0, resultRowIdx, 2);
+    // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
+    resultRow.getCell(1).font = { bold: true };
+    resultRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+    resultRow.getCell(1).border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' },
+    };
+
+    // เพิ่มแถวสำหรับคำว่า PASS และ FAIL
+    const passFailHeaderRow = worksheet.addRow(["PASS", "FAIL"]);
+    passFailHeaderRow.eachCell((cell) => {
+      cell.font = { bold: true }; // ทำให้ตัวหนา
+      cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    // เพิ่มแถวตัวเลขสำหรับ PASS และ FAIL
+    const passFailCountRow = worksheet.addRow([
+      totalPassed, // จำนวน Pass
+      totalCommented + totalDefected, // รวมจำนวน Fail
+    ]);
+
+    passFailCountRow.eachCell((cell) => {
+      cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
 
     // เขียน workbook เป็น buffer
     const buffer = await workbook.xlsx.writeBuffer();
@@ -362,20 +581,56 @@ export function getNotificationToast(key: string): IToast | null {
     case "report_defect":
       return {
         variant: "default",
-        title: "DefectRecieveTitle",
-        description: "DefectRecieveDescription",
+        title: "DefectReceiveTitle",
+        description: "DefectReceiveDescription",
       };
     case "new_comment":
       return {
         variant: "default",
-        title: "CommentRecieveTitle",
-        description: "CommentRecieveDescription",
+        title: "CommentReceiveTitle",
+        description: "CommentReceiveDescription",
       };
     case "update_supervisor":
       return {
         variant: "default",
         title: "UpdateSupervisorTitle",
         description: "UpdateSupervisorDescription",
+      };
+    case "start_patrol":
+      return {
+        variant: "default",
+        title: "StartPatrolTitle",
+        description: "StartPatrolDescription",
+      };
+    case "finish_patrol":
+      return {
+        variant: "default",
+        title: "FinishPatrolTitle",
+        description: "FinishPatrolDescription",
+      };
+    case "defect_resolved":
+      return {
+        variant: "default",
+        title: "DefectResolveInfoTitle",
+        description: "DefectResolveInfoDescription",
+      };
+    case "defect_accept":
+      return {
+        variant: "default",
+        title: "DefectAcceptInfoTitle",
+        description: "DefectAcceptInfoDescription",
+      };
+    case "defect_completed":
+      return {
+        variant: "default",
+        title: "DefectCompleteTitle",
+        description: "DefectCompleteDescription",
+      };
+    case "defect_pending_inspection":
+      return {
+        variant: "default",
+        title: "DefectPendingInspectionTitle",
+        description: "DefectPendingInspectionDescription",
       };
     default:
       return null;
