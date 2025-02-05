@@ -48,7 +48,7 @@ export async function createPreset(req: Request, res: Response) {
       .json({ message: "Preset created successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -121,7 +121,7 @@ export async function updatePreset(req: Request, res: Response) {
       .json({ message: "Preset updated successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});;
   }
 }
 
@@ -218,7 +218,6 @@ export async function updateChecklist(req: Request, res: Response) {
           message: "Checklist update successfully",
           checklists: newChecklist,
         });
-        
       } else {
         res
           .status(500)
@@ -283,8 +282,8 @@ export async function getPreset(req: Request, res: Response) {
     let result = preset;
     res.status(200).json(result);
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({message: `Internal server error: ${error}`});;
   }
 }
 
@@ -296,10 +295,11 @@ export async function getPreset(req: Request, res: Response) {
  **/
 export async function getAllPresets(req: Request, res: Response) {
   try {
-    const { zones, startDate, endDate, search, latest = "true" } = req.query;
-    const latestBoolean = latest === "true";
-
-    const whereClause: any = { latest: latestBoolean };
+    const { zones, startDate, endDate, search, latest } = req.query;
+    
+    const whereClause: any = {
+      latest: latest === "false" ? undefined : true,
+    };
 
     if (zones) {
       whereClause.presetChecklists = {
@@ -406,7 +406,8 @@ export async function getAllPresets(req: Request, res: Response) {
         description: preset.description,
         version: preset.version,
         updatedAt: preset.updatedAt,
-        updateByUserName: preset.user?.profile?.name || preset.user?.username || "Unknown",
+        updateByUserName:
+          preset.user?.profile?.name || preset.user?.username || "Unknown",
         updateByUserImagePath: preset.user?.profile?.image?.path || "",
         zones: uniqueZoneNames,
         versionCount: versionCounts[preset.title] || 0,
@@ -416,12 +417,9 @@ export async function getAllPresets(req: Request, res: Response) {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
-
-
-
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับลบ Preset
@@ -455,13 +453,13 @@ export async function removePreset(req: Request, res: Response) {
       where: { id: presetId },
       data: {
         latest: false,
-      }
+      },
     });
 
     res.status(200).json({ message: "Preset removed successfully" });
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -538,7 +536,7 @@ export async function getChecklist(req: Request, res: Response) {
     res.status(200).json(formattedChecklist);
   } catch (error) {
     console.error("Error fetching checklist:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -550,11 +548,10 @@ export async function getChecklist(req: Request, res: Response) {
  **/
 export async function getAllChecklists(req: Request, res: Response) {
   try {
-    const { zones, startDate, endDate, search } = req.query;
-
+    const { zones, startDate, endDate, search, latest } = req.query;
     // ตัวกรองเริ่มต้นเพื่อหา zones
     const whereClause: any = {
-      latest: true,
+      latest: latest === "false" ? undefined : true,
     };
 
     // กรองโดย zones ถ้ามี
@@ -565,7 +562,7 @@ export async function getAllChecklists(req: Request, res: Response) {
             some: {
               zone: {
                 name: {
-                  in: (zones as string).split(","), 
+                  in: (zones as string).split(","),
                 },
               },
             },
@@ -612,7 +609,7 @@ export async function getAllChecklists(req: Request, res: Response) {
           select: {
             id: true,
             name: true,
-            type: true, 
+            type: true,
             checklistId: true,
             itemZones: {
               select: {
@@ -621,9 +618,10 @@ export async function getAllChecklists(req: Request, res: Response) {
                     name: true,
                     supervisor: {
                       select: {
+                        id: true,
                         profile: true,
                       },
-                    }, 
+                    },
                   },
                 },
               },
@@ -651,14 +649,13 @@ export async function getAllChecklists(req: Request, res: Response) {
       return acc;
     }, {} as Record<string, number>);
 
-  
     const findUser = async (checklist: Checklist) => {
       const findUser = await prisma.user.findUnique({
         where: {
           id: checklist.updatedBy,
         },
         select: {
-          username: true, 
+          username: true,
           profile: true,
         },
       });
@@ -669,7 +666,6 @@ export async function getAllChecklists(req: Request, res: Response) {
               id: findUser.profile.imageId,
             },
           })
-           
         : null;
 
       return {
@@ -714,7 +710,7 @@ export async function getAllChecklists(req: Request, res: Response) {
           itemCounts,
           user: checklist.user,
           zones: zoneNames,
-          versionCount: versionCounts[checklist.title] || 0, 
+          versionCount: versionCounts[checklist.title] || 0,
           items: items,
         };
       })
@@ -723,7 +719,7 @@ export async function getAllChecklists(req: Request, res: Response) {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -826,7 +822,7 @@ export async function createChecklist(req: Request, res: Response) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -859,8 +855,8 @@ export async function removeChecklist(req: Request, res: Response) {
       .json({ message: "Checklist has been deactivated successfully" });
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }

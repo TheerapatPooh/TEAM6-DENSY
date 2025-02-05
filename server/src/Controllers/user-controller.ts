@@ -74,7 +74,7 @@ export async function createUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -160,7 +160,7 @@ export async function updateProfile(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -244,7 +244,7 @@ export async function getUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -314,7 +314,7 @@ export async function getAllUsers(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
     }
 }
@@ -394,7 +394,7 @@ export async function updateUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -429,7 +429,7 @@ export async function removeUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }

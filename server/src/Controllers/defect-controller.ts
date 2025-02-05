@@ -187,7 +187,7 @@ export async function createDefect(req: Request, res: Response) {
     res.status(201).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -272,7 +272,7 @@ export async function getDefect(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -482,7 +482,7 @@ export async function getAllDefects(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -757,7 +757,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     res.status(200).json(result);
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -845,7 +845,7 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -1024,7 +1024,7 @@ export async function getAllComments(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -1099,7 +1099,7 @@ export async function confirmComment(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }

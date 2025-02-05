@@ -126,7 +126,7 @@ export async function getPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -354,7 +354,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -409,7 +409,7 @@ export async function getPatrolUsers(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -561,7 +561,7 @@ export async function createPatrol(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
   }
 }
 
@@ -732,7 +732,7 @@ export async function startPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -905,7 +905,7 @@ export async function finishPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -944,7 +944,7 @@ export async function removePatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -1104,7 +1104,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     return;
   }
 }
@@ -1169,7 +1169,7 @@ export async function commentPatrol(req: Request, res: Response) {
     res.status(201).json(result);
     return;
   } catch (error) {
-    res.status(500);
+    res.status(500).json({message: `Internal server error: ${error}`});
     console.error(error);
     return;
   }
