@@ -624,6 +624,7 @@ export default function page() {
                       {t("Name")}
                     </p>
                     <Input
+                     value={userData.profile.name ? userData.profile.name : "-"}
                       name="name"
                       onChange={handleInputChange}
                       placeholder={
@@ -643,6 +644,7 @@ export default function page() {
                       {t("Email")}
                     </p>
                     <Input
+                      value={userData.email ? userData.email : "-"}
                       name="email"
                       onChange={handleInputChange}
                       placeholder={userData.email ? userData.email : "-"}
@@ -660,6 +662,9 @@ export default function page() {
                       {t("Age")}
                     </p>
                     <Input
+                      value={userData.profile.age
+                        ? userData.profile.age
+                        : "-"}
                       name="age"
                       onChange={handleInputChange}
                       placeholder={
@@ -681,6 +686,7 @@ export default function page() {
                       {t("Tel")}
                     </p>
                     <Input
+                      value={userData.profile.tel ? userData.profile.tel : "-"}
                       name="tel"
                       onChange={handleInputChange}
                       placeholder={
@@ -700,6 +706,9 @@ export default function page() {
                       {t("Address")}
                     </p>
                     <Textarea
+                     value={  userData.profile.address
+                      ? userData.profile.address
+                      : "-"}
                       name="address"
                       onChange={handleInputChange}
                       placeholder={
