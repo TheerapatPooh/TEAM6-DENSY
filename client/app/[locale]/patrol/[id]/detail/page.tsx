@@ -14,7 +14,6 @@
 "use client";
 import { IDefect, IPatrolChecklist, patrolStatus } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
-import Loading from "@/components/loading";
 import PatrolChecklist from "@/components/patrol-checklist";
 import PatrolTimer from "@/components/patrol-timer";
 import TabMenu from "@/components/tab-menu";
@@ -88,9 +87,6 @@ export default function Page() {
   itemCounts(patrol, patrolResults);
   const inspectors = patrolUser;
 
-  if (!patrol || !mounted) {
-    return <Loading />;
-  }
   return (
     <div className="flex flex-col gap-4 ">
       {/* TabList และ Title */}

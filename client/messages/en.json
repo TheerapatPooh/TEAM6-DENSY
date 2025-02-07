@@ -102,9 +102,20 @@
     "Drag&DropFile": "Drag & Drop File",
     "Or": "Or",
     "Browse": "Browse",
-    "EditProfileDescription":"Make changes to your profile here. Click save when you're done.",
-    "EditPasswordDescription":"Change your password here. After saving, you'll be logged out."
-
+    "EditProfileDescription": "Make changes to your profile here. Click save when you're done.",
+    "EditPasswordDescription": "Change your password here. After saving, you'll be logged out.",
+    "NoPatrolsAvailable": "No Patrols Available",
+    "NoPatrolsDescription": "You haven't created any patrols yet, or no patrols match your search criteria.",
+    "NoDefectsReported": "No Defects Reported",
+    "NoDefectsDescription": "There are no defects reported yet, or no defects match your search criteria.",
+    "PageNotFoundTitle": "404 Page Not Found",
+    "PageNotFoundDescription": "Sorry, the page you're looking for does not exist. You might have followed a broken link or entered a wrong URL.",
+    "NoDefectsPatrol": "No Defects Reported in This Patrol",
+    "NoDefectsPatrolDescription": "There have been no defects reported in this patrol inspection so far.",
+    "NoDefectsFoundTitle": "No Defects Reported",
+    "NoDefectsFoundDescription": "There have been no defects reported in this patrol yet, or no defects match your search criteria.",
+    "NoCommentsFound": "No Feedback Received",
+    "NoCommentsDescription": "No feedback or suggestions have been reported for review by the responsible department."
   },
   "Status": {
     "pending": "Pending",
@@ -330,8 +341,7 @@
     "ReportEditResolveConfirmDescription": "Please confirm to edit resolve defect.",
     "EditDefectResolveTitle": "Edit Resolved Defect",
     "EditDefectResolveDescription": "Update the information of a defect marked as resolved and awaiting inspector review.",
-    "ConfirmPasswordChange":"Confirm Password Change",
-    "ConfirmPasswordChangeDescription":"Once you chnage your password, you'll need to use the new one to log in, Do you want to proceed"
-
+    "ConfirmPasswordChange": "Confirm Password Change",
+    "ConfirmPasswordChangeDescription": "Once you chnage your password, you'll need to use the new one to log in, Do you want to proceed"
   }
 }

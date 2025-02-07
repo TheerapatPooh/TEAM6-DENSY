@@ -3,7 +3,7 @@ import Loading from "@/components/loading";
 import { useSocket } from "@/components/socket-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchData } from "@/lib/utils";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useDebugValue } from "react";
 import { boolean, IpVersion } from "zod";
 import { AlertCustom } from "@/components/alert-custom";
@@ -102,7 +102,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         setCountFails(countFails)
         setCountDefects(countDefects)
 
-        return {countItems, countFails, countDefects}
+        return { countItems, countFails, countDefects }
     }
 
 
@@ -114,11 +114,11 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const formatId = (id: number): string => {
         return `P${id.toString().padStart(4, '0')}`;
     };
-   
+
     const formatTimeDate = (dateStr: string): string => {
         const date = new Date(dateStr);
-        const hours = date.getHours().toString().padStart(2, '0'); 
-        const minutes = date.getMinutes().toString().padStart(2, '0'); 
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
         return `${hours}.${minutes}`;
     };
 
@@ -163,9 +163,9 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsAlertOpen(false)
     }
 
-    const totalResults = patrolResults.length
+    const totalResults = patrolResults?.length || 0
     const checkedResults =
-        patrolResults.filter((res) => res.status !== null).length || 0;
+        patrolResults?.filter((res) => res.status !== null).length || 0;
     const canFinish = checkedResults === totalResults;
 
     const getPatrolData = async () => {
@@ -379,10 +379,11 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 await getPatrolUserData()
             } catch (error) {
                 console.error("Error loading data: ", error);
+            } finally {
+                setMounted(true);
             }
         };
         fetchData();
-        setMounted(true);
     }, []);
 
     useEffect(() => {
@@ -520,6 +521,14 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
             setResults(parsedResults);
         }
     }, [patrol?.id]);
+
+    if (!mounted) {
+        return <Loading />;
+    }
+
+    if (mounted && !patrolResults) {
+        return notFound();
+    }
 
     return (
         <PatrolContext.Provider

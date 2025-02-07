@@ -79,6 +79,7 @@ import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
 import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
+import NotFound from "@/components/not-found";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -128,7 +129,7 @@ export default function Page() {
         description: a("PatrolMissingDateDescription"),
       });
       return;
-    } else {  
+    } else {
       setDateError(null);
     }
 
@@ -703,7 +704,11 @@ export default function Page() {
             backResult={handleDialogResult}
           ></AlertCustom>
         )}
-        {allPatrols &&
+        {allPatrols && allPatrols.length === 0 ? (
+          <div className="col-span-full min-h-[261px]">
+            <NotFound icon="task" title="NoPatrolsAvailable" description="NoPatrolsDescription" />
+          </div>
+        ) : (
           allPatrols.map((patrol: IPatrol) => {
             return (
               <PatrolCard
@@ -717,7 +722,8 @@ export default function Page() {
                 onRemoveSuccess={handleRemoveSuccess}
               />
             );
-          })}
+          })
+        )}
       </div>
     </div>
   );

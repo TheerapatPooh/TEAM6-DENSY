@@ -178,12 +178,12 @@ export function PatrolCard({
 
   return (
     <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
-      <CardHeader className="flex flex-row gap-0 p-0 justify-between ">
+      <CardHeader className="flex flex-row gap-0 p-0 justify-between">
         <div className="flex flex-col justify-between items-start gap-4 truncate">
           <CardDescription className="text-lg font-semibold text-muted-foreground">
             {formattedDate}
           </CardDescription>
-          <CardTitle className="text-card-foreground text-2xl truncate">
+          <CardTitle className="text-card-foreground text-2xl truncate w-full">
             {preset.title}
           </CardTitle>
         </div>
@@ -362,7 +362,7 @@ export function PatrolCard({
 
 export function CreatePatrolCard() {
   return (
-    <Card className="bg-accent-gradient border-none flex justify-center items-center min-h-[249px] w-full h-full hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
+    <Card className="bg-accent-gradient border-none flex justify-center items-center min-h-[261px] w-full h-full hover:bg-accent-gradient-hover cursor-pointer custom-shadow">
       <span className="material-symbols-outlined text-card text-8xl">
         note_add
       </span>
