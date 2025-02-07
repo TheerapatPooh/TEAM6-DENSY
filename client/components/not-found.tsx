@@ -12,7 +12,7 @@ export default function NotFound({
 ) {
     const t = useTranslations('General')
     return (
-        <div className="flex flex-col justify-center items-center text-center text-muted-foreground">
+        <div className="flex flex-col justify-center items-center text-center text-muted-foreground py-8">
             <span className="material-symbols-outlined text-9xl text-border mb-4">
                 {icon}
             </span>

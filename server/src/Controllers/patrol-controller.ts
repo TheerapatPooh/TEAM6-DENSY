@@ -117,7 +117,7 @@ export async function getPatrol(req: Request, res: Response) {
     });
 
     if (!patrol) {
-      res.status(404);
+      res.status(404).json({ message: "patrol not found" });
       return;
     }
     let result = patrol;

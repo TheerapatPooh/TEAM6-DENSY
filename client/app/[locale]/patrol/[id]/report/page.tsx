@@ -45,6 +45,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { toast } from "@/hooks/use-toast";
+import NotFound from "@/components/not-found";
 
 export default function Page() {
   const {
@@ -81,10 +82,6 @@ export default function Page() {
   const s = useTranslations("Status");
 
   const inspectors = patrolUser;
-
-  if (!patrol || !mounted) {
-    return <Loading />;
-  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -152,7 +149,7 @@ export default function Page() {
                   iconName = "ios_share";
                   text = "Export";
                   disabled = false;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
                 case "on_going":
                   variant = "primary";
@@ -186,7 +183,7 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
               }
               return (
@@ -419,19 +416,27 @@ export default function Page() {
         </div>
       </div>
       <div className="flex flex-col pt-[133px] gap-4 rounded-md ">
-        {defects.map((defect: IDefect) => {
-          return (
-            <div className="">
-              <ReportDefect
-                defect={defect}
-                page={"patrol-view-report"}
-                response={(defect: IDefect) => {
-                  fetchRealtimeData(defect, "edit");
-                }}
-              />
-            </div>
-          );
-        })}
+        {defects.length === 0 ? (
+          <NotFound
+            icon="campaign"
+            title="NoDefectsPatrol" 
+            description="NoDefectsPatrolDescription" 
+          />
+        ) : (
+          defects.map((defect: IDefect) => {
+            return (
+              <div className="" key={defect.id}>
+                <ReportDefect
+                  defect={defect}
+                  page={"patrol-view-report"}
+                  response={(defect: IDefect) => {
+                    fetchRealtimeData(defect, "edit");
+                  }}
+                />
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

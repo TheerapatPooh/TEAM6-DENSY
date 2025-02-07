@@ -5,7 +5,6 @@ import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
-import Defect from "@/components/defect";
 
 const ExcelJS = require("exceljs");
 
