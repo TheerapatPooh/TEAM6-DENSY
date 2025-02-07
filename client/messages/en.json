@@ -101,7 +101,10 @@
     "EditResolvedTheDefect": "Upload images after resolving the issue for verification.",
     "Drag&DropFile": "Drag & Drop File",
     "Or": "Or",
-    "Browse": "Browse"
+    "Browse": "Browse",
+    "EditProfileDescription":"Make changes to your profile here. Click save when you're done.",
+    "EditPasswordDescription":"Change your password here. After saving, you'll be logged out."
+
   },
   "Status": {
     "pending": "Pending",
@@ -326,6 +329,9 @@
     "ReportEditResolveConfirmTitle": "Are you sure to edit resolve defect?",
     "ReportEditResolveConfirmDescription": "Please confirm to edit resolve defect.",
     "EditDefectResolveTitle": "Edit Resolved Defect",
-    "EditDefectResolveDescription": "Update the information of a defect marked as resolved and awaiting inspector review."
+    "EditDefectResolveDescription": "Update the information of a defect marked as resolved and awaiting inspector review.",
+    "ConfirmPasswordChange":"Confirm Password Change",
+    "ConfirmPasswordChangeDescription":"Once you chnage your password, you'll need to use the new one to log in, Do you want to proceed"
+
   }
 }
