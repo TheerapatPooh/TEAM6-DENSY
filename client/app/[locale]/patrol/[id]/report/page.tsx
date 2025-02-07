@@ -259,7 +259,7 @@ export default function Page() {
                                 {inspectors.length > 5 && (
                                   <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
                                     <AvatarImage src="" />
-                                    <span className="absolute text-card-foreground text-[16px] font-semibold">
+                                    <span className="absolute text-card-foreground text-base font-semibold">
                                       +{inspectors.length - 5}
                                     </span>
                                     <AvatarFallback id={'0'}></AvatarFallback>
