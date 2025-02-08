@@ -37,6 +37,7 @@ export async function getPatrol(req: Request, res: Response) {
               id: true,
               title: true,
               description: true,
+              version: true
             },
           }
           : undefined,
