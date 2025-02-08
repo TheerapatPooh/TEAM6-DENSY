@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import { fetchData, formatTime, getDefectStatusVariant, getItemTypeVariant } from "@/lib/utils";
 import { IDefect } from "@/app/type";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { getInitials } from "@/lib/utils";
 import { defectStatus } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
@@ -107,30 +107,18 @@ export default function Page() {
     const getData = async () => {
       try {
         const dataDefect = await fetchData("get", `/defect/${param.id}`, true);
+        if (dataDefect.status === 404) {
+          notFound();
+        }
         setDefect(dataDefect);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
+      } finally {
+        setMounted(true);
       }
     };
     getData();
-    setMounted(true);
-  }, []);
-
-
-
-  const beforeImage = defect?.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id === defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
-
-  const afterImage = defect?.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id !== defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
+  }, [param.id]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -180,9 +168,27 @@ export default function Page() {
     setDefect(defect)
   }
 
-  if (!mounted || !defect) {
+  if (!mounted) {
     return <Loading />;
   }
+
+  if (!defect?.images) {
+    return notFound();
+  }
+
+  const beforeImage = defect?.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id === defect.userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null;
+
+  const afterImage = defect?.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id !== defect.userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null;
 
   return (
     <div className="bg-card rounded-md custom-shadow flex flex-col px-6 py-4 gap-4">

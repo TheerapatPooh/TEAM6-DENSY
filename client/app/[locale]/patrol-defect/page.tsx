@@ -42,6 +42,7 @@ import Loading from "@/components/loading";
 import ReportDefect from "@/components/report-defect";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { Niconne } from "next/font/google";
+import NotFound from "@/components/not-found";
 
 export default function page() {
     const t = useTranslations("General");
@@ -222,19 +223,28 @@ export default function page() {
                 </DropdownMenu>
             </div>
             <div>
-                {allDefects.map((defect: IDefect) => {
-                    return (
-                        <div className="pb-4">
-                            <ReportDefect
-                                defect={defect}
-                                page={"patrol-defect"}
-                                response={(defect: IDefect) => {
-                                    fetchRealtimeData(defect);
-                                }}
-                            />
-                        </div>
-                    )
-                })}
+                {allDefects.length === 0 ? (
+                    <NotFound
+                        icon="campaign"
+                        title="NoDefectsReported" 
+                        description="NoDefectsDescription" 
+                    />
+                ) : (
+                    allDefects.map((defect: IDefect) => {
+                        return (
+                            <div className="pb-4" key={defect.id}>
+                                <ReportDefect
+                                    defect={defect}
+                                    page={"patrol-defect"}
+                                    response={(defect: IDefect) => {
+                                        fetchRealtimeData(defect);
+                                    }}
+                                />
+                            </div>
+                        );
+                    })
+                )}
+
             </div>
         </div>
     )

@@ -10,7 +10,7 @@ export default function PatrolLayout({
 
     return (
         <PatrolProvider>
-            <div className="flex flex-col gap-4 px-6 py-4">
+            <div className="flex flex-col gap-4 px-6">
                 {children}
             </div>
         </PatrolProvider>

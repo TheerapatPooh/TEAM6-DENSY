@@ -38,6 +38,7 @@ import { fetchData, sortData } from "@/lib/utils";
 import Loading from "@/components/loading";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DateRange } from "react-day-picker";
+import NotFound from "@/components/not-found";
 
 
 
@@ -65,7 +66,7 @@ export default function Page() {
     }));
   };
 
-  const defectStatus: defectStatus[] = ["reported" , "completed" , "pending_inspection" , "in_progress" ,"resolved"]
+  const defectStatus: defectStatus[] = ["reported", "completed", "pending_inspection", "in_progress", "resolved"]
 
   const initialFilter = {
     defectStatus: "All",
@@ -358,9 +359,17 @@ export default function Page() {
 
       </div>
       <div className="flex flex-col gap-y-4 py-4">
-        {allDefects.map((defect) => (
-          <Defect defect={defect} />
-        ))}
+        {allDefects.length === 0 ? (
+          <NotFound
+            icon="campaign"
+            title="NoDefectsFoundTitle"
+            description="NoDefectsFoundDescription"
+          />
+        ) : (
+          allDefects.map((defect) => (
+            <Defect key={defect.id} defect={defect} />
+          ))
+        )}
       </div>
     </div>
   );
