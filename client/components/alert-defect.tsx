@@ -48,8 +48,6 @@ import { Skeleton } from './ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-
 interface IAlertDefect {
     defect?: IDefect,
     item?: IItem,
