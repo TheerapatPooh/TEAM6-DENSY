@@ -149,15 +149,15 @@ export default function page() {
             {/* Edit patrol preset and button */}
             <div className='flex flex-row justify-between mb-4'>
                 <div className='text-2xl font-bold'>
-                    Edit Patrol Preset
+                    {t("EditPatrolPreset")}
                 </div>
 
                 <div className='flex flex-row gap-2'>
-                    <Button variant='secondary'>Cancel</Button>
+                    <Button variant='secondary'>{t("Cancel")}</Button>
 
                     <Button variant='primary' onClick={handleEditPreset}>
                         <span className="material-symbols-outlined mr-2">save</span>
-                        Save
+                        {t("Save")}
                     </Button>
                 </div>
             </div>
@@ -165,7 +165,7 @@ export default function page() {
             {/* title */}
             <div className="flex flex-col mb-4">
                 <div className='text-base font-semibold mb-2'>
-                    Title
+                    {t("Title")}
                 </div>
 
                 <div>
@@ -176,7 +176,7 @@ export default function page() {
             {/* description */}
             <div className="flex flex-col mb-4">
                 <div className='text-base font-semibold mb-2'>
-                    Description
+                    {t("Description")}
                 </div>
 
                 <div>
@@ -187,7 +187,7 @@ export default function page() {
             {/* new checklist */}
             <div className='flex flex-row gap-2'>
                 <div className='text-2xl font-bold'>
-                    Checklist
+                    {t("Checklist")}
                 </div>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -198,10 +198,10 @@ export default function page() {
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
-                                Checklist Group
+                                {t("ChecklistGroup")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                Please add a checklist group
+                                {t("PleaseAddAChecklistGroup")}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
 
@@ -214,7 +214,7 @@ export default function page() {
                                                 <div>
                                                     <div className="flex text-base gap-1 mb-2 ">
                                                         <span className="material-symbols-outlined">history</span>
-                                                        Version {checklist.version}
+                                                        {t("Version")} {checklist.version}
                                                     </div>
 
                                                     <div className="text-2xl font-bold">
@@ -237,9 +237,9 @@ export default function page() {
                                 </ScrollArea>
                                 <AlertDialogFooter>
                                     <div className="flex items-end justify-end gap-[10px]">
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                                         <AlertDialogAction className="bg-primary" onClick={handleDoneChecklist}>
-                                            Done
+                                            {t("Done")}
                                         </AlertDialogAction>
                                     </div>
                                 </AlertDialogFooter>
@@ -250,13 +250,13 @@ export default function page() {
                                 <div>
                                     <div className="flex flex-col justify-center items-center h-[400px] gap-4">
                                         <div className="text-2xl font-semibold">
-                                            You don't have any Checklist want to create now?
+                                        {t("YouDontHaveAnyChecklistWantToCreateNow")}
                                         </div>
                                         <AlertDialogFooter>
                                             <div className="flex gap-[10px]">
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                                                 <AlertDialogAction className="bg-primary">
-                                                    Sure
+                                                    {t("Sure")}
                                                 </AlertDialogAction>
                                             </div>
                                         </AlertDialogFooter>
@@ -281,7 +281,7 @@ export default function page() {
                                         <AccordionItem value="item-1" className="border-none">
                                             <div className="flex flex-row gap-1 text-base">
                                                 <span className="material-symbols-outlined">history</span>
-                                                Version {checklist.version}
+                                                {t("Version")} {checklist.version}
                                             </div>
                                             <div className="flex flex-col">
                                                 <AccordionTrigger className="flex flex-row justify-between hover:no-underline">
