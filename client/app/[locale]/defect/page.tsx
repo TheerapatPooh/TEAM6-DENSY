@@ -39,6 +39,7 @@ import Loading from "@/components/loading";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DateRange } from "react-day-picker";
 import NotFound from "@/components/not-found";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 
@@ -206,7 +207,7 @@ export default function Page() {
   return (
     <div className="flex flex-col">
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pb-4">
         <Textfield
           iconName="search"
           showIcon={true}
@@ -358,19 +359,23 @@ export default function Page() {
         </DropdownMenu>
 
       </div>
-      <div className="flex flex-col gap-y-4 py-4">
-        {allDefects.length === 0 ? (
-          <NotFound
-            icon="campaign"
-            title="NoDefectsFoundTitle"
-            description="NoDefectsFoundDescription"
-          />
-        ) : (
-          allDefects.map((defect) => (
-            <Defect key={defect.id} defect={defect} />
-          ))
-        )}
-      </div>
+      <ScrollArea
+        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
+      >
+        <div className="flex flex-col gap-y-4">
+          {allDefects.length === 0 ? (
+            <NotFound
+              icon="campaign"
+              title="NoDefectsFoundTitle"
+              description="NoDefectsFoundDescription"
+            />
+          ) : (
+            allDefects.map((defect) => (
+              <Defect key={defect.id} defect={defect} />
+            ))
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
