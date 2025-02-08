@@ -390,7 +390,14 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                             unoptimized
                           />
                         ) : (
-                          <p>Waiting for the results.</p>
+                          <div className="flex flex-col items-center justify-center text-center space-y-4">
+                            <span className="material-symbols-outlined text-border text-4xl">
+                              hourglass_empty
+                            </span>
+                            <p className="text-muted-foreground text-lg font-medium">
+                              {t('WaitingForResults')}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </AspectRatio>
@@ -499,7 +506,14 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                             unoptimized
                           />
                         ) : (
-                          <p>Waiting for the results.</p>
+                          <div className="flex flex-col items-center justify-center text-center space-y-4">
+                            <span className="material-symbols-outlined text-border text-4xl">
+                              hourglass_empty
+                            </span>
+                            <p className="text-muted-foreground text-lg font-medium">
+                              {t('WaitingForResults')}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </AspectRatio>
