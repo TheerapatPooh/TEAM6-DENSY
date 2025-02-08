@@ -33,12 +33,13 @@ export async function getPatrol(req: Request, res: Response) {
       include: {
         preset: includePreset
           ? {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-            },
-          }
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                version: true,
+              },
+            }
           : undefined,
         patrolChecklists: {
           include: {
