@@ -213,40 +213,6 @@ export default function page() {
       userForm.append("address", formData.address);
     }
 
-    if (
-      formData.currentPassword ||
-      formData.newPassword ||
-      formData.confirmPassword
-    ) {
-      if (!formData.currentPassword) {
-        setCurrentPassError(a("ProfileCurrentPassRequire"));
-        showErrorToast = true;
-      }
-      if (!formData.newPassword) {
-        setNewPassError(a("ProfileNewPassRequire"));
-        showErrorToast = true;
-      }
-      if (!formData.confirmPassword) {
-        setConfirmPassError(a("ProfileConfirmPassRequire"));
-        showErrorToast = true;
-      } else {
-        const passwordMatch = bcrypt.compare(
-          formData.currentPassword,
-          userData.password
-        );
-        if (passwordMatch) {
-          if (formData.newPassword === formData.confirmPassword) {
-            userForm.append("password", formData.newPassword);
-          } else {
-            setConfirmPassError(a("ProfileConfirmPassInvalid"));
-            showErrorToast = true;
-          }
-        } else {
-          setCurrentPassError(a("ProfileCurrentPassInvalid"));
-          showErrorToast = true;
-        }
-      }
-    }
 
     try {
       if (!showErrorToast) {
@@ -287,7 +253,12 @@ export default function page() {
     setConfirmPassError(null);
     if (!formData || Object.keys(formData).length === 0) {
       setCurrentPassError(a("ProfileCurrentPassRequire"));
-        showErrorToast = true;
+      toast({
+        variant: "error",
+        title: a("ProfileUpdateErrorTitle"),
+        description: a("ProfileCurrentPassRequire"),
+      });
+      showErrorToast = true;
       return;
     }
     if (
@@ -307,10 +278,7 @@ export default function page() {
         setConfirmPassError(a("ProfileConfirmPassRequire"));
         showErrorToast = true;
       } else {
-        const passwordMatch = bcrypt.compare(
-          formData.currentPassword,
-          userData.password
-        );
+        const passwordMatch = await bcrypt.compare(formData.currentPassword, userData.password);
         if (passwordMatch) {
           if (formData.newPassword === formData.confirmPassword) {
             const userForm = new FormData();
@@ -332,6 +300,7 @@ export default function page() {
                 });
                 try {
                   await fetchData("post", `/logout`, true);
+                  window.location.reload();
                 } catch (error) {}
               }
             } catch (error) {
@@ -650,7 +619,9 @@ export default function page() {
                       {t("Age")}
                     </p>
                     <Input
-                      defaultValue={userData.profile.age ? userData.profile.age : "-"}
+                      defaultValue={
+                        userData.profile.age ? userData.profile.age : "-"
+                      }
                       name="age"
                       onChange={handleInputChange}
                       placeholder={
@@ -672,7 +643,9 @@ export default function page() {
                       {t("Tel")}
                     </p>
                     <Input
-                      defaultValue={userData.profile.tel ? userData.profile.tel : "-"}
+                      defaultValue={
+                        userData.profile.tel ? userData.profile.tel : "-"
+                      }
                       name="tel"
                       onChange={handleInputChange}
                       placeholder={
