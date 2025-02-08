@@ -48,7 +48,6 @@ import { Skeleton } from './ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-
 interface IAlertDefect {
     defect?: IDefect,
     item?: IItem,
@@ -343,7 +342,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     </Button>
                 </AlertDialogTrigger>
                 {isAlertDefectOpen &&
-                    <AlertDialogContent className='sm:w-[90%] lg:w-[60%]'>
+                    <AlertDialogContent className='sm:w-[90%] xl:w-[60%]'>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
                                 {t(type === "edit" ? "EditDefect" : type === "resolve" ? "ResolveDefect" : type === "edit-resolve" ? "EditResolveDefect" : "ReportDefect")}
@@ -482,13 +481,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         </div>
                                     </div>
                                 </AspectRatio>
-                                <ScrollArea className="h-72 overflow-y-auto gap-5 rounded-md flex-1">
+                                <ScrollArea className="sm:h-64 md:h-72 xl:h-96 overflow-y-auto gap-5 rounded-md flex-1">
                                     <div className="flex flex-col gap-2 w-full">
                                         {selectedFiles?.map((file, index) => (
                                             <div key={index} className=" flex flex-row justify-between px-4 py-2 w-full bg-secondary rounded-md">
                                                 <div className='flex flex-row gap-3'>
                                                     <div className='flex flex-col justify-center items-center'>
-                                                        <span className="material-symbols-outlined">
+                                                        <span className="material-symbols-outlined text-card-foreground">
                                                             image
                                                         </span>
                                                     </div>
@@ -497,7 +496,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <div className=" truncate w-[145px]">
+                                                                        <div className=" truncate sm:w-56 xl:w-72">
                                                                             {file.name}
                                                                         </div>
                                                                     </TooltipTrigger>
@@ -622,7 +621,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     </AlertDialogContent>
                 }
             </AlertDialog>
-
         </div >
     )
 }

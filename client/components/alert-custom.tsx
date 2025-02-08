@@ -63,7 +63,7 @@ export function AlertCustom({
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       <AlertDialogTrigger asChild></AlertDialogTrigger>
-      <AlertDialogContent onClick={handleContentClick} className="flex flex-col px-6 py-4 sm:w-[90%] lg:w-[60%]">
+      <AlertDialogContent onClick={handleContentClick} className="flex flex-col px-6 py-4 sm:w-[90%] xl:w-[60%]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold text-card-foreground">{title}</AlertDialogTitle>
           <AlertDialogDescription className="text-card-foreground text-base">{description}</AlertDialogDescription>

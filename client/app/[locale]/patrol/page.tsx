@@ -554,7 +554,7 @@ export default function Page() {
             <AlertDialogTrigger className="w-full">
               <CreatePatrolCard />
             </AlertDialogTrigger>
-            <AlertDialogContent className="sm:w-[90%] lg:w-[800px] h-[670px] px-6 py-4">
+            <AlertDialogContent className="sm:w-[90%] xl:w-[60%] h-[670px] px-6 py-4">
               <AlertDialogHeader className="flex">
                 <div className="flex flex-col gap-1">
                   <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
@@ -566,7 +566,7 @@ export default function Page() {
                 </div>
                 <div className="flex items-center justify-center pt-2">
                   <ScrollArea className="h-[500px] w-full rounded-md border-none pr-4 overflow-y-auto">
-                    <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-1 xl:grid-cols-2 gap-4">
                       {allPresets &&
                         allPresets.map((preset, index) => (
                           <Button
@@ -634,7 +634,7 @@ export default function Page() {
 
           {/* Second AlertDialog */}
           <AlertDialog open={secondDialog}>
-            <AlertDialogContent className="sm:w-[90%] lg:w-[800px] h-fit px-6 py-4">
+            <AlertDialogContent className="sm:w-[90%] xl:w-[60%] h-fit px-6 py-4">
               <AlertDialogHeader>
                 <div className="flex flex-col gap-1">
                   <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
@@ -658,7 +658,7 @@ export default function Page() {
                 <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
                 <div className="grid grid-cols-1">
                   <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
-                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 xl:grid-cols-1 gap-4">
                       {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
                         <ChecklistDropdown
                           key={presetChecklist.checklist.id}
