@@ -44,6 +44,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import React from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Page() {
   const {
@@ -88,10 +89,10 @@ export default function Page() {
   const inspectors = patrolUser;
 
   return (
-    <div className="flex flex-col gap-4 ">
+    <div className="flex flex-col gap-4 overflow-hidden">
       {/* TabList และ Title */}
-      <div className="fixed flex flex-col w-full pr-12 pb-4 gap-4 bg-background pt-4 z-50">
-        <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 bg-background">
+        <div className="flex sm:flex-col lg:flex-row lg:items-center justify-between sm:items-start">
           <div className="flex items-center p-0 justify-center text-center gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -176,7 +177,7 @@ export default function Page() {
               <Progress value={calculateProgress()} />
             </div>
           </div>
-          <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-row sm:w-full sm:justify-between lg:w-fit items-center gap-2">
             {patrol && (
               <PatrolTimer
                 launchDate={patrol.startTime}
@@ -254,14 +255,14 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
               }
               return (
@@ -524,28 +525,28 @@ export default function Page() {
           </div>
         </div>
       </div>
-
-      <div className="flex flex-col pt-[133px] gap-4 rounded-md ">
-        {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
-          <div className="rounded-md ">
-            {user?.profile.name === pc.inspector.profile.name ? (
-              <PatrolChecklist
-                handleResult={handleResult}
-                results={results}
-                patrolChecklist={pc}
-                disabled={patrol.status === "on_going" && !lock ? false : true}
-                patrolResult={patrolResults}
-                user={user}
-                response={(defect: IDefect) => {
-                  fetchRealtimeData(defect, "create");
-                }}
-              />
-            ) : (
-              <div></div>
-            )}
-          </div>
-        ))}
-      </div>
+      <ScrollArea
+        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-260px)]"
+      >        {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
+        <div className="rounded-md mb-4">
+          {user?.profile.name === pc.inspector.profile.name ? (
+            <PatrolChecklist
+              handleResult={handleResult}
+              results={results}
+              patrolChecklist={pc}
+              disabled={patrol.status === "on_going" && !lock ? false : true}
+              patrolResult={patrolResults}
+              user={user}
+              response={(defect: IDefect) => {
+                fetchRealtimeData(defect, "create");
+              }}
+            />
+          ) : (
+            <div></div>
+          )}
+        </div>
+      ))}
+      </ScrollArea>
     </div>
   );
 }

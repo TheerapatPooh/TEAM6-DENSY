@@ -115,7 +115,8 @@
     "NoDefectsFoundTitle": "No Defects Reported",
     "NoDefectsFoundDescription": "There have been no defects reported in this patrol yet, or no defects match your search criteria.",
     "NoCommentsFound": "No Feedback Received",
-    "NoCommentsDescription": "No feedback or suggestions have been reported for review by the responsible department."
+    "NoCommentsDescription": "No feedback or suggestions have been reported for review by the responsible department.",
+    "WaitingForResults": "Waiting for the results"
   },
   "Status": {
     "pending": "Pending",

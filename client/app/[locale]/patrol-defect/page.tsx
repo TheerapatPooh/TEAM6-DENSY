@@ -43,6 +43,7 @@ import ReportDefect from "@/components/report-defect";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { Niconne } from "next/font/google";
 import NotFound from "@/components/not-found";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function page() {
     const t = useTranslations("General");
@@ -222,12 +223,14 @@ export default function page() {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <div>
+            <ScrollArea
+                className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
+            >
                 {allDefects.length === 0 ? (
                     <NotFound
                         icon="campaign"
-                        title="NoDefectsReported" 
-                        description="NoDefectsDescription" 
+                        title="NoDefectsReported"
+                        description="NoDefectsDescription"
                     />
                 ) : (
                     allDefects.map((defect: IDefect) => {
@@ -244,8 +247,7 @@ export default function page() {
                         );
                     })
                 )}
-
-            </div>
+            </ScrollArea>
         </div>
     )
 }

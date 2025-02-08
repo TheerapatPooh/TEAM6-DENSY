@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/hover-card";
 import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Page() {
   const {
@@ -63,6 +64,8 @@ export default function Page() {
     isHovered,
     formatDate,
     formatId,
+    formatTimeDate,
+    formatZone,
     handleMouseEnter,
     handleMouseLeave,
     handleOpenDialog,
@@ -86,26 +89,100 @@ export default function Page() {
   return (
     <div className="flex flex-col gap-4">
       {/* TabList และ Title */}
-      <div className="fixed flex flex-col w-full pr-12 pb-4 gap-4 bg-background pt-4 z-50">
-        <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 bg-background">
+        <div className="flex sm:flex-col lg:flex-row lg:items-center justify-between sm:items-start">
           <div className="flex items-center p-0 justify-center text-center gap-2">
-            <Button variant="ghost" className="flex hover:bg-secondary p-2">
-              <span className="material-symbols-outlined text-card-foreground w-[22px] h-[22px]">
-                error
-              </span>
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" className="flex hover:bg-secondary p-2">
+                  <span className="material-symbols-outlined text-card-foreground w-[22px] h-[22px]">
+                    error
+                  </span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="w-[400px] h-fit px-6 py-4 ">
+                <AlertDialogHeader className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-lg font-semibold text-muted-foreground">
+                      {formatDate(patrol.date)}
+                    </p>
+                    <AlertDialogTitle>
+                      <p className="text-2xl font-semibold">
+                        {patrol.preset.title}
+                      </p>
+                    </AlertDialogTitle>
+                  </div>
+
+                  <AlertDialogDescription className="flex flex-col gap-2">
+                    <div className="flex flex-row gap-1">
+                      <span className="material-symbols-outlined">
+                        description
+                      </span>
+                      <p className="text-muted-foreground text-xl font-semibold">
+                        {formatId(patrol.id)}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-row gap-1">
+                      {patrol.status === "completed" && (
+                        <span className="material-symbols-outlined">
+                          event_available
+                        </span>
+                      )}
+
+                      {patrol.status === "completed" ? (
+                        <div className="text-muted-foreground font-extrabold text-lg">
+                          <p className="text-xl font-semibold text-muted-foreground">
+                            {formatDate(patrol.endTime) +
+                              " " +
+                              formatTimeDate(patrol.startTime) +
+                              " - " +
+                              formatTimeDate(patrol.endTime)}
+                          </p>
+                        </div>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+
+                    <div className="flex flex-row gap-1 items-start">
+                      <span className="material-symbols-outlined text-2xl text-muted-foreground p-0">
+                        location_on
+                      </span>
+                      <p className="flex items-center text-base text-muted-foreground">
+                        {formatZone(patrol) || "No zones available"}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-row gap-1 ">
+                      <span className="material-symbols-outlined text-2xl text-muted-foreground ">
+                        data_info_alert
+                      </span>
+                      <p className="gap-1 text-base text-muted-foreground ">
+                        {patrol.preset.description}
+                      </p>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Close</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
             <div className="flex flex-col h-full justify-start w-full">
               <p className="text-2xl font-bold mb-1">{patrol.preset.title}</p>
               <Progress value={calculateProgress()} />
             </div>
           </div>
-
-          <div className="flex flex-row items-center gap-2">
-            <PatrolTimer
-              launchDate={patrol.startTime}
-              patrolStatus={patrol.status}
-              patrolDuration={patrol.duration}
-            />
+          <div className="flex flex-row sm:w-full sm:justify-between lg:w-fit items-center gap-2">
+            {patrol && (
+              <PatrolTimer
+                launchDate={patrol.startTime}
+                patrolStatus={patrol.status}
+                patrolDuration={patrol.duration}
+              />
+            )}
 
             <BadgeCustom
               iconName={getPatrolStatusVariant(patrol.status).iconName}
@@ -149,7 +226,9 @@ export default function Page() {
                   iconName = "ios_share";
                   text = "Export";
                   disabled = false;
-                  handleFunction = () => { };
+                  handleFunction = () => {
+                    // handleOpenExportPatrol()
+                  };
                   break;
                 case "on_going":
                   variant = "primary";
@@ -174,9 +253,7 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {
-                    handleStartPatrol();
-                  };
+                  handleFunction = () => { };
                   break;
                 default:
                   variant = "primary";
@@ -203,6 +280,7 @@ export default function Page() {
                           {t(text)}
                         </Button>
                       </AlertDialogTrigger>
+
                       <AlertDialogContent className="w-[400px] h-fit px-6 py-4 ">
                         <AlertDialogHeader className="flex flex-col gap-2">
                           <div className="flex flex-col gap-1">
@@ -256,7 +334,7 @@ export default function Page() {
                                           src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                         />
                                         <AvatarFallback
-                                          id={inspector.id?.toString()}
+                                          id={inspector.profile.id.toString()}
                                         >
                                           {getInitials(inspector.profile.name)}
                                         </AvatarFallback>
@@ -292,10 +370,10 @@ export default function Page() {
                                     >
                                       <Avatar className="custom-shadow ms-[-10px] me-2.5">
                                         <AvatarImage
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
                                         />
                                         <AvatarFallback
-                                          id={inspector.id?.toString()}
+                                          id={inspector.profile.id.toString()}
                                         >
                                           {getInitials(inspector.profile.name)}
                                         </AvatarFallback>
@@ -357,6 +435,7 @@ export default function Page() {
                             className="bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 rounded-md px-4 text-lg font-bold"
                             onClick={() => {
                               exportData(patrol, patrolResults);
+                              handleCloseDialog();
                               toast({
                                 variant: "success",
                                 title: a("ExportReportPatrolTitle"),
@@ -376,7 +455,7 @@ export default function Page() {
                     canFinish ? (
                       <Button
                         variant={variant}
-                        onClick={handleFunction}
+                        onClick={handleOpenDialog}
                         disabled={disabled}
                       >
                         <span className="material-symbols-outlined">
@@ -399,7 +478,7 @@ export default function Page() {
                   ) : (
                     <Button
                       variant={variant}
-                      onClick={handleOpenDialog}
+                      onClick={() => handleOpenDialog()}
                       disabled={disabled}
                       className="flex flex-row items-center gap-2"
                     >
@@ -409,18 +488,49 @@ export default function Page() {
                       {t(text)}
                     </Button>
                   )}
+                  {patrol.status === "scheduled" && isAlertOpen ? (
+                    <AlertCustom
+                      title={a("PatrolStartConfirmTitle")}
+                      description={a("PatrolStartConfirmDescription")}
+                      primaryButtonText={t("Confirm")}
+                      primaryIcon="check"
+                      secondaryButtonText={t("Cancel")}
+                      backResult={(result) => {
+                        if (result) {
+                          handleStartPatrol();
+                        }
+                        handleCloseDialog();
+                      }}
+                    />
+                  ) : patrol.status === "on_going" && isAlertOpen ? (
+                    <AlertCustom
+                      title={a("PatrolFinishConfirmTitle")}
+                      description={a("PatrolFinishConfirmDescription")}
+                      primaryButtonText={t("Confirm")}
+                      primaryIcon="check"
+                      secondaryButtonText={t("Cancel")}
+                      backResult={(result) => {
+                        if (result) {
+                          handleFinishPatrol();
+                        }
+                        handleCloseDialog();
+                      }}
+                    />
+                  ) : null}
                 </div>
               );
             })()}
           </div>
         </div>
       </div>
-      <div className="flex flex-col pt-[133px] gap-4 rounded-md ">
+      <ScrollArea
+        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-220px)]"
+      >
         {defects.length === 0 ? (
           <NotFound
             icon="campaign"
-            title="NoDefectsPatrol" 
-            description="NoDefectsPatrolDescription" 
+            title="NoDefectsPatrol"
+            description="NoDefectsPatrolDescription"
           />
         ) : (
           defects.map((defect: IDefect) => {
@@ -437,7 +547,7 @@ export default function Page() {
             );
           })
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

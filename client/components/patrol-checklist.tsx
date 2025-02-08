@@ -283,9 +283,9 @@ export default function PatrolChecklist({
                         );
                         return (
                           <div key={itemZones.zone.id} className="bg-background rounded-md px-4 py-2">
-                            <div className="flex flex-row justify-between items-center">
-                              <div className="flex flex-col">
-                                <div className="flex flex-row items-center gap-2">
+                            <div className="flex flex-row justify-between sm:items-end lg:items-center">
+                              <div className="flex flex-col w-full">
+                                <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2">
                                   <div className="flex flex-row items-center gap-1">
                                     <span className="material-symbols-outlined text-muted-foreground">
                                       location_on
@@ -297,7 +297,7 @@ export default function PatrolChecklist({
                                   <p className="text-base">{z(itemZones.zone.name)}</p>
                                 </div>
 
-                                <div className="flex flex-row items-center gap-2">
+                                <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center w-full gap-2">
                                   <div className="flex items-center text-muted-foreground gap-1">
                                     <span className="material-symbols-outlined">engineering</span>
                                     <p className="text-lg font-semibold">{t("supervisor")}</p>
@@ -312,7 +312,7 @@ export default function PatrolChecklist({
                                         {getInitials(itemZones.zone.supervisor.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>
-                                    <p className="text-card-foreground text-lg">{itemZones.zone.supervisor.profile.name}</p>
+                                    <p className="text-card-foreground text-lg truncate">{itemZones.zone.supervisor.profile.name}</p>
                                   </div>
 
                                 </div>
