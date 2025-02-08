@@ -14,6 +14,7 @@
 
 'use client'
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { defectStatus, IDefect } from '@/app/type'
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +35,7 @@ import {
     IPatrolResult,
 } from "@/app/type";
 import React, { useEffect, useState } from "react";
-import { fetchData } from "@/lib/utils";
+import { fetchData, getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -342,7 +343,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     </Button>
                 </AlertDialogTrigger>
                 {isAlertDefectOpen &&
-                    <AlertDialogContent>
+                    <AlertDialogContent className='sm:w-[90%] lg:w-[60%]'>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
                                 {t(type === "edit" ? "EditDefect" : type === "resolve" ? "ResolveDefect" : type === "edit-resolve" ? "EditResolveDefect" : "ReportDefect")}
@@ -378,20 +379,46 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                     <span className="material-symbols-outlined text-2xl me-2">
                                         engineering
                                     </span>
+
                                     <p className="font-semibold me-2">
                                         {t("supervisor")}
                                     </p>
-                                    <p>
-                                        {type === "report"
-                                            ? item.itemZones.map((itemZone: IItemZone) => {
-                                                return result.zoneId === itemZone.zone.id
-                                                    ? itemZone.zone.supervisor.profile.name
-                                                    : null; // 
-                                            })
-                                            :
-                                            defect.patrolResult.itemZone.zone.supervisor.profile.name
-                                        }
-                                    </p>
+                                    {type === "report" ? (
+                                        item.itemZones.map((itemZone: IItemZone) => {
+                                            if (result.zoneId === itemZone.zone.id) {
+                                                return (
+                                                    <div className="flex items-center gap-1">
+                                                        <Avatar className="custom-shadow h-[35px] w-[35px]">
+                                                            <AvatarImage
+                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZone.zone.supervisor.profile.image?.path}`}
+                                                            />
+                                                            <AvatarFallback id={itemZone.zone.supervisor.id.toString()}>
+                                                                {getInitials(itemZone.zone.supervisor.profile.name)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <span className="text-card-foreground text-lg truncate">
+                                                            {itemZone.zone.supervisor.profile.name}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })
+                                    ) : (
+                                        <div className="flex items-center gap-1">
+                                            <Avatar className="custom-shadow h-[35px] w-[35px]">
+                                                <AvatarImage
+                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
+                                                />
+                                                <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
+                                                    {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-card-foreground text-lg truncate">
+                                                {defect.patrolResult.itemZone.zone.supervisor.profile.name}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </AlertDialogHeader>
@@ -424,7 +451,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         onDrop={handleDrop}
                                     >
                                         <div className="flex p-8 flex-col items-center justify-center">
-                                            <span className="material-symbols-outlined text-[48px] font-normal">
+                                            <span className="material-symbols-outlined text-[48px] font-normal text-primary">
                                                 upload
                                             </span>
                                             <div className="text-center mt-2">
