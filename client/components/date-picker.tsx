@@ -70,14 +70,14 @@ export function DatePicker({
   )
 }
 
-interface IDatePickerWithRange {
+interface DatePickerWithRangeIDatePicker {
   startDate: Date | undefined; 
   endDate: Date | undefined; 
   onSelect: (date: DateRange) => void; 
   className?: string; 
 }
 
-export const DatePickerWithRange: React.FC<IDatePickerWithRange> = ({
+export const DatePickerWithRange: React.FC<DatePickerWithRangeIDatePicker> = ({
   startDate,
   endDate,
   onSelect,
