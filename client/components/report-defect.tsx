@@ -550,13 +550,13 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                   {isAfterCarouselOpen && afterImage && afterImage.length > 0 && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                       <div className="relative">
-                        <Carousel setApi={setAfterApi} className="sm:max-w-screen-sm lg:max-w-[1600px]">
+                        <Carousel setApi={setAfterApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
                           <CarouselContent>
                             {afterImage.map((image, index) => (
                               <CarouselItem key={index}>
                                 <div className="flex justify-center">
                                   <Card className="bg-card border-none">
-                                    <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] lg:h-[700px] overflow-hidden p-4">
+                                    <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
                                       <div className="flex items-center justify-center h-full w-full">
                                         <Image
                                           className="object-contain w-full h-full"
