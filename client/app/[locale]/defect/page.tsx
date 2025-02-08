@@ -87,7 +87,7 @@ export default function Page() {
   const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
-    by: "Date",
+    by: "DefectDate",
     order: "Ascending",
   });
 
@@ -189,7 +189,7 @@ export default function Page() {
   }, [searchTerm])
 
   useEffect(() => {
-    localStorage.setItem('defectFilter', JSON.stringify(filter));
+    localStorage.setItem('defectsFilter', JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -228,7 +228,7 @@ export default function Page() {
               value={sort.by}
               onValueChange={(value) => handleSortChange('by', value)}
             >
-              <DropdownMenuRadioItem value="Date" className="text-base" onSelect={(e) => e.preventDefault()}>
+              <DropdownMenuRadioItem value="DefectDate" className="text-base" onSelect={(e) => e.preventDefault()}>
                 {t('Date')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
