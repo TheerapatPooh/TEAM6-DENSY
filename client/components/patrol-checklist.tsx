@@ -300,7 +300,7 @@ export default function PatrolChecklist({
                                 <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center w-full gap-2">
                                   <div className="flex items-center text-muted-foreground gap-1">
                                     <span className="material-symbols-outlined">engineering</span>
-                                    <p className="text-lg font-semibold">{t("supervisor")}</p>
+                                    <p className="text-base font-semibold">{t("supervisor")}</p>
                                   </div>
 
                                   <div className="flex items-center gap-1">
@@ -312,7 +312,7 @@ export default function PatrolChecklist({
                                         {getInitials(itemZones.zone.supervisor.profile.name)}
                                       </AvatarFallback>
                                     </Avatar>
-                                    <p className="text-card-foreground text-lg truncate">{itemZones.zone.supervisor.profile.name}</p>
+                                    <p className="text-card-foreground text-base truncate">{itemZones.zone.supervisor.profile.name}</p>
                                   </div>
 
                                 </div>
