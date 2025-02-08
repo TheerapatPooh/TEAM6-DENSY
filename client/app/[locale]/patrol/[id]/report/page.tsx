@@ -535,7 +535,7 @@ export default function Page() {
         ) : (
           defects.map((defect: IDefect) => {
             return (
-              <div className="" key={defect.id}>
+              <div className="mb-4" key={defect.id}>
                 <ReportDefect
                   defect={defect}
                   page={"patrol-view-report"}

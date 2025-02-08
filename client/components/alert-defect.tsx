@@ -47,7 +47,7 @@ import {
 import { Skeleton } from './ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
-import { tree } from 'next/dist/build/templates/app-page';
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface IAlertDefect {
     defect?: IDefect,
@@ -439,12 +439,12 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                             </div>
                         }
 
-                        <div className="flex flex-col justify-between w-full">
+                        <div className="flex flex-col gap-1 justify-between w-full">
                             <div className='text-sm font-semibold'>
                                 {t("Image")}
                             </div>
-                            <div className='flex flex-row py-1 pr-2 gap-4'>
-                                <div className='flex flex-col gap-1 flex-1 rounded-md custom-shadow'>
+                            <div className='grid grid-cols-2 pr-2 gap-4'>
+                                <AspectRatio ratio={4 / 3} className="flex flex-col gap-1 flex-1 rounded-md custom-shadow">
                                     <div
                                         className="flex h-full w-full rounded-[10px] bg-secondary justify-center items-center"
                                         onDragOver={handleDragOver}
@@ -481,7 +481,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </AspectRatio>
                                 <ScrollArea className="h-72 overflow-y-auto gap-5 rounded-md flex-1">
                                     <div className="flex flex-col gap-2 w-full">
                                         {selectedFiles?.map((file, index) => (
