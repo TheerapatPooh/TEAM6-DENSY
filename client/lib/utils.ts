@@ -107,14 +107,23 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     }
 
     // เพิ่มข้อมูล Patrol ที่ด้านบนของเอกสาร
-    worksheet.addRow(["Date:", formatDateTime(patrol.date)]);
-    worksheet.addRow(["Start Time:",formatDateTime(patrol.startTime)]);
-    worksheet.addRow(["End Time:", formatDateTime(patrol.endTime)]);
-    worksheet.addRow(["Status:", patrol.status.charAt(0).toUpperCase() + patrol.status.slice(1)]);
-    worksheet.addRow(["Preset Title:", patrol.preset.title]);
-    worksheet.addRow(["Preset Version:", patrol.preset.version]);
-    worksheet.addRow(["Preset Description:", patrol.preset.description]);
-    worksheet.addRow([]); // เพิ่มบรรทัดว่าง
+    const rows = [
+      ["Date:", formatDateTime(patrol.date)],
+      ["Start Time:", formatDateTime(patrol.startTime)],
+      ["End Time:", formatDateTime(patrol.endTime)],
+      ["Status:", patrol.status],
+      ["Preset Title:", patrol.preset.title],
+      ["Preset Version:", patrol.preset.version],
+      ["Preset Description:", patrol.preset.description],
+      [] // เพิ่มบรรทัดว่าง
+    ];
+    
+    // เพิ่มข้อมูลทีละแถว และตั้งค่า alignment
+    rows.forEach((data) => {
+        const row = worksheet.addRow(data);
+        row.font = { size: 12 }
+        row.alignment = { horizontal: "left" }; // จัดให้เซลล์แรกชิดซ้าย
+    });
 
     // ขนาดของ Column
     worksheet.columns = [
@@ -142,14 +151,16 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
       worksheet.mergeCells(titleRowIdx, 0, titleRowIdx, 3);
       // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
-      titleRow.getCell(1).font = { bold: true };
+      titleRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
       titleRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       titleRow.getCell(1).border = {
         top: { style: 'thin', color: { argb: 'FF000000' } },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } },
       };
+      // ตั้งค่าสีพื้นหลังให้แถวหัว
+      titleRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // พื้นหลังสีแดง
 
       // ตั้งค่าคอลัมน์พร้อมกับหัวข้อและคีย์
       const headerRow = worksheet.addRow(["Item Name", "Zone Name", "Status"]);
@@ -157,13 +168,14 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       // จัดกึ่งกลางหัวตาราง ตัวหนา มีกรอบ
       headerRow.eachCell((cell) => {
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.font = { bold: true };
+        cell.font = { bold: true, size: 12 };
         cell.border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
           bottom: { style: 'thin' },
           right: { style: 'thin' }
         };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F1F1' } };  // พื้นหลังสีเทาอ่อน
       });
 
      // วนลูปผ่านรายการใน Checklist
@@ -198,6 +210,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
 
           // เพิ่มแถวข้อมูลลงใน worksheet
           const dataRow = worksheet.addRow([item.name, zoneName, statusText]);
+          dataRow.font = { size: 12 };
 
           dataRow.eachCell((cell) => {
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -234,7 +247,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
     worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 4);
     // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
-    sumRow.getCell(1).font = { bold: true };
+    sumRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
     sumRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
     sumRow.getCell(1).border = {
       top: { style: 'thin' },
@@ -242,6 +255,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       bottom: { style: 'thin' },
       right: { style: 'thin' },
     };
+    sumRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '008000' } }; // พื้นหลังสีเขียว
     
     // สร้าง Array เพื่อเก็บข้อมูลจำนวนของแต่ละสถานะในแต่ละโซน
     const zoneStatusCount = [];
@@ -294,7 +308,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // เพิ่มส่วนหัวของตารางสำหรับสรุปผล
     const zoneSummaryHeaderRow = worksheet.addRow(["Zone Name", "Passed", "Commented", "Defected"]);
     zoneSummaryHeaderRow.eachCell((cell) => {
-      cell.font = { bold: true }; // ทำให้หัวตารางตัวหนา
+      cell.font = { bold: true, size: 12 }; // ทำให้หัวตารางตัวหนา
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
       cell.border = {
         top: { style: 'thin' },
@@ -302,6 +316,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
         bottom: { style: 'thin' },
         right: { style: 'thin' },
       };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F1F1' } };  // พื้นหลังสีเทาอ่อน
     });
 
     // เพิ่มข้อมูลสรุปของแต่ละโซนลงในตาราง
@@ -315,6 +330,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
 
       summaryRow.eachCell((cell) => {
         cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+        cell.font = { size: 12 };
         cell.border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
@@ -333,7 +349,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     ]);
 
     totalRow.eachCell((cell) => {
-      cell.font = { bold: true }; // ทำให้ผลรวมตัวหนา
+      cell.font = { bold: true, size: 12 }; // ทำให้ผลรวมตัวหนา
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
       cell.border = {
         top: { style: 'thin' },
@@ -341,6 +357,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
         bottom: { style: 'thin' },
         right: { style: 'thin' },
       };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F1F1' } };  // พื้นหลังสีเทาอ่อน
     });
 
     worksheet.addRow([]);
@@ -352,7 +369,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
     worksheet.mergeCells(resultRowIdx, 0, resultRowIdx, 2);
     // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
-    resultRow.getCell(1).font = { bold: true };
+    resultRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
     resultRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
     resultRow.getCell(1).border = {
       top: { style: 'thin' },
@@ -360,11 +377,12 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       bottom: { style: 'thin' },
       right: { style: 'thin' },
     };
+    resultRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '00008B' } };  // พื้นหลังสีน้ำเงิน
 
     // เพิ่มแถวสำหรับคำว่า Pass และ Fail
     const passFailHeaderRow = worksheet.addRow(["Pass", "Fail"]);
     passFailHeaderRow.eachCell((cell) => {
-      cell.font = { bold: true }; // ทำให้ตัวหนา
+      cell.font = { bold: true, size: 12 }; // ทำให้ตัวหนา
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
       cell.border = {
         top: { style: 'thin' },
@@ -372,6 +390,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
         bottom: { style: 'thin' },
         right: { style: 'thin' },
       };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F1F1' } };  // พื้นหลังสีเทาอ่อน
     });
 
     // เพิ่มแถวตัวเลขสำหรับ Pass และ Fail
@@ -382,6 +401,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
 
     passFailCountRow.eachCell((cell) => {
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
+      cell.font = { size: 12 };
       cell.border = {
         top: { style: 'thin' },
         left: { style: 'thin' },
