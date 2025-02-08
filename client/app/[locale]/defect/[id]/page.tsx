@@ -107,9 +107,6 @@ export default function Page() {
     const getData = async () => {
       try {
         const dataDefect = await fetchData("get", `/defect/${param.id}`, true);
-        if (dataDefect.status === 404) {
-          notFound();
-        }
         setDefect(dataDefect);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -118,7 +115,7 @@ export default function Page() {
       }
     };
     getData();
-  }, [param.id]);
+  }, []);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -380,48 +377,50 @@ export default function Page() {
       </div>
 
       {/* Before After */}
-      <div className="flex justify-between gap-4 w-full h-full">
+      <div className="grid grid-cols-2 gap-4 w-full h-full mb-4">
         {/* before */}
-        <div className="flex flex-col w-1/2 min-h-full">
+        <div className="flex flex-col w-full min-h-full">
           <div className="flex items-center">
             <p className="text-base font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
               {t("Before")}
             </p>
           </div>
 
-          <div>
-            <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md">
-              <div
-                className="flex items-center justify-center cursor-default user-select-none w-full h-full"
-                onClick={() => handleBeforeImageClick()}
-              >
-                {beforeImage &&
-                  beforeImage.length > 0 &&
-                  beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[beforeSlideIndex].path}`} // ใช้ path จาก state
-                    alt="First Image"
-                    width={800}
-                    height={600}
-                    className="rounded-md object-cover cursor-pointer w-full h-full"
-                    unoptimized
-                  />
-                ) : (
-                  <p>Waiting for the results.</p>
-                )}
-              </div>
-            </AspectRatio>
+          <div className="flex flex-col justify-between gap-4">
+            <div className="flex min-h-[500px] max-h-[700px] ">
+              <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md min-h-[500px] max-h-[700px]">
+                <div
+                  className="flex items-center justify-center cursor-default user-select-none w-full h-full"
+                  onClick={() => handleBeforeImageClick()}
+                >
+                  {beforeImage &&
+                    beforeImage.length > 0 &&
+                    beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[beforeSlideIndex].path}`} // ใช้ path จาก state
+                      alt="First Image"
+                      width={800}
+                      height={600}
+                      className="rounded-md object-cover cursor-pointer w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <p>Waiting for the results.</p>
+                  )}
+                </div>
+              </AspectRatio>
+            </div>
 
             {/* Thumbnail images slider */}
-            <ScrollArea className="w-full whitespace-nowrap">
-              <div className="flex w-max space-x-4 p-4">
+            <ScrollArea className="min-w-full whitespace-nowrap">
+              <div className="flex w-max space-x-4 pb-4">
                 {beforeImage &&
                   beforeImage.length > 0 &&
                   beforeImage.map((image, index) => (
                     <div
                       key={index}
                       onClick={() => setBeforeSlideIndex(index)}
-                      className={`flex justify-center min-w-[128px] h-[128px] cursor-pointer rounded-md ${beforeSlideIndex === index ? 'border border-destructive' : ''
+                      className={`flex justify-center w-[128px] h-[128px] cursor-pointer rounded-md ${beforeSlideIndex === index ? 'border border-destructive' : ''
                         }`}
                     >
                       <Image
@@ -491,37 +490,40 @@ export default function Page() {
         </div>
 
         {/* after */}
-        <div className="flex flex-col w-1/2 min-h-full">
+        <div className="flex flex-col w-full min-h-full">
           <div className="flex items-center">
             <p className="text-base font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
               {t("After")}
             </p>
           </div>
 
-          <div>
-            <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md">
-              <div
-                className="flex items-center justify-center cursor-default user-select-none w-full h-full"
-                onClick={() => handleAfterImageClick()}
-              >
-                {afterImage && afterImage.length > 0 && afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[afterSlideIndex].path}`} // ใช้ path จาก state
-                    alt="Second Image"
-                    width={800}
-                    height={600}
-                    className="rounded-md object-cover cursor-pointer w-full h-full"
-                    unoptimized
-                  />
-                ) : (
-                  <p>Waiting for the results.</p>
-                )}
-              </div>
-            </AspectRatio>
+          <div className="flex flex-col justify-between gap-4">
+            <div className="flex min-h-[500px] max-h-[700px]">
+              <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md min-h-[500px] max-h-[700px]">
+                <div
+                  className="flex items-center justify-center cursor-default user-select-none w-full h-full"
+                  onClick={() => handleAfterImageClick()}
+                >
+                  {afterImage && afterImage.length > 0 && afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[afterSlideIndex].path}`} // ใช้ path จาก state
+                      alt="Second Image"
+                      width={800}
+                      height={600}
+                      className="rounded-md object-cover cursor-pointer w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <p>Waiting for the results.</p>
+                  )}
+                </div>
+              </AspectRatio>
+            </div>
+
 
             {/* Thumbnail images slider */}
-            <ScrollArea className="w-full whitespace-nowrap">
-              <div className="flex w-max space-x-4 p-4">
+            <ScrollArea className="min-w-full w-full whitespace-nowrap">
+              <div className="flex w-max space-x-4 pb-4">
                 {afterImage &&
                   afterImage.length > 0 &&
                   afterImage.map((image, index) => (
@@ -544,6 +546,7 @@ export default function Page() {
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
+
 
             {isAfterCarouselOpen && afterImage && afterImage.length > 0 && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
