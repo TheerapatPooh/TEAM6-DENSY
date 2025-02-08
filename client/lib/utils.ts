@@ -5,6 +5,7 @@ import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
+import Defect from "@/components/defect";
 
 const ExcelJS = require("exceljs");
 
@@ -97,11 +98,19 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       return `${formattedDate} ${formattedTime}`;
     };
 
+    // Funtion สำหรับการจัดรูปแบบของข้อมูลชื่อโซน เช่น quality_control_zone จัดรูปแบบเป็น Quality Control Zone
+    const formatZoneName = (zoneName) => {
+      return zoneName
+          .split("_") 
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1)) 
+          .join(" "); 
+    }
+
     // เพิ่มข้อมูล Patrol ที่ด้านบนของเอกสาร
     worksheet.addRow(["Date:", formatDateTime(patrol.date)]);
     worksheet.addRow(["Start Time:",formatDateTime(patrol.startTime)]);
     worksheet.addRow(["End Time:", formatDateTime(patrol.endTime)]);
-    worksheet.addRow(["Status:", patrol.status]);
+    worksheet.addRow(["Status:", patrol.status.charAt(0).toUpperCase() + patrol.status.slice(1)]);
     worksheet.addRow(["Preset Title:", patrol.preset.title]);
     worksheet.addRow(["Preset Version:", patrol.preset.version]);
     worksheet.addRow(["Preset Description:", patrol.preset.description]);
@@ -136,7 +145,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       titleRow.getCell(1).font = { bold: true };
       titleRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       titleRow.getCell(1).border = {
-        top: { style: 'thin' },
+        top: { style: 'thin', color: { argb: 'FF000000' } },
         left: { style: 'thin' },
         bottom: { style: 'thin' },
         right: { style: 'thin' },
@@ -161,7 +170,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
      for (const item of checklist.items) {
         // วนลูปผ่าน itemZone
         for (const itemZone of item.itemZones) {
-          const zoneName = itemZone.zone.name;
+          const zoneName = formatZoneName(itemZone.zone.name);
           // หา result ที่ตรงกับ item และ zone นี้
           const resultItem = result.find(
             (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
@@ -246,7 +255,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     for (const patrolChecklist of patrol.patrolChecklists) {
       for (const item of patrolChecklist.checklist.items) {
         for (const itemZone of item.itemZones) {
-          const zoneName = itemZone.zone.name;
+          const zoneName = formatZoneName(itemZone.zone.name);
           const resultItem = result.find(
             (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
           );
@@ -352,8 +361,8 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       right: { style: 'thin' },
     };
 
-    // เพิ่มแถวสำหรับคำว่า PASS และ FAIL
-    const passFailHeaderRow = worksheet.addRow(["PASS", "FAIL"]);
+    // เพิ่มแถวสำหรับคำว่า Pass และ Fail
+    const passFailHeaderRow = worksheet.addRow(["Pass", "Fail"]);
     passFailHeaderRow.eachCell((cell) => {
       cell.font = { bold: true }; // ทำให้ตัวหนา
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
@@ -365,7 +374,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       };
     });
 
-    // เพิ่มแถวตัวเลขสำหรับ PASS และ FAIL
+    // เพิ่มแถวตัวเลขสำหรับ Pass และ Fail
     const passFailCountRow = worksheet.addRow([
       totalPassed, // จำนวน Pass
       totalCommented + totalDefected, // รวมจำนวน Fail
@@ -391,7 +400,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "patrol_report.xlsx";
+    link.download = "Patrol_Inspection_Report_" + patrol.date.toString().split('T')[0] + ".xlsx";
 
     document.body.appendChild(link);
     link.click();
