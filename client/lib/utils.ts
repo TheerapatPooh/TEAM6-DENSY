@@ -7,6 +7,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
 import Defect from "@/components/defect";
 
+
 const ExcelJS = require("exceljs");
 
 export function cn(...inputs: ClassValue[]) {
@@ -92,7 +93,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     const formatDateTime = (dateTime) => {
       const date = new Date(dateTime);
       // ฟอร์แมตวันที่
-      const formattedDate = date.toLocaleDateString('en-GB'); 
+      const formattedDate = date.toLocaleDateString('en-GB');
       // ฟอร์แมตเวลา
       const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
       return `${formattedDate} ${formattedTime}`;
@@ -101,9 +102,9 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // Funtion สำหรับการจัดรูปแบบของข้อมูลชื่อโซน เช่น quality_control_zone จัดรูปแบบเป็น Quality Control Zone
     const formatZoneName = (zoneName) => {
       return zoneName
-          .split("_") 
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1)) 
-          .join(" "); 
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
     }
 
     // เพิ่มข้อมูล Patrol ที่ด้านบนของเอกสาร
@@ -117,21 +118,21 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       ["Preset Description:", patrol.preset.description],
       [] // เพิ่มบรรทัดว่าง
     ];
-    
+
     // เพิ่มข้อมูลทีละแถว และตั้งค่า alignment
     rows.forEach((data) => {
-        const row = worksheet.addRow(data);
-        row.font = { size: 12 }
-        row.alignment = { horizontal: "left" }; // จัดให้เซลล์แรกชิดซ้าย
+      const row = worksheet.addRow(data);
+      row.font = { size: 12 }
+      row.alignment = { horizontal: "left" }; // จัดให้เซลล์แรกชิดซ้าย
     });
 
     // ขนาดของ Column
     worksheet.columns = [
-      { width: 30 },  
-      { width: 25},  
-      { width: 25 },  
-      { width: 15 },  
-      { width: 20 },  
+      { width: 30 },
+      { width: 25 },
+      { width: 25 },
+      { width: 15 },
+      { width: 20 },
     ];
 
     let totalFails = 0;
@@ -147,7 +148,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       // เพิ่มชื่อ Checklist
       const titleRow = worksheet.addRow([checklist.title + " By " + inspectorName]);
       // หาตำแหน่งของโรวปัจจุบัน
-      const titleRowIdx = worksheet.rowCount; 
+      const titleRowIdx = worksheet.rowCount;
       // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
       worksheet.mergeCells(titleRowIdx, 0, titleRowIdx, 3);
       // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
@@ -178,8 +179,8 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F1F1' } };  // พื้นหลังสีเทาอ่อน
       });
 
-     // วนลูปผ่านรายการใน Checklist
-     for (const item of checklist.items) {
+      // วนลูปผ่านรายการใน Checklist
+      for (const item of checklist.items) {
         // วนลูปผ่าน itemZone
         for (const itemZone of item.itemZones) {
           const zoneName = formatZoneName(itemZone.zone.name);
@@ -214,18 +215,18 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
 
           dataRow.eachCell((cell) => {
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
-          
+
             cell.border = {
               left: { style: 'thin' },
               right: { style: 'thin' }
             };
           });
 
-         
+
 
           dataRow.eachCell((cell) => {
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
-          
+
             cell.border = {
               left: { style: 'thin' },
               right: { style: 'thin' }
@@ -233,7 +234,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
           });
         }
       }
-      const columnCount = headerRow.cellCount; 
+      const columnCount = headerRow.cellCount;
       const blankRow = worksheet.addRow(Array(columnCount).fill("")); // แถวว่างเพื่อเว้นช่อง
       blankRow.eachCell((cell) => {
         cell.border = { top: { style: 'thin' } };
@@ -243,7 +244,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // เพิ่มสรุปที่ด้านล่าง
     const sumRow = worksheet.addRow(["Summary"]);
     // หาตำแหน่งของโรวปัจจุบัน
-    const sumRowIdx = worksheet.rowCount; 
+    const sumRowIdx = worksheet.rowCount;
     // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
     worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 4);
     // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
@@ -256,7 +257,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       right: { style: 'thin' },
     };
     sumRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '008000' } }; // พื้นหลังสีเขียว
-    
+
     // สร้าง Array เพื่อเก็บข้อมูลจำนวนของแต่ละสถานะในแต่ละโซน
     const zoneStatusCount = [];
 
@@ -365,7 +366,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // เพิ่มสรุปที่ด้านล่าง
     const resultRow = worksheet.addRow(["Result"]);
     // หาตำแหน่งของโรวปัจจุบัน
-    const resultRowIdx = worksheet.rowCount; 
+    const resultRowIdx = worksheet.rowCount;
     // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
     worksheet.mergeCells(resultRowIdx, 0, resultRowIdx, 2);
     // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
@@ -433,7 +434,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     );
   }
 };
-
 
 export const getInitials = (name: string) => {
   if (!name) return "";
