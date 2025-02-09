@@ -41,7 +41,6 @@ import { IUser } from "@/app/type";
 import Loading from "@/components/loading";
 import ReportDefect from "@/components/report-defect";
 import { DatePickerWithRange } from "@/components/date-picker";
-import { Niconne } from "next/font/google";
 import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
