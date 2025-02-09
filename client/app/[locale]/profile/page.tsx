@@ -292,7 +292,7 @@ export default function page() {
         setConfirmPassError(a("ProfileConfirmPassInvalid"));
         showErrorToast = true;
       } else {
-        if (formData.newPassword === formData.confirmPassword) {
+        if (formData.newPassword === formData.confirmPassword && passwordMatch) {
           const isPasswordTheSame = await bcrypt.compare(
             formData.newPassword,
             userData.password
@@ -331,9 +331,6 @@ export default function page() {
               showErrorToast = true;
             }
           }
-        } else {
-          setConfirmPassError(a("ProfileConfirmPassInvalid"));
-          showErrorToast = true;
         }
       }
 
