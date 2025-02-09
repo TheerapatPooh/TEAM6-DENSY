@@ -469,6 +469,12 @@ export const sortData = (data: any, sort: { by: string; order: string }) => {
         ? String(a.status).localeCompare(String(b.status)) // เรียงจาก "false" -> "true"
         : String(b.status).localeCompare(String(a.status)) // เรียงจาก "true" -> "false"
     );
+  } else if (sort.by === "DefectDate") {
+    sortedData.sort((a, b) =>
+      sort.order === "Ascending"
+        ? new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+        : new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    );
   }
   return sortedData
 }

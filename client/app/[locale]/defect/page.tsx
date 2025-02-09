@@ -86,9 +86,11 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
+  const [defectType, setDefectType] = useState<string[] | null>([])
+
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
-    by: "Date",
+    by: "DefectDate",
     order: "Ascending",
   });
 
@@ -124,6 +126,7 @@ export default function Page() {
 
   const applyFilter = () => {
     getAllDefects()
+    setDefectType(filter.defectTypes)
   };
 
   const resetFilter = () => {
@@ -190,7 +193,7 @@ export default function Page() {
   }, [searchTerm])
 
   useEffect(() => {
-    localStorage.setItem('defectFilter', JSON.stringify(filter));
+    localStorage.setItem('defectsFilter', JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -229,7 +232,7 @@ export default function Page() {
               value={sort.by}
               onValueChange={(value) => handleSortChange('by', value)}
             >
-              <DropdownMenuRadioItem value="Date" className="text-base" onSelect={(e) => e.preventDefault()}>
+              <DropdownMenuRadioItem value="DefectDate" className="text-base" onSelect={(e) => e.preventDefault()}>
                 {t('Date')}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
@@ -363,7 +366,7 @@ export default function Page() {
         className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
       >
         <div className="flex flex-col gap-y-4">
-          {allDefects.length === 0 ? (
+          {allDefects.length === 0 || defectType.length === 0 ? (
             <NotFound
               icon="campaign"
               title="NoDefectsFoundTitle"

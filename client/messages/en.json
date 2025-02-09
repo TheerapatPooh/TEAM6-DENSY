@@ -116,7 +116,16 @@
     "NoDefectsFoundDescription": "There have been no defects reported in this patrol yet, or no defects match your search criteria.",
     "NoCommentsFound": "No Feedback Received",
     "NoCommentsDescription": "No feedback or suggestions have been reported for review by the responsible department.",
-    "WaitingForResults": "Waiting for the results"
+    "WaitingForResults": "Waiting for the results",
+    "CreatePatrolPreset": "Create Patrol Preset",
+    "Title": "Title",
+    "Description": "Description",
+    "EditPatrolPreset": "Edit Patrol Preset",
+    "ChecklistGroup": "Checklist Group",
+    "ChecklistGroupDescription": "Please add a checklist group",
+    "Done": "Done",
+    "EmptyChecklist": "You don't have any Checklist want to create now?",
+    "Sure": "Sure"
   },
   "Status": {
     "pending": "Pending",
@@ -344,6 +353,20 @@
     "EditDefectResolveTitle": "Edit Resolved Defect",
     "EditDefectResolveDescription": "Update the information of a defect marked as resolved and awaiting inspector review.",
     "ConfirmPasswordChange": "Confirm Password Change",
-    "ConfirmPasswordChangeDescription": "Once you chnage your password, you'll need to use the new one to log in, Do you want to proceed"
+    "ConfirmPasswordChangeDescription": "Once you chnage your password, you'll need to use the new one to log in, Do you want to proceed",
+    "CreatePresetMissingTitle": "Please provide a valid title in the fields.",
+    "CreatePresetMissingDescription": "Please provide a valid description in the fields.",
+    "CreatePresetMissingChecklist": "Please provide a valid checklist in the fields.",
+    "CreatePresetTitle": "Are you sure to create patrol preset?",
+    "CreatePresetDescription": "Please confirm to create patrol preset.",
+    "CreatePresetTitleSuccess": "Preset Saved",
+    "CreatePresetDescriptionSuccess": "Your changes are saved successfully.",
+    "EditPresetTitle": "Are you sure to edit patrol preset?",
+    "EditPresetDescription": "Please confirm to edit patrol preset.",
+    "EditPresetMissingTitle": "Please provide a valid title in the fields.",
+    "EditPresetMissingDescription": "Please provide a valid description in the fields.",
+    "EditPresetMissingChecklist": "Please provide a valid checklist in the fields.",
+    "EditPresetTitleSuccess": "Preset Saved",
+    "EditPresetDescriptionSuccess": "Your changes are saved successfully."
   }
 }
