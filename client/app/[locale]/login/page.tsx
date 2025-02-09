@@ -91,19 +91,19 @@ export default function LoginPage() {
         });
     }
     return (
-        <section className="bg-card flex flex-col lg:flex-row justify-between h-screen p-2">
+        <section className="bg-card flex lg:grid lg:grid-cols-2 h-screen p-2">
             {/* แสดงรูปภาพเฉพาะจอที่มีขนาด sm ขึ้นไป */}
-            <div className="bg-background w-full lg:w-1/2 md:grid hidden grid-rows-5 p-4 rounded-md">
+            <div className="bg-background hidden lg:inline w-full p-4 rounded-md">
                 <Image
-                    className="flex items-center"
+                    className="flex items-center "
                     src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
                     alt="Logo"
                     width={250}
                     height={250}
                     priority
                 />
-                <div className="grid grid-rows-subgrid gap-4 row-span-3 justify-center items-center">
-                    <Carousel className='row-start-2' plugins={[autoplayOptions]} opts={{ loop: true }}>
+                <div className="flex justify-center items-center h-full">
+                    <Carousel plugins={[autoplayOptions]} opts={{ loop: true }}>
                         <CarouselContent>
                             <CarouselItem>
                                 <Image
@@ -141,10 +141,22 @@ export default function LoginPage() {
             </div>
 
             {/* ช่องกรอก username, password ตรงกลางหน้าจอ */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4">
-                <div className='flex w-full justify-end gap-4'>
-                    <ModeToggle />
-                    <LanguageSelect />
+            <div className="flex flex-col w-full justify-center items-center p-4">
+                <div className='flex w-full'>
+                    <div className='lg:hidden'>
+                        <Image
+                            className="flex items-center "
+                            src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
+                            alt="Logo"
+                            width={250}
+                            height={250}
+                            priority
+                        />
+                    </div>
+                    <div className='flex w-full justify-end gap-4'>
+                        <ModeToggle />
+                        <LanguageSelect />
+                    </div>
                 </div>
                 <div className='gap-2 flex flex-col justify-center items-center w-full lg:w-[450px] h-full'>
                     <div className='flex flex-col gap-4 w-[440px]'>

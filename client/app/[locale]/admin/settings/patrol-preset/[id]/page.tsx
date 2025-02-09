@@ -39,8 +39,10 @@ import BadgeCustom from "@/components/badge-custom";
 import Loading from "@/components/loading";
 import { fetchData, getItemTypeVariant } from "@/lib/utils";
 import { IChecklist, IItem, IItemZone, IPreset } from "@/app/type";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
+import { AlertCustom } from "@/components/alert-custom";
+import { toast } from "@/hooks/use-toast";
 
 export default function page() {
 
@@ -60,6 +62,13 @@ export default function page() {
     const t = useTranslations("General");
     const s = useTranslations("Status");
     const z = useTranslations("Zone");
+    const a = useTranslations("Alert");
+
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [titleError, setTitleError] = useState<string | null>(null)
+    const [descriptionError, setDescriptionError] = useState<string | null>(null)
+    const [checklistError, setChecklistError] = useState<string | null>(null)
+    const locale = useLocale();
 
     const getAllChecklists = async () => {
         try {
@@ -69,6 +78,10 @@ export default function page() {
             console.error("Failed to fetch all defect:", error);
         }
     };
+
+    const navigatorToLocale = () => {
+        router.push(`/${locale}/admin/settings/patrol-preset`);
+    }
 
     const getPresetData = async () => {
         try {
@@ -98,7 +111,8 @@ export default function page() {
     };
 
     const handleDoneChecklist = (() => {
-        setSelectChecklists(tempSelectChecklists)
+        const flatChecklists = tempSelectChecklists.flat(Infinity);
+        setSelectChecklists(flatChecklists)
     })
 
     const handleRemoveChecklist = ((checklistId: number) => {
@@ -114,23 +128,55 @@ export default function page() {
         }));
     };
 
+    const handleOpenDialog = () => {
+        setIsAlertOpen(true)
+    };
+
+    const handleCloseDialog = () => {
+        setIsAlertOpen(false)
+    }
+
     const handleEditPreset = async () => {
-        const presetForm = new FormData()
+        if (!formPreset.title || !formPreset.description || !selectChecklists || selectChecklists?.length === 0) {
+            setTitleError(!formPreset.title ? a("EditPresetMissingTitle") : null),
+                setDescriptionError(!formPreset.description ? a("EditPresetMissingDescription") : null),
+                setChecklistError(!selectChecklists || selectChecklists?.length === 0 ? a("EditPresetMissingChecklist") : null),
+                toast({
+                    variant: "error",
+                    title: a("ReportDefectMissingField"),
+                    description:
+                        !formPreset.title
+                            ? a("EditPresetMissingTitle")
+                            : !formPreset.description
+                                ? a("EditPresetMissingDescription")
+                                : !selectChecklists || selectChecklists.length === 0
+                                    ? a("EditPresetMissingChecklist")
+                                    : null
+                });
+            return;
+        }
 
-        presetForm.append("title", formPreset.title)
-        presetForm.append("description", formPreset.description)
-
-        selectChecklists.forEach((checklistId: number) => {
-            presetForm.append("checklists", checklistId.toString());
-        });
+        let data = {
+            title: formPreset.title,
+            description: formPreset.description,
+            checklists: selectChecklists
+        }
 
         try {
-            const fetch = await fetchData("put", `/preset/${param.id}`, true, presetForm)
-            alert("Preset Edited successfully!");
+            const fetch = await fetchData("put", `/preset/${param.id}`, true, data)
+            if (formPreset.title && formPreset.description && selectChecklists && selectChecklists?.length != 0) {
+                toast({
+                    variant: "success",
+                    title: a("EditPresetTitleSuccess"),
+                    description: a("EditPresetDescriptionSuccess"),
+                });
+                setTitleError(null),
+                    setDescriptionError(null),
+                    setChecklistError(null)
+            }
             router.push(`${fetch.preset.id}`)  // เปลี่่ยนหน้าไปยัง id ของตัวที่อัพเดท
         } catch (error) {
             console.error("Error Edited Preset:", error);
-            alert("Failed to Edited Preset");
         }
     }
 
@@ -149,15 +195,22 @@ export default function page() {
             {/* Edit patrol preset and button */}
             <div className='flex flex-row justify-between mb-4'>
                 <div className='text-2xl font-bold'>
-                    Edit Patrol Preset
+                    {t("EditPatrolPreset")}
                 </div>
 
                 <div className='flex flex-row gap-2'>
-                    <Button variant='secondary'>Cancel</Button>
+                    <Button variant='secondary' onClick={() => {
+                        setTitleError(null)
+                        setDescriptionError(null)
+                        setChecklistError(null)
+                        navigatorToLocale()
+                    }}>
+                        {t("Cancel")}
+                    </Button>
 
-                    <Button variant='primary' onClick={handleEditPreset}>
+                    <Button variant='primary' onClick={handleOpenDialog}>
                         <span className="material-symbols-outlined mr-2">save</span>
-                        Save
+                        {t("Save")}
                     </Button>
                 </div>
             </div>
@@ -165,110 +218,122 @@ export default function page() {
             {/* title */}
             <div className="flex flex-col mb-4">
                 <div className='text-base font-semibold mb-2'>
-                    Title
+                    {t("Title")}
                 </div>
 
                 <div>
-                    <Input name="title" value={formPreset.title} className='bg-secondary w-1/3 border-none text-xl' placeholder='title' onChange={handleInputChange}></Input>
+                    <Input name="title" value={formPreset.title} className='bg-secondary w-1/3 border-none text-xl' placeholder='title' onChange={handleInputChange} readOnly></Input>
                 </div>
+                {titleError && (
+                    <p className="text-sm font-light text-destructive italic mt-1">{titleError}</p>
+                )}
             </div>
 
             {/* description */}
             <div className="flex flex-col mb-4">
                 <div className='text-base font-semibold mb-2'>
-                    Description
+                    {t("Description")}
                 </div>
 
                 <div>
                     <Textarea name="description" value={formPreset.description} className='bg-secondary border-none text-xl h-44' placeholder='description' onChange={handleInputChange}></Textarea>
                 </div>
+                {descriptionError && (
+                    <p className="text-sm font-light text-destructive italic mt-1">{descriptionError}</p>
+                )}
             </div>
 
             {/* new checklist */}
-            <div className='flex flex-row gap-2'>
-                <div className='text-2xl font-bold'>
-                    Checklist
-                </div>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button className="w-8 h-8" variant="primary">
-                            <span className="material-symbols-outlined">add</span>
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle className="text-2xl font-semibold">
-                                Checklist Group
-                            </AlertDialogTitle>
-                            <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
-                                Please add a checklist group
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
+            <div className="flex flex-col gap-2">
+                <div className='flex flex-row gap-2'>
+                    <div className='text-2xl font-bold'>
+                        {t("Checklist")}
+                    </div>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button className="w-8 h-8" variant="primary">
+                                <span className="material-symbols-outlined">add</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className="text-2xl font-semibold">
+                                    {t("ChecklistGroup")}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                                    {t("ChecklistGroupDescription")}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
 
-                        {allChecklists ? (
-                            <>
-                                <ScrollArea className="h-[400px] overflow-y-auto rounded-lg w-full">
-                                    {allChecklists.map((checklist: IChecklist) => {
-                                        return (
-                                            <div className="flex flex-row justify-between bg-secondary px-6 py-4 mb-2 rounded-lg">
-                                                <div>
-                                                    <div className="flex text-base gap-1 mb-2 ">
-                                                        <span className="material-symbols-outlined">history</span>
-                                                        Version {checklist.version}
+                            {allChecklists ? (
+                                <>
+                                    <ScrollArea className="h-[400px] overflow-y-auto rounded-lg w-full">
+                                        {allChecklists.map((checklist: IChecklist) => {
+                                            return (
+                                                <div className="flex flex-row justify-between bg-secondary px-6 py-4 mb-2 rounded-lg">
+                                                    <div>
+                                                        <div className="flex text-base gap-1 mb-2 ">
+                                                            <span className="material-symbols-outlined">history</span>
+                                                            Version {checklist.version}
+                                                        </div>
+
+                                                        <div className="text-2xl font-bold">
+                                                            {checklist.title}
+                                                        </div>
                                                     </div>
 
-                                                    <div className="text-2xl font-bold">
-                                                        {checklist.title}
+                                                    <div className="flex justify-center items-center">
+                                                        <Checkbox
+                                                            key={checklist.id}
+                                                            value={checklist.id}
+                                                            checked={tempSelectChecklists.includes(checklist.id)}
+                                                            className="bg-card"
+                                                            onCheckedChange={() => handleSelectChecklists(checklist.id)}>
+                                                        </Checkbox>
                                                     </div>
                                                 </div>
-
-                                                <div className="flex justify-center items-center">
-                                                    <Checkbox
-                                                        key={checklist.id}
-                                                        value={checklist.id}
-                                                        checked={tempSelectChecklists.includes(checklist.id)}
-                                                        className="bg-card"
-                                                        onCheckedChange={() => handleSelectChecklists(checklist.id)}>
-                                                    </Checkbox>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
-                                </ScrollArea>
-                                <AlertDialogFooter>
-                                    <div className="flex items-end justify-end gap-[10px]">
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction className="bg-primary" onClick={handleDoneChecklist}>
-                                            Done
-                                        </AlertDialogAction>
-                                    </div>
-                                </AlertDialogFooter>
-
-                            </>
-                        ) : (
-                            <>
-                                <div>
-                                    <div className="flex flex-col justify-center items-center h-[400px] gap-4">
-                                        <div className="text-2xl font-semibold">
-                                            You don't have any Checklist want to create now?
+                                            )
+                                        })}
+                                    </ScrollArea>
+                                    <AlertDialogFooter>
+                                        <div className="flex items-end justify-end gap-[10px]">
+                                            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                                            <AlertDialogAction className="bg-primary" onClick={handleDoneChecklist}>
+                                                {t("Done")}
+                                            </AlertDialogAction>
                                         </div>
-                                        <AlertDialogFooter>
-                                            <div className="flex gap-[10px]">
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction className="bg-primary">
-                                                    Sure
-                                                </AlertDialogAction>
+                                    </AlertDialogFooter>
+
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <div className="flex flex-col justify-center items-center h-[400px] gap-4">
+                                            <div className="text-2xl font-semibold">
+                                                {t("EmptyChecklist")}
                                             </div>
-                                        </AlertDialogFooter>
+                                            <AlertDialogFooter>
+                                                <div className="flex gap-[10px]">
+                                                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                                                    <AlertDialogAction className="bg-primary">
+                                                        {t("Sure")}
+                                                    </AlertDialogAction>
+                                                </div>
+                                            </AlertDialogFooter>
+                                        </div>
+
                                     </div>
 
-                                </div>
-
-                            </>
-                        )}
-                    </AlertDialogContent>
-                </AlertDialog>
+                                </>
+                            )}
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+                {checklistError && (
+                    <p className="text-sm font-light text-destructive italic mt-1">{checklistError}</p>
+                )}
             </div>
+
 
             {/* checklist info */}
             {
@@ -383,6 +448,22 @@ export default function page() {
                     });
                 })
             }
+
+            {isAlertOpen && (
+                <AlertCustom
+                    title={a("EditPresetTitle")}
+                    description={a("EditPresetDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={(backResult) => {
+                        if (backResult) {
+                            handleEditPreset()
+                        }
+                        handleCloseDialog()
+                    }}
+                />
+            )}
         </div >
     )
 }

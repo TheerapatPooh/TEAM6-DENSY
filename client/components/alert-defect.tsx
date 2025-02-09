@@ -14,6 +14,7 @@
 
 'use client'
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { defectStatus, IDefect } from '@/app/type'
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +35,7 @@ import {
     IPatrolResult,
 } from "@/app/type";
 import React, { useEffect, useState } from "react";
-import { fetchData } from "@/lib/utils";
+import { fetchData, getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -46,8 +47,7 @@ import {
 import { Skeleton } from './ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
-import { tree } from 'next/dist/build/templates/app-page';
-
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 interface IAlertDefect {
     defect?: IDefect,
     item?: IItem,
@@ -342,7 +342,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     </Button>
                 </AlertDialogTrigger>
                 {isAlertDefectOpen &&
-                    <AlertDialogContent>
+                    <AlertDialogContent className='sm:w-[90%] xl:w-[60%]'>
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-2xl font-semibold">
                                 {t(type === "edit" ? "EditDefect" : type === "resolve" ? "ResolveDefect" : type === "edit-resolve" ? "EditResolveDefect" : "ReportDefect")}
@@ -378,20 +378,46 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                     <span className="material-symbols-outlined text-2xl me-2">
                                         engineering
                                     </span>
+
                                     <p className="font-semibold me-2">
                                         {t("supervisor")}
                                     </p>
-                                    <p>
-                                        {type === "report"
-                                            ? item.itemZones.map((itemZone: IItemZone) => {
-                                                return result.zoneId === itemZone.zone.id
-                                                    ? itemZone.zone.supervisor.profile.name
-                                                    : null; // 
-                                            })
-                                            :
-                                            defect.patrolResult.itemZone.zone.supervisor.profile.name
-                                        }
-                                    </p>
+                                    {type === "report" ? (
+                                        item.itemZones.map((itemZone: IItemZone) => {
+                                            if (result.zoneId === itemZone.zone.id) {
+                                                return (
+                                                    <div className="flex items-center gap-1">
+                                                        <Avatar className="custom-shadow h-[35px] w-[35px]">
+                                                            <AvatarImage
+                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZone.zone.supervisor.profile.image?.path}`}
+                                                            />
+                                                            <AvatarFallback id={itemZone.zone.supervisor.id.toString()}>
+                                                                {getInitials(itemZone.zone.supervisor.profile.name)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <span className="text-card-foreground text-lg truncate">
+                                                            {itemZone.zone.supervisor.profile.name}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })
+                                    ) : (
+                                        <div className="flex items-center gap-1">
+                                            <Avatar className="custom-shadow h-[35px] w-[35px]">
+                                                <AvatarImage
+                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
+                                                />
+                                                <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
+                                                    {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-card-foreground text-lg truncate">
+                                                {defect.patrolResult.itemZone.zone.supervisor.profile.name}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </AlertDialogHeader>
@@ -412,19 +438,19 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                             </div>
                         }
 
-                        <div className="flex flex-col justify-between w-full">
+                        <div className="flex flex-col gap-1 justify-between w-full">
                             <div className='text-sm font-semibold'>
                                 {t("Image")}
                             </div>
-                            <div className='flex flex-row py-1 pr-2 gap-4'>
-                                <div className='flex flex-col gap-1 flex-1 rounded-md custom-shadow'>
+                            <div className='grid grid-cols-2 pr-2 gap-4'>
+                                <div className="flex flex-col gap-1 flex-1 rounded-md custom-shadow">
                                     <div
                                         className="flex h-full w-full rounded-[10px] bg-secondary justify-center items-center"
                                         onDragOver={handleDragOver}
                                         onDrop={handleDrop}
                                     >
                                         <div className="flex p-8 flex-col items-center justify-center">
-                                            <span className="material-symbols-outlined text-[48px] font-normal">
+                                            <span className="material-symbols-outlined text-[48px] font-normal text-primary">
                                                 upload
                                             </span>
                                             <div className="text-center mt-2">
@@ -455,13 +481,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         </div>
                                     </div>
                                 </div>
-                                <ScrollArea className="h-72 overflow-y-auto gap-5 rounded-md flex-1">
+                                <ScrollArea className="sm:h-64 overflow-y-auto gap-5 rounded-md flex-1">
                                     <div className="flex flex-col gap-2 w-full">
                                         {selectedFiles?.map((file, index) => (
                                             <div key={index} className=" flex flex-row justify-between px-4 py-2 w-full bg-secondary rounded-md">
                                                 <div className='flex flex-row gap-3'>
                                                     <div className='flex flex-col justify-center items-center'>
-                                                        <span className="material-symbols-outlined">
+                                                        <span className="material-symbols-outlined text-card-foreground">
                                                             image
                                                         </span>
                                                     </div>
@@ -470,7 +496,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <div className=" truncate w-[145px]">
+                                                                        <div className=" truncate sm:w-56 xl:w-72">
                                                                             {file.name}
                                                                         </div>
                                                                     </TooltipTrigger>
@@ -595,7 +621,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                     </AlertDialogContent>
                 }
             </AlertDialog>
-
         </div >
     )
 }

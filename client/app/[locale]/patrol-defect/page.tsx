@@ -39,6 +39,7 @@ import Loading from "@/components/loading";
 import ReportDefect from "@/components/report-defect";
 import { DatePickerWithRange } from "@/components/date-picker";
 import NotFound from "@/components/not-found";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateRange } from "react-day-picker";
 
 export default function page() {
@@ -83,6 +84,7 @@ export default function page() {
     };
 
     const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
+    const [defectType, setDefectType] = useState<string[] | null>([])
 
     const [sort, setSort] = useState<{ by: string; order: string }>({
         by: "DefectDate",
@@ -119,15 +121,15 @@ export default function page() {
         }
     };
 
+
     const applyFilter = () => {
         getAllDefects()
+        setDefectType(filter.defectTypes)
     };
 
     const resetFilter = () => {
         setFilter(initialFilter)
     };
-
-    console.log("alldefect",allDefects)
 
     const handleDateSelect = (dateRange: DateRange) => {
         const startDate = dateRange.from ?? null;
@@ -363,8 +365,10 @@ export default function page() {
                 </DropdownMenu>
 
             </div>
-            <div>
-                {allDefects.length === 0 ? (
+            <ScrollArea
+                className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
+            >
+                {allDefects.length === 0 || defectType.length === 0 ? (
                     <NotFound
                         icon="campaign"
                         title="NoDefectsReported"
@@ -385,8 +389,7 @@ export default function page() {
                         );
                     })
                 )}
-
-            </div>
+            </ScrollArea>
         </div>
     )
 }

@@ -61,7 +61,6 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
     setIsDialogOpen(true);
   };
 
-
   const beforeImage = defect.images
     .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
     .filter((image) => image.image.user.id === defect.userId)
@@ -87,7 +86,6 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
   const [alertBoxDescription, setAlertBoxDescription] = useState();
   const router = useRouter();
   const locale = useLocale();
-
 
   // Handle before image click
   const handleBeforeImageClick = () => {
@@ -372,8 +370,8 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                 </div>
 
                 <div className="flex flex-col justify-between gap-4">
-                  <div className="flex min-h-[500px] max-h-[700px] ">
-                    <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md min-h-[500px] max-h-[700px]">
+                  <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+                    <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
                       <div
                         className="flex items-center justify-center cursor-default user-select-none w-full h-full"
                         onClick={() => handleBeforeImageClick()}
@@ -390,7 +388,14 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                             unoptimized
                           />
                         ) : (
-                          <p>Waiting for the results.</p>
+                          <div className="flex flex-col items-center justify-center text-center space-y-4">
+                            <span className="material-symbols-outlined text-border text-4xl">
+                              hourglass_empty
+                            </span>
+                            <p className="text-muted-foreground text-lg font-medium">
+                              {t('WaitingForResults')}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </AspectRatio>
@@ -425,13 +430,13 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                   {isBeforeCarouselOpen && beforeImage && beforeImage.length > 0 && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                       <div className="relative">
-                        <Carousel setApi={setBeforeApi} className="w-full max-w-screen-lg">
+                        <Carousel setApi={setBeforeApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
                           <CarouselContent>
                             {beforeImage.map((image, index) => (
                               <CarouselItem key={index}>
                                 <div className="flex justify-center">
                                   <Card className="bg-card border-none">
-                                    <CardContent className="flex items-center justify-center h-[700px] w-[1000px] overflow-hidden p-4">
+                                    <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
                                       <div className="flex items-center justify-center h-full w-full">
                                         <Image
                                           className="object-contain w-full h-full"
@@ -483,8 +488,8 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                 </div>
 
                 <div className="flex flex-col justify-between gap-4">
-                  <div className="flex min-h-[500px] max-h-[700px]">
-                    <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md min-h-[500px] max-h-[700px]">
+                  <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+                    <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
                       <div
                         className="flex items-center justify-center cursor-default user-select-none w-full h-full"
                         onClick={() => handleAfterImageClick()}
@@ -499,7 +504,14 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                             unoptimized
                           />
                         ) : (
-                          <p>Waiting for the results.</p>
+                          <div className="flex flex-col items-center justify-center text-center space-y-4">
+                            <span className="material-symbols-outlined text-border text-4xl">
+                              hourglass_empty
+                            </span>
+                            <p className="text-muted-foreground text-lg font-medium">
+                              {t('WaitingForResults')}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </AspectRatio>
@@ -536,13 +548,13 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                   {isAfterCarouselOpen && afterImage && afterImage.length > 0 && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                       <div className="relative">
-                        <Carousel setApi={setAfterApi} className="w-full max-w-screen-lg">
+                        <Carousel setApi={setAfterApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
                           <CarouselContent>
                             {afterImage.map((image, index) => (
                               <CarouselItem key={index}>
                                 <div className="flex justify-center">
                                   <Card className="bg-card border-none">
-                                    <CardContent className="flex items-center justify-center h-[700px] w-[1000px] overflow-hidden p-4">
+                                    <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
                                       <div className="flex items-center justify-center h-full w-full">
                                         <Image
                                           className="object-contain w-full h-full"

@@ -213,41 +213,6 @@ export default function page() {
       userForm.append("address", formData.address);
     }
 
-    if (
-      formData.currentPassword ||
-      formData.newPassword ||
-      formData.confirmPassword
-    ) {
-      if (!formData.currentPassword) {
-        setCurrentPassError(a("ProfileCurrentPassRequire"));
-        showErrorToast = true;
-      }
-      if (!formData.newPassword) {
-        setNewPassError(a("ProfileNewPassRequire"));
-        showErrorToast = true;
-      }
-      if (!formData.confirmPassword) {
-        setConfirmPassError(a("ProfileConfirmPassRequire"));
-        showErrorToast = true;
-      } else {
-        const passwordMatch = bcrypt.compare(
-          formData.currentPassword,
-          userData.password
-        );
-        if (passwordMatch) {
-          if (formData.newPassword === formData.confirmPassword) {
-            userForm.append("password", formData.newPassword);
-          } else {
-            setConfirmPassError(a("ProfileConfirmPassInvalid"));
-            showErrorToast = true;
-          }
-        } else {
-          setCurrentPassError(a("ProfileCurrentPassInvalid"));
-          showErrorToast = true;
-        }
-      }
-    }
-
     try {
       if (!showErrorToast) {
         const response = await fetchData(
@@ -286,11 +251,15 @@ export default function page() {
     setNewPassError(null);
     setConfirmPassError(null);
     if (!formData || Object.keys(formData).length === 0) {
+      setCurrentPassError(a("ProfileCurrentPassRequire"));
+      setNewPassError(a("ProfileNewPassRequire"));
+      setConfirmPassError(a("ProfileConfirmPassRequire"));
       toast({
-        variant: "default",
-        title: a("ProfileNoChangeTitle"),
-        description: a("ProfileNoChangeDescription"),
+        variant: "error",
+        title: a("ProfileUpdateErrorTitle"),
+        description: a("ProfileCurrentPassRequire"),
       });
+      showErrorToast = true;
       return;
     }
     if (
@@ -298,8 +267,16 @@ export default function page() {
       formData.newPassword ||
       formData.confirmPassword
     ) {
+      const passwordMatch = await bcrypt.compare(
+        formData.currentPassword,
+        userData.password
+      );
       if (!formData.currentPassword) {
         setCurrentPassError(a("ProfileCurrentPassRequire"));
+        showErrorToast = true;
+      }
+      if (!passwordMatch) {
+        setCurrentPassError(a("ProfileCurrentPassInvalid"));
         showErrorToast = true;
       }
       if (!formData.newPassword) {
@@ -309,68 +286,63 @@ export default function page() {
       if (!formData.confirmPassword) {
         setConfirmPassError(a("ProfileConfirmPassRequire"));
         showErrorToast = true;
-    } else {
-      const passwordMatch = bcrypt.compare(
-        formData.currentPassword,
-        userData.password
-      );
-      if (passwordMatch) {
-        if (formData.newPassword === formData.confirmPassword) {
-          const userForm = new FormData();
-          userForm.append("password", formData.newPassword);
-
-          try {
-            const response = await fetchData(
-              "put",
-              `/user/${userData.profile.userId}`,
-              true,
-              userForm
-            );
-            if (response) {
-              setUserData(response);
-              toast({
-                variant: "success",
-                title: a("ProfileUpdateSuccessTitle"),
-                description: a("ProfileUpdateSuccessDescription"),
-              });
-              try {
-                await fetchData(
-                  "post",
-                  `/logout`,
-                  true,
-                );
-              } catch (error) {
-                
-              }
-            }
-          } catch (error) {
-            console.error("Error updating password:", error);
-            showErrorToast = true;
-
-          }
-        } else {
-          setConfirmPassError(a("ProfileConfirmPassInvalid"));
-          showErrorToast = true;
-
-        }
-      } else {
-        setCurrentPassError(a("ProfileCurrentPassInvalid"));
+      }
+      if (formData.newPassword !== formData.confirmPassword) {
+        setNewPassError(a("ProfileConfirmPassInvalid"));
+        setConfirmPassError(a("ProfileConfirmPassInvalid"));
         showErrorToast = true;
+      } else {
+        if (formData.newPassword === formData.confirmPassword && passwordMatch) {
+          const isPasswordTheSame = await bcrypt.compare(
+            formData.newPassword,
+            userData.password
+          );
+          if (isPasswordTheSame) {
+            toast({
+              variant: "default",
+              title: a("ProfileNoChangeTitle"),
+              description: a("ProfileNoChangeDescription"),
+            });
+          } else {
+            const userForm = new FormData();
+            userForm.append("password", formData.newPassword);
 
+            try {
+              const response = await fetchData(
+                "put",
+                `/user/${userData.profile.userId}`,
+                true,
+                userForm
+              );
+              if (response) {
+                setUserData(response);
+                toast({
+                  variant: "success",
+                  title: a("ProfileUpdateSuccessTitle"),
+                  description: a("ProfileUpdateSuccessDescription"),
+                });
+                try {
+                  await fetchData("post", `/logout`, true);
+                  window.location.reload();
+                } catch (error) {}
+              }
+            } catch (error) {
+              console.error("Error updating password:", error);
+              showErrorToast = true;
+            }
+          }
+        }
+      }
+
+      if (showErrorToast) {
+        toast({
+          variant: "error",
+          title: a("ProfileUpdateErrorTitle"),
+          description: a("ProfileUpdateErrorDescription"),
+        });
       }
     }
-
-    if (showErrorToast) {
-      toast({
-        variant: "error",
-        title: a("ProfileUpdateErrorTitle"),
-        description: a("ProfileUpdateErrorDescription"),
-      });
-    }
   };
-}
-
-
 
   const handleUpdateImageProfile = async () => {
     const imageForm = new FormData();
@@ -624,7 +596,9 @@ export default function page() {
                       {t("Name")}
                     </p>
                     <Input
-                     value={userData.profile.name ? userData.profile.name : "-"}
+                      defaultValue={
+                        userData.profile.name ? userData.profile.name : "-"
+                      }
                       name="name"
                       onChange={handleInputChange}
                       placeholder={
@@ -644,7 +618,7 @@ export default function page() {
                       {t("Email")}
                     </p>
                     <Input
-                      value={userData.email ? userData.email : "-"}
+                      defaultValue={userData.email ? userData.email : "-"}
                       name="email"
                       onChange={handleInputChange}
                       placeholder={userData.email ? userData.email : "-"}
@@ -662,9 +636,9 @@ export default function page() {
                       {t("Age")}
                     </p>
                     <Input
-                      value={userData.profile.age
-                        ? userData.profile.age
-                        : "-"}
+                      defaultValue={
+                        userData.profile.age ? userData.profile.age : "-"
+                      }
                       name="age"
                       onChange={handleInputChange}
                       placeholder={
@@ -686,7 +660,9 @@ export default function page() {
                       {t("Tel")}
                     </p>
                     <Input
-                      value={userData.profile.tel ? userData.profile.tel : "-"}
+                      defaultValue={
+                        userData.profile.tel ? userData.profile.tel : "-"
+                      }
                       name="tel"
                       onChange={handleInputChange}
                       placeholder={
@@ -706,9 +682,11 @@ export default function page() {
                       {t("Address")}
                     </p>
                     <Textarea
-                     value={  userData.profile.address
-                      ? userData.profile.address
-                      : "-"}
+                      defaultValue={
+                        userData.profile.address
+                          ? userData.profile.address
+                          : "-"
+                      }
                       name="address"
                       onChange={handleInputChange}
                       placeholder={

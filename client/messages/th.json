@@ -36,7 +36,7 @@
     "PleaseSelectAPresetForThePatrol": "กรุณาเลือก รูปแบบ การตั้งค่าการตรวจ",
     "Next": "ต่อไป",
     "Cancel": "ยกเลิก",
-    "Checklist": "รายการตรวจ",
+    "Checklist": "ชุดตรวจตรา",
     "NewPatrol": "สร้าง",
     "PickADate": "เลือกวันที่",
     "inspector": "ผู้ตรวจตรา",
@@ -115,7 +115,17 @@
     "NoDefectsFoundTitle": "ยังไม่มีการแจ้งปัญหา",
     "NoDefectsFoundDescription": "ยังไม่มีการแจ้งปัญหาหรือไม่พบปัญหาที่ตรงกับการค้นหาหรือกรองของคุณ",
     "NoCommentsFound": "ยังไม่มีข้อเสนอแนะที่ได้รับ",
-    "NoCommentsDescription": "ยังไม่มีข้อเสนอแนะหรือคำแนะนำที่แจ้งมาเพื่อให้ผู้รับผิดชอบส่วนงานตรวจสอบ"
+    "NoCommentsDescription": "ยังไม่มีข้อเสนอแนะหรือคำแนะนำที่แจ้งมาเพื่อให้ผู้รับผิดชอบส่วนงานตรวจสอบ",
+    "WaitingForResults": "กำลังรอผลลัพธ์",
+    "CreatePatrolPreset": "สร้างรูปแบบตรวจตรา",
+    "Title": "ชื่อ",
+    "Description": "คำอธิบาย",
+    "EditPatrolPreset": "แก้ไขรูปแบบตรวจตรา",
+    "ChecklistGroup": "ชุดตรวจตรา",
+    "ChecklistGroupDescription": "กรุณาเพิ่มชุดตรวจตรา",
+    "Done": "เรียบร้อย",
+    "EmptyChecklist": "คุณยังไม่มีชุดตรวจตรา ต้องการสร้างตอนนี้หรือไม่?",
+    "Sure": "แน่นอน"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -342,6 +352,20 @@
     "EditDefectResolveTitle": "แก้ไขข้อมูลข้อบกพร่องที่ถูกระบุว่าแก้ไขสำเร็จ",
     "EditDefectResolveDescription": "แก้ไขข้อมูลของข้อบกพร่องที่ถูกระบุว่าแก้ไขสำเร็จและอยู่ระหว่างรอการตรวจสอบจากผู้ตรวจสอบ",
     "ConfirmPasswordChange": "ยืนยันการเปลี่ยนรหัสผ่าน",
-    "ConfirmPasswordChangeDescription": "เมื่อคุณเปลี่ยนรหัสผ่านแล้ว คุณจะต้องใช้รหัสผ่านใหม่ในการเข้าสู่ระบบ คุณต้องการดำเนินการต่อหรือไม่"
+    "ConfirmPasswordChangeDescription": "เมื่อคุณเปลี่ยนรหัสผ่านแล้ว คุณจะต้องใช้รหัสผ่านใหม่ในการเข้าสู่ระบบ คุณต้องการดำเนินการต่อหรือไม่",
+    "CreatePresetMissingTitle": "กรุณาระบุชื่อในช่องข้อมูล",
+    "CreatePresetMissingDescription": "กรุณาระบุคำอธิบายในช่องข้อมูล",
+    "CreatePresetMissingChecklist": "กรุณาระบุชุดตรวจตรา",
+    "CreatePresetTitle": "คุณแน่ใจหรือไม่ว่าต้องการสร้างรูปแบบตรวจตรา?",
+    "CreatePresetDescription": "กรุณายืนยันการสร้างรูปแบบตรวจตรา",
+    "CreatePresetTitleSuccess": "สร้างรูปแบบตรวจตราสำเร็จ",
+    "CreatePresetDescriptionSuccess": "การสร้างรูปแบบตรวจตราของคุณได้รับการบันทึกสำเร็จ",
+    "EditPresetTitle": "คุณแน่ใจหรือไม่ว่าต้องการแก้ไขรูปแบบตรวจตรา?",
+    "EditPresetDescription": "กรุณายืนยันการแก้ไขรูปแบบตรวจตรา",
+    "EditPresetMissingTitle": "กรุณาระบุชื่อในช่องข้อมูล",
+    "EditPresetMissingDescription": "กรุณาระบุคำอธิบายในช่องข้อมูล",
+    "EditPresetMissingChecklist": "กรุณาระบุชุดตรวจตรา",
+    "EditPresetTitleSuccess": "แก้ไขรูปแบบตรวจตราสำเร็จ",
+    "EditPresetDescriptionSuccess": "การแก้ไขรูปแบบตรวจตราของคุณได้รับการบันทึกสำเร็จ"
   }
 }
