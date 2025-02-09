@@ -266,6 +266,7 @@
     "ProfileUpdateErrorDescription": "Please correct the information and try again.",
     "ProfileNameRequire": "Please enter a name.",
     "ProfileEmailInvalid": "Invalid email format. Please use example@domain.com.",
+    "ProfileEmailRequire": "Please enter your Email.",
     "ProfileAgeInvalid": "Invalid age. Enter a number no more than 120.",
     "ProfileAgeRequire": "Please enter your age.",
     "ProfileTelInvalid": "Invalid phone number. Must be 10 digits.",

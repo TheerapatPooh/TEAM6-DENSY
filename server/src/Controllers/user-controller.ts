@@ -74,7 +74,7 @@ export async function createUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -91,7 +91,7 @@ export async function updateProfile(req: Request, res: Response) {
     const userId = (req as any).user.userId;
     const imagePath = req.file?.filename || ""; // ถ้าไม่มีก็เป็นสตริงว่าง
 
-        // ค้นหาผู้ใช้จากฐานข้อมูลตาม userId
+    // ค้นหาผู้ใช้จากฐานข้อมูลตาม userId
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -160,7 +160,7 @@ export async function updateProfile(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -203,10 +203,10 @@ export async function getUser(req: Request, res: Response) {
           active: true,
           profile: includeProfile
             ? {
-                include: {
-                  image: includeImage,
-                },
-              }
+              include: {
+                image: includeImage,
+              },
+            }
             : undefined,
           zone: true,
         },
@@ -224,10 +224,10 @@ export async function getUser(req: Request, res: Response) {
           active: true,
           profile: includeProfile
             ? {
-                include: {
-                  image: includeImage,
-                },
-              }
+              include: {
+                image: includeImage,
+              },
+            }
             : undefined,
           zone: true,
         },
@@ -244,7 +244,7 @@ export async function getUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -299,10 +299,10 @@ export async function getAllUsers(req: Request, res: Response) {
         active: true,
         profile: includeProfile
           ? {
-              include: {
-                image: includeImage,
-              },
-            }
+            include: {
+              image: includeImage,
+            },
+          }
           : undefined,
       },
     });
@@ -314,9 +314,9 @@ export async function getAllUsers(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
-    }
+  }
 }
 
 
@@ -343,9 +343,8 @@ export async function updateUser(req: Request, res: Response) {
     const loggedInUserId = (req as any).user.userId;
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
-    const { username, name, email, tel, address, password, role, department } =
+    const { username, name, age, email, tel, address, password, role, department } =
       req.body;
-    const age = parseInt(req.body.age);
     const updateUser: any = {};
     const updateProfile: any = {};
     if (username !== undefined) updateUser.username = username;
@@ -355,7 +354,7 @@ export async function updateUser(req: Request, res: Response) {
     if (role !== undefined) updateUser.role = role;
     if (department !== undefined) updateUser.department = department;
     if (name !== undefined) updateProfile.name = name;
-    if (age !== undefined) updateProfile.age = age;
+    if (age !== undefined) updateProfile.age = parseInt(age, 10);
     if (tel !== undefined) updateProfile.tel = tel;
     if (address !== undefined) updateProfile.address = address;
 
@@ -394,7 +393,7 @@ export async function updateUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -429,7 +428,7 @@ export async function removeUser(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
