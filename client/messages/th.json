@@ -37,6 +37,7 @@
     "Next": "ต่อไป",
     "Cancel": "ยกเลิก",
     "Checklist": "ชุดตรวจตรา",
+    "CreateChecklist":"สร้างชุดตรวจตรา",
     "NewPatrol": "สร้าง",
     "PickADate": "เลือกวันที่",
     "inspector": "ผู้ตรวจตรา",
@@ -125,7 +126,21 @@
     "ChecklistGroupDescription": "กรุณาเพิ่มชุดตรวจตรา",
     "Done": "เรียบร้อย",
     "EmptyChecklist": "คุณยังไม่มีชุดตรวจตรา ต้องการสร้างตอนนี้หรือไม่?",
-    "Sure": "แน่นอน"
+    "Sure": "แน่นอน",
+    "DateModified":"วันที่แก้ไข",
+    "SelectZones":"เลือกพื้นที่",
+    "FilterbyZone":"กรองโดยพื้นที่",
+    "FilterbyZoneDescription":"กรุณาเลือกโซนเพื่อแสดงเฉพาะข้อมูลที่เกี่ยวข้อง",
+    "Version":"เวอร์ชัน",
+    "UpdateBy":"แก้ไขโดย",
+    "UpdateAt":"แก้ไขเมื่อ",
+    "EditPatrolChecklist":"แก้ไขชุดตรวจตรา",
+    "List":"รายการ",
+    "Item":"หัวข้อตรวจตรา",
+    "EnterItemTitle":"กรุณากรอกหัวข้อตรวจตรา",
+    "SelectAType":"กรุณาเลือกประเภท",
+    "SelectZone":"กรุณาเลือกพื้นที่"
+
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -367,6 +382,10 @@
     "EditPresetMissingDescription": "กรุณาระบุคำอธิบายในช่องข้อมูล",
     "EditPresetMissingChecklist": "กรุณาระบุชุดตรวจตรา",
     "EditPresetTitleSuccess": "แก้ไขรูปแบบตรวจตราสำเร็จ",
-    "EditPresetDescriptionSuccess": "การแก้ไขรูปแบบตรวจตราของคุณได้รับการบันทึกสำเร็จ"
+    "EditPresetDescriptionSuccess": "การแก้ไขรูปแบบตรวจตราของคุณได้รับการบันทึกสำเร็จ",
+    "DeletionSuccessfulTitle":"ลบสำเร็จ",
+    "DeletionSuccessfulDescription":"ลบรายการตรวจสอบสำเร็จแล้ว",
+    "EditChecklistItemMissing":"กรุณาเพิ่มสิ่งของอย่างน้อยหนึ่งรายการในรายการตรวจสอบ",
+    "EditChecklistItemMissingElement":"กรุณาตรวจสอบให้แน่ใจว่าหัวข้อตรวจตราทั้งหมดมีชื่อ, ประเภท, และเลือกพื้นที่อย่างน้อยหนึ่งพื้นที่"
   }
 }

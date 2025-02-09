@@ -1,14 +1,13 @@
 /**
  * คำอธิบาย:
  *  หน้าแสดงรายการ Checklist ทั้งหมดในระบบ โดยสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงรายการ Checklist ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Checklist แต่ละรายการ และสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
  * - สามารถคลิกเพื่อดูรายละเอียดของ Checklist แต่ละรายการ
  * - สามารถคลิกเพื่อสร้าง Checklist ใหม่ได้
  **/
-
 
 "use client";
 import { IChecklist, IZone } from "@/app/type";
@@ -36,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 import { fetchData, formatTime, getInitials } from "@/lib/utils";
 
 import React, { useState, useEffect } from "react";
@@ -58,6 +56,8 @@ const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
   const z = useTranslations("Zone");
+  const t = useTranslations("General");
+  const a = useTranslations("Alert");
 
   const router = useRouter();
   const locale = useLocale();
@@ -67,13 +67,11 @@ export default function Page() {
     versionCount: number;
   }
 
-
-
   const handleDeleteChecklist = async (id: number) => {
     toast({
       variant: "success",
-      title: "Deletion Successful",
-      description: "The checklist has been deleted successfully.",
+      title: a("DeletionSuccessfulTitle"),
+      description: a("DeletionSuccessfulDescription"),
     });
     try {
       const response = await fetchData("delete", `/checklist/${id}`, true);
@@ -158,9 +156,8 @@ export default function Page() {
   // Modify the getData function to use fetchData
   const getData = async () => {
     try {
-
       // Construct query params for the filters
-      const params = new URLSearchParams(); 
+      const params = new URLSearchParams();
 
       // Add search term to params
       if (searchTerm) {
@@ -283,11 +280,7 @@ export default function Page() {
 
   // Reset filters to default
   const resetFilters = async () => {
-    const data = await fetchData(
-      "get",
-      `/checklists`,
-      true
-    );
+    const data = await fetchData("get", `/checklists`, true);
     setTempSelectedZones([]); // Reset temp selected zones
     setTempDateRange({}); // Reset temp date range
     setSelectedZones([]); // Clear applied zones
@@ -323,23 +316,24 @@ export default function Page() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row justify-between pt-2">
-        <div className="text-2xl font-bold">Checklists</div>
+        <div className="text-2xl font-bold">{t("Checklist")}</div>
 
         <Button
           onClick={() => {
             handleGoToCreateChecklist();
           }}
-          className="flex flex-row gap-2"
+          className="flex flex-row gap-2 custom-shadow"
+          variant="primary"
         >
           <span className="material-symbols-outlined text-2xl">add</span>
-          <div className="text-lg">Create Checklist</div>
+          <div className="text-lg">{t("CreateChecklist")}</div>
         </Button>
       </div>
       <div className="flex items-center gap-2">
         <Textfield
           iconName="search"
           showIcon={true}
-          placeholder="Search"
+          placeholder={t("Search")}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
@@ -350,11 +344,11 @@ export default function Page() {
                      justify-center rounded-md text-sm font-medium`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg">Sort</div>
+            <div className="text-lg">{t("Sort")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="p-2 gap-2">
             <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-              SortBy
+              {t("SortBy")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sortOption}
@@ -367,26 +361,26 @@ export default function Page() {
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                Name
+                {t("Name")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="ModifiedDate"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                Date modified
+                {t("DateModified")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="Type"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                Type
+                {t("Type")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
             <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-              Order
+              {t("Order")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sortOrder}
@@ -397,14 +391,14 @@ export default function Page() {
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                Ascending
+                {t("Ascending")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="desc"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                Descending
+                {t("Descending")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -416,7 +410,7 @@ export default function Page() {
                 `}
           >
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg">Filter</div>
+            <div className="text-lg">{t("Filter")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="flex flex-col justify-center gap-2 p-2 z-50"
@@ -425,7 +419,7 @@ export default function Page() {
             <div>
               <div>
                 <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                  Date
+                  {t("Date")}
                 </DropdownMenuLabel>
                 <DatePickerWithRange
                   className="my-date-picker"
@@ -439,7 +433,7 @@ export default function Page() {
                 />
               </div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                Zone
+                {t("Zone")}
               </DropdownMenuLabel>
               <AlertDialog>
                 <AlertDialogTrigger
@@ -455,17 +449,17 @@ export default function Page() {
                     </span>
                     {selectedZones.length > 0
                       ? selectedZones.map((zone) => zone.name).join(", ")
-                      : "Select Zones"}
+                      : t("SelectZones")}
                   </Button>
                 </AlertDialogTrigger>
 
                 <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-2xl">
-                      Filter by Zone
+                      {t("FilterbyZone")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                      Please select the zones to display only the relevant data.
+                      {t("FilterbyZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div>
@@ -473,7 +467,7 @@ export default function Page() {
                       <span className="material-symbols-outlined">
                         location_on
                       </span>
-                      Zone
+                      {t("Zone")}
                     </div>
                     <div className="flex justify-center bg-secondary rounded-lg py-4">
                       <Map
@@ -492,7 +486,7 @@ export default function Page() {
                         setSelectedZones(tempSelectedZones); // Apply selected zones
                       }}
                     >
-                      Done
+                      {t("Done")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -501,10 +495,10 @@ export default function Page() {
 
             <div className="flex w-full justify-end mt-4 gap-2">
               <Button size="sm" variant="secondary" onClick={resetFilters}>
-                Reset
+                {t("Reset")}
               </Button>
               <Button size="sm" onClick={applyFilters}>
-                Apply
+                {t("Apply")}
               </Button>
             </div>
           </DropdownMenuContent>
@@ -513,7 +507,7 @@ export default function Page() {
 
       {/* Checklist Cards */}
 
-      <div className="space-y-4 p-4 rounded-lg">
+      <div className="space-y-4  rounded-lg">
         {filteredChecklists.length > 0 ? (
           sortedChecklists.map((checklist) => (
             <div key={checklist.id}>
@@ -524,7 +518,7 @@ export default function Page() {
                   }}
                   className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer ${getChecklistColor(
                     checklist
-                  )} border-destructive h-[166px] bg-secondary rounded-lg shadow p-2 justify-between`}
+                  )} border-destructive h-[166px] bg-card rounded-lg custom-shadow p-2 justify-between`}
                 >
                   <div className="flex flex-col gap-4 ">
                     {/* Left Section */}
@@ -534,12 +528,12 @@ export default function Page() {
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
-                              className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
+                              className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
                             >
                               <span className="material-symbols-outlined mr-1">
                                 history
                               </span>
-                              Version {checklist.version}
+                              {t("Version")} {checklist.version}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="ml-[129px]">
@@ -548,19 +542,21 @@ export default function Page() {
                                 <span className="material-symbols-outlined mr-1">
                                   history
                                 </span>
-                                Version {checklist.version}
+                                {t("Version")} {checklist.version}
                               </span>
                               <div className="flex flex-col justify-start items-start ">
                                 <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
                                   <div className="text-muted-foreground">
-                                    Update By
+                                    {t("UpdateBy")}
                                   </div>
-                                  {checklist.user.profile.image?.path === "" ? (
+                                  {checklist.user.profile ? (
                                     <Avatar>
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.user.profile.image?.path}`}
                                       />
-                                      <AvatarFallback id={checklist.user.id.toString()}>
+                                      <AvatarFallback
+                                        id={checklist.user.id.toString()}
+                                      >
                                         {getInitials(
                                           checklist.user.profile.name
                                         )}
@@ -574,7 +570,7 @@ export default function Page() {
                                 </div>
                                 <div className="flex gap-2 text-muted-foreground">
                                   <div className="text-muted-foreground">
-                                    Update At
+                                    {t("UpdateAt")}
                                   </div>
                                   {formatTime(checklist.updatedAt)}
                                 </div>
@@ -582,7 +578,7 @@ export default function Page() {
 
                               <div className="flex justify-between  w-full">
                                 <div className="font-bold text-lg text-muted-foreground">
-                                  Total
+                                  {t("Total")}
                                 </div>
                                 <div className="font-bold text-lg text-muted-foreground">
                                   {checklist.versionCount}
@@ -651,7 +647,7 @@ export default function Page() {
                         className="w-[80px] px-4 py-2"
                         side="bottom"
                       >
-                        <div className="text-lg cursor-pointer ">Detail</div>
+                        <div className="text-lg cursor-pointer ">{t("Detail")}</div>
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
@@ -659,7 +655,7 @@ export default function Page() {
                           }}
                           className="text-destructive text-lg cursor-pointer hover:text-transparent-50"
                         >
-                          Delete
+                          {t("Delete")}
                         </div>
                         {isDialogOpen && dialogType === "delete" && (
                           <AlertCustom

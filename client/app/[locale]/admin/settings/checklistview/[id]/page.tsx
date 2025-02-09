@@ -1,13 +1,12 @@
 /**
  * คำอธิบาย:
  *  หน้าแก้ไข Checklist ในระบบ
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงหน้าแก้ไข Checklist ในระบบโดยแสดงช่องกรองข้อมูลของ Checklist
  * - สามารถเพิ่ม ลบ แก้ไข Item ใน Checklist ได้
  **/
-
 
 "use client";
 
@@ -51,6 +50,8 @@ const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
   const z = useTranslations("Zone");
+  const t = useTranslations("General");
+  const a = useTranslations("Alert");
 
   const params = useParams();
   const router = useRouter();
@@ -411,13 +412,15 @@ export default function Page() {
   };
 
   return (
-    <div className=" p-4 ">
-      <div className="m bg-white p-6 rounded-lg shadow-lg">
+    <div className=" ">
+      <div className="m bg-white py-4 px-6 rounded-lg shadow-lg">
         <div className="flex flex-row justify-between">
-          <h1 className="text-2xl font-bold mb-4">Edit Patrol Checklist</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            {t("EditPatrolChecklist")}
+          </h1>
           <div className="flex gap-2">
             <Button onClick={() => window.history.back()} variant="secondary">
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               onClick={() => {
@@ -426,7 +429,8 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">save</span>Save
+              <span className="material-symbols-outlined">save</span>
+              {t("Save")}
             </Button>
             {isDialogOpen && dialogType === "edit" && (
               <AlertCustom
@@ -443,20 +447,20 @@ export default function Page() {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-muted-foreground">
-            Title
+            {t("Title")}
           </label>
           <input
             disabled
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-[360px] mt-1 p-2 bg-secondary text-base font-semibold text-muted-foreground rounded-md"
+            className="w-[360px] mt-1 p-2 bg-secondary text-base text-card-foreground rounded-md"
             placeholder="Enter Checklist title"
           />
         </div>
         <div>
           <div className="flex flex-row items-center gap-2 p-2">
-            <div className="text-2xl font-semibold">List</div>
+            <div className="text-2xl font-semibold">{t("List")}</div>
             <Button
               onClick={handleAddChecklistItem}
               className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -465,13 +469,12 @@ export default function Page() {
             </Button>
             {error.items && (
               <div className="text-destructive">
-                Please add at least one item to the checklist.
+                {a("EditChecklistItemMissing")}
               </div>
             )}
             {error.itemsField && (
               <div className="text-destructive">
-                Please ensure all items have a name, type, and at least one zone
-                selected.
+                {a("EditChecklistItemMissingElement")}
               </div>
             )}
           </div>
@@ -479,9 +482,9 @@ export default function Page() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className=" w-[30%] ">Item</TableHead>
-              <TableHead className="w-[30%] ">Type</TableHead>
-              <TableHead className=" w-[30%] ">Zone</TableHead>
+              <TableHead className=" w-[30%]">{t("Item")}</TableHead>
+              <TableHead className="w-[30%] ">{t("Type")}</TableHead>
+              <TableHead className=" w-[30%] ">{t("Zone")}</TableHead>
               <TableHead className="w-[10%]  "></TableHead>
             </TableRow>
           </TableHeader>
@@ -493,8 +496,8 @@ export default function Page() {
                     type="text"
                     value={selectedChecklistName[item.id]}
                     onChange={(e) => handleNameChange(item.id, e.target.value)}
-                    className="max-w-[350px] w-full p-2 bg-card border-none rounded-md text-base font-semibold text-muted-foreground"
-                    placeholder="Enter Item title"
+                    className="max-w-[350px] w-full p-2 placeholder:text-input bg-card border-none rounded-md "
+                    placeholder={t("EnterItemTitle")}
                   />
                 </TableCell>
                 <TableCell>
@@ -510,8 +513,8 @@ export default function Page() {
                           openStatesType[item.id] ? "rotate-180" : "rotate-0"
                         }`}
                       />
-                      <span className="text-base font-semibold text-muted-foreground ">
-                        {selectedType[item.id] ? "" : "Select a Type"}
+                      <span className=" text-input ">
+                        {selectedType[item.id] ? "" : t("SelectAType")}
                       </span>
                       {selectedType[item.id] && (
                         <BadgeCustom
@@ -581,8 +584,8 @@ export default function Page() {
                       className="flex items-center gap-2 rounded cursor-pointer"
                     >
                       <div className="w-[305px] overflow-hidden text-center">
-                        <p className="text-base font-semibold text-muted-foreground truncate whitespace-nowrap">
-                          {selectedZones[item.id]?.length > 0
+                      <p className={`text-base truncate whitespace-nowrap ${selectedZones[item.id]?.length > 0 ? '' : 'text-input'}`}>
+                      {selectedZones[item.id]?.length > 0
                             ? selectedZones[item.id]
                                 .map((zoneId) =>
                                   z(
@@ -591,7 +594,7 @@ export default function Page() {
                                   )
                                 )
                                 .join(", ")
-                            : "Select Zones"}
+                            : t("SelectZone")}
                         </p>
                       </div>
                     </AlertDialogTrigger>

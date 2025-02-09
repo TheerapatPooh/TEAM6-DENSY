@@ -37,6 +37,7 @@
     "Next": "Next",
     "Cancel": "Cancel",
     "Checklist": "Checklist",
+    "CreateChecklist":"Create Checklist",
     "NewPatrol": " New Patrol",
     "PickADate": "Pick a date",
     "inspector": "Inspector",
@@ -121,11 +122,25 @@
     "Title": "Title",
     "Description": "Description",
     "EditPatrolPreset": "Edit Patrol Preset",
-    "ChecklistGroup": "Checklist Group",
-    "ChecklistGroupDescription": "Please add a checklist group",
+    "ChecklistGroup": "Checklist",
+    "ChecklistGroupDescription": "Please add a checklist",
     "Done": "Done",
     "EmptyChecklist": "You don't have any Checklist want to create now?",
-    "Sure": "Sure"
+    "Sure": "Sure",
+    "DateModified":"Date modified",
+    "SelectZones":"Select Zones",
+    "FilterbyZone":"Filter by Zone",
+    "FilterbyZoneDescription":"Please select the zones to display only the relevant data.",
+    "Version":"Version",
+    "UpdateBy":"Update By",
+    "UpdateAt":"Update At",
+    "EditPatrolChecklist":"Edit Patrol Checklist",
+    "List":"List",
+    "Item":"Item",
+    "EnterItemTitle":"Enter Item title",
+    "SelectAType":"Select a Type",
+    "SelectZone":"Select Zone"
+
   },
   "Status": {
     "pending": "Pending",
@@ -367,6 +382,10 @@
     "EditPresetMissingDescription": "Please provide a valid description in the fields.",
     "EditPresetMissingChecklist": "Please provide a valid checklist in the fields.",
     "EditPresetTitleSuccess": "Preset Saved",
-    "EditPresetDescriptionSuccess": "Your changes are saved successfully."
+    "EditPresetDescriptionSuccess": "Your changes are saved successfully.",
+    "DeletionSuccessfulTitle":"Deletion Successful",
+    "DeletionSuccessfulDescription":"The checklist has been deleted successfully.",
+    "EditChecklistItemMissing":"Please add at least one item to the checklist.",
+    "EditChecklistItemMissingElement":"Please ensure all items have a name, type, and at least one zone selected."
   }
 }
