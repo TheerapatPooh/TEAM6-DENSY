@@ -35,7 +35,11 @@ export default function TabMenu({ id }: { id?: string }) {
     if (pathname === `/${locale}/admin/employees`) {
         return null;
     }
-    
+
+    if (pathname === `/${locale}/admin/settings/patrol-preset/create` || new RegExp(`^/${locale}/admin/settings/patrol-preset/\\d+$`).test(pathname)) {
+        return null
+    }
+
     return (
         <div>
             {currentSubMenu ? (

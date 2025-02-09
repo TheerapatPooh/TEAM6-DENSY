@@ -61,7 +61,6 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
     setIsDialogOpen(true);
   };
 
-
   const beforeImage = defect.images
     .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
     .filter((image) => image.image.user.id === defect.userId)
@@ -87,7 +86,6 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
   const [alertBoxDescription, setAlertBoxDescription] = useState();
   const router = useRouter();
   const locale = useLocale();
-
 
   // Handle before image click
   const handleBeforeImageClick = () => {
