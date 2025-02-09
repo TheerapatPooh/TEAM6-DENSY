@@ -213,7 +213,6 @@ export default function page() {
       userForm.append("address", formData.address);
     }
 
-
     try {
       if (!showErrorToast) {
         const response = await fetchData(
@@ -253,6 +252,8 @@ export default function page() {
     setConfirmPassError(null);
     if (!formData || Object.keys(formData).length === 0) {
       setCurrentPassError(a("ProfileCurrentPassRequire"));
+      setNewPassError(a("ProfileNewPassRequire"));
+      setConfirmPassError(a("ProfileConfirmPassRequire"));
       toast({
         variant: "error",
         title: a("ProfileUpdateErrorTitle"),
@@ -266,8 +267,16 @@ export default function page() {
       formData.newPassword ||
       formData.confirmPassword
     ) {
+      const passwordMatch = await bcrypt.compare(
+        formData.currentPassword,
+        userData.password
+      );
       if (!formData.currentPassword) {
         setCurrentPassError(a("ProfileCurrentPassRequire"));
+        showErrorToast = true;
+      }
+      if (!passwordMatch) {
+        setCurrentPassError(a("ProfileCurrentPassInvalid"));
         showErrorToast = true;
       }
       if (!formData.newPassword) {
@@ -277,10 +286,24 @@ export default function page() {
       if (!formData.confirmPassword) {
         setConfirmPassError(a("ProfileConfirmPassRequire"));
         showErrorToast = true;
+      }
+      if (formData.newPassword !== formData.confirmPassword) {
+        setNewPassError(a("ProfileConfirmPassInvalid"));
+        setConfirmPassError(a("ProfileConfirmPassInvalid"));
+        showErrorToast = true;
       } else {
-        const passwordMatch = await bcrypt.compare(formData.currentPassword, userData.password);
-        if (passwordMatch) {
-          if (formData.newPassword === formData.confirmPassword) {
+        if (formData.newPassword === formData.confirmPassword && passwordMatch) {
+          const isPasswordTheSame = await bcrypt.compare(
+            formData.newPassword,
+            userData.password
+          );
+          if (isPasswordTheSame) {
+            toast({
+              variant: "default",
+              title: a("ProfileNoChangeTitle"),
+              description: a("ProfileNoChangeDescription"),
+            });
+          } else {
             const userForm = new FormData();
             userForm.append("password", formData.newPassword);
 
@@ -307,13 +330,7 @@ export default function page() {
               console.error("Error updating password:", error);
               showErrorToast = true;
             }
-          } else {
-            setConfirmPassError(a("ProfileConfirmPassInvalid"));
-            showErrorToast = true;
           }
-        } else {
-          setCurrentPassError(a("ProfileCurrentPassInvalid"));
-          showErrorToast = true;
         }
       }
 
