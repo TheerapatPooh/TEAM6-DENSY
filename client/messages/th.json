@@ -275,6 +275,7 @@
     "ProfileUpdateErrorDescription": "โปรดแก้ไขข้อมูลแล้วลองอีกครั้ง",
     "ProfileNameRequire": "กรุณากรอกชื่อ",
     "ProfileEmailInvalid": "รูปแบบอีเมลไม่ถูกต้อง กรุณาใช้รูปแบบ example@domain.com",
+    "ProfileEmailRequire": "กรุณากรอกอีเมลของคุณ",
     "ProfileAgeInvalid": "อายุไม่ถูกต้อง กรุณากรอกตัวเลขไม่เกิน 120 ปี",
     "ProfileAgeRequire": "กรุณากรอกอายุของคุณ",
     "ProfileTelInvalid": "หมายเลขโทรศัพท์ไม่ถูกต้อง ต้องมี 10 หลัก",

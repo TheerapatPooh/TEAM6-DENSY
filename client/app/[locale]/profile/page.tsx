@@ -143,78 +143,99 @@ export default function page() {
     const { name, value } = e.target;
     setFormData((prev) => {
       const updatedFormData = { ...prev };
-
-      if (value === "") {
-        delete updatedFormData[name];
-      } else {
-        updatedFormData[name] = value;
-      }
-
+      updatedFormData[name] = value;
       return updatedFormData;
     });
   };
 
+  console.log(formData)
   const handleUpdateUserData = async () => {
+    let update = false
     let showErrorToast = false;
     setCurrentPassError(null);
     setNewPassError(null);
     setConfirmPassError(null);
+    setNameError(null);
     setEmailError(null);
     setAgeError(null);
     setTelError(null);
-    if (!formData || Object.keys(formData).length === 0) {
-      toast({
-        variant: "default",
-        title: a("ProfileNoChangeTitle"),
-        description: a("ProfileNoChangeDescription"),
-      });
-      return;
-    }
+    setAddressError(null);
 
     const userForm = new FormData();
 
-    if (formData?.name && formData?.name !== userData.profile.name) {
+    // name
+    if (formData?.name === null || formData?.name === '') {
+      setNameError(a("ProfileNameRequire"));
+      showErrorToast = true;
+    } else if (formData?.name && formData?.name !== userData.profile.name) {
       userForm.append("name", formData.name);
+      update = true;
     }
-    if (formData?.email && formData?.email !== userData.email) {
-      if (
-        formData?.email &&
-        formData.email.trim() &&
-        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)
-      ) {
+
+    //  email
+    if (formData?.email === null || formData?.email === '') {
+      setEmailError(a("ProfileEmailRequire"));
+      showErrorToast = true;
+    } else if (formData?.email && formData?.email !== userData.email) {
+      if (formData?.email && formData.email.trim() && /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
         userForm.append("email", formData.email);
-      } else {
+        update = true;
+      }
+      else {
         setEmailError(a("ProfileEmailInvalid"));
         showErrorToast = true;
       }
     }
-    if (formData?.age && formData?.age !== userData.profile.age) {
-      if (
-        formData?.age &&
-        !isNaN(Number(formData.age)) &&
-        Number(formData.age) <= 120
-      ) {
+
+    //  age
+    if (formData?.age !== undefined && formData?.age.toString() === '') {
+      setAgeError(a("ProfileAgeRequire"));
+      showErrorToast = true;
+    } else if (formData?.age && formData?.age.toString() !== userData.profile.age.toString()) {
+      if (formData?.age && !isNaN(Number(formData.age)) && Number(formData.age) <= 120) {
         userForm.append("age", formData.age.toString());
+        update = true;
       } else {
         setAgeError(a("ProfileAgeInvalid"));
         showErrorToast = true;
       }
     }
 
-    if (formData?.tel && formData?.tel !== userData.profile.tel) {
+    //  tel
+    if (formData?.tel === null || formData?.tel === '') {
+      setTelError(a("ProfileTelRequire"));
+      showErrorToast = true;
+    } else if (formData?.tel && formData?.tel !== userData.profile.tel) {
       if (formData?.tel?.trim() && /^[0-9]{10}$/.test(formData.tel.trim())) {
         userForm.append("tel", formData.tel);
+        update = true;
       } else {
         setTelError(a("ProfileTelInvalid"));
         showErrorToast = true;
       }
     }
-    if (formData?.address && formData?.address !== userData.profile.address) {
+
+    //  address
+    if (formData?.address === null || formData?.address === '') {
+      setAddressError(a("ProfileAddressRequire"));
+      showErrorToast = true;
+    } else if (formData?.address && formData?.address !== userData.profile.address) {
       userForm.append("address", formData.address);
+      update = true;
     }
 
-    try {
-      if (!showErrorToast) {
+    if (showErrorToast) {
+      toast({
+        variant: "error",
+        title: a("ProfileUpdateErrorTitle"),
+        description: a("ProfileUpdateErrorDescription"),
+      });
+      return;
+    }
+
+    console.log("userform", userForm)
+    if (update) {
+      try {
         const response = await fetchData(
           "put",
           `/user/${userData.profile.userId}`,
@@ -229,118 +250,125 @@ export default function page() {
             description: a("ProfileUpdateSuccessDescription"),
           });
         }
-      } else {
+      } catch (error) {
+        console.error("Error updating profile:", error);
         toast({
           variant: "error",
           title: a("ProfileUpdateErrorTitle"),
           description: a("ProfileUpdateErrorDescription"),
         });
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
+    } else {
       toast({
-        variant: "error",
-        title: a("ProfileUpdateErrorTitle"),
-        description: a("ProfileUpdateErrorDescription"),
+        variant: "default",
+        title: a("ProfileNoChangeTitle"),
+        description: a("ProfileNoChangeDescription"),
       });
+      return;
     }
   };
+
   const handleUpdateUserPassword = async () => {
     let showErrorToast = false;
     setCurrentPassError(null);
     setNewPassError(null);
     setConfirmPassError(null);
-    if (!formData || Object.keys(formData).length === 0) {
+    setNameError(null);
+    setEmailError(null);
+    setAgeError(null);
+    setTelError(null);
+    setAddressError(null);
+
+    // Check if all fields are filled
+    if (!formData?.currentPassword) {
       setCurrentPassError(a("ProfileCurrentPassRequire"));
+      showErrorToast = true;
+    }
+
+    if (!formData?.newPassword) {
       setNewPassError(a("ProfileNewPassRequire"));
+      showErrorToast = true;
+    }
+
+    if (!formData?.confirmPassword) {
       setConfirmPassError(a("ProfileConfirmPassRequire"));
+      showErrorToast = true;
+    }
+
+    // If there's any error, show toast and stop
+    if (showErrorToast) {
       toast({
         variant: "error",
         title: a("ProfileUpdateErrorTitle"),
-        description: a("ProfileCurrentPassRequire"),
+        description: a("ProfileUpdateErrorDescription"),
       });
-      showErrorToast = true;
       return;
     }
-    if (
-      formData.currentPassword ||
-      formData.newPassword ||
-      formData.confirmPassword
-    ) {
-      const passwordMatch = await bcrypt.compare(
-        formData.currentPassword,
-        userData.password
-      );
-      if (!formData.currentPassword) {
-        setCurrentPassError(a("ProfileCurrentPassRequire"));
-        showErrorToast = true;
-      }
-      if (!passwordMatch) {
-        setCurrentPassError(a("ProfileCurrentPassInvalid"));
-        showErrorToast = true;
-      }
-      if (!formData.newPassword) {
-        setNewPassError(a("ProfileNewPassRequire"));
-        showErrorToast = true;
-      }
-      if (!formData.confirmPassword) {
-        setConfirmPassError(a("ProfileConfirmPassRequire"));
-        showErrorToast = true;
-      }
-      if (formData.newPassword !== formData.confirmPassword) {
-        setNewPassError(a("ProfileConfirmPassInvalid"));
-        setConfirmPassError(a("ProfileConfirmPassInvalid"));
-        showErrorToast = true;
-      } else {
-        if (formData.newPassword === formData.confirmPassword && passwordMatch) {
-          const isPasswordTheSame = await bcrypt.compare(
-            formData.newPassword,
-            userData.password
-          );
-          if (isPasswordTheSame) {
-            toast({
-              variant: "default",
-              title: a("ProfileNoChangeTitle"),
-              description: a("ProfileNoChangeDescription"),
-            });
-          } else {
-            const userForm = new FormData();
-            userForm.append("password", formData.newPassword);
 
-            try {
-              const response = await fetchData(
-                "put",
-                `/user/${userData.profile.userId}`,
-                true,
-                userForm
-              );
-              if (response) {
-                setUserData(response);
-                toast({
-                  variant: "success",
-                  title: a("ProfileUpdateSuccessTitle"),
-                  description: a("ProfileUpdateSuccessDescription"),
-                });
-                try {
-                  await fetchData("post", `/logout`, true);
-                  window.location.reload();
-                } catch (error) {}
-              }
-            } catch (error) {
-              console.error("Error updating password:", error);
-              showErrorToast = true;
+    const passwordMatch = await bcrypt.compare(
+      formData?.currentPassword,
+      userData?.password
+    );
+
+    const isPasswordTheSame = await bcrypt.compare(
+      formData?.newPassword,
+      userData?.password
+    );
+
+    if (formData?.newPassword === formData?.confirmPassword) {
+      if (!isPasswordTheSame) {
+        if (passwordMatch) {
+          const userForm = new FormData();
+          userForm.append("password", formData.newPassword);
+
+          try {
+            const response = await fetchData(
+              "put",
+              `/user/${userData.profile.userId}`,
+              true,
+              userForm
+            );
+            if (response) {
+              setUserData(response);
+              toast({
+                variant: "success",
+                title: a("ProfileUpdateSuccessTitle"),
+                description: a("ProfileUpdateSuccessDescription"),
+              });
+              try {
+                await fetchData("post", `/logout`, true);
+                window.location.reload();
+              } catch (error) { }
             }
+          } catch (error) {
+            console.error("Error updating password:", error);
+            showErrorToast = true;
           }
+          return;
+        } else {
+          setCurrentPassError(a("ProfileCurrentPassInvalid"));
+          toast({
+            variant: "error",
+            title: a("ProfileUpdateErrorTitle"),
+            description: a("ProfileUpdateErrorDescription"),
+          });
+          return;
         }
-      }
-
-      if (showErrorToast) {
+      } else {
         toast({
-          variant: "error",
-          title: a("ProfileUpdateErrorTitle"),
-          description: a("ProfileUpdateErrorDescription"),
+          variant: "default",
+          title: a("ProfileNoChangeTitle"),
+          description: a("ProfileNoChangeDescription"),
         });
       }
+    } else {
+      setConfirmPassError(a("ProfileConfirmPassInvalid"));
+      toast({
+        variant: "error",
+        title: a("ProfileUpdateErrorTitle"),
+        description: a("ProfileUpdateErrorDescription"),
+      });
+      return;
     }
   };
 
@@ -505,8 +533,8 @@ export default function page() {
               userData.role === "supervisor"
                 ? "yellow"
                 : userData.role === "inspector"
-                ? "red"
-                : "blue"
+                  ? "red"
+                  : "blue"
             }
             showIcon={true}
             shape="square"
@@ -514,8 +542,8 @@ export default function page() {
               userData.role === "supervisor"
                 ? "engineering"
                 : userData.role === "inspector"
-                ? "person_search"
-                : "manage_accounts"
+                  ? "person_search"
+                  : "manage_accounts"
             }
           >
             {t(userData.role)}
@@ -566,7 +594,7 @@ export default function page() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsContent value="profile">
+        <TabsContent className="w-full" value="profile">
           <div className="flex flex-col bg-card w-full py-4 px-6 rounded-md custom-shadow">
             <div className="flex flex-col gap-4">
               <TabsList className="flex gap-1 bg-secondary w-[233px] h-10">
