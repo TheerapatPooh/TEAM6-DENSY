@@ -208,6 +208,12 @@ export async function getDefect(req: Request, res: Response) {
         id: Number(id),
       },
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            profile: true,
+          },
+        },
         images: {
           include: {
             image: {

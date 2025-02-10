@@ -35,6 +35,7 @@ model User {
   patrolChecklists   PatrolChecklist[]
   images             Image[]
   Checklists         Checklist[]
+  PatrolResult       PatrolResult[]
 
   @@map("users")
 }
@@ -162,16 +163,18 @@ model Checklist {
 }
 
 model PatrolResult {
-  id       Int      @id @default(autoincrement()) @map("pr_id")
-  status   Boolean? @map("pr_status")
-  itemId   Int      @map("pr_itze_it_id")
-  zoneId   Int      @map("pr_itze_ze_id")
-  patrolId Int      @map("pr_pt_id")
+  id           Int      @id @default(autoincrement()) @map("pr_id")
+  status       Boolean? @map("pr_status")
+  itemId       Int      @map("pr_itze_it_id")
+  zoneId       Int      @map("pr_itze_ze_id")
+  patrolId     Int      @map("pr_pt_id")
+  supervisorId Int      @map("pr_su_id")
 
-  comments Comment[]
-  defects  Defect[]
-  itemZone ItemZone  @relation(fields: [itemId, zoneId], references: [itemId, zoneId])
-  patrol   Patrol    @relation(fields: [patrolId], references: [id])
+  comments   Comment[]
+  defects    Defect[]
+  itemZone   ItemZone  @relation(fields: [itemId, zoneId], references: [itemId, zoneId])
+  patrol     Patrol    @relation(fields: [patrolId], references: [id])
+  supervisor User      @relation(fields: [supervisorId], references: [id])
 
   @@map("patrol_results")
 }

@@ -92,6 +92,12 @@ export async function getPatrol(req: Request, res: Response) {
         results: includeResult
           ? {
             include: {
+              supervisor: {
+                select: {
+                  id: true,
+                  profile: true
+                }
+              },
               defects: true,
               comments: {
                 include: {
@@ -624,6 +630,7 @@ export async function startPatrol(req: Request, res: Response) {
               itemId: items.id,
               zoneId: zones.zone.id,
               patrolId: patrolId,
+              supervisorId: zones.zone.supervisor.id,
             },
           });
           // ส่งการแจ้งเตือนให้กับผู้ตรวจสอบถ้ายังไม่ได้แจ้งเตือน
@@ -704,6 +711,7 @@ export async function startPatrol(req: Request, res: Response) {
         },
         results: {
           include: {
+            supervisor: true,
             defects: true,
             comments: {
               include: {
