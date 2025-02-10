@@ -55,10 +55,12 @@ export default function page() {
             const queryString = buildQueryString(filter, searchTerm);
             const allData = await fetchData("get", `/patrol/defects?${queryString}`, true);
             setAllDefects(allData);
+            setDefectType(filter.defectTypes)
         } catch (error) {
             console.error("Failed to fetch all defect:", error);
         }
     };
+
 
     const fetchRealtimeData = (defect: IDefect) => {
         setAllDefects((prevDefects) =>
