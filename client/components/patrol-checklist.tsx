@@ -449,7 +449,7 @@ export default function PatrolChecklist({
                                       size={"lg"}
                                       disabled={disabled}
                                       onClick={() => {
-                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, itemZones.zone.supervisor.id)
+                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, supervisor.id)
                                         setComments(prev => ({
                                           ...prev,
                                           [`${item.id}-${itemZones.zone.id}`]: ""
