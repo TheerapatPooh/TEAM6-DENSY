@@ -70,21 +70,21 @@ export function DatePicker({
   )
 }
 
-interface DatePickerWithRangeIDatePicker {
+interface IDatePickerWithRange {
   startDate: Date | undefined; 
   endDate: Date | undefined; 
   onSelect: (date: DateRange) => void; 
   className?: string; 
 }
 
-export const DatePickerWithRange: React.FC<DatePickerWithRangeIDatePicker> = ({
+export const DatePickerWithRange: React.FC<IDatePickerWithRange> = ({
   startDate,
   endDate,
   onSelect,
   className,
 }) => {
   const [date, setDate] = React.useState<DateRange | undefined>(undefined); 
-
+  const t = useTranslations("General");
   React.useEffect(() => {
     setDate({
       from: startDate,
@@ -125,7 +125,7 @@ export const DatePickerWithRange: React.FC<DatePickerWithRangeIDatePicker> = ({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{t("PickADate")}</span>
             )}
           </Button>
         </PopoverTrigger>

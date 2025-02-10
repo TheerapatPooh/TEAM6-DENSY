@@ -1,3 +1,6 @@
+import Loading from "@/components/loading"
+import { Suspense } from "react"
+
 export default function Layout({
   children,
 }: {
@@ -5,7 +8,9 @@ export default function Layout({
 }) {
   return (
     <section>
-      {children}
+      <Suspense fallback={<Loading />}>
+        {children}
+      </Suspense>
     </section>
   )
 }

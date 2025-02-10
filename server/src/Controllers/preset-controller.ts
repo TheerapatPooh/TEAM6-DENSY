@@ -15,10 +15,9 @@ import { Checklist } from "@prisma/client";
 export async function createPreset(req: Request, res: Response) {
   try {
     const { title, description, checklists } = req.body;
-    const userId = (req as any).user.userId;
-    const intChecklists: number[] = checklists.map(Number); // แปลง checklists เป็น array ของตัวเลข
+    const userId = (req as any).user.userId;    
     // ตรวจสอบข้อมูลที่จำเป็น
-    if (!title || !description || !Array.isArray(checklists) || !userId) {
+    if (!title || !description || !userId) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -34,11 +33,11 @@ export async function createPreset(req: Request, res: Response) {
       },
     });
     // เชื่อมโยง preset กับ checklists ที่เลือก
-    for (const checklistId of intChecklists) {
+    for (const checklistId of checklists) {
       await prisma.presetChecklist.create({
         data: {
           presetId: newPreset.id,
-          checklistId,
+          checklistId: parseInt(checklistId),
         },
       });
     }
@@ -48,7 +47,7 @@ export async function createPreset(req: Request, res: Response) {
       .json({ message: "Preset created successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -69,7 +68,7 @@ export async function updatePreset(req: Request, res: Response) {
     const { title, description, checklists } = req.body;
     const userId = (req as any).user.userId;
     const presetId = parseInt(req.params.id, 10);
-    const intChecklists: number[] = checklists.map(Number);
+
     // ตรวจสอบข้อมูลที่จำเป็น
     if (
       !presetId ||
@@ -107,11 +106,11 @@ export async function updatePreset(req: Request, res: Response) {
       },
     });
     // เชื่อมโยง preset ใหม่กับ checklists ที่เลือก
-    for (const checklistId of intChecklists) {
+    for (const checklistId of checklists) {
       await prisma.presetChecklist.create({
         data: {
           presetId: newPreset.id,
-          checklistId: checklistId,
+          checklistId: parseInt(checklistId),
         },
       });
     }
@@ -121,7 +120,7 @@ export async function updatePreset(req: Request, res: Response) {
       .json({ message: "Preset updated successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });;
   }
 }
 
@@ -282,8 +281,8 @@ export async function getPreset(req: Request, res: Response) {
     let result = preset;
     res.status(200).json(result);
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });;
   }
 }
 
@@ -295,35 +294,80 @@ export async function getPreset(req: Request, res: Response) {
  **/
 export async function getAllPresets(req: Request, res: Response) {
   try {
-    let latest = true;
-    if (req.query.latest && req.query.latest === "true") {
-      latest = false;
-    }
-    const presets = await prisma.preset.findMany({
-      where: latest ? { latest: latest } : undefined,
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        presetChecklists: {
-          select: {
-            checklist: {
-              select: {
-                id: true,
-                title: true,
-                items: {
-                  include: {
-                    itemZones: {
-                      select: {
-                        zone: {
-                          select: {
-                            id: true,
-                            name: true,
-                          },
-                        },
+    const { zones, startDate, endDate, search, latest } = req.query;
+
+    const whereClause: any = {
+      latest: latest === "false" ? undefined : true,
+    };
+
+    if (zones) {
+      whereClause.presetChecklists = {
+        some: {
+          checklist: {
+            items: {
+              some: {
+                itemZones: {
+                  some: {
+                    zone: {
+                      name: {
+                        in: (zones as string).split(","),
                       },
                     },
                   },
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (startDate || endDate) {
+      whereClause.updatedAt = {};
+      if (startDate) {
+        whereClause.updatedAt.gte = new Date(startDate as string);
+      }
+      if (endDate) {
+        whereClause.updatedAt.lte = new Date(endDate as string);
+      }
+    }
+
+    if (search) {
+      whereClause.title = {
+        contains: search as string,
+        mode: "insensitive",
+      };
+    }
+
+    const presets = await prisma.preset.findMany({
+      where: whereClause,
+      include: {
+        presetChecklists: {
+          include: {
+            checklist: {
+              include: {
+                items: {
+                  include: {
+                    itemZones: {
+                      include: {
+                        zone: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profile: {
+              select: {
+                name: true,
+                image: {
+                  select: { path: true },
                 },
               },
             },
@@ -333,38 +377,47 @@ export async function getAllPresets(req: Request, res: Response) {
     });
 
     if (!presets.length) {
-      res.status(404);
+      res.status(404).json({ message: "No presets found" });
       return;
     }
+
+    const allPresets = await prisma.preset.findMany({
+      select: { title: true },
+    });
+
+    const versionCounts = allPresets.reduce((acc, preset) => {
+      acc[preset.title] = (acc[preset.title] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
     const result = presets.map((preset) => {
       const zones = preset.presetChecklists.flatMap((checklist) =>
         checklist.checklist.items.flatMap((item) =>
-          item.itemZones.map((itemZone) => ({
-            id: itemZone.zone.id,
-            name: itemZone.zone.name,
-          }))
+          item.itemZones.map((itemZone) => itemZone.zone.name)
         )
       );
 
-      // ใช้ Set เพื่อกรองค่าที่ซ้ำกัน
-      const uniqueZones = Array.from(
-        new Map(zones.map((zone) => [`${zone.id}-${zone.name}`, zone])).values()
-      );
+      const uniqueZoneNames = Array.from(new Set(zones));
 
       return {
         id: preset.id,
         title: preset.title,
         description: preset.description,
+        version: preset.version,
+        updatedAt: preset.updatedAt,
+        updateByUserName:
+          preset.user?.profile?.name || preset.user?.username || "Unknown",
+        updateByUserImagePath: preset.user?.profile?.image?.path || "",
+        zones: uniqueZoneNames,
         presetChecklists: preset.presetChecklists,
-        zones: uniqueZones,
+        versionCount: versionCounts[preset.title] || 0,
       };
     });
 
     res.status(200).json(result);
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -395,20 +448,18 @@ export async function removePreset(req: Request, res: Response) {
       return;
     }
 
-    // ลบข้อมูล PresetChecklist ที่เกี่ยวข้อง
-    await prisma.presetChecklist.deleteMany({
-      where: { presetId: presetId },
-    });
-
-    // ลบข้อมูล Preset
-    await prisma.preset.delete({
+    // เปลี่ยนสถานะเป็น unLatest
+    await prisma.preset.update({
       where: { id: presetId },
+      data: {
+        latest: false,
+      },
     });
 
     res.status(200).json({ message: "Preset removed successfully" });
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -444,20 +495,20 @@ export async function getChecklist(req: Request, res: Response) {
                     name: true,
                     supervisor: includeSupervisor
                       ? {
-                          select: {
-                            id: true,
-                            role: true,
-                            profile: {
-                              select: {
-                                id: true,
-                                name: true,
-                                age: true,
-                                tel: true,
-                                address: true,
-                              },
+                        select: {
+                          id: true,
+                          role: true,
+                          profile: {
+                            select: {
+                              id: true,
+                              name: true,
+                              age: true,
+                              tel: true,
+                              address: true,
                             },
                           },
-                        }
+                        },
+                      }
                       : undefined,
                   },
                 },
@@ -485,7 +536,7 @@ export async function getChecklist(req: Request, res: Response) {
     res.status(200).json(formattedChecklist);
   } catch (error) {
     console.error("Error fetching checklist:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -497,11 +548,10 @@ export async function getChecklist(req: Request, res: Response) {
  **/
 export async function getAllChecklists(req: Request, res: Response) {
   try {
-    const { zones, startDate, endDate, search } = req.query;
-
+    const { zones, startDate, endDate, search, latest } = req.query;
     // ตัวกรองเริ่มต้นเพื่อหา zones
     const whereClause: any = {
-      latest: true,
+      latest: latest === "false" ? undefined : true,
     };
 
     // กรองโดย zones ถ้ามี
@@ -512,7 +562,7 @@ export async function getAllChecklists(req: Request, res: Response) {
             some: {
               zone: {
                 name: {
-                  in: (zones as string).split(","), 
+                  in: (zones as string).split(","),
                 },
               },
             },
@@ -559,7 +609,7 @@ export async function getAllChecklists(req: Request, res: Response) {
           select: {
             id: true,
             name: true,
-            type: true, 
+            type: true,
             checklistId: true,
             itemZones: {
               select: {
@@ -568,9 +618,10 @@ export async function getAllChecklists(req: Request, res: Response) {
                     name: true,
                     supervisor: {
                       select: {
+                        id: true,
                         profile: true,
                       },
-                    }, 
+                    },
                   },
                 },
               },
@@ -598,24 +649,23 @@ export async function getAllChecklists(req: Request, res: Response) {
       return acc;
     }, {} as Record<string, number>);
 
-  
     const findUser = async (checklist: Checklist) => {
       const findUser = await prisma.user.findUnique({
         where: {
           id: checklist.updatedBy,
         },
         select: {
-          username: true, 
+          username: true,
           profile: true,
         },
       });
 
       const findImage = findUser?.profile?.imageId
         ? await prisma.image.findUnique({
-            where: {
-              id: findUser.profile.imageId,
-            },
-          })
+          where: {
+            id: findUser.profile.imageId,
+          },
+        })
         : null;
 
       return {
@@ -660,7 +710,7 @@ export async function getAllChecklists(req: Request, res: Response) {
           itemCounts,
           user: checklist.user,
           zones: zoneNames,
-          versionCount: versionCounts[checklist.title] || 0, 
+          versionCount: versionCounts[checklist.title] || 0,
           items: items,
         };
       })
@@ -669,7 +719,7 @@ export async function getAllChecklists(req: Request, res: Response) {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -772,7 +822,7 @@ export async function createChecklist(req: Request, res: Response) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -805,8 +855,8 @@ export async function removeChecklist(req: Request, res: Response) {
       .json({ message: "Checklist has been deactivated successfully" });
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500);
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }

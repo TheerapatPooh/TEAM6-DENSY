@@ -1,7 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, PatrolStatus, User } from "@prisma/client";
+import { NotificationType, PatrolStatus, User, ItemType, DefectStatus } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -33,12 +33,13 @@ export async function getPatrol(req: Request, res: Response) {
       include: {
         preset: includePreset
           ? {
-              select: {
-                id: true,
-                title: true,
-                description: true,
-              },
-            }
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              version: true
+            },
+          }
           : undefined,
         patrolChecklists: {
           include: {
@@ -90,34 +91,34 @@ export async function getPatrol(req: Request, res: Response) {
         },
         results: includeResult
           ? {
-              include: {
-                defects: true,
-                comments: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        email: true,
-                        department: true,
-                        role: true,
-                        profile: {
-                          select: {
-                            name: true,
-                            image: true,
-                          },
+            include: {
+              defects: true,
+              comments: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      department: true,
+                      role: true,
+                      profile: {
+                        select: {
+                          name: true,
+                          image: true,
                         },
                       },
                     },
                   },
                 },
               },
-            }
+            },
+          }
           : undefined,
       },
     });
 
     if (!patrol) {
-      res.status(404);
+      res.status(404).json({ message: "patrol not found" });
       return;
     }
     let result = patrol;
@@ -126,7 +127,7 @@ export async function getPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -354,7 +355,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -409,7 +410,7 @@ export async function getPatrolUsers(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -561,7 +562,7 @@ export async function createPatrol(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -732,7 +733,7 @@ export async function startPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -905,7 +906,7 @@ export async function finishPatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -944,7 +945,7 @@ export async function removePatrol(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -959,6 +960,129 @@ export async function removePatrol(req: Request, res: Response) {
 export async function getAllPatrolDefects(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
+    const { status, type, startDate, endDate, search } = req.query;
+
+    const whereConditions: any = {
+      userId: userId,
+    };
+
+    const andConditions: any[] = [];
+
+    // เงื่อนไขการกรองตาม status
+    if (status) {
+      andConditions.push({ status: status });
+    }
+
+    // เงื่อนไขการกรองตาม preset
+    if (type) {
+      const typeArray = (type as string).split(","); // แยกค่าด้วย comma
+      const orTypeConditions = typeArray.map((t) => ({ type: t })); // สร้าง array ของ OR เงื่อนไข
+
+      andConditions.push({ OR: orTypeConditions });
+    }
+
+    // เงื่อนไขการกรองตามช่วงเวลา
+    if (startDate && endDate) {
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        andConditions.push({
+          startTime: {
+            gte: start,
+            lte: end,
+          },
+        });
+      } else {
+        console.error("Invalid date range:", startDate, endDate);
+      }
+    }
+
+    // เงื่อนไขการค้นหา (search)
+    if (search) {
+      const searchId = parseInt(search as string, 10);
+
+      function mapSearchToStatus(search: string): DefectStatus | null {
+        const searchLower = search.toLowerCase();
+
+        // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+        if (searchLower.startsWith("rep")) {
+          return DefectStatus.reported;
+        } else if (searchLower.startsWith("in")) {
+          return DefectStatus.in_progress;
+        } else if (searchLower.startsWith("pe")) {
+          return DefectStatus.pending_inspection;
+        } else if (searchLower.startsWith("res")) {
+          return DefectStatus.resolved;
+        } else if (searchLower.startsWith("co")) {
+          return DefectStatus.completed;
+        }
+        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+        return null;
+      }
+
+      function mapSearchToType(search: string): ItemType | null {
+        const searchLower = search.toLowerCase();
+
+        // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+        if (searchLower.startsWith("sa")) {
+          return ItemType.safety;
+        } else if (searchLower.startsWith("en")) {
+          return ItemType.environment;
+        } else if (searchLower.startsWith("ma")) {
+          return ItemType.maintenance;
+        }
+
+        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+        return null;
+      }
+
+      const mappedStatus = mapSearchToStatus(search as string);
+      const mappedTypes = mapSearchToType(search as string);
+
+      const orConditions = [];
+
+      if (!isNaN(searchId)) {
+        orConditions.push({ id: searchId });
+      }
+
+      // ถ้า mappedStatus มีค่า (ค้นหาตรงกับสถานะ)
+      if (mappedStatus) {
+        orConditions.push({ status: mappedStatus as DefectStatus });
+      }
+
+      // ถ้า mappedTypes มีค่า (ค้นหาตรงกับชนิด)
+      if (mappedTypes) {
+        orConditions.push({ type: mappedTypes as ItemType });
+      }
+
+      // ถ้ามีค่า preset title
+      orConditions.push({
+        name: {
+          contains: search as string,
+        },
+      });
+
+      orConditions.push({
+        user: {
+          profile: {
+            name: {
+              contains: search as string,
+            },
+          },
+        },
+      });
+
+      // ถ้ามีเงื่อนไขใน OR ให้เพิ่มเข้าไปใน AND
+      if (orConditions.length > 0) {
+        andConditions.push({ OR: orConditions });
+      }
+    }
+
+    // ถ้ามีเงื่อนไขเพิ่มเติมให้เพิ่มเข้าไปใน AND
+    if (andConditions.length > 0) {
+      whereConditions.AND = andConditions;
+    }
 
     if (req.params.id) {
       const patrolId = parseInt(req.params.id, 10);
@@ -1038,9 +1162,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
       return;
     } else {
       const defects = await prisma.defect.findMany({
-        where: {
-          userId: userId,
-        },
+        where: whereConditions,
         include: {
           patrolResult: {
             select: {
@@ -1104,7 +1226,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error)
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -1169,7 +1291,7 @@ export async function commentPatrol(req: Request, res: Response) {
     res.status(201).json(result);
     return;
   } catch (error) {
-    res.status(500);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     console.error(error);
     return;
   }

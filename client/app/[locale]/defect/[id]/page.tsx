@@ -27,13 +27,15 @@ import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import { fetchData, formatTime, getDefectStatusVariant, getItemTypeVariant } from "@/lib/utils";
 import { IDefect } from "@/app/type";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { getInitials } from "@/lib/utils";
 import { defectStatus } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
 import { useLocale, useTranslations } from "next-intl";
 import AlertDefect from "@/components/alert-defect";
 import { toast } from "@/hooks/use-toast";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -43,6 +45,9 @@ export default function Page() {
   const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
   const [beforeSlideIndex, setBeforeSlideIndex] = useState(0);
   const [afterSlideIndex, setAfterSlideIndex] = useState(0);
+  const [beforeApi, setBeforeApi] = useState<CarouselApi | null>(null);
+  const [afterApi, setAfterApi] = useState<CarouselApi | null>(null);
+
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
@@ -51,40 +56,52 @@ export default function Page() {
   const locale = useLocale()
 
   // Handle before image click
-  const handleBeforeImageClick = (index: number) => {
-    setBeforeSlideIndex(index);
+  const handleBeforeImageClick = () => {
     setIsBeforeCarouselOpen(true);
   };
 
   // Handle after image click
-  const handleAfterImageClick = (index: number) => {
-    setAfterSlideIndex(index);
+  const handleAfterImageClick = () => {
     setIsAfterCarouselOpen(true);
   };
 
   // Close before carousel
   const handleCloseBeforeCarousel = () => {
     setIsBeforeCarouselOpen(false);
-    setBeforeSlideIndex(0);
   };
 
   // Close after carousel
   const handleCloseAfterCarousel = () => {
     setIsAfterCarouselOpen(false);
-    setAfterSlideIndex(0);
   };
 
-  const [api, setApi] = useState<CarouselApi>();
+  useEffect(() => {
+    if (beforeApi) {
+      beforeApi.on("select", () => {
+        setBeforeSlideIndex(beforeApi.selectedScrollSnap());
+      });
+    }
+  }, [beforeApi]);
 
   useEffect(() => {
-    if (!api) {
-      return;
+    if (beforeApi && beforeSlideIndex !== null) {
+      beforeApi.scrollTo(beforeSlideIndex);
     }
-    api.on("select", () => {
-      setAfterSlideIndex(api.selectedScrollSnap());
-      setBeforeSlideIndex(api.selectedScrollSnap());
-    });
-  }, [api]);
+  }, [beforeSlideIndex, beforeApi]);
+
+  useEffect(() => {
+    if (afterApi) {
+      afterApi.on("select", () => {
+        setAfterSlideIndex(afterApi.selectedScrollSnap());
+      });
+    }
+  }, [afterApi]);
+
+  useEffect(() => {
+    if (afterApi && afterSlideIndex !== null) {
+      afterApi.scrollTo(afterSlideIndex);
+    }
+  }, [afterSlideIndex, afterApi]);
 
   useEffect(() => {
     const getData = async () => {
@@ -93,27 +110,12 @@ export default function Page() {
         setDefect(dataDefect);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
+      } finally {
+        setMounted(true);
       }
     };
     getData();
-    setMounted(true);
   }, []);
-
-
-
-  const beforeImage = defect?.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id === defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
-
-  const afterImage = defect?.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id !== defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -163,9 +165,27 @@ export default function Page() {
     setDefect(defect)
   }
 
-  if (!mounted || !defect) {
+  if (!mounted) {
     return <Loading />;
   }
+
+  if (!defect?.images) {
+    return notFound();
+  }
+
+  const beforeImage = defect?.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id === defect.userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null;
+
+  const afterImage = defect?.images
+    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+    .filter((image) => image.image.user.id !== defect.userId)
+    .map((image: any) => ({
+      path: image.image.path,
+    })) || null;
 
   return (
     <div className="bg-card rounded-md custom-shadow flex flex-col px-6 py-4 gap-4">
@@ -258,7 +278,7 @@ export default function Page() {
                       type={"edit-resolve"}
                       response={(defect: IDefect) => {
                         fetchRealtimeData(defect)
-                      }} />  :
+                      }} /> :
 
                     <Button
                       size="lg"
@@ -345,7 +365,7 @@ export default function Page() {
       <div>
         <div className="grid grid-cols-12 gap-6 ">
           <div className="col-span-full text-muted-foreground ">
-            <p className="text-[16px] font-semibold">{t("Detail")}</p>
+            <p className="text-base font-semibold">{t("Detail")}</p>
 
             <div className="bg-secondary rounded-md h-40 w-full items-center p-4">
               <p className="text-[20px] text-card-foreground">
@@ -357,188 +377,240 @@ export default function Page() {
       </div>
 
       {/* Before After */}
-      <div className="flex w-full space-x-4 mb-4">
-        <div className="flex space-x-4 w-full">
-          {/* before */}
-          <div className="w-full">
-            <div className="flex items-center">
-              <p className="text-[16px] font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
-                {t("Before")}
-              </p>
-            </div>
-
-            <div>
-              <div
-                className="p-4 rounded-md bg-secondary h-96 flex items-center justify-center cursor-default user-select-none"
-                onClick={() => handleBeforeImageClick(0)}
-              >
-                {beforeImage &&
-                  beforeImage.length > 0 &&
-                  beforeImage[0].path ? (
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[0].path}`}
-                    alt="First Image"
-                    width={270}
-                    height={250}
-                    className="object-contain cursor-pointer w-full h-full"
-                    unoptimized
-                  />
-                ) : (
-                  <p>Waiting for the results.</p>
-                )}
-              </div>
-              {isBeforeCarouselOpen &&
-                beforeImage &&
-                beforeImage?.length > 0 && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="relative">
-                      <Carousel
-                        setApi={setApi}
-                        className="w-full max-w-screen-lg"
-                      >
-                        <CarouselContent>
-                          {Array.from({ length: beforeImage.length }).map(
-                            (_, index) => (
-                              <CarouselItem key={index}>
-                                <div className="flex justify-center">
-                                  <Card>
-                                    <CardContent className="flex items-center justify-center h-[600px] w-[900px] overflow-hidden p-4">
-                                      <div className="flex items-center justify-center h-full w-full">
-                                        <Image
-                                          className="object-contain w-full h-full"
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[index].path}`}
-                                          alt={`${beforeImage[index].path}`}
-                                          width={800}
-                                          height={500}
-                                          priority
-                                          unoptimized
-                                        />
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                </div>
-                              </CarouselItem>
-                            )
-                          )}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
-                      <div className="flex justify-center mt-4">
-                        {beforeImage.map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => {
-                              setBeforeSlideIndex(index);
-                            }}
-                            disabled
-                            className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index
-                              ? "bg-white"
-                              : "bg-gray-400"
-                              }`}
-                            aria-label={`Slide ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleCloseBeforeCarousel}
-                      className="absolute top-4 right-4 text-white"
-                    >
-                      Close
-                    </button>
-                  </div>
-                )}
-            </div>
+      <div className="grid grid-cols-2 gap-4 w-full h-full mb-4">
+        {/* before */}
+        <div className="flex flex-col w-full min-h-full">
+          <div className="flex items-center">
+            <p className="text-base font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
+              {t("Before")}
+            </p>
           </div>
 
-          {/* after */}
-          <div className="w-full">
-            <div className="flex items-center">
-              <p className="text-[16px] font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
-                {t("After")}
-              </p>
+          <div className="flex flex-col justify-between gap-4">
+            <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+              <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+                <div
+                  className="flex items-center justify-center cursor-default user-select-none w-full h-full"
+                  onClick={() => handleBeforeImageClick()}
+                >
+                  {beforeImage &&
+                    beforeImage.length > 0 &&
+                    beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[beforeSlideIndex].path}`} // ใช้ path จาก state
+                      alt="First Image"
+                      width={800}
+                      height={600}
+                      className="rounded-md object-cover cursor-pointer w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center space-y-4">
+                      <span className="material-symbols-outlined text-border text-4xl">
+                        hourglass_empty
+                      </span>
+                      <p className="text-muted-foreground text-lg font-medium">
+                        {t('WaitingForResults')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </AspectRatio>
             </div>
 
-            <div>
-              <div
-                className="p-4 rounded-md bg-secondary h-96 flex items-center justify-center cursor-default user-select-none"
-                onClick={() => handleAfterImageClick(0)}
-              >
-                {afterImage && afterImage.length > 0 && afterImage[0].path ? (
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[0].path}`}
-                    alt="First Image"
-                    width={270}
-                    height={250}
-                    className="object-contain cursor-pointer w-full h-full"
-                    unoptimized
-                  />
-                ) : (
-                  <p>Waiting for the results.</p>
-                )}
-              </div>
-              {isAfterCarouselOpen && afterImage && afterImage?.length > 0 && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                  <div className="relative">
-                    <Carousel
-                      setApi={setApi}
-                      className="w-full max-w-screen-lg"
+            {/* Thumbnail images slider */}
+            <ScrollArea className="min-w-full whitespace-nowrap">
+              <div className="flex w-max space-x-4 pb-4">
+                {beforeImage &&
+                  beforeImage.length > 0 &&
+                  beforeImage.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setBeforeSlideIndex(index)}
+                      className={`flex justify-center w-[128px] h-[128px] cursor-pointer rounded-md ${beforeSlideIndex === index ? 'border border-destructive' : ''
+                        }`}
                     >
-                      <CarouselContent>
-                        {Array.from({ length: afterImage.length }).map(
-                          (_, index) => (
-                            <CarouselItem key={index}>
-                              <div className="flex justify-center">
-                                <Card>
-                                  <CardContent className="flex items-center justify-center h-[600px] w-[900px] overflow-hidden p-4">
-                                    <div className="flex items-center justify-center h-full w-full">
-                                      <Image
-                                        className="object-contain w-full h-full"
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[index].path}`}
-                                        alt={`${afterImage[index].path}`}
-                                        width={800}
-                                        height={500}
-                                        priority
-                                        unoptimized
-                                      />
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            </CarouselItem>
-                          )
-                        )}
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </Carousel>
-                    <div className="flex justify-center mt-4">
-                      {afterImage.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            setAfterSlideIndex(index);
-                          }}
-                          disabled
-                          className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index
-                            ? "bg-white"
-                            : "bg-gray-400"
-                            }`}
-                          aria-label={`Slide ${index + 1}`}
-                        />
-                      ))}
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
+                        alt={`Thumbnail ${index}`}
+                        width={128}
+                        height={128}
+                        className="object-cover rounded-md"
+                        unoptimized
+                      />
                     </div>
+                  ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+
+            {isBeforeCarouselOpen && beforeImage && beforeImage.length > 0 && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="relative">
+                  <Carousel setApi={setBeforeApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
+                    <CarouselContent>
+                      {beforeImage.map((image, index) => (
+                        <CarouselItem key={index}>
+                          <div className="flex justify-center">
+                            <Card className="bg-card border-none">
+                              <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
+                                <div className="flex items-center justify-center h-full w-full">
+                                  <Image
+                                    className="object-contain w-full h-full"
+                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
+                                    alt={`${image.path}`}
+                                    width={800}
+                                    height={600}
+                                    priority
+                                    unoptimized
+                                  />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
+                  <div className="flex justify-center mt-4">
+                    {beforeImage.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setBeforeSlideIndex(index)} // ใช้ index ในการเลือก slide
+                        className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index ? "bg-white" : "bg-gray-400"}`}
+                        aria-label={`Slide ${index + 1}`}
+                      />
+                    ))}
                   </div>
-                  <button
-                    onClick={handleCloseAfterCarousel}
-                    className="absolute top-4 right-4 text-white"
-                  >
-                    Close
-                  </button>
                 </div>
-              )}
+                <button
+                  onClick={handleCloseBeforeCarousel}
+                  className="absolute top-4 right-4 text-white"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* after */}
+        <div className="flex flex-col w-full min-h-full">
+          <div className="flex items-center">
+            <p className="text-base font-semibold text-muted-foreground mb-1 cursor-default user-select-none">
+              {t("After")}
+            </p>
+          </div>
+
+          <div className="flex flex-col justify-between gap-4">
+            <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+              <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+                <div
+                  className="flex items-center justify-center cursor-default user-select-none w-full h-full"
+                  onClick={() => handleAfterImageClick()}
+                >
+                  {afterImage && afterImage.length > 0 && afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[afterSlideIndex].path}`} // ใช้ path จาก state
+                      alt="Second Image"
+                      width={800}
+                      height={600}
+                      className="rounded-md object-cover cursor-pointer w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center space-y-4">
+                      <span className="material-symbols-outlined text-border text-4xl">
+                        hourglass_empty
+                      </span>
+                      <p className="text-muted-foreground text-lg font-medium">
+                        {t('WaitingForResults')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </AspectRatio>
             </div>
+
+
+            {/* Thumbnail images slider */}
+            <ScrollArea className="min-w-full w-full whitespace-nowrap">
+              <div className="flex w-max space-x-4 pb-4">
+                {afterImage &&
+                  afterImage.length > 0 &&
+                  afterImage.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setAfterSlideIndex(index)}
+                      className={`flex justify-center min-w-[128px] h-[128px] cursor-pointer rounded-md ${afterSlideIndex === index ? 'border border-destructive' : ''
+                        }`}
+                    >
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
+                        alt={`Thumbnail ${index}`}
+                        width={128}
+                        height={128}
+                        className="object-cover rounded-md"
+                        unoptimized
+                      />
+                    </div>
+                  ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+
+
+            {isAfterCarouselOpen && afterImage && afterImage.length > 0 && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="relative">
+                <Carousel setApi={setAfterApi} className="sm:max-w-screen-sm lg:max-w-[1600px]">
+                    <CarouselContent>
+                      {afterImage.map((image, index) => (
+                        <CarouselItem key={index}>
+                          <div className="flex justify-center">
+                            <Card className="bg-card border-none">
+                              <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] lg:h-[700px] overflow-hidden p-4">
+                                <div className="flex items-center justify-center h-full w-full">
+                                  <Image
+                                    className="object-contain w-full h-full"
+                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
+                                    alt={`${image.path}`}
+                                    width={800}
+                                    height={600}
+                                    priority
+                                    unoptimized
+                                  />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
+                  <div className="flex justify-center mt-4">
+                    {afterImage.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setAfterSlideIndex(index)} // ใช้ index ในการเลือก slide
+                        className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index ? "bg-white" : "bg-gray-400"}`}
+                        aria-label={`Slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseAfterCarousel}
+                  className="absolute top-4 right-4 text-white"
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

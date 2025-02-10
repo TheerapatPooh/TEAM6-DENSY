@@ -104,7 +104,7 @@ export default function ProfileDropdown() {
           <Button
             ref={buttonRef}
             variant="ghost"
-            className="text-input w-56 h-[45px] bg-card flex gap-2 justify-between items-center py-2 px-2"
+            className="text-input w-52 h-[45px] bg-card flex gap-2 justify-between items-center py-2 px-2"
             onPointerDown={handleIconClick}
           >
             <div className="flex items-center gap-2">

@@ -70,6 +70,8 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
+import NotFound from "@/components/not-found";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Page() {
   const t = useTranslations("General");
@@ -381,164 +383,180 @@ export default function Page() {
       </div>
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>{t("Message")}</TableHead>
-            <TableHead className="w-[180px]">{t("Date")}</TableHead>
-            <TableHead className="w-[240px]">{t("Status")}</TableHead>
-            <TableHead className="w-[240px]">{t("inspector")}</TableHead>
-            <TableHead className="text-end w-[10px]"></TableHead>
+          <TableRow className="grid grid-cols-12 w-full">
+            <TableHead className="sm:col-span-3 lg:col-span-5">{t("Message")}</TableHead>
+            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Date")}</TableHead>
+            <TableHead className="sm:col-span-3 lg:col-span-2">{t("Status")}</TableHead>
+            <TableHead className="sm:col-span-3 lg:col-span-2">{t("inspector")}</TableHead>
+            <TableHead className="sm:col-span-1 lg:col-span-1"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allComments.map((comment, index) => (
-            <TableRow key={index}>
-              <TableCell className="font-medium">{comment.message}</TableCell>
-              <TableCell className="font-medium">
-                {formatTime(comment.timestamp)}
-              </TableCell>
-              <TableCell className="font-medium">
-                <BadgeCustom
-                  variant={comment.status === false ? "blue" : "green"}
-                  iconName={
-                    comment.status === false ? "hourglass_top" : "check"
-                  }
-                  showIcon={true}
-                >
-                  {s(comment.status === false ? "pending" : "completed")}
-                </BadgeCustom>
-              </TableCell>
-              <TableCell className="font-medium flex flex-row gap-2 items-center">
-                {comment.user.profile.name ? (
-                  <Avatar>
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
-                    />
-                    <AvatarFallback id={comment.user.id.toString()}>
-                      {getInitials(comment.user.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <Skeleton className="h-12 w-12 rounded-full bg-input" />
-                )}
-                <div>
-                  {comment.user.profile.name ? (
-                    comment.user.profile.name
-                  ) : (
-                    <div className="text-destructive">
-                      {comment.user.username}
-                      <div className="text-[14px]">No profile is provided</div>
+          <ScrollArea
+            className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
+          >
+            {allComments.length === 0 ? (
+              <tr className="w-full h-full">
+                <td colSpan={5} className="w-full text-center py-6">
+                  <NotFound
+                    icon="chat"
+                    title="NoCommentsFound"
+                    description="NoCommentsDescription"
+                  />
+                </td>
+              </tr>
+            ) : (
+              allComments.map((comment, index) => (
+                <TableRow key={index} className="grid grid-cols-12">
+                  <TableCell className="font-medium sm:col-span-3 lg:col-span-5">{comment.message}</TableCell>
+                  <TableCell className="font-medium sm:col-span-2 lg:col-span-2">
+                    {formatTime(comment.timestamp)}
+                  </TableCell>
+                  <TableCell className="font-medium sm:col-span-3 lg:col-span-2">
+                    <BadgeCustom
+                      variant={comment.status === false ? "blue" : "green"}
+                      iconName={
+                        comment.status === false ? "hourglass_top" : "check"
+                      }
+                      showIcon={true}
+                    >
+                      {s(comment.status === false ? "pending" : "completed")}
+                    </BadgeCustom>
+                  </TableCell>
+                  <TableCell className="font-medium sm:col-span-3 lg:col-span-2 flex flex-row gap-2 items-center">
+                    {comment.user.profile.name ? (
+                      <Avatar>
+                        <AvatarImage
+                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
+                        />
+                        <AvatarFallback id={comment.user.id.toString()}>
+                          {getInitials(comment.user.profile.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <Skeleton className="h-12 w-12 rounded-full bg-input" />
+                    )}
+                    <div>
+                      {comment.user.profile.name ? (
+                        comment.user.profile.name
+                      ) : (
+                        <div className="text-destructive">
+                          {comment.user.username}
+                          <div className="text-[14px]">No profile is provided</div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" className="w-[45px] h-[45px]">
-                      <span className="material-symbols-outlined items-center text-input">
-                        more_horiz
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" className="w-[45px] h-[45px]">
+                          <span className="material-symbols-outlined items-center text-input">
+                            more_horiz
+                          </span>
+                        </Button>
+                      </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end" className="p-0">
-                    <DropdownMenuItem className="p-0">
-                      <AlertDialog>
-                        <AlertDialogTrigger
-                          asChild
-                          className="pl-2 py-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div
-                            className="cursor-pointer w-full h-full flex"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            {t("Detail")}
-                          </div>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="px-6 py-4 gap-4">
-                          <div className="flex flex-col gap-2">
-                            <p className="text-lg font-semibold text-muted-foreground">
-                              {formatTime(comment.timestamp)}
-                            </p>
-                            <p className="text-2xl font-bold text-card-foreground">
-                              {
-                                comment.patrolResult.itemZone.item.checklist
-                                  .title
-                              }
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <p className="text-xl text-muted-foreground">
-                              {comment.patrolResult.itemZone.item.name}
-                            </p>
-                            <div className="flex items-center gap-1 text-base text-muted-foreground">
-                              <span className="material-symbols-outlined">
-                                location_on
-                              </span>
-                              <p>
-                                {z(comment.patrolResult.itemZone.zone.name)}
-                              </p>
-                            </div>
-                          </div>
-                          <BadgeCustom
-                            variant={
-                              getItemTypeVariant(
-                                comment.patrolResult.itemZone.item
-                                  .type as itemType
-                              ).variant
-                            }
-                            shape="square"
-                            showIcon={true}
-                            iconName={
-                              getItemTypeVariant(
-                                comment.patrolResult.itemZone.item
-                                  .type as itemType
-                              ).iconName
-                            }
-                          >
-                            {s(comment.patrolResult.itemZone.item.type)}
-                          </BadgeCustom>
-
-                          <AlertDialogFooter>
-                            <AlertDialogCancel
+                      <DropdownMenuContent align="end" className="p-0">
+                        <DropdownMenuItem className="p-0">
+                          <AlertDialog>
+                            <AlertDialogTrigger
+                              asChild
+                              className="pl-2 py-2"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {t("Close")}
-                            </AlertDialogCancel>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuItem>
-                    {isDialogOpen && (
-                      <AlertCustom
-                        title={a("ConfirmCommentTitle")}
-                        description={a("ConfirmCommentDescription")}
-                        primaryButtonText={t("Confirm")}
-                        primaryIcon="check"
-                        primaryVariant="primary"
-                        secondaryButtonText={t("Cancel")}
-                        backResult={handleDialogResult}
-                      ></AlertCustom>
-                    )}
-                    <DropdownMenuItem
-                      className="cursor-pointer w-full h-full flex"
-                      disabled={comment.status === true}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleConfirmComment(comment.id);
-                        e.stopPropagation();
-                      }}
-                    >
-                      <p className="text-primary">{t("Resolve")}</p>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+                              <div
+                                className="cursor-pointer w-full h-full flex"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                {t("Detail")}
+                              </div>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="px-6 py-4 gap-4">
+                              <div className="flex flex-col gap-2">
+                                <p className="text-lg font-semibold text-muted-foreground">
+                                  {formatTime(comment.timestamp)}
+                                </p>
+                                <p className="text-2xl font-bold text-card-foreground">
+                                  {
+                                    comment.patrolResult.itemZone.item.checklist
+                                      .title
+                                  }
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <p className="text-xl text-muted-foreground">
+                                  {comment.patrolResult.itemZone.item.name}
+                                </p>
+                                <div className="flex items-center gap-1 text-base text-muted-foreground">
+                                  <span className="material-symbols-outlined">
+                                    location_on
+                                  </span>
+                                  <p>
+                                    {z(comment.patrolResult.itemZone.zone.name)}
+                                  </p>
+                                </div>
+                              </div>
+                              <BadgeCustom
+                                variant={
+                                  getItemTypeVariant(
+                                    comment.patrolResult.itemZone.item
+                                      .type as itemType
+                                  ).variant
+                                }
+                                shape="square"
+                                showIcon={true}
+                                iconName={
+                                  getItemTypeVariant(
+                                    comment.patrolResult.itemZone.item
+                                      .type as itemType
+                                  ).iconName
+                                }
+                              >
+                                {s(comment.patrolResult.itemZone.item.type)}
+                              </BadgeCustom>
+
+                              <AlertDialogFooter>
+                                <AlertDialogCancel
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {t("Close")}
+                                </AlertDialogCancel>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuItem>
+                        {isDialogOpen && (
+                          <AlertCustom
+                            title={a("ConfirmCommentTitle")}
+                            description={a("ConfirmCommentDescription")}
+                            primaryButtonText={t("Confirm")}
+                            primaryIcon="check"
+                            primaryVariant="primary"
+                            secondaryButtonText={t("Cancel")}
+                            backResult={handleDialogResult}
+                          ></AlertCustom>
+                        )}
+                        <DropdownMenuItem
+                          className="cursor-pointer w-full h-full flex"
+                          disabled={comment.status === true}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleConfirmComment(comment.id);
+                            e.stopPropagation();
+                          }}
+                        >
+                          <p className="text-primary">{t("Resolve")}</p>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </ScrollArea>
         </TableBody>
       </Table>
     </div>
