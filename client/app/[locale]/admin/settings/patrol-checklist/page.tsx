@@ -322,8 +322,7 @@ export default function Page() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row justify-between pt-2">
-        <div className="text-2xl font-bold">{t("Checklists")}</div>
-
+        <div className="text-2xl font-bold">{t("Checklist")}</div>
         <Button
           onClick={() => {
             handleGoToCreateChecklist();
