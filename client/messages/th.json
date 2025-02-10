@@ -140,7 +140,9 @@
     "CreatePatrolChecklist":"สร้างชุดตรวจตราการตรวจตรา",
     "Create":"สร้าง",
     "EnterChecklistTitle":"กรุณากรอกชื่อชุดตรวจตรา",
-    "HasBeenCreated":"ถูกสร้างแล้ว"
+    "HasBeenCreated":"ถูกสร้างแล้ว",
+    "Done":"เสร็จสิ้น",
+    "Title":"ชื่อ"
 
 
   },

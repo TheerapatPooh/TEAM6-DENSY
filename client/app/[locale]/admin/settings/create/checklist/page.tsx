@@ -52,6 +52,8 @@ export default function Page() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");
+  const s = useTranslations("Status");
+
 
   const params = useParams();
   const router = useRouter();
@@ -477,7 +479,7 @@ export default function Page() {
                           variant={getBadgeVariant(selectedType[item.id])}
                           showIcon
                         >
-                          {selectedType[item.id]}
+                          {s(selectedType[item.id])}
                         </BadgeCustom>
                       )}
                     </DropdownMenuTrigger>
@@ -498,7 +500,7 @@ export default function Page() {
                           variant="green"
                           showIcon
                         >
-                          safety
+                          {s("safety")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -512,7 +514,7 @@ export default function Page() {
                           variant="blue"
                           showIcon
                         >
-                          environment
+                          {s("environment")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -526,7 +528,7 @@ export default function Page() {
                           variant="red"
                           showIcon
                         >
-                          maintenance
+                          {s("maintenance")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                     </DropdownMenuContent>

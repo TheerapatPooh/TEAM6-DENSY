@@ -429,7 +429,7 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">save</span>Save
+              <span className="material-symbols-outlined">save</span>{t("Save")}
             </Button>
             {isDialogOpen && dialogType === "edit" && (
               <AlertCustom
@@ -522,7 +522,7 @@ export default function Page() {
                           variant={getBadgeVariant(selectedType[item.id])}
                           showIcon
                         >
-                          {selectedType[item.id]}
+                          {s(selectedType[item.id])}
                         </BadgeCustom>
                       )}
                     </DropdownMenuTrigger>
