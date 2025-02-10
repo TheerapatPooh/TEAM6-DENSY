@@ -147,7 +147,7 @@
   },
   "Status": {
     "pending": "Pending",
-    "scheduled": "Schedule",
+    "scheduled": "Scheduled",
     "on_going": "On Going",
     "completed": "Completed",
     "safety": "Safety",
