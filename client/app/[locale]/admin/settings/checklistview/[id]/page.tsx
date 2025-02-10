@@ -260,8 +260,8 @@ export default function Page() {
     if (!data.title || data.title.trim() === "") {
       toast({
         variant: "error",
-        title: "Validation Error",
-        description: "The title field must not be empty.",
+        title: a("ValidationError"),
+        description: a("ChecklistTitleMissing"),
       });
       setError((prev) => ({ ...prev, title: true }));
       hasError = true;
@@ -273,8 +273,8 @@ export default function Page() {
     if (!data.items || data.items.length === 0) {
       toast({
         variant: "error",
-        title: "Validation Error",
-        description: "The items list must not be empty.",
+        title: a("ValidationError"),
+        description: a("ChecklistItemMissing"),
       });
       setError((prev) => ({ ...prev, items: true }));
       hasError = true;
@@ -287,8 +287,8 @@ export default function Page() {
       if (!item.name || item.name.trim() === "") {
         toast({
           variant: "error",
-          title: "Validation Error",
-          description: "Each item must have a name.",
+          title: a("ValidationError"),
+          description: a("ItemMustName"),
         });
         setError((prev) => ({ ...prev, itemsField: true }));
         hasError = true;
@@ -297,8 +297,8 @@ export default function Page() {
       if (!item.type || item.type.trim() === "") {
         toast({
           variant: "error",
-          title: "Validation Error",
-          description: "Each item must have a type.",
+          title: a("ValidationError"),
+          description: a("ItemMustType"),
         });
         setError((prev) => ({ ...prev, itemsField: true }));
         hasError = true;
@@ -307,8 +307,8 @@ export default function Page() {
       if (!Array.isArray(item.zoneId) || item.zoneId.length === 0) {
         toast({
           variant: "error",
-          title: "Validation Error",
-          description: "Each item must have at least one zone selected.",
+          title: a("ValidationError"),
+          description: a("ItemMustZone"),
         });
         setError((prev) => ({ ...prev, itemsField: true }));
         hasError = true;
@@ -355,8 +355,8 @@ export default function Page() {
     ) {
       toast({
         variant: "default",
-        title: "No Changes Detected",
-        description: "No changes were made to the Patrol Checklist.",
+        title: a("ProfileNoChangeTitle"),
+        description: a("ChecklistNoChangeDescription"),
       });
       return;
     }
@@ -393,7 +393,7 @@ export default function Page() {
         console.error("API Error:", response.status, response.data);
         toast({
           variant: "error",
-          title: "Fail to Edit Patrol Checklist",
+          title: a("FailEditChecklist"),
           description: `${response.data.message}`,
         });
         return;
@@ -402,8 +402,8 @@ export default function Page() {
       // Handle successful response
       toast({
         variant: "success",
-        title: "Edit Patrol Checklist Successfully",
-        description: `Patrol Checklist ${dataToUpdate.title} has been Edited`,
+        title: a("EditChecklistSuccess"),
+        description: `${t("PatrolChecklist")} ${dataToUpdate.title} ${t("HasBeenEdited")}`,
       });
       router.push(`/${locale}/admin/settings/patrol-checklist`);
     } catch (error: any) {
@@ -434,11 +434,11 @@ export default function Page() {
             </Button>
             {isDialogOpen && dialogType === "edit" && (
               <AlertCustom
-                title={"Are you sure to edit Patrol Checklist?"}
-                description={"Please confirm to edit Patrol Checklist."}
-                primaryButtonText={"Confirm"}
+                title={a("EditPatrolChecklist")}
+                description={a("EditPatrolChecklistDescription")}
+                primaryButtonText={t("Confirm")}
                 primaryIcon="check"
-                secondaryButtonText={"Cancel"}
+                secondaryButtonText={t("Cancel")}
                 backResult={(result) => handleDialogResult(result)}
               />
             )}
@@ -602,10 +602,10 @@ export default function Page() {
                     <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-2xl">
-                          Choose Inspection Zone
+                        {t("ChooseInspectionZone")}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-base">
-                          Please select zones for inspection.
+                        {t("ChooseInspectionZoneDescription")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div>
@@ -613,7 +613,7 @@ export default function Page() {
                           <span className="material-symbols-outlined">
                             location_on
                           </span>
-                          Zone
+                          {t("Zone")}
                         </div>
                         <div className=" flex justify-center bg-secondary rounded-lg py-4">
                           <Map
@@ -628,7 +628,7 @@ export default function Page() {
 
                       <AlertDialogFooter>
                         <AlertDialogAction className="bg-primary">
-                          Done
+                          {t("Done")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

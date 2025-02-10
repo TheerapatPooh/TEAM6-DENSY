@@ -137,9 +137,18 @@
     "EditPatrolChecklist":"แก้ไขชุดตรวจตรา",
     "List":"รายการ",
     "Item":"หัวข้อตรวจตรา",
-    "EnterItemTitle":"กรุณากรอกหัวข้อตรวจตรา",
+    "EnterItemTitle":"กรุณากรอกชื่อชุดตรวจตรา",
     "SelectAType":"กรุณาเลือกประเภท",
-    "SelectZone":"กรุณาเลือกพื้นที่"
+    "SelectZone":"กรุณาเลือกพื้นที่",
+    "ChooseInspectionZone":"เลือกพื้นที่การตรวจสอบ",
+    "ChooseInspectionZoneDescription":"กรุณาเลือกพื้นที่สำหรับการตรวจสอบ",
+    "PatrolChecklist":"ชุดตรวจตราการตรวจตรา",
+    "HasBeenEdited":"ถูกแก้ไขแล้ว",
+    "CreatePatrolChecklist":"สร้างชุดตรวจตราการตรวจตรา",
+    "Create":"สร้าง",
+    "EnterChecklistTitle":"กรุณากรอกชื่อชุดตรวจตรา",
+    "HasBeenCreated":"ถูกสร้างแล้ว"
+
 
   },
   "Status": {
@@ -386,6 +395,20 @@
     "DeletionSuccessfulTitle":"ลบสำเร็จ",
     "DeletionSuccessfulDescription":"ลบรายการตรวจสอบสำเร็จแล้ว",
     "EditChecklistItemMissing":"กรุณาเพิ่มสิ่งของอย่างน้อยหนึ่งรายการในรายการตรวจสอบ",
-    "EditChecklistItemMissingElement":"กรุณาตรวจสอบให้แน่ใจว่าหัวข้อตรวจตราทั้งหมดมีชื่อ, ประเภท, และเลือกพื้นที่อย่างน้อยหนึ่งพื้นที่"
+    "EditChecklistItemMissingElement":"กรุณาตรวจสอบให้แน่ใจว่าหัวข้อตรวจตราทั้งหมดมีชื่อ, ประเภท, และเลือกพื้นที่อย่างน้อยหนึ่งพื้นที่",
+    "ValidationError":"ข้อผิดพลาดในการตรวจสอบข้อมูล",
+    "ChecklistTitleMissing":"ชื่อชุดตรวจตราต้องไม่เว้นว่าง",
+    "ChecklistItemMissing":"รายการชุดตรวจตราต้องไม่เว้นว่าง",
+    "ItemMustName":"แต่ละรายการต้องมีชื่อ",
+    "ItemMustType":"แต่ละรายการต้องมีประเภท",
+    "ItemMustZone":"แต่ละรายการต้องเลือกอย่างน้อยหนึ่งพื้นที่",
+    "ChecklistNoChangeDescription":"คุณยังไม่ได้ทำการเปลี่ยนแปลง ในชุดตรวจตราของคุณ",
+    "FailEditChecklist":"ไม่สามารถแก้ไขรายการชุดตรวจตราได้",
+    "EditChecklistSuccess":"แก้ไขรายการชุดตรวจตราได้สำเร็จ",
+    "CreateChecklistSuccess":"สร้างรายการชุดตรวจตราได้สำเร็จ",
+    "EditPatrolChecklist":"คุณแน่ใจหรือไม่ว่าต้องการแก้ไขชุดตรวจตราการตรวจตรา?",
+    "EditPatrolChecklistDescription":"กรุณายืนยันการแก้ไขชุดตรวจตราการตรวจตรา",
+    "CreatePatrolChecklist":"คุณแน่ใจหรือไม่ว่าต้องการเพิ่มชุดตรวจตราการตรวจตราใหม่?",
+    "CreatePatrolChecklistDescription":"กรุณายืนยันการเพิ่มชุดตรวจตราการตรวจตราใหม่"
   }
 }

@@ -1,13 +1,12 @@
 /**
  * คำอธิบาย:
  *  หน้าสร้าง Checklist ในระบบ
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงหน้าสร้าง Checklist ในระบบโดยแสดงช่องกรองข้อมูลของ Checklist
  * - สามารถเพิ่ม ลบ แก้ไข Item ใน Checklist ได้
  **/
-
 
 "use client";
 
@@ -15,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
 import { fetchData } from "@/lib/utils";
-import {  IItem, IZone } from "@/app/type";
+import { IItem, IZone } from "@/app/type";
 import { useParams } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import {
@@ -50,8 +49,10 @@ import dynamic from "next/dynamic";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
-    const z = useTranslations("Zone");
-  
+  const z = useTranslations("Zone");
+  const t = useTranslations("General");
+  const a = useTranslations("Alert");
+
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
@@ -90,7 +91,6 @@ export default function Page() {
 
     getData();
   }, [params.id]);
-
 
   const handleOpenChangeType = (itemId: number, isOpen: boolean) => {
     setOpenStatesType((prev) => ({
@@ -243,8 +243,8 @@ export default function Page() {
     if (!data.title || data.title.trim() === "") {
       toast({
         variant: "error",
-        title: "Validation Error",
-        description: "The title field must not be empty.",
+        title: a("ValidationError"),
+        description: a("ChecklistTitleMissing"),
       });
       setError((prev) => ({ ...prev, title: true }));
       hasError = true;
@@ -256,8 +256,8 @@ export default function Page() {
     if (!data.items || data.items.length === 0) {
       toast({
         variant: "error",
-        title: "Validation Error",
-        description: "The items list must not be empty.",
+        title: a("ValidationError"),
+        description: a("ChecklistItemMissing"),
       });
       setError((prev) => ({ ...prev, items: true }));
       hasError = true;
@@ -270,8 +270,8 @@ export default function Page() {
       if (!item.name || item.name.trim() === "") {
         toast({
           variant: "error",
-          title: "Validation Error",
-          description: "Each item must have a name.",
+          title: a("ValidationError"),
+          description: a("ItemMustName"),
         });
         setError((prev) => ({ ...prev, itemsField: true }));
         hasError = true;
@@ -280,8 +280,8 @@ export default function Page() {
       if (!item.type || item.type.trim() === "") {
         toast({
           variant: "error",
-          title: "Validation Error",
-          description: "Each item must have a type.",
+          title: a("ValidationError"),
+          description: a("ItemMustType"),
         });
         setError((prev) => ({ ...prev, itemsField: true }));
         hasError = true;
@@ -290,8 +290,8 @@ export default function Page() {
       if (!Array.isArray(item.zoneId) || item.zoneId.length === 0) {
         toast({
           variant: "error",
-          title: "Validation Error",
-          description: "Each item must have at least one zone selected.",
+          title: a("ValidationError"),
+          description: a("ItemMustZone"),
         });
         setError((prev) => ({ ...prev, itemsField: true }));
         hasError = true;
@@ -346,7 +346,7 @@ export default function Page() {
         console.error("API Error:", response.status, response.data);
         toast({
           variant: "error",
-          title: "Fail to Create Patrol Checklist",
+          title: a("FailEditChecklist"),
           description: `${response.data.message}`,
         });
         return;
@@ -355,8 +355,8 @@ export default function Page() {
       // Handle successful response
       toast({
         variant: "success",
-        title: "Create Patrol Checklist Successfully",
-        description: `Patrol Checklist ${dataToUpdate.title} has been created`,
+        title: a("CreateChecklistSuccess"),
+        description: `${t("PatrolChecklist")} ${dataToUpdate.title} ${t("HasBeenCreated")}`,
       });
       router.push(`/${locale}/admin/settings/patrol-checklist`);
     } catch (error: any) {
@@ -365,13 +365,15 @@ export default function Page() {
   };
 
   return (
-    <div className=" p-4 ">
-      <div className="m bg-white p-6 rounded-lg shadow-lg">
+    <div>
+      <div className="m bg-white px-4 py-6 rounded-lg shadow-lg">
         <div className="flex flex-row justify-between">
-          <h1 className="text-2xl font-bold mb-4">Create Patrol Checklist</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            {t("CreatePatrolChecklist")}
+          </h1>
           <div className="flex gap-2">
             <Button onClick={() => window.history.back()} variant="secondary">
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               onClick={() => {
@@ -380,15 +382,16 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">add</span>Create
+              <span className="material-symbols-outlined">add</span>
+              {t("Create")}
             </Button>
             {isDialogOpen && dialogType === "create" && (
               <AlertCustom
-                title={"Are you sure to add new Patrol Checklist?"}
-                description={"Please confirm to add new Patrol Checklist."}
-                primaryButtonText={"Confirm"}
+                title={a("CreatePatrolChecklist")}
+                description={a("CreatePatrolChecklistDescription")}
+                primaryButtonText={t("Confirm")}
                 primaryIcon="check"
-                secondaryButtonText={"Cancel"}
+                secondaryButtonText={t("Cancel")}
                 backResult={(result) => handleDialogResult(result)}
               />
             )}
@@ -397,24 +400,22 @@ export default function Page() {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-muted-foreground">
-            Title
+            {t("Title")}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-[360px] mt-1 p-2 bg-secondary text-base font-semibold text-muted-foreground rounded-md"
-            placeholder="Enter Checklist title"
+            className="w-[360px] mt-1 p-2 bg-secondary text-base  rounded-md"
+            placeholder={t("EnterChecklistTitle")}
           />
           {error.title && (
-            <div className="text-destructive">
-              Please provide a title for the checklist.
-            </div>
+            <div className="text-destructive">{a("ChecklistTitleMissing")}</div>
           )}
         </div>
         <div>
           <div className="flex flex-row items-center gap-2 p-2">
-            <div className="text-2xl font-semibold">List</div>
+            <div className="text-2xl font-semibold">{t("List")}</div>
             <Button
               onClick={handleAddChecklistItem}
               className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -423,13 +424,12 @@ export default function Page() {
             </Button>
             {error.items && (
               <div className="text-destructive">
-                Please add at least one item to the checklist.
+                {a("EditChecklistItemMissing")}
               </div>
             )}
             {error.itemsField && (
               <div className="text-destructive">
-                Please ensure all items have a name, type, and at least one zone
-                selected.
+                {a("EditChecklistItemMissingElement")}
               </div>
             )}
           </div>
@@ -437,9 +437,9 @@ export default function Page() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className=" w-[30%] ">Item</TableHead>
-              <TableHead className=" w-[30%]">Type</TableHead>
-              <TableHead className=" w-[30%]">Zone</TableHead>
+              <TableHead className=" w-[30%] ">{t("Item")}</TableHead>
+              <TableHead className=" w-[30%]">{t("Type")}</TableHead>
+              <TableHead className=" w-[30%]">{t("Zone")}</TableHead>
               <TableHead className=" w-[10%] "></TableHead>
             </TableRow>
           </TableHeader>
@@ -450,8 +450,8 @@ export default function Page() {
                   <input
                     value={selectedChecklistName[item.id]}
                     onChange={(e) => handleNameChange(item.id, e.target.value)}
-                    className="max-w-[350px] w-full p-2 bg-card border-none rounded-md text-base font-semibold text-muted-foreground"
-                    placeholder="Enter Item title"
+                    className="max-w-[350px] w-full p-2 bg-card border-none rounded-md text-base placeholder:text-input"
+                    placeholder={t("EnterItemTitle")}
                   />
                 </TableCell>
                 <TableCell className="flex justify-start  px-4 ">
@@ -467,10 +467,8 @@ export default function Page() {
                           openStatesType[item.id] ? "rotate-180" : "rotate-0"
                         }`}
                       />
-                      <span className="text-base font-semibold text-muted-foreground ">
-                        {selectedType[item.id]
-                          ? ""
-                          : "Select a Type"}
+                      <span className="text-base text-input ">
+                        {selectedType[item.id] ? "" : t("SelectAType")}
                       </span>
                       {selectedType[item.id] && (
                         <BadgeCustom
@@ -541,16 +539,17 @@ export default function Page() {
                       className="flex items-center gap-2 rounded cursor-pointer  max-w-[350px] w-full"
                     >
                       <div className=" overflow-hidden text-center">
-                        <p className="text-base font-semibold text-muted-foreground truncate whitespace-nowrap ">
+                      <p className={`text-base truncate whitespace-nowrap ${selectedZones[item.id]?.length > 0 ? '' : 'text-input'}`}>
                           {selectedZones[item.id]?.length > 0
                             ? selectedZones[item.id]
-                                .map(
-                                  (zoneId) => z(allZones.find((zone) => zone.id === zoneId)
-                                  ?.name)
-                                    
+                                .map((zoneId) =>
+                                  z(
+                                    allZones.find((zone) => zone.id === zoneId)
+                                      ?.name
+                                  )
                                 )
                                 .join(", ")
-                            : "Select Zones"}
+                            : t("SelectZone")}
                         </p>
                       </div>
                     </AlertDialogTrigger>
@@ -558,10 +557,10 @@ export default function Page() {
                     <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-2xl">
-                          Choose Inspection Zone
+                          {t("ChooseInspectionZone")}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-base">
-                          Please select zones for inspection.
+                          {t("ChooseInspectionZoneDescription")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div>
@@ -569,7 +568,7 @@ export default function Page() {
                           <span className="material-symbols-outlined">
                             location_on
                           </span>
-                          Zone
+                          {t("Zone")}
                         </div>
                         <div className=" flex justify-center bg-secondary rounded-lg py-4">
                           <Map
@@ -584,7 +583,7 @@ export default function Page() {
 
                       <AlertDialogFooter>
                         <AlertDialogAction className="bg-primary">
-                          Done
+                           {t("Done")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
