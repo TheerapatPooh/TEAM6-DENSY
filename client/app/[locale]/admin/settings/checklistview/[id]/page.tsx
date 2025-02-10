@@ -52,7 +52,7 @@ export default function Page() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");
-
+  const s = useTranslations("Status");
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
@@ -429,8 +429,7 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">save</span>
-              {t("Save")}
+              <span className="material-symbols-outlined">save</span>Save
             </Button>
             {isDialogOpen && dialogType === "edit" && (
               <AlertCustom
@@ -543,7 +542,7 @@ export default function Page() {
                           variant="green"
                           showIcon
                         >
-                          safety
+                          {s("safety")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -557,7 +556,7 @@ export default function Page() {
                           variant="blue"
                           showIcon
                         >
-                          environment
+                          {s("environment")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -571,7 +570,7 @@ export default function Page() {
                           variant="red"
                           showIcon
                         >
-                          maintenance
+                          {s("maintenance")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                     </DropdownMenuContent>

@@ -70,8 +70,8 @@ export default function Page() {
   const handleDeleteChecklist = async (id: number) => {
     toast({
       variant: "success",
-      title: a("DeletionSuccessfulTitle"),
-      description: a("DeletionSuccessfulDescription"),
+      title: a("ChecklistRemoveSuccessTitle"),
+      description: a("ChecklistRemoveSuccessDescription"),
     });
     try {
       const response = await fetchData("delete", `/checklist/${id}`, true);
@@ -317,7 +317,6 @@ export default function Page() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-row justify-between pt-2">
         <div className="text-2xl font-bold">{t("Checklist")}</div>
-
         <Button
           onClick={() => {
             handleGoToCreateChecklist();
@@ -659,15 +658,15 @@ export default function Page() {
                         </div>
                         {isDialogOpen && dialogType === "delete" && (
                           <AlertCustom
-                            title={
-                              "Are you sure to delete this Patrol Checklist?"
+                            title={a(
+                              "ChecklistRemoveConfirmTitle")
                             }
-                            description={
-                              "Please confirm to delete this Patrol Checklist."
+                            description={a
+                              ("ChecklistRemoveConfirmDescription")
                             }
-                            primaryButtonText={"Confirm"}
+                            primaryButtonText={t("Confirm")}
                             primaryIcon="check"
-                            secondaryButtonText={"Cancel"}
+                            secondaryButtonText={t("Cancel")}
                             backResult={(result) => handleDialogResult(result)}
                           />
                         )}

@@ -319,7 +319,7 @@ export default function page() {
                                         <AccordionItem value="item-1" className="border-none">
                                             <div className="flex flex-row gap-1 text-base">
                                                 <span className="material-symbols-outlined">history</span>
-                                                Version {checklist.version}
+                                                {t("Version")} {checklist.version}
                                             </div>
                                             <div className="flex flex-col">
                                                 <AccordionTrigger className="flex flex-row justify-between hover:no-underline">

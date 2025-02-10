@@ -264,10 +264,10 @@ export default function Page() {
     <div>
       <div className="mb-4"></div>
       <div className="flex flex-row justify-between mb-4">
-        <div className="text-2xl font-bold">{t("Settings Patrol Preset")}</div>
+        <div className="text-2xl font-bold">{t("SettingsPatrolPreset")}</div>
         <Button className="flex flex-row gap-2" onClick={handleCreatePreset}>
           <span className="material-symbols-outlined text-2xl">add</span>
-          <div className="text-lg">{t("Create Preset")}</div>
+          <div className="text-lg">{t("CreatePreset")}</div>
         </Button>
       </div>
       <div className="flex items-center gap-2 mb-4">
@@ -300,14 +300,14 @@ export default function Page() {
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                {t("SortByAlphabet")}
+                {t("Name")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="Date"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
-                {t("SortByDateModify")}
+                {t("DateModified")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
@@ -381,18 +381,18 @@ export default function Page() {
                     </span>
                     {selectedZones.length > 0
                       ? selectedZones.map((zone) => z(zone.name)).join(", ")
-                      : t("Select Zones")}
+                      : t("SelectZones")}
                   </Button>
                 </AlertDialogTrigger>
 
                 <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-2xl">
-                      {t("Filter by Zone")}
+                      {t("FilterByZone")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
                       {t(
-                        "Please select the zones to display only the relevant data"
+                        "PleaseSelectTheZonesToDisplayOnlyTheRelevantData"
                       )}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -472,7 +472,7 @@ export default function Page() {
                     <div className="flex flex-col justify-start items-start ">
                       <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
                         <div className="text-muted-foreground">
-                          {t("Update By")}
+                          {t("UpdateBy")}
                         </div>
                         {(preset as any).updateByUserImagePath ? (
                           <Avatar>
@@ -494,7 +494,7 @@ export default function Page() {
                       </div>
                       <div className="flex gap-2 text-muted-foreground">
                         <div className="text-muted-foreground">
-                          {t("Update At")}
+                          {t("UpdateAt")}
                         </div>
                         {formatTime(preset.updatedAt)}
                       </div>
