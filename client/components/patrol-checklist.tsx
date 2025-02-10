@@ -34,6 +34,7 @@ import {
   IUser,
   IDefect,
   IComment,
+  patrolStatus,
 } from "@/app/type";
 import React, { useState, useEffect } from "react";
 import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
@@ -48,6 +49,7 @@ import { AlertCustom } from "@/components/alert-custom";
 
 interface IPatrolChecklistProps {
   user: IUser;
+  patrolStatus: patrolStatus;
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
   handleResult: (result: {
@@ -63,6 +65,7 @@ interface IPatrolChecklistProps {
 
 export default function PatrolChecklist({
   user,
+  patrolStatus,
   patrolChecklist,
   disabled,
   handleResult,
@@ -281,6 +284,14 @@ export default function PatrolChecklist({
                           item.id,
                           itemZones.zone.id
                         );
+                        const matchedPatrolResult = patrolResult.find(
+                          (pr) => pr.itemId === item.id && pr.zoneId === itemZones.zone.id
+                        );
+                        const supervisor =
+                          patrolStatus === "scheduled"
+                            ? itemZones.zone.supervisor
+                            : matchedPatrolResult?.supervisor;
+
                         return (
                           <div key={itemZones.zone.id} className="bg-background rounded-md px-4 py-2">
                             <div className="flex flex-row justify-between sm:items-end lg:items-center">
@@ -306,13 +317,13 @@ export default function PatrolChecklist({
                                   <div className="flex items-center gap-1">
                                     <Avatar className="custom-shadow h-[35px] w-[35px]">
                                       <AvatarImage
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZones.zone.supervisor.profile.image?.path}`}
+                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${supervisor.profile.image?.path}`}
                                       />
-                                      <AvatarFallback id={itemZones.zone.supervisor.id.toString()}>
-                                        {getInitials(itemZones.zone.supervisor.profile.name)}
+                                      <AvatarFallback id={supervisor.id.toString()}>
+                                        {getInitials(supervisor.profile?.name)}
                                       </AvatarFallback>
                                     </Avatar>
-                                    <p className="text-card-foreground text-base truncate">{itemZones.zone.supervisor.profile.name}</p>
+                                    <p className="text-card-foreground text-base truncate">{supervisor.profile?.name}</p>
                                   </div>
 
                                 </div>
@@ -438,7 +449,7 @@ export default function PatrolChecklist({
                                       size={"lg"}
                                       disabled={disabled}
                                       onClick={() => {
-                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, itemZones.zone.supervisor.id)
+                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, supervisor.id)
                                         setComments(prev => ({
                                           ...prev,
                                           [`${item.id}-${itemZones.zone.id}`]: ""

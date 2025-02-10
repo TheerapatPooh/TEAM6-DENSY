@@ -60,6 +60,7 @@ export async function createDefect(req: Request, res: Response) {
         status: "reported" as DefectStatus,
         startTime: new Date(),
         user: { connect: { id: parseInt(defectUserId) } },
+        supervisor: { connect: { id: parseInt(supervisorId) } },
         patrolResult: { connect: { id: parseInt(patrolResultId) } },
       },
     });
@@ -187,7 +188,7 @@ export async function createDefect(req: Request, res: Response) {
     res.status(201).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -207,6 +208,17 @@ export async function getDefect(req: Request, res: Response) {
         id: Number(id),
       },
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
         images: {
           include: {
             image: {
@@ -249,7 +261,12 @@ export async function getDefect(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
-                        profile: true,
+                        profile: {
+                          select:{
+                            name:true,
+                            image:true
+                          }
+                        },
                       },
                     },
                   },
@@ -272,7 +289,7 @@ export async function getDefect(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -290,15 +307,7 @@ export async function getAllDefects(req: Request, res: Response) {
     const { status, type, startDate, endDate, search } = req.query;
     // สร้างเงื่อนไขหลัก
     const whereConditions: any = {
-      patrolResult: {
-        itemZone: {
-          zone: {
-            supervisor: {
-              id: userId,
-            },
-          },
-        },
-      },
+      supervisorId: userId,
     };
 
     const andConditions: any[] = [];
@@ -422,6 +431,17 @@ export async function getAllDefects(req: Request, res: Response) {
     const defects = await prisma.defect.findMany({
       where: whereConditions,
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            profile: {
+              select:{
+                name: true,
+                image: true
+              }
+            },
+          },
+        },
         patrolResult: {
           select: {
             zoneId: true,
@@ -482,7 +502,7 @@ export async function getAllDefects(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -687,6 +707,17 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       // Response
       where: { id: Number(id) },
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            profile: {
+              select:{
+                name: true,
+                image: true
+              }
+            },
+          },
+        },
         patrolResult: {
           select: {
             patrol: {
@@ -756,8 +787,8 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -844,8 +875,8 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     res.status(200).json({ message: "Defect deleted successfully" });
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -863,15 +894,7 @@ export async function getAllComments(req: Request, res: Response) {
     const { status, startDate, endDate, search } = req.query;
     // สร้างเงื่อนไขหลัก
     const whereConditions: any = {
-      patrolResult: {
-        itemZone: {
-          zone: {
-            supervisor: {
-              id: userId,
-            },
-          },
-        },
-      },
+      supervisorId: userId,
     };
 
     const andConditions: any[] = [];
@@ -1023,8 +1046,8 @@ export async function getAllComments(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -1098,8 +1121,8 @@ export async function confirmComment(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }

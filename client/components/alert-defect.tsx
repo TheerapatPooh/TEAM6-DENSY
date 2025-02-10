@@ -407,14 +407,14 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         <div className="flex items-center gap-1">
                                             <Avatar className="custom-shadow h-[35px] w-[35px]">
                                                 <AvatarImage
-                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
+                                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.supervisor.profile.image?.path}`}
                                                 />
-                                                <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
-                                                    {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
+                                                <AvatarFallback id={defect.supervisor.id.toString()}>
+                                                    {getInitials(defect.supervisor.profile.name)}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <span className="text-card-foreground text-lg truncate">
-                                                {defect.patrolResult.itemZone.zone.supervisor.profile.name}
+                                                {defect.supervisor.profile.name}
                                             </span>
                                         </div>
                                     )}
