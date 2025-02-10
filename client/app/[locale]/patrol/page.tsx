@@ -444,9 +444,6 @@ export default function Page() {
                 onSelect={handleDateSelect}
                 className="my-date-picker"
               />
-              {dateError && (
-                <p className="text-sm font-light text-destructive italic mt-1">{dateError}</p>
-              )}
             </div>
             <div>
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>

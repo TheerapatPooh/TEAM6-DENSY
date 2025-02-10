@@ -51,7 +51,8 @@ const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
   const z = useTranslations("Zone");
-
+  const t = useTranslations("General");
+  const s = useTranslations("Status");
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
@@ -414,10 +415,10 @@ export default function Page() {
     <div className=" p-4 ">
       <div className="m bg-white p-6 rounded-lg shadow-lg">
         <div className="flex flex-row justify-between">
-          <h1 className="text-2xl font-bold mb-4">Edit Patrol Checklist</h1>
+          <h1 className="text-2xl font-bold mb-4">{t("EditPatrolChecklist")}</h1>
           <div className="flex gap-2">
             <Button onClick={() => window.history.back()} variant="secondary">
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               onClick={() => {
@@ -426,7 +427,7 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">save</span>Save
+              <span className="material-symbols-outlined">save</span>{t("Save")}
             </Button>
             {isDialogOpen && dialogType === "edit" && (
               <AlertCustom
@@ -443,7 +444,7 @@ export default function Page() {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-muted-foreground">
-            Title
+            {t("Title")}
           </label>
           <input
             disabled
@@ -456,7 +457,7 @@ export default function Page() {
         </div>
         <div>
           <div className="flex flex-row items-center gap-2 p-2">
-            <div className="text-2xl font-semibold">List</div>
+            <div className="text-2xl font-semibold">{t("List")}</div>
             <Button
               onClick={handleAddChecklistItem}
               className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -479,9 +480,9 @@ export default function Page() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className=" w-[30%] ">Item</TableHead>
-              <TableHead className="w-[30%] ">Type</TableHead>
-              <TableHead className=" w-[30%] ">Zone</TableHead>
+              <TableHead className=" w-[30%] ">{t("Item")}</TableHead>
+              <TableHead className="w-[30%] ">{t("Type")}</TableHead>
+              <TableHead className=" w-[30%] ">{t("Zone")}</TableHead>
               <TableHead className="w-[10%]  "></TableHead>
             </TableRow>
           </TableHeader>
@@ -540,7 +541,7 @@ export default function Page() {
                           variant="green"
                           showIcon
                         >
-                          safety
+                          {s("safety")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -554,7 +555,7 @@ export default function Page() {
                           variant="blue"
                           showIcon
                         >
-                          environment
+                          {s("environment")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -568,7 +569,7 @@ export default function Page() {
                           variant="red"
                           showIcon
                         >
-                          maintenance
+                          {s("maintenance")}
                         </BadgeCustom>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -599,10 +600,10 @@ export default function Page() {
                     <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-2xl">
-                          Choose Inspection Zone
+                          {t("ChooseInspectionZone")}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-base">
-                          Please select zones for inspection.
+                        {t("PleaseSelectZonesForInspection")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div>
@@ -610,7 +611,7 @@ export default function Page() {
                           <span className="material-symbols-outlined">
                             location_on
                           </span>
-                          Zone
+                          {t("Zone")}
                         </div>
                         <div className=" flex justify-center bg-secondary rounded-lg py-4">
                           <Map
@@ -625,7 +626,7 @@ export default function Page() {
 
                       <AlertDialogFooter>
                         <AlertDialogAction className="bg-primary">
-                          Done
+                          {t("Done")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

@@ -55,6 +55,7 @@ export default function Page() {
       const queryString = buildQueryString(filter, searchTerm);
       const data = await fetchData("get", `/defects?${queryString}`, true);
       setAllDefects(data);
+      setDefectType(filter.defectTypes)
     } catch (error) {
       console.error("Failed to fetch patrol data:", error);
     }

@@ -50,8 +50,8 @@ import dynamic from "next/dynamic";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
-    const z = useTranslations("Zone");
-  
+  const z = useTranslations("Zone");
+  const t = useTranslations("General")
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
@@ -368,10 +368,10 @@ export default function Page() {
     <div className=" p-4 ">
       <div className="m bg-white p-6 rounded-lg shadow-lg">
         <div className="flex flex-row justify-between">
-          <h1 className="text-2xl font-bold mb-4">Create Patrol Checklist</h1>
+          <h1 className="text-2xl font-bold mb-4">{t("CreatePatrolChecklist")}</h1>
           <div className="flex gap-2">
             <Button onClick={() => window.history.back()} variant="secondary">
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               onClick={() => {
@@ -380,7 +380,7 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">add</span>Create
+              <span className="material-symbols-outlined">add</span>{t("Create")}
             </Button>
             {isDialogOpen && dialogType === "create" && (
               <AlertCustom
@@ -397,7 +397,7 @@ export default function Page() {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-muted-foreground">
-            Title
+            {t("Title")}
           </label>
           <input
             type="text"
@@ -414,7 +414,7 @@ export default function Page() {
         </div>
         <div>
           <div className="flex flex-row items-center gap-2 p-2">
-            <div className="text-2xl font-semibold">List</div>
+            <div className="text-2xl font-semibold">{t("List")}</div>
             <Button
               onClick={handleAddChecklistItem}
               className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -437,9 +437,9 @@ export default function Page() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className=" w-[30%] ">Item</TableHead>
-              <TableHead className=" w-[30%]">Type</TableHead>
-              <TableHead className=" w-[30%]">Zone</TableHead>
+              <TableHead className=" w-[30%] ">{t("Item")}</TableHead>
+              <TableHead className=" w-[30%]">{t("Type")}</TableHead>
+              <TableHead className=" w-[30%]">{t("Zone")}</TableHead>
               <TableHead className=" w-[10%] "></TableHead>
             </TableRow>
           </TableHeader>
