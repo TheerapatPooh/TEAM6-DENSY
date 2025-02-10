@@ -47,6 +47,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AlertCustom } from "@/components/alert-custom";
 
 export default function Page() {
   const {
