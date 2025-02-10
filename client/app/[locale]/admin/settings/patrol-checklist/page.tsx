@@ -535,7 +535,7 @@ export default function Page() {
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
-                              className="text-card-foreground text-[16px] flex items-center hover:bg-secondary m-0 p-0"
+                              className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
                             >
                               <span className="material-symbols-outlined mr-1">
                                 history
@@ -605,7 +605,7 @@ export default function Page() {
                         <span className="material-symbols-outlined  text-muted-foreground">
                           location_on
                         </span>
-                        <p className="text-[16px] text-muted-foreground truncate">
+                        <p className="text-base text-muted-foreground truncate">
                           {checklist.zones.map((zone) => z(zone)).join(", ")}
                         </p>
                       </div>

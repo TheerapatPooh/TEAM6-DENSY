@@ -79,6 +79,7 @@ import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
 import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
+import NotFound from "@/components/not-found";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -128,7 +129,7 @@ export default function Page() {
         description: a("PatrolMissingDateDescription"),
       });
       return;
-    } else {  
+    } else {
       setDateError(null);
     }
 
@@ -544,181 +545,190 @@ export default function Page() {
         </DropdownMenu>
 
       </div>
+      <ScrollArea
+        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {/* Create Patrol Card with AlertDialog */}
+          <AlertDialog>
+            <AlertDialogTrigger className="w-full">
+              <CreatePatrolCard />
+            </AlertDialogTrigger>
+            <AlertDialogContent className="sm:w-[90%] xl:w-[60%] h-[670px] px-6 py-4">
+              <AlertDialogHeader className="flex">
+                <div className="flex flex-col gap-1">
+                  <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
+                    {t('PatrolPreset')}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-base text-input">
+                    {t('PleaseSelectAPresetForThePatrol')}
+                  </AlertDialogDescription>
+                </div>
+                <div className="flex items-center justify-center pt-2">
+                  <ScrollArea className="h-[500px] w-full rounded-md border-none pr-4 overflow-y-auto">
+                    <div className="grid sm:grid-cols-1 xl:grid-cols-2 gap-4">
+                      {allPresets &&
+                        allPresets.map((preset, index) => (
+                          <Button
+                            key={index}
+                            variant={"outline"}
+                            className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
+                              ? "border-destructive"
+                              : "border-transparent"
+                              } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
+                            onClick={() => setSelectedPreset(preset)}
+                          >
+                            {/* Title */}
+                            <p className="font-bold text-2xl text-card-foreground">
+                              {preset.title}
+                            </p>
+                            {/* Zone */}
+                            <div className="flex flex-row w-full h-full gap-1">
+                              {/* Positioned Icon */}
+                              <span className="material-symbols-outlined text-2xl text-muted-foreground">
+                                location_on
+                              </span>
+                              {/* Zones */}
+                              <Textarea
+                                disabled
+                                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-semibold line-clamp-3"
+                                value={preset.zones.map((zone) => z(zone)).join(", ")}
+                              />
+                            </div>
+                            {/* Description */}
+                            <div className="flex flex-row w-full h-full gap-1">
+                              {/* Positioned Icon */}
+                              <span className="material-symbols-outlined text-2xl text-muted-foreground">
+                                data_info_alert
+                              </span>
+                              {/* Positioned Textarea */}
+                              <Textarea
+                                disabled
+                                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-normal line-clamp-3"
+                                value={preset.description}
+                              />
+                            </div>
+                          </Button>
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <div className="flex items-end justify-end gap-2">
+                  <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className={buttonVariants({ variant: 'primary', size: 'lg' })}
+                    onClick={() => setSecondDialog(true)}
+                    disabled={isNextButtonDisabled}
+                  >
+                    {t('Next')}
+                    <span className="material-symbols-outlined text-2xl">
+                      chevron_right
+                    </span>
+                  </AlertDialogAction>
+                </div>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {/* Create Patrol Card with AlertDialog */}
-        <AlertDialog>
-          <AlertDialogTrigger className="w-full">
-            <CreatePatrolCard />
-          </AlertDialogTrigger>
-          <AlertDialogContent className="w-[800px] h-[670px] px-6 py-4">
-            <AlertDialogHeader className="flex">
+          {/* Second AlertDialog */}
+          <AlertDialog open={secondDialog}>
+            <AlertDialogContent className="sm:w-[90%] xl:w-[60%] h-fit px-6 py-4">
+              <AlertDialogHeader>
+                <div className="flex flex-col gap-1">
+                  <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
+                    {t('PatrolPreset')}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-base text-input">
+                    {t('PleaseSelectAPresetForThePatrol')}
+                  </AlertDialogDescription>
+                </div>
+                <div className="flex flex-col gap-1 pt-2">
+                  <p className="text-sm font-semibold text-muted-foreground"> {t('Date')}</p>
+                  <DatePicker
+                    handleSelectedTime={(time: string) => setSelectedDate(time)}
+                  />
+                  {dateError && (
+                    <p className="text-sm font-light italic text-destructive mt-1">{a(dateError)}</p>
+                  )}
+                </div>
+              </AlertDialogHeader>
               <div className="flex flex-col gap-1">
-                <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
-                  {t('PatrolPreset')}
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-base text-input">
-                  {t('PleaseSelectAPresetForThePatrol')}
-                </AlertDialogDescription>
-              </div>
-              <div className="flex items-center justify-center pt-2">
-                <ScrollArea className="h-[500px] w-full rounded-md border-none pr-4 overflow-y-auto">
-                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                    {allPresets &&
-                      allPresets.map((preset, index) => (
-                        <Button
-                          key={index}
-                          variant={"outline"}
-                          className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
-                            ? "border-destructive"
-                            : "border-transparent"
-                            } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
-                          onClick={() => setSelectedPreset(preset)}
-                        >
-                          {/* Title */}
-                          <p className="font-bold text-2xl text-card-foreground">
-                            {preset.title}
-                          </p>
-                          {/* Zone */}
-                          <div className="flex flex-row w-full h-full gap-1">
-                            {/* Positioned Icon */}
-                            <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                              location_on
-                            </span>
-                            {/* Zones */}
-                            <Textarea
-                              disabled
-                              className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-semibold line-clamp-3"
-                              value={preset.zones.map((zone) => z(zone)).join(", ")}
-                            />
-                          </div>
-                          {/* Description */}
-                          <div className="flex flex-row w-full h-full gap-1">
-                            {/* Positioned Icon */}
-                            <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                              data_info_alert
-                            </span>
-                            {/* Positioned Textarea */}
-                            <Textarea
-                              disabled
-                              className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-normal line-clamp-3"
-                              value={preset.description}
-                            />
-                          </div>
-                        </Button>
+                <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
+                <div className="grid grid-cols-1">
+                  <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
+                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 xl:grid-cols-1 gap-4">
+                      {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
+                        <ChecklistDropdown
+                          key={presetChecklist.checklist.id}
+                          checklist={presetChecklist.checklist}
+                          handleselectUser={(selectedUser: IUser) => {
+                            handleSelectUser(presetChecklist.checklist.id, selectedUser.id);
+                          }}
+                        />
                       ))}
-                  </div>
-                </ScrollArea>
+                    </div>
+                  </ScrollArea>
+                </div>
               </div>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <div className="flex items-end justify-end gap-2">
-                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-                <AlertDialogAction
-                  className={buttonVariants({ variant: 'primary', size: 'lg' })}
-                  onClick={() => setSecondDialog(true)}
-                  disabled={isNextButtonDisabled}
-                >
-                  {t('Next')}
-                  <span className="material-symbols-outlined text-2xl">
-                    chevron_right
-                  </span>
-                </AlertDialogAction>
-              </div>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
-        {/* Second AlertDialog */}
-        <AlertDialog open={secondDialog}>
-          <AlertDialogContent className="max-w-[800px] h-fit px-6 py-4">
-            <AlertDialogHeader>
-              <div className="flex flex-col gap-1">
-                <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
-                  {t('PatrolPreset')}
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-base text-input">
-                  {t('PleaseSelectAPresetForThePatrol')}
-                </AlertDialogDescription>
-              </div>
-              <div className="flex flex-col gap-1 pt-2">
-                <p className="text-sm font-semibold text-muted-foreground"> {t('Date')}</p>
-                <DatePicker
-                  handleSelectedTime={(time: string) => setSelectedDate(time)}
-                />
-                {dateError && (
-                  <p className="text-sm font-light italic text-destructive mt-1">{a(dateError)}</p>
-                )}
-              </div>
-            </AlertDialogHeader>
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
-              <div className="grid grid-cols-1">
-                <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
-                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
-                    {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
-                      <ChecklistDropdown
-                        key={presetChecklist.checklist.id}
-                        checklist={presetChecklist.checklist}
-                        handleselectUser={(selectedUser: IUser) => {
-                          handleSelectUser(presetChecklist.checklist.id, selectedUser.id);
-                        }}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              <AlertDialogFooter>
+                <div className="flex items-end justify-end gap-2">
+                  <AlertDialogCancel onClick={() => {
+                    setSecondDialog(false)
+                    setDateError(null)
+                  }
+                  }>
+                    {t('Cancel')}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
+                    onClick={handleCreatePatrol}
+                  >
+                    <span className="material-symbols-outlined text-2xl">
+                      note_add
+                    </span>
+                    {t('NewPatrol')}
+                  </AlertDialogAction>
+                </div>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {isDialogOpen && (
+            <AlertCustom
+              title={a("PatrolCreateConfirmTitle")}
+              description={a("PatrolCreateConfirmDescription")}
+              primaryButtonText={t("Confirm")}
+              primaryIcon="check"
+              secondaryButtonText={t("Cancel")}
+              backResult={handleDialogResult}
+            ></AlertCustom>
+          )}
+
+          {allPatrols && allPatrols.length === 0 ? (
+            <div className="col-span-full min-h-[261px]">
+              <NotFound icon="task" title="NoPatrolsAvailable" description="NoPatrolsDescription" />
             </div>
-
-            <AlertDialogFooter>
-              <div className="flex items-end justify-end gap-2">
-                <AlertDialogCancel onClick={() => {
-                  setSecondDialog(false)
-                  setDateError(null)
-                }
-                }>
-                  {t('Cancel')}
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
-                  onClick={handleCreatePatrol}
-                >
-                  <span className="material-symbols-outlined text-2xl">
-                    note_add
-                  </span>
-                  {t('NewPatrol')}
-                </AlertDialogAction>
-              </div>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {isDialogOpen && (
-          <AlertCustom
-            title={a("PatrolCreateConfirmTitle")}
-            description={a("PatrolCreateConfirmDescription")}
-            primaryButtonText={t("Confirm")}
-            primaryIcon="check"
-            secondaryButtonText={t("Cancel")}
-            backResult={handleDialogResult}
-          ></AlertCustom>
-        )}
-        {allPatrols &&
-          allPatrols.map((patrol: IPatrol) => {
-            return (
-              <PatrolCard
-                key={patrol.id}
-                status={patrol.status as patrolStatus}
-                date={new Date(patrol.date)}
-                preset={patrol.preset}
-                id={patrol.id}
-                itemCounts={patrol.itemCounts}
-                inspectors={patrol.inspectors}
-                onRemoveSuccess={handleRemoveSuccess}
-              />
-            );
-          })}
-      </div>
+          ) : (
+            allPatrols.map((patrol: IPatrol) => {
+              return (
+                <PatrolCard
+                  key={patrol.id}
+                  status={patrol.status as patrolStatus}
+                  date={new Date(patrol.date)}
+                  preset={patrol.preset}
+                  id={patrol.id}
+                  itemCounts={patrol.itemCounts}
+                  inspectors={patrol.inspectors}
+                  onRemoveSuccess={handleRemoveSuccess}
+                />
+              );
+            })
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

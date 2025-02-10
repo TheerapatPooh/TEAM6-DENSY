@@ -36,7 +36,7 @@ export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDro
   useEffect(() => {
     const getData = async () => {
       try {
-        const users = await fetchData("get", "/users?profile=true&image=true&role=inspector", true);
+        const users = await fetchData("get", "/users?profile=true&image=true&roles=inspector", true);
         setUserData(users);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);

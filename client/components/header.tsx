@@ -81,7 +81,7 @@ export default function Header({ variant }: IHeader) {
           <div className="flex items-center text-2xl font-medium">{s(getPathWord())}</div>
         )}
         {variant !== "admin" && (
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center sm:w-[100px] lg:w-[120px]">
             <Image
               className="flex items-center cursor-pointer"
               src={resolvedTheme === "dark" ? darkLogo : lightLogo}
@@ -97,20 +97,20 @@ export default function Header({ variant }: IHeader) {
         {variant === 'inspector' && (
           <div className="flex justify-between items-center ms-2 gap-4">
             <button
-              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-destructive" : "text-input"
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/patrol`)}
             >
               <span className="material-symbols-outlined">list_alt_check</span>{" "}
-              {s('Patrol')}
+              <p className="text-lg sm:inline truncate">{s('Patrol')}</p> 
             </button>
             <button
-              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-destructive" : "text-input"
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
               <span className="material-symbols-outlined">build</span>
-              {s('Defect')}
+              <p className="text-lg sm:inline truncate">{s('Defect')}</p> 
             </button>
           </div>
         )}
@@ -118,20 +118,20 @@ export default function Header({ variant }: IHeader) {
         {variant === 'supervisor' && (
           <div className="flex justify-between items-center ms-2 gap-4">
             <button
-              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/defect`) ? "border-b-4 border-destructive" : "text-input"
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 text-lg flex items-center  ${isActive(`/${locale}/defect`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/defect`)}
             >
-              <span className="material-symbols-outlined">gpp_maybe</span>               
-              {s('Defect')}
+              <span className="material-symbols-outlined">gpp_maybe</span>
+              <p className="text-lg sm:inline truncate">{s('Defect')}</p> 
             </button>
             <button
-              className={`w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/comment`) ? "border-b-4 border-destructive" : "text-input"
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/comment`) ? "border-b-4 border-destructive" : "text-input"
                 }`}
               onClick={() => router.push(`/${locale}/comment`)}
             >
-              <span className="material-symbols-outlined">chat</span>               
-              {s('Comment')}
+              <span className="material-symbols-outlined">chat</span>
+              <p className="text-lg sm:inline truncate">{s('Comment')}</p> 
             </button>
           </div>
         )}

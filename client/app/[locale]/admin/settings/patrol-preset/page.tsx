@@ -453,7 +453,7 @@ export default function Page() {
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="text-card-foreground text-[16px] flex items-center hover:bg-secondary m-0 p-0"
+                    className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
                   >
                     <span className="material-symbols-outlined mr-1">
                       history
