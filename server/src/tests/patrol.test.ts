@@ -48,6 +48,7 @@ describe('getPatrol', () => {
                         id: true,
                         title: true,
                         description: true,
+                        version: true,
                     },
                 },
                 patrolChecklists: {
