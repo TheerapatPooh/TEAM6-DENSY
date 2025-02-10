@@ -532,6 +532,7 @@ export default function Page() {
           {user?.profile.name === pc.inspector.profile.name ? (
             <PatrolChecklist
               handleResult={handleResult}
+              patrolStatus={patrol.status}
               results={results}
               patrolChecklist={pc}
               disabled={patrol.status === "on_going" && !lock ? false : true}

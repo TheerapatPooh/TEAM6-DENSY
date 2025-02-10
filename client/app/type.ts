@@ -39,9 +39,11 @@ export interface IDefect {
     startTime: string;
     endTime: string;
     userId?: number;
+    supervisorId?: number;
     patrolResultId?: number;
     timeStamp: Date;
     user?: IUser;
+    supervisor?: IUser;
     patrolResult: IPatrolResult;
     images: IDefectIImage[];
 }
@@ -130,7 +132,7 @@ export interface IChecklist {
     latest: boolean;
     updatedAt: string;
     updatedBy: number;
-    
+
     patrols?: IPatrolChecklist[];
     user: IUser;
     presetChecklists?: IPresetChecklist[];
@@ -144,11 +146,13 @@ export interface IPatrolResult {
     itemId: number;
     zoneId: number;
     patrolId?: number;
+    supervisorId?: number;
 
     comments?: IComment[];
     defects?: IDefect[]
     itemZone?: IItemZone;
     patrol?: IPatrol;
+    supervisor?: IUser;
 }
 
 export interface IItem {
@@ -200,9 +204,11 @@ export interface IComment {
     timestamp: string;
     status: boolean;
     userId: number;
+    supervisorId: number;
     patrolResultId: number;
 
     user: IUser;
+    supervisor: IUser;
     patrolResult: IPatrolResult;
 }
 
@@ -266,7 +272,7 @@ export const LoginSchema = z.object({
 })
 
 export interface IToast {
-    variant: "default" | "error" | "success"; 
+    variant: "default" | "error" | "success";
     title: string;
     description: string;
 }
