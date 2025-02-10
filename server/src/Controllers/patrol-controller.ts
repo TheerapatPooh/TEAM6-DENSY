@@ -1111,6 +1111,12 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
           },
         },
         include: {
+          supervisor: {
+            select: {
+              id: true,
+              profile: true
+            }
+          },
           patrolResult: {
             select: {
               zoneId: true,
@@ -1244,7 +1250,7 @@ export async function commentPatrol(req: Request, res: Response) {
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     // รับข้อมูลจาก request body
-    const { message, patrolResultId } = req.body;
+    const { message, patrolResultId, supervisorId } = req.body;
 
     // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
     if (!message || !patrolResultId) {
@@ -1275,6 +1281,7 @@ export async function commentPatrol(req: Request, res: Response) {
         timestamp: new Date(),
         userId: userId,
         patrolResultId: parseInt(patrolResultId, 10),
+        supervisorId: parseInt(supervisorId, 10),
       },
     });
 

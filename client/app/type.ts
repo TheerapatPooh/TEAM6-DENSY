@@ -39,9 +39,11 @@ export interface IDefect {
     startTime: string;
     endTime: string;
     userId?: number;
+    supervisorId?: number;
     patrolResultId?: number;
     timeStamp: Date;
     user?: IUser;
+    supervisor?: IUser;
     patrolResult: IPatrolResult;
     images: IDefectIImage[];
 }
@@ -200,9 +202,11 @@ export interface IComment {
     timestamp: string;
     status: boolean;
     userId: number;
+    supervisorId: number;
     patrolResultId: number;
 
     user: IUser;
+    supervisor: IUser;
     patrolResult: IPatrolResult;
 }
 

@@ -266,14 +266,14 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                 <div className="flex items-center gap-1">
                   <Avatar className="custom-shadow h-[35px] w-[35px]">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.supervisor.profile.image?.path}`}
                     />
-                    <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
-                      {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
+                    <AvatarFallback id={defect.supervisor.id.toString()}>
+                      {getInitials(defect.supervisor.profile.name)}
                     </AvatarFallback>
                   </Avatar>
 
-                  <p className="text-card-foreground text-lg">{defect.patrolResult.itemZone.zone.supervisor.profile.name}</p>
+                  <p className="text-card-foreground text-lg">{defect.supervisor.profile.name}</p>
                 </div>
               </div>
               <div>
@@ -612,13 +612,13 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
             <div>
               {defect.status === "resolved" && page === "patrol-defect" && (
                 <div className="flex space-x-2 justify-end">
-                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection", defect.patrolResult.itemZone.zone.supervisor.id)}>
+                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection", defect.supervisor.id)}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       cancel
                     </span>
                     Rework
                   </Button>
-                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed", defect.patrolResult.itemZone.zone.supervisor.id)}>
+                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed", defect.supervisor.id)}>
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       check_circle
                     </span>
