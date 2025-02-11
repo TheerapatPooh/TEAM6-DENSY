@@ -1,14 +1,13 @@
 /**
  * คำอธิบาย:
  *  หน้าแสดงรายการ Checklist ทั้งหมดในระบบ โดยสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงรายการ Checklist ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Checklist แต่ละรายการ และสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
  * - สามารถคลิกเพื่อดูรายละเอียดของ Checklist แต่ละรายการ
  * - สามารถคลิกเพื่อสร้าง Checklist ใหม่ได้
  **/
-
 
 "use client";
 import { IChecklist, IZone } from "@/app/type";
@@ -36,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 import { fetchData, formatTime, getInitials } from "@/lib/utils";
 
 import React, { useState, useEffect } from "react";
@@ -60,6 +58,7 @@ export default function Page() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");
+
   const router = useRouter();
   const locale = useLocale();
   interface IChecklistWithExtras extends IChecklist {
@@ -157,9 +156,8 @@ export default function Page() {
   // Modify the getData function to use fetchData
   const getData = async () => {
     try {
-
       // Construct query params for the filters
-      const params = new URLSearchParams(); 
+      const params = new URLSearchParams();
 
       // Add search term to params
       if (searchTerm) {
@@ -282,11 +280,7 @@ export default function Page() {
 
   // Reset filters to default
   const resetFilters = async () => {
-    const data = await fetchData(
-      "get",
-      `/checklists`,
-      true
-    );
+    const data = await fetchData("get", `/checklists`, true);
     setTempSelectedZones([]); // Reset temp selected zones
     setTempDateRange({}); // Reset temp date range
     setSelectedZones([]); // Clear applied zones
@@ -327,7 +321,8 @@ export default function Page() {
           onClick={() => {
             handleGoToCreateChecklist();
           }}
-          className="flex flex-row gap-2"
+          className="flex flex-row gap-2 custom-shadow"
+          variant="primary"
         >
           <span className="material-symbols-outlined text-2xl">add</span>
           <div className="text-lg">{t("CreateChecklist")}</div>
@@ -460,12 +455,10 @@ export default function Page() {
                 <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-2xl">
-                      {t("FilterByZone")}
+                      {t("FilterbyZone")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                    {t(
-                        "PleaseSelectTheZonesToDisplayOnlyTheRelevantData"
-                      )}
+                      {t("FilterbyZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div>
@@ -513,7 +506,7 @@ export default function Page() {
 
       {/* Checklist Cards */}
 
-      <div className="space-y-4 p-4 rounded-lg">
+      <div className="space-y-4  rounded-lg">
         {filteredChecklists.length > 0 ? (
           sortedChecklists.map((checklist) => (
             <div key={checklist.id}>
@@ -524,7 +517,7 @@ export default function Page() {
                   }}
                   className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer ${getChecklistColor(
                     checklist
-                  )} border-destructive h-[166px] bg-secondary rounded-lg shadow p-2 justify-between`}
+                  )} border-destructive h-[166px] bg-card rounded-lg custom-shadow p-2 justify-between`}
                 >
                   <div className="flex flex-col gap-4 ">
                     {/* Left Section */}
@@ -534,7 +527,7 @@ export default function Page() {
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
-                              className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
+                              className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
                             >
                               <span className="material-symbols-outlined mr-1">
                                 history
@@ -555,12 +548,14 @@ export default function Page() {
                                   <div className="text-muted-foreground">
                                     {t("UpdateBy")}
                                   </div>
-                                  {checklist.user.profile.image?.path === "" ? (
+                                  {checklist.user.profile ? (
                                     <Avatar>
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.user.profile.image?.path}`}
                                       />
-                                      <AvatarFallback id={checklist.user.id.toString()}>
+                                      <AvatarFallback
+                                        id={checklist.user.id.toString()}
+                                      >
                                         {getInitials(
                                           checklist.user.profile.name
                                         )}
