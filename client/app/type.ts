@@ -88,6 +88,7 @@ export interface IPatrol {
     results: IPatrolResult[];
     itemCounts: number;
     inspectors?: IUser[]
+    disabled?: boolean;
 }
 
 export interface IPatrolChecklist {
@@ -115,6 +116,7 @@ export interface IPreset {
     patrols?: IPatrol[];
     zones?: IZone[];
     versionCount?: number;
+    disabled?: boolean;
 }
 
 export interface IPresetChecklist {

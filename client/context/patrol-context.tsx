@@ -171,8 +171,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const getPatrolData = async () => {
         if (params.id) {
             try {
-                const data = await fetchData("get", `/patrol/${params.id}?preset=true`, true);
-                const result = await fetchData("get", `/patrol/${params.id}?result=true`, true);
+                const data = await fetchData("get", `/patrol/${params.id}?preset=true&result=true`, true);
                 const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
                 const otherResults = localStorage.getItem(`otherResults_${data.id}`);
                 if (savedResults) {
@@ -182,7 +181,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                     setOtherResults(JSON.parse(otherResults));
                 }
                 setPatrol(data);
-                setPatrolResults(result.results)
+                setPatrolResults(data.results)
             } catch (error) {
                 console.error("Failed to fetch patrol data:", error);
             }

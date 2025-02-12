@@ -39,13 +39,13 @@ export async function getPatrol(req: Request, res: Response) {
       include: {
         preset: includePreset
           ? {
-              select: {
-                id: true,
-                title: true,
-                description: true,
-                version: true,
-              },
-            }
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              version: true,
+            },
+          }
           : undefined,
         patrolChecklists: {
           include: {
@@ -98,39 +98,39 @@ export async function getPatrol(req: Request, res: Response) {
         },
         results: includeResult
           ? {
-              include: {
-                supervisor: {
-                  select: {
-                    id: true,
-                    profile: {
-                      select: {
-                        name: true,
-                        image: true,
-                      },
+            include: {
+              supervisor: {
+                select: {
+                  id: true,
+                  profile: {
+                    select: {
+                      name: true,
+                      image: true,
                     },
                   },
                 },
-                defects: true,
-                comments: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        email: true,
-                        department: true,
-                        role: true,
-                        profile: {
-                          select: {
-                            name: true,
-                            image: true,
-                          },
+              },
+              defects: true,
+              comments: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      department: true,
+                      role: true,
+                      profile: {
+                        select: {
+                          name: true,
+                          image: true,
                         },
                       },
                     },
                   },
                 },
               },
-            }
+            },
+          }
           : undefined,
       },
     });
@@ -304,6 +304,17 @@ export async function getAllPatrols(req: Request, res: Response) {
                           select: {
                             id: true,
                             name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                    image: true,
+                                  },
+                                },
+                              },
+                            }
                           },
                         },
                       },
@@ -340,15 +351,20 @@ export async function getAllPatrols(req: Request, res: Response) {
           preset: patrol.preset,
           itemCounts: {},
           inspectors: [],
+          disabled: false,
         };
       }
 
       let count = 0;
+      let disabled = false;
       patrol.patrolChecklists.forEach((patrolChecklist) => {
         // นับจำนวน item แต่ละประเภท
         patrolChecklist.checklist.items.forEach((item) => {
-          item.itemZones.forEach((_itemZone) => {
+          item.itemZones.forEach((itemZone) => {
             count++;
+            if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
+              disabled = true;
+            }
           });
         });
         groupedPatrols[patrol.id].itemCounts = count;
@@ -364,6 +380,7 @@ export async function getAllPatrols(req: Request, res: Response) {
           groupedPatrols[patrol.id].inspectors.push(inspector);
         }
       });
+      groupedPatrols[patrol.id].disabled = disabled;
     });
 
     // แปลงกลุ่ม patrols เป็น array
