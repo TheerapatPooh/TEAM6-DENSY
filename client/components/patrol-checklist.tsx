@@ -285,9 +285,6 @@ export default function PatrolChecklist({
                           (pr) => pr.itemId === item.id && pr.zoneId === itemZones.zone.id
                         );
 
-                        console.log("status", status)
-                        console.log("existingResult", existingResult)
-
                         const supervisor =
                           patrolStatus === "scheduled"
                             ? itemZones.zone.supervisor

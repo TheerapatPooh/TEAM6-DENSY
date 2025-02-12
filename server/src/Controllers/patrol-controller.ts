@@ -746,6 +746,7 @@ export async function startPatrol(req: Request, res: Response) {
                 id: true,
                 profile: {
                   select: {
+                    name: true,
                     image: true,
                   },
                 },
