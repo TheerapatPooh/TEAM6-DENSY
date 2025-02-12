@@ -280,13 +280,14 @@ export default function PatrolChecklist({
                     <AccordionContent className="flex flex-col gap-4">
                       {item.itemZones.flatMap((itemZones: IItemZone) => {
                         const status = checkStatus(item.id, itemZones.zone.id);
-                        const existingResult = getExistingResult(
-                          item.id,
-                          itemZones.zone.id
-                        );
+                        const existingResult = getExistingResult(item.id, itemZones.zone.id);
                         const matchedPatrolResult = patrolResult.find(
                           (pr) => pr.itemId === item.id && pr.zoneId === itemZones.zone.id
                         );
+
+                        console.log("status", status)
+                        console.log("existingResult", existingResult)
+
                         const supervisor =
                           patrolStatus === "scheduled"
                             ? itemZones.zone.supervisor
@@ -332,27 +333,13 @@ export default function PatrolChecklist({
                                 <Button
                                   variant={
                                     resultStatus[`${item.id}-${itemZones.zone.id}`] ===
-                                      true
-                                      ? "success"
-                                      : "secondary"
+                                      true ? "success" : "secondary"
                                   }
-                                  className={`w-[155px] ${resultStatus === null
-                                    ? "bg-secondary text-card-foreground"
-                                    : ""
-                                    }
-                                                                    ${existingResult?.status ===
-                                      true
-                                      ? "bg-[#27BC31] hover:bg-[#27BC31]"
-                                      : ""
-                                    }
-                                                                    ${existingResult?.status ===
-                                      false
-                                      ? "bg-secondary hover:bg-secondary"
-                                      : ""
-                                    }
-                                                                    ${disabled
-                                      ? " cursor-not-allowed opacity-50"
-                                      : ""
+                                  className={`w-[155px] ${resultStatus ===
+                                    null ? "bg-secondary text-card-foreground" : ""
+                                    } ${existingResult?.status === true || status === true ? "bg-green hover:bg-green text-card" : ""
+                                    } ${existingResult?.status === false ? "bg-secondary hover:bg-secondary" : ""
+                                    } ${disabled ? " cursor-not-allowed opacity-50" : ""
                                     }
                                                                     `}
                                   onClick={() => {
@@ -369,27 +356,13 @@ export default function PatrolChecklist({
                                 <Button
                                   variant={
                                     resultStatus[`${item.id}-${itemZones.zone.id}`] ===
-                                      false
-                                      ? "fail"
-                                      : "secondary"
+                                      false ? "fail" : "secondary"
                                   }
-                                  className={`w-[155px] ${resultStatus === null
-                                    ? "bg-secondary text-card-foreground"
-                                    : ""
-                                    }
-                                                                    ${existingResult?.status ===
-                                      false
-                                      ? "bg-destructive hover:bg-destructive"
-                                      : ""
-                                    }
-                                                                    ${existingResult?.status ===
-                                      true
-                                      ? "bg-secondary hover:bg-secondary"
-                                      : ""
-                                    }
-                                                                    ${disabled
-                                      ? " cursor-not-allowed opacity-50"
-                                      : ""
+                                  className={`w-[155px] ${resultStatus ===
+                                    null ? "bg-secondary text-card-foreground" : ""
+                                    } ${existingResult?.status === false || status === false ? "bg-destructive hover:bg-destructive text-card" : ""
+                                    } ${existingResult?.status === true ? "bg-secondary hover:bg-secondary" : ""
+                                    } ${disabled ? " cursor-not-allowed opacity-50" : ""
                                     }
                                                                     `}
                                   onClick={() => {
