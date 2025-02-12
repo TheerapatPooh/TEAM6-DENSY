@@ -399,6 +399,14 @@ export async function getAllPresets(req: Request, res: Response) {
 
       const uniqueZoneNames = Array.from(new Set(zones));
 
+      const disabled = preset.presetChecklists.some((checklist) =>
+        checklist.checklist.items.some((item) =>
+          item.itemZones.some(
+            (itemZone) => itemZone.zone.userId === null
+          )
+        )
+      );
+
       return {
         id: preset.id,
         title: preset.title,
@@ -411,6 +419,7 @@ export async function getAllPresets(req: Request, res: Response) {
         zones: uniqueZoneNames,
         presetChecklists: preset.presetChecklists,
         versionCount: versionCounts[preset.title] || 0,
+        disabled
       };
     });
 

@@ -564,49 +564,59 @@ export default function Page() {
                 <div className="flex items-center justify-center pt-2">
                   <ScrollArea className="h-[500px] w-full rounded-md border-none pr-4 overflow-y-auto">
                     <div className="grid sm:grid-cols-1 xl:grid-cols-2 gap-4">
-                      {allPresets &&
-                        allPresets.map((preset, index) => (
-                          <Button
-                            key={index}
-                            variant={"outline"}
-                            className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
-                              ? "border-destructive"
-                              : "border-transparent"
-                              } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
-                            onClick={() => setSelectedPreset(preset)}
-                          >
-                            {/* Title */}
-                            <p className="font-bold text-2xl text-card-foreground">
-                              {preset.title}
-                            </p>
-                            {/* Zone */}
-                            <div className="flex flex-row w-full h-full gap-1">
-                              {/* Positioned Icon */}
-                              <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                                location_on
-                              </span>
-                              {/* Zones */}
-                              <Textarea
-                                disabled
-                                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-semibold line-clamp-3"
-                                value={preset.zones.map((zone) => z(zone)).join(", ")}
-                              />
-                            </div>
-                            {/* Description */}
-                            <div className="flex flex-row w-full h-full gap-1">
-                              {/* Positioned Icon */}
-                              <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                                data_info_alert
-                              </span>
-                              {/* Positioned Textarea */}
-                              <Textarea
-                                disabled
-                                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-normal line-clamp-3"
-                                value={preset.description}
-                              />
-                            </div>
-                          </Button>
-                        ))}
+                      {(() => {
+                        const availablePresets = allPresets ? allPresets.filter((preset) => !preset.disabled) : [];
+                        return availablePresets.length > 0 ? (
+                          availablePresets.map((preset, index) => (
+                            <Button
+                              key={index}
+                              variant={"outline"}
+                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset ? "border-destructive" : "border-transparent"
+                                } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
+                              onClick={() => setSelectedPreset(preset)}
+                            >
+                              {/* Title */}
+                              <p className="font-bold text-2xl text-card-foreground">
+                                {preset.title}
+                              </p>
+                              {/* Zone */}
+                              <div className="flex flex-row w-full h-full gap-1">
+                                {/* Positioned Icon */}
+                                <span className="material-symbols-outlined text-2xl text-muted-foreground">
+                                  location_on
+                                </span>
+                                {/* Zones */}
+                                <Textarea
+                                  disabled
+                                  className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-semibold line-clamp-3"
+                                  value={preset.zones.map((zone) => z(zone)).join(", ")}
+                                />
+                              </div>
+                              {/* Description */}
+                              <div className="flex flex-row w-full h-full gap-1">
+                                {/* Positioned Icon */}
+                                <span className="material-symbols-outlined text-2xl text-muted-foreground">
+                                  data_info_alert
+                                </span>
+                                {/* Positioned Textarea */}
+                                <Textarea
+                                  disabled
+                                  className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-normal line-clamp-3"
+                                  value={preset.description}
+                                />
+                              </div>
+                            </Button>
+                          ))
+                        ) : (
+                          <div className="col-span-full min-h-[261px]">
+                            <NotFound
+                              icon="deployed_code"
+                              title="NoPresetsFound"
+                              description="NoPresetsDescription"
+                            />
+                          </div>
+                        );
+                      })()}
                     </div>
                   </ScrollArea>
                 </div>
@@ -704,13 +714,12 @@ export default function Page() {
             ></AlertCustom>
           )}
 
-          {allPatrols && allPatrols.length === 0 ? (
-            <div className="col-span-full min-h-[261px]">
-              <NotFound icon="task" title="NoPatrolsAvailable" description="NoPatrolsDescription" />
-            </div>
-          ) : (
-            allPatrols.map((patrol: IPatrol) => {
-              return (
+          {(() => {
+            // กรอง preset ที่ไม่ได้ disabled
+            const availablePatrols = allPatrols ? allPatrols.filter((patrol) => !patrol.disabled) : [];
+
+            return availablePatrols.length > 0 ? (
+              availablePatrols.map((patrol) => (
                 <PatrolCard
                   key={patrol.id}
                   status={patrol.status as patrolStatus}
@@ -721,9 +730,14 @@ export default function Page() {
                   inspectors={patrol.inspectors}
                   onRemoveSuccess={handleRemoveSuccess}
                 />
-              );
-            })
-          )}
+              ))
+            ) : (
+              <div className="col-span-full min-h-[261px]">
+                <NotFound icon="task" title="NoPatrolsAvailable" description="NoPatrolsDescription" />
+              </div>
+            );
+          })()}
+
         </div>
       </ScrollArea>
     </div>
