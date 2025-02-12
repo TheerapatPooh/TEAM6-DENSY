@@ -10,17 +10,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchData, formatTime } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
+import { fetchData, formatTime, getInitials } from "@/lib/utils";
+
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +32,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@radix-ui/react-tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
@@ -47,13 +49,47 @@ export default function Page() {
   const t = useTranslations("General");
   const z = useTranslations("Zone");
 
-  const [allPreset, setAllPreset] = useState<IPreset[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State สำหรับเปิด/ปิด Dialog
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null); // เก็บ Action ที่จะลบ
+  const router = useRouter();
+  const locale = useLocale();
+  interface IPresetWithExtras extends IPreset {
+    updateByUserName: string;
+    updateByUserImagePath: string;
+  }
 
-  const handleOpenDialog = () => {
+  // ลบจาก API removePreset
+  const removePreset = async (id: number) => {
+    toast({
+      variant: "success",
+      title: a("PresetRemoveSuccessTitle"),
+      description: a("PresetRemoveSuccessDescription"),
+    });
+    try {
+      const response = await fetchData("delete", `/preset/${id}`, true);
+
+      if (response) {
+        setAllPreset((prevPresets) =>
+          prevPresets.filter((preset) => preset.id !== id)
+        );
+      } else {
+        console.error("Failed to delete Preset: No response from API");
+      }
+
+     
+    } catch (error) {
+      console.error("An error occurred while deleting the preset:", error);
+    }
+  };
+
+  const handleRemovePreset = (id: number) => {
+    setPendingAction(() => () => removePreset(id)); // ตั้งค่า Action ที่จะลบ
+    setDialogType("delete");
     setIsDialogOpen(true);
   };
+
+  const [allPreset, setAllPreset] = useState<IPresetWithExtras[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // State สำหรับเปิด/ปิด Dialog
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null); // เก็บ Action ที่จะลบ
+  const [dialogType, setDialogType] = useState<string>("");
 
   const handleDialogResult = (result: boolean) => {
     setIsDialogOpen(false);
@@ -62,9 +98,6 @@ export default function Page() {
       setPendingAction(null); // Clear the pending action
     }
   };
-
-  const router = useRouter();
-  const locale = useLocale();
 
   const handleEdit = (id: number) => {
     router.push(`/${locale}/admin/settings/patrol-preset/${id}`);
@@ -75,10 +108,49 @@ export default function Page() {
 
   const getData = async () => {
     try {
-      const data = await fetchData("get", "/presets", true);
-      setAllPreset(data);
+      // Construct query params for the filters
+      const params = new URLSearchParams();
+
+      // Add search term to params
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+
+      // Add selected zones to params
+      if (selectedZones.length > 0) {
+        params.append(
+          "zones",
+          selectedZones.map((zone) => zone.name).join(",")
+        );
+      }
+
+      // Add date range to params
+      if (selectedDateRange?.from) {
+        params.append("startDate", selectedDateRange.from.toISOString());
+      }
+      if (selectedDateRange?.to) {
+        params.append("endDate", selectedDateRange.to.toISOString());
+      }
+
+      // Fetch data using fetchData utility with query params
+      const data = await fetchData(
+        "get",
+        `/presets?${params.toString()}`,
+        true
+      );
+
+      // Validate data format
+      if (!Array.isArray(data)) {
+        console.error("Invalid data format:", data);
+        return []; // Return empty array if data format is incorrect
+      }
+
+      setFilteredPresets(data); // Initially set filtered data to all data
+
+      return data; // Return fetched data
     } catch (error) {
-      console.error("Failed to fetch presets:", error);
+      console.error("Failed to fetch preset data:", error); // Log error
+      return []; // Return empty array on error
     }
   };
 
@@ -86,53 +158,10 @@ export default function Page() {
     getData();
   }, []);
 
-  const handleRemovePreset = (id: number) => {
-    setPendingAction(() => () => removePreset(id)); // ตั้งค่า Action ที่จะลบ
-    handleOpenDialog(); // เปิด Dialog ยืนยัน
-  };
-  const handleRemoveSuccess = (id: number) => {
-    setAllPreset((prevPresets) =>
-      prevPresets.filter((preset) => preset.id !== id)
-    );
-
-    toast({
-      variant: "success",
-      title: a("PresetRemoveSuccessTitle"),
-      description: a("PresetRemoveSuccessDescription"),
-    });
-  };
-  // ลบจาก API removePreset
-  const removePreset = async (id: number) => {
-    try {
-      await fetchData("delete", `/preset/${id}`, true);
-      handleRemoveSuccess(id);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
   // search bar
-
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  // State สำหรับเก็บ sort type และ order
-  const [sort, setSort] = useState<{ by: string; order: string }>({
-    by: "ID", // default: sort by ID
-    order: "Ascending", // default: ascending order
-  });
-
-  // ฟังก์ชันเปลี่ยนค่า Sort Type และ Order
-  const handleSortChange = (type: string, value: string) => {
-    setSort((prevSort) => ({
-      ...prevSort,
-      [type]: value,
-    }));
-  };
-
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [sortOption, setSortOption] = useState<"Name" | "ModifiedDate">("Name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedZones, setSelectedZones] = useState<IZone[]>([]);
   const [tempSelectedZones, setTempSelectedZones] = useState<IZone[]>([]);
   const [selectedDateRange, setSelectedDateRange] = useState<{
@@ -143,145 +172,116 @@ export default function Page() {
     from?: Date;
     to?: Date;
   }>({});
-  const [filteredPreset, setFilteredPresets] = useState<IPreset[]>(allPreset);
+  const [filteredPreset, setFilteredPresets] =
+    useState<IPresetWithExtras[]>(allPreset);
 
-  const filteredPresets = allPreset.filter((preset) => {
-    const lowerSearchTerm = searchTerm.toLowerCase();
-
-    // ค้นหาใน title, description และ zones
-    const titleMatch = preset.title.toLowerCase().includes(lowerSearchTerm);
-    const descriptionMatch = preset.description
-      .toLowerCase()
-      .includes(lowerSearchTerm);
-    const zonesMatch =
-      preset.zones &&
-      Array.isArray(preset.zones) &&
-      preset.zones.some((zone: string | { name: string }) => {
-        const zoneKey = typeof zone === "string" ? zone : zone?.name;
-        if (!zoneKey) return false;
-
-        const translatedZone = z(zoneKey);
-        return translatedZone.toLowerCase().includes(lowerSearchTerm);
-      });
-
-    // เพิ่มเงื่อนไข selectedZones
-    const selectedZonesMatch =
-      selectedZones.length === 0 || // ถ้าไม่มีการเลือกโซน จะแสดงทั้งหมด
-      (preset.zones &&
-        preset.zones.some((zone: string | { name: string }) => {
-          const zoneKey = typeof zone === "string" ? zone : zone?.name;
-          return selectedZones.some(
-            (selectedZone) =>
-              selectedZone.name.toLowerCase() === zoneKey.toLowerCase()
-          );
-        }));
-
-    return (titleMatch || descriptionMatch || zonesMatch) && selectedZonesMatch;
-  });
-
-  // ฟังก์ชันจัดเรียงข้อมูล
-  const sortedPresets = filteredPresets.sort((a, b) => {
-    if (sort.by === "Date") {
-      // จัดเรียงตามวันที่อัปเดต
-      const dateA = new Date(a.updatedAt).getTime();
-      const dateB = new Date(b.updatedAt).getTime();
-
-      if (sort.order === "Ascending") {
-        return dateA - dateB; // น้อยไปมาก (วันที่เก่าก่อน)
-      } else {
-        return dateB - dateA; // มากไปน้อย (วันที่ใหม่ก่อน)
-      }
-    } else if (sort.by === "Alphabet") {
-      // จัดเรียงตามชื่อ (title)
-      const titleA = a.title.toLowerCase();
-      const titleB = b.title.toLowerCase();
-
-      if (sort.order === "Ascending") {
-        return titleA.localeCompare(titleB); // A-Z
-      } else {
-        return titleB.localeCompare(titleA); // Z-A
-      }
-    }
-    return 0; // หากไม่มีเงื่อนไข
-  });
-
-  const applyFilters = () => {
-    const filtered = allPreset.filter((preset) => {
-      const matchesZones =
-        tempSelectedZones.length === 0 || // ถ้าไม่มีการเลือก Zone จะแสดงทั้งหมด
-        preset.zones.some((zone) =>
-          tempSelectedZones.some((selectedZone) => {
-            const zoneName = zone?.name?.toLowerCase(); // ตรวจสอบ zone.name
-            const selectedZoneName = selectedZone?.name?.toLowerCase(); // ตรวจสอบ selectedZone.name
-  
-            return zoneName && selectedZoneName && zoneName === selectedZoneName;
-          })
-        );
-  
-      const matchesDateRange =
-        (!tempDateRange?.from ||
-          new Date(preset.updatedAt) >= tempDateRange.from) &&
-        (!tempDateRange?.to || new Date(preset.updatedAt) <= tempDateRange.to);
-  
-      return matchesZones && matchesDateRange;
-    });
-  
-    // อัปเดต filteredPreset
-    setSelectedZones(tempSelectedZones);
-    setSelectedDateRange(tempDateRange);
-    setFilteredPresets(filtered);
+  // Filter by search term
+  const filterBySearchTerm = (presets: IPresetWithExtras[]) => {
+    if (!searchTerm) return presets; // If no search term, return all checklists
+    return presets.filter((preset) =>
+      preset.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   };
-  
 
+  // Fetch and apply search filter on search term change
   useEffect(() => {
     const fetchAndFilter = async () => {
-      const freshData = allPreset; // ใช้ข้อมูลที่มีอยู่
-      const filtered = freshData.filter((preset) => {
-        const matchesDateRange =
-          (!tempDateRange?.from ||
-            new Date(preset.updatedAt) >= tempDateRange.from) &&
-          (!tempDateRange?.to ||
-            new Date(preset.updatedAt) <= tempDateRange.to);
-
-        return matchesDateRange;
-      });
-
-      setFilteredPresets(filtered); // อัปเดตข้อมูลที่กรองแล้ว
+      const freshData = await getData(); // Fetch fresh data
+      const filtered = filterBySearchTerm(freshData); // Apply search term filter
+      setFilteredPresets(filtered); // Update state with filtered data
     };
 
     fetchAndFilter();
-  }, [tempDateRange]); // ทำงานเมื่อ tempDateRange เปลี่ยนแปลง
+  }, [searchTerm]); // Trigger fetch when search term changes
 
-  const resetFilters = () => {
+  // Apply filters (zones, date range, and search term)
+  const applyFilters = async () => {
+    const freshData = await getData(); // Fetch fresh data
+
+    // Update selected filters
+    setSelectedZones(tempSelectedZones);
+    setSelectedDateRange(tempDateRange);
+
+    // Apply filters for zones and date range
+    const filtered = freshData.filter((preset) => {
+      const matchesZones =
+        tempSelectedZones.length === 0 || // If no zones are selected, show all
+        preset.zones.some((zone) =>
+          tempSelectedZones.some(
+            (selectedZone) =>
+              selectedZone.name.toLowerCase() === zone.toLowerCase()
+          )
+        );
+
+      const matchesDateRange =
+        (!tempDateRange?.from ||
+          new Date(preset.updatedAt) >= tempDateRange.from) &&
+        (!tempDateRange?.to ||
+          new Date(preset.updatedAt) <= tempDateRange.to);
+
+      return matchesZones && matchesDateRange;
+    });
+
+    // Apply search term filter
+    const filteredWithSearch = filterBySearchTerm(filtered);
+    setFilteredPresets(filteredWithSearch); // Update the filtered state
+  };
+
+  const resetFilters = async () => {
+    const data = await fetchData("get", `/presets`, true);
     setTempSelectedZones([]);
     setTempDateRange({});
     setSelectedZones([]);
     setSelectedDateRange({});
-    setFilteredPresets(allPreset); // รีเซ็ตข้อมูลที่กรองแล้วเป็นทั้งหมด
+    setFilteredPresets(data); // รีเซ็ตข้อมูลที่กรองแล้วเป็นทั้งหมด
   };
 
+  const [sortedPresets, setSortedPresets] = useState<
+    IPresetWithExtras[]
+  >([]);
+
+    useEffect(() => {
+      const sorted = [...filteredPreset].sort((a, b) => {
+        let comparison = 0;
+  
+        if (sortOption === "Name") {
+          comparison = a.title.localeCompare(b.title);
+        } else if (sortOption === "ModifiedDate") {
+          comparison =
+            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        } 
+  
+        return sortOrder === "asc" ? comparison : -comparison;
+      });
+  
+      setSortedPresets(sorted); // Update sorted checklists state
+    }, [filteredPreset, sortOption, sortOrder]); // Dependencies to trigger the effect
+
+
   return (
-    <div>
-      <div className="mb-4"></div>
-      <div className="flex flex-row justify-between mb-4">
+    <div className="flex flex-col gap-4 ">
+      <div className="flex flex-row justify-between pt-2">
         <div className="text-2xl font-bold">{t("SettingsPatrolPreset")}</div>
-        <Button className="flex flex-row gap-2" onClick={handleCreatePreset}>
+        <Button
+          variant="primary"
+          className="flex flex-row gap-2"
+          onClick={handleCreatePreset}
+        >
           <span className="material-symbols-outlined text-2xl">add</span>
           <div className="text-lg">{t("CreatePreset")}</div>
         </Button>
       </div>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2">
         <Textfield
           iconName="search"
           showIcon={true}
           placeholder={t("Search")}
-          onChange={handleSearch}
+          onChange={(e) => setSearchTerm(e.target.value)}
           value={searchTerm}
         />
-        <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
+        <DropdownMenu>
           <DropdownMenuTrigger
-            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-      ${isSortOpen ? "border border-destructive" : "border-none"}`}
+            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium `}
           >
             <span className="material-symbols-outlined">swap_vert</span>
             <div className="text-lg">{t("Sort")}</div>
@@ -292,18 +292,20 @@ export default function Page() {
               {t("SortBy")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
-              value={sort.by}
-              onValueChange={(value) => handleSortChange("by", value)}
+              value={sortOption}
+              onValueChange={(value) =>
+                setSortOption(value as "Name" | "ModifiedDate")
+              }
             >
               <DropdownMenuRadioItem
-                value="Alphabet"
+                value="Name"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
                 {t("Name")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                value="Date"
+                value="ModifiedDate"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
@@ -316,18 +318,18 @@ export default function Page() {
               {t("Order")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
-              value={sort.order}
-              onValueChange={(value) => handleSortChange("order", value)}
+              value={sortOrder}
+              onValueChange={(value) => setSortOrder(value as "desc" | "asc")}
             >
               <DropdownMenuRadioItem
-                value="Ascending"
+                value="asc"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
                 {t("Ascending")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                value="Descending"
+                value="desc"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
@@ -391,9 +393,7 @@ export default function Page() {
                       {t("FilterByZone")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                      {t(
-                        "PleaseSelectTheZonesToDisplayOnlyTheRelevantData"
-                      )}
+                      {t("PleaseSelectTheZonesToDisplayOnlyTheRelevantData")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div>
@@ -419,7 +419,7 @@ export default function Page() {
                       className="bg-primary"
                       onClick={() => {
                         // กด Done แค่เซฟชั่วคราวใน tempSelectedZones
-                        setTempSelectedZones(tempSelectedZones);
+                        setSelectedZones(tempSelectedZones);
                       }}
                     >
                       {t("Done")}
@@ -440,151 +440,181 @@ export default function Page() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <div className="space-y-4">
-        {filteredPresets.map((preset) => (
-          <div
-            key={preset.id}
-            className="bg-card rounded-lg shadow p-4  h-[220px]"
-          >
-            {/* Version with Tooltip */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
-                  >
-                    <span className="material-symbols-outlined mr-1">
-                      history
+      <ScrollArea className="h-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-290px)]">
+        <div className="space-y-4">
+          {sortedPresets.map((preset) => (
+            <div
+            onClick={() => {handleEdit(preset.id)}}
+              key={preset.id}
+              className="bg-card rounded-lg shadow p-4 cursor-pointer h-[219px]"
+            >
+              {/* Title and Details */}
+              <div className="flex justify-between overflow-hidden text-ellipsis">
+                <div className="flex flex-col gap-4 min-w-0">
+                  <div className="flex flex-col gap-1 justify-start items-start">
+                    {/* Version with Tooltip */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
+                          >
+                            <span className="material-symbols-outlined mr-1">
+                              history
+                            </span>
+                            {t("Version")} {preset.version}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="ml-[129px]">
+                          <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
+                            <span className="text-card-foreground text-lg font-bold flex items-center ">
+                              <span className="material-symbols-outlined mr-1">
+                                history
+                              </span>
+                              {t("Version")} {preset.version}
+                            </span>
+                            <div className="flex flex-col justify-start items-start ">
+                              <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
+                                <div className="text-muted-foreground">
+                                  {t("UpdateBy")}
+                                </div>
+                                {preset.user.profile ? (
+                                  <Avatar>
+                                    <AvatarImage
+                                      src={`${
+                                        process.env.NEXT_PUBLIC_UPLOAD_URL
+                                      }/${
+                                        (preset as any).updateByUserImagePath
+                                      }`}
+                                    />
+                                    <AvatarFallback
+                                      id={preset.user.id.toString()}
+                                    >
+                                      {getInitials(preset.updateByUserName)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <Skeleton className="h-12 w-12 rounded-full" />
+                                )}
+                                {(preset as any).updateByUserName}
+                              </div>
+                              <div className="flex gap-2 text-muted-foreground">
+                                <div className="text-muted-foreground">
+                                  {t("UpdateAt")}
+                                </div>
+                                {formatTime(preset.updatedAt)}
+                              </div>
+                            </div>
+                            <div className="flex justify-between w-full">
+                              <div className="font-bold text-lg text-muted-foreground">
+                                {t("Total")}
+                              </div>
+                              <div className="font-bold text-lg text-muted-foreground">
+                                {preset.version} {t("Version")}
+                              </div>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {/* Title */}
+                    <h2 className="text-xl font-semibold truncate">
+                      {preset.title}
+                    </h2>
+                  </div>
+                  {/* Zones */}
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="material-symbols-outlined">
+                      location_on
                     </span>
-                    {t("Version")} {preset.version}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="ml-[129px]">
-                  <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                    <span className="text-card-foreground text-lg font-bold flex items-center ">
-                      <span className="material-symbols-outlined mr-1">
-                        history
-                      </span>
-                      {t("Version")} {preset.version}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                            {preset.zones && preset.zones.length > 0
+                              ? preset.zones.map((zone) => z(zone)).join(", ")
+                              : z("NoZonesAvailable")}{" "}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="bottom"
+                          align="start"
+                          sideOffset={10}
+                          className="bg-card shadow-lg rounded-md p-4 w-fit"
+                        >
+                          <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                            {t("Zone")}
+                          </h3>
+                          <ScrollArea className="h-32 rounded-md bg-card">
+                            {preset.zones.map((zone) => (
+                              <div className="text-sm text-foreground">
+                                - {z(zone)}
+                              </div>
+                            ))}
+                          </ScrollArea>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  {/* Description */}
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="material-symbols-outlined">
+                      data_info_alert
                     </span>
-                    <div className="flex flex-col justify-start items-start ">
-                      <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                        <div className="text-muted-foreground">
-                          {t("UpdateBy")}
-                        </div>
-                        {(preset as any).updateByUserImagePath ? (
-                          <Avatar>
-                            <AvatarImage
-                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${
-                                (preset as any).updateByUserImagePath
-                              }`}
-                            />
-                            <AvatarFallback>
-                              {(preset as any).updateByUserName
-                                ?.charAt(0)
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <Skeleton className="h-12 w-12 rounded-full" />
-                        )}
-                        {(preset as any).updateByUserName}
-                      </div>
-                      <div className="flex gap-2 text-muted-foreground">
-                        <div className="text-muted-foreground">
-                          {t("UpdateAt")}
-                        </div>
-                        {formatTime(preset.updatedAt)}
-                      </div>
-                      <div className="flex justify-between w-full">
-                        <div className="font-bold text-lg text-muted-foreground">
-                          {t("Total")}
-                        </div>
-                        <div className="font-bold text-lg text-muted-foreground">
-                          {preset.version} {t("Version")}
-                        </div>
-                      </div>
+                    <div className="text-sm text-muted-foreground truncate">
+                      {preset.description}
                     </div>
                   </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {/* Title and Details */}
-            <div className="flex justify-between">
-              <div className="flex flex-col gap-2">
-                {/* Title */}
-                <h2 className="text-xl font-semibold">{preset.title}</h2>
-
-                {/* Zones */}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="material-symbols-outlined">location_on</span>
-                  <p className="truncate">
-                    {preset.zones && preset.zones.length > 0
-                      ? preset.zones.map((zone) => z(zone)).join(", ")
-                      : z("NoZonesAvailable")}{" "}
-                  </p>
                 </div>
 
-                {/* Description */}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="material-symbols-outlined">
-                    data_info_alert
-                  </span>
-                  <div className="text-sm text-muted-foreground">
-                    {preset.description}
-                  </div>
-                </div>
+                {/* Action Buttons */}
               </div>
+              <div className="sticky right-[0px]  flex flex-row justify-end items-end ">
+                <DropdownMenu>
+                  <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" className="w-[45px] h-[45px]">
+                      <span className="material-symbols-outlined items-center text-input">
+                        more_vert
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
 
-              {/* Action Buttons */}
+                  <DropdownMenuContent align="end" className="p-0">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        handleEdit(preset.id);
+                      }}
+                    >
+                      <h1>{t("Detail")}</h1>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemovePreset(preset.id);
+                      }}
+                    >
+                      <h1 className="text-destructive cursor-pointer">
+                        {t("Delete")}
+                      </h1>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {isDialogOpen && (
+                  <AlertCustom
+                    title={a("PresetRemoveConfirmTitle")}
+                    description={a("PresetRemoveConfirmDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={handleDialogResult}
+                  />
+                )}
+              </div>
             </div>
-            <div className="flex flex-col items-end gap-2 mt-5">
-              <DropdownMenu>
-                <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" className="w-[45px] h-[45px]">
-                    <span className="material-symbols-outlined items-center text-input">
-                      more_vert
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="p-0">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      handleEdit(preset.id);
-                    }}
-                  >
-                    <h1>{t("Detail")}</h1>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemovePreset(preset.id);
-                    }}
-                  >
-                    <h1 className="text-destructive cursor-pointer">
-                      {t("Delete")}
-                    </h1>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {isDialogOpen && (
-                <AlertCustom
-                  title={a("PresetRemoveConfirmTitle")}
-                  description={a("PresetRemoveConfirmDescription")}
-                  primaryButtonText={t("Confirm")}
-                  primaryIcon="check"
-                  secondaryButtonText={t("Cancel")}
-                  backResult={handleDialogResult}
-                />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

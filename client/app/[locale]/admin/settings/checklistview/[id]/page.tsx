@@ -413,7 +413,7 @@ export default function Page() {
 
   return (
     <div className=" ">
-      <div className="m bg-white py-4 px-6 rounded-lg shadow-lg">
+      <div className="m bg-card py-4 px-6 rounded-lg shadow-lg">
         <div className="flex flex-row justify-between">
           <h1 className="text-2xl font-bold mb-4">
             {t("EditPatrolChecklist")}

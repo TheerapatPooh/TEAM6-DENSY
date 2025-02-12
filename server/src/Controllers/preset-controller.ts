@@ -1,6 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { Checklist } from "@prisma/client";
+import { profile } from "console";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่
@@ -413,9 +414,11 @@ export async function getAllPresets(req: Request, res: Response) {
         description: preset.description,
         version: preset.version,
         updatedAt: preset.updatedAt,
-        updateByUserName:
-          preset.user?.profile?.name || preset.user?.username || "Unknown",
-        updateByUserImagePath: preset.user?.profile?.image?.path || "",
+        user:preset.user,
+
+        updateByUserName:preset.user?.profile?.name || preset.user?.username || "Unknown",
+        updateByUserImagePath: preset.user?.profile?.image?.path ,
+
         zones: uniqueZoneNames,
         presetChecklists: preset.presetChecklists,
         versionCount: versionCounts[preset.title] || 0,
