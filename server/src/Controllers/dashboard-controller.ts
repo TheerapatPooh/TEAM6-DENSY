@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 
 export async function getHeatMap(req: Request, res: Response) {
     try {
-
         const allDefects = await prisma.defect.findMany({
             include: {
                 supervisor: {
@@ -62,8 +61,8 @@ export async function getHeatMap(req: Request, res: Response) {
                                                 profile: {
                                                     select: {
                                                         name: true,
-                                                        image: true
-                                                    }
+                                                        image: true,
+                                                    },
                                                 },
                                             },
                                         },
@@ -76,8 +75,22 @@ export async function getHeatMap(req: Request, res: Response) {
             },
         });
 
+        const allPatrols = await prisma.patrol.findMany({
+            include: {
+                results: {
+                    select: {
+                        defects: true,
+                    },
+                },
+            },
+        });
+
         if (!allDefects) {
             res.status(404).json({ message: "Defect not found" });
+            return;
+        }
+        if (!allPatrols) {
+            res.status(404).json({ message: "Patrol not found" });
             return;
         }
         // คำนวณ defectCategory
@@ -87,8 +100,11 @@ export async function getHeatMap(req: Request, res: Response) {
             maintenance: "hsl(var(--destructive))",
         };
 
-        let defectCategoryMap: Record<string, { type: string; amounts: number; fill: string }> = {};
-        allDefects.forEach(defect => {
+        let defectCategoryMap: Record<
+            string,
+            { type: string; amounts: number; fill: string }
+        > = {};
+        allDefects.forEach((defect) => {
             const type = defect.type || "Unknown";
             if (!defectCategoryMap[type]) {
                 defectCategoryMap[type] = {
@@ -103,21 +119,29 @@ export async function getHeatMap(req: Request, res: Response) {
         const defectCatagory = Object.values(defectCategoryMap);
 
         // คำนวณ commonDefects
-        let defectNameMap: Record<string, { name: string; amounts: number; fill: string }> = {};
+        let defectNameMap: Record<
+            string,
+            { name: string; amounts: number; fill: string }
+        > = {};
 
         const usedColors = new Set<number>(); // เก็บค่าที่ใช้ไปแล้ว
 
-        allDefects.forEach(defect => {
+        allDefects.forEach((defect) => {
             const name = defect.name || "Unknown Defect";
             if (!defectNameMap[name]) {
                 let randomChartIndex;
-                const availableIndices = [1, 2, 3, 4, 5].filter(i => !usedColors.has(i));
+                const availableIndices = [1, 2, 3, 4, 5].filter(
+                    (i) => !usedColors.has(i)
+                );
 
                 if (availableIndices.length === 0) {
                     usedColors.clear(); // รีเซ็ตเมื่อครบ 5 สี
                     randomChartIndex = Math.floor(Math.random() * 5) + 1;
                 } else {
-                    randomChartIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+                    randomChartIndex =
+                        availableIndices[
+                        Math.floor(Math.random() * availableIndices.length)
+                        ];
                 }
 
                 usedColors.add(randomChartIndex);
@@ -125,7 +149,7 @@ export async function getHeatMap(req: Request, res: Response) {
                 defectNameMap[name] = {
                     name,
                     amounts: 0,
-                    fill: `hsl(var(--chart-${randomChartIndex}))`
+                    fill: `hsl(var(--chart-${randomChartIndex}))`,
                 };
             }
             defectNameMap[name].amounts++;
@@ -136,11 +160,36 @@ export async function getHeatMap(req: Request, res: Response) {
             .sort((a, b) => b.amounts - a.amounts) // เรียงจากมากไปน้อย
             .slice(0, 5); // เอาแค่ 5 อันแรก
 
+        const completionRate = {
+            noDefect: 0,
+            withDefect: 0,
+        };
 
+        allPatrols.forEach((patrol) => {
+            // ตรวจสอบว่า patrol นี้มี defects หรือไม่
+            const hasDefects = patrol.results.some(
+                (result) => result.defects.length > 0
+            );
+
+            if (hasDefects) {
+                completionRate.withDefect += 1;
+            } else {
+                completionRate.noDefect += 1;
+            }
+        });
+
+        // สร้างข้อมูลสำหรับแสดงผลใน radial chart
+        const patrolCompletionRate = [
+            {
+                noDefect: completionRate.noDefect,
+                withDefect: completionRate.withDefect
+            },
+        ];
 
         let result = {
             defectCatagory,
             commonDefects,
+            patrolCompletionRate,
         };
         res.status(200).json(result);
         return;

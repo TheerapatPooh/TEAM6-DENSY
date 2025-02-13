@@ -52,14 +52,14 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
                 if (!payload || payload.length === 0) return null;
 
                 return (
-                  <div className="bg-card-foreground p-1 custom-shadow rounded-md">
+                  <div className="bg-card-foreground px-2.5 py-1.5 custom-shadow rounded-md">
                     {payload.map((entry, index) => {
                       const percent = ((parseFloat(entry.value.toString()) / totalReports) * 100).toFixed(2);
                       return (
                         <div key={index} className="flex items-center gap-6">
-                          <div className="flex items-center gap-1 text-sm font-medium text-border">
+                          <div className="flex items-center gap-2 text-sm font-medium text-border">
                             <span
-                              className="inline-block w-3 h-3 rounded-sm"
+                              className="inline-block w-2.5 h-2.5 rounded-[2px]"
                               style={{ backgroundColor: entry.payload.fill }}
                             />
                             <p>{s(entry.name)}</p>

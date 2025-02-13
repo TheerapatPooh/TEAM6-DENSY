@@ -2,6 +2,7 @@
 import { IDashboardData } from "@/app/type";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DonutGraph } from "@/components/donut-graph";
+import { GaugeGraph } from "@/components/gauge-graph";
 import { PieGraph } from "@/components/pie-graph";
 import { fetchData } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import React, { useEffect, useState } from "react";
 export default function Page() {
   const [data, setData] = useState<IDashboardData>();
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     const getData = async () => {
       const response = await fetchData("get", "/dashboard/heat-map", true);
@@ -44,10 +46,11 @@ export default function Page() {
 
         </div>
       </div>
-      <div className="flex rounded-md px-6 py-4 bg-card">
+      <div className="flex flex-col rounded-md px-6 py-4 bg-card">
         <h1 className="text-2xl font-semibold text-card-foreground">
           Patrol Completion Rate
         </h1>
+        <GaugeGraph chartData={data.patrolCompletionRate}/>
       </div>
     </div>
   );

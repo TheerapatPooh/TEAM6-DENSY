@@ -303,9 +303,8 @@ export interface ICommonDefectItem {
 }
 
 export interface IPatrolCompletionRateItem {
-    name: string;
-    rate: number;
-    fill: string;
+    noDefect: number;
+    withDefect: number;
 }
 
 export interface IDashboardData {
