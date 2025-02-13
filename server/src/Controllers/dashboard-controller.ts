@@ -85,6 +85,20 @@ export async function getHeatMap(req: Request, res: Response) {
             },
         });
 
+        const allZones = await prisma.zone.findMany({
+            include: {
+                itemZones: {
+                    select: {
+                        results: {
+                            select: {
+                                defects: true
+                            },
+                        }
+                    },
+                },
+            },
+        });
+
         if (!allDefects) {
             res.status(404).json({ message: "Defect not found" });
             return;
@@ -160,6 +174,7 @@ export async function getHeatMap(req: Request, res: Response) {
             .sort((a, b) => b.amounts - a.amounts) // เรียงจากมากไปน้อย
             .slice(0, 5); // เอาแค่ 5 อันแรก
 
+        // คำนวณ patrolCompletionRate
         const completionRate = {
             noDefect: 0,
             withDefect: 0,
@@ -186,10 +201,31 @@ export async function getHeatMap(req: Request, res: Response) {
             },
         ];
 
+        // คำนวณ heatMap
+        const heatMap = allZones.map(zone => {
+            // นับจำนวน defects ในแต่ละ zone
+            let defectCount = 0;
+
+            // วนลูปผ่านทุกๆ itemZone ของ zone
+            zone.itemZones.forEach(itemZone => {
+                itemZone.results.forEach(result => {
+                    defectCount += result.defects.length; // เพิ่มจำนวน defects ที่พบใน result
+                });
+            });
+
+            // คืนค่าข้อมูลที่มี id, name และ defects
+            return {
+                id: zone.id,
+                name: zone.name,
+                defects: defectCount
+            };
+        });
+
         let result = {
             defectCatagory,
             commonDefects,
             patrolCompletionRate,
+            heatMap
         };
         res.status(200).json(result);
         return;

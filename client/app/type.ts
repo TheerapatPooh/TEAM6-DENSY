@@ -168,11 +168,10 @@ export interface IItem {
 }
 
 export interface IZone {
-    toLowerCase(): unknown;
     id: number;
     name: string;
-    locationId: number;
-    userId: number;
+    locationId?: number;
+    userId?: number;
     pathData?: string;
     text?: {
         x: number;
@@ -181,6 +180,7 @@ export interface IZone {
         rotation: number;
     } | null
     supervisor?: IUser;
+    defects?: number;
 }
 
 
@@ -283,11 +283,11 @@ export interface IToast {
 export interface IHeatmapZone {
     id: number;
     name: string;
-    defect: number;
+    defects: number;
 }
 
-export interface IHeatmapItem {
-    zones: IHeatmapZone[];
+export interface IHeatMap {
+    data: IHeatmapZone[];
 }
 
 export interface IDefectCategoryItem {
@@ -308,7 +308,7 @@ export interface IPatrolCompletionRateItem {
 }
 
 export interface IDashboardData {
-    heatmap: IHeatmapItem[];
+    heatMap: IHeatmapZone[];
     defectCatagory: IDefectCategoryItem[];
     commonDefects: ICommonDefectItem[];
     patrolCompletionRate: IPatrolCompletionRateItem[];
