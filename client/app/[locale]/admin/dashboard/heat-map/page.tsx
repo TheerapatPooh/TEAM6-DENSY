@@ -46,7 +46,7 @@ export default function Page() {
 
         </div>
       </div>
-      <div className="flex flex-col rounded-md px-6 py-4 bg-card">
+      <div className="flex flex-col rounded-md px-6 py-4 bg-card min-h-[460px]">
         <h1 className="text-2xl font-semibold text-card-foreground">
           Patrol Completion Rate
         </h1>

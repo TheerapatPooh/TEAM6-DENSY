@@ -30,9 +30,9 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
       };
       return acc;
     }, {} as ChartConfig);
-  }, [chartData]);  
+  }, [chartData]);
 
-  
+
   const totalReports = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.amounts, 0);
   }, []);
@@ -109,7 +109,7 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing the distribution of defect types.
+          Shows the most frequent defect during patrols.
         </div>
       </CardFooter>
     </div>

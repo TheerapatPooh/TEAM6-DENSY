@@ -14,6 +14,7 @@ import {
 import {
     ChartConfig,
     ChartContainer,
+    ChartLegend,
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
@@ -42,16 +43,16 @@ export function GaugeGraph({ chartData }: IGaugeGraphProps) {
 
     return (
         <div className="flex flex-col">
-            <CardContent className="flex flex-1 items-center pb-0">
+            <CardContent className="flex flex-1 items-center pt-2">
                 <ChartContainer
                     config={chartConfig}
-                    className="mx-auto aspect-square w-full max-w-[250px]"
+                    className="mx-auto aspect-video w-full h-[360px]"
                 >
                     <RadialBarChart
                         data={chartData}
                         endAngle={180}
-                        innerRadius={80}
-                        outerRadius={130}
+                        innerRadius={160}
+                        outerRadius={240}
                     >
                         <ChartTooltip
                             cursor={false}
@@ -65,15 +66,15 @@ export function GaugeGraph({ chartData }: IGaugeGraphProps) {
                                             <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
                                                 <tspan
                                                     x={viewBox.cx}
-                                                    y={(viewBox.cy || 0) - 16}
-                                                    className="fill-foreground text-2xl font-bold"
+                                                    y={(viewBox.cy || 0) - 36}
+                                                    className="fill-card-foreground text-[48px] font-bold"
                                                 >
                                                     {noDefectPercent}%
                                                 </tspan>
                                                 <tspan
                                                     x={viewBox.cx}
-                                                    y={(viewBox.cy || 0) + 4}
-                                                    className="fill-muted-foreground"
+                                                    y={(viewBox.cy || 0) + 8}
+                                                    className="text-base fill-muted-foreground"
                                                 >
                                                     No Defect
                                                 </tspan>
@@ -97,17 +98,39 @@ export function GaugeGraph({ chartData }: IGaugeGraphProps) {
                             cornerRadius={5}
                             className="stroke-transparent stroke-2"
                         />
+                        <ChartLegend
+                            content={({ payload }) => (
+                                <div className="flex flex-col gap-2 items-center">
+                                    <div className="flex gap-4 justify-center">
+                                        <div key={`legend-item-1`} className="flex items-center gap-1">
+                                            <span
+                                                className="inline-block w-3 h-3 rounded-sm"
+                                                style={{ backgroundColor: chartConfig.noDefect.color }}
+                                            ></span>
+                                            <span className="text-sm">{chartConfig.noDefect.label}</span>
+                                        </div>
+                                        <div key={`legend-item-2`} className="flex items-center gap-1">
+                                            <span
+                                                className="inline-block w-3 h-3 rounded-sm"
+                                                style={{ backgroundColor: chartConfig.withDefect.color }}
+                                            ></span>
+                                            <span className="text-sm">{chartConfig.withDefect.label}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm font-semibold leading-none">
+                                        Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+                                    </div>
+                                    <div className="leading-none text-muted-foreground">
+                                        Shows the rate of patrols completed without defects.
+                                    </div>
+                                </div>
+
+                            )}
+                            className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+                        />
                     </RadialBarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    Showing total visitors for the last 6 months
-                </div>
-            </CardFooter>
         </div>
     )
 }
