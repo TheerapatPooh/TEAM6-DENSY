@@ -73,8 +73,6 @@ export default function Page() {
       } else {
         console.error("Failed to delete Preset: No response from API");
       }
-
-     
     } catch (error) {
       console.error("An error occurred while deleting the preset:", error);
     }
@@ -99,9 +97,9 @@ export default function Page() {
     }
   };
 
-  const handleEdit = (id: number) => {
-    router.push(`/${locale}/admin/settings/patrol-preset/${id}`);
-  };
+  
+  
+  
   const handleCreatePreset = () => {
     router.push(`/${locale}/admin/settings/patrol-preset/create`);
   };
@@ -157,6 +155,8 @@ export default function Page() {
   useEffect(() => {
     getData();
   }, []);
+
+  
 
   // search bar
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -216,8 +216,7 @@ export default function Page() {
       const matchesDateRange =
         (!tempDateRange?.from ||
           new Date(preset.updatedAt) >= tempDateRange.from) &&
-        (!tempDateRange?.to ||
-          new Date(preset.updatedAt) <= tempDateRange.to);
+        (!tempDateRange?.to || new Date(preset.updatedAt) <= tempDateRange.to);
 
       return matchesZones && matchesDateRange;
     });
@@ -236,27 +235,41 @@ export default function Page() {
     setFilteredPresets(data); // รีเซ็ตข้อมูลที่กรองแล้วเป็นทั้งหมด
   };
 
-  const [sortedPresets, setSortedPresets] = useState<
-    IPresetWithExtras[]
-  >([]);
+  const [sortedPresets, setSortedPresets] = useState<IPresetWithExtras[]>([]);
 
-    useEffect(() => {
-      const sorted = [...filteredPreset].sort((a, b) => {
-        let comparison = 0;
-  
-        if (sortOption === "Name") {
-          comparison = a.title.localeCompare(b.title);
-        } else if (sortOption === "ModifiedDate") {
-          comparison =
-            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-        } 
-  
-        return sortOrder === "asc" ? comparison : -comparison;
-      });
-  
-      setSortedPresets(sorted); // Update sorted checklists state
-    }, [filteredPreset, sortOption, sortOrder]); // Dependencies to trigger the effect
+  useEffect(() => {
+    const sorted = [...filteredPreset].sort((a, b) => {
+      let comparison = 0;
 
+      if (sortOption === "Name") {
+        comparison = a.title.localeCompare(b.title);
+      } else if (sortOption === "ModifiedDate") {
+        comparison =
+          new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    setSortedPresets(sorted); // Update sorted checklists state
+  }, [filteredPreset, sortOption, sortOrder]); // Dependencies to trigger the effect
+
+  const handleEdit = (id: number) => {
+    // Find the preset by id from the sortedPresets array
+    const preset = sortedPresets.find(p => p.id === id);
+  
+    // Redirect to the error page if preset or zones are missing
+    if (!preset?.zones?.length || !preset.zones.every(zone => zone.userId)) {
+      router.push(`/${locale}/admin/settings/patrol-preset/error/unassinged-zone`);
+    } else {
+      // If all zones have a userId, navigate to the patrol preset page
+      router.push(`/${locale}/admin/settings/patrol-preset/${id}`);
+    }
+  };
+  
+  
+  
+  
 
   return (
     <div className="flex flex-col gap-4 ">
@@ -444,7 +457,9 @@ export default function Page() {
         <div className="space-y-4">
           {sortedPresets.map((preset) => (
             <div
-            onClick={() => {handleEdit(preset.id)}}
+              onClick={() => {
+                handleEdit(preset.id);
+              }}
               key={preset.id}
               className="bg-card rounded-lg shadow p-4 cursor-pointer h-[219px]"
             >
@@ -533,8 +548,18 @@ export default function Page() {
                         <TooltipTrigger asChild>
                           <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
                             {preset.zones && preset.zones.length > 0
-                              ? preset.zones.map((zone) => z(zone)).join(", ")
-                              : z("NoZonesAvailable")}{" "}
+                              ? preset.zones.map((zone, index) => (
+                                  <span
+                                    key={index}
+                                    className={
+                                      zone.userId ? "" : "text-destructive"
+                                    }
+                                  >
+                                    {z(zone.name)}
+                                    {index < preset.zones.length - 1 && ", "}
+                                  </span>
+                                ))
+                              : z("NoZonesAvailable")}
                           </div>
                         </TooltipTrigger>
                         <TooltipContent
@@ -547,9 +572,17 @@ export default function Page() {
                             {t("Zone")}
                           </h3>
                           <ScrollArea className="h-32 rounded-md bg-card">
-                            {preset.zones.map((zone) => (
+                            {preset.zones.map((zone, index) => (
                               <div className="text-sm text-foreground">
-                                - {z(zone)}
+                                - <span
+                                    key={index}
+                                    className={
+                                      zone.userId ? "" : "text-destructive"
+                                    }
+                                  >
+                                    {z(zone.name)}
+                                    {index < preset.zones.length - 1 && ", "}
+                                  </span>
                               </div>
                             ))}
                           </ScrollArea>
