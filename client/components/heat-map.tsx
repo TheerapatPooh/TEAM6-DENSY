@@ -12,7 +12,7 @@
 
 'use client';
 import { Stage, Layer, Path, Text } from 'react-konva';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IZone, ILocation, IHeatMap } from '@/app/type';
 import { fetchData } from '@/lib/utils';
 import zonePath from '@/lib/zonePath.json'
@@ -36,10 +36,12 @@ const zoneCriteria = [
 ];
 
 export default function HeatMap({ data }: IHeatMap) {
+    const stageRef = useRef(null);  // เพิ่ม useRef สำหรับ Stage
     const [stageDimensions, setStageDimensions] = useState({ width: 780, height: 518, size: "LG" });
     const [zones, setZones] = useState<IZone[]>([]);
     const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
     const [paths, setPaths] = useState<{ text: any, id: number, pathData: string, defects?: number }[]>([])
+
     const m = useTranslations('Map')
     const locale = useLocale();
     const [language, setLanguage] = useState('en');
@@ -97,6 +99,12 @@ export default function HeatMap({ data }: IHeatMap) {
         return defects > 50 ? "#F5F7FA" : "#333840";
     };
 
+    useEffect(() => {
+        if (stageRef.current) {
+            stageRef.current.batchDraw(); 
+        }
+    }, [zones]); 
+
     if (!data) {
         return (
             <p>Loading...</p>
@@ -115,8 +123,8 @@ export default function HeatMap({ data }: IHeatMap) {
                                 className={`w-12 h-12 ${index === 0 ? 'rounded-t-md' : ''} ${index === zoneCriteria.length - 1 ? 'rounded-b-md' : ''}`}
                                 style={{
                                     backgroundColor: index === zoneCriteria.length - 1
-                                        ? getCSSVariableValue('--secondary') 
-                                        : criteria.color 
+                                        ? getCSSVariableValue('--secondary')
+                                        : criteria.color
                                 }}
                             ></span>
                             <p className='text-2xl text-card-foreground font-bold text-center'>{criteria.label}</p>
@@ -125,7 +133,7 @@ export default function HeatMap({ data }: IHeatMap) {
                 </div>
             </div>
             {/* HeatMap */}
-            <Stage width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md'>
+            <Stage ref={stageRef} width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md'>
                 <Layer x={8} y={8}>
                     {zones?.map((zone) => {
                         const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน

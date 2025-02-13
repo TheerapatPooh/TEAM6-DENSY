@@ -3,15 +3,26 @@ import { Request, Response } from "express";
 
 export async function getHeatMap(req: Request, res: Response) {
     try {
+        const { startDate, endDate } = req.query;
+        // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
+        const dateFilter: any = {};
+        if (startDate || endDate) {
+            dateFilter.startTime = {
+                ...(startDate && { gte: new Date(startDate as string) }),
+                ...(endDate && { lte: new Date(endDate as string) }),
+            };
+        }
         const allZones = await prisma.zone.findMany({
             include: {
                 itemZones: {
-                    select: {
+                    include: {
                         results: {
                             select: {
-                                defects: true
+                                defects: {
+                                    where: dateFilter, 
+                                }
                             },
-                        }
+                        },
                     },
                 },
             },
@@ -24,13 +35,12 @@ export async function getHeatMap(req: Request, res: Response) {
 
         // คำนวณ heatMap
         const heatMap = allZones.map(zone => {
-            // นับจำนวน defects ในแต่ละ zone
             let defectCount = 0;
 
             // วนลูปผ่านทุกๆ itemZone ของ zone
             zone.itemZones.forEach(itemZone => {
-                itemZone.results.forEach(result => {
-                    defectCount += result.defects.length; // เพิ่มจำนวน defects ที่พบใน result
+                itemZone.results.forEach(result => {    
+                    defectCount += result.defects.length; // เพิ่มจำนวน defects ที่ตรงเงื่อนไข
                 });
             });
 
@@ -38,7 +48,7 @@ export async function getHeatMap(req: Request, res: Response) {
             return {
                 id: zone.id,
                 name: zone.name,
-                defects: defectCount
+                defects: defectCount,
             };
         });
 
@@ -53,7 +63,17 @@ export async function getHeatMap(req: Request, res: Response) {
 }
 export async function getDefectCatagory(req: Request, res: Response) {
     try {
+        const { startDate, endDate } = req.query;
+        // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
+        const dateFilter: any = {};
+        if (startDate || endDate) {
+            dateFilter.startTime = {
+                ...(startDate && { gte: new Date(startDate as string) }),
+                ...(endDate && { lte: new Date(endDate as string) }),
+            };
+        }
         const allDefects = await prisma.defect.findMany({
+            where: dateFilter,
             include: {
                 supervisor: {
                     select: {
@@ -203,7 +223,17 @@ export async function getDefectCatagory(req: Request, res: Response) {
 }
 export async function getCommonDefects(req: Request, res: Response) {
     try {
+        const { startDate, endDate } = req.query;
+        // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
+        const dateFilter: any = {};
+        if (startDate || endDate) {
+            dateFilter.startTime = {
+                ...(startDate && { gte: new Date(startDate as string) }),
+                ...(endDate && { lte: new Date(endDate as string) }),
+            };
+        }
         const allDefects = await prisma.defect.findMany({
+            where: dateFilter,
             include: {
                 supervisor: {
                     select: {
@@ -334,7 +364,17 @@ export async function getCommonDefects(req: Request, res: Response) {
 }
 export async function getPatrolCompletionRate(req: Request, res: Response) {
     try {
+        const { startDate, endDate } = req.query;
+        // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
+        const dateFilter: any = {};
+        if (startDate || endDate) {
+            dateFilter.date = {
+                ...(startDate && { gte: new Date(startDate as string) }),
+                ...(endDate && { lte: new Date(endDate as string) }),
+            };
+        }
         const allPatrols = await prisma.patrol.findMany({
+            where: dateFilter,
             include: {
                 results: {
                     select: {
