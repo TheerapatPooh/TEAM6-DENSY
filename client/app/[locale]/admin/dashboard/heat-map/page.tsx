@@ -1,5 +1,5 @@
 'use client'
-import { IDashboardData } from "@/app/type";
+import { ICommonDefectItem, IDashboardData, IDefectCategoryItem, IHeatmapZone, IPatrolCompletionRateItem } from "@/app/type";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DonutGraph } from "@/components/donut-graph";
 import { GaugeGraph } from "@/components/gauge-graph";
@@ -9,21 +9,30 @@ import { fetchData } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
 
 export default function Page() {
-  const [data, setData] = useState<IDashboardData>();
+  const [heatMap, setHeatMap] = useState<IHeatmapZone[]>();
+  const [defectCatagory, setDefectCatagory] = useState<IDefectCategoryItem[]>();
+  const [commonDefects, setCommonDefect] = useState<ICommonDefectItem[]>();
+  const [patrolCompletion, setPatrolCompletion] = useState<IPatrolCompletionRateItem[]>();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
-      const response = await fetchData("get", "/dashboard/heat-map", true);
+      const heatMap = await fetchData("get", "/dashboard/heat-map", true);
+      const defectCatagory = await fetchData("get", "/dashboard/defect-catagory", true);
+      const commonDefects = await fetchData("get", "/dashboard/common-defects", true);
+      const patrolCompletion = await fetchData("get", "/dashboard/patrol-completion", true);
       // fetch data
-      setData(response);
+      setHeatMap(heatMap);
+      setDefectCatagory(defectCatagory);
+      setCommonDefect(commonDefects);
+      setPatrolCompletion(patrolCompletion);
     };
     getData();
     setMounted(true);
   }, []);
 
-  if (!mounted || !data) return null;
-  const heatMap = [
+  if (!mounted || !heatMap || !defectCatagory || !commonDefects || !patrolCompletion) return null;
+  const heatMapMock = [
     {
         "id": 1,
         "name": "r&d_zone",
@@ -136,13 +145,13 @@ export default function Page() {
           <h1 className="text-2xl font-semibold text-card-foreground">
             Defect Category
           </h1>
-          <DonutGraph key={Date.now()} chartData={data.defectCatagory} />
+          <DonutGraph key={Date.now()} chartData={defectCatagory} />
         </div>
         <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">
             Common Defects
           </h1>
-          <PieGraph key={Date.now()} chartData={data.commonDefects} />
+          <PieGraph key={Date.now()} chartData={commonDefects} />
 
         </div>
       </div>
@@ -150,7 +159,7 @@ export default function Page() {
         <h1 className="text-2xl font-semibold text-card-foreground">
           Patrol Completion Rate
         </h1>
-        <GaugeGraph key={Date.now()} chartData={data.patrolCompletionRate} />
+        <GaugeGraph key={Date.now()} chartData={patrolCompletion} />
       </div>
     </div>
   );

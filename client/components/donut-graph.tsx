@@ -127,7 +127,7 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
                         className="inline-block w-3 h-3 rounded-sm"
                         style={{ backgroundColor: entry.color }}
                       ></span>
-                      <span className="text-sm">{s(entry.value)}</span>
+                      <span className="text-sm w-28">{s(entry.value)}</span>
                     </div>
                   ))}
                 </div>
