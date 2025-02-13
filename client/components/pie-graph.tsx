@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { TrendingUp } from "lucide-react";
-import { Label, Pie, PieChart, LabelList } from "recharts";
+import { Pie, PieChart, LabelList } from "recharts";
 
 import {
   CardContent,
@@ -14,26 +14,25 @@ import {
   ChartLegend,
   ChartTooltip,
 } from "@/components/ui/chart";
-import { IDefectCategoryItem } from "@/app/type";
-import { useTranslations } from "next-intl";
+import { ICommonDefectItem } from "@/app/type";
 
 
 interface IDonutGraphProps {
-  chartData: IDefectCategoryItem[];
+  chartData: ICommonDefectItem[];
 }
 
-export function DonutGraph({ chartData }: IDonutGraphProps) {
-  const s = useTranslations('Status');
+export function PieGraph({ chartData }: IDonutGraphProps) {
   const chartConfig = React.useMemo(() => {
     return chartData.reduce((acc, item) => {
-      acc[item.type] = {
-        label: item.type,
+      acc[item.name] = {
+        label: item.name,
         color: item.fill,
       };
       return acc;
     }, {} as ChartConfig);
-  }, [chartData]);
+  }, [chartData]);  
 
+  
   const totalReports = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.amounts, 0);
   }, []);
@@ -62,7 +61,7 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
                               className="inline-block w-3 h-3 rounded-sm"
                               style={{ backgroundColor: entry.payload.fill }}
                             />
-                            <p>{s(entry.name)}</p>
+                            <p>{entry.name}</p>
                           </div>
                           <p className="text-sm text-card">{percent}%</p>
                         </div>
@@ -75,40 +74,8 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
             <Pie
               data={chartData}
               dataKey="amounts"
-              nameKey="type"
-              innerRadius={60}
-              strokeWidth={5}
+              nameKey="name"
             >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {totalReports.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Reports
-                        </tspan>
-                      </text>
-                    );
-                  }
-                  return null;
-                }}
-              />
               <LabelList
                 dataKey="amounts"
                 className="fill-card"
@@ -120,14 +87,14 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
             </Pie>
             <ChartLegend
               content={({ payload }) => (
-                <div className="flex gap-4 justify-center">
+                <div className="flex flex-col gap-1 justify-center">
                   {payload?.map((entry, index) => (
                     <div key={`legend-item-${index}`} className="flex items-center gap-1">
                       <span
                         className="inline-block w-3 h-3 rounded-sm"
                         style={{ backgroundColor: entry.color }}
                       ></span>
-                      <span className="text-sm">{s(entry.value)}</span>
+                      <span className="text-sm">{entry.value}</span>
                     </div>
                   ))}
                 </div>

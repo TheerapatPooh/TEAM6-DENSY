@@ -2,6 +2,7 @@
 import { IDashboardData } from "@/app/type";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DonutGraph } from "@/components/donut-graph";
+import { PieGraph } from "@/components/pie-graph";
 import { fetchData } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
 
@@ -35,10 +36,12 @@ export default function Page() {
           </h1>
           <DonutGraph chartData={data.defectCatagory}/>
         </div>
-        <div className="flex py-4 px-6 w-full rounded-md custom-shadow bg-card">
+        <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">
             Common Defects
           </h1>
+          <PieGraph chartData={data.commonDefects}/>
+
         </div>
       </div>
       <div className="flex rounded-md px-6 py-4 bg-card">
