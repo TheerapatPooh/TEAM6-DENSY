@@ -191,8 +191,8 @@ export default function page() {
     if (formData?.age !== undefined && formData?.age.toString() === '') {
       setAgeError(a("ProfileAgeRequire"));
       showErrorToast = true;
-    } else if (formData?.age && formData?.age.toString() !== userData.profile.age.toString()) {
-      if (formData?.age && !isNaN(Number(formData.age)) && Number(formData.age) <= 120) {
+    } else if (formData?.age && formData?.age.toString() !== userData.profile?.age?.toString()) {
+      if (formData?.age && !isNaN(Number(formData.age)) && Number(formData.age) <= 120 && Number(formData.age) > 0) {
         userForm.append("age", formData.age.toString());
         update = true;
       } else {

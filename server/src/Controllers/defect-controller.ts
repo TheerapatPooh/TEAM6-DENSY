@@ -182,6 +182,17 @@ export async function createDefect(req: Request, res: Response) {
             },
           },
         },
+        supervisor: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        }
       },
     });
 

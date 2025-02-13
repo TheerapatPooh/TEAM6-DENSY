@@ -1,8 +1,25 @@
+'use client'
+import { IDashboardData } from "@/app/type";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DonutGraph } from "@/components/donut-graph";
-import React from "react";
+import { fetchData } from "@/lib/utils";
+import React, { useEffect, useState } from "react";
 
 export default function Page() {
+  const [data, setData] = useState<IDashboardData>();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const getData = async () => {
+      const response = await fetchData("get", "/dashboard/heat-map", true);
+      // fetch data
+      setData(response);
+    };
+    getData();
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !data) return null;
+
   return (
     <div className="flex flex-col gap-4 h-full w-full">
       <div className="flex items-center justify-between w-full bg-card rounded-md custom-shadow py-4 px-6">
@@ -16,7 +33,7 @@ export default function Page() {
           <h1 className="text-2xl font-semibold text-card-foreground">
             Defect Category
           </h1>
-          <DonutGraph></DonutGraph>
+          <DonutGraph chartData={data.defectCatagory}/>
         </div>
         <div className="flex py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">

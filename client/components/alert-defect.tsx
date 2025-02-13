@@ -241,7 +241,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         const formData = new FormData();
 
         formData.append("supervisorId",
-            defect.patrolResult.itemZone.zone.supervisor.profile.userId.toString()
+            defect.supervisor.id.toString()
         );
         formData.append("defectUserId",
             defect.userId.toString()
@@ -367,7 +367,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 ? item.itemZones.map((itemZone: IItemZone) => {
                                                     return result.zoneId === itemZone.zone.id
                                                         ? z(itemZone.zone.name)
-                                                        : null; // 
+                                                        : null;  
                                                 })
                                                 : z(defect.patrolResult.itemZone.zone.name)}
                                         </p>
@@ -385,18 +385,22 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                     {type === "report" ? (
                                         item.itemZones.map((itemZone: IItemZone) => {
                                             if (result.zoneId === itemZone.zone.id) {
+                                                const patrolResult = patrolResults.find(
+                                                    (patrolResult: IPatrolResult) => patrolResult.zoneId === itemZone.zone.id
+                                                );
+                                                const supervisor = patrolResult?.supervisor;
                                                 return (
                                                     <div className="flex items-center gap-1">
                                                         <Avatar className="custom-shadow h-[35px] w-[35px]">
                                                             <AvatarImage
-                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${itemZone.zone.supervisor.profile.image?.path}`}
+                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${supervisor.profile.image?.path}`}
                                                             />
-                                                            <AvatarFallback id={itemZone.zone.supervisor.id.toString()}>
-                                                                {getInitials(itemZone.zone.supervisor.profile.name)}
+                                                            <AvatarFallback id={supervisor.id.toString()}>
+                                                                {getInitials(supervisor.profile.name)}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <span className="text-card-foreground text-lg truncate">
-                                                            {itemZone.zone.supervisor.profile.name}
+                                                            {supervisor.profile.name}
                                                         </span>
                                                     </div>
                                                 );
@@ -581,9 +585,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                     patrolResults.find((patrolResult: IPatrolResult) =>
                                                         result.itemId === patrolResult.itemId && result.zoneId === patrolResult.zoneId
                                                     )?.id || null,
-                                                    item.itemZones.find((itemZone: IItemZone) =>
-                                                        result.zoneId === itemZone.zone.id
-                                                    )?.zone.supervisor.id || null,
+                                                    patrolResults.find((patrolResult: IPatrolResult) =>
+                                                        result.zoneId === patrolResult.zoneId
+                                                    )?.supervisor.id || null,
                                                     selectedFiles
                                                 );
                                                 break;

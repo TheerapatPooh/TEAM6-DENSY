@@ -278,3 +278,39 @@ export interface IToast {
     title: string;
     description: string;
 }
+
+
+export interface IHeatmapZone {
+    id: number;
+    name: string;
+    defect: number;
+}
+
+export interface IHeatmapItem {
+    zones: IHeatmapZone[];
+}
+
+export interface IDefectCategoryItem {
+    type: string;
+    amounts: number;
+    fill: string;
+}
+
+export interface ICommonDefectItem {
+    name: string;
+    amounts: number;
+    fill: string;
+}
+
+export interface IPatrolCompletionRateItem {
+    name: string;
+    rate: number;
+    fill: string;
+}
+
+export interface IDashboardData {
+    heatmap: IHeatmapItem[];
+    defectCatagory: IDefectCategoryItem[];
+    commonDefects: ICommonDefectItem[];
+    patrolCompletionRate: IPatrolCompletionRateItem[];
+}
