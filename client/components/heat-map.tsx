@@ -112,15 +112,15 @@ export default function HeatMap({ data }: IHeatMap) {
     }
 
     return (
-        <div className='flex justify-between items-center w-full'>
+        <div className='flex flex-col xl:flex-row justify-between items-center w-full pt-4 gap-4'>
             {/* Defect */}
-            <div>
-                <h1 className='text-2xl text-card-foreground font-bold'>Defect</h1>
-                <div>
+            <div className='flex flex-row items-center xl:flex-col xl:items-start gap-2'>
+                <h1 className='text-2xl text-card-foreground font-bold pb-8 xl:p-0'>Defect</h1>
+                <div className='flex xl:flex-col'>
                     {zoneCriteria.map((criteria, index) => (
-                        <div key={index} className='flex flex-row items-center justify-between'>
+                        <div key={index} className='flex flex-col xl:flex-row items-center justify-between'>
                             <span
-                                className={`w-12 h-12 ${index === 0 ? 'rounded-t-md' : ''} ${index === zoneCriteria.length - 1 ? 'rounded-b-md' : ''}`}
+                                className={`w-12 h-12 ${index === 0 ? 'rounded-s-md xl:rounded-b-none xl:rounded-t-md' : ''} ${index === zoneCriteria.length - 1 ? 'rounded-e-md xl:rounded-b-md xl:rounded-t-none' : ''}`}
                                 style={{
                                     backgroundColor: index === zoneCriteria.length - 1
                                         ? getCSSVariableValue('--secondary')
@@ -168,9 +168,9 @@ export default function HeatMap({ data }: IHeatMap) {
                 </Layer>
             </Stage >
             {/* WarningAreas */}
-            <div className='flex flex-col gap-4'>
+            <div className='flex xl:flex-col gap-4'>
                 <h1 className='text-2xl text-card-foreground font-bold'>Warning Areas</h1>
-                <div className='flex flex-col gap-4'>
+                <div className='grid grid-cols-2 xl:flex xl:flex-col gap-4'>
                     {warningAreas.map((zone, index) => (
                         <div key={index} className='flex flex-row items-center justify-start gap-2'>
                             <span

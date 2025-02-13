@@ -164,6 +164,7 @@ export default function Page() {
   ]
   return (
     <div className="flex flex-col gap-4 h-full w-full">
+      {/* Heat Map */}
       <div className="flex flex-col items-center justify-between w-full bg-card rounded-md custom-shadow py-4 px-6">
         <div className="flex justify-between w-full">
           <h1 className="text-2xl font-semibold text-card-foreground">
@@ -174,10 +175,12 @@ export default function Page() {
             endDate={filter?.end}
             onSelect={handleDateSelect}
             className="my-date-picker"
-          />        </div>
+          />
+        </div>
         <HeatMap data={heatMap} />
       </div>
-      <div className="flex gap-4 justify-between">
+      {/* Defect Catagory & Common Defects */}
+      <div className="flex flex-col xl:flex-row gap-4 justify-between">
         <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">
             Defect Category
@@ -189,9 +192,9 @@ export default function Page() {
             Common Defects
           </h1>
           <PieGraph key={Date.now()} chartData={commonDefects} />
-
         </div>
       </div>
+     {/* Patrol Completion */}
       <div className="flex flex-col rounded-md px-6 py-4 bg-card min-h-[460px]">
         <h1 className="text-2xl font-semibold text-card-foreground">
           Patrol Completion Rate
