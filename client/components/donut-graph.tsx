@@ -90,6 +90,7 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
               nameKey="type"
               innerRadius={60}
               strokeWidth={5}
+              className="hover:cursor-pointer"
             >
               <Label
                 content={({ viewBox }) => {
@@ -132,7 +133,7 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
             </Pie>
             <ChartLegend
               content={({ payload }) => (
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-4 justify-center hover:cursor-pointer">
                   {payload?.map((entry, index) => (
                     <div key={`legend-item-${index}`} className="flex items-center gap-1">
                       <span

@@ -13,8 +13,7 @@
 'use client';
 import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useRef, useState } from 'react';
-import { IZone, ILocation, IHeatMap } from '@/app/type';
-import { fetchData } from '@/lib/utils';
+import { IZone, IHeatMap } from '@/app/type';
 import zonePath from '@/lib/zonePath.json'
 import zonePathMd from '@/lib/zonePath-md.json'
 import zonePathSm from '@/lib/zonePath-sm.json'
@@ -23,6 +22,7 @@ import wallPathMd from '@/lib/wallPath-md.json'
 import wallPathSm from '@/lib/wallPath-sm.json'
 import React from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import NotFound from '@/components/not-found';
 
 const zoneCriteria = [
     { defects: 75, label: "> 75", color: '#400000' },
@@ -92,8 +92,9 @@ export default function HeatMap({ data }: IHeatMap) {
         return matchedCriteria ? matchedCriteria.color : '#DCE2EC'; // ถ้าไม่พบ criteria, ใช้สี fallback
     };
 
-    const warningAreas = zones.sort((a, b) => b.defects - a.defects).slice(0, 5);
-
+    const warningAreas = zones.some(zone => zone.defects > 0)
+        ? zones.sort((a, b) => b.defects - a.defects).slice(0, 5)
+        : [];
     const getTextColor = (defects: number) => {
         if (defects < 10) {
             return getCSSVariableValue('--card-foreground');
@@ -103,9 +104,9 @@ export default function HeatMap({ data }: IHeatMap) {
 
     useEffect(() => {
         if (stageRef.current) {
-            stageRef.current.batchDraw(); 
+            stageRef.current.batchDraw();
         }
-    }, [zones]); 
+    }, [zones]);
 
     if (!data) {
         return (
@@ -118,7 +119,7 @@ export default function HeatMap({ data }: IHeatMap) {
             {/* Defect */}
             <div className='flex flex-row items-center xl:flex-col xl:items-start gap-2'>
                 <h1 className='text-2xl text-card-foreground font-bold pb-8 xl:p-0'>{s("Defect")}</h1>
-                <div className='flex xl:flex-col'>
+                <div className='flex xl:flex-col '>
                     {zoneCriteria.map((criteria, index) => (
                         <div key={index} className='flex flex-col xl:flex-row items-center justify-between'>
                             <span
@@ -129,7 +130,7 @@ export default function HeatMap({ data }: IHeatMap) {
                                         : criteria.color
                                 }}
                             ></span>
-                            <p className='text-2xl text-card-foreground font-bold text-center'>{criteria.label}</p>
+                            <p className='text-xl text-card-foreground font-semibold text-center'>{criteria.label}</p>
                         </div>
                     ))}
                 </div>
@@ -170,18 +171,28 @@ export default function HeatMap({ data }: IHeatMap) {
                 </Layer>
             </Stage >
             {/* WarningAreas */}
-            <div className='flex xl:flex-col gap-4'>
+            <div className='flex flex-col justify-center w-full xl:w-auto  gap-4 min-h-[274px] min-w-[185px]'>
                 <h1 className='text-2xl text-card-foreground font-bold'>{d("WarningAreas")}</h1>
-                <div className='grid grid-cols-2 xl:flex xl:flex-col gap-4'>
-                    {warningAreas.map((zone, index) => (
-                        <div key={index} className='flex flex-row items-center justify-start gap-2'>
-                            <span
-                                className={`w-8 h-8 rounded-md`}
-                                style={{ backgroundColor: getZoneColor(zone.defects) }}
-                            ></span>
-                            <p className='text-base text-card-foreground font-semibold text-center'>{m(zone.name)}</p>
+                <div className='flex flex-col gap-4'>
+                    {warningAreas.length > 0 ? (
+                        warningAreas.map((zone, index) => (
+                            <div key={index} className='flex flex-row items-center justify-start gap-2'>
+                                <span
+                                    className={`w-8 h-8 rounded-md`}
+                                    style={{ backgroundColor: getZoneColor(zone.defects) }}
+                                ></span>
+                                <p className='text-base text-card-foreground font-semibold text-center'>{m(zone.name)}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-64">
+                            <NotFound
+                                icon="monitoring"
+                                title="NoDataAvailable"
+                                description="NoDataAvailableDescription"
+                            />
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
         </div>

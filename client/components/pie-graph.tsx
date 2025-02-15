@@ -92,6 +92,7 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
               cx="50%"
               cy="50%"
               outerRadius={90}
+              className="hover:cursor-pointer"
             >
               <LabelList
                 dataKey="amounts"
@@ -106,7 +107,7 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
               content={({ payload }) => (
                 <div className="flex flex-col gap-1 justify-center">
                   {payload?.map((entry, index) => (
-                    <div key={`legend-item-${index}`} className="flex items-center gap-1">
+                    <div key={`legend-item-${index}`} className="flex items-center gap-1 hover:cursor-pointer">
                       <span
                         className="inline-block w-3 h-3 rounded-sm"
                         style={{ backgroundColor: entry.color }}
@@ -114,7 +115,7 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
                       <span className="text-sm">{entry.value}</span>
                     </div>
                   ))}
-                  <div className="mt-2 text-center leading-none text-muted-foreground text-sm">
+                  <div className="mt-2 text-center leading-none text-muted-foreground text-sm hover:cursor-text">
                     {d("CommonDefectsDescription")}
                   </div>
                 </div>

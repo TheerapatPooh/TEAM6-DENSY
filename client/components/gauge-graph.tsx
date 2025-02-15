@@ -70,7 +70,7 @@ export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate)
                                                 <tspan
                                                     x={viewBox.cx}
                                                     y={(viewBox.cy || 0) - 36}
-                                                    className="fill-card-foreground text-[48px] font-bold"
+                                                    className="fill-card-foreground text-[48px] font-bold hover:cursor-pointer"
                                                 >
                                                     {percent?.toFixed(2)}%
                                                 </tspan>
@@ -92,19 +92,19 @@ export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate)
                             stackId="a"
                             cornerRadius={5}
                             fill="var(--color-withDefect)"
-                            className="stroke-transparent stroke-2"
+                            className="stroke-transparent stroke-2 hover:cursor-pointer"
                         />
                         <RadialBar
                             dataKey="noDefect"
                             fill="var(--color-noDefect)"
                             stackId="a"
                             cornerRadius={5}
-                            className="stroke-transparent stroke-2"
+                            className="stroke-transparent stroke-2 hover:cursor-pointer"
                         />
                         <ChartLegend
                             content={({ payload }) => (
                                 <div className="flex flex-col gap-2 items-center">
-                                    <div className="flex gap-4 justify-center">
+                                    <div className="flex gap-4 justify-center hover:cursor-pointer">
                                         <div key={`legend-item-1`} className="flex items-center gap-1">
                                             <span
                                                 className="inline-block w-3 h-3 rounded-sm"
@@ -120,14 +120,14 @@ export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate)
                                             <span className="text-sm">{chartConfig.withDefect.label}</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm font-semibold leading-none">
+                                    <div className="flex items-center gap-2 text-sm font-semibold leading-none hover:cursor-text">
                                         {d("Trending")}{isPositiveTrend ? d("Up") : d("Down")}
                                         <span className={isPositiveTrend ? "text-green" : "text-destructive"}>
                                             {trend.toFixed(2)}%
                                         </span>{d("ThisMonth")}
                                         {isPositiveTrend ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                                     </div>
-                                    <div className="leading-none text-muted-foreground text-sm">
+                                    <div className="leading-none text-muted-foreground text-sm hover:cursor-text">
                                         {d('PatrolCompletionRateDescription')}
                                     </div>
                                 </div>
