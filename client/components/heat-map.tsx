@@ -25,6 +25,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import NotFound from '@/components/not-found';
 import Loading from '@/components/loading';
 import { zoneCriteria } from '@/constants/zone-criteria';
+import { useTheme } from 'next-themes';
 
 
 export default function HeatMap({ data }: IHeatMap) {
@@ -33,6 +34,7 @@ export default function HeatMap({ data }: IHeatMap) {
     const [zones, setZones] = useState<IZone[]>([]);
     const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
     const [paths, setPaths] = useState<{ text: any, id: number, pathData: string, defects?: number }[]>([])
+    const { resolvedTheme } = useTheme();
 
     const s = useTranslations('Sidebar')
     const m = useTranslations('Map')
@@ -63,7 +65,7 @@ export default function HeatMap({ data }: IHeatMap) {
 
             setZones(updatedZones);
         }
-    }, [data]);
+    }, [data, resolvedTheme]);
 
     const getCSSVariableValue = (variableName: string) => {
         const value = getComputedStyle(document.documentElement)
@@ -101,7 +103,7 @@ export default function HeatMap({ data }: IHeatMap) {
     }, [zones]);
 
     if (!data) {
-        return <Loading/>
+        return <Loading />
     }
 
     return (
