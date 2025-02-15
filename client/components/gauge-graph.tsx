@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/chart"
 import { IPatrolCompletionRate } from "@/app/type"
 import { useTranslations } from "next-intl"
+import NotFound from "@/components/not-found"
 
 export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate) {
     const d = useTranslations("Dashboard")
@@ -30,6 +31,18 @@ export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate)
             color: "hsl(var(--destructive))",
         },
     } satisfies ChartConfig
+    
+    if (!chartData || chartData.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <NotFound
+                    icon="monitoring"
+                    title="NoDataAvailable"
+                    description="NoDataAvailableDescription"
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col">
@@ -59,7 +72,7 @@ export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate)
                                                     y={(viewBox.cy || 0) - 36}
                                                     className="fill-card-foreground text-[48px] font-bold"
                                                 >
-                                                    {percent.toFixed(2)}%
+                                                    {percent?.toFixed(2)}%
                                                 </tspan>
                                                 <tspan
                                                     x={viewBox.cx}

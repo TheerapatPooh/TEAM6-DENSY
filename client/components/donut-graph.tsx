@@ -16,10 +16,12 @@ import {
 } from "@/components/ui/chart";
 import { IDefectCategory } from "@/app/type";
 import { useTranslations } from "next-intl";
+import NotFound from "@/components/not-found";
 
 export function DonutGraph({ chartData, trend }: IDefectCategory) {
   const s = useTranslations('Status');
   const d = useTranslations('Dashboard');
+
   const chartConfig = React.useMemo(() => {
     return chartData.reduce((acc, item) => {
       acc[item.type] = {
@@ -36,6 +38,18 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
 
   const isPositiveTrend = trend >= 0;
 
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <NotFound
+          icon="monitoring"
+          title="NoDataAvailable"
+          description="NoDataAvailableDescription"
+        />
+      </div>
+    );
+  }
+  
   return (
     <div className="flex flex-col">
       <CardContent className="flex-1 pb-0">

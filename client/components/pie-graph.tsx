@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/chart";
 import { ICommonDefectItem } from "@/app/type";
 import { useTranslations } from "next-intl";
+import NotFound from "@/components/not-found";
 
 
 interface IDonutGraphProps {
@@ -38,6 +39,18 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
     return chartData.reduce((acc, curr) => acc + curr.amounts, 0);
   }, []);
 
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <NotFound
+          icon="monitoring"
+          title="NoDataAvailable"
+          description="NoDataAvailableDescription"
+        />
+      </div>
+    );
+  }
+  
   return (
     <div className="flex flex-col">
       <CardContent className="flex-1 pb-0">

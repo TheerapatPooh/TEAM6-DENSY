@@ -518,7 +518,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
         ];
 
         let result = {
-            chartData: patrolCompletionRate,
+            chartData: allPatrols.length !== 0 ? patrolCompletionRate : [],
             percent: currentPercent,
             trend: trend,
         }

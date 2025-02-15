@@ -41,7 +41,6 @@ export default function Page() {
     if (endDate) params.endDate = endDate.toISOString();
 
     const queryString = new URLSearchParams(params).toString()
-    console.log(queryString)
     const heatMap = await fetchData("get", `/dashboard/heat-map?${queryString}`, true);
     const defectCatagory = await fetchData("get", `/dashboard/defect-catagory?${queryString}`, true);
     const commonDefects = await fetchData("get", `/dashboard/common-defects?${queryString}`, true);
