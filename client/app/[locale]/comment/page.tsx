@@ -396,7 +396,7 @@ export default function Page() {
             className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
           >
             {allComments.length === 0 ? (
-              <tr className="w-full h-full">
+              <tr className="flex w-full h-full">
                 <td colSpan={5} className="w-full text-center py-6">
                   <NotFound
                     icon="chat"

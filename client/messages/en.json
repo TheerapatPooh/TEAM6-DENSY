@@ -145,7 +145,9 @@
     "ChooseInspectionZone": "Choose Inspection Zone",
     "PleaseSelectZonesForInspection": "Please select zones for inspection.",
     "CreatePatrolChecklist": "Create Patrol Checklist",
-    "Create": "Create"
+    "Create": "Create",
+    "NoDataAvailable": "No Data Available",
+    "NoDataAvailableDescription": "There is no data to display at this moment"
   },
   "Status": {
     "pending": "Pending",
@@ -414,5 +416,37 @@
     "EditPatrolChecklistDescription": "Please confirm to edit Patrol Checklist.",
     "CreatePatrolChecklist": "Are you sure to add new Patrol Checklist?",
     "CreatePatrolChecklistDescription": "Please confirm to add new Patrol Checklist."
+  },
+  "Month": {
+    "AllTime": "All Time",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December"
+  },
+  "Dashboard": {
+    "NoDefect": "No Defect",
+    "WithDefect": "With Defect",
+    "Reports": "Reports",
+    "Trending": "Trending",
+    "Down": " down by",
+    "Up": " up by",
+    "ThisMonth": "this month",
+    "HeatMap": "Heat Map",
+    "WarningAreas": "Warning Areas",
+    "DefectCatagory": "Defect Category",
+    "DefectCatagoryDescription": "Showing the distribution of defect types.",
+    "CommonDefects": "Common Defects",
+    "CommonDefectsDescription": "Shows the most frequent defect during patrols.",
+    "PatrolCompletionRate": "Patrol Completion Rate",
+    "PatrolCompletionRateDescription": "Shows the rate of patrols completed without defects."
   }
 }
