@@ -305,7 +305,7 @@
     "ProfileAddressRequire": "กรุณากรอกข้อมูลที่อยู่อาศัย",
     "ProfileCurrentPassInvalid": "รหัสผ่านปัจจุบันไม่ถูกต้อง",
     "ProfileCurrentPassRequire": "กรุณากรอกรหัสผ่านปัจจุบัน",
-    "ProfileConfirmPassInvalid": "รหัสผ่านใหม่ไม่ตรงกัน กรุณาลองใหม่อีกครั้ง",
+    "ProfileConfirmPassInvalid": "รหัสผ่านยืนยันไม่ตรงกัน กรุณาลองใหม่อีกครั้ง",
     "ProfileConfirmPassRequire": "กรุณากรอกยืนยันรหัสผ่านใหม่",
     "ProfileNewPassRequire": "กรุณากรอกรหัสผ่านใหม่",
     "ProfileUpdateConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการบันทึกข้อมูลโปรไฟล์",

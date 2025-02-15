@@ -305,7 +305,7 @@
     "ProfileAddressRequire": "Please enter an address.",
     "ProfileCurrentPassInvalid": "Current Password do not match.",
     "ProfileCurrentPassRequire": "Please enter a current password.",
-    "ProfileConfirmPassInvalid": "New passwords do not match. Please try again.",
+    "ProfileConfirmPassInvalid": "Confirm passwords do not match. Please try again.",
     "ProfileConfirmPassRequire": "Please enter a confirm new password.",
     "ProfileNewPassRequire": "Please enter a new password.",
     "ProfileUpdateConfirmTitle": "Are you sure to save profile?",
