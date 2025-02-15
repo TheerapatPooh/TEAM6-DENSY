@@ -1,15 +1,10 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import { TrendingDown, TrendingUp } from "lucide-react"
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 
 import {
-    Card,
     CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card"
 import {
     ChartConfig,
@@ -18,28 +13,23 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { IPatrolCompletionRateItem } from "@/app/type"
+import { IPatrolCompletionRate } from "@/app/type"
+import { useTranslations } from "next-intl"
 
-interface IGaugeGraphProps {
-    chartData: IPatrolCompletionRateItem[];
-}
+export function GaugeGraph({ chartData, percent, trend }: IPatrolCompletionRate) {
+    const d = useTranslations("Dashboard")
+    const isPositiveTrend = trend >= 0;
 
-const chartConfig = {
-    noDefect: {
-        label: "No Defect",
-        color: "hsl(var(--green))",
-    },
-    withDefect: {
-        label: "With Defect",
-        color: "hsl(var(--destructive))",
-    },
-} satisfies ChartConfig
-
-
-export function GaugeGraph({ chartData }: IGaugeGraphProps) {
-    // คำนวณเปอร์เซ็นต์ของ noDefect
-    const totalPatrols = chartData.reduce((sum, item) => sum + (item.noDefect || 0) + (item.withDefect || 0), 0);
-    const noDefectPercent = (chartData.reduce((sum, item) => sum + (item.noDefect || 0), 0) / totalPatrols * 100).toFixed(2);
+    const chartConfig = {
+        noDefect: {
+            label: d("NoDefect"),
+            color: "hsl(var(--green))",
+        },
+        withDefect: {
+            label: d("WithDefect"),
+            color: "hsl(var(--destructive))",
+        },
+    } satisfies ChartConfig
 
     return (
         <div className="flex flex-col">
@@ -69,14 +59,14 @@ export function GaugeGraph({ chartData }: IGaugeGraphProps) {
                                                     y={(viewBox.cy || 0) - 36}
                                                     className="fill-card-foreground text-[48px] font-bold"
                                                 >
-                                                    {noDefectPercent}%
+                                                    {percent.toFixed(2)}%
                                                 </tspan>
                                                 <tspan
                                                     x={viewBox.cx}
                                                     y={(viewBox.cy || 0) + 8}
                                                     className="text-base fill-muted-foreground"
                                                 >
-                                                    No Defect
+                                                    {d("NoDefect")}
                                                 </tspan>
                                             </text>
                                         )
@@ -118,10 +108,14 @@ export function GaugeGraph({ chartData }: IGaugeGraphProps) {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm font-semibold leading-none">
-                                        Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+                                        {d("Trending")}{isPositiveTrend ? d("Up") : d("Down")}
+                                        <span className={isPositiveTrend ? "text-green" : "text-destructive"}>
+                                            {trend.toFixed(2)}%
+                                        </span>{d("ThisMonth")}
+                                        {isPositiveTrend ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                                     </div>
-                                    <div className="leading-none text-muted-foreground">
-                                        Shows the rate of patrols completed without defects.
+                                    <div className="leading-none text-muted-foreground text-sm">
+                                        {d('PatrolCompletionRateDescription')}
                                     </div>
                                 </div>
 

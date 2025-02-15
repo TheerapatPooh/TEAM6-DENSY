@@ -176,6 +176,7 @@ export async function getDefectCatagory(req: Request, res: Response) {
 
         const defectCatagory = Object.values(defectCategoryMap);
 
+        // คำนวณ trend
         const currentMonthStart = startDate ? new Date(startDate as string) : new Date();
         currentMonthStart.setDate(1);
         currentMonthStart.setHours(0, 0, 0, 0);
@@ -218,7 +219,7 @@ export async function getDefectCatagory(req: Request, res: Response) {
         }
 
         let result = {
-            data: defectCatagory,
+            chartData: defectCatagory,
             trend: trend,
         }
         res.status(200).json(result);
@@ -415,6 +416,99 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
             }
         });
 
+
+        // คำนวณ trend
+        const currentMonthStart = startDate ? new Date(startDate as string) : new Date();
+        currentMonthStart.setDate(1);
+        currentMonthStart.setHours(0, 0, 0, 0);
+
+        const currentMonthEnd = new Date(currentMonthStart);
+        currentMonthEnd.setMonth(currentMonthEnd.getMonth() + 1);
+        currentMonthEnd.setMilliseconds(-1);
+
+        const previousMonthStart = new Date(currentMonthStart);
+        previousMonthStart.setMonth(previousMonthStart.getMonth() - 1);
+
+        const previousMonthEnd = new Date(currentMonthStart);
+        previousMonthEnd.setMilliseconds(-1);
+
+        const patrolsCurrentMonth = await prisma.patrol.findMany({
+            where: {
+                date: {
+                    gte: currentMonthStart,
+                    lte: currentMonthEnd,
+                },
+            },
+            include: {
+                results: {
+                    select: {
+                        defects: true,
+                    },
+                },
+            },
+        });
+
+        const currentCompletionRate = {
+            noDefect: 0,
+            withDefect: 0,
+        };
+
+        patrolsCurrentMonth.forEach((patrol) => {
+            // ตรวจสอบว่า patrol นี้มี defects หรือไม่
+            const hasDefects = patrol.results.some(
+                (result) => result.defects.length > 0
+            );
+
+            if (hasDefects) {
+                currentCompletionRate.withDefect += 1;
+            } else {
+                currentCompletionRate.noDefect += 1;
+            }
+        });
+
+        const patrolsPreviousMonth = await prisma.patrol.findMany({
+            where: {
+                date: {
+                    gte: previousMonthStart,
+                    lte: previousMonthEnd,
+                },
+            },
+            include: {
+                results: {
+                    select: {
+                        defects: true,
+                    },
+                },
+            },
+        });
+
+        const prevCompletionRate = {
+            noDefect: 0,
+            withDefect: 0,
+        };
+
+        patrolsPreviousMonth.forEach((patrol) => {
+            // ตรวจสอบว่า patrol นี้มี defects หรือไม่
+            const hasDefects = patrol.results.some(
+                (result) => result.defects.length > 0
+            );
+
+            if (hasDefects) {
+                prevCompletionRate.withDefect += 1;
+            } else {
+                prevCompletionRate.noDefect += 1;
+            }
+        });
+
+        const currentPercent = (currentCompletionRate.noDefect / patrolsCurrentMonth.length) * 100;
+        const prevPercent = (prevCompletionRate.noDefect / patrolsPreviousMonth.length) * 100;
+        let trend = 0;
+        if (prevPercent > 0) {
+            trend = ((currentPercent - prevPercent) / prevPercent) * 100;
+        } else if (currentPercent > 0) {
+            trend = 100;
+        }
+
         // สร้างข้อมูลสำหรับแสดงผลใน radial chart
         const patrolCompletionRate = [
             {
@@ -423,7 +517,11 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
             },
         ];
 
-        let result = patrolCompletionRate;
+        let result = {
+            chartData: patrolCompletionRate,
+            percent: currentPercent,
+            trend: trend,
+        }
         res.status(200).json(result);
         return;
     } catch (error) {

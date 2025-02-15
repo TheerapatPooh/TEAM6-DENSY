@@ -1,6 +1,5 @@
 'use client'
-import { ICommonDefectItem, IDefectCategory, IHeatmapZone, IPatrolCompletionRateItem } from "@/app/type";
-import { DatePickerWithRange } from "@/components/date-picker";
+import { ICommonDefectItem, IDefectCategory, IHeatmapZone, IPatrolCompletionRate } from "@/app/type";
 import { DonutGraph } from "@/components/donut-graph";
 import { GaugeGraph } from "@/components/gauge-graph";
 import HeatMap from "@/components/heat-map";
@@ -18,7 +17,7 @@ export default function Page() {
   const [heatMap, setHeatMap] = useState<IHeatmapZone[]>();
   const [defectCatagory, setDefectCatagory] = useState<IDefectCategory>();
   const [commonDefects, setCommonDefect] = useState<ICommonDefectItem[]>();
-  const [patrolCompletion, setPatrolCompletion] = useState<IPatrolCompletionRateItem[]>();
+  const [patrolCompletion, setPatrolCompletion] = useState<IPatrolCompletionRate>();
   const [mounted, setMounted] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string>("AllTime");
 
@@ -42,7 +41,7 @@ export default function Page() {
     if (endDate) params.endDate = endDate.toISOString();
 
     const queryString = new URLSearchParams(params).toString()
-
+    console.log(queryString)
     const heatMap = await fetchData("get", `/dashboard/heat-map?${queryString}`, true);
     const defectCatagory = await fetchData("get", `/dashboard/defect-catagory?${queryString}`, true);
     const commonDefects = await fetchData("get", `/dashboard/common-defects?${queryString}`, true);
@@ -64,103 +63,6 @@ export default function Page() {
   }, [selectedMonth]);
 
   if (!mounted || !heatMap || !defectCatagory || !commonDefects || !patrolCompletion) return null;
-  const heatMapMock = [
-    {
-      "id": 1,
-      "name": "r&d_zone",
-      "defects": 23
-    },
-    {
-      "id": 2,
-      "name": "assembly_line_zone",
-      "defects": 34
-    },
-    {
-      "id": 3,
-      "name": "raw_materials_storage_zone",
-      "defects": 4
-    },
-    {
-      "id": 4,
-      "name": "quality_control_zone",
-      "defects": 11
-    },
-    {
-      "id": 5,
-      "name": "it_zone",
-      "defects": 45
-    },
-    {
-      "id": 6,
-      "name": "customer_service_zone",
-      "defects": 6
-    },
-    {
-      "id": 7,
-      "name": "prototype_zone",
-      "defects": 57
-    },
-    {
-      "id": 8,
-      "name": "manager_office",
-      "defects": 26
-    },
-    {
-      "id": 9,
-      "name": "water_supply",
-      "defects": 4
-    },
-    {
-      "id": 10,
-      "name": "maintenance_zone",
-      "defects": 12
-    },
-    {
-      "id": 11,
-      "name": "warehouse",
-      "defects": 23
-    },
-    {
-      "id": 12,
-      "name": "storage_zone",
-      "defects": 0
-    },
-    {
-      "id": 13,
-      "name": "server_room",
-      "defects": 78
-    },
-    {
-      "id": 14,
-      "name": "electrical_zone",
-      "defects": 0
-    },
-    {
-      "id": 15,
-      "name": "engineering_zone",
-      "defects": 45
-    },
-    {
-      "id": 16,
-      "name": "training_simulation_zone",
-      "defects": 0
-    },
-    {
-      "id": 17,
-      "name": "workstation_a",
-      "defects": 0
-    },
-    {
-      "id": 18,
-      "name": "workstation_b",
-      "defects": 0
-    },
-    {
-      "id": 19,
-      "name": "testing_lab",
-      "defects": 0
-    }
-  ]
 
   const today = new Date();
 
@@ -184,27 +86,27 @@ export default function Page() {
               </SelectTrigger>
               <SelectContent>
                 {monthOptions.map((month) => (
-                    <SelectItem key={month} value={month}>
+                  <SelectItem key={month} value={month}>
                     {`${m(month.split(" ")[0])} ${month.split(" ")[1] || ""}`}
-                    </SelectItem>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
-        <HeatMap data={heatMapMock} />
+        <HeatMap data={heatMap} />
       </div>
       {/* Defect Catagory & Common Defects */}
       <div className="flex flex-col xl:flex-row gap-4 justify-between">
         <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">
-            Defect Category
+            {d("DefectCatagory")}
           </h1>
-          <DonutGraph key={Date.now()} chartData={defectCatagory.data} trend={defectCatagory.trend} />
+          <DonutGraph key={Date.now()} chartData={defectCatagory.chartData} trend={defectCatagory.trend} />
         </div>
         <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">
-            Common Defects
+            {d("CommonDefects")}
           </h1>
           <PieGraph key={Date.now()} chartData={commonDefects} />
         </div>
@@ -212,9 +114,9 @@ export default function Page() {
       {/* Patrol Completion */}
       <div className="flex flex-col rounded-md px-6 py-4 bg-card min-h-[460px]">
         <h1 className="text-2xl font-semibold text-card-foreground">
-          Patrol Completion Rate
+          {d("PatrolCompletionRate")}
         </h1>
-        <GaugeGraph key={Date.now()} chartData={patrolCompletion} />
+        <GaugeGraph key={Date.now()} chartData={patrolCompletion.chartData} percent={patrolCompletion.percent} trend={patrolCompletion.trend} />
       </div>
     </div>
   );

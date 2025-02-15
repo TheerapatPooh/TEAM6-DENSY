@@ -431,6 +431,8 @@
     "December": "December"
   },
   "Dashboard": {
+    "NoDefect": "No Defect",
+    "WithDefect": "With Defect",
     "Reports": "Reports",
     "Trending": "Trending",
     "Down": " down by",
@@ -440,8 +442,8 @@
     "WarningAreas": "Warning Areas",
     "DefectCatagory": "Defect Category",
     "DefectCatagoryDescription": "Showing the distribution of defect types.",
-    "CommonsDefects": "Common Defects",
-    "CommonsDefectsDescription": "Shows the most frequent defect during patrols.",
+    "CommonDefects": "Common Defects",
+    "CommonDefectsDescription": "Shows the most frequent defect during patrols.",
     "PatrolCompletionRate": "Patrol Completion Rate",
     "PatrolCompletionRateDescription": "Shows the rate of patrols completed without defects."
   }

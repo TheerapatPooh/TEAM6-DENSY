@@ -291,17 +291,13 @@ export interface IHeatMap {
 }
 
 export interface IDefectCategory {
-    data: IDefectCategoryItem[];
+    chartData: IDefectCategoryItem[];
     trend: number;
 }
 export interface IDefectCategoryItem {
     type: string;
     amounts: number;
     fill: string;
-}
-export interface ICommonDefect {
-    data: ICommonDefectItem[];
-    trend: number;
 }
 
 export interface ICommonDefectItem {
@@ -310,8 +306,9 @@ export interface ICommonDefectItem {
     fill: string;
 }
 export interface IPatrolCompletionRate {
-    data: IPatrolCompletionRateItem[];
+    chartData: IPatrolCompletionRateItem[];
     trend: number;
+    percent: number;
 }
 export interface IPatrolCompletionRateItem {
     noDefect: number;

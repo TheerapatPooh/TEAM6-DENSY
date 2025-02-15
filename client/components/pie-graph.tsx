@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { TrendingUp } from "lucide-react";
 import { Pie, PieChart, LabelList } from "recharts";
 
 import {
@@ -15,6 +14,7 @@ import {
   ChartTooltip,
 } from "@/components/ui/chart";
 import { ICommonDefectItem } from "@/app/type";
+import { useTranslations } from "next-intl";
 
 
 interface IDonutGraphProps {
@@ -22,6 +22,7 @@ interface IDonutGraphProps {
 }
 
 export function PieGraph({ chartData }: IDonutGraphProps) {
+  const d = useTranslations("Dashboard");
   const chartConfig = React.useMemo(() => {
     return chartData.reduce((acc, item) => {
       acc[item.name] = {
@@ -42,9 +43,9 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[300px]"
+          className="mx-auto aspect-square max-h-[350px]"
         >
-          <PieChart>
+          <PieChart width={300} height={350}>
             <ChartTooltip
               cursor={false}
               content={({ payload }) => {
@@ -75,6 +76,9 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
               data={chartData}
               dataKey="amounts"
               nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={90}
             >
               <LabelList
                 dataKey="amounts"
@@ -97,6 +101,9 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
                       <span className="text-sm">{entry.value}</span>
                     </div>
                   ))}
+                  <div className="mt-2 text-center leading-none text-muted-foreground text-sm">
+                    {d("CommonDefectsDescription")}
+                  </div>
                 </div>
               )}
               className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
@@ -104,14 +111,6 @@ export function PieGraph({ chartData }: IDonutGraphProps) {
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 text-sm font-semibold leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Shows the most frequent defect during patrols.
-        </div>
-      </CardFooter>
     </div>
   );
 }

@@ -14,15 +14,10 @@ import {
   ChartLegend,
   ChartTooltip,
 } from "@/components/ui/chart";
-import { IDefectCategoryItem } from "@/app/type";
+import { IDefectCategory } from "@/app/type";
 import { useTranslations } from "next-intl";
 
-interface IDonutGraphProps {
-  chartData: IDefectCategoryItem[];
-  trend: number;
-}
-
-export function DonutGraph({ chartData, trend }: IDonutGraphProps) {
+export function DonutGraph({ chartData, trend }: IDefectCategory) {
   const s = useTranslations('Status');
   const d = useTranslations('Dashboard');
   const chartConfig = React.useMemo(() => {
@@ -39,7 +34,6 @@ export function DonutGraph({ chartData, trend }: IDonutGraphProps) {
     return chartData.reduce((acc, curr) => acc + curr.amounts, 0);
   }, []);
 
-  const formattedTrend = trend.toFixed(2);
   const isPositiveTrend = trend >= 0;
 
   return (
@@ -144,12 +138,12 @@ export function DonutGraph({ chartData, trend }: IDonutGraphProps) {
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 text-sm font-semibold leading-none">
           {d("Trending")}{isPositiveTrend ? d("Up") : d("Down")}
-          <span className={isPositiveTrend ? "text-green" : "text-destructive"}>
-            {formattedTrend}%
+          <span className={isPositiveTrend ? "text-destructive" : "text-green"}>
+            {trend.toFixed(2)}%
           </span>{d("ThisMonth")}
           {isPositiveTrend ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
         </div>
-        <div className="leading-none text-muted-foreground">
+        <div className="leading-none text-muted-foreground text-sm">
           {d("DefectCatagoryDescription")}
         </div>
       </CardFooter>

@@ -431,6 +431,8 @@
     "December": "ธันวาคม"
   },
   "Dashboard": {
+    "NoDefect": "ไม่พบปัญหา",
+    "WithDefect": "พบปัญหา",
     "Reports": "ปัญหา",
     "Trending": "แนวโน้ม",
     "Down": "ลดลง",
@@ -440,8 +442,8 @@
     "WarningAreas": "พื้นที่ควรระวัง",
     "DefectCatagory": "ประเภทของปัญหา",
     "DefectCatagoryDescription": "แสดงการกระจายประเภทของปัญหา",
-    "CommonsDefects": "ปัญหาที่พบบ่อย",
-    "CommonsDefectsDescription": "แสดงปัญหาที่พบบ่อยที่สุดระหว่างการตรวจตรา",
+    "CommonDefects": "ปัญหาที่พบบ่อย",
+    "CommonDefectsDescription": "แสดงปัญหาที่พบบ่อยที่สุดระหว่างการตรวจตรา",
     "PatrolCompletionRate": "อัตราความสมบูรณ์ของการตรวจตรา",
     "PatrolCompletionRateDescription": "แสดงอัตราการตรวจตราที่เสร็จสมบูรณ์โดยไม่มีปัญหา"
   }
