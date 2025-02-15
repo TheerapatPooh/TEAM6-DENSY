@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { Label, Pie, PieChart, LabelList } from "recharts";
 
 import {
@@ -17,13 +17,14 @@ import {
 import { IDefectCategoryItem } from "@/app/type";
 import { useTranslations } from "next-intl";
 
-
 interface IDonutGraphProps {
   chartData: IDefectCategoryItem[];
+  trend: number;
 }
 
-export function DonutGraph({ chartData }: IDonutGraphProps) {
+export function DonutGraph({ chartData, trend }: IDonutGraphProps) {
   const s = useTranslations('Status');
+  const d = useTranslations('Dashboard');
   const chartConfig = React.useMemo(() => {
     return chartData.reduce((acc, item) => {
       acc[item.type] = {
@@ -37,6 +38,9 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
   const totalReports = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.amounts, 0);
   }, []);
+
+  const formattedTrend = trend.toFixed(2);
+  const isPositiveTrend = trend >= 0;
 
   return (
     <div className="flex flex-col">
@@ -101,7 +105,7 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Reports
+                          {d("Reports")}
                         </tspan>
                       </text>
                     );
@@ -139,10 +143,14 @@ export function DonutGraph({ chartData }: IDonutGraphProps) {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 text-sm font-semibold leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          {d("Trending")}{isPositiveTrend ? d("Up") : d("Down")}
+          <span className={isPositiveTrend ? "text-green" : "text-destructive"}>
+            {formattedTrend}%
+          </span>{d("ThisMonth")}
+          {isPositiveTrend ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing the distribution of defect types.
+          {d("DefectCatagoryDescription")}
         </div>
       </CardFooter>
     </div>

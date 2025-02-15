@@ -290,10 +290,18 @@ export interface IHeatMap {
     data: IHeatmapZone[];
 }
 
+export interface IDefectCategory {
+    data: IDefectCategoryItem[];
+    trend: number;
+}
 export interface IDefectCategoryItem {
     type: string;
     amounts: number;
     fill: string;
+}
+export interface ICommonDefect {
+    data: ICommonDefectItem[];
+    trend: number;
 }
 
 export interface ICommonDefectItem {
@@ -301,15 +309,13 @@ export interface ICommonDefectItem {
     amounts: number;
     fill: string;
 }
-
+export interface IPatrolCompletionRate {
+    data: IPatrolCompletionRateItem[];
+    trend: number;
+}
 export interface IPatrolCompletionRateItem {
     noDefect: number;
     withDefect: number;
 }
 
-export interface IDashboardData {
-    heatMap: IHeatmapZone[];
-    defectCatagory: IDefectCategoryItem[];
-    commonDefects: ICommonDefectItem[];
-    patrolCompletionRate: IPatrolCompletionRateItem[];
-}
+

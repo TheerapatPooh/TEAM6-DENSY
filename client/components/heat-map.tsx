@@ -42,7 +42,9 @@ export default function HeatMap({ data }: IHeatMap) {
     const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
     const [paths, setPaths] = useState<{ text: any, id: number, pathData: string, defects?: number }[]>([])
 
+    const s = useTranslations('Sidebar')
     const m = useTranslations('Map')
+    const d = useTranslations('Dashboard')
     const locale = useLocale();
     const [language, setLanguage] = useState('en');
 
@@ -115,7 +117,7 @@ export default function HeatMap({ data }: IHeatMap) {
         <div className='flex flex-col xl:flex-row justify-between items-center w-full pt-4 gap-4'>
             {/* Defect */}
             <div className='flex flex-row items-center xl:flex-col xl:items-start gap-2'>
-                <h1 className='text-2xl text-card-foreground font-bold pb-8 xl:p-0'>Defect</h1>
+                <h1 className='text-2xl text-card-foreground font-bold pb-8 xl:p-0'>{s("Defect")}</h1>
                 <div className='flex xl:flex-col'>
                     {zoneCriteria.map((criteria, index) => (
                         <div key={index} className='flex flex-col xl:flex-row items-center justify-between'>
@@ -169,7 +171,7 @@ export default function HeatMap({ data }: IHeatMap) {
             </Stage >
             {/* WarningAreas */}
             <div className='flex xl:flex-col gap-4'>
-                <h1 className='text-2xl text-card-foreground font-bold'>Warning Areas</h1>
+                <h1 className='text-2xl text-card-foreground font-bold'>{d("WarningAreas")}</h1>
                 <div className='grid grid-cols-2 xl:flex xl:flex-col gap-4'>
                     {warningAreas.map((zone, index) => (
                         <div key={index} className='flex flex-row items-center justify-start gap-2'>

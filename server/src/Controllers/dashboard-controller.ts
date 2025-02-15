@@ -19,7 +19,7 @@ export async function getHeatMap(req: Request, res: Response) {
                         results: {
                             select: {
                                 defects: {
-                                    where: dateFilter, 
+                                    where: dateFilter,
                                 }
                             },
                         },
@@ -39,7 +39,7 @@ export async function getHeatMap(req: Request, res: Response) {
 
             // วนลูปผ่านทุกๆ itemZone ของ zone
             zone.itemZones.forEach(itemZone => {
-                itemZone.results.forEach(result => {    
+                itemZone.results.forEach(result => {
                     defectCount += result.defects.length; // เพิ่มจำนวน defects ที่ตรงเงื่อนไข
                 });
             });
@@ -64,6 +64,7 @@ export async function getHeatMap(req: Request, res: Response) {
 export async function getDefectCatagory(req: Request, res: Response) {
     try {
         const { startDate, endDate } = req.query;
+
         // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
         const dateFilter: any = {};
         if (startDate || endDate) {
@@ -175,44 +176,51 @@ export async function getDefectCatagory(req: Request, res: Response) {
 
         const defectCatagory = Object.values(defectCategoryMap);
 
-        // คำนวณ commonDefects
-        let defectNameMap: Record<
-            string,
-            { name: string; amounts: number; fill: string }
-        > = {};
+        const currentMonthStart = startDate ? new Date(startDate as string) : new Date();
+        currentMonthStart.setDate(1);
+        currentMonthStart.setHours(0, 0, 0, 0);
 
-        const usedColors = new Set<number>(); // เก็บค่าที่ใช้ไปแล้ว
+        const currentMonthEnd = new Date(currentMonthStart);
+        currentMonthEnd.setMonth(currentMonthEnd.getMonth() + 1);
+        currentMonthEnd.setMilliseconds(-1);
 
-        allDefects.forEach((defect) => {
-            const name = defect.name || "Unknown Defect";
-            if (!defectNameMap[name]) {
-                let randomChartIndex;
-                const availableIndices = [1, 2, 3, 4, 5].filter(
-                    (i) => !usedColors.has(i)
-                );
+        const previousMonthStart = new Date(currentMonthStart);
+        previousMonthStart.setMonth(previousMonthStart.getMonth() - 1);
 
-                if (availableIndices.length === 0) {
-                    usedColors.clear(); // รีเซ็ตเมื่อครบ 5 สี
-                    randomChartIndex = Math.floor(Math.random() * 5) + 1;
-                } else {
-                    randomChartIndex =
-                        availableIndices[
-                        Math.floor(Math.random() * availableIndices.length)
-                        ];
-                }
+        const previousMonthEnd = new Date(currentMonthStart);
+        previousMonthEnd.setMilliseconds(-1);
 
-                usedColors.add(randomChartIndex);
+        // ดึง defect ของเดือนปัจจุบันและเดือนก่อนหน้า
+        const defectsCurrentMonth = await prisma.defect.count({
+            where: {
+                startTime: {
+                    gte: currentMonthStart,
+                    lte: currentMonthEnd,
+                },
 
-                defectNameMap[name] = {
-                    name,
-                    amounts: 0,
-                    fill: `hsl(var(--chart-${randomChartIndex}))`,
-                };
-            }
-            defectNameMap[name].amounts++;
+            },
         });
 
-        let result = defectCatagory
+        const defectsPreviousMonth = await prisma.defect.count({
+            where: {
+                startTime: {
+                    gte: previousMonthStart,
+                    lte: previousMonthEnd,
+                },
+            },
+        });
+
+        let trend = 0;
+        if (defectsPreviousMonth > 0) {
+            trend = ((defectsCurrentMonth - defectsPreviousMonth) / defectsPreviousMonth) * 100;
+        } else if (defectsCurrentMonth > 0) {
+            trend = 100;
+        }
+
+        let result = {
+            data: defectCatagory,
+            trend: trend,
+        }
         res.status(200).json(result);
         return;
     } catch (error) {

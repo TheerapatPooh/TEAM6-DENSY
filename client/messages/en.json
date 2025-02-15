@@ -414,5 +414,35 @@
     "EditPatrolChecklistDescription": "Please confirm to edit Patrol Checklist.",
     "CreatePatrolChecklist": "Are you sure to add new Patrol Checklist?",
     "CreatePatrolChecklistDescription": "Please confirm to add new Patrol Checklist."
+  },
+  "Month": {
+    "AllTime": "All Time",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December"
+  },
+  "Dashboard": {
+    "Reports": "Reports",
+    "Trending": "Trending",
+    "Down": " down by",
+    "Up": " up by",
+    "ThisMonth": "this month",
+    "HeatMap": "Heat Map",
+    "WarningAreas": "Warning Areas",
+    "DefectCatagory": "Defect Category",
+    "DefectCatagoryDescription": "Showing the distribution of defect types.",
+    "CommonsDefects": "Common Defects",
+    "CommonsDefectsDescription": "Shows the most frequent defect during patrols.",
+    "PatrolCompletionRate": "Patrol Completion Rate",
+    "PatrolCompletionRateDescription": "Shows the rate of patrols completed without defects."
   }
 }

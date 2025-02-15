@@ -1,35 +1,47 @@
 'use client'
-import { ICommonDefectItem, IDashboardData, IDefectCategoryItem, IFilterPatrol, IHeatmapZone, IPatrolCompletionRateItem } from "@/app/type";
+import { ICommonDefectItem, IDefectCategory, IHeatmapZone, IPatrolCompletionRateItem } from "@/app/type";
 import { DatePickerWithRange } from "@/components/date-picker";
 import { DonutGraph } from "@/components/donut-graph";
 import { GaugeGraph } from "@/components/gauge-graph";
 import HeatMap from "@/components/heat-map";
 import { PieGraph } from "@/components/pie-graph";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fetchData } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
+
+const monthFormatter = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
 
 export default function Page() {
+  const d = useTranslations("Dashboard");
+  const m = useTranslations("Month");
   const [heatMap, setHeatMap] = useState<IHeatmapZone[]>();
-  const [defectCatagory, setDefectCatagory] = useState<IDefectCategoryItem[]>();
+  const [defectCatagory, setDefectCatagory] = useState<IDefectCategory>();
   const [commonDefects, setCommonDefect] = useState<ICommonDefectItem[]>();
   const [patrolCompletion, setPatrolCompletion] = useState<IPatrolCompletionRateItem[]>();
   const [mounted, setMounted] = useState(false);
-  const [filter, setFilter] = useState<{ start: Date | undefined; end: Date | undefined }>()
+  const [selectedMonth, setSelectedMonth] = useState<string>("AllTime");
+
+  const getMonthRange = (month: string) => {
+    if (month === "AllTime") return { startDate: undefined, endDate: undefined };
+
+    const dateParts = month.split(" ");
+    const year = parseInt(dateParts[1]);
+    const monthIndex = new Date(`${dateParts[0]} 1, ${year}`).getMonth();
+
+    const startDate = new Date(year, monthIndex, 1);
+    const endDate = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+    return { startDate, endDate };
+  };
 
   const getData = async () => {
+    const { startDate, endDate } = getMonthRange(selectedMonth);
     const params: Record<string, string | undefined> = {};
-    // เพิ่ม startDate
-    if (filter?.start) {
-      params.startDate = filter?.start.toISOString();
-    }
 
-    // เพิ่ม endDate 
-    if (filter?.end) {
-      params.endDate = filter?.end.toISOString();
-    }
+    if (startDate) params.startDate = startDate.toISOString();
+    if (endDate) params.endDate = endDate.toISOString();
+
     const queryString = new URLSearchParams(params).toString()
-    console.log(queryString)
 
     const heatMap = await fetchData("get", `/dashboard/heat-map?${queryString}`, true);
     const defectCatagory = await fetchData("get", `/dashboard/defect-catagory?${queryString}`, true);
@@ -42,19 +54,6 @@ export default function Page() {
     setPatrolCompletion(patrolCompletion);
   };
 
-  const handleDateSelect = (dateRange: DateRange) => {
-    const startDate = dateRange.from ?? null;
-    const endDate = dateRange.to
-      ? new Date(new Date(dateRange.to).setHours(23, 59, 59, 999))
-      : null;
-    setFilter(
-      {
-        start: startDate || undefined,
-        end: endDate || undefined
-      }
-    );
-  };
-
   useEffect(() => {
     getData();
     setMounted(true);
@@ -62,7 +61,7 @@ export default function Page() {
 
   useEffect(() => {
     getData();
-  }, [filter]);
+  }, [selectedMonth]);
 
   if (!mounted || !heatMap || !defectCatagory || !commonDefects || !patrolCompletion) return null;
   const heatMapMock = [
@@ -162,22 +161,38 @@ export default function Page() {
       "defects": 0
     }
   ]
+
+  const today = new Date();
+
+  const monthOptions = ["AllTime", ...Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    return monthFormatter.format(date);
+  })];
+
   return (
     <div className="flex flex-col gap-4 h-full w-full">
       {/* Heat Map */}
       <div className="flex flex-col items-center justify-between w-full bg-card rounded-md custom-shadow py-4 px-6">
         <div className="flex justify-between w-full">
           <h1 className="text-2xl font-semibold text-card-foreground">
-            Heat Map
+            {d("HeatMap")}
           </h1>
-          <DatePickerWithRange
-            startDate={filter?.start}
-            endDate={filter?.end}
-            onSelect={handleDateSelect}
-            className="my-date-picker"
-          />
+          <div className="w-48">
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map((month) => (
+                    <SelectItem key={month} value={month}>
+                    {`${m(month.split(" ")[0])} ${month.split(" ")[1] || ""}`}
+                    </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <HeatMap data={heatMap} />
+        <HeatMap data={heatMapMock} />
       </div>
       {/* Defect Catagory & Common Defects */}
       <div className="flex flex-col xl:flex-row gap-4 justify-between">
@@ -185,7 +200,7 @@ export default function Page() {
           <h1 className="text-2xl font-semibold text-card-foreground">
             Defect Category
           </h1>
-          <DonutGraph key={Date.now()} chartData={defectCatagory} />
+          <DonutGraph key={Date.now()} chartData={defectCatagory.data} trend={defectCatagory.trend} />
         </div>
         <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
           <h1 className="text-2xl font-semibold text-card-foreground">
@@ -194,7 +209,7 @@ export default function Page() {
           <PieGraph key={Date.now()} chartData={commonDefects} />
         </div>
       </div>
-     {/* Patrol Completion */}
+      {/* Patrol Completion */}
       <div className="flex flex-col rounded-md px-6 py-4 bg-card min-h-[460px]">
         <h1 className="text-2xl font-semibold text-card-foreground">
           Patrol Completion Rate

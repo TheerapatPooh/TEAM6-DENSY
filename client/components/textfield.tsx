@@ -53,7 +53,7 @@ export default function Textfield({
       <Input
         type={type === 'password' ? (visible ? 'text' : 'password') : type}
         placeholder={placeholder}
-        className={cn("ps-10 h-[40px] outline-none border-none bg-card flex-1 text-card-foreground text-base placeholder:text-input", className)}
+        className={cn("ps-10 h-9 outline-none border-none bg-card flex-1 text-card-foreground text-base placeholder:text-input", className)}
         value={value}
         onChange={onChange}
         ref={ref}
