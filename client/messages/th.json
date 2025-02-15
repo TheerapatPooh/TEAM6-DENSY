@@ -418,7 +418,7 @@
     "CreatePatrolChecklistDescription": "กรุณายืนยันการเพิ่มชุดตรวจตราการตรวจตราใหม่"
   },
   "Month": {
-    "AllTime": "ตลอดเวลา",
+    "AllTime": "ทุกช่วงเวลา",
     "January": "มกราคม",
     "February": "กุมภาพันธ์",
     "March": "มีนาคม",

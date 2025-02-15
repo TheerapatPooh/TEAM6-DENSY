@@ -325,32 +325,13 @@ export async function getCommonDefects(req: Request, res: Response) {
             { name: string; amounts: number; fill: string }
         > = {};
 
-        const usedColors = new Set<number>(); // เก็บค่าที่ใช้ไปแล้ว
-
         allDefects.forEach((defect) => {
             const name = defect.name || "Unknown Defect";
             if (!defectNameMap[name]) {
-                let randomChartIndex;
-                const availableIndices = [1, 2, 3, 4, 5].filter(
-                    (i) => !usedColors.has(i)
-                );
-
-                if (availableIndices.length === 0) {
-                    usedColors.clear(); // รีเซ็ตเมื่อครบ 5 สี
-                    randomChartIndex = Math.floor(Math.random() * 5) + 1;
-                } else {
-                    randomChartIndex =
-                        availableIndices[
-                        Math.floor(Math.random() * availableIndices.length)
-                        ];
-                }
-
-                usedColors.add(randomChartIndex);
-
                 defectNameMap[name] = {
                     name,
                     amounts: 0,
-                    fill: `hsl(var(--chart-${randomChartIndex}))`,
+                    fill: "", // ค่าสีจะกำหนดภายหลัง
                 };
             }
             defectNameMap[name].amounts++;
@@ -361,6 +342,10 @@ export async function getCommonDefects(req: Request, res: Response) {
             .sort((a, b) => b.amounts - a.amounts) // เรียงจากมากไปน้อย
             .slice(0, 5); // เอาแค่ 5 อันแรก
 
+        // กำหนดสีตามลำดับ ไม่สุ่ม
+        commonDefects.forEach((defect, index) => {
+            defect.fill = `hsl(var(--chart-${index + 1}))`; // ใช้ index + 1 เพื่อให้เริ่มที่ 1
+        });
 
         let result = commonDefects;
         res.status(200).json(result);
@@ -375,15 +360,18 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
     try {
         const { startDate, endDate } = req.query;
         // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
-        const dateFilter: any = {};
+        let dateFilter;
         if (startDate || endDate) {
-            dateFilter.date = {
+            dateFilter = {
                 ...(startDate && { gte: new Date(startDate as string) }),
                 ...(endDate && { lte: new Date(endDate as string) }),
             };
         }
         const allPatrols = await prisma.patrol.findMany({
-            where: dateFilter,
+            where: {
+                date: dateFilter,
+                status: 'completed'
+            },
             include: {
                 results: {
                     select: {
@@ -438,6 +426,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
                     gte: currentMonthStart,
                     lte: currentMonthEnd,
                 },
+                status: 'completed'
             },
             include: {
                 results: {
@@ -472,6 +461,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
                     gte: previousMonthStart,
                     lte: previousMonthEnd,
                 },
+                status: 'completed'
             },
             include: {
                 results: {
@@ -500,6 +490,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
             }
         });
 
+        const percent = (completionRate.noDefect / allPatrols.length) * 100;
         const currentPercent = (currentCompletionRate.noDefect / patrolsCurrentMonth.length) * 100;
         const prevPercent = (prevCompletionRate.noDefect / patrolsPreviousMonth.length) * 100;
         let trend = 0;
@@ -519,7 +510,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
 
         let result = {
             chartData: allPatrols.length !== 0 ? patrolCompletionRate : [],
-            percent: currentPercent,
+            percent: !startDate && !endDate ? percent : currentPercent,
             trend: trend,
         }
         res.status(200).json(result);

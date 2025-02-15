@@ -61,7 +61,8 @@ export default function Page() {
     getData();
   }, [selectedMonth]);
 
-  if (!mounted || !heatMap || !defectCatagory || !commonDefects || !patrolCompletion) return null;
+  if (!mounted || !heatMap || !defectCatagory || !commonDefects || !patrolCompletion)
+    return null;
 
   const today = new Date();
 
@@ -111,7 +112,7 @@ export default function Page() {
         </div>
       </div>
       {/* Patrol Completion */}
-      <div className="flex flex-col rounded-md px-6 py-4 bg-card min-h-[460px]">
+      <div className="flex flex-col rounded-md px-6 py-4 bg-card custom-shadow min-h-[460px]">
         <h1 className="text-2xl font-semibold text-card-foreground">
           {d("PatrolCompletionRate")}
         </h1>
