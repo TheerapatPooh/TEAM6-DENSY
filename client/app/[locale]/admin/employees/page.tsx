@@ -52,10 +52,8 @@ import { useTranslations } from "next-intl";
 import NotFound from "@/components/not-found";
 
 export default function Page() {
-  const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");
-  const g = useTranslations("General");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -64,29 +62,29 @@ export default function Page() {
   const roles = [
     {
       value: "admin",
-      label: g("admin"),
+      label: t("admin"),
       icon: "manage_accounts",
       variant: "blue",
     },
     {
       value: "inspector",
-      label: g("inspector"),
+      label: t("inspector"),
       icon: "person_search",
       variant: "red",
     },
     {
       value: "supervisor",
-      label: g("supervisor"),
+      label: t("supervisor"),
       icon: "manage_accounts",
       variant: "yellow",
     },
   ];
 
   const statuses = [
-    { value: "true", label: g("Active"), color: "bg-green", variant: "green" },
+    { value: "true", label: ("Active"), color: "bg-green", variant: "green" },
     {
       value: "false",
-      label: g("Inactive"),
+      label: ("Inactive"),
       color: "bg-destructive",
       variant: "red",
     },
@@ -206,9 +204,7 @@ export default function Page() {
 
   const form = useForm();
   const { handleSubmit } = form;
-  const { handleSubmit } = form;
 
-  const onSubmit = () => {};
   const onSubmit = () => {};
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
