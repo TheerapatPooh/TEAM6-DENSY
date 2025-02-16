@@ -81,14 +81,12 @@ export default function Page() {
 
   const handleRemovePreset = (id: number) => {
     setPendingAction(() => () => removePreset(id)); // ตั้งค่า Action ที่จะลบ
-    setDialogType("delete");
     setIsDialogOpen(true);
   };
 
   const [allPreset, setAllPreset] = useState<IPresetWithExtras[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State สำหรับเปิด/ปิด Dialog
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null); // เก็บ Action ที่จะลบ
-  const [dialogType, setDialogType] = useState<string>("");
 
   const handleDialogResult = (result: boolean) => {
     setIsDialogOpen(false);
@@ -173,12 +171,16 @@ export default function Page() {
 
   // Filter by search term
   const filterBySearchTerm = (presets: IPresetWithExtras[]) => {
-    if (!searchTerm) return presets; // If no search term, return all checklists
-    return presets.filter((preset) =>
-      preset.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (!searchTerm) return presets;
+    
+    const cleanSearch = searchTerm.toLowerCase().trim();
+    
+    return presets.filter((preset) => {
+      const titleMatch = preset.title.toLowerCase().includes(cleanSearch);
+      const descMatch = preset.description?.toLowerCase().includes(cleanSearch);
+      return titleMatch || descMatch ;
+    });
   };
-
   // Fetch and apply search filter on search term change
   useEffect(() => {
     const fetchAndFilter = async () => {
@@ -186,7 +188,6 @@ export default function Page() {
       const filtered = filterBySearchTerm(freshData); // Apply search term filter
       setFilteredPresets(filtered); // Update state with filtered data
     };
-
     fetchAndFilter();
   }, [searchTerm]); // Trigger fetch when search term changes
 
@@ -202,20 +203,20 @@ export default function Page() {
     const filtered = freshData.filter((preset) => {
       const matchesZones =
         tempSelectedZones.length === 0 || // If no zones are selected, show all
-        preset.zones.some((zone) =>
-          tempSelectedZones.some(
-            (selectedZone) =>
-              selectedZone.name.toLowerCase() === zone.toLowerCase()
+        preset.zones.some((zone) => 
+          tempSelectedZones.some((selectedZone) =>
+            selectedZone.name.toLowerCase() === zone.name.toLowerCase()
           )
         );
-
+    
       const matchesDateRange =
         (!tempDateRange?.from ||
           new Date(preset.updatedAt) >= tempDateRange.from) &&
         (!tempDateRange?.to || new Date(preset.updatedAt) <= tempDateRange.to);
-
+    
       return matchesZones && matchesDateRange;
     });
+    
 
     // Apply search term filter
     const filteredWithSearch = filterBySearchTerm(filtered);

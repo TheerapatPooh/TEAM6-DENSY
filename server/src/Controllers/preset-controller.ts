@@ -16,7 +16,7 @@ import { profile } from "console";
 export async function createPreset(req: Request, res: Response) {
   try {
     const { title, description, checklists } = req.body;
-    const userId = (req as any).user.userId;    
+    const userId = (req as any).user.userId;
     // ตรวจสอบข้อมูลที่จำเป็น
     if (!title || !description || !userId) {
       res.status(400).json({ message: "Missing required fields" });
@@ -121,7 +121,7 @@ export async function updatePreset(req: Request, res: Response) {
       .json({ message: "Preset updated successfully", preset: newPreset });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: `Internal server error: ${error}` });;
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -283,7 +283,7 @@ export async function getPreset(req: Request, res: Response) {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: `Internal server error: ${error}` });;
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -333,12 +333,13 @@ export async function getAllPresets(req: Request, res: Response) {
       }
     }
 
-    if (search) {
-      whereClause.title = {
-        contains: search as string,
-        mode: "insensitive",
-      };
+    if (search) {  // Use decodedSearch instead of raw search
+      whereClause.OR = [
+        { title: { contains: search } },
+        { description: { contains: search } },
+      ];
     }
+      
 
     const presets = await prisma.preset.findMany({
       where: whereClause,
@@ -396,21 +397,18 @@ export async function getAllPresets(req: Request, res: Response) {
         checklist.checklist.items.flatMap((item) =>
           item.itemZones.map((itemZone) => ({
             name: itemZone.zone.name,
-            userId: itemZone.zone.userId || null
+            userId: itemZone.zone.userId || null,
           }))
         )
       );
-      
+
       const uniqueZones = Array.from(
         new Map(zones.map((zone) => [zone.name, zone])).values()
       );
-      
 
       const disabled = preset.presetChecklists.some((checklist) =>
         checklist.checklist.items.some((item) =>
-          item.itemZones.some(
-            (itemZone) => itemZone.zone.userId === null
-          )
+          item.itemZones.some((itemZone) => itemZone.zone.userId === null)
         )
       );
 
@@ -420,15 +418,16 @@ export async function getAllPresets(req: Request, res: Response) {
         description: preset.description,
         version: preset.version,
         updatedAt: preset.updatedAt,
-        user:preset.user,
+        user: preset.user,
 
-        updateByUserName:preset.user?.profile?.name || preset.user?.username || "Unknown",
-        updateByUserImagePath: preset.user?.profile?.image?.path ,
+        updateByUserName:
+          preset.user?.profile?.name || preset.user?.username || "Unknown",
+        updateByUserImagePath: preset.user?.profile?.image?.path,
 
         zones: uniqueZones,
         presetChecklists: preset.presetChecklists,
         versionCount: versionCounts[preset.title] || 0,
-        disabled
+        disabled,
       };
     });
 
@@ -513,20 +512,20 @@ export async function getChecklist(req: Request, res: Response) {
                     name: true,
                     supervisor: includeSupervisor
                       ? {
-                        select: {
-                          id: true,
-                          role: true,
-                          profile: {
-                            select: {
-                              id: true,
-                              name: true,
-                              age: true,
-                              tel: true,
-                              address: true,
+                          select: {
+                            id: true,
+                            role: true,
+                            profile: {
+                              select: {
+                                id: true,
+                                name: true,
+                                age: true,
+                                tel: true,
+                                address: true,
+                              },
                             },
                           },
-                        },
-                      }
+                        }
                       : undefined,
                   },
                 },
@@ -680,10 +679,10 @@ export async function getAllChecklists(req: Request, res: Response) {
 
       const findImage = findUser?.profile?.imageId
         ? await prisma.image.findUnique({
-          where: {
-            id: findUser.profile.imageId,
-          },
-        })
+            where: {
+              id: findUser.profile.imageId,
+            },
+          })
         : null;
 
       return {
