@@ -164,7 +164,12 @@
     "Activate": "เปิดใช้งาน",
     "Deactivate": "ปิดใช้งาน",
     "NoDataAvailable": "ไม่มีข้อมูล",
-    "NoDataAvailableDescription": "ไม่มีข้อมูลที่จะแสดงในขณะนี้"
+    "NoDataAvailableDescription": "ไม่มีข้อมูลที่จะแสดงในขณะนี้",
+    "ZoneWithoutAssignedUsers": "โซนที่ไม่มีผู้ใช้งานที่มอบหมาย",
+    "ZoneWithoutAssignedUsersDescription": "ดูเหมือนว่าพรีเซ็ตที่เลือกมีโซนที่ยังไม่มีผู้ดูแลที่มอบหมาย.",
+    "PleaseGoTo": "กรุณาไปที่",
+    "Location&Zone": "ตำแหน่ง & โซน",
+    "AssignUsersToTheZone": "ส่วนนี้และมอบหมายผู้ใช้งานให้กับโซน."
   },
   "Status": {
     "pending": "รอดำเนินการ",

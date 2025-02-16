@@ -3,13 +3,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 export default function Page() {
   //แปลภาษา
-  const a = useTranslations("Alert");
   const t = useTranslations("General");
-  const z = useTranslations("Zone");
 
-  const router = useRouter();
   const locale = useLocale();
- 
 
   return (
     <div className=" flex flex-col items-center text-center text-muted-foreground">
@@ -21,22 +17,21 @@ export default function Page() {
       <div className="pt-80">
         {/* Title */}
         <p className="text-4xl font-semibold text-card-foreground mb-2">
-          Zone Without Assigned Users
+          {t("ZoneWithoutAssignedUsers")}
         </p>
         {/* Message to admin */}
         <p className="text-lg font-medium mt-4">
-          It seems that the selected preset has zone without assigned
-          supervisor.
+          {t("ZoneWithoutAssignedUsersDescription")}
         </p>
         <p className="text-lg font-medium mt-2">
-          Please go to the{" "}
+          {t("PleaseGoTo")}{" "}
           <a
             href={`/${locale}/admin/settings/location-&-zone`}
             className="text-blue-500 underline"
           >
-            Location & Zone
+            {t("Location&Zone")}
           </a>{" "}
-          section and assign users to the zone.
+          {t("AssignUsersToTheZone")}
         </p>
       </div>
     </div>

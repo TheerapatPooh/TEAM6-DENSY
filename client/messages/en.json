@@ -164,7 +164,12 @@
     "Activate": "Activate",
     "Deactivate": "Deactivate",
     "NoDataAvailable": "No Data Available",
-    "NoDataAvailableDescription": "There is no data to display at this moment"
+    "NoDataAvailableDescription": "There is no data to display at this moment",
+    "ZoneWithoutAssignedUsers":"Zone Without Assigned Users",
+    "ZoneWithoutAssignedUsersDescription":"It seems that the selected preset has zone without assigned supervisor.",
+    "PleaseGoTo":"Please go to the",
+    "Location&Zone":"Location & Zone",
+    "AssignUsersToTheZone.":"section and assign users to the zone."
   },
   "Status": {
     "pending": "Pending",
