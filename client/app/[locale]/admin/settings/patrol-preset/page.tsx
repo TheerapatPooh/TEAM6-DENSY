@@ -40,6 +40,7 @@ import {
 } from "@radix-ui/react-tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import NotFound from "@/components/not-found";
 
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
@@ -97,9 +98,6 @@ export default function Page() {
     }
   };
 
-  
-  
-  
   const handleCreatePreset = () => {
     router.push(`/${locale}/admin/settings/patrol-preset/create`);
   };
@@ -155,8 +153,6 @@ export default function Page() {
   useEffect(() => {
     getData();
   }, []);
-
-  
 
   // search bar
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -256,20 +252,18 @@ export default function Page() {
 
   const handleEdit = (id: number) => {
     // Find the preset by id from the sortedPresets array
-    const preset = sortedPresets.find(p => p.id === id);
-  
+    const preset = sortedPresets.find((p) => p.id === id);
+
     // Redirect to the error page if preset or zones are missing
-    if (!preset?.zones?.length || !preset.zones.every(zone => zone.userId)) {
-      router.push(`/${locale}/admin/settings/patrol-preset/error/unassinged-zone`);
+    if (!preset?.zones?.length || !preset.zones.every((zone) => zone.userId)) {
+      router.push(
+        `/${locale}/admin/settings/patrol-preset/error/unassinged-zone`
+      );
     } else {
       // If all zones have a userId, navigate to the patrol preset page
       router.push(`/${locale}/admin/settings/patrol-preset/${id}`);
     }
   };
-  
-  
-  
-  
 
   return (
     <div className="flex flex-col gap-4 ">
@@ -455,197 +449,215 @@ export default function Page() {
       </div>
       <ScrollArea className="h-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-290px)]">
         <div className="space-y-4">
-          {sortedPresets.map((preset) => (
-            <div
-              onClick={() => {
-                handleEdit(preset.id);
-              }}
-              key={preset.id}
-              className="bg-card rounded-lg shadow p-4 cursor-pointer h-[219px]"
-            >
-              {/* Title and Details */}
-              <div className="flex justify-between overflow-hidden text-ellipsis">
-                <div className="flex flex-col gap-4 min-w-0">
-                  <div className="flex flex-col gap-1 justify-start items-start">
-                    {/* Version with Tooltip */}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
-                          >
-                            <span className="material-symbols-outlined mr-1">
-                              history
-                            </span>
-                            {t("Version")} {preset.version}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="ml-[129px]">
-                          <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                            <span className="text-card-foreground text-lg font-bold flex items-center ">
-                              <span className="material-symbols-outlined mr-1">
-                                history
-                              </span>
-                              {t("Version")} {preset.version}
-                            </span>
-                            <div className="flex flex-col justify-start items-start ">
-                              <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                <div className="text-muted-foreground">
-                                  {t("UpdateBy")}
+          {(() => {
+            return sortedPresets.length > 0 ? (
+              sortedPresets.map((preset) => (
+                <div
+                  onClick={() => {
+                    handleEdit(preset.id);
+                  }}
+                  key={preset.id}
+                  className="bg-card rounded-lg shadow p-4 cursor-pointer h-[219px]"
+                >
+                  {/* Title and Details */}
+                  <div className="flex justify-between overflow-hidden text-ellipsis">
+                    <div className="flex flex-col gap-4 min-w-0">
+                      <div className="flex flex-col gap-1 justify-start items-start">
+                        {/* Version with Tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
+                              >
+                                <span className="material-symbols-outlined mr-1">
+                                  history
+                                </span>
+                                {t("Version")} {preset.version}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              className="ml-[129px]"
+                            >
+                              <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
+                                <span className="text-card-foreground text-lg font-bold flex items-center ">
+                                  <span className="material-symbols-outlined mr-1">
+                                    history
+                                  </span>
+                                  {t("Version")} {preset.version}
+                                </span>
+                                <div className="flex flex-col justify-start items-start ">
+                                  <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
+                                    <div className="text-muted-foreground">
+                                      {t("UpdateBy")}
+                                    </div>
+                                    {preset.user.profile ? (
+                                      <Avatar>
+                                        <AvatarImage
+                                          src={`${
+                                            process.env.NEXT_PUBLIC_UPLOAD_URL
+                                          }/${
+                                            (preset as any)
+                                              .updateByUserImagePath
+                                          }`}
+                                        />
+                                        <AvatarFallback
+                                          id={preset.user.id.toString()}
+                                        >
+                                          {getInitials(preset.updateByUserName)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    ) : (
+                                      <Skeleton className="h-12 w-12 rounded-full" />
+                                    )}
+                                    {(preset as any).updateByUserName}
+                                  </div>
+                                  <div className="flex gap-2 text-muted-foreground">
+                                    <div className="text-muted-foreground">
+                                      {t("UpdateAt")}
+                                    </div>
+                                    {formatTime(preset.updatedAt)}
+                                  </div>
                                 </div>
-                                {preset.user.profile ? (
-                                  <Avatar>
-                                    <AvatarImage
-                                      src={`${
-                                        process.env.NEXT_PUBLIC_UPLOAD_URL
-                                      }/${
-                                        (preset as any).updateByUserImagePath
-                                      }`}
-                                    />
-                                    <AvatarFallback
-                                      id={preset.user.id.toString()}
+                                <div className="flex justify-between w-full">
+                                  <div className="font-bold text-lg text-muted-foreground">
+                                    {t("Total")}
+                                  </div>
+                                  <div className="font-bold text-lg text-muted-foreground">
+                                    {preset.version} {t("Version")}
+                                  </div>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        {/* Title */}
+                        <h2 className="text-xl font-semibold truncate">
+                          {preset.title}
+                        </h2>
+                      </div>
+                      {/* Zones */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="material-symbols-outlined">
+                          location_on
+                        </span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                                {preset.zones && preset.zones.length > 0
+                                  ? preset.zones.map((zone, index) => (
+                                      <span
+                                        key={index}
+                                        className={
+                                          zone.userId ? "" : "text-destructive"
+                                        }
+                                      >
+                                        {z(zone.name)}
+                                        {index < preset.zones.length - 1 &&
+                                          ", "}
+                                      </span>
+                                    ))
+                                  : z("NoZonesAvailable")}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              align="start"
+                              sideOffset={10}
+                              className="bg-card shadow-lg rounded-md p-4 w-fit"
+                            >
+                              <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                                {t("Zone")}
+                              </h3>
+                              <ScrollArea className="h-32 rounded-md bg-card">
+                                {preset.zones.map((zone, index) => (
+                                  <div className="text-sm text-foreground">
+                                    -{" "}
+                                    <span
+                                      key={index}
+                                      className={
+                                        zone.userId ? "" : "text-destructive"
+                                      }
                                     >
-                                      {getInitials(preset.updateByUserName)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                ) : (
-                                  <Skeleton className="h-12 w-12 rounded-full" />
-                                )}
-                                {(preset as any).updateByUserName}
-                              </div>
-                              <div className="flex gap-2 text-muted-foreground">
-                                <div className="text-muted-foreground">
-                                  {t("UpdateAt")}
-                                </div>
-                                {formatTime(preset.updatedAt)}
-                              </div>
-                            </div>
-                            <div className="flex justify-between w-full">
-                              <div className="font-bold text-lg text-muted-foreground">
-                                {t("Total")}
-                              </div>
-                              <div className="font-bold text-lg text-muted-foreground">
-                                {preset.version} {t("Version")}
-                              </div>
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    {/* Title */}
-                    <h2 className="text-xl font-semibold truncate">
-                      {preset.title}
-                    </h2>
-                  </div>
-                  {/* Zones */}
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="material-symbols-outlined">
-                      location_on
-                    </span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
-                            {preset.zones && preset.zones.length > 0
-                              ? preset.zones.map((zone, index) => (
-                                  <span
-                                    key={index}
-                                    className={
-                                      zone.userId ? "" : "text-destructive"
-                                    }
-                                  >
-                                    {z(zone.name)}
-                                    {index < preset.zones.length - 1 && ", "}
-                                  </span>
-                                ))
-                              : z("NoZonesAvailable")}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="bottom"
-                          align="start"
-                          sideOffset={10}
-                          className="bg-card shadow-lg rounded-md p-4 w-fit"
-                        >
-                          <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-                            {t("Zone")}
-                          </h3>
-                          <ScrollArea className="h-32 rounded-md bg-card">
-                            {preset.zones.map((zone, index) => (
-                              <div className="text-sm text-foreground">
-                                - <span
-                                    key={index}
-                                    className={
-                                      zone.userId ? "" : "text-destructive"
-                                    }
-                                  >
-                                    {z(zone.name)}
-                                    {index < preset.zones.length - 1 && ", "}
-                                  </span>
-                              </div>
-                            ))}
-                          </ScrollArea>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  {/* Description */}
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="material-symbols-outlined">
-                      data_info_alert
-                    </span>
-                    <div className="text-sm text-muted-foreground truncate">
-                      {preset.description}
+                                      {z(zone.name)}
+                                      {index < preset.zones.length - 1 && ", "}
+                                    </span>
+                                  </div>
+                                ))}
+                              </ScrollArea>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      {/* Description */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="material-symbols-outlined">
+                          data_info_alert
+                        </span>
+                        <div className="text-sm text-muted-foreground truncate">
+                          {preset.description}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Action Buttons */}
+                  </div>
+                  <div className="sticky right-[0px]  flex flex-row justify-end items-end ">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" className="w-[45px] h-[45px]">
+                          <span className="material-symbols-outlined items-center text-input">
+                            more_vert
+                          </span>
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent align="end" className="p-0">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            handleEdit(preset.id);
+                          }}
+                        >
+                          <h1>{t("Detail")}</h1>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemovePreset(preset.id);
+                          }}
+                        >
+                          <h1 className="text-destructive cursor-pointer">
+                            {t("Delete")}
+                          </h1>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {isDialogOpen && (
+                      <AlertCustom
+                        title={a("PresetRemoveConfirmTitle")}
+                        description={a("PresetRemoveConfirmDescription")}
+                        primaryButtonText={t("Confirm")}
+                        primaryIcon="check"
+                        secondaryButtonText={t("Cancel")}
+                        backResult={handleDialogResult}
+                      />
+                    )}
                   </div>
                 </div>
-
-                {/* Action Buttons */}
+              ))
+            ) : (
+              <div className="col-span-full min-h-[261px]">
+                <NotFound
+                  icon="quick_reference_all"
+                  title="NoFoundPresetsAvailable"
+                  description="NotFoundPresetsDescription"
+                />
               </div>
-              <div className="sticky right-[0px]  flex flex-row justify-end items-end ">
-                <DropdownMenu>
-                  <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" className="w-[45px] h-[45px]">
-                      <span className="material-symbols-outlined items-center text-input">
-                        more_vert
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent align="end" className="p-0">
-                    <DropdownMenuItem
-                      onClick={() => {
-                        handleEdit(preset.id);
-                      }}
-                    >
-                      <h1>{t("Detail")}</h1>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemovePreset(preset.id);
-                      }}
-                    >
-                      <h1 className="text-destructive cursor-pointer">
-                        {t("Delete")}
-                      </h1>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                {isDialogOpen && (
-                  <AlertCustom
-                    title={a("PresetRemoveConfirmTitle")}
-                    description={a("PresetRemoveConfirmDescription")}
-                    primaryButtonText={t("Confirm")}
-                    primaryIcon="check"
-                    secondaryButtonText={t("Cancel")}
-                    backResult={handleDialogResult}
-                  />
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })()}
         </div>
       </ScrollArea>
     </div>

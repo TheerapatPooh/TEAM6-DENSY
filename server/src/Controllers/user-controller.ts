@@ -343,7 +343,7 @@ export async function updateUser(req: Request, res: Response) {
     const loggedInUserId = (req as any).user.userId;
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
-    const { username, name, age, email, tel, address, password, role, department } =
+    const { username, name, age, email, tel, address, password, role, department,active } =
       req.body;
     const updateUser: any = {};
     const updateProfile: any = {};
@@ -357,6 +357,7 @@ export async function updateUser(req: Request, res: Response) {
     if (age !== undefined) updateProfile.age = parseInt(age, 10);
     if (tel !== undefined) updateProfile.tel = tel;
     if (address !== undefined) updateProfile.address = address;
+    if (active !== undefined) updateUser.active = active;
 
     // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
     if (loggedInUserId !== id && loggedInUserRole !== "admin") {
