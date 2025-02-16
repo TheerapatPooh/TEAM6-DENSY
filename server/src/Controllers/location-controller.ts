@@ -93,7 +93,34 @@ export async function getZone(req: Request, res: Response) {
       },
     })
 
-    if (!zoneWithData) {
+    const allData = await prisma.zone.findUnique({
+      where: { id: zoneId },
+      include: {
+        supervisor: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true,
+            department: true,
+            createdAt: true,
+            profile: { include: { image: true } },
+          },
+        },
+        itemZones: {
+          include: {
+            results: {
+              include: {
+                defects: true,
+                comments: true
+              }
+            }
+          }
+        }
+      },
+    })
+
+    if (!zoneWithData || !allData) {
       return res.status(404).json({
         message: "Zone not found"
       })
@@ -102,18 +129,62 @@ export async function getZone(req: Request, res: Response) {
     let totalComments = 0
     let defectCompleted = 0
     let defectPending = 0
+    let monthlyDefects: { [key: string]: number } = {};
 
     for (const itemZone of zoneWithData.itemZones) {
       for (const result of itemZone.results) {
-        totalComments += result.comments?.length || 0
+        totalComments += result.comments?.length || 0;
 
         for (const defect of result.defects) {
-          defect.status === 'completed'
-            ? defectCompleted++
-            : defectPending++
+          if (defect.status === "completed") {
+            defectCompleted++;
+          } else {
+            defectPending++;
+          }
         }
       }
     }
+    for (const itemZone of allData.itemZones) {
+      for (const result of itemZone.results) {
+        totalComments += result.comments?.length || 0;
+
+        for (const defect of result.defects) {
+          const defectDate = new Date(defect.startTime);
+          const defectMonth = defectDate.toLocaleString("en-US", { month: "long" });
+          const defectYear = defectDate.getFullYear(); // ดึงปี
+          const monthYearKey = `${defectMonth} ${defectYear}`; // รวมเดือนและปี
+          monthlyDefects[monthYearKey] = (monthlyDefects[monthYearKey] || 0) + 1;
+        }
+      }
+    }
+
+    // แปลง `endDate` เป็น Date Object
+    const endDateObj = endDate ? new Date(endDate as string) : null;
+    const endYear = endDateObj ? endDateObj.getFullYear() : null;
+    const endMonth = endDateObj ? endDateObj.getMonth() : null;
+
+    // สร้าง `chartData` และกรองข้อมูลตาม `endDate`
+    const chartData = Object.keys(monthlyDefects)
+      .map((monthYear) => {
+        const [monthName, year] = monthYear.split(" ");
+        const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth(); // แปลงชื่อเดือนเป็น index
+
+        return {
+          month: monthYear,
+          defect: monthlyDefects[monthYear],
+          year: parseInt(year),
+          monthIndex,
+        };
+      })
+      .filter((data) => {
+        // ถ้ามี `endDate` ให้กรองเฉพาะข้อมูลที่อยู่ก่อนหรือเท่ากับ `endDate`
+        if (endDateObj && endYear !== null && endMonth !== null) {
+          return data.year < endYear || (data.year === endYear && data.monthIndex <= endMonth);
+        }
+        return true;
+      })
+      .map(({ month, defect }) => ({ month, defect })); // คืนค่าเฉพาะฟิลด์ที่ต้องการ
+
 
     const { itemZones, ...zoneWithoutItemZones } = zoneWithData
 
@@ -221,15 +292,18 @@ export async function getZone(req: Request, res: Response) {
     let currentComments = 0
     let currentCompleted = 0
     let currentPending = 0
+    let currentDefect = 0
     let prevComments = 0
     let prevCompleted = 0
     let prevPending = 0
+    let prevDefect = 0
 
     for (const itemZone of currentMonthData.itemZones) {
       for (const result of itemZone.results) {
         currentComments += result.comments?.length || 0
 
         for (const defect of result.defects) {
+          currentDefect++
           defect.status === 'completed'
             ? currentCompleted++
             : currentPending++
@@ -241,6 +315,7 @@ export async function getZone(req: Request, res: Response) {
         prevComments += result.comments?.length || 0
 
         for (const defect of result.defects) {
+          prevDefect++
           defect.status === 'completed'
             ? prevCompleted++
             : prevPending++
@@ -259,6 +334,8 @@ export async function getZone(req: Request, res: Response) {
         totalComments: { value: totalComments, trend: calculateTrend(currentComments, prevComments) },
         defectCompleted: { value: defectCompleted, trend: calculateTrend(currentCompleted, prevCompleted) },
         defectPending: { value: defectPending, trend: calculateTrend(currentPending, prevPending) },
+        chartData,
+        defectTrend: calculateTrend(currentDefect, prevDefect),
       }
     }
 

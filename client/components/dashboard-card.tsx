@@ -6,8 +6,8 @@ export default function DashboardCard({ title, value, trend, icon, iconColor, po
   const trendColor = trend === 0
     ? 'text-green'
     : positive
-      ? (trend > 0 ? 'text-green' : 'text-destructive') 
-      : (trend > 0 ? 'text-destructive' : 'text-green'); 
+      ? (trend > 0 ? 'text-green' : 'text-destructive')
+      : (trend > 0 ? 'text-destructive' : 'text-green');
   const d = useTranslations('Dashboard')
   return (
     <div className='flex flex-col w-full gap-4 bg-card px-6 py-4 rounded-md custom-shadow'>
@@ -19,9 +19,14 @@ export default function DashboardCard({ title, value, trend, icon, iconColor, po
           </span>
         </div>
       </div>
-      <div className='flex flex-col gap-1'>
-        <p className='text-2xl font-bold'>{value}</p>
-        <p className={`text-sm font-medium ${trendColor}`}>{trend}% from last month</p>      </div>
+      <div className='flex flex-col gap-1 text-2xl font-bold'>
+        {trend && (
+          <div>
+            <p className=''>{value}</p>
+            <p className={`text-sm font-medium ${trendColor}`}>{trend}% from last month</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

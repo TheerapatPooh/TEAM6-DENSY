@@ -1,6 +1,7 @@
 'use client'
 import { IZone } from '@/app/type'
 import DashboardCard from '@/components/dashboard-card'
+import { LineGraph } from '@/components/line-graph'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -16,6 +17,7 @@ export default function Page() {
 
   const t = useTranslations('General')
   const m = useTranslations('Month')
+  const z = useTranslations('Zone')
   const params = useParams()
   const router = useRouter()
   const locale = useLocale()
@@ -45,12 +47,11 @@ export default function Page() {
 
   if (!mounted || !zone)
     return null;
-  console.log(zone)
 
   return (
-    <div className='flex flex-col w-full'>
+    <div className='flex flex-col gap-4 w-full'>
       <div className='flex justify-between w-full'>
-        <h1 className='text-2xl font-bold text-card-foreground'>Zone</h1>
+        <h1 className='text-2xl font-bold text-card-foreground'>{z(zone.name)}</h1>
         <Button variant='secondary' onClick={() => router.push(`/${locale}/admin/dashboard/heat-map`)}>Back</Button>
       </div>
       <div className='flex justify-between items-center'>
@@ -113,6 +114,7 @@ export default function Page() {
           positive={false}
         />
       </div>
+      <LineGraph chartData={zone.dashboard.chartData} defectTrend={zone.dashboard.defectTrend}/>
     </div>
   )
 }

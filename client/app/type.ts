@@ -185,7 +185,14 @@ export interface IZone {
         totalComments: IDashboardCard;
         defectCompleted: IDashboardCard;
         defectPending: IDashboardCard;
+        chartData: IZoneChartDataItem[];
+        defectTrend: number;
     }
+}
+
+interface IZoneChartDataItem {
+    month: string;
+    defect: number;
 }
 
 export interface IItemZone {
@@ -321,7 +328,7 @@ export interface IPatrolCompletionRateItem {
 export interface IDashboardCard {
     title: string;
     value: number;
-    trend: number;
+    trend?: number;
     icon: string;
     iconColor: string;
     positive?: boolean;
