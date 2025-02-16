@@ -52,6 +52,8 @@ import {
 import { useRouter } from "next/navigation";
 import { DatePickerWithRange } from "@/components/date-picker";
 import dynamic from "next/dynamic";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import NotFound from "@/components/not-found";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
@@ -314,7 +316,7 @@ export default function Page() {
     setSortedChecklists(sorted); // Update sorted checklists state
   }, [filteredChecklists, sortOption, sortOrder]); // Dependencies to trigger the effect
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 ">
       <div className="flex flex-row justify-between pt-2">
         <div className="text-2xl font-bold">{t("Checklist")}</div>
         <Button
@@ -447,7 +449,7 @@ export default function Page() {
                       location_on
                     </span>
                     {selectedZones.length > 0
-                      ? selectedZones.map((zone) => zone.name).join(", ")
+                      ? selectedZones.map((zone) => z(zone.name)).join(", ")
                       : t("SelectZones")}
                   </Button>
                 </AlertDialogTrigger>
@@ -505,21 +507,20 @@ export default function Page() {
       </div>
 
       {/* Checklist Cards */}
-
-      <div className="space-y-4  rounded-lg">
-        {filteredChecklists.length > 0 ? (
-          sortedChecklists.map((checklist) => (
-            <div key={checklist.id}>
-              <div>
+      <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-280px)]">
+        <div className="space-y-4  rounded-lg">
+          {sortedChecklists.length > 0 ? (
+            sortedChecklists.map((checklist) => (
+              <div key={checklist.id}>
                 <div
                   onClick={() => {
                     handleChecklist(checklist.id);
                   }}
-                  className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer ${getChecklistColor(
+                  className={`flex flex-row border-l-[10px] truncate h-[166px] cursor-pointer ${getChecklistColor(
                     checklist
-                  )} border-destructive h-[166px] bg-card rounded-lg custom-shadow p-2 justify-between`}
+                  )} border-destructive h-[166px] bg-card rounded-lg custom-shadow px-6 py-4 justify-between`}
                 >
-                  <div className="flex flex-col gap-4 ">
+                  <div className="flex flex-col gap-4  min-w-0">
                     {/* Left Section */}
                     <div className="gap-1">
                       <TooltipProvider>
@@ -580,7 +581,7 @@ export default function Page() {
                                   {t("Total")}
                                 </div>
                                 <div className="font-bold text-lg text-muted-foreground">
-                                  {checklist.versionCount}
+                                  {checklist.versionCount} {t("Version")}
                                 </div>
                               </div>
                             </div>
@@ -588,20 +589,49 @@ export default function Page() {
                         </Tooltip>
                       </TooltipProvider>
 
-                      <h2 className="text-2xl font-semibold">
+                      <h2 className="text-2xl font-semibold truncate">
                         {checklist.title}
                       </h2>
                     </div>
 
                     {/* Stats */}
-                    <div className="flex flex-col gap-2 text-gray-500">
-                      <div className="flex flex-row gap-2">
+                    <div className="flex flex-col gap-2 text-gray-500 ">
+                      <div className="flex flex-row gap-2 ">
                         <span className="material-symbols-outlined  text-muted-foreground">
                           location_on
                         </span>
-                        <p className="text-base text-muted-foreground truncate">
-                          {checklist.zones.map((zone) => z(zone)).join(", ")}
-                        </p>
+
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <p className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                                {checklist.zones
+                                  .map((zone) => z(zone))
+                                  .join(", ")}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              align="start"
+                              sideOffset={10}
+                              className="bg-card shadow-lg rounded-md p-4 w-fit"
+                            >
+                              <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                                {t("Zone")}
+                              </h3>
+                              <ScrollArea className="h-32 rounded-md bg-card">
+                                {checklist.zones.map((zone) => (
+                                  <div
+                                    key={zone}
+                                    className="text-sm text-foreground"
+                                  >
+                                    - {z(zone)}
+                                  </div>
+                                ))}
+                              </ScrollArea>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                       <div className="flex gap-2">
                         <div className="flex items-center">
@@ -631,10 +661,11 @@ export default function Page() {
                       </div>
                     </div>
                   </div>
-                  <div className=" flex flex-row items-end ">
+
+                  <div className="sticky right-[0px]  flex flex-row items-end ">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <span className="material-symbols-outlined">
+                        <span className="material-symbols-outlined text-input">
                           more_vert
                         </span>
                       </DropdownMenuTrigger>
@@ -646,7 +677,9 @@ export default function Page() {
                         className="w-[80px] px-4 py-2"
                         side="bottom"
                       >
-                        <div className="text-lg cursor-pointer ">{t("Detail")}</div>
+                        <div className="text-lg cursor-pointer ">
+                          {t("Detail")}
+                        </div>
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
@@ -658,12 +691,8 @@ export default function Page() {
                         </div>
                         {isDialogOpen && dialogType === "delete" && (
                           <AlertCustom
-                            title={a(
-                              "ChecklistRemoveConfirmTitle")
-                            }
-                            description={a
-                              ("ChecklistRemoveConfirmDescription")
-                            }
+                            title={a("ChecklistRemoveConfirmTitle")}
+                            description={a("ChecklistRemoveConfirmDescription")}
                             primaryButtonText={t("Confirm")}
                             primaryIcon="check"
                             secondaryButtonText={t("Cancel")}
@@ -675,12 +704,18 @@ export default function Page() {
                   </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full min-h-[261px]">
+              <NotFound
+                icon="quick_reference_all"
+                title="NoChecklistsAvailable"
+                description="NoChecklistsDescription"
+              />
             </div>
-          ))
-        ) : (
-          <p>No checklists found.</p>
-        )}
-      </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

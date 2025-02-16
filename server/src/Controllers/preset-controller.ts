@@ -1,6 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { Checklist } from "@prisma/client";
+import { profile } from "console";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่
@@ -393,11 +394,17 @@ export async function getAllPresets(req: Request, res: Response) {
     const result = presets.map((preset) => {
       const zones = preset.presetChecklists.flatMap((checklist) =>
         checklist.checklist.items.flatMap((item) =>
-          item.itemZones.map((itemZone) => itemZone.zone.name)
+          item.itemZones.map((itemZone) => ({
+            name: itemZone.zone.name,
+            userId: itemZone.zone.userId || null
+          }))
         )
       );
-
-      const uniqueZoneNames = Array.from(new Set(zones));
+      
+      const uniqueZones = Array.from(
+        new Map(zones.map((zone) => [zone.name, zone])).values()
+      );
+      
 
       const disabled = preset.presetChecklists.some((checklist) =>
         checklist.checklist.items.some((item) =>
@@ -413,10 +420,12 @@ export async function getAllPresets(req: Request, res: Response) {
         description: preset.description,
         version: preset.version,
         updatedAt: preset.updatedAt,
-        updateByUserName:
-          preset.user?.profile?.name || preset.user?.username || "Unknown",
-        updateByUserImagePath: preset.user?.profile?.image?.path || "",
-        zones: uniqueZoneNames,
+        user:preset.user,
+
+        updateByUserName:preset.user?.profile?.name || preset.user?.username || "Unknown",
+        updateByUserImagePath: preset.user?.profile?.image?.path ,
+
+        zones: uniqueZones,
         presetChecklists: preset.presetChecklists,
         versionCount: versionCounts[preset.title] || 0,
         disabled

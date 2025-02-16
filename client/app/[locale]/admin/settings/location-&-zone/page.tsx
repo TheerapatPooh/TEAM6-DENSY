@@ -108,12 +108,27 @@ export default function Page() {
       // Make API request to save the data
       const res = await fetchData("put", `/zone/${selectZone.id}`, true, data);
       if (res) {
-        // Update zones state with the new response
         setZones((prevZones) => {
-          return prevZones.map((zone) =>
-            zone.id === res.id ? res : zone
-          );
+          return prevZones.map((zone) => {
+            // If the current zone's supervisor id matches res's supervisor id, set supervisor to null
+            if (zone.supervisor?.id === res.supervisor.id) {
+              return {
+                ...zone,
+                supervisor: null, // Set the supervisor to null
+              };
+            }
+        
+            // If the zone's id matches res.id, return the updated zone (res)
+            if (zone.id === res.id) {
+              return res;
+            }
+        
+            // Return the zone unchanged if no condition is met
+            return zone;
+          });
         });
+        
+        
         toast({
           variant: "success",
           title: a("ZoneUpdateSuccessTitle"),
