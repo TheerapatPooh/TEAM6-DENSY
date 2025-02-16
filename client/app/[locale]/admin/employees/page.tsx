@@ -52,7 +52,7 @@ import { useTranslations } from "next-intl";
 
 export default function Page() {
   const a = useTranslations("Alert");
-
+  const g = useTranslations("General");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -61,29 +61,29 @@ export default function Page() {
   const roles = [
     {
       value: "admin",
-      label: "Admin",
+      label: g("admin"),
       icon: "manage_accounts",
       variant: "blue",
     },
     {
       value: "inspector",
-      label: "Inspector",
+      label: g("inspector"),
       icon: "person_search",
       variant: "red",
     },
     {
       value: "supervisor",
-      label: "Supervisor",
+      label: g("supervisor"),
       icon: "manage_accounts",
       variant: "yellow",
     },
   ];
 
   const statuses = [
-    { value: "true", label: "Active", color: "bg-green", variant: "green" },
+    { value: "true", label: g("Active"), color: "bg-green", variant: "green" },
     {
       value: "false",
-      label: "Inactive",
+      label: g("Inactive"),
       color: "bg-destructive",
       variant: "red",
     },
@@ -202,12 +202,9 @@ export default function Page() {
   }, [selectedRoles, selectedStatus]); // Dependency array for state changes
 
   const form = useForm();
-  const {
-    handleSubmit,
-  } = form;
+  const { handleSubmit } = form;
 
-  const onSubmit = () => {
-  };
+  const onSubmit = () => {};
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -226,15 +223,15 @@ export default function Page() {
       if (updatedStatus === true) {
         toast({
           variant: "success",
-          title: "User Activation Successful",
-          description: "The user's account has been activated.",
+          title: a("UserActivationSuccessTitle"),
+          description: a("UserActivationSuccessDescription"),
         });
       }
       if (updatedStatus === false) {
         toast({
           variant: "success",
-          title: "User Deactivation Successful",
-          description: "The user's account has been deactivated.",
+          title: a("UserDeactivationSuccessTitle"),
+          description: a("UserDeactivationSuccessDescription"),
         });
       }
       // Perform the API update inside the async function
@@ -290,20 +287,20 @@ export default function Page() {
       if (role === user.role && password === "") {
         toast({
           variant: "default",
-          title: "No Updates Applied",
-          description: "The provided details were either blank or unchanged",
+          title: a("EmployeeNoUpdateAppliedTitle"),
+          description: a("EmployeeNoUpdateAppliedDescription"),
         });
         return prevUsers;
       }
-      
-      if(role !== user.role || password !== ""){
+
+      if (role !== user.role || password !== "") {
         (async () => {
           try {
             toast({
               variant: "success",
-              title: "Update Successful",
+              title: a("EmployeeUpdateSuccessTitle"),
               description:
-                "The user's information has been successfully updated.",
+                a("EmployeeUpdateSuccessDescription"),
             });
 
             await fetchData("put", `/user/${userId}`, true, data);
@@ -345,8 +342,8 @@ export default function Page() {
     try {
       toast({
         variant: "success",
-        title: "Employee Added",
-        description: "You have successfully added employee.",
+        title: a("EmployeeAddSuccessTitle"),
+        description: a("EmployeeAddSuccessDescription"),
       });
       const response = await fetchData("post", `/user`, true, data);
       setAllUsers((prev) => [...prev, response]);
@@ -365,26 +362,26 @@ export default function Page() {
     const { username, password } = userCreate.current;
     const newErrors = { username: "", password: "" };
     if (!username) {
-      newErrors.username = "Please provide a valid username in the fields.";
+      newErrors.username = a("EmployeeUsernameInvalid");
       toast({
         variant: "error",
-        title: "Add new Employee Failed",
-        description: "Please provide a valid informations in the fields.",
+        title: a("EmployeeAddErrorTitle"),
+        description: a("EmployeeAddErrorDescription"),
       });
     }
     if (!password) {
-      newErrors.password = "Please provide a valid Password in the fields.";
+      newErrors.password = a("EmployeePassWordInvalid");
       toast({
         variant: "error",
-        title: "Add new Employee Failed",
-        description: "Please provide a valid informations in the fields.",
+        title: a("EmployeeAddErrorTitle"),
+        description: a("EmployeeAddErrorDescription"),
       });
     } else if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long.";
+      newErrors.password = a("EmployeePasswordMinLength");
       toast({
         variant: "error",
-        title: "Add new Employee Failed",
-        description: "Password must be at least 8 characters long.",
+        title: a("EmployeeAddErrorTitle"),
+        description: a("EmployeePasswordMinLength"),
       });
     }
 
@@ -399,7 +396,6 @@ export default function Page() {
     if (!validateFieldsUserCreate()) {
       return;
     }
-
 
     setPendingAction(() => () => handleUserCreate(username, password, role));
     setDialogType("create");
@@ -426,8 +422,8 @@ export default function Page() {
     ) {
       toast({
         variant: "default",
-        title: "No Updates Applied",
-        description: "The provided details were either blank or unchanged",
+        title: a("EmployeeNoUpdateAppliedTitle"),
+        description: a("EmployeeNoUpdateAppliedDescription"),
       });
       await setIsDialogOpen(false);
       return;
@@ -438,11 +434,11 @@ export default function Page() {
       updatedUser.password.length < 8 &&
       updatedUser.password !== ""
     ) {
-      setPasswordErrorForEdit("Password must be at least 8 characters long.");
+      setPasswordErrorForEdit(a("EmployeeEditPasswordMinLengthErrorDescription"));
       toast({
         variant: "error",
-        title: "Password Error",
-        description: "Password must be at least 8 characters long.",
+        title: a("EmployeeEditPasswordMinLengthErrorTitle"),
+        description: a("EmployeeEditPasswordMinLengthErrorDescription"),
       });
       return;
     } else {
@@ -530,7 +526,7 @@ export default function Page() {
     <div className="flex flex-col ">
       {/* Search and Actions */}
       <div className="flex justify-between">
-        <h1 className="font-bold text-2xl">Manage Employees</h1>
+        <h1 className="font-bold text-2xl">{g("ManageEmployees")}</h1>
         <div className="flex justify-between items-center mb-4">
           <AlertDialog
             open={
@@ -563,7 +559,7 @@ export default function Page() {
                 size="default"
               >
                 <span className="material-symbols-outlined">add</span>
-                New Employee
+                {g("NewEmployee")}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent
@@ -573,10 +569,9 @@ export default function Page() {
             >
               <AlertDialogTitle></AlertDialogTitle>
               <AlertDialogHeader>
-                <h1 className="text-2xl font-bold">Add New Employee</h1>
+                <h1 className="text-2xl font-bold">{a("AddEmployeeTitle")}</h1>
                 <AlertDialogDescription>
-                  Enter the username, password, and assign a role for the new
-                  employee.
+                  {a("AddEmployeeDescription")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <FormProvider {...form}>
@@ -585,12 +580,12 @@ export default function Page() {
                   className="flex flex-col gap-4"
                 >
                   <div className="flex flex-col gap-1">
-                    <label>Username</label>
+                    <label>{g("Username")}</label>
                     <Textfield
                       className="bg-secondary"
                       showIcon={true}
                       iconName="person"
-                      placeholder="Username"
+                      placeholder= {g("Username")}
                       onChange={(e) => {
                         if (userCreate.current) {
                           userCreate.current.username = e.target.value;
@@ -609,12 +604,12 @@ export default function Page() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>Password</label>
+                    <label>{g("Password")}</label>
                     <Textfield
                       className="bg-secondary"
                       showIcon={true}
                       iconName="lock"
-                      placeholder="Password"
+                      placeholder={g("Password")}
                       onChange={(e) => {
                         if (userCreate.current) {
                           userCreate.current.password = e.target.value;
@@ -633,7 +628,7 @@ export default function Page() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>Role</label>
+                    <label>{g("Role")}</label>
                     <div className="relative bg-secondary rounded-md ">
                       <Select
                         defaultValue="inspector"
@@ -653,7 +648,7 @@ export default function Page() {
                                 showIcon={true}
                                 shape="square"
                               >
-                                supervisor
+                                {g("supervisor")}
                               </BadgeCustom>
                             </SelectItem>
                             <SelectItem value="inspector">
@@ -663,7 +658,7 @@ export default function Page() {
                                 showIcon={true}
                                 shape="square"
                               >
-                                inspector
+                                {g("inspector")}
                               </BadgeCustom>
                             </SelectItem>
                             <SelectItem value="admin">
@@ -673,7 +668,7 @@ export default function Page() {
                                 showIcon={true}
                                 shape="square"
                               >
-                                admin
+                                {g("admin")}
                               </BadgeCustom>
                             </SelectItem>
                           </SelectGroup>
@@ -685,7 +680,7 @@ export default function Page() {
                   <div className="mt-6 flex justify-end items-center gap-4">
                     <AlertDialogCancel asChild>
                       <Button variant="secondary" type="button">
-                        Back
+                        {g("Back")}
                       </Button>
                     </AlertDialogCancel>
                     <Button
@@ -697,15 +692,15 @@ export default function Page() {
                       }}
                     >
                       <span className="material-symbols-outlined">add</span>
-                      New Employee
+                      {g("NewEmployee")}
                     </Button>
                     {isDialogOpen && dialogType === "create" && (
                       <AlertCustom
-                        title={"Are you sure to add new employee?"}
-                        description={"Please confirm to add new employee."}
-                        primaryButtonText={"Confirm"}
+                        title={a("ConfirmAddEmployeeTitle")}
+                        description={a("ConfirmAddEmployeeDescription")}
+                        primaryButtonText={g("Confirm")}
                         primaryIcon="check"
-                        secondaryButtonText={"Cancel"}
+                        secondaryButtonText={g("Cancel")}
                         backResult={(result) => handleDialogResult(result)}
                       />
                     )}
@@ -721,7 +716,7 @@ export default function Page() {
           <Textfield
             iconName="search"
             showIcon={true}
-            placeholder="Search"
+            placeholder={g("Search")}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <DropdownMenu>
@@ -731,13 +726,13 @@ export default function Page() {
                justify-center rounded-md text-sm font-medium`}
             >
               <span className="material-symbols-outlined">swap_vert</span>
-              <div className="text-lg">Sort</div>
+              <div className="text-lg">{g("Sort")}</div>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="p-2 gap-2">
               {/* Sort By label */}
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                Sort By
+                {g("SortBy")}
               </DropdownMenuLabel>
 
               <DropdownMenuRadioGroup
@@ -747,17 +742,17 @@ export default function Page() {
                 }
               >
                 <DropdownMenuRadioItem value="Name" className="text-base">
-                  Name
+                  {g("Name")}
                 </DropdownMenuRadioItem>
 
                 <DropdownMenuRadioItem value="Type" className="text-base">
-                  Type
+                  {g("Type")}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
 
               {/* Order label */}
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                Order
+                {g("Order")}
               </DropdownMenuLabel>
 
               <DropdownMenuRadioGroup
@@ -767,10 +762,10 @@ export default function Page() {
                 }
               >
                 <DropdownMenuRadioItem value="asc" className="text-base">
-                  Ascending
+                  {g("Ascending")}
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="desc" className="text-base">
-                  Descending
+                  {g("Descending")}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
@@ -781,7 +776,7 @@ export default function Page() {
               className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium`}
             >
               <span className="material-symbols-outlined">page_info</span>
-              <div className="text-lg">Filter</div>
+              <div className="text-lg">{g("Filter")}</div>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="flex flex-col justify-center gap-2 p-2 z-50"
@@ -789,7 +784,7 @@ export default function Page() {
             >
               <div>
                 <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                  Role
+                  {g("Role")}
                 </DropdownMenuLabel>
 
                 {roles.map((role) => (
@@ -834,7 +829,7 @@ export default function Page() {
                 ))}
 
                 <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                  Status
+                  {g("Status")}
                 </DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={selectedStatus}>
                   {statuses.map((status) => (
@@ -883,10 +878,10 @@ export default function Page() {
 
               <div className="flex w-full justify-end mt-4 gap-2">
                 <Button size="sm" variant="secondary" onClick={handleReset}>
-                  Reset
+                  {g("Reset")}
                 </Button>
                 <Button size="sm" onClick={handleApply}>
-                  Apply
+                  {g("Apply")}
                 </Button>
               </div>
             </DropdownMenuContent>
@@ -901,10 +896,10 @@ export default function Page() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[5%] ">Id</TableHead>
-                  <TableHead className="w-[30%]">Full Name</TableHead>
-                  <TableHead className="w-[30%]">Role</TableHead>
-                  <TableHead className="w-[30%]">Status</TableHead>
+                  <TableHead className="w-[5%] ">{g("Id")}</TableHead>
+                  <TableHead className="w-[30%]">{g("FullName")}</TableHead>
+                  <TableHead className="w-[30%]">{g("Role")}</TableHead>
+                  <TableHead className="w-[30%]">{g("Status")}</TableHead>
                   <TableHead className=" w-[1%]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -920,7 +915,10 @@ export default function Page() {
                               <AvatarImage
                                 src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
                               />
-                              <AvatarFallback id={employee.id.toString()} className="text-[10px] ">
+                              <AvatarFallback
+                                id={employee.id.toString()}
+                                className="text-[10px] "
+                              >
                                 {getInitials(employee.profile.name)}
                               </AvatarFallback>
                             </Avatar>
@@ -936,7 +934,7 @@ export default function Page() {
                             <div className="text-destructive">
                               {employee.username}
                               <div className="text-[14px]">
-                                No profile is provided
+                              {a("EmployeeNoProfileProvided")}
                               </div>
                             </div>
                           )}
@@ -966,7 +964,9 @@ export default function Page() {
                         }
                         showIcon={true}
                       >
-                        {employee.role}
+                        {employee.role === "admin" && g("admin")}
+                        {employee.role === "inspector" && g("inspector")}
+                        {employee.role === "supervisor" && g("supervisor")}
                       </BadgeCustom>
                     </TableCell>
                     <TableCell>
@@ -980,7 +980,7 @@ export default function Page() {
                               employee.active ? "bg-green" : "bg-destructive"
                             } `}
                           ></div>
-                          {employee.active ? "Active" : "Inactive"}
+                          {employee.active ? g("Active") : g("Inactive")}
                         </div>
                       </BadgeCustom>
                     </TableCell>
@@ -1019,7 +1019,7 @@ export default function Page() {
                                   onClick={(e) => e.stopPropagation()}
                                   className="flex w-full text-[18px]"
                                 >
-                                  {"Edit"}
+                                  {g("Edit")}
                                 </div>
                               </AlertDialogTrigger>
                               <AlertDialogContent
@@ -1030,17 +1030,16 @@ export default function Page() {
                               >
                                 <AlertDialogHeader>
                                   <h1 className="text-2xl font-bold">
-                                    Edit Employee
+                                  {a("EmployeeEditTitle")}
                                   </h1>
                                   <AlertDialogTitle></AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Enter the username, password, and assign a
-                                    role for the employee.
+                                  {a("EmployeeEditDescription")}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
 
                                 <div className="flex flex-col gap-1 pointer-events-none">
-                                  <label>Username</label>
+                                  <label>{g("Username")}</label>
                                   <Textfield
                                     className="bg-secondary cursor-not-allowed "
                                     showIcon={true}
@@ -1053,9 +1052,9 @@ export default function Page() {
 
                                 <div className=" flex flex-col gap-4">
                                   <div>
-                                    <label>Password</label>
+                                    <label>{g("Password")}</label>
                                     <Textfield
-                                      placeholder="Password"
+                                      placeholder={g("Password")}
                                       className={`bg-secondary`}
                                       showIcon={true}
                                       iconName="lock"
@@ -1069,7 +1068,7 @@ export default function Page() {
                                           // Validate password length
                                           if (e.target.value.length < 8) {
                                             setPasswordErrorForEdit(
-                                              "Password must be at least 8 characters long."
+                                              a("EmployeePasswordMinLength")
                                             );
                                           } else {
                                             setPasswordErrorForEdit(null);
@@ -1092,7 +1091,7 @@ export default function Page() {
                                 </div>
 
                                 <div className="">
-                                  <label>Role</label>
+                                  <label>{g("Role")}</label>
                                   <div className="relative bg-secondary rounded-md">
                                     <Select
                                       defaultValue={employee.role}
@@ -1115,7 +1114,7 @@ export default function Page() {
                                               showIcon={true}
                                               shape="square"
                                             >
-                                              supervisor
+                                              {g("supervisor")}
                                             </BadgeCustom>
                                           </SelectItem>
                                           <SelectItem value="inspector">
@@ -1125,7 +1124,7 @@ export default function Page() {
                                               showIcon={true}
                                               shape="square"
                                             >
-                                              inspector
+                                              {g("inspector")}
                                             </BadgeCustom>
                                           </SelectItem>
                                           <SelectItem value="admin">
@@ -1135,7 +1134,7 @@ export default function Page() {
                                               showIcon={true}
                                               shape="square"
                                             >
-                                              admin
+                                              {g("admin")}
                                             </BadgeCustom>
                                           </SelectItem>
                                         </SelectGroup>
@@ -1156,7 +1155,7 @@ export default function Page() {
                                       } catch (error) {}
                                     }}
                                   >
-                                    Back
+                                    {g("Back")}
                                   </Button>
 
                                   <Button
@@ -1171,7 +1170,7 @@ export default function Page() {
                                     <span className="material-symbols-outlined">
                                       save
                                     </span>
-                                    Save
+                                    {g("Save")}
                                   </Button>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
@@ -1179,13 +1178,13 @@ export default function Page() {
                               {isDialogOpen === true &&
                                 dialogType === "edit" && (
                                   <AlertCustom
-                                    title={"Are you sure to edit employee?"}
-                                    description={
-                                      "Please confirm to edit employee."
+                                    title={a("EmployeeEditConfirmTitle")}
+                                    description={a
+                                      ("EmployeeEditConfirmDescription")
                                     }
-                                    primaryButtonText={"Confirm"}
+                                    primaryButtonText={g("Confirm")}
                                     primaryIcon="check"
-                                    secondaryButtonText={"Cancel"}
+                                    secondaryButtonText={g("Cancel")}
                                     backResult={handleDialogResult}
                                   />
                                 )}
@@ -1199,24 +1198,24 @@ export default function Page() {
                               }}
                               className="flex w-full text-[18px] text-destructive"
                             >
-                              {employee.active ? "Deactivate" : "Activate"}
+                              {employee.active ? g("Deactivate") : g("Activate")}
                             </div>
                             {isDialogOpen === true &&
                               dialogType === "deactivate" && (
                                 <AlertCustom
                                   title={
                                     employee.active
-                                      ? "Are you sure to deactivate employee?"
-                                      : "Are you sure to activate employee?"
+                                      ? a("EmployeeDeactivateConfirmTitle")
+                                      : a("EmployeeActivateConfirmTitle")
                                   }
                                   description={
                                     employee.active
-                                      ? "Please confirm to deactivate employee."
-                                      : "Please confirm to activate employee."
+                                      ? a("EmployeeDeactivateConfirmDescription")
+                                      : a("EmployeeActivateConfirmDescription")
                                   }
-                                  primaryButtonText={"Confirm"}
+                                  primaryButtonText={g("Confirm")}
                                   primaryIcon="check"
-                                  secondaryButtonText={"Cancel"}
+                                  secondaryButtonText={g("Cancel")}
                                   backResult={handleDialogResult}
                                 />
                               )}
