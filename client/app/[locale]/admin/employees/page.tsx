@@ -55,7 +55,7 @@ export default function Page() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");
-
+  const g = useTranslations("General");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -64,29 +64,29 @@ export default function Page() {
   const roles = [
     {
       value: "admin",
-      label: "Admin",
+      label: g("admin"),
       icon: "manage_accounts",
       variant: "blue",
     },
     {
       value: "inspector",
-      label: "Inspector",
+      label: g("inspector"),
       icon: "person_search",
       variant: "red",
     },
     {
       value: "supervisor",
-      label: "Supervisor",
+      label: g("supervisor"),
       icon: "manage_accounts",
       variant: "yellow",
     },
   ];
 
   const statuses = [
-    { value: "true", label: "Active", color: "bg-green", variant: "green" },
+    { value: "true", label: g("Active"), color: "bg-green", variant: "green" },
     {
       value: "false",
-      label: "Inactive",
+      label: g("Inactive"),
       color: "bg-destructive",
       variant: "red",
     },
@@ -206,7 +206,9 @@ export default function Page() {
 
   const form = useForm();
   const { handleSubmit } = form;
+  const { handleSubmit } = form;
 
+  const onSubmit = () => {};
   const onSubmit = () => {};
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -437,7 +439,7 @@ export default function Page() {
       updatedUser.password.length < 8 &&
       updatedUser.password !== ""
     ) {
-      setPasswordErrorForEdit("Password must be at least 8 characters long.");
+      setPasswordErrorForEdit(a("EmployeeEditPasswordMinLengthErrorDescription"));
       toast({
         variant: "error",
         title: a("PasswordError"),
