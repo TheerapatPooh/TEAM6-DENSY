@@ -670,3 +670,24 @@ export function getNotificationToast(key: string): IToast | null {
       return null;
   }
 }
+
+const today = new Date();
+
+export const getMonthRange = (month: string) => {
+  if (month === "AllTime") return { startDate: undefined, endDate: undefined };
+
+  const dateParts = month.split(" ");
+  const year = parseInt(dateParts[1]);
+  const monthIndex = new Date(`${dateParts[0]} 1, ${year}`).getMonth();
+
+  const startDate = new Date(year, monthIndex, 1);
+  const endDate = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+  return { startDate, endDate };
+};
+
+const monthFormatter = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
+
+export const monthOptions = ["AllTime", ...Array.from({ length: 12 }, (_, i) => {
+  const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+  return monthFormatter.format(date);
+})];

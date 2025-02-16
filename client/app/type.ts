@@ -181,8 +181,12 @@ export interface IZone {
     } | null
     supervisor?: IUser;
     defects?: number;
+    dashboard?: {
+        totalComments: IDashboardCard;
+        defectCompleted: IDashboardCard;
+        defectPending: IDashboardCard;
+    }
 }
-
 
 export interface IItemZone {
     itemId: number;
@@ -313,6 +317,14 @@ export interface IPatrolCompletionRate {
 export interface IPatrolCompletionRateItem {
     noDefect: number;
     withDefect: number;
+}
+export interface IDashboardCard {
+    title: string;
+    value: number;
+    trend: number;
+    icon: string;
+    iconColor: string;
+    positive?: boolean;
 }
 
 

@@ -26,6 +26,8 @@ import NotFound from '@/components/not-found';
 import Loading from '@/components/loading';
 import { zoneCriteria } from '@/constants/zone-criteria';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 export default function HeatMap({ data }: IHeatMap) {
@@ -35,7 +37,7 @@ export default function HeatMap({ data }: IHeatMap) {
     const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
     const [paths, setPaths] = useState<{ text: any, id: number, pathData: string, defects?: number }[]>([])
     const { resolvedTheme } = useTheme();
-
+    const router = useRouter()
     const s = useTranslations('Sidebar')
     const m = useTranslations('Map')
     const d = useTranslations('Dashboard')
@@ -102,6 +104,11 @@ export default function HeatMap({ data }: IHeatMap) {
         }
     }, [zones]);
 
+    const handleZoneClick = (zoneId: number) => {
+        router.push(`/${locale}/admin/dashboard/heat-map/${zoneId}`)
+    };
+
+
     if (!data) {
         return <Loading />
     }
@@ -128,7 +135,7 @@ export default function HeatMap({ data }: IHeatMap) {
                 </div>
             </div>
             {/* HeatMap */}
-            <Stage ref={stageRef} width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md'>
+            <Stage ref={stageRef} width={stageDimensions.width} height={stageDimensions.height} className='bg-card rounded-md hover:cursor-pointer'>
                 <Layer x={8} y={8}>
                     {zones?.map((zone) => {
                         const textLanguage = zone.text?.[language] || zone.text?.['en']; // ใช้สำหรับเก็บค่าตัวแปร text ของภาษาที่ใช้ในปัจจุบัน
@@ -138,6 +145,7 @@ export default function HeatMap({ data }: IHeatMap) {
                             <React.Fragment key={zone.id}>
                                 <Path
                                     data={zone.pathData}
+                                    onClick={() => handleZoneClick(zone.id)}
                                     fill={getZoneColor(defectCount)} // ใช้ gradient ที่กำหนด
                                 />
                                 {textLanguage && (
@@ -168,13 +176,33 @@ export default function HeatMap({ data }: IHeatMap) {
                 <div className='flex flex-col gap-4'>
                     {warningAreas.length > 0 ? (
                         warningAreas.map((zone, index) => (
-                            <div key={index} className='flex flex-row items-center justify-start gap-2'>
-                                <span
-                                    className={`w-8 h-8 rounded-md`}
-                                    style={{ backgroundColor: getZoneColor(zone.defects) }}
-                                ></span>
-                                <p className='text-base text-card-foreground font-semibold text-center'>{m(zone.name)}</p>
-                            </div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div key={index} className='flex flex-row items-center justify-start gap-2 hover:cursor-pointer'>
+                                            <span
+                                                className={`w-8 h-8 rounded-md`}
+                                                style={{ backgroundColor: getZoneColor(zone.defects) }}
+                                            ></span>
+                                            <p className='text-base text-card-foreground font-semibold text-center'>{m(zone.name)}</p>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="bg-card-foreground px-2.5 py-1.5 custom-shadow rounded-md w-56">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center justify-between gap-6">
+                                                <div className="flex items-center gap-2 text-sm font-medium text-border">
+                                                    <span
+                                                        className="inline-block w-2.5 h-2.5 rounded-[2px]"
+                                                        style={{ backgroundColor: getZoneColor(zone.defects) }} // ใช้สีของโซน
+                                                    />
+                                                    <p>{m(zone.name)}</p>
+                                                </div>
+                                                <p className="text-sm text-card">{zone.defects}</p>
+                                            </div>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         ))
                     ) : (
                         <div className="flex flex-col items-center justify-center h-64">
