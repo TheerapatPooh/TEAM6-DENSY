@@ -149,11 +149,11 @@ export default function Page() {
   };
 
   const handleChecklist = (id: number) => {
-    router.push(`/${locale}/admin/settings/checklistview/${id}`);
+    router.push(`/${locale}/admin/settings/patrol-checklist/${id}`);
   };
 
   const handleGoToCreateChecklist = () => {
-    router.push(`/${locale}/admin/settings/create/checklist`);
+    router.push(`/${locale}/admin/settings/patrol-checklist/create`);
   };
   // Modify the getData function to use fetchData
   const getData = async () => {
