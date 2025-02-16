@@ -31,34 +31,29 @@ export default function TabMenu({ id }: { id?: string }) {
         router.push(`/${locale}${link.replace("${id}", id || "")}`);
     };
 
-    // ถ้า path เป็น /en/admin/employees ให้ return null
-    if (pathname === `/${locale}/admin/employees`) {
-        return null;
-    }
-
-    if (pathname === `/${locale}/admin/settings/patrol-preset/create` || new RegExp(`^/${locale}/admin/settings/patrol-preset/\\d+$`).test(pathname)) {
-        return null
-    }
-
+    console.log(pathname)
     return (
         <div>
             {currentSubMenu ? (
-                <Tabs defaultValue={`/${locale}`} value={pathname}>
+                <Tabs defaultValue={`/${locale}`} value={pathname.replace(/\/\d+$/, '')}>
                     <TabsList className="bg-secondary p-1 h-fit ">
-                        {currentSubMenu.items.map((item, index) => (
-                            <TabsTrigger key={index} value={`/${locale}${item.link.replace("${id}", id || "")}`} onClick={() => handleTabClick(item.link)}>
-                                <span className="material-symbols-outlined mr-2">
-                                    {item.icon}
-                                </span>
-                                <p className="font-semibold">{item.text}</p>
-                            </TabsTrigger>
-                        ))}
+                        {currentSubMenu.items.map((item, index) => {
+          
+                            const value = `/${locale}${item.link.replace("${id}", id || "")}`.replace(/\/$/, "");
+                            console.log("value", value)
+                            return (
+                                <TabsTrigger key={index} value={value} onClick={() => handleTabClick(item.link)}>
+                                    <span className="material-symbols-outlined mr-2">
+                                        {item.icon}
+                                    </span>
+                                    <p className="font-semibold">{item.text}</p>
+                                </TabsTrigger>
+                            )
+                        })}
                     </TabsList>
                 </Tabs>
             ) : (
-                <div>
-                    No submenu available for this path.
-                </div>
+                null
             )}
         </div>
     )

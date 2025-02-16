@@ -23,14 +23,10 @@ export const subMenuList = [
         ]
     },
     {
-        group: "admin/employees",
-        items: []
-    },
-    {
         group: "admin/settings",
         items: [
-            { link: "/admin/settings/patrol-preset", text: "Patrol Preset", icon: "deployed_code" },
-            { link: "/admin/settings/patrol-checklist", text: "Patrol Checklist", icon: "checklist" },
+            { link: "/admin/settings/patrol-preset/${id}", text: "Patrol Preset", icon: "deployed_code" },
+            { link: "/admin/settings/patrol-checklist/${id}", text: "Patrol Checklist", icon: "checklist" },
             { link: "/admin/settings/location-&-zone", text: "Location & Zone", icon: "location_on" },
         ]
     },
