@@ -1254,8 +1254,8 @@ export default function Page() {
             <div className="col-span-full min-h-[261px]">
               <NotFound
                 icon="quick_reference_all"
-                title="NoChecklistsAvailable"
-                description="NoChecklistsDescription"
+                title="NoDataAvailable"
+                description="NoDataAvailableDescription"
               />
             </div>
           )}
