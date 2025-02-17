@@ -532,8 +532,8 @@
     "DefectTrendAnalysis": "การวิเคราะห์แนวโน้มข้อบกพร่อง",
     "DefectTrendAnalysisDescription": "ดูแนวโน้มข้อบกพร่องในแต่ละเดือน",
     "FromLastMonth": "จากเดือนที่แล้ว",
-    "TotalReport": "รายงานรวม",
-    "DefectCompleted": "ข้อบกพร่องที่เสร็จสมบูรณ์",
+    "TotalReport": "ถูกรายงานทั้งหมด",
+    "DefectCompleted": "ข้อบกพร่องที่แก้ไขเสร็จสิ้น",
     "DefectPending": "ข้อบกพร่องที่รอดำเนินการ"
   }
 }

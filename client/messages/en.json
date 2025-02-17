@@ -170,7 +170,7 @@
     "ZoneWithoutAssignedUsersDescription": "It seems that the selected preset has zone without assigned supervisor.",
     "PleaseGoTo": "Please go to the",
     "Location&Zone": "Location & Zone",
-    "AssignUsersToTheZone.": "section and assign users to the zone.",
+    "AssignUsersToTheZone": "section and assign users to the zone.",
     "Timestamp": "Timestamp",
     "Reporter": "Reporter"
   },

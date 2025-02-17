@@ -257,36 +257,37 @@ export default function Page() {
           </Select>
         </div>
       </div>
-      <div className="flex sm:flex-col xl:flex-row gap-4 w-full">
-        <DashboardCard
-          title="TotalReport"
-          value={zone.dashboard.defectReported.value}
-          trend={zone.dashboard.defectReported.trend}
-          icon="campaign"
-          variant="orange"
-          positive={false}
-        />
-        <DashboardCard
-          title="DefectCompleted"
-          value={zone.dashboard.defectCompleted.value}
-          trend={zone.dashboard.defectCompleted.trend}
-          icon="verified"
-          variant="green"
-          positive={true}
-        />
-        <DashboardCard
-          title="DefectPending"
-          value={zone.dashboard.defectPending.value}
-          trend={zone.dashboard.defectPending.trend}
-          icon="hourglass_top"
-          variant="yellow"
-          positive={false}
-        />
-      </div>
       <ScrollArea
-        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-432px)]"
+        className="h-full w-full rounded-md flex-1 
+    [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-280px)]"
       >
         <div className="flex flex-col gap-4">
+          <div className="flex sm:flex-col xl:flex-row gap-4 w-full">
+            <DashboardCard
+              title="TotalReport"
+              value={zone.dashboard.defectReported.value}
+              trend={zone.dashboard.defectReported.trend}
+              icon="campaign"
+              variant="orange"
+              positive={false}
+            />
+            <DashboardCard
+              title="DefectCompleted"
+              value={zone.dashboard.defectCompleted.value}
+              trend={zone.dashboard.defectCompleted.trend}
+              icon="verified"
+              variant="green"
+              positive={true}
+            />
+            <DashboardCard
+              title="DefectPending"
+              value={zone.dashboard.defectPending.value}
+              trend={zone.dashboard.defectPending.trend}
+              icon="hourglass_top"
+              variant="yellow"
+              positive={false}
+            />
+          </div>
           <div className="flex flex-col rounded-md gap-2 px-6 py-4 bg-card custom-shadow min-h-[460px]">
             <h1 className="text-2xl font-semibold text-card-foreground">
               {d("DefectTrendAnalysis")}
