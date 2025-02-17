@@ -1,6 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification } from "@Controllers/util-controller.js";
+import { calculateTrend, createNotification } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 
 /**
@@ -36,7 +36,7 @@ export async function getZone(req: Request, res: Response) {
       andConditions.push({ status: status });
     }
 
-    // เงื่อนไขการกรองตาม preset
+    // เงื่อนไขการกรองตาม type
     if (type) {
       const typeArray = (type as string).split(","); // แยกค่าด้วย comma
       const orTypeConditions = typeArray.map((t) => ({ type: t })); // สร้าง array ของ OR เงื่อนไข
@@ -44,44 +44,46 @@ export async function getZone(req: Request, res: Response) {
       andConditions.push({ OR: orTypeConditions });
     }
 
+    function mapSearchToStatus(search: string): DefectStatus | null {
+      const searchLower = search.toLowerCase();
+
+      // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+      if (searchLower.startsWith("rep")) {
+        return DefectStatus.reported;
+      } else if (searchLower.startsWith("in")) {
+        return DefectStatus.in_progress;
+      } else if (searchLower.startsWith("pe")) {
+        return DefectStatus.pending_inspection;
+      } else if (searchLower.startsWith("res")) {
+        return DefectStatus.resolved;
+      } else if (searchLower.startsWith("co")) {
+        return DefectStatus.completed;
+      }
+      // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+      return null;
+    }
+
+    function mapSearchToType(search: string): ItemType | null {
+      const searchLower = search.toLowerCase();
+
+      // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+      if (searchLower.startsWith("sa")) {
+        return ItemType.safety;
+      } else if (searchLower.startsWith("en")) {
+        return ItemType.environment;
+      } else if (searchLower.startsWith("ma")) {
+        return ItemType.maintenance;
+      }
+
+      // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+      return null;
+    }
+
     // เงื่อนไขการค้นหา (search)
     if (search) {
       const searchId = parseInt(search as string, 10);
 
-      function mapSearchToStatus(search: string): DefectStatus | null {
-        const searchLower = search.toLowerCase();
 
-        // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
-        if (searchLower.startsWith("rep")) {
-          return DefectStatus.reported;
-        } else if (searchLower.startsWith("in")) {
-          return DefectStatus.in_progress;
-        } else if (searchLower.startsWith("pe")) {
-          return DefectStatus.pending_inspection;
-        } else if (searchLower.startsWith("res")) {
-          return DefectStatus.resolved;
-        } else if (searchLower.startsWith("co")) {
-          return DefectStatus.completed;
-        }
-        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
-        return null;
-      }
-
-      function mapSearchToType(search: string): ItemType | null {
-        const searchLower = search.toLowerCase();
-
-        // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
-        if (searchLower.startsWith("sa")) {
-          return ItemType.safety;
-        } else if (searchLower.startsWith("en")) {
-          return ItemType.environment;
-        } else if (searchLower.startsWith("ma")) {
-          return ItemType.maintenance;
-        }
-
-        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
-        return null;
-      }
 
       const mappedStatus = mapSearchToStatus(search as string);
       const mappedTypes = mapSearchToType(search as string);
@@ -102,7 +104,6 @@ export async function getZone(req: Request, res: Response) {
         orConditions.push({ type: mappedTypes as ItemType });
       }
 
-      // ถ้ามีค่า preset title
       orConditions.push({
         name: {
           contains: search as string,
@@ -183,7 +184,9 @@ export async function getZone(req: Request, res: Response) {
             results: {
               include: {
                 defects: {
-                  where: whereConditions,
+                  where: {
+                    startTime: dateFilter
+                  },
                   include: {
                     user: {
                       select: {
@@ -238,7 +241,7 @@ export async function getZone(req: Request, res: Response) {
       })
     }
 
-    let totalComments = 0
+    let defectReported = 0
     let defectCompleted = 0
     let defectPending = 0
     let monthlyDefects: { [key: string]: number } = {};
@@ -246,8 +249,7 @@ export async function getZone(req: Request, res: Response) {
 
     for (const itemZone of zoneWithData.itemZones) {
       for (const result of itemZone.results) {
-        totalComments += result.comments?.length || 0;
-
+        defectReported += result.defects?.length || 0
         for (const defect of result.defects) {
           allDefects.push(defect);
           if (defect.status === "completed") {
@@ -258,10 +260,9 @@ export async function getZone(req: Request, res: Response) {
         }
       }
     }
+
     for (const itemZone of allData.itemZones) {
       for (const result of itemZone.results) {
-        totalComments += result.comments?.length || 0;
-
         for (const defect of result.defects) {
           const defectDate = new Date(defect.startTime);
           const defectMonth = defectDate.toLocaleString("en-US", { month: "long" });
@@ -270,6 +271,35 @@ export async function getZone(req: Request, res: Response) {
           monthlyDefects[monthYearKey] = (monthlyDefects[monthYearKey] || 0) + 1;
         }
       }
+    }
+
+    // กรองตาม status
+    if (status) {
+      allDefects = allDefects.filter(defect => defect.status === status);
+    }
+
+    // กรองตาม type (รองรับหลายค่า)
+    if (type) {
+      const types = (type as string).split(',');
+      allDefects = allDefects.filter(defect => types.includes(defect.type));
+    }
+
+    // กรองตาม search (รองรับหลายเงื่อนไข)
+    if (search) {
+      const searchId = parseInt(search as string, 10);
+      const mappedStatus = mapSearchToStatus(search as string);
+      const mappedType = mapSearchToType(search as string);
+
+      allDefects = allDefects.filter(defect => {
+        const searchLower = search.toString().toLocaleLowerCase();
+        const matchesId = defect.id === searchId;
+        const matchesStatus = mappedStatus ? defect.status === mappedStatus : false;
+        const matchesType = mappedType ? defect.type === mappedType : false;
+        const matchesName = defect.name?.toLowerCase().includes(searchLower);
+        const matchesUserName = defect.user?.profile?.name?.toLowerCase().includes(searchLower);
+
+        return matchesId || matchesStatus || matchesType || matchesName || matchesUserName;
+      });
     }
 
     // แปลง `endDate` เป็น Date Object
@@ -403,33 +433,29 @@ export async function getZone(req: Request, res: Response) {
       return
     }
 
-    let currentComments = 0
+    let currentDefects = 0
     let currentCompleted = 0
     let currentPending = 0
-    let currentDefect = 0
-    let prevComments = 0
+
+    let prevDefects = 0
     let prevCompleted = 0
     let prevPending = 0
-    let prevDefect = 0
 
     for (const itemZone of currentMonthData.itemZones) {
       for (const result of itemZone.results) {
-        currentComments += result.comments?.length || 0
-
+        currentDefects += result.defects?.length || 0
         for (const defect of result.defects) {
-          currentDefect++
           defect.status === 'completed'
             ? currentCompleted++
             : currentPending++
         }
       }
     }
+
     for (const itemZone of previousMonthData.itemZones) {
       for (const result of itemZone.results) {
-        prevComments += result.comments?.length || 0
-
+        prevDefects += result.defects?.length || 0
         for (const defect of result.defects) {
-          prevDefect++
           defect.status === 'completed'
             ? prevCompleted++
             : prevPending++
@@ -437,19 +463,14 @@ export async function getZone(req: Request, res: Response) {
       }
     }
 
-    const calculateTrend = (current: number, previous: number): number => {
-      if (previous === 0) return current > 0 ? 100 : 0;
-      return Number((((current - previous) / previous) * 100).toFixed(2));
-    };
-
     const result = {
       ...zoneWithoutItemZones,
       dashboard: {
-        totalComments: { value: totalComments, trend: calculateTrend(currentComments, prevComments) },
+        defectReported: { value: defectReported, trend: calculateTrend(currentDefects, prevDefects) },
         defectCompleted: { value: defectCompleted, trend: calculateTrend(currentCompleted, prevCompleted) },
         defectPending: { value: defectPending, trend: calculateTrend(currentPending, prevPending) },
         chartData,
-        defectTrend: calculateTrend(currentDefect, prevDefect),
+        defectTrend: calculateTrend(currentDefects, prevDefects),
         defects: allDefects
       }
     }
@@ -458,10 +479,7 @@ export async function getZone(req: Request, res: Response) {
 
   } catch (error) {
     console.error("Server Error:", error)
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error"
-    })
+    return res.status(500).json("Internal server error")
   }
 }
 

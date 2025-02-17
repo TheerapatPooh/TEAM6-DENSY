@@ -1,5 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
+import { calculateTrend } from "@Controllers/util-controller.js";
 
 export async function getHeatMap(req: Request, res: Response) {
   try {
@@ -276,9 +277,9 @@ export async function getCommonDefects(req: Request, res: Response) {
       };
     }
     const allDefects = await prisma.defect.findMany({
-        where: {
-            startTime: dateFilter,
-            ...zoneFilter
+      where: {
+        startTime: dateFilter,
+        ...zoneFilter
       },
       include: {
         supervisor: {
@@ -533,12 +534,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
       (currentCompletionRate.noDefect / patrolsCurrentMonth.length) * 100;
     const prevPercent =
       (prevCompletionRate.noDefect / patrolsPreviousMonth.length) * 100;
-    let trend = 0;
-    if (prevPercent > 0) {
-      trend = ((currentPercent - prevPercent) / prevPercent) * 100;
-    } else if (currentPercent > 0) {
-      trend = 100;
-    }
+    let trend = calculateTrend(8, 3);
 
     // สร้างข้อมูลสำหรับแสดงผลใน radial chart
     const patrolCompletionRate = [

@@ -22,7 +22,7 @@ export default function DashboardCard({ title, value, trend, icon, variant, posi
         />
       </div>
       <div className='flex flex-col gap-1 text-2xl font-bold'>
-        {trend && (
+        {trend !== undefined && (
           <div>
             <p className=''>{value}</p>
             <p className={`text-sm font-medium ${trendColor}`}>{trend}% {d('FromLastMonth')}</p>

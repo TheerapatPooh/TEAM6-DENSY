@@ -88,8 +88,6 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
-
-
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "DefectDate",
     order: "Ascending",
@@ -171,7 +169,6 @@ export default function Page() {
     const zone = await fetchData("get", `/zone/${params.id}?dashboard=true&${queryString}`, true);
     const defectCatagory = await fetchData("get", `/dashboard/defect-catagory?${queryString}`, true);
     const commonDefects = await fetchData("get", `/dashboard/common-defects?${queryString}`, true);
-
     // fetch data
     setZone(zone);
     setDefectCatagory(defectCatagory);
@@ -263,8 +260,8 @@ export default function Page() {
       <div className="flex sm:flex-col xl:flex-row gap-4 w-full">
         <DashboardCard
           title="TotalReport"
-          value={zone.dashboard.totalComments.value}
-          trend={zone.dashboard.totalComments.trend}
+          value={zone.dashboard.defectReported.value}
+          trend={zone.dashboard.defectReported.trend}
           icon="campaign"
           variant="orange"
           positive={false}
@@ -502,7 +499,7 @@ export default function Page() {
                           iconName={getItemTypeVariant(defect.type).iconName}
                           shape="square"
                           showIcon={true}
-                          hideText={window.innerWidth > 1024 ? false : true}
+                          hideText={windowWidth > 1024 ? false : true}
                         >
                           {s(defect.type)}
                         </BadgeCustom>
@@ -538,7 +535,7 @@ export default function Page() {
                           variant={getDefectStatusVariant(defect.status).variant}
                           iconName={getDefectStatusVariant(defect.status).iconName}
                           showIcon={true}
-                          hideText={window.innerWidth > 1024 ? false : true}
+                          hideText={windowWidth > 1024 ? false : true}
                         >
                           {s(defect.status)}
                         </BadgeCustom>

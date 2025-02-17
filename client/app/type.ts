@@ -183,7 +183,7 @@ export interface IZone {
     supervisor?: IUser;
     defects?: number;
     dashboard?: {
-        totalComments: IDashboardCard;
+        defectReported: IDashboardCard;
         defectCompleted: IDashboardCard;
         defectPending: IDashboardCard;
         chartData: IZoneChartDataItem[];
