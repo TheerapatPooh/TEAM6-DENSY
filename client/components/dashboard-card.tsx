@@ -25,7 +25,7 @@ export default function DashboardCard({ title, value, trend, icon, variant, posi
         {trend && (
           <div>
             <p className=''>{value}</p>
-            <p className={`text-sm font-medium ${trendColor}`}>{trend}% from last month</p>
+            <p className={`text-sm font-medium ${trendColor}`}>{trend}% {d('FromLastMonth')}</p>
           </div>
         )}
       </div>

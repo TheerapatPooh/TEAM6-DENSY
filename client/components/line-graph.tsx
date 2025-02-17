@@ -4,12 +4,8 @@ import { TrendingDown, TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
-    Card,
     CardContent,
-    CardDescription,
     CardFooter,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card"
 import {
     ChartConfig,
@@ -20,15 +16,24 @@ import {
 import { useTranslations } from "next-intl"
 import NotFound from "@/components/not-found"
 
-const chartConfig = {
-    defect: {
-        label: "Defect",
-        color: "hsl(var(--chart-1))",
-    },
-} satisfies ChartConfig
 
 export function LineGraph({ chartData, defectTrend }) {
     const d = useTranslations('Dashboard')
+    const s = useTranslations('Sidebar')
+    const m = useTranslations('Month')
+    const chartConfig = {
+        defect: {
+            label: s("Defect"),
+            color: "hsl(var(--chart-1))",
+        },
+    } satisfies ChartConfig
+
+    // ฟังก์ชันแปลงชื่อเดือน
+    const translateMonth = (month: string) => {
+        const [monthName, year] = month.split(" ");
+        return `${m(monthName)} ${year}`;  // แปลชื่อเดือนและคงปีไว้
+    };
+
     const sortedChartData = chartData.sort((a, b) => {
         // สมมติว่า `month` มีรูปแบบ "January 2024"
         const monthOrder = [
@@ -83,8 +88,8 @@ export function LineGraph({ chartData, defectTrend }) {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            tickFormatter={(value) => value.slice(0, 3)}
-                        />
+                            tickFormatter={(value) => translateMonth(value)} 
+                            />
                         <ChartTooltip
                             cursor={false}
                             content={<ChartTooltipContent indicator="line" />}
@@ -108,7 +113,7 @@ export function LineGraph({ chartData, defectTrend }) {
                     {isPositiveTrend ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                 </div>
                 <div className="leading-none text-muted-foreground text-sm">
-                    {d("DefectCatagoryDescription")}
+                    {d("DefectTrendAnalysisDescription")}
                 </div>
             </CardFooter>
         </div>

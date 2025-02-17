@@ -223,7 +223,7 @@ export default function Page() {
           variant="secondary"
           onClick={() => router.push(`/${locale}/admin/dashboard/heat-map`)}
         >
-          Back
+          {t("Back")}
         </Button>
       </div>
       <div className="flex justify-between items-center">
@@ -264,7 +264,7 @@ export default function Page() {
       </div>
       <div className="flex sm:flex-col xl:flex-row gap-4 w-full">
         <DashboardCard
-          title="TotalComments"
+          title="TotalReport"
           value={zone.dashboard.totalComments.value}
           trend={zone.dashboard.totalComments.trend}
           icon="campaign"
