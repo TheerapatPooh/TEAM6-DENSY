@@ -57,8 +57,6 @@ export default function Notification() {
     const { socket, isConnected } = useSocket()
     const [unreadCount, setUnreadCount] = useState(0);
 
-    // const unreadCount = notifications.filter(notification => !notification.read).length
-
     const router = useRouter()
 
     function isValidDateFormat(date: string): boolean {
@@ -72,7 +70,7 @@ export default function Notification() {
         if (isValidDateFormat(content)) {
             content = formatTime(content)
         }
-        else if(content) {
+        else if (content) {
             content = z(content)
         }
 
@@ -182,15 +180,19 @@ export default function Notification() {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
             socket.on('new_notification', (data: INotification) => {
-                setAllNotifications((prevNotifications) => [...prevNotifications, data]);
+                setAllNotifications((prevNotifications) =>
+                    [...prevNotifications, data].sort((a, b) =>
+                        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                    )
+                ); 
                 const notification = formatMessage(data.message)
                 const toastData = getNotificationToast(notification.key)
-        
+
                 if (toastData) {
                     toast({
                         variant: toastData.variant,
                         title: a(toastData.title),
-                        description: a(toastData.description, { content: notification.content}),
+                        description: a(toastData.description, { content: notification.content }),
                     });
                 } else {
                     console.error(`Notification not found for key: ${notification.key}`);
@@ -201,6 +203,7 @@ export default function Notification() {
                 socket.off('new_notification');
             };
         }
+        fetchNotifications();
     }, [socket, isConnected]);
 
     useEffect(() => {
@@ -220,6 +223,7 @@ export default function Notification() {
         // อัปเดตค่า previousUnreadCount เป็นค่าปัจจุบัน
         prevUnreadCountRef.current = unreadCount;
     }, [unreadCount]);
+    console.log('noti',allNotifications)
 
     const trailingActions = (id: number) => (
         <TrailingActions>
@@ -275,14 +279,14 @@ export default function Notification() {
                     <div className='h-full overflow-y-auto flex flex-col gap-6'>
                         <ScrollArea className="flex-1 p-0 pr-4">
                             <SwipeableList style={{ overflow: 'visible' }}>
-                                {getRecentNotifications().map((notification, index) => {
+                                {getRecentNotifications().map((notification) => {
                                     const { key, content } = formatMessage(notification.message);
                                     return (
                                         <SwipeableListItem
-                                            key={index}
+                                            key={notification.id}
                                             trailingActions={trailingActions(notification.id)}>
                                             <Button
-                                                key={index}
+                                                key={notification.id}
                                                 variant={'ghost'}
                                                 className="justify-between items-center w-full h-fit gap-6 px-6 py-4 truncate mb-4"
                                                 onClick={() => handleNotificationClick(notification)}
@@ -293,7 +297,7 @@ export default function Notification() {
                                                         className="text-sm font-normal text-card-foreground text-start line-clamp-2 bg-transparent resize-none outline-none cursor-pointer"
                                                         readOnly
                                                     >
-                                                        {n(key, { content: content})}
+                                                        {n(key, { content: content })}
                                                     </textarea>
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-xs font-normal text-muted-foreground text-start">
