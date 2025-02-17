@@ -61,7 +61,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
   useEffect(() => {
     const currentLanguage = locale; // ภาษาที่ใช้อยู่ในปัจจุบัน
     setLanguage(currentLanguage || 'en');
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (windowWidth <= 1280) { // ความกว้างของหน้าจอสำหรับจอมือถือ

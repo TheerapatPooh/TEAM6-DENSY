@@ -223,7 +223,6 @@ export default function Notification() {
         // อัปเดตค่า previousUnreadCount เป็นค่าปัจจุบัน
         prevUnreadCountRef.current = unreadCount;
     }, [unreadCount]);
-    console.log('noti',allNotifications)
 
     const trailingActions = (id: number) => (
         <TrailingActions>
