@@ -58,9 +58,9 @@ export async function login(req: Request, res: Response) {
     res.status(200).json({ message: "Login Success", token });
     return
   } catch (error) {
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
-  
+
 }
 
 /**
@@ -80,7 +80,7 @@ export async function logout(req: Request, res: Response) {
     res.status(200).json({ message: "Logout successful" });
     return
   } catch (error) {
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return
   }
 }
@@ -153,7 +153,7 @@ export async function getAllNotifications(req: Request, res: Response) {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -217,7 +217,7 @@ export async function updateNotification(req: Request, res: Response) {
     res.status(200).json(notification);
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -237,7 +237,7 @@ export async function markAllAsRead(req: Request, res: Response) {
     });
     res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -267,7 +267,7 @@ export async function markAsRead(req: Request, res: Response) {
     res.status(200).json({ message: "Notification marked as read" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -388,3 +388,8 @@ export function authorzied(allowedRoles: string[]) {
     next();
   };
 }
+
+export const calculateTrend = (current: number, previous: number): number => {
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return Number((((current - previous) / previous) * 100).toFixed(2));
+};

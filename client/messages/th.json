@@ -152,7 +152,7 @@
     "Create": "สร้าง",
     "AddNewEmployee": "สร้างผู้ใช้ใหม่",
     "AddNewEmployeeDescription": "กรอกชื่อผู้ใช้ รหัสผ่าน และกำหนดบทบาทสำหรับพนักงานใหม่",
-    "NoProfileProvided":"ไม่มีโปรไฟล์",
+    "NoProfileProvided": "ไม่มีโปรไฟล์",
     "EditEmployee": "แก้ไขผู้ใช้",
     "EditEmployeeDescription": "กรอกชื่อผู้ใช้ รหัสผ่าน และกำหนดหน้าที่สำหรับพนักงาน",
     "NoDataAvailable": "ไม่มีข้อมูล",
@@ -170,7 +170,9 @@
     "ZoneWithoutAssignedUsersDescription": "ดูเหมือนว่าพรีเซ็ตที่เลือกมีโซนที่ยังไม่มีผู้ดูแลที่มอบหมาย.",
     "PleaseGoTo": "กรุณาไปที่",
     "Location&Zone": "ตำแหน่ง & โซน",
-    "AssignUsersToTheZone": "ส่วนนี้และมอบหมายผู้ใช้งานให้กับโซน."
+    "AssignUsersToTheZone": "ส่วนนี้และมอบหมายผู้ใช้งานให้กับโซน.",
+    "Timestamp": "เวลาที่บันทึก",
+    "Reporter": "ผู้รายงาน"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -495,7 +497,6 @@
     "SureToDeactivateDescription": "โปรดยืนยันเพื่อปิดใช้งานพนักงาน",
     "SureToActivate": "คุณแน่ใจหรือไม่ว่าต้องการเปิดใช้งานพนักงาน?",
     "SureToActivateDescription": "โปรดยืนยันเพื่อเปิดใช้งานพนักงาน"
-
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",
@@ -527,6 +528,12 @@
     "CommonDefects": "ปัญหาที่พบบ่อย",
     "CommonDefectsDescription": "แสดงปัญหาที่พบบ่อยที่สุดระหว่างการตรวจตรา",
     "PatrolCompletionRate": "อัตราความสมบูรณ์ของการตรวจตรา",
-    "PatrolCompletionRateDescription": "แสดงอัตราการตรวจตราที่เสร็จสมบูรณ์โดยไม่มีปัญหา"
+    "PatrolCompletionRateDescription": "แสดงอัตราการตรวจตราที่เสร็จสมบูรณ์โดยไม่มีปัญหา",
+    "DefectTrendAnalysis": "การวิเคราะห์แนวโน้มข้อบกพร่อง",
+    "DefectTrendAnalysisDescription": "ดูแนวโน้มข้อบกพร่องในแต่ละเดือน",
+    "FromLastMonth": "จากเดือนที่แล้ว",
+    "TotalReport": "รายงานรวม",
+    "DefectCompleted": "ข้อบกพร่องที่เสร็จสมบูรณ์",
+    "DefectPending": "ข้อบกพร่องที่รอดำเนินการ"
   }
 }

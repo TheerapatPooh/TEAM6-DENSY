@@ -194,7 +194,7 @@ const ChartTooltipContent = React.forwardRef<
               <div
                 key={item.dataKey}
                 className={cn(
-                  "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-sm font-medium",
+                  "flex w-full gap-2 flex-wrap items-s text-card",
                   indicator === "dot" && "items-center"
                 )}
               >
@@ -239,7 +239,7 @@ const ChartTooltipContent = React.forwardRef<
                         </span>
                       </div>
                       {item.value && (
-                        <span className="font-medium tabular-nums text-sm text-card">
+                        <span className="font-semibold tabular-nums text-sm text-card">
                           {item.value.toLocaleString()}
                         </span>
                       )}
