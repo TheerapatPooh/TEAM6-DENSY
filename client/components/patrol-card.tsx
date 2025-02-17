@@ -34,11 +34,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { formatPatrolId, getInitials } from "@/lib/utils";
+import { formatPatrolId, getInitials, getPatrolStatusVariant } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
+import BadgeCustom from "@/components/badge-custom";
 
 export interface IPatrolCard {
   id: number;
@@ -187,38 +188,12 @@ export function PatrolCard({
             {preset.title}
           </CardTitle>
         </div>
-        {status === ("pending" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-primary/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-primary">
-              hourglass_top
-            </span>
-          </div>
-        ) : status === ("scheduled" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-yellow/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-yellow">
-              event_available
-            </span>
-          </div>
-        ) : status === ("on_going" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-purple/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-purple">
-              cached
-            </span>
-          </div>
-        ) : status === ("completed" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-green/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-green">
-              check
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
-            <span className="material-symbols-outlined text-red-500">
-              error
-            </span>
-          </div>
-        )}
-
+        <BadgeCustom
+          variant={getPatrolStatusVariant(status).variant}
+          iconName={getPatrolStatusVariant(status).iconName}
+          showIcon={true}
+          hideText={true}
+        />
       </CardHeader>
       <CardContent className="flex flex-col gap-2 p-0">
         <div className="flex text-muted-foreground items-center gap-1">

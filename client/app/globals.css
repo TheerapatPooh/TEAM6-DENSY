@@ -21,8 +21,8 @@ body {
     --card: 216 33% 97%;
     --card-foreground: 217 11% 23%;
     --popover: 216 33% 97%;
-    --popover-foreground: 217 11% 23%;;
-    --primary: 210 75% 50%;  
+    --popover-foreground: 217 11% 23%;
+    --primary: 210 75% 50%;
     --primary-foreground: 216 33% 97%;
     --secondary: 218 31% 90%;
     --secondary-foreground: 240 5.9% 10%;
@@ -35,17 +35,22 @@ body {
     --border: 217 22% 74%;
     --input: 217 22% 74%;
     --ring: 217 22% 74%;
-    --chart-1: 0 85% 55%;  
-    --chart-2: 10 85% 55%; 
-    --chart-3: 20 85% 55%;
-    --chart-4: 30 85% 55%;  
-    --chart-5: 40 85% 55%; 
+    --chart-1: 0 85% 55%;
+    --chart-2: 0 80% 60%;
+    --chart-3: 0 75% 65%;
+    --chart-4: 0 70% 70%;
+    --chart-5: 0 65% 75%;
+    --chart-6: 210 65% 60%;  
+    --chart-7: 140 60% 60%;  
+    --chart-8: 160 60% 55%;  
+    --chart-9: 40 85% 60%; 
+    --chart-10: 270 65% 65%; 
     --radius: 0.5rem;
     --shadow-color: rgba(109, 109, 109, 0.1);
-    --green: 140 70% 45%;  
-    --mint: 160 65% 50%;  
+    --green: 140 70% 45%;
+    --mint: 160 65% 50%;
     --yellow: 40 85% 55%;
-    --purple: 270 65% 60%; 
+    --purple: 270 65% 60%;
     --orange: 20 85% 55%;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -56,6 +61,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 220 14% 4%;
     --foreground: 216 33% 97%;
@@ -76,18 +82,22 @@ body {
     --border: 221 11% 34%;
     --input: 221 11% 34%;
     --ring: 221 11% 34%;
-    --chart-1: 0 70% 50%;   
-    --chart-2: 10 70% 50%;  
-    --chart-3: 20 70% 50%; 
-    --chart-4: 30 70% 50%; 
-    --chart-5: 40 70% 50%; 
-    --chart-5: 40 75% 50%;
+    --chart-1: 0 70% 50%;
+    --chart-2: 0 65% 55%;
+    --chart-3: 0 60% 60%;
+    --chart-4: 0 55% 65%;
+    --chart-5: 0 50% 70%;
+    --chart-6: 210 70% 40%; 
+    --chart-7: 140 50% 40%;  
+    --chart-8: 160 50% 40%;
+    --chart-9: 40 75% 40%;   
+    --chart-10: 270 55% 45%; 
     --shadow-color: rgba(0, 0, 0, 0.5);
-    --green: 140 60% 40%;  
-    --mint: 160 55% 45%;   
-    --yellow: 40 75% 50%;  
-    --purple: 270 55% 55%; 
-    --orange: 20 70% 50%; 
+    --green: 140 60% 40%;
+    --mint: 160 55% 45%;
+    --yellow: 40 75% 50%;
+    --purple: 270 55% 55%;
+    --orange: 20 70% 50%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -103,10 +113,12 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
@@ -139,9 +151,10 @@ body {
   box-sizing: border-box;
   animation: animloader 2s ease infinite;
 }
+
 .loader::after,
 .loader::before {
-  content: '';  
+  content: '';
   box-sizing: border-box;
   width: 16px;
   height: 16px;
@@ -154,6 +167,7 @@ body {
   top: 0;
   animation: animloader 2s 0.2s ease infinite;
 }
+
 .loader::before {
   animation-delay: 0.4s;
   left: 60px;
@@ -164,10 +178,12 @@ body {
     top: 0;
     color: hsl(var(--card-foreground));
   }
+
   50% {
     top: 30px;
     color: hsl(var(--destructive));
   }
+
   100% {
     top: 0;
     color: hsl(var(--muted-foreground));
@@ -184,8 +200,9 @@ body {
   letter-spacing: 4px;
   box-sizing: border-box;
 }
+
 .loader2::before {
-  content: '';  
+  content: '';
   box-sizing: border-box;
   position: absolute;
   right: 70px;
@@ -194,8 +211,9 @@ body {
   width: 5.15px;
   background: currentColor;
 }
+
 .loader2::after {
-  content: '';  
+  content: '';
   width: 8px;
   height: 8px;
   position: absolute;
@@ -211,20 +229,25 @@ body {
   0% {
     transform: translateY(8px) scaleY(1) scaleX(1.25);
   }
-  25%, 75% {
+
+  25%,
+  75% {
     transform: translateY(-5px) scaleY(1.2) scaleX(1);
   }
+
   50% {
     transform: translateY(-10px) scaleY(1) scaleX(1);
   }
+
   100% {
     transform: translateY(8px) scaleY(0.8) scaleX(0.8);
   }
 }
+
 .map-container {
   display: flex;
-  align-items: center;     
-  justify-content: center;    
-  overflow: hidden;        
-  position: relative;      
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
 }

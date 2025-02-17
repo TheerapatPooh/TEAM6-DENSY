@@ -55,7 +55,6 @@ export default function page() {
             const queryString = buildQueryString(filter, searchTerm);
             const allData = await fetchData("get", `/patrol/defects?${queryString}`, true);
             setAllDefects(allData);
-            setDefectType(filter.defectTypes)
         } catch (error) {
             console.error("Failed to fetch all defect:", error);
         }
@@ -86,7 +85,6 @@ export default function page() {
     };
 
     const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
-    const [defectType, setDefectType] = useState<string[] | null>([])
 
     const [sort, setSort] = useState<{ by: string; order: string }>({
         by: "DefectDate",
@@ -126,7 +124,6 @@ export default function page() {
 
     const applyFilter = () => {
         getAllDefects()
-        setDefectType(filter.defectTypes)
     };
 
     const resetFilter = () => {
@@ -370,7 +367,7 @@ export default function page() {
             <ScrollArea
                 className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
             >
-                {allDefects.length === 0 || defectType.length === 0 ? (
+                {allDefects.length === 0 ? (
                     <NotFound
                         icon="campaign"
                         title="NoDefectsReported"

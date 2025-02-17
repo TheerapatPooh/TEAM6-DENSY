@@ -614,7 +614,7 @@ export default function Page() {
                               side="bottom"
                               align="start"
                               sideOffset={10}
-                              className="bg-card shadow-lg rounded-md p-4 w-fit"
+                              className="bg-card custom-shadow rounded-md p-4 w-fit"
                             >
                               <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                                 {t("Zone")}

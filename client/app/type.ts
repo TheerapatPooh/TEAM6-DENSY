@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { timeStamp } from 'console';
 import { useTranslations } from "next-intl";
+import { badgeVariants } from "@/components/badge-custom";
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type role = "admin" | "inspector" | "supervisor"
@@ -181,8 +182,20 @@ export interface IZone {
     } | null
     supervisor?: IUser;
     defects?: number;
+    dashboard?: {
+        defectReported: IDashboardCard;
+        defectCompleted: IDashboardCard;
+        defectPending: IDashboardCard;
+        chartData: IZoneChartDataItem[];
+        defectTrend: number;
+        defects?: IDefect[];
+    }
 }
 
+interface IZoneChartDataItem {
+    month: string;
+    defect: number;
+}
 
 export interface IItemZone {
     itemId: number;
@@ -313,6 +326,14 @@ export interface IPatrolCompletionRate {
 export interface IPatrolCompletionRateItem {
     noDefect: number;
     withDefect: number;
+}
+export interface IDashboardCard {
+    title: string;
+    value: number;
+    trend?: number;
+    icon: string;
+    variant: keyof typeof badgeVariants;
+    positive?: boolean;
 }
 
 

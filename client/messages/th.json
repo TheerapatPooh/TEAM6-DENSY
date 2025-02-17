@@ -152,7 +152,7 @@
     "Create": "สร้าง",
     "AddNewEmployee": "สร้างผู้ใช้ใหม่",
     "AddNewEmployeeDescription": "กรอกชื่อผู้ใช้ รหัสผ่าน และกำหนดบทบาทสำหรับพนักงานใหม่",
-    "NoProfileProvided":"ไม่มีโปรไฟล์",
+    "NoProfileProvided": "ไม่มีโปรไฟล์",
     "EditEmployee": "แก้ไขผู้ใช้",
     "EditEmployeeDescription": "กรอกชื่อผู้ใช้ รหัสผ่าน และกำหนดหน้าที่สำหรับพนักงาน",
     "NoDataAvailable": "ไม่มีข้อมูล",
@@ -180,6 +180,8 @@
     "PatrolChecklist": "ชุดตรวจตรา",
     "HasBeenCreated": "ถูกสร้างเรียบร้อยแล้ว",
     "HasBeenEdited": "ถูกแก้ไขเรียบร้อยแล้ว"
+    "Timestamp": "เวลาที่บันทึก",
+    "Reporter": "ผู้รายงาน"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -538,6 +540,12 @@
     "CommonDefects": "ปัญหาที่พบบ่อย",
     "CommonDefectsDescription": "แสดงปัญหาที่พบบ่อยที่สุดระหว่างการตรวจตรา",
     "PatrolCompletionRate": "อัตราความสมบูรณ์ของการตรวจตรา",
-    "PatrolCompletionRateDescription": "แสดงอัตราการตรวจตราที่เสร็จสมบูรณ์โดยไม่มีปัญหา"
+    "PatrolCompletionRateDescription": "แสดงอัตราการตรวจตราที่เสร็จสมบูรณ์โดยไม่มีปัญหา",
+    "DefectTrendAnalysis": "การวิเคราะห์แนวโน้มข้อบกพร่อง",
+    "DefectTrendAnalysisDescription": "ดูแนวโน้มข้อบกพร่องในแต่ละเดือน",
+    "FromLastMonth": "จากเดือนที่แล้ว",
+    "TotalReport": "ถูกรายงานทั้งหมด",
+    "DefectCompleted": "ข้อบกพร่องที่แก้ไขเสร็จสิ้น",
+    "DefectPending": "ข้อบกพร่องที่รอดำเนินการ"
   }
 }

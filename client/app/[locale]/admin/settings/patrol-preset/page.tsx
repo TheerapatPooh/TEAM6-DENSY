@@ -458,7 +458,7 @@ export default function Page() {
                     handleEdit(preset.id);
                   }}
                   key={preset.id}
-                  className="bg-card rounded-lg shadow p-4 cursor-pointer h-[219px]"
+                  className="bg-card rounded-lg custom-shadow p-4 cursor-pointer h-[219px]"
                 >
                   {/* Title and Details */}
                   <div className="flex justify-between overflow-hidden text-ellipsis">
@@ -568,7 +568,7 @@ export default function Page() {
                               side="bottom"
                               align="start"
                               sideOffset={10}
-                              className="bg-card shadow-lg rounded-md p-4 w-fit"
+                              className="bg-card custom-shadow rounded-md p-4 w-fit"
                             >
                               <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                                 {t("Zone")}
@@ -606,7 +606,7 @@ export default function Page() {
 
                     {/* Action Buttons */}
                   </div>
-                  <div className="sticky right-[0px]  flex flex-row justify-end items-end ">
+                  <div className="flex flex-row justify-end items-end ">
                     <DropdownMenu>
                       <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" className="w-[45px] h-[45px]">

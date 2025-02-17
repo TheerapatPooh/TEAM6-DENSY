@@ -17,9 +17,10 @@ interface IBadgeCustom {
     showIcon?: boolean,
     timeStamp?: string,
     showTime?: boolean,
-    className?: string, 
+    className?: string,
     width?: string,
     height?: string,
+    hideText?: boolean,
     children?: React.ReactNode
 }
 
@@ -48,6 +49,7 @@ export default function BadgeCustom({
     timeStamp,
     showTime = false,
     width,
+    hideText = false,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     children
 }: IBadgeCustom) {
@@ -56,17 +58,19 @@ export default function BadgeCustom({
 
     return (
         <Badge className={cn(
-            `${badgeClass} ${shape} cursor-pointer align-center h-[30px] py-4`,
+            `${badgeClass} ${shape} cursor-pointer align-center custom-shadow ${hideText ? 'aspect-square w-9 h-9' : 'h-[30px] py-4'}`,
             width ? width : ("w-fit"),
-            showTime ? "justify-between" : showIcon ? "justify-center" : "justify-center" 
+            showTime ? "justify-between" : showIcon ? "justify-center" : "justify-center"
         )}>
             <div className='flex gap-2 items-center'>
                 {showIcon && iconName && (
-                    <span className="material-symbols-outlined text-[22px]">
+                    <span className="material-symbols-outlined">
                         {iconName}
                     </span>
                 )}
-                <span className='text-base font-semibold w-full text-center'>{children}</span>
+                {!hideText && (  
+                    <span className='text-base font-semibold w-full text-center'>{children}</span>
+                )}
             </div>
             {showTime && (
                 <span className="text-base font-normal">

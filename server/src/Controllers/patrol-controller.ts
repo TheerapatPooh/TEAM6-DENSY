@@ -1335,7 +1335,7 @@ export async function commentPatrol(req: Request, res: Response) {
       },
     });
     if (!validPatrol) {
-      res.status(403).json({ message: "Patrol or checklist not found" });
+      res.status(404).json({ message: "Patrol or checklist not found" });
       return;
     }
 
