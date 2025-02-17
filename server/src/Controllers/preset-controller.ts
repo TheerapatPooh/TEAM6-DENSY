@@ -72,11 +72,9 @@ export async function updatePreset(req: Request, res: Response) {
 
     // ตรวจสอบข้อมูลที่จำเป็น
     if (
-      !presetId ||
       !title ||
       !description ||
-      !Array.isArray(checklists) ||
-      !userId
+      !Array.isArray(checklists)
     ) {
       res.status(400).json({ message: "Missing required fields" });
       return;

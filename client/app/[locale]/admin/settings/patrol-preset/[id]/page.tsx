@@ -56,6 +56,7 @@ export default function page() {
     description: "",
     checklists: [],
   });
+
   const param = useParams();
   const router = useRouter();
 
@@ -165,30 +166,38 @@ export default function page() {
 
     // Prepare data ที่จะส่งไป update
     const data = {
+      title: formPreset.title,
       description: formPreset.description,
       checklists: selectChecklists,
     };
 
     // สร้าง object เปรียบเทียบข้อมูลเดิมจาก presetData
-    const originalData = {
-      description: presetData.description,
-      checklists: presetData.presetChecklists.map(
-        (preset) => preset.checklist.id
-      ),
-    };
+    const originalchecklists = presetData.presetChecklists.map(
+      (preset) => preset.checklist.id
+    );
 
     // เปรียบเทียบข้อมูล ถ้าไม่มีการเปลี่ยนแปลง
-    if (JSON.stringify(data) === JSON.stringify(originalData)) {
-      toast({
-        variant: "default",
-        title: a("ProfileNoChangeTitle"),
-        description: a("ChecklistNoChangeDescription"),
-      });
-      return;
-    }
+    console.log(formPreset.description)
+    console.log(presetData.description)
+
+    console.log(selectChecklists)
+    console.log(originalchecklists)
+
 
     // ถ้ามีการเปลี่ยนแปลง ให้ดำเนินการอัปเดต
     try {
+      if (
+        formPreset.description === presetData.description 
+        &&
+        Array.isArray(selectChecklists) === Array.isArray(originalchecklists)
+      ) {
+        toast({
+          variant: "default",
+          title: a("ProfileNoChangeTitle"),
+          description: a("ChecklistNoChangeDescription"),
+        });
+        return;
+      }
       const response = await fetchData(
         "put",
         `/preset/${param.id}`,
@@ -283,7 +292,7 @@ export default function page() {
         <div>
           <Input
             name="title"
-            value={formPreset.title}
+            defaultValue={formPreset.title}
             className="bg-secondary w-1/3 border-none text-xl"
             placeholder="title"
             onChange={handleInputChange}
@@ -304,7 +313,7 @@ export default function page() {
         <div>
           <Textarea
             name="description"
-            value={formPreset.description}
+            defaultValue={formPreset.description}
             className="bg-secondary border-none text-xl h-44"
             placeholder="description"
             onChange={handleInputChange}
