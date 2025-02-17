@@ -296,6 +296,8 @@ export async function getPreset(req: Request, res: Response) {
 export async function getAllPresets(req: Request, res: Response) {
   try {
     const { zones, startDate, endDate, search, latest } = req.query;
+    const userRole = (req as any).user.role;
+
 
     const whereClause: any = {
       latest: latest === "false" ? undefined : true,
@@ -393,18 +395,30 @@ export async function getAllPresets(req: Request, res: Response) {
     }, {} as Record<string, number>);
 
     const result = presets.map((preset) => {
-      const zones = preset.presetChecklists.flatMap((checklist) =>
-        checklist.checklist.items.flatMap((item) =>
-          item.itemZones.map((itemZone) => ({
-            name: itemZone.zone.name,
-            userId: itemZone.zone.userId || null,
-          }))
-        )
-      );
+      
 
-      const uniqueZones = Array.from(
-        new Map(zones.map((zone) => [zone.name, zone])).values()
-      );
+      let uniqueZones
+
+      if (userRole === "admin") {
+        const zones = preset.presetChecklists.flatMap((checklist) =>
+          checklist.checklist.items.flatMap((item) =>
+            item.itemZones.map((itemZone) => ({
+              name: itemZone.zone.name,
+              userId: itemZone.zone.userId || null,
+            }))
+          )
+        );
+         uniqueZones = Array.from(
+          new Map(zones.map((zone) => [zone.name, zone])).values()
+        );
+      }else{
+        const zones = preset.presetChecklists.flatMap((checklist) =>
+          checklist.checklist.items.flatMap((item) =>
+            item.itemZones.map((itemZone) => itemZone.zone.name)
+          )
+        );
+          uniqueZones = Array.from(new Set(zones));
+      }
 
       const disabled = preset.presetChecklists.some((checklist) =>
         checklist.checklist.items.some((item) =>
