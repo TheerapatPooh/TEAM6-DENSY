@@ -60,7 +60,7 @@ export function LineGraph({ chartData, defectTrend }) {
     }
 
     return (
-        <div className="bg-card rounded-md custom-shadow">
+        <div>
             <CardContent className="h-[420px] mt-4">
                 <ChartContainer config={chartConfig} className="h-[400px] w-full">
                     <AreaChart
