@@ -398,10 +398,10 @@ export default function Page() {
                 <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-2xl">
-                      {t("FilterByZone")}
+                      {t("FilterByZoneTitle")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                      {t("PleaseSelectTheZonesToDisplayOnlyTheRelevantData")}
+                      {t("FilterbyZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div>

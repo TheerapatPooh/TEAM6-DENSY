@@ -170,7 +170,16 @@
     "ZoneWithoutAssignedUsersDescription":"It seems that the selected preset has zone without assigned supervisor.",
     "PleaseGoTo":"Please go to the",
     "Location&Zone":"Location & Zone",
-    "AssignUsersToTheZone.":"section and assign users to the zone."
+    "AssignUsersToTheZone":"section and assign users to the zone.",
+    "EnterChecklistTitle": "Enter Checklist Title",
+    "EnterPresetTitle": "Enter Preset Title",
+    "EnterPresetDescription": "Enter Preset Description",
+    "EnterItemTitle": "Enter Item Title",
+    "SelectAType": "SelectType",
+    "SelectZone": "SelectZone",
+    "PatrolChecklist": "Patrol Checklist",
+    "HasBeenCreated": "Has Been Created",
+    "HasBeenEdited": "Has Been Edited"
   },
   "Status": {
     "pending": "Pending",
@@ -432,6 +441,9 @@
     "ItemMustType": "Each item must have a type.",
     "ItemMustZone": "Each item must have at least one zone selected.",
     "ChecklistNoChangeDescription": "You have not made any changes to your checklist",
+    "CreateChecklistFailTitle": "Unable to create checklist",
+    "CreateChecklistFailDescription": "A checklist with title",
+    "AlreadyExists": "already exists.",
     "FailEditChecklist": "Fail to Edit Patrol Checklist",
     "EditChecklistSuccess": "Edit Patrol Checklist Successfully",
     "CreateChecklistSuccess": "Create Patrol Checklist Successfully",
