@@ -176,14 +176,6 @@ export default function page() {
       (preset) => preset.checklist.id
     );
 
-    // เปรียบเทียบข้อมูล ถ้าไม่มีการเปลี่ยนแปลง
-    console.log(formPreset.description)
-    console.log(presetData.description)
-
-    console.log(selectChecklists)
-    console.log(originalchecklists)
-
-
     // ถ้ามีการเปลี่ยนแปลง ให้ดำเนินการอัปเดต
     try {
       if (

@@ -642,7 +642,7 @@ export default function Page() {
                           key={preset.id}
                           className="text-lg cursor-pointer "
                         >
-                          {t("Detail")}
+                          {t("Edit")}
                         </div>
 
                         <div

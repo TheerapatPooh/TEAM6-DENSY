@@ -1,7 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { Checklist } from "@prisma/client";
-import { profile } from "console";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่

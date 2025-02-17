@@ -93,13 +93,7 @@ export default function Page() {
   const [allUsers, setAllUsers] = useState<IUser[]>([]);
   const getData = async () => {
     try {
-      console.log("Fetching data...");
-
-      // Log the current values of state variables
-      console.log("Selected Roles:", selectedRoles);
-      console.log("Selected Status:", selectedStatus);
-      console.log("Search Term:", searchTerm);
-
+      
       // Construct query params for roles, active status, and search term
       const params = new URLSearchParams();
 
@@ -107,28 +101,24 @@ export default function Page() {
       if (selectedRoles.length > 0) {
         params.append("roles", selectedRoles.join(","));
       } else {
-        console.log("No roles selected.");
+    
       }
 
       // Add active status to params
       if (selectedStatus !== null) {
         params.append("active", selectedStatus.toString()); // Assuming `selectedStatus` is a boolean
       } else {
-        console.log("No status selected.");
+        
       }
 
       // Add search term to params (if any)
       if (searchTerm) {
-        console.log("Search Term:", searchTerm);
         params.append("search", searchTerm);
       } else {
-        console.log("No search term.");
+
       }
 
-      // If params are empty, log a message
-      if (!params.toString()) {
-        console.log("No query params to send.");
-      }
+      
 
       // Fetch data using fetchData utility with query params
       const data = await fetchData(
@@ -137,10 +127,7 @@ export default function Page() {
         true
       );
 
-      console.log(
-        "Endpoint URL:",
-        `/users?profile=true&image=true&user=true&${params.toString()}`
-      );
+      
 
       // Validate data format
       if (!Array.isArray(data)) {
@@ -148,7 +135,7 @@ export default function Page() {
         return []; // Return empty array if data format is incorrect
       }
 
-      console.log("Fetched data successfully:", data);
+      
       setAllUsers(data); // Update state with the fetched data
       setFilteredUsers(data); // Initially set filtered data to all data
 
@@ -220,7 +207,7 @@ export default function Page() {
       }
 
       const updatedStatus = !user.active;
-      const data = { active: updatedStatus };
+      
 
       // Show toast based on the new status
       toast({
@@ -518,7 +505,6 @@ export default function Page() {
       return sortOrder === "asc" ? comparison : -comparison; // Ascending/Descending order
     });
   
-    console.log("Sorted Users:", sorted);
     setSortedUser(sorted); // Set the sorted users list
   
   }, [filteredUsers, sortOption, sortOrder]); // Dependencies (no need for `allUsers` here)
@@ -758,7 +744,7 @@ export default function Page() {
                   {t("Type")}
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="ID" className="text-base">
-                  Id
+                  {t("Id")}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
 
@@ -908,7 +894,7 @@ export default function Page() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[5%] ">Id</TableHead>
+                    <TableHead className="w-[5%] ">{t("Id")}</TableHead>
                     <TableHead className="w-[30%]">{t("FullName")}</TableHead>
                     <TableHead className="w-[30%]">{t("Role")}</TableHead>
                     <TableHead className="w-[30%]">{t("Status")}</TableHead>
@@ -1164,15 +1150,12 @@ export default function Page() {
                                       size="lg"
                                       onClick={async () => {
                                         handleDialogResult(false);
-                                        try {
                                           setPendingAction(null); // Clear the pending action
                                           setDialogType(""); // Reset the dialog type after action is completed
-                                        } catch (error) {}
                                       }}
                                     >
                                       {t("Back")}
                                     </Button>
-
                                     <Button
                                       className=" flex  justify-center gap-2"
                                       variant="primary"
