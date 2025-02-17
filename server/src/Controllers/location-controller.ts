@@ -1,7 +1,7 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType } from "@prisma/client";
+import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Zone
@@ -11,7 +11,7 @@ import { NotificationType } from "@prisma/client";
  **/
 export async function getZone(req: Request, res: Response) {
   try {
-    const { dashboard, startDate, endDate } = req.query;
+    const { dashboard, startDate, endDate, status, type, search } = req.query;
     const zoneId = parseInt(req.params.id, 10)
     const role = (req as any).user.role
 
@@ -22,6 +22,112 @@ export async function getZone(req: Request, res: Response) {
         ...(startDate && { gte: new Date(startDate as string) }),
         ...(endDate && { lte: new Date(endDate as string) }),
       };
+    }
+
+    // สร้างเงื่อนไขหลัก
+    const whereConditions: any = {
+      startTime: dateFilter
+    };
+
+    const andConditions: any[] = [];
+
+    // เงื่อนไขการกรองตาม status
+    if (status) {
+      andConditions.push({ status: status });
+    }
+
+    // เงื่อนไขการกรองตาม preset
+    if (type) {
+      const typeArray = (type as string).split(","); // แยกค่าด้วย comma
+      const orTypeConditions = typeArray.map((t) => ({ type: t })); // สร้าง array ของ OR เงื่อนไข
+
+      andConditions.push({ OR: orTypeConditions });
+    }
+
+    // เงื่อนไขการค้นหา (search)
+    if (search) {
+      const searchId = parseInt(search as string, 10);
+
+      function mapSearchToStatus(search: string): DefectStatus | null {
+        const searchLower = search.toLowerCase();
+
+        // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+        if (searchLower.startsWith("rep")) {
+          return DefectStatus.reported;
+        } else if (searchLower.startsWith("in")) {
+          return DefectStatus.in_progress;
+        } else if (searchLower.startsWith("pe")) {
+          return DefectStatus.pending_inspection;
+        } else if (searchLower.startsWith("res")) {
+          return DefectStatus.resolved;
+        } else if (searchLower.startsWith("co")) {
+          return DefectStatus.completed;
+        }
+        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+        return null;
+      }
+
+      function mapSearchToType(search: string): ItemType | null {
+        const searchLower = search.toLowerCase();
+
+        // ตรวจสอบความใกล้เคียงกับค่าของ DefectStatus
+        if (searchLower.startsWith("sa")) {
+          return ItemType.safety;
+        } else if (searchLower.startsWith("en")) {
+          return ItemType.environment;
+        } else if (searchLower.startsWith("ma")) {
+          return ItemType.maintenance;
+        }
+
+        // ถ้าไม่มีค่าใดที่ตรงกับการค้นหา
+        return null;
+      }
+
+      const mappedStatus = mapSearchToStatus(search as string);
+      const mappedTypes = mapSearchToType(search as string);
+
+      const orConditions = [];
+
+      if (!isNaN(searchId)) {
+        orConditions.push({ id: searchId });
+      }
+
+      // ถ้า mappedStatus มีค่า (ค้นหาตรงกับสถานะ)
+      if (mappedStatus) {
+        orConditions.push({ status: mappedStatus as DefectStatus });
+      }
+
+      // ถ้า mappedTypes มีค่า (ค้นหาตรงกับชนิด)
+      if (mappedTypes) {
+        orConditions.push({ type: mappedTypes as ItemType });
+      }
+
+      // ถ้ามีค่า preset title
+      orConditions.push({
+        name: {
+          contains: search as string,
+        },
+      });
+
+      orConditions.push({
+        user: {
+          profile: {
+            name: {
+              contains: search as string,
+            },
+          },
+        },
+      });
+
+      // ถ้ามีเงื่อนไขใน OR ให้เพิ่มเข้าไปใน AND
+      if (orConditions.length > 0) {
+        andConditions.push({ OR: orConditions });
+      }
+    }
+
+    // ถ้ามีเงื่อนไขเพิ่มเติมให้เพิ่มเข้าไปใน AND
+    if (andConditions.length > 0) {
+      whereConditions.AND = andConditions;
     }
 
     // Authorization Check
@@ -77,8 +183,14 @@ export async function getZone(req: Request, res: Response) {
             results: {
               include: {
                 defects: {
-                  where: {
-                    startTime: dateFilter
+                  where: whereConditions,
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        profile: true
+                      }
+                    }
                   }
                 },
                 comments: {
@@ -130,12 +242,14 @@ export async function getZone(req: Request, res: Response) {
     let defectCompleted = 0
     let defectPending = 0
     let monthlyDefects: { [key: string]: number } = {};
+    let allDefects: any[] = [];
 
     for (const itemZone of zoneWithData.itemZones) {
       for (const result of itemZone.results) {
         totalComments += result.comments?.length || 0;
 
         for (const defect of result.defects) {
+          allDefects.push(defect);
           if (defect.status === "completed") {
             defectCompleted++;
           } else {
@@ -336,6 +450,7 @@ export async function getZone(req: Request, res: Response) {
         defectPending: { value: defectPending, trend: calculateTrend(currentPending, prevPending) },
         chartData,
         defectTrend: calculateTrend(currentDefect, prevDefect),
+        defects: allDefects
       }
     }
 

@@ -187,6 +187,7 @@ export interface IZone {
         defectPending: IDashboardCard;
         chartData: IZoneChartDataItem[];
         defectTrend: number;
+        defects?: IDefect[];
     }
 }
 
