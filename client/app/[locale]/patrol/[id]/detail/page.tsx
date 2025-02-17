@@ -526,7 +526,7 @@ export default function Page() {
         </div>
       </div>
       <ScrollArea
-        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-260px)]"
+        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-224px)]"
       >        {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
         <div className="rounded-md mb-4">
           {user?.profile.name === pc.inspector.profile.name ? (
