@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { timeStamp } from 'console';
 import { useTranslations } from "next-intl";
+import { badgeVariants } from "@/components/badge-custom";
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
 export type role = "admin" | "inspector" | "supervisor"
@@ -331,7 +332,7 @@ export interface IDashboardCard {
     value: number;
     trend?: number;
     icon: string;
-    iconColor: string;
+    variant: keyof typeof badgeVariants;
     positive?: boolean;
 }
 

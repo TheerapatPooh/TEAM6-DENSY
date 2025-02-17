@@ -7,10 +7,9 @@ import { LineGraph } from "@/components/line-graph";
 import NotFound from "@/components/not-found";
 import { PieGraph } from "@/components/pie-graph";
 import Textfield from "@/components/textfield";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import {
   fetchData,
   formatTime,
@@ -45,6 +45,22 @@ export default function Page() {
   const [commonDefects, setCommonDefect] = useState<ICommonDefectItem[]>();
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // เพิ่ม event listener สำหรับ resize
+    window.addEventListener('resize', handleResize);
+
+    // ลบ event listener เมื่อคอมโพเนนต์ถูกทำลาย
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const handleSortChange = (type: string, value: string) => {
     setSort((prevSort) => ({
@@ -63,7 +79,7 @@ export default function Page() {
 
   const getStoredFilter = () => {
     if (typeof window !== 'undefined') {
-      const storedFilter = localStorage.getItem('defectsFilter');
+      const storedFilter = localStorage.getItem('dashboardDefectsFilter');
       if (storedFilter) {
         return JSON.parse(storedFilter);
       }
@@ -174,7 +190,7 @@ export default function Page() {
   }, [selectedMonth, searchTerm]);
 
   useEffect(() => {
-    localStorage.setItem('defectsFilter', JSON.stringify(filter));
+    localStorage.setItem('dashboardDefectsFilter', JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -193,7 +209,7 @@ export default function Page() {
         }));
       }
     }
-  }, [sort, zone]); 
+  }, [sort, zone]);
 
   if (!mounted || !zone) return null;
 
@@ -246,13 +262,13 @@ export default function Page() {
           </Select>
         </div>
       </div>
-      <div className="flex gap-4 w-full">
+      <div className="flex sm:flex-col xl:flex-row gap-4 w-full">
         <DashboardCard
           title="TotalComments"
           value={zone.dashboard.totalComments.value}
           trend={zone.dashboard.totalComments.trend}
           icon="campaign"
-          iconColor="orange"
+          variant="orange" 
           positive={false}
         />
         <DashboardCard
@@ -260,7 +276,7 @@ export default function Page() {
           value={zone.dashboard.defectCompleted.value}
           trend={zone.dashboard.defectCompleted.trend}
           icon="verified"
-          iconColor="green"
+          variant="green"
           positive={true}
         />
         <DashboardCard
@@ -268,7 +284,7 @@ export default function Page() {
           value={zone.dashboard.defectPending.value}
           trend={zone.dashboard.defectPending.trend}
           icon="hourglass_top"
-          iconColor="yellow"
+          variant="yellow"
           positive={false}
         />
       </div>
@@ -439,14 +455,14 @@ export default function Page() {
         </DropdownMenu>
 
       </div>
-      <Table>
+      <Table className="overflow-hidden">
         <TableHeader>
           <TableRow className="grid grid-cols-12 w-full">
-            <TableHead className="sm:col-span-3 lg:col-span-5">{t("Name")}</TableHead>
+            <TableHead className="sm:col-span-3 lg:col-span-4">{t("Name")}</TableHead>
             <TableHead className="sm:col-span-2 lg:col-span-2">{t("Type")}</TableHead>
-            <TableHead className="sm:col-span-3 lg:col-span-2">{t("Reporter")}</TableHead>
+            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Reporter")}</TableHead>
             <TableHead className="sm:col-span-3 lg:col-span-2">{t("Timestamp")}</TableHead>
-            <TableHead className="sm:col-span-1 lg:col-span-1">{t("Status")}</TableHead>
+            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -458,26 +474,38 @@ export default function Page() {
                 <td colSpan={5} className="w-full text-center py-6">
                   <NotFound
                     icon="campaign"
-                    title="NoDefectsFoundTitle"
-                    description="NoDefectsFoundDescription"
+                    title="NoDefectsReported"
+                    description="NoDefectsDescription"
                   />
                 </td>
               </tr>
             ) : (
               zone.dashboard.defects.map((defect, index) => (
                 <TableRow key={index} className="grid grid-cols-12">
-                  <TableCell className="font-medium sm:col-span-3 lg:col-span-5">{defect.name}</TableCell>
-                  <TableCell className="font-medium sm:col-span-2 lg:col-span-2">
+                  <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-4 flex items-center min-w-0">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="truncate">{defect.name}</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="ml-[129px]">
+                          <p className="max-w-[200px] break-words">{defect.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
                     <BadgeCustom
                       variant={getItemTypeVariant(defect.type).variant}
                       iconName={getItemTypeVariant(defect.type).iconName}
                       shape="square"
                       showIcon={true}
+                      hideText={window.innerWidth > 1024 ? false : true}
                     >
                       {s(defect.type)}
                     </BadgeCustom>
                   </TableCell>
-                  <TableCell className="font-medium sm:col-span-3 lg:col-span-2">
+                  <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex gap-2 items-center">
                     {defect.user?.profile?.name ? (
                       <Avatar>
                         <AvatarImage
@@ -490,7 +518,7 @@ export default function Page() {
                     ) : (
                       <Skeleton className="h-12 w-12 rounded-full bg-input" />
                     )}
-                    <div>
+                    <div className="sm:hidden lg:flex">
                       {defect.user?.profile?.name ? (
                         defect.user.profile.name
                       ) : (
@@ -500,14 +528,15 @@ export default function Page() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium sm:col-span-3 lg:col-span-2 flex flex-row gap-2 items-center">
+                  <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-2 flex items-center">
                     {formatTime(defect.startTime)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
                     <BadgeCustom
                       variant={getDefectStatusVariant(defect.status).variant}
                       iconName={getDefectStatusVariant(defect.status).iconName}
                       showIcon={true}
+                      hideText={window.innerWidth > 1024 ? false : true}
                     >
                       {s(defect.status)}
                     </BadgeCustom>

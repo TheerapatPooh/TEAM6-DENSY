@@ -370,8 +370,8 @@ export default function Page() {
           {allDefects.length === 0 || defectType.length === 0 ? (
             <NotFound
               icon="campaign"
-              title="NoDefectsFoundTitle"
-              description="NoDefectsFoundDescription"
+              title="NoDefectsReported"
+              description="NoDefectsDescription"
             />
           ) : (
             allDefects.map((defect) => (

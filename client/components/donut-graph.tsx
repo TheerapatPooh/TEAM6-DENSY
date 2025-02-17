@@ -69,14 +69,14 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
                       const percent = ((parseFloat(entry.value.toString()) / totalReports) * 100).toFixed(2);
                       return (
                         <div key={index} className="flex items-center gap-6">
-                          <div className="flex items-center gap-2 text-sm font-medium text-border">
+                          <div className="flex items-center gap-2 text-sm text-border">
                             <span
                               className="inline-block w-2.5 h-2.5 rounded-[2px]"
                               style={{ backgroundColor: entry.payload.fill }}
                             />
                             <p>{s(entry.name)}</p>
                           </div>
-                          <p className="text-sm text-card">{percent}%</p>
+                          <p className="text-sm text-card font-semibold">{percent}%</p>
                         </div>
                       );
                     })}
