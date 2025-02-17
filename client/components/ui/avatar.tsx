@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils"
 
 function getColorFromId(id: string): string {
   const chartColors = [
-    "bg-chart-1",
-    "bg-chart-2",
-    "bg-chart-3",
-    "bg-chart-4",
-    "bg-chart-5",
+    "bg-chart-6",
+    "bg-chart-7",
+    "bg-chart-8",
+    "bg-chart-9",
+    "bg-chart-10",
   ];
   const index = id.charCodeAt(0) % chartColors.length;
   return chartColors[index];

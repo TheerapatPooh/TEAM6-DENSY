@@ -71,7 +71,7 @@ export default function Header({ variant }: IHeader) {
 
   return (
     <header
-      className={`px-6 py-0 bg-card h-[70px] flex items-center sticky top-0 z-50 ${variant === "admin"
+      className={`px-6 py-0 bg-card h-[70px] custom-shadow flex items-center sticky top-0 z-50 ${variant === "admin"
         ? "justify-between"
         : "justify-between custom-shadow"
         }`}

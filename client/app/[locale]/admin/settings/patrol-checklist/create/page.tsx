@@ -368,7 +368,7 @@ export default function Page() {
 
   return (
     <div>
-      <div className="m bg-card px-4 py-6 rounded-lg shadow-lg">
+      <div className="m bg-card px-4 py-6 rounded-lg custom-shadow">
         <div className="flex flex-row justify-between">
           <h1 className="text-2xl font-bold mb-4">
             {t("CreatePatrolChecklist")}
@@ -487,7 +487,7 @@ export default function Page() {
                     <DropdownMenuContent
                       align="start"
                       side="bottom"
-                      className=" bg-white border border-gray-200 shadow-lg rounded  p-2"
+                      className=" bg-white border border-gray-200 custom-shadow rounded  p-2"
                     >
                       <DropdownMenuItem
                         onClick={() => {

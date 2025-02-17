@@ -55,7 +55,7 @@ export default function Page() {
 
   return (
     <ScrollArea
-      className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
+      className="w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
     >
       <div className="flex flex-col gap-4 h-full w-full">
         {/* Heat Map */}

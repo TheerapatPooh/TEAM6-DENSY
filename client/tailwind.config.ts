@@ -48,7 +48,12 @@ const config: Config = {
 					'2': 'hsl(var(--chart-2))',
 					'3': 'hsl(var(--chart-3))',
 					'4': 'hsl(var(--chart-4))',
-					'5': 'hsl(var(--chart-5))'
+					'5': 'hsl(var(--chart-5))',
+					'6': 'hsl(var(--chart-6))',
+					'7': 'hsl(var(--chart-7))',
+					'8': 'hsl(var(--chart-8))',
+					'9': 'hsl(var(--chart-9))',
+					'10': 'hsl(var(--chart-10))'
 				},
 				green: 'hsl(var(--green))',
 				mint: 'hsl(var(--mint))',
@@ -57,8 +62,8 @@ const config: Config = {
 				orange: 'hsl(var(--orange))',
 			},
 			backgroundImage: {
-				'accent-gradient': 'linear-gradient(to bottom, #C16975, #FB0023)',
-				'accent-gradient-hover': 'linear-gradient(to bottom, #CE9099, #FF3A56)' 
+				'accent-gradient': 'linear-gradient(to bottom, #AF4141, #EE2B2B)',
+				'accent-gradient-hover': 'linear-gradient(to bottom, #D24D4D, #F04F4F)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
