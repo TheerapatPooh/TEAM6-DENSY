@@ -348,8 +348,8 @@ export default function Page() {
         console.error("API Error:", response.status, response.data);
         toast({
           variant: "error",
-          title: a("FailEditChecklist"),
-          description: `${response.data.message}`,
+          title: a("CreateChecklistFailTitle"),
+          description: `${a("CreateChecklistFailDescription")} ${dataToUpdate.title} ${a("AlreadyExists")}`,
         });
         return;
       }

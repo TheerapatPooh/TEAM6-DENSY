@@ -198,7 +198,7 @@ export default function page() {
                 </div>
 
                 <div>
-                    <Input name="title" value={formPreset.title} className='bg-secondary w-1/3 border-none text-xl' placeholder='title' onChange={handleInputChange}></Input>
+                    <Input name="title" value={formPreset.title} className='bg-secondary w-1/3 border-none text-xl' placeholder= {t("EnterPresetTitle")} onChange={handleInputChange}></Input>
                 </div>
                 {titleError && (
                     <p className="text-sm font-light text-destructive italic mt-1">{titleError}</p>
@@ -212,7 +212,7 @@ export default function page() {
                 </div>
 
                 <div>
-                    <Textarea name="description" value={formPreset.description} className='bg-secondary border-none text-xl h-44' placeholder='description' onChange={handleInputChange}></Textarea>
+                    <Textarea name="description" value={formPreset.description} className='bg-secondary border-none text-xl h-44' placeholder={t("EnterPresetDescription")}  onChange={handleInputChange}></Textarea>
                 </div>
                 {descriptionError && (
                     <p className="text-sm font-light text-destructive italic mt-1">{descriptionError}</p>
@@ -241,7 +241,7 @@ export default function page() {
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
 
-                            {allChecklists ? (
+                            {allChecklists.length ? (
                                 <>
                                     <ScrollArea className="h-[400px] overflow-y-auto rounded-lg w-full">
                                         {allChecklists.map((checklist: IChecklist) => {
@@ -250,7 +250,7 @@ export default function page() {
                                                     <div>
                                                         <div className="flex text-base gap-1 mb-2 ">
                                                             <span className="material-symbols-outlined">history</span>
-                                                            Version {checklist.version}
+                                                            {t("Version")} {checklist.version}
                                                         </div>
 
                                                         <div className="text-2xl font-bold">
@@ -365,7 +365,7 @@ export default function page() {
                                                                                                     location_on
                                                                                                 </span>
                                                                                                 <p className="font-semibold text-lg">
-                                                                                                    Zone
+                                                                                                    {t("Zone")}
                                                                                                 </p>
                                                                                                 <p className="text-lg">{z(itemZone.zone.name)}</p>
                                                                                             </div>
@@ -374,7 +374,7 @@ export default function page() {
                                                                                                     badge
                                                                                                 </span>
                                                                                                 <p className="font-semibold text-lg">
-                                                                                                    Supervisor
+                                                                                                    {t("supervisor")}
                                                                                                 </p>
                                                                                                 <div className="flex flex-row items-center">
                                                                                                     <Avatar className="mr-1 h-6 w-6" >
@@ -393,13 +393,13 @@ export default function page() {
                                                                                                 <span className="material-symbols-outlined">
                                                                                                     check
                                                                                                 </span>
-                                                                                                Yes
+                                                                                                {t("Yes")}
                                                                                             </Button>
                                                                                             <Button variant="secondary" className="w-[155px] cursor-not-allowed opacity-50">
                                                                                                 <span className="material-symbols-outlined">
                                                                                                     close
                                                                                                 </span>
-                                                                                                No
+                                                                                                {t("No")}
                                                                                             </Button>
                                                                                         </div>
                                                                                     </div>

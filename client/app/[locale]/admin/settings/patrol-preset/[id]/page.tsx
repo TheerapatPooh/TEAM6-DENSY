@@ -274,7 +274,7 @@ export default function page() {
                                                     <div>
                                                         <div className="flex text-base gap-1 mb-2 ">
                                                             <span className="material-symbols-outlined">history</span>
-                                                            Version {checklist.version}
+                                                            {t("Version")} {checklist.version}
                                                         </div>
 
                                                         <div className="text-2xl font-bold">
@@ -392,7 +392,7 @@ export default function page() {
                                                                                                     location_on
                                                                                                 </span>
                                                                                                 <p className="font-semibold text-lg">
-                                                                                                    Zone
+                                                                                                    {t("Zone")}
                                                                                                 </p>
                                                                                                 <p className="text-lg">{z(itemZone.zone.name)}</p>
                                                                                             </div>
@@ -401,7 +401,7 @@ export default function page() {
                                                                                                     badge
                                                                                                 </span>
                                                                                                 <p className="font-semibold text-lg">
-                                                                                                    Supervisor
+                                                                                                    {t("supervisor")}
                                                                                                 </p>
                                                                                                 <div className="flex flex-row items-center">
                                                                                                     <Avatar className="mr-1 h-6 w-6" >
@@ -420,13 +420,13 @@ export default function page() {
                                                                                                 <span className="material-symbols-outlined">
                                                                                                     check
                                                                                                 </span>
-                                                                                                Yes
+                                                                                                {t("Yes")}
                                                                                             </Button>
                                                                                             <Button variant="secondary" className="w-[155px] cursor-not-allowed opacity-50">
                                                                                                 <span className="material-symbols-outlined">
                                                                                                     close
                                                                                                 </span>
-                                                                                                No
+                                                                                                {t("No")}
                                                                                             </Button>
                                                                                         </div>
                                                                                     </div>
