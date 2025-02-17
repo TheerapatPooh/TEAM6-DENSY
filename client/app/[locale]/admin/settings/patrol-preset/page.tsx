@@ -635,7 +635,13 @@ export default function Page() {
                         className="w-[80px] px-4 py-2"
                         side="bottom"
                       >
-                        <div className="text-lg cursor-pointer ">
+                        <div
+                          onClick={() => {
+                            handleEdit(preset.id);
+                          }}
+                          key={preset.id}
+                          className="text-lg cursor-pointer "
+                        >
                           {t("Detail")}
                         </div>
 
