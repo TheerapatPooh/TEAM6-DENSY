@@ -88,7 +88,6 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
-  const [defectType, setDefectType] = useState<string[] | null>([])
 
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
@@ -128,7 +127,6 @@ export default function Page() {
 
   const applyFilter = () => {
     getData()
-    setDefectType(filter.defectTypes)
   };
 
   const resetFilter = () => {
@@ -268,7 +266,7 @@ export default function Page() {
           value={zone.dashboard.totalComments.value}
           trend={zone.dashboard.totalComments.trend}
           icon="campaign"
-          variant="orange" 
+          variant="orange"
           positive={false}
         />
         <DashboardCard
@@ -288,265 +286,271 @@ export default function Page() {
           positive={false}
         />
       </div>
-      <div className="flex flex-col rounded-md gap-2 px-6 py-4 bg-card custom-shadow min-h-[460px]">
-        <h1 className="text-2xl font-semibold text-card-foreground">
-          {d("DefectTrendAnalysis")}
-        </h1>
-        <LineGraph
-          chartData={zone.dashboard.chartData}
-          defectTrend={zone.dashboard.defectTrend}
-        />
-      </div>
-      {/* Defect Catagory & Common Defects */}
-      <div className="flex flex-col xl:flex-row gap-4 justify-between">
-        <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
-          <h1 className="text-2xl font-semibold text-card-foreground">
-            {d("DefectCatagory")}
-          </h1>
-          <DonutGraph chartData={defectCatagory.chartData} trend={defectCatagory.trend} />
-        </div>
-        <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
-          <h1 className="text-2xl font-semibold text-card-foreground">
-            {d("CommonDefects")}
-          </h1>
-          <PieGraph chartData={commonDefects} />
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Textfield
-          iconName="search"
-          showIcon={true}
-          placeholder={t("Search")}
-          onChange={handleSearch}
-        />
+      <ScrollArea
+        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-432px)]"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col rounded-md gap-2 px-6 py-4 bg-card custom-shadow min-h-[460px]">
+            <h1 className="text-2xl font-semibold text-card-foreground">
+              {d("DefectTrendAnalysis")}
+            </h1>
+            <LineGraph
+              chartData={zone.dashboard.chartData}
+              defectTrend={zone.dashboard.defectTrend}
+            />
+          </div>
+          {/* Defect Catagory & Common Defects */}
+          <div className="flex flex-col xl:flex-row gap-4 justify-between">
+            <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
+              <h1 className="text-2xl font-semibold text-card-foreground">
+                {d("DefectCatagory")}
+              </h1>
+              <DonutGraph key={JSON.stringify(defectCatagory.chartData)} chartData={defectCatagory.chartData} trend={defectCatagory.trend} />
+            </div>
+            <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
+              <h1 className="text-2xl font-semibold text-card-foreground">
+                {d("CommonDefects")}
+              </h1>
+              <PieGraph key={JSON.stringify(commonDefects)} chartData={commonDefects} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Textfield
+              iconName="search"
+              showIcon={true}
+              placeholder={t("Search")}
+              onChange={handleSearch}
+            />
 
-        <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
-          <DropdownMenuTrigger
-            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
+            <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
+              <DropdownMenuTrigger
+                className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
           ${isSortOpen ? "border border-destructive" : "border-none"}`}
-          >
-            <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg">{t('Sort')}</div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-2 gap-2">
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={sort.by}
-              onValueChange={(value) => handleSortChange('by', value)}
-            >
-              <DropdownMenuRadioItem value="DefectDate" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Date')}
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Status')}
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
+              >
+                <span className="material-symbols-outlined">swap_vert</span>
+                <div className="text-lg">{t('Sort')}</div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="p-2 gap-2">
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={sort.by}
+                  onValueChange={(value) => handleSortChange('by', value)}
+                >
+                  <DropdownMenuRadioItem value="DefectDate" className="text-base" onSelect={(e) => e.preventDefault()}>
+                    {t('Date')}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
+                    {t('Status')}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
 
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={sort.order}
-              onValueChange={(value) => handleSortChange('order', value)}
-            >
-              <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Ascending')}
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Descending')}
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={sort.order}
+                  onValueChange={(value) => handleSortChange('order', value)}
+                >
+                  <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
+                    {t('Ascending')}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
+                    {t('Descending')}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-        <DropdownMenu onOpenChange={(open) => setIsFilterOpen(open)}>
-          <DropdownMenuTrigger
-            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
+            <DropdownMenu onOpenChange={(open) => setIsFilterOpen(open)}>
+              <DropdownMenuTrigger
+                className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
           ${isFilterOpen ? "border border-destructive" : "border-none"}`}
-          >
-            <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg">{t('Filter')}</div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="flex flex-col justify-center gap-2 p-2 z-50"
-            align="end"
-          >
-            <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
-              <Select
-                value={filter?.defectStatus || 'All'}
-                onValueChange={(value) =>
-                  setFilter({
-                    defectStatus: value,
-                    defectTypes: filter?.defectTypes || [],
-                    dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
-                  })
-                }
               >
-                <SelectTrigger className="">
-                  <SelectValue
-                    placeholder={filter?.defectStatus === 'All' ? t('All') : filter?.defectStatus}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{t('Status')}</SelectLabel>
-                    <SelectItem value="All">{t('All')}</SelectItem>
-                    {defectStatus.map((status) => (
-                      <SelectItem value={status} key={status}>
-                        {s(status)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Type')}</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem
-                checked={filter?.defectTypes.includes("safety")}
-                onCheckedChange={(checked) => toggleTypeFilter("safety", checked)}
-                onSelect={(e) => e.preventDefault()}
+                <span className="material-symbols-outlined">page_info</span>
+                <div className="text-lg">{t('Filter')}</div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="flex flex-col justify-center gap-2 p-2 z-50"
+                align="end"
               >
-                <BadgeCustom
-                  width="w-full"
-                  variant="green"
-                  showIcon={true}
-                  iconName="verified_user"
-                  children={s('safety')}
-                  shape="square"
-                />
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={filter?.defectTypes.includes("environment")}
-                onCheckedChange={(checked) => toggleTypeFilter("environment", checked)}
-                onSelect={(e) => e.preventDefault()}
-              >
-                <BadgeCustom
-                  width="w-full"
-                  variant="blue"
-                  showIcon={true}
-                  iconName="psychiatry"
-                  children={s('environment')}
-                  shape="square"
-                />
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={filter?.defectTypes.includes("maintenance")}
-                onCheckedChange={(checked) => toggleTypeFilter("maintenance", checked)}
-                onSelect={(e) => e.preventDefault()}
-              >
-                <BadgeCustom
-                  width="w-full"
-                  variant="red"
-                  showIcon={true}
-                  iconName="build"
-                  children={s('maintenance')}
-                  shape="square"
-                />
-              </DropdownMenuCheckboxItem>
-            </div>
-
-            <div className="flex w-full justify-end mt-4 gap-2">
-              <Button size="sm" variant="secondary" onClick={resetFilter}>
-                {t('Reset')}
-              </Button>
-              <Button size="sm" variant="primary" onClick={applyFilter}>{t('Apply')}</Button>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-      </div>
-      <Table className="overflow-hidden">
-        <TableHeader>
-          <TableRow className="grid grid-cols-12 w-full">
-            <TableHead className="sm:col-span-3 lg:col-span-4">{t("Name")}</TableHead>
-            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Type")}</TableHead>
-            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Reporter")}</TableHead>
-            <TableHead className="sm:col-span-3 lg:col-span-2">{t("Timestamp")}</TableHead>
-            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Status")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <ScrollArea
-            className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-860px)]"
-          >
-            {zone.dashboard.defects?.length === 0 ? (
-              <tr className="flex w-full h-full">
-                <td colSpan={5} className="w-full text-center py-6">
-                  <NotFound
-                    icon="campaign"
-                    title="NoDefectsReported"
-                    description="NoDefectsDescription"
-                  />
-                </td>
-              </tr>
-            ) : (
-              zone.dashboard.defects.map((defect, index) => (
-                <TableRow key={index} className="grid grid-cols-12">
-                  <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-4 flex items-center min-w-0">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="truncate">{defect.name}</span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="ml-[129px]">
-                          <p className="max-w-[200px] break-words">{defect.name}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </TableCell>
-                  <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
+                <div>
+                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
+                  <Select
+                    value={filter?.defectStatus || 'All'}
+                    onValueChange={(value) =>
+                      setFilter({
+                        defectStatus: value,
+                        defectTypes: filter?.defectTypes || [],
+                        dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
+                      })
+                    }
+                  >
+                    <SelectTrigger className="">
+                      <SelectValue
+                        placeholder={filter?.defectStatus === 'All' ? t('All') : filter?.defectStatus}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>{t('Status')}</SelectLabel>
+                        <SelectItem value="All">{t('All')}</SelectItem>
+                        {defectStatus.map((status) => (
+                          <SelectItem value={status} key={status}>
+                            {s(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Type')}</DropdownMenuLabel>
+                  <DropdownMenuCheckboxItem
+                    checked={filter?.defectTypes.includes("safety")}
+                    onCheckedChange={(checked) => toggleTypeFilter("safety", checked)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
                     <BadgeCustom
-                      variant={getItemTypeVariant(defect.type).variant}
-                      iconName={getItemTypeVariant(defect.type).iconName}
+                      width="w-full"
+                      variant="green"
+                      showIcon={true}
+                      iconName="verified_user"
+                      children={s('safety')}
                       shape="square"
-                      showIcon={true}
-                      hideText={window.innerWidth > 1024 ? false : true}
-                    >
-                      {s(defect.type)}
-                    </BadgeCustom>
-                  </TableCell>
-                  <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex gap-2 items-center">
-                    {defect.user?.profile?.name ? (
-                      <Avatar>
-                        <AvatarImage
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
-                        />
-                        <AvatarFallback id={defect.user.id.toString()}>
-                          {getInitials(defect.user.profile.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <Skeleton className="h-12 w-12 rounded-full bg-input" />
-                    )}
-                    <div className="sm:hidden lg:flex">
-                      {defect.user?.profile?.name ? (
-                        defect.user.profile.name
-                      ) : (
-                        <div className="text-destructive">
-                          <div className="text-[14px]">No profile is provided</div>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-2 flex items-center">
-                    {formatTime(defect.startTime)}
-                  </TableCell>
-                  <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
+                    />
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={filter?.defectTypes.includes("environment")}
+                    onCheckedChange={(checked) => toggleTypeFilter("environment", checked)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
                     <BadgeCustom
-                      variant={getDefectStatusVariant(defect.status).variant}
-                      iconName={getDefectStatusVariant(defect.status).iconName}
+                      width="w-full"
+                      variant="blue"
                       showIcon={true}
-                      hideText={window.innerWidth > 1024 ? false : true}
-                    >
-                      {s(defect.status)}
-                    </BadgeCustom>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </ScrollArea>
-        </TableBody>
-      </Table>
+                      iconName="psychiatry"
+                      children={s('environment')}
+                      shape="square"
+                    />
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={filter?.defectTypes.includes("maintenance")}
+                    onCheckedChange={(checked) => toggleTypeFilter("maintenance", checked)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <BadgeCustom
+                      width="w-full"
+                      variant="red"
+                      showIcon={true}
+                      iconName="build"
+                      children={s('maintenance')}
+                      shape="square"
+                    />
+                  </DropdownMenuCheckboxItem>
+                </div>
+
+                <div className="flex w-full justify-end mt-4 gap-2">
+                  <Button size="sm" variant="secondary" onClick={resetFilter}>
+                    {t('Reset')}
+                  </Button>
+                  <Button size="sm" variant="primary" onClick={applyFilter}>{t('Apply')}</Button>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+          </div>
+          <Table className="overflow-hidden min-h-[calc(100vh-860px)]">
+            <TableHeader>
+              <TableRow className="grid grid-cols-12 w-full">
+                <TableHead className="sm:col-span-3 lg:col-span-4">{t("Name")}</TableHead>
+                <TableHead className="sm:col-span-2 lg:col-span-2">{t("Type")}</TableHead>
+                <TableHead className="sm:col-span-2 lg:col-span-2">{t("Reporter")}</TableHead>
+                <TableHead className="sm:col-span-3 lg:col-span-2">{t("Timestamp")}</TableHead>
+                <TableHead className="sm:col-span-2 lg:col-span-2">{t("Status")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <ScrollArea
+                className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-860px)]"
+              >
+                {zone.dashboard.defects?.length === 0 ? (
+                  <tr className="flex w-full h-full">
+                    <td colSpan={5} className="w-full text-center py-6">
+                      <NotFound
+                        icon="campaign"
+                        title="NoDefectsReported"
+                        description="NoDefectsDescription"
+                      />
+                    </td>
+                  </tr>
+                ) : (
+                  zone.dashboard.defects.map((defect, index) => (
+                    <TableRow key={index} className="grid grid-cols-12">
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-4 flex items-center min-w-0">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="truncate">{defect.name}</span>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="ml-[129px]">
+                              <p className="max-w-[200px] break-words">{defect.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
+                        <BadgeCustom
+                          variant={getItemTypeVariant(defect.type).variant}
+                          iconName={getItemTypeVariant(defect.type).iconName}
+                          shape="square"
+                          showIcon={true}
+                          hideText={window.innerWidth > 1024 ? false : true}
+                        >
+                          {s(defect.type)}
+                        </BadgeCustom>
+                      </TableCell>
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex gap-2 items-center">
+                        {defect.user?.profile?.name ? (
+                          <Avatar>
+                            <AvatarImage
+                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
+                            />
+                            <AvatarFallback id={defect.user.id.toString()}>
+                              {getInitials(defect.user.profile.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <Skeleton className="h-12 w-12 rounded-full bg-input" />
+                        )}
+                        <div className="sm:hidden lg:flex">
+                          {defect.user?.profile?.name ? (
+                            defect.user.profile.name
+                          ) : (
+                            <div className="text-destructive">
+                              <div className="text-[14px]">No profile is provided</div>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-2 flex items-center">
+                        {formatTime(defect.startTime)}
+                      </TableCell>
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
+                        <BadgeCustom
+                          variant={getDefectStatusVariant(defect.status).variant}
+                          iconName={getDefectStatusVariant(defect.status).iconName}
+                          showIcon={true}
+                          hideText={window.innerWidth > 1024 ? false : true}
+                        >
+                          {s(defect.status)}
+                        </BadgeCustom>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </ScrollArea>
+            </TableBody>
+          </Table>
+        </div>
+      </ScrollArea>
     </div>
   );
 }
