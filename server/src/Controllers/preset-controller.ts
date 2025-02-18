@@ -1,7 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { Checklist } from "@prisma/client";
-import { profile } from "console";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Preset ใหม่
@@ -72,11 +71,9 @@ export async function updatePreset(req: Request, res: Response) {
 
     // ตรวจสอบข้อมูลที่จำเป็น
     if (
-      !presetId ||
       !title ||
       !description ||
-      !Array.isArray(checklists) ||
-      !userId
+      !Array.isArray(checklists)
     ) {
       res.status(400).json({ message: "Missing required fields" });
       return;

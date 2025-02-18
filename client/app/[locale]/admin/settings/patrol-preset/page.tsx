@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *  หน้าแสดงรายการ Preset ทั้งหมดในระบบ โดยสามารถค้นหา Preset ได้ และสามารถค้นหา Preset ตาม Zone และ Date ได้
+ * Input:
+ * - ไม่มี
+ * Output:
+ * - แสดงรายการ Preset ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Preset แต่ละรายการ และสามารถค้นหา Preset ได้ และสามารถค้นหา Preset ตาม Zone และ Date ได้
+ * - สามารถคลิกเพื่อดูรายละเอียดของ Preset แต่ละรายการ
+ * - สามารถคลิกเพื่อสร้าง Preset ใหม่ได้
+ **/
+
 "use client";
 import { IPreset, IZone } from "@/app/type";
 import Textfield from "@/components/textfield";
@@ -6,7 +17,6 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -71,6 +81,7 @@ export default function Page() {
         setAllPreset((prevPresets) =>
           prevPresets.filter((preset) => preset.id !== id)
         );
+        setFilteredPresets((prev) => prev.filter((preset) => preset.id !== id));
       } else {
         console.error("Failed to delete Preset: No response from API");
       }
@@ -81,18 +92,21 @@ export default function Page() {
 
   const handleRemovePreset = (id: number) => {
     setPendingAction(() => () => removePreset(id)); // ตั้งค่า Action ที่จะลบ
+    setDialogType("delete");
     setIsDialogOpen(true);
   };
 
   const [allPreset, setAllPreset] = useState<IPresetWithExtras[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State สำหรับเปิด/ปิด Dialog
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null); // เก็บ Action ที่จะลบ
+  const [dialogType, setDialogType] = useState<string>("");
 
   const handleDialogResult = (result: boolean) => {
     setIsDialogOpen(false);
     if (result && pendingAction) {
       pendingAction(); // Execute the pending action
       setPendingAction(null); // Clear the pending action
+      setDialogType("");
     }
   };
 
@@ -172,13 +186,13 @@ export default function Page() {
   // Filter by search term
   const filterBySearchTerm = (presets: IPresetWithExtras[]) => {
     if (!searchTerm) return presets;
-    
+
     const cleanSearch = searchTerm.toLowerCase().trim();
-    
+
     return presets.filter((preset) => {
       const titleMatch = preset.title.toLowerCase().includes(cleanSearch);
       const descMatch = preset.description?.toLowerCase().includes(cleanSearch);
-      return titleMatch || descMatch ;
+      return titleMatch || descMatch;
     });
   };
   // Fetch and apply search filter on search term change
@@ -203,20 +217,20 @@ export default function Page() {
     const filtered = freshData.filter((preset) => {
       const matchesZones =
         tempSelectedZones.length === 0 || // If no zones are selected, show all
-        preset.zones.some((zone) => 
-          tempSelectedZones.some((selectedZone) =>
-            selectedZone.name.toLowerCase() === zone.name.toLowerCase()
+        preset.zones.some((zone) =>
+          tempSelectedZones.some(
+            (selectedZone) =>
+              selectedZone.name.toLowerCase() === zone.name.toLowerCase()
           )
         );
-    
+
       const matchesDateRange =
         (!tempDateRange?.from ||
           new Date(preset.updatedAt) >= tempDateRange.from) &&
         (!tempDateRange?.to || new Date(preset.updatedAt) <= tempDateRange.to);
-    
+
       return matchesZones && matchesDateRange;
     });
-    
 
     // Apply search term filter
     const filteredWithSearch = filterBySearchTerm(filtered);
@@ -608,44 +622,52 @@ export default function Page() {
                   </div>
                   <div className="flex flex-row justify-end items-end ">
                     <DropdownMenu>
-                      <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" className="w-[45px] h-[45px]">
-                          <span className="material-symbols-outlined items-center text-input">
-                            more_vert
-                          </span>
-                        </Button>
+                      <DropdownMenuTrigger asChild>
+                        <span className="material-symbols-outlined text-input">
+                          more_vert
+                        </span>
                       </DropdownMenuTrigger>
-
-                      <DropdownMenuContent align="end" className="p-0">
-                        <DropdownMenuItem
+                      <DropdownMenuContent
+                        align="end"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="w-[80px] px-4 py-2"
+                        side="bottom"
+                      >
+                        <div
                           onClick={() => {
                             handleEdit(preset.id);
                           }}
+                          key={preset.id}
+                          className="text-lg cursor-pointer "
                         >
-                          <h1>{t("Detail")}</h1>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
+                          {t("Edit")}
+                        </div>
+
+                        <div
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemovePreset(preset.id);
                           }}
+                          className="text-destructive text-lg cursor-pointer hover:text-transparent-50"
                         >
-                          <h1 className="text-destructive cursor-pointer">
-                            {t("Delete")}
-                          </h1>
-                        </DropdownMenuItem>
+                          {t("Delete")}
+                        </div>
+
+                        {/* แสดง AlertCustom เฉพาะเมื่อ dialogType === "delete" */}
+                        {isDialogOpen && dialogType === "delete" && (
+                          <AlertCustom
+                            title={a("PresetRemoveConfirmTitle")}
+                            description={a("PresetRemoveConfirmDescription")}
+                            primaryButtonText={t("Confirm")}
+                            primaryIcon="check"
+                            secondaryButtonText={t("Cancel")}
+                            backResult={(result) => handleDialogResult(result)}
+                          />
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    {isDialogOpen && (
-                      <AlertCustom
-                        title={a("PresetRemoveConfirmTitle")}
-                        description={a("PresetRemoveConfirmDescription")}
-                        primaryButtonText={t("Confirm")}
-                        primaryIcon="check"
-                        secondaryButtonText={t("Cancel")}
-                        backResult={handleDialogResult}
-                      />
-                    )}
                   </div>
                 </div>
               ))
