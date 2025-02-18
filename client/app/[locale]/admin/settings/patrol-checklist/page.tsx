@@ -678,7 +678,7 @@ export default function Page() {
                         side="bottom"
                       >
                         <div className="text-lg cursor-pointer ">
-                          {t("Detail")}
+                          {t("Edit")}
                         </div>
                         <div
                           onClick={(e) => {
