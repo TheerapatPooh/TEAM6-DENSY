@@ -148,7 +148,6 @@ export default function page() {
     });
   };
 
-  console.log(formData)
   const handleUpdateUserData = async () => {
     let update = false
     let showErrorToast = false;
@@ -233,7 +232,6 @@ export default function page() {
       return;
     }
 
-    console.log("userform", userForm)
     if (update) {
       try {
         const response = await fetchData(
