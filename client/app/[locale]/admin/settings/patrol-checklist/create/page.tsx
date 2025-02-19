@@ -54,7 +54,6 @@ export default function Page() {
   const a = useTranslations("Alert");
   const s = useTranslations("Status");
 
-
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
@@ -76,10 +75,25 @@ export default function Page() {
   const [selectedType, setSelectedType] = useState<{
     [itemId: number]: string;
   }>({});
-
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   interface IItemWithZonesName extends IItem {
     zones?: any[];
   }
+  useEffect(() => {
+    // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // เพิ่ม event listener สำหรับ resize
+    window.addEventListener("resize", handleResize);
+
+    // ลบ event listener เมื่อคอมโพเนนต์ถูกทำลาย
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -349,7 +363,9 @@ export default function Page() {
         toast({
           variant: "error",
           title: a("CreateChecklistFailTitle"),
-          description: `${a("CreateChecklistFailDescription")} ${dataToUpdate.title} ${a("AlreadyExists")}`,
+          description: `${a("CreateChecklistFailDescription")} ${
+            dataToUpdate.title
+          } ${a("AlreadyExists")}`,
         });
         return;
       }
@@ -358,7 +374,9 @@ export default function Page() {
       toast({
         variant: "success",
         title: a("CreateChecklistSuccess"),
-        description: `${t("PatrolChecklist")} ${dataToUpdate.title} ${t("HasBeenCreated")}`,
+        description: `${t("PatrolChecklist")} ${dataToUpdate.title} ${t(
+          "HasBeenCreated"
+        )}`,
       });
       router.push(`/${locale}/admin/settings/patrol-checklist`);
     } catch (error: any) {
@@ -436,7 +454,7 @@ export default function Page() {
             )}
           </div>
         </div>
-        <Table>
+        <Table wrapperClassName="shadow-none">
           <TableHeader>
             <TableRow>
               <TableHead className=" w-[30%] ">{t("Item")}</TableHead>
@@ -478,6 +496,7 @@ export default function Page() {
                           iconName={getBadgeIcon(selectedType[item.id])}
                           variant={getBadgeVariant(selectedType[item.id])}
                           showIcon
+                          hideText={windowWidth > 911 ? false : true}
                         >
                           {s(selectedType[item.id])}
                         </BadgeCustom>
@@ -541,7 +560,13 @@ export default function Page() {
                       className="flex items-center gap-2 rounded cursor-pointer  max-w-[350px] w-full"
                     >
                       <div className=" overflow-hidden text-center">
-                      <p className={`text-base truncate whitespace-nowrap ${selectedZones[item.id]?.length > 0 ? '' : 'text-input'}`}>
+                        <p
+                          className={`text-base truncate whitespace-nowrap ${
+                            selectedZones[item.id]?.length > 0
+                              ? ""
+                              : "text-input"
+                          }`}
+                        >
                           {selectedZones[item.id]?.length > 0
                             ? selectedZones[item.id]
                                 .map((zoneId) =>
@@ -585,7 +610,7 @@ export default function Page() {
 
                       <AlertDialogFooter>
                         <AlertDialogAction className="bg-primary">
-                           {t("Done")}
+                          {t("Done")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
