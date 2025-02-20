@@ -93,13 +93,6 @@ export default function Page() {
   const [allUsers, setAllUsers] = useState<IUser[]>([]);
   const getData = async () => {
     try {
-      console.log("Fetching data...");
-
-      // Log the current values of state variables
-      console.log("Selected Roles:", selectedRoles);
-      console.log("Selected Status:", selectedStatus);
-      console.log("Search Term:", searchTerm);
-
       // Construct query params for roles, active status, and search term
       const params = new URLSearchParams();
 

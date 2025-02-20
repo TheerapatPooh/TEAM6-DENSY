@@ -215,7 +215,7 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
               schedule
             </span>
             <span className="text-lg font-bold text-muted-foreground cursor-default ">
-              {formatTime(defect.startTime)}
+              {formatTime(defect.startTime,locale)}
             </span>
             <h2 className="text-lg font-bold text-card-foreground cursor-default ">
               {defect.name}

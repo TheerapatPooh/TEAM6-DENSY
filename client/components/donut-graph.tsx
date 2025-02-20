@@ -23,7 +23,7 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
   const d = useTranslations('Dashboard');
 
   const chartConfig = React.useMemo(() => {
-    return chartData.reduce((acc, item) => {
+    return chartData?.reduce((acc, item) => {
       acc[item.type] = {
         label: item.type,
         color: item.fill,
@@ -33,7 +33,7 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
   }, [chartData]);
 
   const totalReports = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.amounts, 0);
+    return chartData?.reduce((acc, curr) => acc + curr.amounts, 0);
   }, []);
 
   const isPositiveTrend = trend >= 0;
@@ -49,7 +49,7 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col">
       <CardContent className="flex-1 pb-0">
@@ -150,7 +150,7 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
+      {trend ? <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 text-sm font-semibold leading-none">
           {d("Trending")}{isPositiveTrend ? d("Up") : d("Down")}
           <span className={isPositiveTrend ? "text-destructive" : "text-green"}>
@@ -159,9 +159,18 @@ export function DonutGraph({ chartData, trend }: IDefectCategory) {
           {isPositiveTrend ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
         </div>
         <div className="leading-none text-muted-foreground text-sm">
-          {d("DefectCatagoryDescription")}
+          {d("DefectCategoryDescription")}
         </div>
       </CardFooter>
+        :
+        <CardFooter className="flex-col gap-2 text-sm">
+          <div className="leading-none text-muted-foreground text-sm">
+            <p>{d("DefectCategoryDescription")}</p>
+          </div>
+        </CardFooter>
+
+      }
+
     </div>
   );
 }

@@ -572,7 +572,7 @@ export default function Page() {
                                   <div className="text-muted-foreground">
                                     {t("UpdateAt")}
                                   </div>
-                                  {formatTime(checklist.updatedAt)}
+                                  {formatTime(checklist.updatedAt,locale)}
                                 </div>
                               </div>
 

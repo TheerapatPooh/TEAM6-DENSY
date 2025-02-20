@@ -42,7 +42,6 @@ interface IPatrolContext {
     formatTimeDate: (dateStr: string) => string
     formatId: (id: number) => string
     formatDate: (dateStr: string) => string
-
 }
 
 const PatrolContext = createContext<IPatrolContext | undefined>(undefined);

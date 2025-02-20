@@ -181,7 +181,12 @@
     "HasBeenCreated": "Has Been Created",
     "HasBeenEdited": "Has Been Edited",
     "Timestamp": "Timestamp",
-    "Reporter": "Reporter"
+    "Reporter": "Reporter",
+    "Hour": "Hour",
+    "DocID": "Doc ID",
+    "Progress": "Progress",
+    "Result": "Result",
+    "PatrolList": "Patrol List"
   },
   "Status": {
     "pending": "Pending",
@@ -508,7 +513,13 @@
     "SureToDeactivate": "Are you sure to deactivate employee?",
     "SureToDeactivateDescription": "Please confirm to deactivate employee.",
     "SureToActivate": "Are you sure to activate employee?",
-    "SureToActivateDescription": "Please confirm to activate employee."
+    "SureToActivateDescription": "Please confirm to activate employee.",
+    "ExportPatrolAlert": "Are you sure to export patrol?",
+    "ExportPatrolAlertDescription": "Please confirm to export patrol.",
+    "ExportPatrolNoData": "Export Patrol Failed",
+    "ExportPatrolNoDataDescription": "No available patrol data or no patrol selected.",
+    "ExportPatrolStatusNotCompleteDescription": "Patrol has not been completed."
+    
   },
   "Month": {
     "AllTime": "All Time",
@@ -535,8 +546,8 @@
     "ThisMonth": "this month",
     "HeatMap": "Heat Map",
     "WarningAreas": "Warning Areas",
-    "DefectCatagory": "Defect Category",
-    "DefectCatagoryDescription": "Showing the distribution of defect types.",
+    "DefectCategory": "Defect Category",
+    "DefectCategoryDescription": "Showing the distribution of defect types.",
     "CommonDefects": "Common Defects",
     "CommonDefectsDescription": "Shows the most frequent defect during patrols.",
     "PatrolCompletionRate": "Patrol Completion Rate",
@@ -546,6 +557,16 @@
     "FromLastMonth": "from last month",
     "TotalReport": "Total Report",
     "DefectCompleted": "Defect Completed",
-    "DefectPending": "Defect Pending"
+    "DefectPending": "Defect Pending",
+
+    "ChecklistPass": "Checklist Pass",
+    "TotalFails": "Total Fails",
+    "TotalReports": "Total Reports",
+    "TotalComments": "Total Comments",
+    "DefectReported": "Defect Reported",
+    "PatrolDuration": "Patrol Duration",
+    "PatrolDurationDescription": "Monitor the time taken for each patrol to analyze the duration of each inspection round."
+
+
   }
 }
