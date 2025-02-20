@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
@@ -109,6 +109,7 @@ export default function Page() {
       console.error("Failed to fetch patrol data:", error);
     }
   };
+
 
   const [results, setResults] = useState<IPatrolResult[]>([]);
   const [patrolResults, setPatrolResults] = useState<IPatrolResult[]>([]);
@@ -224,75 +225,45 @@ export default function Page() {
 
   // console.log("allpatrol", allPatrols);
 
-  useEffect(() => {
 
-    if (socket && isConnected && allPatrols) {
-      allPatrols.map((patrol) => {
-        socket.emit("join_room", patrol.id);
+  const joinedRoomsRef = useRef(new Set()); // ✅ ป้องกัน join ซ้ำ
 
-        const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
+  const handleResultUpdate = useCallback((updatedResults: IPatrolResult[]) => {
+    setAllPatrols((prevPatrols) =>
+      prevPatrols.map((updatePatrol) => {
+        const updatedResultsForPatrol = updatePatrol.results.map((result) => {
+          const matchingResult = updatedResults.find((updatedResult) => updatedResult.id === result.id);
+          return matchingResult
+            ? { ...result, status: matchingResult.status, defects: matchingResult.defects || [] }
+            : result;
+        });
 
-
-
-          // Avoid unnecessary updates to localStorage
-          if (updatedResults.length > 0) {
-            const savedResults = localStorage.getItem(
-              `patrolResults_${patrol.id}`
-            );
-            const parsedResults: IPatrolResult[] = savedResults
-              ? JSON.parse(savedResults)
-              : [];
-            if (
-              JSON.stringify(parsedResults) !== JSON.stringify(updatedResults)
-            ) {
-              localStorage.setItem(
-                `patrolResults_${patrol.id}`,
-                JSON.stringify(updatedResults)
-              );
-            }
-          }
-
-
-          console.log("updatedResults", updatedResults)
-          // Update the patrol's results
-          const updatedPatrols = allPatrols.map((updatePatrol) => {
-            if (updatePatrol.id === patrol.id) {
-              // สำหรับ patrol นี้, อัปเดต results ตามที่ตรงกับ result.id
-              const updatedResultsForPatrol = updatePatrol.results.map((result) => {
-                // หา result ใน updatedResults ที่ตรงกัน
-                const matchingResult = updatedResults.find(
-                  (updatedResult) => updatedResult.id === result.id
-                );
-                if (matchingResult) {
-                  // อัปเดต result ถ้าพบ matchingResult
-                  return {
-                    ...result,
-                    ...matchingResult, // ใช้ข้อมูลจาก updatedResults
-                  };
-                }
-                return result;
-              });
-
-              // คืนค่า patrol ที่มีการอัปเดตผลลัพธ์
-              return {
-                ...updatePatrol,
-                results: updatedResultsForPatrol,
-              };
-            }
-            return updatePatrol;
-          });
-          setAllPatrols(updatedPatrols);
-        };
-
-        socket.on("patrol_result_update", handleResultUpdate);
-
-        return () => {
-          socket.off("patrol_result_update", handleResultUpdate);
-        };
+        return { ...updatePatrol, results: updatedResultsForPatrol };
       })
+    );
+  }, []);
 
+  useEffect(() => {
+    if (socket && isConnected) {
+      socket.on("patrol_result_update", handleResultUpdate);
+      return () => {
+        socket.off("patrol_result_update", handleResultUpdate);
+      };
     }
-  }, [socket, isConnected])
+  }, [socket, isConnected, handleResultUpdate]); // ✅ ป้องกัน re-subscribe loop
+
+  useEffect(() => {
+    if (socket && isConnected && allPatrols) {
+      allPatrols.forEach((patrol) => {
+        if (!joinedRoomsRef.current.has(patrol.id)) {
+          console.log(`Joining room: ${patrol.id}`);
+          socket.emit("join_room", patrol.id);
+          joinedRoomsRef.current.add(patrol.id); // ✅ กัน join ซ้ำ
+        }
+      });
+    }
+  }, [socket, isConnected]);
+
   console.log("allpatrol", allPatrols)
 
 
@@ -542,14 +513,15 @@ export default function Page() {
     });
   };
 
-  const calculateProgress = (patrol: IPatrol) => {
-    // if (!patrol) return 0;
-    // const checkedResults = patrol.results.filter(
-    //   (res) => res.status !== null
-    // ).length;
+  const calculateProgress = (patrolResults: IPatrolResult[]) => {
+    if (!patrolResults) return 0;
+    const checkedResults = patrolResults.filter(
+      (res) => res.status !== null
+    ).length;
+    const totalResults = patrolResults.length;
 
-    // if (totalResults === 0) return 0;
-    // return (checkedResults / totalResults) * 100;
+    if (totalResults === 0) return 0;
+    return (checkedResults / totalResults) * 100;
   };
 
   useEffect(() => {
@@ -861,7 +833,7 @@ export default function Page() {
                         </TableCell>
                         <TableCell className='sm:col-span-2 lg:col-span-2'>
                           <p>
-                            <Progress value={80} />
+                            <Progress value={calculateProgress(patrol.results)} />
                           </p>
                         </TableCell>
                         <TableCell className='sm:col-span-2 lg:col-span-1'>
