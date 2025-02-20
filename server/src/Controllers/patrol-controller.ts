@@ -406,6 +406,7 @@ export async function getAllPatrols(req: Request, res: Response) {
         },
         results: {
           select: {
+            id: true,
             status: true,
             defects: true,
           }

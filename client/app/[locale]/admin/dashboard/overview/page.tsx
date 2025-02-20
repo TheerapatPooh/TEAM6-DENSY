@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useRef } from 'react'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,8 @@ export default function Page() {
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
 
+  const allPatrolId = allPatrols.map(patrol => patrol.id);
+
   const [dateError, setDateError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPreset, setSelectedPreset] = useState<IPreset>();
@@ -107,6 +109,193 @@ export default function Page() {
       console.error("Failed to fetch patrol data:", error);
     }
   };
+
+  const [results, setResults] = useState<IPatrolResult[]>([]);
+  const [patrolResults, setPatrolResults] = useState<IPatrolResult[]>([]);
+
+
+  // useEffect(() => {
+  //   if (socket && isConnected && allPatrols) {
+  //     // เรียกใช้ forEach แทน map เพื่อไม่ให้เกิดผลข้างเคียงที่ไม่ต้องการ
+  //     allPatrols.forEach((patrol) => {
+  //       // เชื่อมต่อกับห้องแต่ละห้อง
+  //       socket.emit("join_room", patrol.id);
+
+  //       // ตั้งค่า handler สำหรับการอัพเดตผล
+  //       const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
+  //         const currentUserResults = updatedResults;
+
+  //         // ป้องกันการอัพเดต localStorage ที่ไม่จำเป็น
+  //         if (currentUserResults.length > 0) {
+  //           const savedResults = localStorage.getItem(
+  //             `patrolResults_${patrol.id}`
+  //           );
+  //           const parsedResults: IPatrolResult[] = savedResults
+  //             ? JSON.parse(savedResults)
+  //             : [];
+  //           if (
+  //             JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)
+  //           ) {
+  //             localStorage.setItem(
+  //               `patrolResults_${patrol.id}`,
+  //               JSON.stringify(currentUserResults)
+  //             );
+  //           }
+  //         }
+
+  //         // อัพเดตผลใน patrol
+  //         const updatedPatrols = allPatrols.map((p) => {
+  //           if (p.id === patrol.id) {
+  //             return { ...p, results: currentUserResults }; // ตั้งค่า results สำหรับ patrol ที่ตรงกับ id
+  //           }
+  //           return p;
+  //         });
+
+  //         // อัพเดต state ถ้ามีการเปลี่ยนแปลง
+  //         setAllPatrols(updatedPatrols);
+  //       };
+
+  //       // ตรวจสอบว่าไม่ทำการตั้งค่า listener ซ้ำซ้อน
+  //       socket.on("patrol_result_update", handleResultUpdate);
+
+  //       // ลบ event listener เมื่อ component unmount หรือเมื่อเงื่อนไขเปลี่ยน
+  //       return () => {
+  //         socket.off("patrol_result_update", handleResultUpdate);
+  //       };
+  //     });
+  //   }
+  // }, [socket, isConnected, allPatrols]);
+
+
+  // const patrolRef = useRef(allPatrols);
+
+  // useEffect(() => {
+  //   patrolRef.current = allPatrols; // เก็บค่าของ allPatrols ทุกครั้งที่มันเปลี่ยนแปลง
+  // }, [allPatrols]);
+
+  // useEffect(() => {
+  //   if (socket && isConnected && allPatrols) {
+  //     allPatrols.forEach((patrol) => {
+  //       socket.emit("join_room", patrol.id);
+
+  //       const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
+  //         const currentUserResults = updatedResults;
+
+  //         // Avoid unnecessary updates to localStorage
+  //         if (currentUserResults.length > 0) {
+  //           const savedResults = localStorage.getItem(
+  //             `patrolResults_${patrol.id}`
+  //           );
+  //           const parsedResults: IPatrolResult[] = savedResults
+  //             ? JSON.parse(savedResults)
+  //             : [];
+  //           if (
+  //             JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)
+  //           ) {
+  //             localStorage.setItem(
+  //               `patrolResults_${patrol.id}`,
+  //               JSON.stringify(currentUserResults)
+  //             );
+  //           }
+  //         }
+
+  //         // Update patrol results in the local ref first
+  //         const updatedPatrols = patrolRef.current.map((p) => {
+  //           if (p.id === patrol.id) {
+  //             console.log("Updating patrol results for patrol ID:", p.id);
+  //             return { ...p, results: currentUserResults };
+  //           }
+  //           return p;
+  //         });
+  //         console.log("Updated patrols:", updatedPatrols);
+
+  //         // Update the state
+  //         setAllPatrols(updatedPatrols);
+  //       };
+
+  //       socket.on("patrol_result_update", handleResultUpdate);
+
+  //       return () => {
+  //         socket.off("patrol_result_update", handleResultUpdate);
+  //       };
+  //     });
+  //   }
+  // }, [socket, isConnected, allPatrols]); // Ensure this effect runs when `allPatrols` changes
+
+  // console.log("allpatrol", allPatrols);
+
+  useEffect(() => {
+
+    if (socket && isConnected && allPatrols) {
+      allPatrols.map((patrol) => {
+        socket.emit("join_room", patrol.id);
+
+        const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
+
+
+
+          // Avoid unnecessary updates to localStorage
+          if (updatedResults.length > 0) {
+            const savedResults = localStorage.getItem(
+              `patrolResults_${patrol.id}`
+            );
+            const parsedResults: IPatrolResult[] = savedResults
+              ? JSON.parse(savedResults)
+              : [];
+            if (
+              JSON.stringify(parsedResults) !== JSON.stringify(updatedResults)
+            ) {
+              localStorage.setItem(
+                `patrolResults_${patrol.id}`,
+                JSON.stringify(updatedResults)
+              );
+            }
+          }
+
+
+          console.log("updatedResults", updatedResults)
+          // Update the patrol's results
+          const updatedPatrols = allPatrols.map((updatePatrol) => {
+            if (updatePatrol.id === patrol.id) {
+              // สำหรับ patrol นี้, อัปเดต results ตามที่ตรงกับ result.id
+              const updatedResultsForPatrol = updatePatrol.results.map((result) => {
+                // หา result ใน updatedResults ที่ตรงกัน
+                const matchingResult = updatedResults.find(
+                  (updatedResult) => updatedResult.id === result.id
+                );
+                if (matchingResult) {
+                  // อัปเดต result ถ้าพบ matchingResult
+                  return {
+                    ...result,
+                    ...matchingResult, // ใช้ข้อมูลจาก updatedResults
+                  };
+                }
+                return result;
+              });
+
+              // คืนค่า patrol ที่มีการอัปเดตผลลัพธ์
+              return {
+                ...updatePatrol,
+                results: updatedResultsForPatrol,
+              };
+            }
+            return updatePatrol;
+          });
+          setAllPatrols(updatedPatrols);
+        };
+
+        socket.on("patrol_result_update", handleResultUpdate);
+
+        return () => {
+          socket.off("patrol_result_update", handleResultUpdate);
+        };
+      })
+
+    }
+  }, [socket, isConnected])
+  console.log("allpatrol", allPatrols)
+
+
 
   const countPatrolResult = (results: IPatrolResult[]) => {
     let fail = 0;
@@ -351,6 +540,16 @@ export default function Page() {
         console.error(`Export failed for patrol ID: ${patrol.id}`, error);
       }
     });
+  };
+
+  const calculateProgress = (patrol: IPatrol) => {
+    // if (!patrol) return 0;
+    // const checkedResults = patrol.results.filter(
+    //   (res) => res.status !== null
+    // ).length;
+
+    // if (totalResults === 0) return 0;
+    // return (checkedResults / totalResults) * 100;
   };
 
   useEffect(() => {
