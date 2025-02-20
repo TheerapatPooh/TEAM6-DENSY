@@ -65,19 +65,14 @@ import { useRouter } from 'next/navigation';
 export default function Page() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
-  const z = useTranslations('Zone')
   const s = useTranslations("Status");
 
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
 
-  const allPatrolId = allPatrols.map(patrol => patrol.id);
-
   const [dateError, setDateError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>([]);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -110,123 +105,7 @@ export default function Page() {
     }
   };
 
-
-  const [results, setResults] = useState<IPatrolResult[]>([]);
-  const [patrolResults, setPatrolResults] = useState<IPatrolResult[]>([]);
-
-
-  // useEffect(() => {
-  //   if (socket && isConnected && allPatrols) {
-  //     // เรียกใช้ forEach แทน map เพื่อไม่ให้เกิดผลข้างเคียงที่ไม่ต้องการ
-  //     allPatrols.forEach((patrol) => {
-  //       // เชื่อมต่อกับห้องแต่ละห้อง
-  //       socket.emit("join_room", patrol.id);
-
-  //       // ตั้งค่า handler สำหรับการอัพเดตผล
-  //       const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
-  //         const currentUserResults = updatedResults;
-
-  //         // ป้องกันการอัพเดต localStorage ที่ไม่จำเป็น
-  //         if (currentUserResults.length > 0) {
-  //           const savedResults = localStorage.getItem(
-  //             `patrolResults_${patrol.id}`
-  //           );
-  //           const parsedResults: IPatrolResult[] = savedResults
-  //             ? JSON.parse(savedResults)
-  //             : [];
-  //           if (
-  //             JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)
-  //           ) {
-  //             localStorage.setItem(
-  //               `patrolResults_${patrol.id}`,
-  //               JSON.stringify(currentUserResults)
-  //             );
-  //           }
-  //         }
-
-  //         // อัพเดตผลใน patrol
-  //         const updatedPatrols = allPatrols.map((p) => {
-  //           if (p.id === patrol.id) {
-  //             return { ...p, results: currentUserResults }; // ตั้งค่า results สำหรับ patrol ที่ตรงกับ id
-  //           }
-  //           return p;
-  //         });
-
-  //         // อัพเดต state ถ้ามีการเปลี่ยนแปลง
-  //         setAllPatrols(updatedPatrols);
-  //       };
-
-  //       // ตรวจสอบว่าไม่ทำการตั้งค่า listener ซ้ำซ้อน
-  //       socket.on("patrol_result_update", handleResultUpdate);
-
-  //       // ลบ event listener เมื่อ component unmount หรือเมื่อเงื่อนไขเปลี่ยน
-  //       return () => {
-  //         socket.off("patrol_result_update", handleResultUpdate);
-  //       };
-  //     });
-  //   }
-  // }, [socket, isConnected, allPatrols]);
-
-
-  // const patrolRef = useRef(allPatrols);
-
-  // useEffect(() => {
-  //   patrolRef.current = allPatrols; // เก็บค่าของ allPatrols ทุกครั้งที่มันเปลี่ยนแปลง
-  // }, [allPatrols]);
-
-  // useEffect(() => {
-  //   if (socket && isConnected && allPatrols) {
-  //     allPatrols.forEach((patrol) => {
-  //       socket.emit("join_room", patrol.id);
-
-  //       const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
-  //         const currentUserResults = updatedResults;
-
-  //         // Avoid unnecessary updates to localStorage
-  //         if (currentUserResults.length > 0) {
-  //           const savedResults = localStorage.getItem(
-  //             `patrolResults_${patrol.id}`
-  //           );
-  //           const parsedResults: IPatrolResult[] = savedResults
-  //             ? JSON.parse(savedResults)
-  //             : [];
-  //           if (
-  //             JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)
-  //           ) {
-  //             localStorage.setItem(
-  //               `patrolResults_${patrol.id}`,
-  //               JSON.stringify(currentUserResults)
-  //             );
-  //           }
-  //         }
-
-  //         // Update patrol results in the local ref first
-  //         const updatedPatrols = patrolRef.current.map((p) => {
-  //           if (p.id === patrol.id) {
-  //             console.log("Updating patrol results for patrol ID:", p.id);
-  //             return { ...p, results: currentUserResults };
-  //           }
-  //           return p;
-  //         });
-  //         console.log("Updated patrols:", updatedPatrols);
-
-  //         // Update the state
-  //         setAllPatrols(updatedPatrols);
-  //       };
-
-  //       socket.on("patrol_result_update", handleResultUpdate);
-
-  //       return () => {
-  //         socket.off("patrol_result_update", handleResultUpdate);
-  //       };
-  //     });
-  //   }
-  // }, [socket, isConnected, allPatrols]); // Ensure this effect runs when `allPatrols` changes
-
-  // console.log("allpatrol", allPatrols);
-
-
-  const joinedRoomsRef = useRef(new Set()); // ✅ ป้องกัน join ซ้ำ
+  const joinedRoomsRef = useRef(new Set());
 
   const handleResultUpdate = useCallback((updatedResults: IPatrolResult[]) => {
     setAllPatrols((prevPatrols) =>
@@ -238,35 +117,27 @@ export default function Page() {
             : result;
         });
 
+        // คัดเฉพาะผลลัพธ์ที่ตรงกับ patrolId นี้เท่านั้น
+        const filteredUpdatedResults = updatedResults.filter((result) => result.patrolId === updatePatrol.id);
+
+        if (filteredUpdatedResults.length > 0) {
+          // ดึงค่าที่เคยเก็บใน localStorage (ถ้ามี)
+          const existingResults = JSON.parse(localStorage.getItem(`patrol_${updatePatrol.id}`) || "[]");
+
+          // รวมค่าใหม่เข้าไปในอาร์เรย์โดยหลีกเลี่ยงค่าซ้ำ
+          const updatedStorageResults = [
+            ...existingResults.filter((res: IPatrolResult) => !filteredUpdatedResults.some((upd) => upd.id === res.id)),
+            ...filteredUpdatedResults,
+          ];
+
+          // เซ็ตค่าเป็นอาร์เรย์เฉพาะของ patrol นี้
+          localStorage.setItem(`patrol_${updatePatrol.id}`, JSON.stringify(updatedStorageResults));
+        }
+
         return { ...updatePatrol, results: updatedResultsForPatrol };
       })
     );
   }, []);
-
-  useEffect(() => {
-    if (socket && isConnected) {
-      socket.on("patrol_result_update", handleResultUpdate);
-      return () => {
-        socket.off("patrol_result_update", handleResultUpdate);
-      };
-    }
-  }, [socket, isConnected, handleResultUpdate]); // ✅ ป้องกัน re-subscribe loop
-
-  useEffect(() => {
-    if (socket && isConnected && allPatrols) {
-      allPatrols.forEach((patrol) => {
-        if (!joinedRoomsRef.current.has(patrol.id)) {
-          console.log(`Joining room: ${patrol.id}`);
-          socket.emit("join_room", patrol.id);
-          joinedRoomsRef.current.add(patrol.id); // ✅ กัน join ซ้ำ
-        }
-      });
-    }
-  }, [socket, isConnected]);
-
-  console.log("allpatrol", allPatrols)
-
-
 
   const countPatrolResult = (results: IPatrolResult[]) => {
     let fail = 0;
@@ -398,7 +269,11 @@ export default function Page() {
   };
 
   const applyFilter = () => {
-    getPatrolData()
+    const fetchData = async () => {
+      await getPatrolData()
+      await initializePatrols()
+    };
+    fetchData();
   };
 
   const resetFilter = () => {
@@ -453,6 +328,15 @@ export default function Page() {
     }
 
     return new URLSearchParams(params).toString();
+  };
+
+  const removeLocalStoragePatrolCompleted = () => {
+    allPatrols.forEach(patrol => {
+      if (patrol.status === 'completed') {
+        const localStorageKey = `patrol_${patrol.id}`;
+        localStorage.removeItem(localStorageKey);
+      }
+    });
   };
 
   const formatId = (id: number): string => {
@@ -524,11 +408,92 @@ export default function Page() {
     return (checkedResults / totalResults) * 100;
   };
 
+  const initializePatrols = () => {
+    setAllPatrols((prevPatrols) =>
+      prevPatrols?.map((updatePatrol) => {
+        const resultLocal = localStorage.getItem(`patrol_${updatePatrol.id}`);
+        let parsedResults: IPatrolResult[] = [];
+
+        if (resultLocal) {
+          try {
+            parsedResults = JSON.parse(resultLocal);
+          } catch (error) {
+            console.error(`Error parsing localStorage for patrol_${updatePatrol.id}:`, error);
+          }
+        }
+
+        // ตรวจสอบว่า parsedResults มีข้อมูลหรือไม่
+        if (parsedResults.length > 0) {
+          // อัปเดตค่า status สำหรับแต่ละ result ใน updatePatrol
+          const updatedResultsForPatrol = updatePatrol.results.map((result) => {
+            const matchingResult = parsedResults.find(
+              (parsedResult) =>
+                String(parsedResult.patrolId) === String(updatePatrol.id) && // แปลงเป็น string
+                String(parsedResult.id) === String(result.id) // แปลงเป็น string
+            );
+
+            return matchingResult
+              ? { ...result, status: matchingResult.status } // อัปเดตค่า status
+              : result; // ถ้าไม่พบให้ใช้ค่าเดิม
+          });
+
+          // อัปเดต allPatrols ด้วย results ใหม่
+          return { ...updatePatrol, results: updatedResultsForPatrol };
+        }
+
+        // ถ้าไม่มีข้อมูลใน localStorage ให้คืนค่า updatePatrol เดิม
+        return updatePatrol;
+      })
+    );
+  };
+
   useEffect(() => {
-    getPatrolData();
-    getPresetData()
-    setLoading(false)
+    const fetchData = async () => {
+      setLoading(true);
+      await getPresetData();
+      await getPatrolData();
+      await initializePatrols()
+
+      setTimeout(() => {
+        removeLocalStoragePatrolCompleted();
+      }, 1000); // หน่วงเวลา 1 วินาที
+
+      setLoading(false);
+    };
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPatrolData();
+      await initializePatrols()
+    };
+    fetchData();
+  }, [searchTerm]);
+
+  useEffect(() => {
+    removeLocalStoragePatrolCompleted()
+  },[allPatrols] )
+
+  useEffect(() => {
+    if (socket && isConnected) {
+      socket.on("patrol_result_update", handleResultUpdate);
+      return () => {
+        socket.off("patrol_result_update", handleResultUpdate);
+      };
+    }
+  }, [socket, isConnected, handleResultUpdate]); 
+
+  useEffect(() => {
+    if (socket && isConnected && allPatrols) {
+      allPatrols.forEach((patrol) => {
+        if (!joinedRoomsRef.current.has(patrol.id)) {
+          socket.emit("join_room", patrol.id);
+          joinedRoomsRef.current.add(patrol.id); 
+        }
+      });
+    }
+  }, [socket, isConnected]);
 
   useEffect(() => {
     // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
@@ -544,10 +509,6 @@ export default function Page() {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
-  useEffect(() => {
-    getPatrolData();
-  }, [searchTerm]);
 
   useEffect(() => {
     localStorage.setItem('filter', JSON.stringify(filter));

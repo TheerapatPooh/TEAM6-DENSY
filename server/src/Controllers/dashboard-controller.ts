@@ -63,8 +63,6 @@ export async function getHeatMap(req: Request, res: Response) {
   }
 }
 export async function getDefectCategory(req: Request, res: Response) {
-
-  console.log("req ", req.query)
   try {
     const { startDate, endDate, patrolId, zoneId } = req.query;
 

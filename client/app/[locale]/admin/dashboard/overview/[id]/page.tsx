@@ -188,8 +188,6 @@ export default function page() {
         };
     }, []);
 
-
-
     useEffect(() => {
         const fetchData = async () => {
             try {
