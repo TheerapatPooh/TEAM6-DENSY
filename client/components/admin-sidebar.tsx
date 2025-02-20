@@ -58,12 +58,12 @@ export function AdminSidebar() {
     };
 
     return (
-        <SidebarProvider className={`sticky transition-all duration-300 ${isExpanded ? "w-[240px]" : "w-[70px] pointer-events-none"}`}>
-            <Sidebar className={`w-[240px] custom-shadow border-none ${isExpanded ? "w-[240px]" : "w-[70px] "}`}>
+        <SidebarProvider className={`sticky transition-all duration-300 ${isExpanded ? "sm:w-[200px] lg:w-[240px]" : "w-[70px] pointer-events-none"}`}>
+            <Sidebar className={`w-[240px] custom-shadow border-none ${isExpanded ? "sm:w-[200px] lg:w-[240px]" : "w-[70px] "}`}>
                 <SidebarContent className="p-[8px] pt-[8px] bg-card overflow-x-hidden">
                     <SidebarGroup className="p-0">
                         <SidebarGroupLabel className="mb-[16px]">
-                            <div className="flex items-center space-x-[24px] mt-[16px] transition-all duration-300">
+                            <div className="flex items-center w-full justify-between mt-[16px] transition-all duration-300">
                                 {isExpanded && (
                                     <Image
                                         className="flex items-center cursor-pointer"

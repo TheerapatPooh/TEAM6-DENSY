@@ -15,10 +15,8 @@ import { Stage, Layer, Path, Text } from 'react-konva';
 import { useEffect, useRef, useState } from 'react';
 import { IZone, IHeatMap } from '@/app/type';
 import zonePath from '@/lib/zonePath.json'
-import zonePathMd from '@/lib/zonePath-md.json'
 import zonePathSm from '@/lib/zonePath-sm.json'
 import wallPath from '@/lib/wallPath.json'
-import wallPathMd from '@/lib/wallPath-md.json'
 import wallPathSm from '@/lib/wallPath-sm.json'
 import React from 'react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -32,7 +30,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 export default function HeatMap({ data }: IHeatMap) {
     const stageRef = useRef(null);  // เพิ่ม useRef สำหรับ Stage
-    const [stageDimensions, setStageDimensions] = useState({ width: 780, height: 518, size: "LG" });
+    const [stageDimensions, setStageDimensions] = useState({ width: 780, height: 518 });
     const [zones, setZones] = useState<IZone[]>([]);
     const [walls, setWalls] = useState<{ id: number, pathData: string }[]>([])
     const [paths, setPaths] = useState<{ text: any, id: number, pathData: string, defects?: number }[]>([])
@@ -43,17 +41,41 @@ export default function HeatMap({ data }: IHeatMap) {
     const d = useTranslations('Dashboard')
     const locale = useLocale();
     const [language, setLanguage] = useState('en');
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    useEffect(() => {
+        // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
+
+        // เพิ่ม event listener สำหรับ resize
+        window.addEventListener('resize', handleResize);
+
+        // ลบ event listener เมื่อคอมโพเนนต์ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         const currentLanguage = locale; // ภาษาที่ใช้อยู่ในปัจจุบัน
         setLanguage(currentLanguage || 'en');
-    }, []);
-
+    }, [locale]);
 
     useEffect(() => {
-        setWalls(wallPath)
-        setPaths(zonePath)
+        if (windowWidth <= 1280) { // ความกว้างของหน้าจอสำหรับจอมือถือ
+            setStageDimensions({ width: 483, height: 323 });
+            setWalls(wallPathSm)
+            setPaths(zonePathSm)
+        } else { // ความกว้างของหน้าจอสำหรับจอคอมพิวเตอร์
+            setStageDimensions({ width: 780, height: 518 });
+            setWalls(wallPath)
+            setPaths(zonePath)
+        }
+    }, [windowWidth])
 
+    useEffect(() => {
         if (data) {
             const updatedZones = data?.map((zone) => {
                 const matchedZonePath = paths.find(path => path.id === zone.id);
@@ -67,7 +89,7 @@ export default function HeatMap({ data }: IHeatMap) {
 
             setZones(updatedZones);
         }
-    }, [data, resolvedTheme]);
+    }, [data, resolvedTheme, paths]);
 
     const getCSSVariableValue = (variableName: string) => {
         const value = getComputedStyle(document.documentElement)
