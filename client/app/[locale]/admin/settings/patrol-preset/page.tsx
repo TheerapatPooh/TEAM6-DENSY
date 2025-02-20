@@ -398,14 +398,16 @@ export default function Page() {
                 >
                   <Button
                     variant={"secondary"}
-                    className="w-full h-[36px] rounded-md bg-secondary justify-start text-left gap-[13px] font-normal text-base pl-2"
+                    className="w-full h-[36px] rounded-md bg-secondary justify-start text-left gap-[13px] font-normal text-base pl-2 flex"
                   >
-                    <span className="material-symbols-outlined ml-1">
+                    <span className="material-symbols-outlined ml-1 shrink-0">
                       location_on
                     </span>
-                    {selectedZones.length > 0
-                      ? selectedZones.map((zone) => z(zone.name)).join(", ")
-                      : t("SelectZones")}
+                    <p className="truncate w-[200px]">
+                      {selectedZones.length > 0
+                        ? selectedZones.map((zone) => z(zone.name)).join(", ")
+                        : t("SelectZones")}
+                    </p>
                   </Button>
                 </AlertDialogTrigger>
 
@@ -428,6 +430,9 @@ export default function Page() {
                     <div className="flex justify-center bg-secondary rounded-lg py-4">
                       <Map
                         disable={false}
+                        initialSelectedZones={selectedZones.map(
+                          (zone) => zone.id
+                        )}
                         onZoneSelect={(zones: IZone[]) =>
                           setTempSelectedZones(zones)
                         } // อัปเดต tempSelectedZones
@@ -484,7 +489,7 @@ export default function Page() {
                             <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
-                                className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
+                                className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
                               >
                                 <span className="material-symbols-outlined mr-1">
                                   history

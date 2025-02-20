@@ -547,7 +547,7 @@ export default function Page() {
                     <DropdownMenuContent
                       align="start"
                       side="bottom"
-                      className=" bg-white border border-gray-200 custom-shadow rounded  p-2"
+                      className="custom-shadow rounded-md bg-card  p-2"
                     >
                       <DropdownMenuItem
                         onClick={() => {
