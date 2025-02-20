@@ -52,7 +52,7 @@ import {
   getItemTypeVariant,
   sortData,
 } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { formatTime } from "@/lib/utils";
@@ -83,6 +83,7 @@ export default function Page() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [allComments, setAllComments] = useState<IComment[]>([]);
+  const locale = useLocale()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -410,7 +411,7 @@ export default function Page() {
                 <TableRow key={index} className="grid grid-cols-12">
                   <TableCell className="font-medium sm:col-span-3 lg:col-span-5">{comment.message}</TableCell>
                   <TableCell className="font-medium sm:col-span-2 lg:col-span-2">
-                    {formatTime(comment.timestamp)}
+                    {formatTime(comment.timestamp,locale)}
                   </TableCell>
                   <TableCell className="font-medium sm:col-span-3 lg:col-span-2">
                     <BadgeCustom
@@ -477,7 +478,7 @@ export default function Page() {
                             <AlertDialogContent className="px-6 py-4 gap-4">
                               <div className="flex flex-col gap-2">
                                 <p className="text-lg font-semibold text-muted-foreground">
-                                  {formatTime(comment.timestamp)}
+                                  {formatTime(comment.timestamp,locale)}
                                 </p>
                                 <p className="text-2xl font-bold text-card-foreground">
                                   {

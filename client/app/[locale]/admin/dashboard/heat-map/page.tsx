@@ -14,7 +14,7 @@ export default function Page() {
   const d = useTranslations("Dashboard");
   const m = useTranslations("Month");
   const [heatMap, setHeatMap] = useState<IHeatmapZone[]>();
-  const [defectCatagory, setDefectCatagory] = useState<IDefectCategory>();
+  const [defectCategory, setDefectCategory] = useState<IDefectCategory>();
   const [commonDefects, setCommonDefect] = useState<ICommonDefectItem[]>();
   const [patrolCompletion, setPatrolCompletion] = useState<IPatrolCompletionRate>();
   const [mounted, setMounted] = useState(false);
@@ -31,12 +31,12 @@ export default function Page() {
 
     const queryString = new URLSearchParams(params).toString()
     const heatMap = await fetchData("get", `/dashboard/heat-map?${queryString}`, true);
-    const defectCatagory = await fetchData("get", `/dashboard/defect-catagory?${queryString}`, true);
+    const defectCategory = await fetchData("get", `/dashboard/defect-category?${queryString}`, true);
     const commonDefects = await fetchData("get", `/dashboard/common-defects?${queryString}`, true);
     const patrolCompletion = await fetchData("get", `/dashboard/patrol-completion?${queryString}`, true);
     // fetch data
     setHeatMap(heatMap);
-    setDefectCatagory(defectCatagory);
+    setDefectCategory(defectCategory);
     setCommonDefect(commonDefects);
     setPatrolCompletion(patrolCompletion);
   };
@@ -50,7 +50,7 @@ export default function Page() {
     getData();
   }, [selectedMonth]);
 
-  if (!mounted || !heatMap || !defectCatagory || !commonDefects || !patrolCompletion)
+  if (!mounted || !heatMap || !defectCategory || !commonDefects || !patrolCompletion)
     return null;
 
   return (
@@ -81,13 +81,13 @@ export default function Page() {
           </div>
           <HeatMap data={heatMap} />
         </div>
-        {/* Defect Catagory & Common Defects */}
+        {/* Defect Category & Common Defects */}
         <div className="flex flex-col xl:flex-row gap-4 justify-between">
           <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
             <h1 className="text-2xl font-semibold text-card-foreground">
-              {d("DefectCatagory")}
+              {d("DefectCategory")}
             </h1>
-            <DonutGraph key={Date.now()} chartData={defectCatagory.chartData} trend={defectCatagory.trend} />
+            <DonutGraph key={Date.now()} chartData={defectCategory.chartData} trend={defectCategory.trend} />
           </div>
           <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
             <h1 className="text-2xl font-semibold text-card-foreground">

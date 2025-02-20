@@ -42,7 +42,6 @@ interface IPatrolContext {
     formatTimeDate: (dateStr: string) => string
     formatId: (id: number) => string
     formatDate: (dateStr: string) => string
-
 }
 
 const PatrolContext = createContext<IPatrolContext | undefined>(undefined);
@@ -479,16 +478,34 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [socket, patrol?.id]);
 
     useEffect(() => {
+
         if (socket && isConnected && results.length > 0 && patrol) {
-            const uniqueResults = results.map(
-                ({ inspectorId, id, itemId, zoneId, status }) => ({
-                    inspectorId,
-                    id,
-                    itemId,
-                    zoneId,
-                    status,
-                })
-            );
+            const uniqueResults = results.map(({ inspectorId, id, itemId, zoneId, status }) => {
+                let existingResult = patrolResults.find(
+                    (patrolResult) => patrolResult.itemId === itemId && patrolResult.zoneId === zoneId
+                );
+                if (existingResult) {
+                    return {
+                        inspectorId,
+                        id: existingResult.id,  
+                        itemId,
+                        zoneId,
+                        status,
+                        patrolId: patrol.id,
+                    };
+                } else {
+                    return {
+                        inspectorId,
+                        id,
+                        itemId,
+                        zoneId,
+                        status,
+                        patrolId: patrol.id,
+                    };
+                }
+            });
+
+            console.log("uniqueResults", uniqueResults)
 
             const hasChanged =
                 uniqueResults.length !== lastEmittedResults.current.length ||

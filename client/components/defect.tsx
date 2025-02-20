@@ -44,7 +44,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center text-black-500 space-x-2">
                     <span className="material-symbols-outlined text-muted-foreground cursor-default ">schedule</span>
-                    <span className="font-semibold text-lg text-muted-foreground">{formatTime(defect.startTime)}</span>
+                    <span className="font-semibold text-lg text-muted-foreground">{formatTime(defect.startTime,locale)}</span>
                 </div>
                 <div>
                     <BadgeCustom
@@ -137,7 +137,7 @@ export default function Defect({ defect }: { defect: IDefect }) {
 
                                 <div className="flex items-center pt-2">
                                     <span className="text-sm text-muted-foreground">
-                                        Joined {formatTime(defect.user.createdAt)}
+                                        Joined {formatTime(defect.user.createdAt,locale)}
                                     </span>
                                 </div>
                             </div>

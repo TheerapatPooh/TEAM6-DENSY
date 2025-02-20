@@ -43,10 +43,12 @@ export interface IDefect {
     supervisorId?: number;
     patrolResultId?: number;
     timeStamp: Date;
+
     user?: IUser;
+    zone?: IZone;
     supervisor?: IUser;
     patrolResult: IPatrolResult;
-    images: IDefectIImage[];
+    images: IDefectImage[];
 }
 
 export interface INotification {
@@ -236,10 +238,10 @@ export interface IImage {
 
     user?: IUser;
     profiles: IProfile[];
-    defects: IDefectIImage[];
+    defects: IDefectImage[];
 }
 
-export interface IDefectIImage {
+export interface IDefectImage {
     defectId?: number
     imageId?: number
     image: IImage
@@ -334,6 +336,10 @@ export interface IDashboardCard {
     icon: string;
     variant: keyof typeof badgeVariants;
     positive?: boolean;
+}
+
+export interface IPatrolDuration {
+    duration: number;
 }
 
 

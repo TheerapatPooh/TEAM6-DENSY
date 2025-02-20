@@ -533,7 +533,7 @@ export default function Page() {
                                     <div className="text-muted-foreground">
                                       {t("UpdateAt")}
                                     </div>
-                                    {formatTime(preset.updatedAt)}
+                                    {formatTime(preset.updatedAt,locale)}
                                   </div>
                                 </div>
                                 <div className="flex justify-between w-full">

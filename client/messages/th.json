@@ -181,7 +181,12 @@
     "HasBeenCreated": "ถูกสร้างเรียบร้อยแล้ว",
     "HasBeenEdited": "ถูกแก้ไขเรียบร้อยแล้ว",
     "Timestamp": "เวลาที่บันทึก",
-    "Reporter": "ผู้รายงาน"
+    "Reporter": "ผู้รายงาน",
+    "hour": "ชั่วโมง",
+    "DocID": "หมายเลขเอกสาร",
+    "Progress": "ความคืบหน้า",
+    "Result": "ผลลัพธ์",
+    "PatrolList": "รายการตรวจตรา"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -504,7 +509,12 @@
     "SureToDeactivate": "คุณแน่ใจหรือไม่ว่าต้องการปิดใช้งานพนักงาน?",
     "SureToDeactivateDescription": "โปรดยืนยันเพื่อปิดใช้งานพนักงาน",
     "SureToActivate": "คุณแน่ใจหรือไม่ว่าต้องการเปิดใช้งานพนักงาน?",
-    "SureToActivateDescription": "โปรดยืนยันเพื่อเปิดใช้งานพนักงาน"
+    "SureToActivateDescription": "โปรดยืนยันเพื่อเปิดใช้งานพนักงาน",
+    "ExportPatrolAlert": "คุณแน่ใจหรือไม่ว่าต้องการออกรายงานผลการตรวจตรา?",
+    "ExportPatrolAlertDescription": "โปรดยืนยันเพื่อออกรายงานผลการตรวจตรา",
+    "ExportPatrolNoData": "การออกรายงานผลการตรวจตราล้มเหลว",
+    "ExportPatrolNoDataDescription": "ไม่มีข้อมูลการตรวจตรา หรือยังไม่ได้เลือกการตรวจตรา",
+    "ExportPatrolStatusNotCompleteDescription": "การตรวจตรายังไม่สิ้นสุด"
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",
@@ -531,8 +541,8 @@
     "ThisMonth": "ในเดือนนี้",
     "HeatMap": "แผนที่ความร้อน",
     "WarningAreas": "พื้นที่ควรระวัง",
-    "DefectCatagory": "ประเภทของปัญหา",
-    "DefectCatagoryDescription": "แสดงการกระจายประเภทของปัญหา",
+    "DefectCategory": "ประเภทของปัญหา",
+    "DefectCategoryDescription": "แสดงการกระจายประเภทของปัญหา",
     "CommonDefects": "ปัญหาที่พบบ่อย",
     "CommonDefectsDescription": "แสดงปัญหาที่พบบ่อยที่สุดระหว่างการตรวจตรา",
     "PatrolCompletionRate": "อัตราความสมบูรณ์ของการตรวจตรา",
@@ -542,6 +552,13 @@
     "FromLastMonth": "จากเดือนที่แล้ว",
     "TotalReport": "ถูกรายงานทั้งหมด",
     "DefectCompleted": "ข้อบกพร่องที่แก้ไขเสร็จสิ้น",
-    "DefectPending": "ข้อบกพร่องที่รอดำเนินการ"
+    "DefectPending": "ข้อบกพร่องที่รอดำเนินการ",
+    "TotalPass": "จำนวนหัวข้อตรวจตราผ่าน",
+    "TotalFails": "จำนวนหัวข้อตรวจตราไม่ผ่าน",
+    "TotalReports": "จำนวนการแจ้งปัญหา",
+    "TotalComments": "จำนวนข้อเสนอแนะ",
+    "DefectReported": "ปัญหาที่แจ้ง",
+    "PatrolDuration": "ระยะเวลาการตรวจตรา",
+    "PatrolDurationDescription": "ติดตามระยะเวลาในการตรวจตราเพื่อวิเคราะห์ระยะเวลาที่ใช้ในแต่ละรอบการตรวจสอบ"
   }
 }

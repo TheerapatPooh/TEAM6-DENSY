@@ -196,7 +196,7 @@ export default function Page() {
             <span className="material-symbols-outlined text-2xl">
               schedule
             </span>
-            <p>{formatTime(defect.startTime)}</p>
+            <p>{formatTime(defect.startTime,locale)}</p>
           </div>
           <h1 className="text-2xl font-bold text-card-foreground">
             {defect.name}
