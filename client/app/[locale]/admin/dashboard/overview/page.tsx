@@ -712,7 +712,7 @@ export default function Page() {
       {/* Table */}
       <div>
         <ScrollArea
-          className="rounded-md sm:w-[702px] lg:w-full whitespace-nowrap">
+          className="rounded-md w-full">
           <Table className='overflow-hidden sm:w-max lg:w-full'>
             <TableHeader>
               <TableRow className="grid grid-cols-12 w-full">
