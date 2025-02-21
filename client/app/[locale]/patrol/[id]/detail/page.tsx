@@ -50,11 +50,9 @@ export default function Page() {
   const {
     patrol,
     patrolResults,
-    results,
     user,
     lock,
     isAlertOpen,
-    mounted,
     canFinish,
     countDefects,
     countFails,
@@ -87,9 +85,6 @@ export default function Page() {
 
   itemCounts(patrol, patrolResults);
   const inspectors = patrolUser;
-
-  console.log('patrolResults', patrolResults)
-  console.log("results", results);
 
   return (
     <div className="flex flex-col gap-4 overflow-hidden">

@@ -49,15 +49,16 @@ import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 interface IAlertDefect {
+    userId: number
     defect?: IDefect,
     item?: IItem,
     type: "edit" | "report" | "resolve" | "edit-resolve",
     patrolResults?: IPatrolResult[],
-    result?: { inspectorId: number, itemId: number; zoneId: number; status: boolean, supervisorId?: number },
+    result?: { id: number, inspectorId: number, itemId: number; zoneId: number; status: boolean, supervisorId?: number },
     response: (defect: IDefect) => void;
 }
 
-export default function AlertDefect({ defect, item, type, patrolResults, result, response }: IAlertDefect) {
+export default function AlertDefect({ userId, defect, item, type, patrolResults, result, response }: IAlertDefect) {
     const disabled = false
     const a = useTranslations("Alert");
     const t = useTranslations("General");
@@ -632,9 +633,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                     item.name,
                                                     defectDescription,
                                                     item.type,
-                                                    result.inspectorId,
+                                                    result.inspectorId || userId,
                                                     patrolResults.find((patrolResult: IPatrolResult) =>
-                                                        result.itemId === patrolResult.itemId && result.zoneId === patrolResult.zoneId
+                                                        result.id === patrolResult.id
                                                     )?.id || null,
                                                     patrolResults.find((patrolResult: IPatrolResult) =>
                                                         result.zoneId === patrolResult.zoneId

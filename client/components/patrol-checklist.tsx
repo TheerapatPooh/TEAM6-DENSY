@@ -143,25 +143,6 @@ export default function PatrolChecklist({
     response(defect)
   }
 
-  // useEffect(() => {
-  //   if (patrolResults && patrolChecklist.checklist.items) {
-  //     const initialStatus = patrolChecklist.checklist.items.reduce((acc, item) => {
-  //       item.itemZones.flatMap((itemZone: IItemZone) => {
-  //         const matchingResult = patrolResults.find((result) => {
-  //           return result.itemId === item.id && result.zoneId === itemZone.zone.id;
-  //         });
-  //         // ถ้ามี matchingResult และ status ไม่เป็น null ให้เก็บค่า status
-  //         if (matchingResult && matchingResult.status !== null) {
-  //           acc[`${item.id}-${itemZone.zone.id}`] = matchingResult.status;
-  //         }
-
-  //       });
-  //       return acc;
-  //     }, {} as { [key: string]: boolean | null });
-  //     setResultStatus(initialStatus); // เก็บค่า resultStatus ที่อัพเดตแล้ว
-  //   }
-  // }, [patrolChecklist.checklist, patrolResults]);
-
   const handleClick = (id: number, inspectorId: number, itemId: number, zoneId: number, status: boolean) => {
     if (!disabled) {
       handleResult({ id, inspectorId, itemId, zoneId, status });
@@ -247,14 +228,8 @@ export default function PatrolChecklist({
                     <AccordionContent className="flex flex-col gap-4">
                       {item.itemZones.flatMap((itemZone: IItemZone) => {
                         const existingResult = getExistingResult(item.id, itemZone.zone.id);
-                        const matchedPatrolResult = patrolResults.find(
-                          (pr) => pr.itemId === item.id && pr.zoneId === itemZone.zone.id
-                        );
 
-                        const supervisor =
-                          patrolStatus === "scheduled"
-                            ? itemZone.zone.supervisor
-                            : matchedPatrolResult?.supervisor;
+                        const supervisor = itemZone.zone.supervisor
 
                         return (
                           <div key={itemZone.zone.id} className="bg-background rounded-md px-4 py-2">
@@ -295,10 +270,10 @@ export default function PatrolChecklist({
                               <div className="flex gap-2">
                                 <Button
                                   variant={
-                                    existingResult.status ===
+                                    existingResult?.status ===
                                       true ? "success" : "secondary"
                                   }
-                                  className={`w-[155px] ${existingResult.status ===
+                                  className={`w-[155px] ${existingResult?.status ===
                                     null ? "bg-secondary text-card-foreground" : ""
                                     } ${existingResult?.status === true ? "bg-green hover:bg-green text-card" : ""
                                     } ${existingResult?.status === false ? "bg-secondary hover:bg-secondary" : ""
@@ -306,7 +281,7 @@ export default function PatrolChecklist({
                                     }
                                                                     `}
                                   onClick={() => {
-                                    if (!existingResult.status === true || existingResult.status === null) {
+                                    if (patrolStatus === 'on_going' && !existingResult?.status === true || existingResult?.status === null) {
                                       handleClick(existingResult.id, patrolChecklist.inspector.id, existingResult.itemId, existingResult.zoneId, true);
                                     }
                                   }}
@@ -318,10 +293,10 @@ export default function PatrolChecklist({
                                 </Button>
                                 <Button
                                   variant={
-                                    existingResult.status ===
+                                    existingResult?.status ===
                                       false ? "fail" : "secondary"
                                   }
-                                  className={`w-[155px] ${existingResult.status ===
+                                  className={`w-[155px] ${existingResult?.status ===
                                     null ? "bg-secondary text-card-foreground" : ""
                                     } ${existingResult?.status === false ? "bg-destructive hover:bg-destructive text-card" : ""
                                     } ${existingResult?.status === true ? "bg-secondary hover:bg-secondary" : ""
@@ -329,7 +304,7 @@ export default function PatrolChecklist({
                                     }
                                                                     `}
                                   onClick={() => {
-                                    if (!existingResult.status === false || existingResult.status === null) {
+                                    if (patrolStatus === 'on_going' && !existingResult?.status === false || existingResult?.status === null) {
                                       handleClick(existingResult.id, patrolChecklist.inspector.id, existingResult.itemId, existingResult.zoneId, false);
                                     }
                                   }}
@@ -345,6 +320,7 @@ export default function PatrolChecklist({
                             {(existingResult?.status === false) && (
                               <div className="flex flex-col items-start gap-4 mt-2">
                                 <AlertDefect
+                                  userId={ patrolChecklist.inspector.id }
                                   item={item}
                                   type={"report"}
                                   result={existingResult}
