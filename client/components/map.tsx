@@ -79,7 +79,7 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
     if (initialSelectedZones) {
       setSelectedZones(initialSelectedZones);
     }
-  }, [initialSelectedZones]);
+  }, []);
 
   const fetch = async () => {
     try {

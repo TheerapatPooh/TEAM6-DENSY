@@ -194,7 +194,7 @@ export default function page() {
   }
 
   return (
-    <div className="bg-card px-6 py-4 ">
+    <div className="bg-card px-6 py-4 rounded-md custom-shadow">
       {/* create patrol preset and button */}
       <div className="flex flex-row justify-between mb-4">
         <div className="text-2xl font-bold">{t("CreatePatrolPreset")}</div>
@@ -284,7 +284,7 @@ export default function page() {
                   <ScrollArea className="h-[400px] overflow-y-auto rounded-lg w-full">
                     {allChecklists.map((checklist: IChecklist) => {
                       return (
-                        <div className="flex flex-row justify-between bg-secondary px-6 py-4 mb-2 rounded-lg">
+                        <div className="flex flex-row justify-between bg-secondary px-6 py-4 mb-2 rounded-lg custom-shadow">
                           <div>
                             <div className="flex text-base gap-1 mb-2 ">
                               <span className="material-symbols-outlined">

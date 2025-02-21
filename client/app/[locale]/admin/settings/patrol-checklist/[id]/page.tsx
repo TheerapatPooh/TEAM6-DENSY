@@ -61,7 +61,7 @@ export default function Page() {
   const [openStatesType, setOpenStatesType] = useState<{
     [key: number]: boolean;
   }>({});
-
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [title, setTitle] = useState("");
   const [items, setItems] = useState<IItemWithZonesName[]>([]);
   const [selectedChecklistName, setSelectedChecklistName] = useState<{
@@ -77,6 +77,20 @@ export default function Page() {
   interface IItemWithZonesName extends IItem {
     zones?: any[];
   }
+  useEffect(() => {
+    // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // เพิ่ม event listener สำหรับ resize
+    window.addEventListener("resize", handleResize);
+
+    // ลบ event listener เมื่อคอมโพเนนต์ถูกทำลาย
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const handleOpenChangeType = (itemId: number, isOpen: boolean) => {
     setOpenStatesType((prev) => ({
@@ -403,7 +417,9 @@ export default function Page() {
       toast({
         variant: "success",
         title: a("EditChecklistSuccess"),
-        description: `${t("PatrolChecklist")} ${dataToUpdate.title} ${t("HasBeenEdited")}`,
+        description: `${t("PatrolChecklist")} ${dataToUpdate.title} ${t(
+          "HasBeenEdited"
+        )}`,
       });
       router.push(`/${locale}/admin/settings/patrol-checklist`);
     } catch (error: any) {
@@ -429,7 +445,8 @@ export default function Page() {
               className="flex gap-2 justify-center items-center"
               variant="primary"
             >
-              <span className="material-symbols-outlined">save</span>{t("Save")}
+              <span className="material-symbols-outlined">save</span>
+              {t("Save")}
             </Button>
             {isDialogOpen && dialogType === "edit" && (
               <AlertCustom
@@ -478,7 +495,7 @@ export default function Page() {
             )}
           </div>
         </div>
-        <Table>
+        <Table wrapperClassName="shadow-none">
           <TableHeader>
             <TableRow>
               <TableHead className=" w-[30%]">{t("Item")}</TableHead>
@@ -521,6 +538,7 @@ export default function Page() {
                           iconName={getBadgeIcon(selectedType[item.id])}
                           variant={getBadgeVariant(selectedType[item.id])}
                           showIcon
+                          hideText={windowWidth > 911 ? false : true}
                         >
                           {s(selectedType[item.id])}
                         </BadgeCustom>
@@ -529,7 +547,7 @@ export default function Page() {
                     <DropdownMenuContent
                       align="start"
                       side="bottom"
-                      className=" bg-white border border-gray-200 custom-shadow rounded  p-2"
+                      className="custom-shadow rounded-md bg-card  p-2"
                     >
                       <DropdownMenuItem
                         onClick={() => {
@@ -583,8 +601,14 @@ export default function Page() {
                       className="flex items-center gap-2 rounded cursor-pointer"
                     >
                       <div className="w-[305px] overflow-hidden text-center">
-                      <p className={`text-base truncate whitespace-nowrap ${selectedZones[item.id]?.length > 0 ? '' : 'text-input'}`}>
-                      {selectedZones[item.id]?.length > 0
+                        <p
+                          className={`text-base truncate whitespace-nowrap ${
+                            selectedZones[item.id]?.length > 0
+                              ? ""
+                              : "text-input"
+                          }`}
+                        >
+                          {selectedZones[item.id]?.length > 0
                             ? selectedZones[item.id]
                                 .map((zoneId) =>
                                   z(
@@ -601,10 +625,10 @@ export default function Page() {
                     <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-2xl">
-                        {t("ChooseInspectionZone")}
+                          {t("ChooseInspectionZone")}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-base">
-                        {t("ChooseInspectionZoneDescription")}
+                          {t("ChooseInspectionZoneDescription")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div>
