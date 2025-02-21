@@ -577,28 +577,26 @@ export const getItemTypeVariant = (type: itemType) => {
   return { iconName, variant };
 };
 
-export function formatTime(timestamp: string) {
-  const date = new Date(timestamp).toLocaleDateString(
-    "th-TH",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }
-  );
+export function formatTime(timestamp: string, locale: string, showTime: boolean = true) {
+  let language = locale === "th" ? "th-TH" : "en-GB";
 
-  const time = new Date(timestamp).toLocaleTimeString(
-    "th-TH",
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    }
-  );
-  return date + " " + time
+  const date = new Date(timestamp).toLocaleDateString(language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  if (!showTime) return date;
+
+  const time = new Date(timestamp).toLocaleTimeString(language, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  return `${date} ${time}`;
 }
-
 export function formatPatrolId(id: number): string {
   let newId = id.toString().padStart(4, '0'); // ทำให้เป็นเลข 4 หลัก เติมศูนย์ข้างหน้า
   return `P${newId}`; // ใส่ P ด้านหน้า

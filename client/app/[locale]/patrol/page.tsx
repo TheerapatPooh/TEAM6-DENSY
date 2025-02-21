@@ -723,7 +723,7 @@ export default function Page() {
                 <PatrolCard
                   key={patrol.id}
                   status={patrol.status as patrolStatus}
-                  date={new Date(patrol.date)}
+                  date={(patrol.date)}
                   preset={patrol.preset}
                   id={patrol.id}
                   itemCounts={patrol.itemCounts}

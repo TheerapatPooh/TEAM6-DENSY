@@ -62,9 +62,16 @@ export async function getHeatMap(req: Request, res: Response) {
     return;
   }
 }
-export async function getDefectCatagory(req: Request, res: Response) {
+export async function getDefectCategory(req: Request, res: Response) {
   try {
-    const { startDate, endDate, zoneId } = req.query;
+    const { startDate, endDate, patrolId, zoneId } = req.query;
+
+    // เงื่อนไขกรอง defect ตาม patrolId
+    const patrolFilter: any = {
+      patrolResult: {
+        patrolId: Number(patrolId),
+      },
+    };
 
     // สร้างตัวกรองสำหรับวันที่ ถ้ามี startDate และ endDate
     let dateFilter: any = {};
@@ -89,8 +96,7 @@ export async function getDefectCatagory(req: Request, res: Response) {
     }
     const allDefects = await prisma.defect.findMany({
       where: {
-        startTime: dateFilter,
-        ...zoneFilter,
+        ...(patrolId ? patrolFilter : { ...dateFilter, ...zoneFilter }),
       },
       include: {
         supervisor: {
@@ -191,7 +197,7 @@ export async function getDefectCatagory(req: Request, res: Response) {
       defectCategoryMap[type].amounts++;
     });
 
-    const defectCatagory = Object.values(defectCategoryMap);
+    const defectCategory = Object.values(defectCategoryMap);
 
     // คำนวณ trend
     const currentMonthStart = startDate
@@ -241,7 +247,7 @@ export async function getDefectCatagory(req: Request, res: Response) {
     }
 
     let result = {
-      chartData: defectCatagory,
+      chartData: defectCategory,
       trend: trend,
     };
     res.status(200).json(result);
@@ -548,7 +554,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
       chartData: allPatrols.length !== 0 ? patrolCompletionRate : [],
       percent: !startDate && !endDate ? percent : currentPercent,
       trend: trend,
-    };
+    }
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -557,3 +563,71 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
     return;
   }
 }
+
+export async function getDefectReported(req: Request, res: Response) {
+  try {
+    const patrolId = parseInt(req.params.id, 10);
+
+    const patrol = await prisma.patrol.findFirst({
+      where: { id: patrolId },
+      select: {
+        results: {
+          select: {
+            zoneId: true,
+            defects: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                user: {
+                  select: {
+                    id: true,
+                    profile: {
+                      select: {
+                        id: true,
+                        name: true,
+                        image: { select: { path: true } }
+                      }
+                    }
+                  }
+                },
+                startTime: true,
+                status: true,
+              }
+            },
+          },
+        }
+      }
+    });
+
+    if (!patrol) {
+      res.status(404).json({ message: "patrol not found" });
+      return;
+    }
+
+    // ดึง zone ข้อมูลตาม zoneId
+    const zoneIds = patrol.results.map(result => result.zoneId);
+    const zones = await prisma.zone.findMany({
+      where: { id: { in: zoneIds } },
+      select: { id: true, name: true }
+    });
+
+    // รวม defects ทั้งหมดจาก results และผูก zone เข้าไป
+    const defects = patrol.results.flatMap(result =>
+      result.defects.map(defect => ({
+        ...defect,
+        zone: zones.find(zone => zone.id === result.zoneId) || {}
+      }))
+    );
+
+    res.status(200).json(defects);
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
+    return;
+  }
+}
+
+
+

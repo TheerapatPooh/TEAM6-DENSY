@@ -68,7 +68,7 @@ export default function Notification() {
         const [key, ...dynamicParts] = message.split('-');
         let content = dynamicParts.join('-');
         if (isValidDateFormat(content)) {
-            content = formatTime(content)
+            content = formatTime(content,locale)
         }
         else if (content) {
             content = z(content)

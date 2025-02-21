@@ -24,6 +24,7 @@ export async function getPatrol(req: Request, res: Response) {
     const includeResult = req.query.result === "true";
 
     const userId = (req as any).user.userId;
+    const role = (req as any).user.role;
     const patrolId = parseInt(req.params.id, 10);
     let patrol: any;
 
@@ -32,7 +33,7 @@ export async function getPatrol(req: Request, res: Response) {
         id: patrolId,
         patrolChecklists: {
           some: {
-            userId: userId,
+            userId: role === "admin" ? undefined : userId,
           },
         },
       },
@@ -161,11 +162,12 @@ export async function getAllPatrols(req: Request, res: Response) {
   try {
     const { status, preset, startDate, endDate, search } = req.query;
     const userId = (req as any).user.userId;
+    const role = (req as any).user.role;
     // สร้างเงื่อนไขหลัก สำหรับค้นหา
     const whereConditions: any = {
       patrolChecklists: {
         some: {
-          userId: userId,
+          userId: role === "admin" ? undefined : userId,
         },
       },
     };
@@ -336,52 +338,173 @@ export async function getAllPatrols(req: Request, res: Response) {
             },
           },
         },
+        results: {
+          select: {
+            status: true,
+            defects: true,
+          }
+        }
+      },
+    });
+
+    const allPatrolsAdmin = await prisma.patrol.findMany({
+      where: whereConditions,
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            version: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                    image: true,
+                                  },
+                                },
+                              },
+                            }
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              select: {
+                id: true,
+                email: true,
+                profile: {
+                  include: {
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          select: {
+            id: true,
+            status: true,
+            defects: true,
+          }
+        }
       },
     });
 
     // จัดกลุ่ม patrols โดยใช้ id และรวม Inspectors และ Item Counts
     const groupedPatrols: Record<number, any> = {};
 
-    allPatrols.forEach((patrol) => {
-      if (!groupedPatrols[patrol.id]) {
-        groupedPatrols[patrol.id] = {
-          id: patrol.id,
-          date: patrol.date,
-          status: patrol.status,
-          preset: patrol.preset,
-          itemCounts: {},
-          inspectors: [],
-          disabled: false,
-        };
-      }
-
-      let count = 0;
-      let disabled = false;
-      patrol.patrolChecklists.forEach((patrolChecklist) => {
-        // นับจำนวน item แต่ละประเภท
-        patrolChecklist.checklist.items.forEach((item) => {
-          item.itemZones.forEach((itemZone) => {
-            count++;
-            if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
-              disabled = true;
-            }
-          });
-        });
-        groupedPatrols[patrol.id].itemCounts = count;
-
-        // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
-        const inspector = patrolChecklist.inspector;
-        if (
-          inspector &&
-          !groupedPatrols[patrol.id].inspectors.some(
-            (ins: any) => ins.id === inspector.id
-          )
-        ) {
-          groupedPatrols[patrol.id].inspectors.push(inspector);
+    if (role === "admin") {
+      allPatrolsAdmin.forEach((patrol) => {
+        if (!groupedPatrols[patrol.id]) {
+          groupedPatrols[patrol.id] = {
+            id: patrol.id,
+            date: patrol.date,
+            startTime: patrol.startTime,
+            endTime: patrol.endTime,
+            duration: patrol.duration,
+            status: patrol.status,
+            preset: patrol.preset,
+            patrolChecklists: patrol.patrolChecklists,
+            itemCounts: {},
+            inspectors: [],
+            results: patrol.results,
+            disabled: false,
+          };
         }
+
+        let count = 0;
+        let disabled = false;
+        patrol.patrolChecklists.forEach((patrolChecklist) => {
+          // นับจำนวน item แต่ละประเภท
+          patrolChecklist.checklist.items.forEach((item) => {
+            item.itemZones.forEach((itemZone) => {
+              count++;
+              if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
+                disabled = true;
+              }
+            });
+          });
+          groupedPatrols[patrol.id].itemCounts = count;
+
+          // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
+          const inspector = patrolChecklist.inspector;
+          if (
+            inspector &&
+            !groupedPatrols[patrol.id].inspectors.some(
+              (ins: any) => ins.id === inspector.id
+            )
+          ) {
+            groupedPatrols[patrol.id].inspectors.push(inspector);
+          }
+        });
+        groupedPatrols[patrol.id].disabled = disabled;
       });
-      groupedPatrols[patrol.id].disabled = disabled;
-    });
+    } else {
+      allPatrols.forEach((patrol) => {
+        if (!groupedPatrols[patrol.id]) {
+          groupedPatrols[patrol.id] = {
+            id: patrol.id,
+            date: patrol.date,
+            status: patrol.status,
+            preset: patrol.preset,
+            itemCounts: {},
+            inspectors: [],
+            disabled: false,
+          };
+        }
+
+        let count = 0;
+        let disabled = false;
+        patrol.patrolChecklists.forEach((patrolChecklist) => {
+          // นับจำนวน item แต่ละประเภท
+          patrolChecklist.checklist.items.forEach((item) => {
+            item.itemZones.forEach((itemZone) => {
+              count++;
+              if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
+                disabled = true;
+              }
+            });
+          });
+          groupedPatrols[patrol.id].itemCounts = count;
+
+          // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
+          const inspector = patrolChecklist.inspector;
+          if (
+            inspector &&
+            !groupedPatrols[patrol.id].inspectors.some(
+              (ins: any) => ins.id === inspector.id
+            )
+          ) {
+            groupedPatrols[patrol.id].inspectors.push(inspector);
+          }
+        });
+        groupedPatrols[patrol.id].disabled = disabled;
+      });
+    }
 
     // แปลงกลุ่ม patrols เป็น array
     const result = Object.values(groupedPatrols);

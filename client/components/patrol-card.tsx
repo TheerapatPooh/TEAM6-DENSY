@@ -34,7 +34,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { formatPatrolId, getInitials, getPatrolStatusVariant } from "@/lib/utils";
+import { formatPatrolId, formatTime, getInitials, getPatrolStatusVariant } from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
@@ -43,7 +43,7 @@ import BadgeCustom from "@/components/badge-custom";
 
 export interface IPatrolCard {
   id: number;
-  date: Date;
+  date: string;
   status: patrolStatus;
   preset: IPreset;
   itemCounts: number;
@@ -73,16 +73,6 @@ export function PatrolCard({
 
   const router = useRouter()
   const locale = useLocale()
-
-  const formattedDate =
-    date instanceof Date
-      ? date.toLocaleDateString(`${locale}-GB`, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      : "N/A"; // Fallback if date is not valid
-
 
   const getPatrolData = async () => {
     try {
@@ -182,7 +172,7 @@ export function PatrolCard({
       <CardHeader className="flex flex-row gap-0 p-0 justify-between">
         <div className="flex flex-col justify-between items-start gap-4 truncate">
           <CardDescription className="text-lg font-semibold text-muted-foreground">
-            {formattedDate}
+            {formatTime(date,locale,false)}
           </CardDescription>
           <CardTitle className="text-card-foreground text-2xl truncate w-full">
             {preset.title}

@@ -39,7 +39,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Skeleton } from "./ui/skeleton";
 import { formatTime } from "@/lib/utils";
 import AlertDefect from "./alert-defect";
@@ -84,6 +84,7 @@ export default function PatrolChecklist({
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
   const param = useParams()
+  const locale = useLocale()
 
   const checkStatus = (itemId: number, zoneId: number) => {
     const result = results.find(
@@ -395,7 +396,7 @@ export default function PatrolChecklist({
                                         (
                                           <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
                                             <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
-                                            <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp)}</p>
+                                            <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp,locale)}</p>
                                             <div className="flex items-end">
                                               <p className="text-xl">{comment.message}</p>
                                             </div>

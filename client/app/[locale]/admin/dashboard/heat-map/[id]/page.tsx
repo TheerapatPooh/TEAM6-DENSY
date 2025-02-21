@@ -41,7 +41,7 @@ export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [selectedMonth, setSelectedMonth] = useState<string>("AllTime");
   const [zone, setZone] = useState<IZone>();
-  const [defectCatagory, setDefectCatagory] = useState<IDefectCategory>();
+  const [defectCategory, setDefectCategory] = useState<IDefectCategory>();
   const [commonDefects, setCommonDefect] = useState<ICommonDefectItem[]>();
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -146,6 +146,8 @@ export default function Page() {
   const router = useRouter();
   const locale = useLocale();
 
+  
+
   const getData = async () => {
     const { startDate, endDate } = getMonthRange(selectedMonth);
     const queryParams: Record<string, string | undefined> = {};
@@ -167,11 +169,11 @@ export default function Page() {
 
     const queryString = new URLSearchParams(queryParams).toString();
     const zone = await fetchData("get", `/zone/${params.id}?dashboard=true&${queryString}`, true);
-    const defectCatagory = await fetchData("get", `/dashboard/defect-catagory?${queryString}`, true);
+    const defectCategory = await fetchData("get", `/dashboard/defect-category?${queryString}`, true);
     const commonDefects = await fetchData("get", `/dashboard/common-defects?${queryString}`, true);
     // fetch data
     setZone(zone);
-    setDefectCatagory(defectCatagory);
+    setDefectCategory(defectCategory);
     setCommonDefect(commonDefects);
   };
 
@@ -297,13 +299,13 @@ export default function Page() {
               defectTrend={zone.dashboard.defectTrend}
             />
           </div>
-          {/* Defect Catagory & Common Defects */}
+          {/* Defect Category & Common Defects */}
           <div className="flex flex-col xl:flex-row gap-4 justify-between">
             <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
               <h1 className="text-2xl font-semibold text-card-foreground">
-                {d("DefectCatagory")}
+                {d("DefectCategory")}
               </h1>
-              <DonutGraph key={JSON.stringify(defectCatagory.chartData)} chartData={defectCatagory.chartData} trend={defectCatagory.trend} />
+              <DonutGraph key={JSON.stringify(defectCategory.chartData)} chartData={defectCategory.chartData} trend={defectCategory.trend} />
             </div>
             <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
               <h1 className="text-2xl font-semibold text-card-foreground">
@@ -529,7 +531,7 @@ export default function Page() {
                         </div>
                       </TableCell>
                       <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-2 flex items-center">
-                        {formatTime(defect.startTime)}
+                        {formatTime(defect.startTime,locale)}
                       </TableCell>
                       <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
                         <BadgeCustom
