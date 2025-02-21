@@ -233,7 +233,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const handleResult = (result: IPatrolResult) => {
         setResults((prevResults) => {
             const existingIndex = prevResults.findIndex(
-                (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
+                (r) => r.id === result.id
             );
 
             if (existingIndex !== -1) {
@@ -478,6 +478,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [socket, patrol?.id]);
 
     useEffect(() => {
+        mergeResults(results)
 
         if (socket && isConnected && results.length > 0 && patrol) {
             const uniqueResults = results.map(({ inspectorId, id, itemId, zoneId, status }) => {
@@ -487,7 +488,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 if (existingResult) {
                     return {
                         inspectorId,
-                        id: existingResult.id,  
+                        id: existingResult.id,
                         itemId,
                         zoneId,
                         status,
@@ -504,8 +505,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                     };
                 }
             });
-
-            console.log("uniqueResults", uniqueResults)
 
             const hasChanged =
                 uniqueResults.length !== lastEmittedResults.current.length ||

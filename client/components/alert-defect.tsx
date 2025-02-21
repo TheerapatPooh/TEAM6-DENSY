@@ -53,7 +53,7 @@ interface IAlertDefect {
     item?: IItem,
     type: "edit" | "report" | "resolve" | "edit-resolve",
     patrolResults?: IPatrolResult[],
-    result?: { inspectorId: number, itemId: number; zoneId: number; status: boolean },
+    result?: { inspectorId: number, itemId: number; zoneId: number; status: boolean, supervisorId?: number },
     response: (defect: IDefect) => void;
 }
 
@@ -120,16 +120,23 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
             });
             return;
         }
+        // formData.append("name", name);
+        // formData.append("description", description);
+        // formData.append("type", type);
+        // formData.append("status", "reported");
+        // formData.append("defectUserId", userId?.toString());
+        // formData.append("patrolResultId", patrolResultId.toString());
+        // formData.append("supervisorId", supervisorId.toString());
+        const defectData = {
+            name,
+            description,
+            type,
+            defectUserId: userId?.toString(),
+            patrolResultId: patrolResultId.toString(),
+            supervisorId: supervisorId.toString(),
+        };
 
         const formData = new FormData();
-
-        formData.append("name", name);
-        formData.append("description", description);
-        formData.append("type", type);
-        formData.append("status", "reported");
-        formData.append("defectUserId", userId?.toString());
-        formData.append("patrolResultId", patrolResultId.toString());
-        formData.append("supervisorId", supervisorId.toString());
 
         files?.forEach((file) => {
             formData.append("imageFiles", file);
@@ -139,8 +146,22 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 "post",
                 "/defect",
                 true,
+                defectData,
+                false
+            );
+            const defectId = createDefect.id;
+
+            // ส่งไฟล์ใน request แยก
+            const formData = new FormData();
+            formData.append("status", createDefect.status);
+            files.forEach((file) => formData.append("imageFiles", file));
+
+            await fetchData(
+                "put",
+                `/defect/${defectId}/upload`,
+                true,
                 formData,
-                true
+                true // เป็น FormData
             );
             if (description && files) {
                 toast({
@@ -186,13 +207,21 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
 
         const formData = new FormData();
 
-        formData.append("name", name);
-        formData.append("description", description);
-        formData.append("type", type);
-        formData.append("status", status);
-        formData.append("defectUserId", userId.toString());
-        formData.append("patrolResultId", patrolResultId.toString());
-        formData.append("supervisorId", supervisorId.toString());
+        // formData.append("name", name);
+        // formData.append("description", description);
+        // formData.append("type", type);
+        // formData.append("status", status);
+        // formData.append("defectUserId", userId.toString());
+        // formData.append("patrolResultId", patrolResultId.toString());
+        // formData.append("supervisorId", supervisorId.toString());
+        const defectData = {
+            name,
+            description,
+            type,
+            defectUserId: userId?.toString(),
+            patrolResultId: patrolResultId.toString(),
+            supervisorId: supervisorId.toString(),
+        };
 
         files?.forEach((file) => {
             formData.append("imageFiles", file);
@@ -202,9 +231,17 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 "put",
                 `/defect/${id}`,
                 true,
-                formData,
-                true
+                defectData,
+                false
             );
+            const defectId = updateDefect.id;
+
+            // จากนั้นเรียก API สำหรับอัปโหลดรูปภาพแยกต่างหาก
+            const formData = new FormData();
+            formData.append("status", updateDefect.status);
+            files.forEach((file) => formData.append("imageFiles", file));
+
+            await fetchData("put", `/defect/${defectId}/upload`, true, formData, true);
             if (description && files) {
                 toast({
                     variant: "success",
@@ -238,30 +275,44 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
             return;
         }
 
-        const formData = new FormData();
+        const defectData = {
+            supervisorId: defect.supervisor.id.toString(),
+            defectUserId: defect.userId.toString(),
+            status: "resolved",
+            deleteExistingImages: deleteExistingImages.toString(),
+        };
+        // formData.append("supervisorId",
+        //     defect.supervisor.id.toString()
+        // );
+        // formData.append("defectUserId",
+        //     defect.userId.toString()
+        // );
+        // formData.append("status", "resolved")
+        // formData.append("deleteExistingImages", deleteExistingImages.toString())
 
-        formData.append("supervisorId",
-            defect.supervisor.id.toString()
-        );
-        formData.append("defectUserId",
-            defect.userId.toString()
-        );
-        formData.append("status", "resolved")
-        formData.append("deleteExistingImages", deleteExistingImages.toString())
-
-        files?.forEach((file) => {
-            formData.append("imageFiles", file);
-        });
 
         try {
             const resolveDefect = await fetchData(
                 "put",
                 `/defect/${id}`,
                 true,
-                formData,
-                true
+                defectData,
+                false
             );
+            const formData = new FormData();
 
+
+            formData.append("status", resolveDefect.status);
+            files?.forEach((file) => {
+                formData.append("imageFiles", file);
+            });
+            await fetchData(
+                "put",
+                `/defect/${id}/upload`, // ใช้ PUT สำหรับการอัปโหลดไฟล์
+                true,
+                formData,
+                true // เป็น FormData
+            );
             if (files) {
                 if (type === "resolve") {
                     toast({
@@ -367,7 +418,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 ? item.itemZones.map((itemZone: IItemZone) => {
                                                     return result.zoneId === itemZone.zone.id
                                                         ? z(itemZone.zone.name)
-                                                        : null;  
+                                                        : null;
                                                 })
                                                 : z(defect.patrolResult.itemZone.zone.name)}
                                         </p>

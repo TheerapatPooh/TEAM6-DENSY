@@ -88,6 +88,9 @@ export default function Page() {
   itemCounts(patrol, patrolResults);
   const inspectors = patrolUser;
 
+  console.log('patrolResults', patrolResults)
+  console.log("results", results);
+
   return (
     <div className="flex flex-col gap-4 overflow-hidden">
       {/* TabList และ Title */}
@@ -533,11 +536,9 @@ export default function Page() {
             <PatrolChecklist
               handleResult={handleResult}
               patrolStatus={patrol.status}
-              results={results}
               patrolChecklist={pc}
               disabled={patrol.status === "on_going" && !lock ? false : true}
-              patrolResult={patrolResults}
-              user={user}
+              patrolResults={patrolResults}
               response={(defect: IDefect) => {
                 fetchRealtimeData(defect, "create");
               }}
