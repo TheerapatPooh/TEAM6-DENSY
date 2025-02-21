@@ -592,7 +592,7 @@ export default function Page() {
                   onSubmit={handleSubmit(onSubmit)}
                   className="flex flex-col gap-4"
                 >
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 w-96">
                     <label>{t("Username")}</label>
                     <Textfield
                       className="bg-secondary"
@@ -616,7 +616,7 @@ export default function Page() {
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 w-96">
                     <label>{t("Password")}</label>
                     <Textfield
                       className="bg-secondary"
@@ -642,14 +642,14 @@ export default function Page() {
 
                   <div className="flex flex-col gap-1">
                     <label>{t("Role")}</label>
-                    <div className="relative bg-secondary rounded-md ">
+                    <div className="relative rounded-md w-auto">
                       <Select
                         defaultValue="inspector"
                         onValueChange={(value) => {
                           userCreate.current.role = value as role;
                         }}
                       >
-                        <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                        <SelectTrigger className="bg-secondary w-96 h-auto p-2 rounded-md border-none">
                           <SelectValue placeholder="" />
                         </SelectTrigger>
                         <SelectContent>
