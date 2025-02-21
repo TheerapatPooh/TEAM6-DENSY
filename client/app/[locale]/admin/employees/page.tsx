@@ -58,6 +58,7 @@ export default function Page() {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const roles = [
     {
@@ -93,7 +94,7 @@ export default function Page() {
   const [allUsers, setAllUsers] = useState<IUser[]>([]);
   const getData = async () => {
     try {
-      
+
       // Construct query params for roles, active status, and search term
       const params = new URLSearchParams();
 
@@ -101,14 +102,14 @@ export default function Page() {
       if (selectedRoles.length > 0) {
         params.append("roles", selectedRoles.join(","));
       } else {
-    
+
       }
 
       // Add active status to params
       if (selectedStatus !== null) {
         params.append("active", selectedStatus.toString()); // Assuming `selectedStatus` is a boolean
       } else {
-        
+
       }
 
       // Add search term to params (if any)
@@ -118,7 +119,7 @@ export default function Page() {
 
       }
 
-      
+
 
       // Fetch data using fetchData utility with query params
       const data = await fetchData(
@@ -127,7 +128,7 @@ export default function Page() {
         true
       );
 
-      
+
 
       // Validate data format
       if (!Array.isArray(data)) {
@@ -135,7 +136,7 @@ export default function Page() {
         return []; // Return empty array if data format is incorrect
       }
 
-      
+
       setAllUsers(data); // Update state with the fetched data
       setFilteredUsers(data); // Initially set filtered data to all data
 
@@ -151,6 +152,23 @@ export default function Page() {
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      console.log("Window width:", window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // เรียกใช้งานครั้งแรก
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
 
   // Fetch and apply search filter on search term change
   useEffect(() => {
@@ -192,7 +210,7 @@ export default function Page() {
   const form = useForm();
   const { handleSubmit } = form;
 
-  const onSubmit = () => {};
+  const onSubmit = () => { };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -207,17 +225,17 @@ export default function Page() {
       }
 
       const updatedStatus = !user.active;
-      
+
 
       // Show toast based on the new status
       toast({
         variant: "success",
         title: updatedStatus
-        ? a("UserActivationSuccessful")
-        : a("UserDeactivationSuccessful"),
-      description: updatedStatus
-        ? a("UserActivationSuccessfulDescription")
-        : a("UserDeactivationSuccessfulDescription"),
+          ? a("UserActivationSuccessful")
+          : a("UserDeactivationSuccessful"),
+        description: updatedStatus
+          ? a("UserActivationSuccessfulDescription")
+          : a("UserDeactivationSuccessfulDescription"),
       });
 
       return prevUsers.map((user) =>
@@ -247,39 +265,39 @@ export default function Page() {
         console.error(`User with ID ${userId} not found.`);
         return prevUsers;
       }
-  
+
       const data: { active: boolean; password?: string; role: role } = {
         active,
         role,
       };
-  
+
       // Add password to data if provided
       if (password && password.trim() !== "") {
         data.password = password;
       }
-  
+
       // Check if there is no update to apply
       if (role === user.role && password === "") {
         toast({
           variant: "default",
           title: a("NoUpdatesApplied"),
-          description:a("NoUpdatesAppliedDescription"),
+          description: a("NoUpdatesAppliedDescription"),
         });
         return prevUsers; // No updates, return previous state
       }
-  
+
       // Proceed to update if changes are detected
       const updatedUsers = prevUsers.map((user) =>
         user.id === userId
           ? {
-              ...user,
-              ...(data.role && { role: data.role }), // Update role if needed
-              ...(password && { password: data.password }), // Update password if needed
-              active: data.active, // Update active status
-            }
+            ...user,
+            ...(data.role && { role: data.role }), // Update role if needed
+            ...(password && { password: data.password }), // Update password if needed
+            active: data.active, // Update active status
+          }
           : user
       );
-  
+
       // Perform the API update
       const updateUserData = async () => {
         try {
@@ -299,16 +317,16 @@ export default function Page() {
           });
         }
       };
-  
+
       // Call update only if there are changes
       if (role !== user.role || password !== "") {
         updateUserData(); // Execute async update call
       }
-  
+
       return updatedUsers; // Return updated user list for optimistic rendering
     });
   };
-  
+
 
   let userCreate = useRef<editedUser>({
     username: "",
@@ -331,7 +349,7 @@ export default function Page() {
       toast({
         variant: "success",
         title: a("EmployeeAdded"),
-        description:a("EmployeeAddedDescription"),
+        description: a("EmployeeAddedDescription"),
       });
       const response = await fetchData("post", `/user`, true, data);
       setFilteredUsers((prev) => [...prev, response]);
@@ -481,10 +499,10 @@ export default function Page() {
   const [sortedUser, setSortedUser] = useState<IUser[]>([]);
 
   useEffect(() => {
-  
+
     const sorted = [...filteredUsers].sort((a, b) => {
       let comparison = 0;
-  
+
       // Sort by Name
       if (sortOption === "Name") {
         const titleA = a.title || a.username || ""; // Handle undefined values
@@ -501,14 +519,14 @@ export default function Page() {
       else if (sortOption === "ID") {
         comparison = a.id - b.id; // Assume ID is a number
       }
-  
+
       return sortOrder === "asc" ? comparison : -comparison; // Ascending/Descending order
     });
-  
+
     setSortedUser(sorted); // Set the sorted users list
-  
+
   }, [filteredUsers, sortOption, sortOrder]); // Dependencies (no need for `allUsers` here)
-  
+
   useEffect(() => {
     userRefs.current = sortedUser.map((employee) => ({
       username: employee.username,
@@ -574,7 +592,7 @@ export default function Page() {
                   onSubmit={handleSubmit(onSubmit)}
                   className="flex flex-col gap-4"
                 >
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 w-96">
                     <label>{t("Username")}</label>
                     <Textfield
                       className="bg-secondary"
@@ -598,7 +616,7 @@ export default function Page() {
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 w-96">
                     <label>{t("Password")}</label>
                     <Textfield
                       className="bg-secondary"
@@ -624,14 +642,14 @@ export default function Page() {
 
                   <div className="flex flex-col gap-1">
                     <label>{t("Role")}</label>
-                    <div className="relative bg-secondary rounded-md ">
+                    <div className="relative rounded-md w-auto">
                       <Select
                         defaultValue="inspector"
                         onValueChange={(value) => {
                           userCreate.current.role = value as role;
                         }}
                       >
-                        <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                        <SelectTrigger className="bg-secondary w-96 h-auto p-2 rounded-md border-none">
                           <SelectValue placeholder="" />
                         </SelectTrigger>
                         <SelectContent>
@@ -789,17 +807,16 @@ export default function Page() {
                   <DropdownMenuCheckboxItem
                     key={role.value}
                     checked={selectedRoles.includes(role.value)}
-                    className={`text-base ${
-                      selectedRoles.includes(role.value) ? "bg-muted/50" : ""
-                    }`}
+                    className={`text-base ${selectedRoles.includes(role.value) ? "bg-muted/50" : ""
+                      }`}
                     onSelect={(e) => {
                       e.preventDefault();
                       // Toggle role selection in the array
                       setSelectedRoles((prevSelectedRoles) =>
                         prevSelectedRoles.includes(role.value)
                           ? prevSelectedRoles.filter(
-                              (item) => item !== role.value
-                            )
+                            (item) => item !== role.value
+                          )
                           : [...prevSelectedRoles, role.value]
                       );
                     }}
@@ -808,15 +825,15 @@ export default function Page() {
                       shape="square"
                       variant={
                         role.variant as
-                          | "blue"
-                          | "red"
-                          | "yellow"
-                          | "green"
-                          | "default"
-                          | "secondary"
-                          | "mint"
-                          | "orange"
-                          | "purple"
+                        | "blue"
+                        | "red"
+                        | "yellow"
+                        | "green"
+                        | "default"
+                        | "secondary"
+                        | "mint"
+                        | "orange"
+                        | "purple"
                       }
                       iconName={role.icon}
                       showIcon={true}
@@ -834,9 +851,8 @@ export default function Page() {
                     <DropdownMenuRadioItem
                       key={status.value}
                       value={status.value}
-                      className={`text-base ${
-                        selectedStatus === status.value ? "bg-muted/50" : ""
-                      }`}
+                      className={`text-base ${selectedStatus === status.value ? "bg-muted/50" : ""
+                        }`}
                       onSelect={(e) => {
                         if (
                           status.value === "true" ||
@@ -851,15 +867,15 @@ export default function Page() {
                       <BadgeCustom
                         variant={
                           status.variant as
-                            | "blue"
-                            | "red"
-                            | "yellow"
-                            | "green"
-                            | "default"
-                            | "secondary"
-                            | "mint"
-                            | "orange"
-                            | "purple"
+                          | "blue"
+                          | "red"
+                          | "yellow"
+                          | "green"
+                          | "default"
+                          | "secondary"
+                          | "mint"
+                          | "orange"
+                          | "purple"
                         }
                       >
                         <div className="flex flex-row justify-center items-center gap-2 w-[105px]">
@@ -887,334 +903,303 @@ export default function Page() {
         </div>
 
         {/* Manage Employees Section */}
-       
-          {/* Header */}
-          {sortedUser.length > 0 ? (
-            <div className="bg-secondary rounded-lg border-none">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[5%] ">{t("Id")}</TableHead>
-                    <TableHead className="w-[30%]">{t("FullName")}</TableHead>
-                    <TableHead className="w-[30%]">{t("Role")}</TableHead>
-                    <TableHead className="w-[30%]">{t("Status")}</TableHead>
-                    <TableHead className=" w-[1%]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedUser.map((employee, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {employee.id}
-                      </TableCell>
-                      <TableCell className="font-medium items-center">
-                        <div className="flex items-center gap-2">
-                          <div>
-                            {employee.profile.name ? (
-                              <Avatar className="custom-shadow h-[35px] w-[35px]">
-                                <AvatarImage
-                                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
-                                />
-                                <AvatarFallback
-                                  id={employee.id.toString()}
-                                  className="text-[10px] "
-                                >
-                                  {getInitials(employee.profile.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                            ) : (
-                              <Skeleton className="w-[22px] h-[22px] rounded-full bg-input" />
-                            )}
-                          </div>
 
-                          <div>
-                            {employee.profile.name ? (
-                              employee.profile.name
-                            ) : (
-                              <div className="text-destructive">
-                                {employee.username}
-                                <div className="text-[14px]">
-                                  {t("NoProfileProvided")}
-                                </div>
-                              </div>
-                            )}
-                          </div>
+        {/* Header */}
+        {sortedUser.length > 0 ? (
+          <div className="bg-secondary rounded-lg border-none">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[5%] ">{t("Id")}</TableHead>
+                  <TableHead className="w-[30%]">{t("FullName")}</TableHead>
+                  <TableHead className="w-[30%]">{t("Role")}</TableHead>
+                  <TableHead className="w-[30%]">{t("Status")}</TableHead>
+                  <TableHead className=" w-[1%]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedUser.map((employee, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {employee.id}
+                    </TableCell>
+                    <TableCell className="font-medium items-center">
+                      <div className="flex items-center gap-2">
+                        <div>
+                          {employee.profile.name ? (
+                            <Avatar className="custom-shadow h-[35px] w-[35px]">
+                              <AvatarImage
+                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
+                              />
+                              <AvatarFallback
+                                id={employee.id.toString()}
+                                className="text-[10px] "
+                              >
+                                {getInitials(employee.profile.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <Skeleton className="w-[22px] h-[22px] rounded-full bg-input" />
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <BadgeCustom
-                          shape="square"
-                          variant={
-                            employee.role === "supervisor"
-                              ? "yellow"
-                              : employee.role === "admin"
+
+                        <div>
+                          {employee.profile.name ? (
+                            employee.profile.name
+                          ) : (
+                            <div className="text-destructive">
+                              {employee.username}
+                              <div className="text-[14px]">
+                                {t("NoProfileProvided")}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <BadgeCustom
+                        shape="square"
+                        variant={
+                          employee.role === "supervisor"
+                            ? "yellow"
+                            : employee.role === "admin"
                               ? "blue"
                               : employee.role === "inspector"
-                              ? "red"
-                              : "mint"
-                          }
-                          iconName={
-                            employee.role === "supervisor"
-                              ? "engineering"
-                              : employee.role === "inspector"
+                                ? "red"
+                                : "mint"
+                        }
+                        iconName={
+                          employee.role === "supervisor"
+                            ? "engineering"
+                            : employee.role === "inspector"
                               ? "person_search"
                               : employee.role === "admin"
-                              ? "manage_accounts"
-                              : "account_circle"
-                          }
-                          showIcon={true}
+                                ? "manage_accounts"
+                                : "account_circle"
+                        }
+                        showIcon={true}
+                        hideText={windowWidth > 911 ? false : true}
+                      >
+                        {t(employee.role)}
+                      </BadgeCustom>
+                    </TableCell>
+                    <TableCell>
+                      <BadgeCustom
+                        variant={employee.active ? "green" : "red"}
+                        showIcon={true}
+                      >
+                        <div
+                          className={`flex flex-row justify-center items-center gap-2 ${windowWidth <= 911 ? "w-[25px]" : "w-[105px]"}`}
                         >
-                          {t(employee.role)}
-                        </BadgeCustom>
-                      </TableCell>
-                      <TableCell>
-                        <BadgeCustom
-                          variant={employee.active ? "green" : "red"}
-                          showIcon={true}
-                        >
-                          <div className="flex flex-row justify-center items-center gap-2 w-[105px]">
-                            <div
-                              className={` flex w-2 h-2  rounded-full ${
-                                employee.active ? "bg-green" : "bg-destructive"
-                              } `}
-                            ></div>
-                            {employee.active ? t("Active") : t("Inactive")}
-                          </div>
-                        </BadgeCustom>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <Button
-                              variant="ghost"
-                              className="w-[45px] h-[45px]"
-                              onClick={() => setDialogType("blank")}
-                            >
-                              <span className="material-symbols-outlined items-center text-muted-foreground">
-                                more_horiz
-                              </span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="px-4 py-2"
+                          <div
+                            className={`w-2 h-2 rounded-full ${employee.active ? "bg-green" : "bg-destructive"
+                              }`}
+                          ></div>
+                          {windowWidth > 911 && (employee.active ? t("Active") : t("Inactive"))}
+                        </div>
+                      </BadgeCustom>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <Button
+                            variant="ghost"
+                            className="w-[45px] h-[45px]"
+                            onClick={() => setDialogType("blank")}
                           >
-                            <div className=" cursor-pointer">
-                              <AlertDialog
-                                open={
-                                  (isDialogOpen && dialogType === "editform") ||
-                                  dialogType === "edit"
-                                }
-                              >
-                                <AlertDialogTrigger
-                                  asChild
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsDialogOpen(true);
-                                    setPasswordErrorForEdit(null);
-                                    setDialogType("editform");
-                                    userRefs.current[index].password = "";
-                                  }}
-                                >
-                                  <div
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="flex w-full text-[18px]"
-                                  >
-                                    {t("Edit")}
-                                  </div>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent
-                                  className="flex flex-col gap-4 "
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <AlertDialogHeader>
-                                    <h1 className="text-2xl font-bold">
-                                      {t("EditEmployee")}
-                                    </h1>
-                                    <AlertDialogTitle></AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      {t("EditEmployeeDescription")}
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-
-                                  <div className="flex flex-col gap-1 pointer-events-none">
-                                    <label> {t("Username")}</label>
-                                    <Textfield
-                                      className="bg-secondary cursor-not-allowed "
-                                      showIcon={true}
-                                      iconName="person"
-                                      onChange={() => {}}
-                                      value={""}
-                                      placeholder={employee.username}
-                                    />
-                                  </div>
-
-                                  <div className=" flex flex-col gap-4">
-                                    <div>
-                                      <label>{t("Password")}</label>
-                                      <Textfield
-                                        placeholder={t("Password")}
-                                        className={`bg-secondary`}
-                                        showIcon={true}
-                                        iconName="lock"
-                                        onChange={(e) => {
-                                          try {
-                                            if (userRefs.current[index]) {
-                                              userRefs.current[index].password =
-                                                e.target.value;
-                                            }
-
-                                            // Validate password length
-                                            if (e.target.value.length < 8) {
-                                              setPasswordErrorForEdit(
-                                                "Password must be at least 8 characters long."
-                                              );
-                                            } else {
-                                              setPasswordErrorForEdit(null);
-                                            }
-                                          } catch (error) {
-                                            console.error(
-                                              "Error in onChange handler:",
-                                              error
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    </div>
-
-                                    {passwordErrorForEdit && (
-                                      <p className="text-red-500 text-sm mt-1">
-                                        {passwordErrorForEdit}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  <div className="">
-                                    <label>{t("Role")}</label>
-                                    <div className="relative bg-secondary rounded-md">
-                                      <Select
-                                        defaultValue={employee.role}
-                                        onValueChange={(value) => {
-                                          if (userRefs.current[index]) {
-                                            userRefs.current[index].role =
-                                              value as role; // Ensure the value matches the type
-                                          }
-                                        }}
-                                      >
-                                        <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
-                                          <SelectValue placeholder="" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectGroup>
-                                            <SelectItem value="supervisor">
-                                              <BadgeCustom
-                                                variant="yellow"
-                                                iconName="engineering"
-                                                showIcon={true}
-                                                shape="square"
-                                              >
-                                                {t("supervisor")}
-                                              </BadgeCustom>
-                                            </SelectItem>
-                                            <SelectItem value="inspector">
-                                              <BadgeCustom
-                                                variant="red"
-                                                iconName="person_search"
-                                                showIcon={true}
-                                                shape="square"
-                                              >
-                                                {t("inspector")}
-                                              </BadgeCustom>
-                                            </SelectItem>
-                                            <SelectItem value="admin">
-                                              <BadgeCustom
-                                                variant="blue"
-                                                iconName="manage_accounts"
-                                                showIcon={true}
-                                                shape="square"
-                                              >
-                                                {t("admin")}
-                                              </BadgeCustom>
-                                            </SelectItem>
-                                          </SelectGroup>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-
-                                  <AlertDialogFooter>
-                                    <Button
-                                      variant="secondary"
-                                      size="lg"
-                                      onClick={async () => {
-                                        handleDialogResult(false);
-                                          setPendingAction(null); // Clear the pending action
-                                          setDialogType(""); // Reset the dialog type after action is completed
-                                      }}
-                                    >
-                                      {t("Back")}
-                                    </Button>
-                                    <Button
-                                      className=" flex  justify-center gap-2"
-                                      variant="primary"
-                                      size="lg"
-                                      onClick={(e) => {
-                                        e.stopPropagation(); // Prevent click event from bubbling up
-                                        handleEditUserDialog(
-                                          employee.id,
-                                          index
-                                        );
-                                      }}
-                                    >
-                                      <span className="material-symbols-outlined">
-                                        save
-                                      </span>
-                                      {t("Save")}
-                                    </Button>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-
-                                {isDialogOpen === true &&
-                                  dialogType === "edit" && (
-                                    <AlertCustom
-                                      title={a("SureToEditEmployee")}
-                                      description={
-                                        a("SureToEditEmployeeDescription")
-                                      }
-                                      primaryButtonText={t("Confirm")}
-                                      primaryIcon="check"
-                                      secondaryButtonText={t("Cancel")}
-                                      backResult={handleDialogResult}
-                                    />
-                                  )}
-                              </AlertDialog>
-                            </div>
-                            <div className=" cursor-pointer">
-                              <div
+                            <span className="material-symbols-outlined items-center text-muted-foreground">
+                              more_horiz
+                            </span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="px-4 py-2"
+                        >
+                          <div className=" cursor-pointer">
+                            <AlertDialog
+                              open={
+                                (isDialogOpen && dialogType === "editform") ||
+                                dialogType === "edit"
+                              }
+                            >
+                              <AlertDialogTrigger
+                                asChild
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleInactiveUserDialog(employee.id);
+                                  setIsDialogOpen(true);
+                                  setPasswordErrorForEdit(null);
+                                  setDialogType("editform");
+                                  userRefs.current[index].password = "";
                                 }}
-                                className="flex w-full text-[18px] text-destructive"
                               >
-                                {employee.active
-                                  ? t("Deactivate")
-                                  : t("Activate")}
-                              </div>
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex w-full text-[18px]"
+                                >
+                                  {t("Edit")}
+                                </div>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent
+                                className="flex flex-col gap-4 "
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <AlertDialogHeader>
+                                  <h1 className="text-2xl font-bold">
+                                    {t("EditEmployee")}
+                                  </h1>
+                                  <AlertDialogTitle></AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {t("EditEmployeeDescription")}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+
+                                <div className="flex flex-col gap-1 pointer-events-none">
+                                  <label> {t("Username")}</label>
+                                  <Textfield
+                                    className="bg-secondary cursor-not-allowed "
+                                    showIcon={true}
+                                    iconName="person"
+                                    onChange={() => { }}
+                                    value={""}
+                                    placeholder={employee.username}
+                                  />
+                                </div>
+
+                                <div className=" flex flex-col gap-4">
+                                  <div>
+                                    <label>{t("Password")}</label>
+                                    <Textfield
+                                      placeholder={t("Password")}
+                                      className={`bg-secondary`}
+                                      showIcon={true}
+                                      iconName="lock"
+                                      onChange={(e) => {
+                                        try {
+                                          if (userRefs.current[index]) {
+                                            userRefs.current[index].password =
+                                              e.target.value;
+                                          }
+
+                                          // Validate password length
+                                          if (e.target.value.length < 8) {
+                                            setPasswordErrorForEdit(
+                                              "Password must be at least 8 characters long."
+                                            );
+                                          } else {
+                                            setPasswordErrorForEdit(null);
+                                          }
+                                        } catch (error) {
+                                          console.error(
+                                            "Error in onChange handler:",
+                                            error
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </div>
+
+                                  {passwordErrorForEdit && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {passwordErrorForEdit}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="">
+                                  <label>{t("Role")}</label>
+                                  <div className="relative bg-secondary rounded-md">
+                                    <Select
+                                      defaultValue={employee.role}
+                                      onValueChange={(value) => {
+                                        if (userRefs.current[index]) {
+                                          userRefs.current[index].role =
+                                            value as role; // Ensure the value matches the type
+                                        }
+                                      }}
+                                    >
+                                      <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                                        <SelectValue placeholder="" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectGroup>
+                                          <SelectItem value="supervisor">
+                                            <BadgeCustom
+                                              variant="yellow"
+                                              iconName="engineering"
+                                              showIcon={true}
+                                              shape="square"
+                                            >
+                                              {t("supervisor")}
+                                            </BadgeCustom>
+                                          </SelectItem>
+                                          <SelectItem value="inspector">
+                                            <BadgeCustom
+                                              variant="red"
+                                              iconName="person_search"
+                                              showIcon={true}
+                                              shape="square"
+                                            >
+                                              {t("inspector")}
+                                            </BadgeCustom>
+                                          </SelectItem>
+                                          <SelectItem value="admin">
+                                            <BadgeCustom
+                                              variant="blue"
+                                              iconName="manage_accounts"
+                                              showIcon={true}
+                                              shape="square"
+                                            >
+                                              {t("admin")}
+                                            </BadgeCustom>
+                                          </SelectItem>
+                                        </SelectGroup>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                <AlertDialogFooter>
+                                  <Button
+                                    variant="secondary"
+                                    size="lg"
+                                    onClick={async () => {
+                                      handleDialogResult(false);
+                                      setPendingAction(null); // Clear the pending action
+                                      setDialogType(""); // Reset the dialog type after action is completed
+                                    }}
+                                  >
+                                    {t("Back")}
+                                  </Button>
+                                  <Button
+                                    className=" flex  justify-center gap-2"
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent click event from bubbling up
+                                      handleEditUserDialog(
+                                        employee.id,
+                                        index
+                                      );
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined">
+                                      save
+                                    </span>
+                                    {t("Save")}
+                                  </Button>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+
                               {isDialogOpen === true &&
-                                dialogType === "deactivate" && (
+                                dialogType === "edit" && (
                                   <AlertCustom
-                                    title={
-                                      employee.active
-                                        ? a("SureToDeactivate")
-                                        : a("SureToActivate")
-                                    }
+                                    title={a("SureToEditEmployee")}
                                     description={
-                                      employee.active
-                                        ? a("SureToDeactivateDescription")
-                                        : a("SureToActivateDescription")
+                                      a("SureToEditEmployeeDescription")
                                     }
                                     primaryButtonText={t("Confirm")}
                                     primaryIcon="check"
@@ -1222,24 +1207,57 @@ export default function Page() {
                                     backResult={handleDialogResult}
                                   />
                                 )}
+                            </AlertDialog>
+                          </div>
+                          <div className=" cursor-pointer">
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleInactiveUserDialog(employee.id);
+                              }}
+                              className="flex w-full text-[18px] text-destructive"
+                            >
+                              {employee.active
+                                ? t("Deactivate")
+                                : t("Activate")}
                             </div>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="col-span-full min-h-[261px]">
-              <NotFound
-                icon="quick_reference_all"
-                title="NoDataAvailable"
-                description="NoDataAvailableDescription"
-              />
-            </div>
-          )}
+                            {isDialogOpen === true &&
+                              dialogType === "deactivate" && (
+                                <AlertCustom
+                                  title={
+                                    employee.active
+                                      ? a("SureToDeactivate")
+                                      : a("SureToActivate")
+                                  }
+                                  description={
+                                    employee.active
+                                      ? a("SureToDeactivateDescription")
+                                      : a("SureToActivateDescription")
+                                  }
+                                  primaryButtonText={t("Confirm")}
+                                  primaryIcon="check"
+                                  secondaryButtonText={t("Cancel")}
+                                  backResult={handleDialogResult}
+                                />
+                              )}
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="col-span-full min-h-[261px]">
+            <NotFound
+              icon="quick_reference_all"
+              title="NoDataAvailable"
+              description="NoDataAvailableDescription"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
