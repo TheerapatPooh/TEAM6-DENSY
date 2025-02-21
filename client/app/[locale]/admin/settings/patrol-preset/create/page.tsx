@@ -227,7 +227,7 @@ export default function page() {
           <Input
             name="title"
             value={formPreset.title}
-            className="bg-secondary w-1/3 border-none text-xl"
+            className="bg-secondary w-72 border-none text-xl"
             placeholder={t("EnterPresetTitle")}
             onChange={handleInputChange}
           ></Input>
