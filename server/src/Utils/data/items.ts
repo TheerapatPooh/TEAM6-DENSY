@@ -13,4 +13,6 @@ export const items: Item[] = [
     { id: 11, name: 'Access Control System Check', type: 'safety', checklistId: 4 },
     { id: 12, name: 'Server Equipment Inspection', type: 'maintenance', checklistId: 5 },
     { id: 13, name: 'Forklift Maintenance', type: 'maintenance', checklistId: 5 },
+    { id: 14, name: 'Water Quality Inspection', type: 'environment', checklistId: 6 },
+    { id: 15, name: 'Structural Integrity', type: 'safety', checklistId: 7 },
 ];

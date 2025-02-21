@@ -13,7 +13,7 @@ export const users: User[] = [
   },
   {
     id: 2,
-    username: 'johnDoe',
+    username: 'inspector1',
     email: null,
     password: '$2b$10$L73TPSodzlpLeFsp68DSXeBC10xyRX8QpHzvruzaxXmqN71Z8dA/K',
     role: 'inspector',
@@ -23,7 +23,7 @@ export const users: User[] = [
   },
   {
     id: 3,
-    username: 'jameSmith',
+    username: 'inspector2',
     email: null,
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'inspector',
@@ -37,7 +37,7 @@ export const users: User[] = [
     email: 'supervisor2@example.com',
     password: '$2b$10$xz9VijvJ0YCmWMpOnnFW2eX/LHpgY03IXgFxZT5O9jyhs1IhViQBm',
     role: 'supervisor',
-    department: 'IT',
+    department: 'R&D',
     createdAt: new Date('2024-10-06T09:51:09.771Z'),
     active: true
   },
@@ -47,7 +47,7 @@ export const users: User[] = [
     email: 'supervisor3@example.com',
     password: '$2b$10$T53hUAU2Xuri80R4WtJbWOzwIJwnTRfmZ6EpDSe7ok0pVrelK3jGe',
     role: 'supervisor',
-    department: 'Maintenance',
+    department: 'Assemblyline',
     createdAt: new Date('2024-10-06T09:51:12.275Z'),
     active: true
   },
@@ -57,7 +57,7 @@ export const users: User[] = [
     email: 'supervisor4@example.com',
     password: '$2b$10$tP0hx2pwwlH2iSPu00JAOu7CJkGTYRrky0j/uXvWsNpcifXOV0bP.',
     role: 'supervisor',
-    department: 'Customer Service',
+    department: 'Raw Materials Storage',
     createdAt: new Date('2024-10-06T09:51:14.185Z'),
     active: true
   },
@@ -77,7 +77,7 @@ export const users: User[] = [
     email: 'supervisor6@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'IT',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -87,7 +87,7 @@ export const users: User[] = [
     email: 'supervisor7@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Customer Service',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -97,7 +97,7 @@ export const users: User[] = [
     email: 'supervisor8@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Prototype',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -107,7 +107,7 @@ export const users: User[] = [
     email: 'supervisor9@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Manager Office',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -117,7 +117,7 @@ export const users: User[] = [
     email: 'supervisor10@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Water Supply',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -127,7 +127,7 @@ export const users: User[] = [
     email: 'supervisor11@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Maintenance',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -137,7 +137,7 @@ export const users: User[] = [
     email: 'supervisor12@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Server Room',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -147,7 +147,7 @@ export const users: User[] = [
     email: 'supervisor13@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Storage',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -157,7 +157,7 @@ export const users: User[] = [
     email: 'supervisor14@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Warehouse',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -167,7 +167,7 @@ export const users: User[] = [
     email: 'supervisor15@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Electrical',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -177,7 +177,7 @@ export const users: User[] = [
     email: 'supervisor16@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Engineering',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -187,7 +187,7 @@ export const users: User[] = [
     email: 'supervisor17@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Training Simulation',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -197,7 +197,7 @@ export const users: User[] = [
     email: 'supervisor18@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Work Station A',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },
@@ -207,7 +207,17 @@ export const users: User[] = [
     email: 'supervisor19@example.com',
     password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
     role: 'supervisor',
-    department: 'R&D',
+    department: 'Work Station B',
+    createdAt: new Date('2024-10-06T10:27:09.916Z'),
+    active: true
+  },
+  {
+    id: 22,
+    username: 'supervisor1',
+    email: 'supervisor1@example.com',
+    password: '$2b$10$ie9w6UV.fquwZiKYYYbxhOmiGZl4KDC3cfMZDd0zk8IlEKY6R9ORm',
+    role: 'supervisor',
+    department: 'Testing Lab',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
     active: true
   },

@@ -6,4 +6,6 @@ export const checklists: Checklist[] = [
     { id: 3, title: 'Cleanliness Inspection', version: 1, latest: true, updatedAt: new Date('2024-10-06 17:05:15.000'), updatedBy: 1 },
     { id: 4, title: 'Security Inspection', version: 1, latest: true, updatedAt: new Date('2024-10-06 17:05:25.000'), updatedBy: 1 },
     { id: 5, title: 'Equipment Inspection', version: 1, latest: true, updatedAt: new Date('2024-10-06 17:05:43.000'), updatedBy: 1 },
+    { id: 6, title: 'Environmental Inspection', version: 1, latest: true, updatedAt: new Date('2024-10-06 17:05:45.000'), updatedBy: 1 },
+    { id: 7, title: 'Structural Inspection', version: 1, latest: true, updatedAt: new Date('2024-10-06 17:05:45.000'), updatedBy: 1 },
 ];
