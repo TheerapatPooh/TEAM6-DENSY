@@ -387,7 +387,7 @@ export const calculateTrend = (current: number, previous: number): number => {
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
 
-    const id = req.params.id; 
+    const id = req.params.id;
     const status = req.body.status;
 
     if (!id || !status) {
@@ -423,13 +423,13 @@ export const uploadDefectImages = async (req: Request, res: Response) => {
     const { status } = req.body;
 
     if (req.files) {
-      const imageFiles  = req.files as Express.Multer.File[];
+      const imageFiles = req.files as Express.Multer.File[];
       console.log(imageFiles)
       await handleDefectImagesUpload(
         parseInt(id),
         status as DefectStatus,
         userId,
-        imageFiles 
+        imageFiles
       );
     }
 
@@ -459,6 +459,7 @@ export const handleDefectImagesUpload = async (
       data: {
         path: filePath,
         updatedBy: updatedBy,
+        timestamp: new Date(),
       },
     });
 
@@ -471,6 +472,40 @@ export const handleDefectImagesUpload = async (
   }
 };
 
+// ฟังก์ชันจัดกลุ่มรูปภาพตามช่วงเวลา
+const groupImagesByTimestamp = (
+  images: Array<{
+    id: number;
+    timestamp: Date;
+    updatedBy: number;
+    path: string;
+  }>,
+  thresholdMs: number
+) => {
+  if (images.length === 0) return [];
+
+  const groups: Array<Array<{
+    id: number;
+    timestamp: Date;
+    updatedBy: number;
+    path: string;
+  }>> = [];
+  let currentGroup = [images[0]];
+  let currentTime = images[0].timestamp.getTime();
+
+  for (let i = 1; i < images.length; i++) {
+    const imgTime = images[i].timestamp.getTime();
+    if (currentTime - imgTime <= thresholdMs) {
+      currentGroup.push(images[i]);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = [images[i]];
+      currentTime = imgTime;
+    }
+  }
+  groups.push(currentGroup);
+  return groups;
+};
 
 export const handleDefectImageUpdates = async (
   defectId: number,
@@ -490,15 +525,13 @@ export const handleDefectImageUpdates = async (
 
   const existingImages = await prisma.image.findMany({
     where: { id: { in: existingDefectImages.map((img) => img.imageId) } },
-    select: { id: true, path: true, updatedBy: true },
+    select: { id: true, path: true, updatedBy: true, timestamp: true },
+    orderBy: { timestamp: 'desc' },
   });
 
-  console.log("1")
   // เงื่อนไขลบภาพเมื่ออัปเดต
   if (status === 'reported') {
     // ลบทั้งหมดเมื่อสถานะเป็น reported
-    console.log("2")
-    console.log(existingImages)
 
     await deleteImages(existingImages.map(img => img.id))
   } else if (
@@ -506,12 +539,26 @@ export const handleDefectImageUpdates = async (
     options.deleteExistingImages &&
     options.supervisorId
   ) {
-    // ลบเฉพาะของ supervisor เมื่อสถานะ resolved และต้องการลบ
-    const supervisorImages = existingImages.filter(
-      img => img.updatedBy === Number(options.supervisorId)
-    )
-    await deleteImages(supervisorImages.map(img => img.id))
+    // กลุ่มรูปภาพตามเวลาที่ใกล้เคียง (1 วินาที)
+    const grouped = groupImagesByTimestamp(existingImages, 1 * 1000);
+    const latestGroup = grouped[0] || [];
+
+    // กรองเฉพาะรูปของ supervisor ปัจจุบัน
+    const authorizedImages = latestGroup.filter(
+      img => img.updatedBy === options.supervisorId
+    );
+    let defect = await prisma.defect.findFirst({
+      where: {
+        id: defectId
+      },
+      select: {
+        status: true
+      }
+    })
+    defect?.status === 'resolved' as DefectStatus ? await deleteImages(authorizedImages.map(img => img.id)) : undefined
+
   }
+
 
   // อัปโหลดภาพใหม่
   await handleDefectImagesUpload(
