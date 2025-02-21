@@ -22,5 +22,6 @@ export const profiles: Profile[] = [
     { id: 19, name: 'Rachel Allen', age: 23, tel: '1100998877', address: 'Trang, Thailand', userId: 19, imageId: null },
     { id: 20, name: 'George Baker', age: 31, tel: '0099887766', address: 'Nonthaburi, Thailand', userId: 20, imageId: null },
     { id: 21, name: 'Jessica Adams', age: 29, tel: '9988776655', address: 'Ayutthaya, Thailand', userId: 21, imageId: null },
+    { id: 22, name: 'Arounsawat Nakrub', age: 22, tel: '9988719655', address: 'Chonburi, Thailand', userId: 22, imageId: null },
 ];
 
