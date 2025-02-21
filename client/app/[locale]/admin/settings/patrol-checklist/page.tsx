@@ -448,9 +448,11 @@ export default function Page() {
                     <span className="material-symbols-outlined">
                       location_on
                     </span>
-                    {selectedZones.length > 0
-                      ? selectedZones.map((zone) => z(zone.name)).join(", ")
-                      : t("SelectZones")}
+                    <p className="truncate w-[200px]">
+                      {selectedZones.length > 0
+                        ? selectedZones.map((zone) => z(zone.name)).join(", ")
+                        : t("SelectZones")}
+                    </p>
                   </Button>
                 </AlertDialogTrigger>
 
@@ -473,6 +475,7 @@ export default function Page() {
                     <div className="flex justify-center bg-secondary rounded-lg py-4">
                       <Map
                         disable={false}
+                        initialSelectedZones={selectedZones.map((zone) => zone.id)}
                         onZoneSelect={(zones: IZone[]) =>
                           setTempSelectedZones(zones)
                         }

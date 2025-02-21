@@ -103,7 +103,7 @@ export default function page() {
   };
 
   const handleSelectChecklists = (checklistId: number) => {
-    setSelectChecklists((prev) => {
+    setTempSelectChecklists((prev) => {
       if (prev.includes(checklistId)) {
         return prev.filter((id) => id !== checklistId);
       } else {
@@ -118,7 +118,9 @@ export default function page() {
     setSelectChecklists(flatChecklists);
   };
 
-  const handleRemoveChecklist = (checklistId: number) => {
+
+
+  const handleRemoveChecklist = (checklistId: number) => { 
     setSelectChecklists((prev) => prev.filter((id) => id !== checklistId));
     setTempSelectChecklists((prev) => prev.filter((id) => id !== checklistId));
   };
@@ -179,9 +181,8 @@ export default function page() {
     // ถ้ามีการเปลี่ยนแปลง ให้ดำเนินการอัปเดต
     try {
       if (
-        formPreset.description === presetData.description 
-        &&
-        Array.isArray(selectChecklists) === Array.isArray(originalchecklists)
+        formPreset.description === presetData.description &&
+        JSON.stringify(selectChecklists) === JSON.stringify(originalchecklists)
       ) {
         toast({
           variant: "default",
@@ -233,7 +234,7 @@ export default function page() {
   }
 
   return (
-    <div className="bg-card px-6 py-4 ">
+    <div className="bg-card px-6 py-4 rounded-md custom-shadow">
       {/* Edit patrol preset and button */}
       <div className="flex flex-row justify-between mb-4">
         <div className="text-2xl font-bold">{t("EditPatrolPreset")}</div>
@@ -360,8 +361,7 @@ export default function page() {
                           <div className="flex justify-center items-center">
                             <Checkbox
                               key={checklist.id}
-                              value={checklist.id}
-                              checked={tempSelectChecklists.includes(
+                              defaultChecked={tempSelectChecklists.includes(
                                 checklist.id
                               )}
                               className="bg-card"
