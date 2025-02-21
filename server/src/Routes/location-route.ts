@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { getAllZones, getLocation, getZone, updateSupervisor } from "@Controllers/location-controller.js";
-import { authenticateUser, authorzied } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized } from "@Controllers/util-controller.js";
 const router = Router()
 
 /**
@@ -292,6 +292,6 @@ router.get('/location/:id', authenticateUser, getLocation)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/zone/:id', authenticateUser, authorzied(['admin']), updateSupervisor)
+router.put('/zone/:id', authenticateUser, authorized(['admin']), updateSupervisor)
 
 export default router
