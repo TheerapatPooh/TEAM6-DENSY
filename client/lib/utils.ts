@@ -78,15 +78,14 @@ export async function fetchData(
   form?: boolean
 ) {
   try {
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
     const config: AxiosRequestConfig = {
       withCredentials: credential,
-      headers: form
-        ? {
-          "Content-Type": "multipart/form-data",
-        }
-        : {
-          "Content-Type": "application/json",
-        },
+      headers: {
+        "X-CSRF-Token": csrfToken,
+        "Content-Type": form ? "multipart/form-data" : "application/json",
+      },
     };
 
     let response;

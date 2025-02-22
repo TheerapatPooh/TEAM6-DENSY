@@ -203,7 +203,7 @@ export async function refreshToken(req: Request, res: Response) {
     const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
 
     // สร้าง accessToken ใหม่
-    const newAccessToken = jwt.sign({ userId: decoded.userId, role: user.role, sessionId: decoded.sessionId }, jwtSecret, {
+    const newAccessToken = jwt.sign({ userId: decoded.userId, role: user?.role, sessionId: decoded.sessionId }, jwtSecret, {
       expiresIn: "1h",
     });
 
