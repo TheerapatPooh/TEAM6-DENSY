@@ -1,6 +1,6 @@
 import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
-import { authenticateUser, authorized, upload, uploadDefectImages } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized, defectUpload, uploadDefectImages } from "@Controllers/util-controller.js";
 
 const router = Router()
 
@@ -382,7 +382,7 @@ router.post('/defect', authenticateUser, authorized(['admin', 'inspector']), cre
  *       500:
  *         description: Internal server error
  */
-router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 'supervisor']), upload.array('imageFiles', 10), updateDefect);
+router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 'supervisor']), defectUpload.array('imageFiles', 10), updateDefect);
 
 /**
  * @swagger
@@ -640,7 +640,7 @@ router.put(
   '/defect/:id/upload',
   authenticateUser,
   authorized(['admin', 'inspector']),
-  upload.array('imageFiles', 10), // Multer middleware here
+  defectUpload.array('imageFiles', 10), // Multer middleware here
   uploadDefectImages
 );
 

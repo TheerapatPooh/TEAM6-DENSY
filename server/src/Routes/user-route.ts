@@ -1,7 +1,7 @@
 import { createUser, getUser, updateProfile, getAllUsers, updateUser, removeUser } from "@Controllers/user-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";
-import { upload } from "@Controllers/util-controller.js";
+import { profileUpload } from "@Controllers/util-controller.js";
 const router = Router()
 
 /**
@@ -361,7 +361,7 @@ router.post('/user', authenticateUser, authorized(['admin']), createUser)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/profile', authenticateUser, upload.single('imageProfile'), updateProfile)
+router.put('/profile', authenticateUser, profileUpload.single('imageProfile'), updateProfile)
 
 /**
  * @swagger

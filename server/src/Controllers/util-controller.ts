@@ -384,9 +384,24 @@ export const calculateTrend = (current: number, previous: number): number => {
  * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บในโฟลเดอร์ `uploads/` พร้อมกับชื่อไฟล์ที่ไม่ซ้ำกัน
  * - req.file: Object (รายละเอียดของไฟล์ที่ถูกอัปโหลด เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
 **/
-const storage = multer.diskStorage({
+const profileStorage = multer.diskStorage({
   destination: (req, file, callback) => {
+    const userId = (req as any).user.userId;
+    const folderPath = path.join('uploads', 'profiles', userId.toString());
 
+    fs.mkdirSync(folderPath, { recursive: true });
+    callback(null, folderPath);
+  },
+  filename: (req, file, callback) => {
+    const userId = (req as any).user.userId;
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const uniqueSuffix = `${userId}_${timestamp}_${file.originalname}`;
+    callback(null, uniqueSuffix);
+  },
+});
+
+const defectStorage = multer.diskStorage({
+  destination: (req, file, callback) => {
     const id = req.params.id;
     const status = req.body.status;
 
@@ -395,19 +410,24 @@ const storage = multer.diskStorage({
     }
 
     const folderType = status === 'reported' ? 'before' : 'after';
-    const folderPath = path.join('uploads', `defect-${id}`, folderType);
+    // ปรับโครงสร้างโฟลเดอร์ที่ต้องการให้เป็น uploads/defects/id/folderType
+    const folderPath = path.join('uploads', 'defects', id.toString(), folderType);
 
     fs.mkdirSync(folderPath, { recursive: true });
     callback(null, folderPath);
   },
   filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + file.originalname;
+    const id = req.params.id;
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const uniqueSuffix = `${id}_${timestamp}_${file.originalname}`;
     callback(null, uniqueSuffix);
   },
 });
 
+
 // Export the multer upload middleware
-export const upload = multer({ storage: storage });
+export const profileUpload = multer({ storage: profileStorage });
+export const defectUpload = multer({ storage: defectStorage });
 
 function getUploadsPath(): string {
   const currentDir = process.cwd();
@@ -424,7 +444,6 @@ export const uploadDefectImages = async (req: Request, res: Response) => {
 
     if (req.files) {
       const imageFiles = req.files as Express.Multer.File[];
-      console.log(imageFiles)
       await handleDefectImagesUpload(
         parseInt(id),
         status as DefectStatus,
@@ -448,12 +467,11 @@ export const handleDefectImagesUpload = async (
   for (const file of files) {
     const folderType =
       status === 'reported' ? 'before' : 'after';
-    const folderPrefix = `defect-${defectId}`;
-    const filePath = path.join(
-      folderPrefix,
-      folderType,
-      file.filename
-    );
+    // สร้าง folderPrefix ตามที่ได้กำหนดใน multer diskStorage
+    const folderPath = path.join('defects', defectId.toString(), folderType);
+
+    // ใช้ filename ที่ได้จาก multer diskStorage (filename ที่ใช้จะต้องอยู่ในโครงสร้างเดียวกัน)
+    const filePath = path.join(folderPath, file.filename);
 
     const image = await prisma.image.create({
       data: {
@@ -578,8 +596,6 @@ export const deleteImages = async (imageIds: number[]) => {
     where: { id: { in: imageIds } },
     select: { path: true },
   })
-  console.log("3")
-  console.log(imagesToDelete)
 
   imagesToDelete.forEach((image) => {
     const filePath = path.join(uploadsPath, image.path)
