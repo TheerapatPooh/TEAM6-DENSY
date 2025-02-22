@@ -414,7 +414,7 @@ function getUploadsPath(): string {
   return path.join(currentDir, "uploads"); // Adjust path as needed
 }
 
-const uploadsPath = getUploadsPath();
+export const uploadsPath = getUploadsPath();
 
 export const uploadDefectImages = async (req: Request, res: Response) => {
   try {
@@ -507,7 +507,7 @@ const groupImagesByTimestamp = (
   return groups;
 };
 
-export const handleDefectImageUpdates = async (
+export const handleDefectImagesUpdate = async (
   defectId: number,
   status: DefectStatus,
   options: {
@@ -569,9 +569,8 @@ export const handleDefectImageUpdates = async (
   )
 }
 
-
 // ฟังก์ชันช่วยลบภาพ
-const deleteImages = async (imageIds: number[]) => {
+export const deleteImages = async (imageIds: number[]) => {
   if (imageIds.length === 0) return
 
   // ลบไฟล์จากระบบ

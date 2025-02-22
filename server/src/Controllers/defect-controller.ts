@@ -1,6 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification, handleDefectImageUpdates } from "@Controllers/util-controller.js";
+import { createNotification, deleteImages, handleDefectImagesUpdate } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from "fs";
 import path from "path";
@@ -546,7 +546,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     }
 
     if (newImageFiles?.length) {
-      await handleDefectImageUpdates(Number(id), status, {
+      await handleDefectImagesUpdate(Number(id), status, {
         updatedBy: status === 'reported'
           ? Number(defectUserId)
           : Number(supervisorId),
@@ -714,20 +714,27 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 export async function deleteDefect(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user.userId;
-
     const { id } = req.params;
 
+    // ตรวจสอบ defect ว่ามีอยู่จริง
     const defect = await prisma.defect.findUnique({
-      where: {
-        id: Number(id),
-      },
+      where: { id: Number(id) },
     });
-
     if (!defect) {
-      //เช็ค defect
       res.status(404).json({ message: "Defect not found" });
       return;
     }
+    const validPatrol = await prisma.patrol.findFirst({
+      where: {
+        results: { some: { id: defect.patrolResultId } },
+        patrolChecklists: { some: { userId } },
+      },
+    });
+    if (!validPatrol) {
+      res.status(403).json({ message: "Unauthorized access" });
+      return;
+    }
+
     // ค้นหาภาพที่เกี่ยวข้องกับ Defect นี้
     const existingDefectImages = await prisma.defectImage.findMany({
       where: { defectId: Number(id) },
@@ -736,53 +743,11 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     // ดึง IDs ของภาพที่จะลบ
     const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
     // ค้นหาข้อมูลภาพที่จะลบ
-    const imagesToDelete = await prisma.image.findMany({
-      where: { id: { in: imageIdsToDelete } },
-      select: { path: true },
-    });
-    // ลบไฟล์ภาพจากที่เก็บในระบบ
-    for (const image of imagesToDelete) {
-      const filePath = path.join(uploadsPath, image.path);
-      try {
-        fs.unlinkSync(filePath);
-      } catch (error) {
-        console.error(`Failed to delete file at ${filePath}:`, error);
-      }
-    }
-    // ลบข้อมูลในฐานข้อมูลที่เชื่อมโยงกับ Defect และภาพ
-    await prisma.defectImage.deleteMany({
-      where: { defectId: Number(id) },
-    });
-    await prisma.image.deleteMany({
-      where: { id: { in: imageIdsToDelete } },
-    });
-    // ตรวจสอบว่าผู้ใช้งานมีสิทธิ์ใน Patrol ที่เกี่ยวข้องกับ Defect นี้หรือไม่
-    const validPatrol = await prisma.patrol.findFirst({
-      where: {
-        results: {
-          some: {
-            id: defect.patrolResultId,
-          },
-        },
-        patrolChecklists: {
-          some: {
-            userId: userId,
-          },
-        },
-      },
-    });
-    // หากไม่พบ Patrol ที่เกี่ยวข้องกับผู้ใช้งานให้แสดงข้อผิดพลาด 404
-    if (!validPatrol) {
-      res
-        .status(404)
-        .json({ message: "You are not associated with this Patrol" });
-      return;
-    }
-    // ลบข้อมูล Defect จากฐานข้อมูล
+    await deleteImages(imageIdsToDelete);
+
+    // ลบ defect หลัก
     await prisma.defect.delete({
-      where: {
-        id: Number(id),
-      },
+      where: { id: Number(id) },
     });
     res.status(200).json({ message: "Defect deleted successfully" });
     return;
