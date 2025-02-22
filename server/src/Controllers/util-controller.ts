@@ -441,10 +441,11 @@ export const uploadDefectImages = async (req: Request, res: Response) => {
     const userId = (req as any).user.userId;
     const { id } = req.params;
     const { status } = req.body;
+    let images: any[] = [];
 
     if (req.files) {
       const imageFiles = req.files as Express.Multer.File[];
-      await handleDefectImagesUpload(
+      images = await handleDefectImagesUpload(
         parseInt(id),
         status as DefectStatus,
         userId,
@@ -452,7 +453,7 @@ export const uploadDefectImages = async (req: Request, res: Response) => {
       );
     }
 
-    res.status(200).json({ message: "Files uploaded successfully" });
+    res.status(200).json({ message: "Files uploaded successfully", images: images, });
   } catch (error) {
     res.status(500).json({ error: "File upload failed" });
   }
@@ -464,6 +465,7 @@ export const handleDefectImagesUpload = async (
   updatedBy: number,
   files: Express.Multer.File[]
 ) => {
+  const createdImages: any[] = [];
   for (const file of files) {
     const folderType =
       status === 'reported' ? 'before' : 'after';
@@ -479,6 +481,13 @@ export const handleDefectImagesUpload = async (
         updatedBy: updatedBy,
         timestamp: new Date(),
       },
+      include: {
+        user: {
+          select: {
+            id: true
+          }
+        },
+      }
     });
 
     await prisma.defectImage.create({
@@ -487,7 +496,9 @@ export const handleDefectImagesUpload = async (
         imageId: image.id,
       },
     });
+    createdImages.push({ image });
   }
+  return createdImages;
 };
 
 // ฟังก์ชันจัดกลุ่มรูปภาพตามช่วงเวลา

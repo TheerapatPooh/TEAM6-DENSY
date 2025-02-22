@@ -49,7 +49,7 @@ import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 interface IAlertDefect {
-    userId: number
+    userId?: number
     defect?: IDefect,
     item?: IItem,
     type: "edit" | "report" | "resolve" | "edit-resolve",
@@ -152,7 +152,7 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
             formData.append("status", "reported");
             files.forEach((file) => formData.append("imageFiles", file));
 
-            await fetchData(
+            const defectImage = await fetchData(
                 "put",
                 `/defect/${id}/upload`,
                 true,
@@ -169,6 +169,8 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
             }
             setSelectedFiles(null)
             setDefectDescription(null)
+            createDefect.images = defectImage.images;
+            createDefect.images = defectImage.images
             response(createDefect)
         } catch (error) {
             console.error("Error creating defect:", error);
