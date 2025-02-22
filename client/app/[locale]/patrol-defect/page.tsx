@@ -88,7 +88,7 @@ export default function page() {
 
     const [sort, setSort] = useState<{ by: string; order: string }>({
         by: "DefectDate",
-        order: "Ascending",
+        order: "Descending",
     });
 
     const toggleTypeFilter = (type: itemType, checked: boolean) => {

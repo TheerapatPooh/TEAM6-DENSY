@@ -2,7 +2,6 @@
 
 import { IDefect, IDefectCategory, IPatrol, IPatrolResult, IUser } from '@/app/type'
 import BadgeCustom from '@/components/badge-custom'
-import defect from '@/components/defect'
 import Loading from '@/components/loading'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -57,7 +56,6 @@ export default function page() {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [hoverState, setHoverState] = useState<{ [key: string]: { isHovered: boolean; isClicked: boolean } }>({});
-
 
     const getPatrolData = async () => {
         if (params.id) {
@@ -388,13 +386,19 @@ export default function page() {
                                     <AlertDialogAction
                                         className="bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 rounded-md px-4 text-lg font-bold"
                                         onClick={() => {
-                                            exportData(patrol, patrol.results);
-                                            handleCloseDialog();
-                                            toast({
-                                                variant: "success",
-                                                title: a("ExportReportPatrolTitle"),
-                                                description: a("ExportReportPatrolDescription"),
-                                            });
+                                            patrol.status !== "completed"
+                                                ? (toast({
+                                                    variant: "error",
+                                                    title: a("ExportPatrolNoData"),
+                                                    description: a("ExportPatrolStatusNotCompleteDescription"),
+                                                }),
+                                                    handleCloseDialog())
+                                                : (exportData(patrol, patrol.results),
+                                                    toast({
+                                                        variant: "success",
+                                                        title: a("ExportReportPatrolTitle"),
+                                                        description: a("ExportReportPatrolDescription"),
+                                                    }));
                                         }}
                                     >
                                         <span className="material-symbols-outlined text-2xl me-2">
@@ -425,7 +429,6 @@ export default function page() {
                             <BadgeCustom
                                 iconName={getPatrolStatusVariant(patrol.status).iconName}
                                 showIcon={true}
-                                showTime={false}
                                 variant={getPatrolStatusVariant(patrol.status).variant}
                             >
                                 {s(patrol.status)}
@@ -642,7 +645,7 @@ export default function page() {
                                                 </td>
                                             </tr>
                                         ) : (defects.map((defect, index) => (
-                                            <TableRow key={index} className="grid grid-cols-12 w-full">
+                                            <TableRow key={index} className="grid grid-cols-12 w-full items-center">
                                                 <TableCell className="sm:text-sm lg:text-base sm:col-span-3 sm:w-[200px] lg:col-span-2 flex items-center min-w-0">
                                                     <TooltipProvider>
                                                         <Tooltip>
@@ -655,15 +658,13 @@ export default function page() {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </TableCell>
-                                                <TableCell className='sm:col-span-1  lg:col-span-2'>
+                                                <TableCell className="sm:text-sm lg:text-base sm:col-span-1 lg:col-span-2 flex items-center">
                                                     <BadgeCustom
                                                         iconName={getItemTypeVariant(defect.type).iconName}
                                                         showIcon={true}
-                                                        showTime={false}
                                                         shape='square'
                                                         variant={getItemTypeVariant(defect.type).variant}
                                                         hideText={windowWidth > 1024 ? false : true}
-
                                                     >
                                                         {s(defect.type)}
                                                     </BadgeCustom>
@@ -690,7 +691,7 @@ export default function page() {
                                                 <TableCell className='sm:col-span-2 lg:col-span-2'>
                                                     <p>{z(defect.zone.name)}</p>
                                                 </TableCell>
-                                                <TableCell className='sm:col-span-2 lg:col-span-2'>
+                                                <TableCell className='sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center'>
                                                     <BadgeCustom
                                                         iconName={getDefectStatusVariant(defect.status).iconName}
                                                         showIcon={true}
@@ -720,7 +721,7 @@ export default function page() {
                                 <h1 className="text-2xl font-semibold text-card-foreground">
                                     {d("PatrolDuration")}
                                 </h1>
-                                <div className='flex flex-col pt-6'>
+                                <div className='flex flex-col'>
                                     <RadialChart duration={patrol.duration} />
                                 </div>
                             </div>
