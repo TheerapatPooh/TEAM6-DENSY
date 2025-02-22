@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";
-import { getCommonDefects, getDefectCategory, getDefectReported, getHeatMap, getPatrolCompletionRate } from '@Controllers/dashboard-controller.js';
+import { getCommonDefects, getDefectCategory, getHeatMap, getPatrolCompletionRate, getDefectReported } from '@Controllers/dashboard-controller.js';
 
 const router = Router()
 router.get('/dashboard/heat-map', authenticateUser, authorized(['admin']), getHeatMap)

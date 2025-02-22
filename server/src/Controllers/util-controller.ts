@@ -5,7 +5,9 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import multer from 'multer';
 import { getIOInstance } from '@Utils/socket.js';
 import nodemailer from 'nodemailer';
-
+import fs from "fs";
+import path from "path";
+import { DefectStatus } from "@prisma/client";
 declare global {
   namespace Express {
     interface Request {
@@ -111,28 +113,6 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
     return
   }
 }
-
-/**
- * คำอธิบาย: ฟังก์ชันสำหรับอัพโหลดรูปภาพโดยใช้ multer
- * Input: 
- * - req.file: Object (ไฟล์รูปภาพที่อัปโหลด โดย multer จะทำการจัดการและเพิ่มลงใน `uploads/`)
- * - req.body: Object (ข้อมูลเพิ่มเติมที่แนบมากับการอัปโหลดรูปภาพ)
- * Output: 
- * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บในโฟลเดอร์ `uploads/` พร้อมกับชื่อไฟล์ที่ไม่ซ้ำกัน
- * - req.file: Object (รายละเอียดของไฟล์ที่ถูกอัปโหลด เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
-**/
-const storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, 'uploads/'); // กำหนดโฟลเดอร์สำหรับเก็บไฟล์ที่อัปโหลด
-  },
-  filename: function (req, file, callback) {
-    const uniqueSuffix = Date.now() + '-' + file.originalname; // ตั้งชื่อไฟล์ใหม่ให้ไม่ซ้ำกัน
-    callback(null, uniqueSuffix);  // บันทึกชื่อไฟล์
-  }
-});
-
-// Export the multer upload middleware
-export const upload = multer({ storage: storage });
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูลการแจ้งเตือน
@@ -393,3 +373,259 @@ export const calculateTrend = (current: number, previous: number): number => {
   if (previous === 0) return current > 0 ? 100 : 0;
   return Number((((current - previous) / previous) * 100).toFixed(2));
 };
+
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับอัพโหลดรูปภาพโดยใช้ multer
+ * Input: 
+ * - req.file: Object (ไฟล์รูปภาพที่อัปโหลด โดย multer จะทำการจัดการและเพิ่มลงใน `uploads/`)
+ * - req.body: Object (ข้อมูลเพิ่มเติมที่แนบมากับการอัปโหลดรูปภาพ)
+ * Output: 
+ * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บในโฟลเดอร์ `uploads/` พร้อมกับชื่อไฟล์ที่ไม่ซ้ำกัน
+ * - req.file: Object (รายละเอียดของไฟล์ที่ถูกอัปโหลด เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
+**/
+const profileStorage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    const userId = (req as any).user.userId;
+    const folderPath = path.join('uploads', 'profiles', userId.toString());
+
+    fs.mkdirSync(folderPath, { recursive: true });
+    callback(null, folderPath);
+  },
+  filename: (req, file, callback) => {
+    const userId = (req as any).user.userId;
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const uniqueSuffix = `${userId}_${timestamp}_${file.originalname}`;
+    callback(null, uniqueSuffix);
+  },
+});
+
+const defectStorage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    const id = req.params.id;
+    const status = req.body.status;
+
+    if (!id || !status) {
+      return callback(new Error("defectId and status are required"), "");
+    }
+
+    const folderType = status === 'reported' ? 'before' : 'after';
+    // ปรับโครงสร้างโฟลเดอร์ที่ต้องการให้เป็น uploads/defects/id/folderType
+    const folderPath = path.join('uploads', 'defects', id.toString(), folderType);
+
+    fs.mkdirSync(folderPath, { recursive: true });
+    callback(null, folderPath);
+  },
+  filename: (req, file, callback) => {
+    const id = req.params.id;
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const uniqueSuffix = `${id}_${timestamp}_${file.originalname}`;
+    callback(null, uniqueSuffix);
+  },
+});
+
+
+// Export the multer upload middleware
+export const profileUpload = multer({ storage: profileStorage });
+export const defectUpload = multer({ storage: defectStorage });
+
+function getUploadsPath(): string {
+  const currentDir = process.cwd();
+  return path.join(currentDir, "uploads"); // Adjust path as needed
+}
+
+export const uploadsPath = getUploadsPath();
+
+export const uploadDefectImages = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { id } = req.params;
+    const { status } = req.body;
+    let images: any[] = [];
+
+    if (req.files) {
+      const imageFiles = req.files as Express.Multer.File[];
+      images = await handleDefectImagesUpload(
+        parseInt(id),
+        status as DefectStatus,
+        userId,
+        imageFiles
+      );
+    }
+
+    res.status(200).json({ message: "Files uploaded successfully", images: images, });
+  } catch (error) {
+    res.status(500).json({ error: "File upload failed" });
+  }
+};
+
+export const handleDefectImagesUpload = async (
+  defectId: number,
+  status: DefectStatus,
+  updatedBy: number,
+  files: Express.Multer.File[]
+) => {
+  const createdImages: any[] = [];
+  for (const file of files) {
+    const folderType =
+      status === 'reported' ? 'before' : 'after';
+    // สร้าง folderPrefix ตามที่ได้กำหนดใน multer diskStorage
+    const folderPath = path.join('defects', defectId.toString(), folderType);
+
+    // ใช้ filename ที่ได้จาก multer diskStorage (filename ที่ใช้จะต้องอยู่ในโครงสร้างเดียวกัน)
+    const filePath = path.join(folderPath, file.filename);
+
+    const image = await prisma.image.create({
+      data: {
+        path: filePath,
+        updatedBy: updatedBy,
+        timestamp: new Date(),
+      },
+      include: {
+        user: {
+          select: {
+            id: true
+          }
+        },
+      }
+    });
+
+    await prisma.defectImage.create({
+      data: {
+        defectId: defectId,
+        imageId: image.id,
+      },
+    });
+    createdImages.push({ image });
+  }
+  return createdImages;
+};
+
+// ฟังก์ชันจัดกลุ่มรูปภาพตามช่วงเวลา
+const groupImagesByTimestamp = (
+  images: Array<{
+    id: number;
+    timestamp: Date;
+    updatedBy: number;
+    path: string;
+  }>,
+  thresholdMs: number
+) => {
+  if (images.length === 0) return [];
+
+  const groups: Array<Array<{
+    id: number;
+    timestamp: Date;
+    updatedBy: number;
+    path: string;
+  }>> = [];
+  let currentGroup = [images[0]];
+  let currentTime = images[0].timestamp.getTime();
+
+  for (let i = 1; i < images.length; i++) {
+    const imgTime = images[i].timestamp.getTime();
+    if (currentTime - imgTime <= thresholdMs) {
+      currentGroup.push(images[i]);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = [images[i]];
+      currentTime = imgTime;
+    }
+  }
+  groups.push(currentGroup);
+  return groups;
+};
+
+export const handleDefectImagesUpdate = async (
+  defectId: number,
+  status: DefectStatus,
+  options: {
+    updatedBy: number;
+    supervisorId?: number;
+    deleteExistingImages?: boolean;
+    files: Express.Multer.File[];
+  }
+) => {
+  // ลบภาพเดิมตามเงื่อนไข
+  const existingDefectImages = await prisma.defectImage.findMany({
+    where: { defectId },
+    select: { imageId: true },
+  });
+
+  const existingImages = await prisma.image.findMany({
+    where: { id: { in: existingDefectImages.map((img) => img.imageId) } },
+    select: { id: true, path: true, updatedBy: true, timestamp: true },
+    orderBy: { timestamp: 'desc' },
+  });
+
+  // เงื่อนไขลบภาพเมื่ออัปเดต
+  if (status === 'reported') {
+    // ลบทั้งหมดเมื่อสถานะเป็น reported
+
+    await deleteImages(existingImages.map(img => img.id))
+  } else if (
+    status === 'resolved' &&
+    options.deleteExistingImages &&
+    options.supervisorId
+  ) {
+    // กลุ่มรูปภาพตามเวลาที่ใกล้เคียง (1 วินาที)
+    const grouped = groupImagesByTimestamp(existingImages, 1 * 1000);
+    const latestGroup = grouped[0] || [];
+
+    // กรองเฉพาะรูปของ supervisor ปัจจุบัน
+    const authorizedImages = latestGroup.filter(
+      img => img.updatedBy === options.supervisorId
+    );
+    let defect = await prisma.defect.findFirst({
+      where: {
+        id: defectId
+      },
+      select: {
+        status: true
+      }
+    })
+    defect?.status === 'resolved' as DefectStatus ? await deleteImages(authorizedImages.map(img => img.id)) : undefined
+
+  }
+
+
+  // อัปโหลดภาพใหม่
+  await handleDefectImagesUpload(
+    defectId,
+    status,
+    options.updatedBy,
+    options.files
+  )
+}
+
+// ฟังก์ชันช่วยลบภาพ
+export const deleteImages = async (imageIds: number[]) => {
+  if (imageIds.length === 0) return
+
+  // ลบไฟล์จากระบบ
+  const imagesToDelete = await prisma.image.findMany({
+    where: { id: { in: imageIds } },
+    select: { path: true },
+  })
+
+  imagesToDelete.forEach((image) => {
+    const filePath = path.join(uploadsPath, image.path)
+    try {
+      fs.unlinkSync(filePath)
+    } catch (error) {
+      console.error(`Failed to delete file at ${filePath}:`, error)
+    }
+  })
+
+  // ลบข้อมูลจากฐานข้อมูล
+  await prisma.$transaction([
+    prisma.defectImage.deleteMany({
+      where: { imageId: { in: imageIds } }
+    }),
+    prisma.image.deleteMany({
+      where: {
+        id: { in: imageIds }
+      }
+    })
+  ])
+}

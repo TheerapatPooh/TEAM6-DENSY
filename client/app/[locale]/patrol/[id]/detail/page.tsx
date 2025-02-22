@@ -50,11 +50,9 @@ export default function Page() {
   const {
     patrol,
     patrolResults,
-    results,
     user,
     lock,
     isAlertOpen,
-    mounted,
     canFinish,
     countDefects,
     countFails,
@@ -533,11 +531,9 @@ export default function Page() {
             <PatrolChecklist
               handleResult={handleResult}
               patrolStatus={patrol.status}
-              results={results}
               patrolChecklist={pc}
               disabled={patrol.status === "on_going" && !lock ? false : true}
-              patrolResult={patrolResults}
-              user={user}
+              patrolResults={patrolResults}
               response={(defect: IDefect) => {
                 fetchRealtimeData(defect, "create");
               }}

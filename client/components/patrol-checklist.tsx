@@ -48,61 +48,32 @@ import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 
 interface IPatrolChecklistProps {
-  user: IUser;
   patrolStatus: patrolStatus;
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
-  handleResult: (result: {
-    inspectorId: number;
-    itemId: number;
-    zoneId: number;
-    status: boolean;
-  }) => void;
-  results: Array<{ itemId: number; zoneId: number; status: boolean }>;
-  patrolResult: IPatrolResult[];
+  handleResult: (
+    result: IPatrolResult) => void;
+  patrolResults: IPatrolResult[];
   response?: (defect: IDefect) => void
 }
 
 export default function PatrolChecklist({
-  user,
   patrolStatus,
   patrolChecklist,
   disabled,
   handleResult,
-  results = [],
-  patrolResult,
+  patrolResults,
   response,
 }: IPatrolChecklistProps) {
   const [mounted, setMounted] = useState<boolean>(false);
-  const [resultStatus, setResultStatus] = useState<{
-    [key: string]: boolean | null;
-  }>({});
   const [comments, setComments] = useState<{ [key: string]: string }>({});
-  const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResult);
+  const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResults);
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
   const param = useParams()
   const locale = useLocale()
-
-  const checkStatus = (itemId: number, zoneId: number) => {
-    const result = results.find(
-      (res) => res.itemId === itemId && res.zoneId === zoneId
-    );
-    return result ? result.status : null;
-  };
-
-  useEffect(() => {
-    if (results.length > 0) {
-      const initialStatus = results.reduce((acc, result) => {
-        acc[`${result.itemId}-${result.zoneId}`] = result.status;
-        return acc;
-      }, {} as { [key: string]: boolean | null });
-
-      setResultStatus(initialStatus);
-    }
-  }, [results]);
 
   const handleCreateComment = async (
     message: string,
@@ -162,7 +133,7 @@ export default function PatrolChecklist({
   };
 
   const getExistingResult = (itemId: number, zoneId: number) => {
-    const result = patrolResult.find(
+    const result = patrolResults.find(
       (res) => res.itemId === itemId && res.zoneId === zoneId
     );
     return result;
@@ -172,33 +143,9 @@ export default function PatrolChecklist({
     response(defect)
   }
 
-  useEffect(() => {
-    if (patrolResult && patrolChecklist.checklist.items) {
-      const initialStatus = patrolChecklist.checklist.items.reduce((acc, item) => {
-        item.itemZones.flatMap((itemZone: IItemZone) => {
-          const matchingResult = patrolResult.find((result) => {
-            return result.itemId === item.id && result.zoneId === itemZone.zone.id;
-          });
-          // ถ้ามี matchingResult และ status ไม่เป็น null ให้เก็บค่า status
-          if (matchingResult && matchingResult.status !== null) {
-            acc[`${item.id}-${itemZone.zone.id}`] = matchingResult.status;
-          }
-
-        });
-        return acc;
-      }, {} as { [key: string]: boolean | null });
-
-      setResultStatus(initialStatus); // เก็บค่า resultStatus ที่อัพเดตแล้ว
-    }
-  }, [patrolChecklist.checklist, patrolResult]);
-
-  const handleClick = (inspectorId: number, itemId: number, zoneId: number, status: boolean) => {
+  const handleClick = (id: number, inspectorId: number, itemId: number, zoneId: number, status: boolean) => {
     if (!disabled) {
-      handleResult({ inspectorId, itemId, zoneId, status });
-      setResultStatus((prev) => ({
-        ...prev,
-        [`${itemId}-${zoneId}`]: status,
-      }));
+      handleResult({ id, inspectorId, itemId, zoneId, status });
     }
   };
 
@@ -217,7 +164,7 @@ export default function PatrolChecklist({
   }
 
   const checkResultStatusChecklist = (checklistId: number): boolean => {
-    const checklistResults = patrolResult.filter(result =>
+    const checklistResults = patrolResults.filter(result =>
       patrolChecklist.checklist.id === checklistId &&
       patrolChecklist.checklist.items.some(item =>
         item.id === result.itemId &&
@@ -279,20 +226,13 @@ export default function PatrolChecklist({
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col gap-4">
-                      {item.itemZones.flatMap((itemZones: IItemZone) => {
-                        const status = checkStatus(item.id, itemZones.zone.id);
-                        const existingResult = getExistingResult(item.id, itemZones.zone.id);
-                        const matchedPatrolResult = patrolResult.find(
-                          (pr) => pr.itemId === item.id && pr.zoneId === itemZones.zone.id
-                        );
+                      {item.itemZones.flatMap((itemZone: IItemZone) => {
+                        const existingResult = getExistingResult(item.id, itemZone.zone.id);
 
-                        const supervisor =
-                          patrolStatus === "scheduled"
-                            ? itemZones.zone.supervisor
-                            : matchedPatrolResult?.supervisor;
+                        const supervisor = itemZone.zone.supervisor
 
                         return (
-                          <div key={itemZones.zone.id} className="bg-background rounded-md px-4 py-2">
+                          <div key={itemZone.zone.id} className="bg-background rounded-md px-4 py-2">
                             <div className="flex flex-row justify-between sm:items-end lg:items-center">
                               <div className="flex flex-col w-full">
                                 <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2">
@@ -304,7 +244,7 @@ export default function PatrolChecklist({
                                       {t("Zone")}
                                     </p>
                                   </div>
-                                  <p className="text-base">{z(itemZones.zone.name)}</p>
+                                  <p className="text-base">{z(itemZone.zone.name)}</p>
                                 </div>
 
                                 <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center w-full gap-2">
@@ -330,19 +270,19 @@ export default function PatrolChecklist({
                               <div className="flex gap-2">
                                 <Button
                                   variant={
-                                    resultStatus[`${item.id}-${itemZones.zone.id}`] ===
+                                    existingResult?.status ===
                                       true ? "success" : "secondary"
                                   }
-                                  className={`w-[155px] ${resultStatus ===
+                                  className={`w-[155px] ${existingResult?.status ===
                                     null ? "bg-secondary text-card-foreground" : ""
-                                    } ${existingResult?.status === true || status === true ? "bg-green hover:bg-green text-card" : ""
+                                    } ${existingResult?.status === true ? "bg-green hover:bg-green text-card" : ""
                                     } ${existingResult?.status === false ? "bg-secondary hover:bg-secondary" : ""
                                     } ${disabled ? " cursor-not-allowed opacity-50" : ""
                                     }
                                                                     `}
                                   onClick={() => {
-                                    if (!existingResult.status === true || existingResult.status === null) {
-                                      handleClick(user.id, item.id, itemZones.zone.id, true);
+                                    if (patrolStatus === 'on_going' && !existingResult?.status === true || existingResult?.status === null) {
+                                      handleClick(existingResult.id, patrolChecklist.inspector.id, existingResult.itemId, existingResult.zoneId, true);
                                     }
                                   }}
                                 >
@@ -353,19 +293,19 @@ export default function PatrolChecklist({
                                 </Button>
                                 <Button
                                   variant={
-                                    resultStatus[`${item.id}-${itemZones.zone.id}`] ===
+                                    existingResult?.status ===
                                       false ? "fail" : "secondary"
                                   }
-                                  className={`w-[155px] ${resultStatus ===
+                                  className={`w-[155px] ${existingResult?.status ===
                                     null ? "bg-secondary text-card-foreground" : ""
-                                    } ${existingResult?.status === false || status === false ? "bg-destructive hover:bg-destructive text-card" : ""
+                                    } ${existingResult?.status === false ? "bg-destructive hover:bg-destructive text-card" : ""
                                     } ${existingResult?.status === true ? "bg-secondary hover:bg-secondary" : ""
                                     } ${disabled ? " cursor-not-allowed opacity-50" : ""
                                     }
                                                                     `}
                                   onClick={() => {
-                                    if (!existingResult.status === false || existingResult.status === null) {
-                                      handleClick(user.id, item.id, itemZones.zone.id, false);
+                                    if (patrolStatus === 'on_going' && !existingResult?.status === false || existingResult?.status === null) {
+                                      handleClick(existingResult.id, patrolChecklist.inspector.id, existingResult.itemId, existingResult.zoneId, false);
                                     }
                                   }}
                                 >
@@ -377,64 +317,64 @@ export default function PatrolChecklist({
                               </div>
                             </div>
 
-                            {(status === false ||
-                              existingResult?.status === false) && (
-                                <div className="flex flex-col items-start gap-4 mt-2">
-                                  <AlertDefect
-                                    item={item}
-                                    type={"report"}
-                                    result={existingResult}
-                                    patrolResults={patrolResult}
-                                    response={(defect: IDefect) => (
-                                      fetchRealtimeData(defect)
-                                    )}
-                                  />
+                            {(existingResult?.status === false) && (
+                              <div className="flex flex-col items-start gap-4 mt-2">
+                                <AlertDefect
+                                  userId={ patrolChecklist.inspector.id }
+                                  item={item}
+                                  type={"report"}
+                                  result={existingResult}
+                                  patrolResults={patrolResults}
+                                  response={(defect: IDefect) => (
+                                    fetchRealtimeData(defect)
+                                  )}
+                                />
 
-                                  <div className="flex flex-col items-start w-full gap-2">
-                                    {patrolResultState.flatMap(pr => pr.comments ?? []).map((comment: IComment) =>
-                                      comment.patrolResultId === existingResult.id ?
-                                        (
-                                          <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
-                                            <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
-                                            <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp,locale)}</p>
-                                            <div className="flex items-end">
-                                              <p className="text-xl">{comment.message}</p>
-                                            </div>
+                                <div className="flex flex-col items-start w-full gap-2">
+                                  {patrolResultState.flatMap(pr => pr.comments ?? []).map((comment: IComment) =>
+                                    comment.patrolResultId === existingResult.id ?
+                                      (
+                                        <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
+                                          <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
+                                          <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp, locale)}</p>
+                                          <div className="flex items-end">
+                                            <p className="text-xl">{comment.message}</p>
                                           </div>
-                                        )
-                                        : null
-                                    )}
-                                    <Textarea
-                                      key={`${item.id}-${itemZones.zone.id}`}
-                                      className="min-h-[120px] bg-secondary border-none text-xl"
-                                      placeholder={`${t("Comment")}...`}
-                                      disabled={disabled}
-                                      value={comments[`${item.id}-${itemZones.zone.id}`] || ""}
-                                      onChange={(e) => handleCommentChange(item.id, itemZones.zone.id, e.target.value)}
-                                    />
-                                  </div>
-
-                                  <div className="flex justify-end w-full mt-2">
-                                    <Button
-                                      variant={"primary"}
-                                      size={"lg"}
-                                      disabled={disabled}
-                                      onClick={() => {
-                                        handleCreateComment(comments[`${item.id}-${itemZones.zone.id}`], existingResult.id, supervisor.id)
-                                        setComments(prev => ({
-                                          ...prev,
-                                          [`${item.id}-${itemZones.zone.id}`]: ""
-                                        }));
-                                      }}
-                                    >
-                                      <span className="material-symbols-outlined me-2">
-                                        send
-                                      </span>
-                                      {t("Send")}
-                                    </Button>
-                                  </div>
+                                        </div>
+                                      )
+                                      : null
+                                  )}
+                                  <Textarea
+                                    key={`${item.id}-${itemZone.zone.id}`}
+                                    className="min-h-[120px] bg-secondary border-none text-xl"
+                                    placeholder={`${t("Comment")}...`}
+                                    disabled={disabled}
+                                    value={comments[`${item.id}-${itemZone.zone.id}`] || ""}
+                                    onChange={(e) => handleCommentChange(item.id, itemZone.zone.id, e.target.value)}
+                                  />
                                 </div>
-                              )}
+
+                                <div className="flex justify-end w-full mt-2">
+                                  <Button
+                                    variant={"primary"}
+                                    size={"lg"}
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      handleCreateComment(comments[`${item.id}-${itemZone.zone.id}`], existingResult.id, supervisor.id)
+                                      setComments(prev => ({
+                                        ...prev,
+                                        [`${item.id}-${itemZone.zone.id}`]: ""
+                                      }));
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined me-2">
+                                      send
+                                    </span>
+                                    {t("Send")}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )
                       })}

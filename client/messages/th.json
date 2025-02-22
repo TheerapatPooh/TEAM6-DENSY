@@ -514,7 +514,9 @@
     "ExportPatrolAlertDescription": "โปรดยืนยันเพื่อออกรายงานผลการตรวจตรา",
     "ExportPatrolNoData": "การออกรายงานผลการตรวจตราล้มเหลว",
     "ExportPatrolNoDataDescription": "ไม่มีข้อมูลการตรวจตรา หรือยังไม่ได้เลือกการตรวจตรา",
-    "ExportPatrolStatusNotCompleteDescription": "การตรวจตรายังไม่สิ้นสุด"
+    "ExportPatrolStatusNotCompleteDescription": "การตรวจตรายังไม่สิ้นสุด",
+    "ReportDefectErrorInvalidImage": "รูปภาพไม่ถูกต้อง",
+    "ReportDefectErrorInvalidImageMessage": "กรุณาอัปโหลดรูปภาพในรูปแบบที่รองรับ (png, jpeg, jpg, gif)"
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",

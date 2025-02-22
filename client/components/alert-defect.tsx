@@ -49,15 +49,16 @@ import { toast } from '@/hooks/use-toast';
 import { AlertCustom } from "@/components/alert-custom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 interface IAlertDefect {
+    userId?: number
     defect?: IDefect,
     item?: IItem,
     type: "edit" | "report" | "resolve" | "edit-resolve",
     patrolResults?: IPatrolResult[],
-    result?: { inspectorId: number, itemId: number; zoneId: number; status: boolean },
+    result?: { id: number, inspectorId: number, itemId: number; zoneId: number; status: boolean, supervisorId?: number },
     response: (defect: IDefect) => void;
 }
 
-export default function AlertDefect({ defect, item, type, patrolResults, result, response }: IAlertDefect) {
+export default function AlertDefect({ userId, defect, item, type, patrolResults, result, response }: IAlertDefect) {
     const disabled = false
     const a = useTranslations("Alert");
     const t = useTranslations("General");
@@ -95,6 +96,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         setDefectDescription(value);
     };
 
+    // ตรวจสอบว่าไฟล์ทั้งหมดเป็นไฟล์รูปภาพ
+    const validImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
 
     const handleCreateDefect = async (
         name: string,
@@ -105,7 +108,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         supervisorId: number,
         files: File[]
     ) => {
-
+        setDetailError(null)
+        setFileError(null)
         if (!description || !files || files?.length === 0) {
             setDetailError(!description ? a("ReportDefectErrorMissingDetail") : null)
             setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
@@ -120,29 +124,49 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
             });
             return;
         }
+        const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
 
-        const formData = new FormData();
+        if (invalidFiles.length > 0) {
+            setFileError(a("ReportDefectErrorInvalidImageMessage"))
+            toast({
+                variant: "error",
+                title: a("ReportDefectErrorInvalidImage"),
+                description: a("ReportDefectErrorInvalidImageMessage"),
+            });
+            return;
+        }
+        const defectData = {
+            name,
+            description,
+            type,
+            defectUserId: userId?.toString(),
+            patrolResultId: patrolResultId.toString(),
+            supervisorId: supervisorId.toString(),
+        };
 
-        formData.append("name", name);
-        formData.append("description", description);
-        formData.append("type", type);
-        formData.append("status", "reported");
-        formData.append("defectUserId", userId?.toString());
-        formData.append("patrolResultId", patrolResultId.toString());
-        formData.append("supervisorId", supervisorId.toString());
-
-        files?.forEach((file) => {
-            formData.append("imageFiles", file);
-        });
         try {
             const createDefect = await fetchData(
                 "post",
                 "/defect",
                 true,
-                formData,
-                true
+                defectData,
+                false
             );
-            if (description && files) {
+            const id = createDefect.id;
+
+            // ส่งไฟล์ใน request แยก
+            const formData = new FormData();
+            formData.append("status", "reported");
+            files.forEach((file) => formData.append("imageFiles", file));
+
+            const defectImage = await fetchData(
+                "put",
+                `/defect/${id}/upload`,
+                true,
+                formData,
+                true // เป็น FormData
+            );
+            if (defectImage) {
                 toast({
                     variant: "success",
                     title: a("ReportDefectTitle"),
@@ -150,9 +174,14 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 });
                 closeAlertDefect()
             }
+
+            createDefect.images = defectImage.images;
+            createDefect.images = defectImage.images
+            response(createDefect)
+            setDetailError(null)
+            setFileError(null)
             setSelectedFiles(null)
             setDefectDescription(null)
-            response(createDefect)
         } catch (error) {
             console.error("Error creating defect:", error);
         }
@@ -163,12 +192,13 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         name: string,
         description: string,
         type: string,
-        status: string,
         userId: number,
         patrolResultId: number | null,
         supervisorId: number,
         files: File[]
     ) => {
+        setDetailError(null)
+        setFileError(null)
         if (!description || !files || files?.length === 0) {
             setDetailError(!description ? a("ReportDefectErrorMissingDetail") : null)
             setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
@@ -184,15 +214,27 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
             return;
         }
 
+        const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
+
+        if (invalidFiles.length > 0) {
+            setFileError(a("ReportDefectErrorInvalidImageMessage"))
+            toast({
+                variant: "error",
+                title: a("ReportDefectErrorInvalidImage"),
+                description: a("ReportDefectErrorInvalidImageMessage"),
+            });
+            return;
+        }
+
         const formData = new FormData();
 
         formData.append("name", name);
         formData.append("description", description);
         formData.append("type", type);
-        formData.append("status", status);
+        formData.append("status", 'reported');
         formData.append("defectUserId", userId.toString());
-        formData.append("patrolResultId", patrolResultId.toString());
         formData.append("supervisorId", supervisorId.toString());
+        formData.append("deleteExistingImages", "true");
 
         files?.forEach((file) => {
             formData.append("imageFiles", file);
@@ -205,7 +247,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 formData,
                 true
             );
-            if (description && files) {
+
+            if (updateDefect) {
                 toast({
                     variant: "success",
                     title: a("EditReportDefectTitle"),
@@ -213,6 +256,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 });
                 closeAlertDefect()
             }
+            setDetailError(null)
+            setFileError(null)
             setSelectedFiles(null)
             setDefectDescription(null)
             response(updateDefect)
@@ -227,7 +272,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
         type: string,
         deleteExistingImages: boolean,
     ) => {
-
+        setDetailError(null)
+        setFileError(null)
         if (!files || files?.length === 0) {
             setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
             toast({
@@ -238,17 +284,24 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
             return;
         }
 
+        const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
+
+        if (invalidFiles.length > 0) {
+            setFileError(a("ReportDefectErrorInvalidImageMessage"))
+            toast({
+                variant: "error",
+                title: a("ReportDefectErrorInvalidImage"),
+                description: a("ReportDefectErrorInvalidImageMessage"),
+            });
+            return;
+        }
+
         const formData = new FormData();
 
-        formData.append("supervisorId",
-            defect.supervisor.id.toString()
-        );
-        formData.append("defectUserId",
-            defect.userId.toString()
-        );
-        formData.append("status", "resolved")
-        formData.append("deleteExistingImages", deleteExistingImages.toString())
-
+        formData.append("status", 'resolved');
+        formData.append("defectUserId", defect.userId.toString());
+        formData.append("supervisorId", defect.supervisor.id.toString());
+        formData.append("deleteExistingImages", "true");
         files?.forEach((file) => {
             formData.append("imageFiles", file);
         });
@@ -261,8 +314,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 formData,
                 true
             );
-
-            if (files) {
+            if (resolveDefect) {
                 if (type === "resolve") {
                     toast({
                         variant: "success",
@@ -279,6 +331,8 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                 }
                 closeAlertDefect()
             }
+            setDetailError(null)
+            setFileError(null)
             setSelectedFiles(null)
             response(resolveDefect)
         } catch (error) {
@@ -367,7 +421,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                 ? item.itemZones.map((itemZone: IItemZone) => {
                                                     return result.zoneId === itemZone.zone.id
                                                         ? z(itemZone.zone.name)
-                                                        : null;  
+                                                        : null;
                                                 })
                                                 : z(defect.patrolResult.itemZone.zone.name)}
                                         </p>
@@ -549,6 +603,7 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                         setDetailError(null)
                                         setFileError(null)
                                         setSelectedFiles(null)
+                                        setDefectDescription(null)
                                     }}>
                                     {t("Cancel")}
                                 </AlertDialogCancel>
@@ -581,9 +636,9 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                     item.name,
                                                     defectDescription,
                                                     item.type,
-                                                    result.inspectorId,
+                                                    result.inspectorId || userId,
                                                     patrolResults.find((patrolResult: IPatrolResult) =>
-                                                        result.itemId === patrolResult.itemId && result.zoneId === patrolResult.zoneId
+                                                        result.id === patrolResult.id
                                                     )?.id || null,
                                                     patrolResults.find((patrolResult: IPatrolResult) =>
                                                         result.zoneId === patrolResult.zoneId
@@ -602,7 +657,6 @@ export default function AlertDefect({ defect, item, type, patrolResults, result,
                                                     defect.name,
                                                     defectDescription,
                                                     defect.type,
-                                                    defect.status,
                                                     defect.userId,
                                                     defect.patrolResultId,
                                                     defect.patrolResult.itemZone.zone.supervisor.id,

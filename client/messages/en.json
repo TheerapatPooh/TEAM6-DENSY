@@ -166,11 +166,11 @@
     "FullName": "Full Name",
     "Deactivate": "Deactivate",
     "Activate": "Activate",
-    "ZoneWithoutAssignedUsers":"Zone Without Assigned Users",
-    "ZoneWithoutAssignedUsersDescription":"It seems that the selected preset has zone without assigned supervisor.",
-    "PleaseGoTo":"Please go to the",
-    "Location&Zone":"Location & Zone",
-    "AssignUsersToTheZone":"section and assign users to the zone.",
+    "ZoneWithoutAssignedUsers": "Zone Without Assigned Users",
+    "ZoneWithoutAssignedUsersDescription": "It seems that the selected preset has zone without assigned supervisor.",
+    "PleaseGoTo": "Please go to the",
+    "Location&Zone": "Location & Zone",
+    "AssignUsersToTheZone": "section and assign users to the zone.",
     "EnterChecklistTitle": "Enter Checklist Title",
     "EnterPresetTitle": "Enter Preset Title",
     "EnterPresetDescription": "Enter Preset Description",
@@ -514,8 +514,9 @@
     "ExportPatrolAlertDescription": "Please confirm to export patrol.",
     "ExportPatrolNoData": "Export Patrol Failed",
     "ExportPatrolNoDataDescription": "No available patrol data or no patrol selected.",
-    "ExportPatrolStatusNotCompleteDescription": "Patrol has not been completed."
-    
+    "ExportPatrolStatusNotCompleteDescription": "Patrol has not been completed.",
+    "ReportDefectErrorInvalidImage": "Invalid Image",
+    "ReportDefectErrorInvalidImageMessage": "Please upload an image in a supported format (png, jpeg, jpg, gif)."
   },
   "Month": {
     "AllTime": "All Time",

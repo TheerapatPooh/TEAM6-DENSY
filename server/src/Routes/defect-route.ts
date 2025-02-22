@@ -1,6 +1,6 @@
 import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
-import { authenticateUser, authorized, upload } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized, defectUpload, uploadDefectImages } from "@Controllers/util-controller.js";
 
 const router = Router()
 
@@ -637,5 +637,13 @@ router.get('/comments', authenticateUser, authorized(['admin', 'supervisor']), g
  *                   example: "Internal server error"
  */
 router.put('/comment/:id', authenticateUser, authorized(['admin', 'supervisor']), confirmComment)
+
+router.put(
+  '/defect/:id/upload',
+  authenticateUser,
+  authorized(['admin', 'inspector']),
+  defectUpload.array('imageFiles', 10), // Multer middleware here
+  uploadDefectImages
+);
 
 export default router
