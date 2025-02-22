@@ -1,7 +1,7 @@
 import { Zone } from "@prisma/client";
 
 export const zones: Zone[] = [
-  { id: 1, name: 'r&d_zone', locationId: 1, userId: 3 }, 
+  { id: 1, name: 'r&d_zone', locationId: 1, userId: 22 }, 
   { id: 2, name: 'assembly_line_zone', locationId: 1, userId: 4 }, 
   { id: 3, name: 'raw_materials_storage_zone', locationId: 1, userId: 5 }, 
   { id: 4, name: 'quality_control_zone', locationId: 1, userId: 6 }, 
