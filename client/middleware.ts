@@ -8,18 +8,29 @@ const intlMiddleware = createIntlMiddleware({
 });
 
 export function middleware(req: NextRequest) {
-  const response = intlMiddleware(req)
-  const authToken = req.cookies.get("authToken")?.value
   const currentPathname = req.nextUrl.pathname
+  const response = intlMiddleware(req)
   const localeMatch = currentPathname.match(/^\/(en|th)(\/|$)/)
   const locale = localeMatch ? localeMatch[1] : 'en'
+
+  if (currentPathname.startsWith(`/${locale}/refresh`)) {
+    return response;
+  }
+
+  const authToken = req.cookies.get("authToken")?.value
+  const refreshToken = req.cookies.get("refreshToken")?.value;
   const isLoginPage = req.nextUrl.pathname === `/${locale}/login`
   const isProfilePage = currentPathname.startsWith(`/${locale}/profile`);
 
 
-  if (!authToken && !isLoginPage) {
+  if (!authToken && !refreshToken && !isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
   }
+
+  if (!authToken && refreshToken) {
+    return NextResponse.redirect(new URL(`/${locale}/refresh`, req.url));
+  }
+
   if (authToken && isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}`, req.url))
   }
@@ -33,7 +44,7 @@ export function middleware(req: NextRequest) {
       if (isProfilePage) {
         return response;
       }
-      
+
       if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
         return NextResponse.redirect(new URL(`/${locale}/admin/dashboard/overview`, req.url));
       }

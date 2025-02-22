@@ -1,4 +1,4 @@
-import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications } from "@Controllers/util-controller.js";
+import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications, refreshToken } from "@Controllers/util-controller.js";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 
@@ -68,6 +68,8 @@ const loginLimiter = rateLimit({
  *                   example: "Internal Server Error"
  */
 router.post("/login", loginLimiter, login);
+
+router.post("/refresh-token", refreshToken); 
 
 /**
  * @swagger

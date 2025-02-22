@@ -5,7 +5,6 @@ import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
-import Defect from "@/components/defect";
 
 
 const ExcelJS = require("exceljs");
@@ -13,6 +12,26 @@ const ExcelJS = require("exceljs");
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export async function refreshAccessToken() {
+  try {
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, {
+      withCredentials: true,
+    });
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh-token`, {}, {
+      withCredentials: true,
+      headers: { "X-CSRF-Token": csrfToken },
+    });
+
+    return response.data.accessToken;
+  } catch (error) {
+    console.error("Failed to refresh token", error);
+    return null;
+  }
+}
+
 export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values)
   if (!validatedFields.success) {
@@ -36,7 +55,6 @@ export async function login(values: z.infer<typeof LoginSchema>) {
   }
 }
 
-
 export async function logout() {
   try {
     const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
@@ -51,7 +69,6 @@ export async function logout() {
     throw new Error("Logout failed", error);
   }
 }
-
 
 export async function fetchData(
   type: "get" | "delete" | "post" | "put",
@@ -99,8 +116,6 @@ export async function fetchData(
     };
   }
 }
-
-
 
 export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {

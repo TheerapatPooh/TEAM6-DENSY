@@ -72,7 +72,7 @@ export default function LoginPage() {
     function onSubmit(values: z.infer<typeof LoginSchema>) {
         startTransition(async () => {
             const result = await login(values)
-            if (result.token) {
+            if (result.accessToken && result.refreshToken) {
                 toast({
                     variant: "success",
                     title: a("LoginSuccessTitle"),
