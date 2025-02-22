@@ -1,6 +1,7 @@
 import { ItemZone } from "@prisma/client";
 
 export const item_zones: ItemZone[] = [
+    // Assembly zone : 2
     { itemId: 1, zoneId: 2 },
     { itemId: 2, zoneId: 2 },
     { itemId: 3, zoneId: 2 },
@@ -10,6 +11,8 @@ export const item_zones: ItemZone[] = [
     { itemId: 7, zoneId: 2 },
     { itemId: 8, zoneId: 2 },
     { itemId: 9, zoneId: 2 },
+
+    // Raw zone : 3
     { itemId: 10, zoneId: 3 },
     { itemId: 11, zoneId: 3 },
     { itemId: 12, zoneId: 3 },
@@ -19,4 +22,191 @@ export const item_zones: ItemZone[] = [
     { itemId: 16, zoneId: 3 },
     { itemId: 17, zoneId: 3 },
     { itemId: 18, zoneId: 3 },
+
+    // Maintenance zone : 10
+    { itemId: 19, zoneId: 10 },
+    { itemId: 20, zoneId: 10 },
+    { itemId: 21, zoneId: 10 },
+    { itemId: 22, zoneId: 10 },
+    { itemId: 23, zoneId: 10 },
+    { itemId: 24, zoneId: 10 },
+    { itemId: 25, zoneId: 10 },
+    { itemId: 26, zoneId: 10 },
+    { itemId: 27, zoneId: 10 },
+
+    // Storage zone : 12
+    { itemId: 28, zoneId: 12 },
+    { itemId: 29, zoneId: 12 },
+    { itemId: 30, zoneId: 12 },
+    { itemId: 31, zoneId: 12 },
+    { itemId: 32, zoneId: 12 },
+    { itemId: 33, zoneId: 12 },
+    { itemId: 34, zoneId: 12 },
+    { itemId: 35, zoneId: 12 },
+    { itemId: 36, zoneId: 12 },
+
+    // Warehouse zone : 11
+    { itemId: 37, zoneId: 11 },
+    { itemId: 38, zoneId: 11 },
+    { itemId: 39, zoneId: 11 },
+    { itemId: 40, zoneId: 11 },
+    { itemId: 41, zoneId: 11 },
+    { itemId: 42, zoneId: 11 },
+    { itemId: 43, zoneId: 11 },
+    { itemId: 44, zoneId: 11 },
+    { itemId: 45, zoneId: 11 },
+
+    // Quality zone : 4
+    { itemId: 46, zoneId: 4 },
+    { itemId: 47, zoneId: 4 },
+    { itemId: 48, zoneId: 4 },
+    { itemId: 49, zoneId: 4 },
+    { itemId: 50, zoneId: 4 },
+    { itemId: 51, zoneId: 4 },
+    { itemId: 52, zoneId: 4 },
+    { itemId: 53, zoneId: 4 },
+    { itemId: 54, zoneId: 4 },
+
+    // Server zone : 13
+    { itemId: 55, zoneId: 13 },
+    { itemId: 56, zoneId: 13 },
+    { itemId: 57, zoneId: 13 },
+    { itemId: 58, zoneId: 13 },
+    { itemId: 59, zoneId: 13 },
+    { itemId: 60, zoneId: 13 },
+    { itemId: 61, zoneId: 13 },
+    { itemId: 62, zoneId: 13 },
+    { itemId: 63, zoneId: 13 },
+
+    // Testing zone : 19
+    { itemId: 64, zoneId: 19 },
+    { itemId: 65, zoneId: 19 },
+    { itemId: 66, zoneId: 19 },
+    { itemId: 67, zoneId: 19 },
+    { itemId: 68, zoneId: 19 },
+    { itemId: 69, zoneId: 19 },
+    { itemId: 70, zoneId: 19 },
+    { itemId: 71, zoneId: 19 },
+    { itemId: 72, zoneId: 19 },
+
+    // Working A zone : 17
+    { itemId: 73, zoneId: 17 },
+    { itemId: 74, zoneId: 17 },
+    { itemId: 75, zoneId: 17 },
+    { itemId: 76, zoneId: 17 },
+    { itemId: 77, zoneId: 17 },
+    { itemId: 78, zoneId: 17 },
+    { itemId: 79, zoneId: 17 },
+    { itemId: 80, zoneId: 17 },
+    { itemId: 81, zoneId: 17 },
+
+    // Working B zone : 18
+    { itemId: 82, zoneId: 18 },
+    { itemId: 83, zoneId: 18 },
+    { itemId: 84, zoneId: 18 },
+    { itemId: 85, zoneId: 18 },
+    { itemId: 86, zoneId: 18 },
+    { itemId: 87, zoneId: 18 },
+    { itemId: 88, zoneId: 18 },
+    { itemId: 89, zoneId: 18 },
+    { itemId: 90, zoneId: 18 },
+
+    // Training zone : 16
+    { itemId: 91, zoneId: 16 },
+    { itemId: 92, zoneId: 16 },
+    { itemId: 93, zoneId: 16 },
+    { itemId: 94, zoneId: 16 },
+    { itemId: 95, zoneId: 16 },
+    { itemId: 96, zoneId: 16 },
+    { itemId: 97, zoneId: 16 },
+    { itemId: 98, zoneId: 16 },
+    { itemId: 99, zoneId: 16 },
+
+    // Engineering zone : 15
+    { itemId: 100, zoneId: 15 },
+    { itemId: 101, zoneId: 15 },
+    { itemId: 102, zoneId: 15 },
+    { itemId: 103, zoneId: 15 },
+    { itemId: 104, zoneId: 15 },
+    { itemId: 105, zoneId: 15 },
+    { itemId: 106, zoneId: 15 },
+    { itemId: 107, zoneId: 15 },
+    { itemId: 108, zoneId: 15 },
+
+    // Prototype zone : 7
+    { itemId: 109, zoneId: 7 },
+    { itemId: 110, zoneId: 7 },
+    { itemId: 111, zoneId: 7 },
+    { itemId: 112, zoneId: 7 },
+    { itemId: 113, zoneId: 7 },
+    { itemId: 114, zoneId: 7 },
+    { itemId: 115, zoneId: 7 },
+    { itemId: 116, zoneId: 7 },
+    { itemId: 117, zoneId: 7 },
+
+    // IT zone : 5
+    { itemId: 118, zoneId: 5 },
+    { itemId: 119, zoneId: 5 },
+    { itemId: 120, zoneId: 5 },
+    { itemId: 121, zoneId: 5 },
+    { itemId: 122, zoneId: 5 },
+    { itemId: 123, zoneId: 5 },
+    { itemId: 124, zoneId: 5 },
+    { itemId: 125, zoneId: 5 },
+    { itemId: 126, zoneId: 5 },
+
+    // Customer zone : 6
+    { itemId: 127, zoneId: 6 },
+    { itemId: 128, zoneId: 6 },
+    { itemId: 129, zoneId: 6 },
+    { itemId: 130, zoneId: 6 },
+    { itemId: 131, zoneId: 6 },
+    { itemId: 132, zoneId: 6 },
+    { itemId: 133, zoneId: 6 },
+    { itemId: 134, zoneId: 6 },
+    { itemId: 135, zoneId: 6 },
+
+    // Manager zone : 8
+    { itemId: 136, zoneId: 8 },
+    { itemId: 137, zoneId: 8 },
+    { itemId: 138, zoneId: 8 },
+    { itemId: 139, zoneId: 8 },
+    { itemId: 140, zoneId: 8 },
+    { itemId: 141, zoneId: 8 },
+    { itemId: 142, zoneId: 8 },
+    { itemId: 143, zoneId: 8 },
+    { itemId: 144, zoneId: 8 },
+
+    // Water Supply zone : 9
+    { itemId: 145, zoneId: 9 },
+    { itemId: 146, zoneId: 9 },
+    { itemId: 147, zoneId: 9 },
+    { itemId: 148, zoneId: 9 },
+    { itemId: 149, zoneId: 9 },
+    { itemId: 150, zoneId: 9 },
+    { itemId: 151, zoneId: 9 },
+    { itemId: 152, zoneId: 9 },
+    { itemId: 153, zoneId: 9 },
+
+    // Electrical zone : 14
+    { itemId: 154, zoneId: 14 },
+    { itemId: 155, zoneId: 14 },
+    { itemId: 156, zoneId: 14 },
+    { itemId: 157, zoneId: 14 },
+    { itemId: 158, zoneId: 14 },
+    { itemId: 159, zoneId: 14 },
+    { itemId: 160, zoneId: 14 },
+    { itemId: 161, zoneId: 14 },
+    { itemId: 162, zoneId: 14 },
+
+    // R&D zone : 1
+    { itemId: 163, zoneId: 1 },
+    { itemId: 164, zoneId: 1 },
+    { itemId: 165, zoneId: 1 },
+    { itemId: 166, zoneId: 1 },
+    { itemId: 167, zoneId: 1 },
+    { itemId: 168, zoneId: 1 },
+    { itemId: 169, zoneId: 1 },
+    { itemId: 170, zoneId: 1 },
+    { itemId: 171, zoneId: 1 },
 ];
