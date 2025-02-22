@@ -19,7 +19,17 @@ export async function login(values: z.infer<typeof LoginSchema>) {
     return { error: "Invalid field!" }
   }
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`,
+      values,
+      {
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
+        withCredentials: true
+      })
     return response.data
   } catch (error: any) {
     return { error: error.response?.data?.message || "Login failed" };
@@ -29,7 +39,14 @@ export async function login(values: z.infer<typeof LoginSchema>) {
 
 export async function logout() {
   try {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, {
+      headers: {
+        "X-CSRF-Token": csrfToken,
+      },
+      withCredentials: true
+    })
   } catch (error: any) {
     throw new Error("Logout failed", error);
   }

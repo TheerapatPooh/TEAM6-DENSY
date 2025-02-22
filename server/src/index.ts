@@ -10,6 +10,7 @@ import { initSocketIO } from '@Utils/socket.js';
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+import csurf from "csurf";
 
 dotenv.config()
 
@@ -20,6 +21,13 @@ const PORT = process.env.SERVER_PORT
 
 app.use(cookieParser());
 app.use(corsMiddleware)
+
+const csrfProtection = csurf({ cookie: true });
+app.use(csrfProtection);
+app.get("/api/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
 app.use('/uploads', express.static(path.join(__dirname, '../../server/uploads')));
 app.use(bodyParse.json({ limit: '10mb' }))
 app.use(express.json())

@@ -79,6 +79,12 @@ export default function LoginPage() {
                     description: a("LoginSuccessDescription"),
                 });
                 router.push(`/${locale}`);
+            } else if (result.error === "Too many login attempts, please try again later") {
+                toast({
+                    variant: "error",
+                    title: a("LoginTooManyTitle"), 
+                    description: a("LoginTooManyDescription"),
+                });
             } else {
 
                 // แสดง Toast แจ้ง Error
