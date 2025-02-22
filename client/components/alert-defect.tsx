@@ -96,6 +96,8 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
         setDefectDescription(value);
     };
 
+    // ตรวจสอบว่าไฟล์ทั้งหมดเป็นไฟล์รูปภาพ
+    const validImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
 
     const handleCreateDefect = async (
         name: string,
@@ -106,7 +108,8 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
         supervisorId: number,
         files: File[]
     ) => {
-
+        setDetailError(null)
+        setFileError(null)
         if (!description || !files || files?.length === 0) {
             setDetailError(!description ? a("ReportDefectErrorMissingDetail") : null)
             setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
@@ -121,13 +124,17 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
             });
             return;
         }
-        // formData.append("name", name);
-        // formData.append("description", description);
-        // formData.append("type", type);
-        // formData.append("status", "reported");
-        // formData.append("defectUserId", userId?.toString());
-        // formData.append("patrolResultId", patrolResultId.toString());
-        // formData.append("supervisorId", supervisorId.toString());
+        const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
+
+        if (invalidFiles.length > 0) {
+            setFileError(a("ReportDefectErrorInvalidImageMessage"))
+            toast({
+                variant: "error",
+                title: a("ReportDefectErrorInvalidImage"),
+                description: a("ReportDefectErrorInvalidImageMessage"),
+            });
+            return;
+        }
         const defectData = {
             name,
             description,
@@ -159,7 +166,7 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                 formData,
                 true // เป็น FormData
             );
-            if (description && files) {
+            if (defectImage) {
                 toast({
                     variant: "success",
                     title: a("ReportDefectTitle"),
@@ -167,11 +174,14 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                 });
                 closeAlertDefect()
             }
-            setSelectedFiles(null)
-            setDefectDescription(null)
+
             createDefect.images = defectImage.images;
             createDefect.images = defectImage.images
             response(createDefect)
+            setDetailError(null)
+            setFileError(null)
+            setSelectedFiles(null)
+            setDefectDescription(null)
         } catch (error) {
             console.error("Error creating defect:", error);
         }
@@ -187,6 +197,8 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
         supervisorId: number,
         files: File[]
     ) => {
+        setDetailError(null)
+        setFileError(null)
         if (!description || !files || files?.length === 0) {
             setDetailError(!description ? a("ReportDefectErrorMissingDetail") : null)
             setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
@@ -198,6 +210,18 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                     : !description
                         ? a("ReportDefectMissingDetail")
                         : a("ReportDefectMissingImage"),
+            });
+            return;
+        }
+
+        const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
+
+        if (invalidFiles.length > 0) {
+            setFileError(a("ReportDefectErrorInvalidImageMessage"))
+            toast({
+                variant: "error",
+                title: a("ReportDefectErrorInvalidImage"),
+                description: a("ReportDefectErrorInvalidImageMessage"),
             });
             return;
         }
@@ -224,7 +248,7 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                 true
             );
 
-            if (description && files) {
+            if (updateDefect) {
                 toast({
                     variant: "success",
                     title: a("EditReportDefectTitle"),
@@ -232,6 +256,8 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                 });
                 closeAlertDefect()
             }
+            setDetailError(null)
+            setFileError(null)
             setSelectedFiles(null)
             setDefectDescription(null)
             response(updateDefect)
@@ -246,13 +272,26 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
         type: string,
         deleteExistingImages: boolean,
     ) => {
-
+        setDetailError(null)
+        setFileError(null)
         if (!files || files?.length === 0) {
             setFileError(!files || files?.length === 0 ? a("ReportDefectErrorMissingImage") : null)
             toast({
                 variant: "error",
                 title: a("ReportDefectMissingField"),
                 description: a("ReportDefectMissingImage"),
+            });
+            return;
+        }
+
+        const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
+
+        if (invalidFiles.length > 0) {
+            setFileError(a("ReportDefectErrorInvalidImageMessage"))
+            toast({
+                variant: "error",
+                title: a("ReportDefectErrorInvalidImage"),
+                description: a("ReportDefectErrorInvalidImageMessage"),
             });
             return;
         }
@@ -275,7 +314,7 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                 formData,
                 true
             );
-            if (files) {
+            if (resolveDefect) {
                 if (type === "resolve") {
                     toast({
                         variant: "success",
@@ -292,6 +331,8 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                 }
                 closeAlertDefect()
             }
+            setDetailError(null)
+            setFileError(null)
             setSelectedFiles(null)
             response(resolveDefect)
         } catch (error) {
@@ -562,6 +603,7 @@ export default function AlertDefect({ userId, defect, item, type, patrolResults,
                                         setDetailError(null)
                                         setFileError(null)
                                         setSelectedFiles(null)
+                                        setDefectDescription(null)
                                     }}>
                                     {t("Cancel")}
                                 </AlertDialogCancel>
