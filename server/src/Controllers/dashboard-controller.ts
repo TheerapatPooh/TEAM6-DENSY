@@ -62,6 +62,7 @@ export async function getHeatMap(req: Request, res: Response) {
     return;
   }
 }
+
 export async function getDefectCategory(req: Request, res: Response) {
   try {
     const { startDate, endDate, patrolId, zoneId } = req.query;
@@ -258,6 +259,7 @@ export async function getDefectCategory(req: Request, res: Response) {
     return;
   }
 }
+
 export async function getCommonDefects(req: Request, res: Response) {
   try {
     const { startDate, endDate, zoneId } = req.query;
@@ -400,6 +402,7 @@ export async function getCommonDefects(req: Request, res: Response) {
     return;
   }
 }
+
 export async function getPatrolCompletionRate(req: Request, res: Response) {
   try {
     const { startDate, endDate } = req.query;

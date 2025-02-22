@@ -1,6 +1,6 @@
 import { getPreset, getAllPresets, createPreset, updatePreset, getAllChecklists, getChecklist, createChecklist, removeChecklist, removePreset, updateChecklist } from "@Controllers/preset-controller.js";
 import { Router } from 'express'
-import { authenticateUser, authorzied } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized } from "@Controllers/util-controller.js";
 const router = Router()
 
 /**
@@ -84,7 +84,7 @@ const router = Router()
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/preset/:id', authenticateUser, authorzied(['admin', 'inspector']), getPreset)
+router.get('/preset/:id', authenticateUser, authorized(['admin', 'inspector']), getPreset)
 
 /**
  * @swagger
@@ -178,7 +178,7 @@ router.get('/preset/:id', authenticateUser, authorzied(['admin', 'inspector']), 
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/presets', authenticateUser, authorzied(['admin', 'inspector']), getAllPresets)
+router.get('/presets', authenticateUser, authorized(['admin', 'inspector']), getAllPresets)
 
 /**
  * @swagger
@@ -252,7 +252,7 @@ router.get('/presets', authenticateUser, authorzied(['admin', 'inspector']), get
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post('/preset', authenticateUser, authorzied(['admin']), createPreset)
+router.post('/preset', authenticateUser, authorized(['admin']), createPreset)
 
 /**
  * @swagger
@@ -343,7 +343,7 @@ router.post('/preset', authenticateUser, authorzied(['admin']), createPreset)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/preset/:id', authenticateUser, authorzied(['admin']), updatePreset)
+router.put('/preset/:id', authenticateUser, authorized(['admin']), updatePreset)
 
 /**
  * @swagger
@@ -390,7 +390,7 @@ router.put('/preset/:id', authenticateUser, authorzied(['admin']), updatePreset)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/preset/:id', authenticateUser, authorzied(['admin']), removePreset);
+router.delete('/preset/:id', authenticateUser, authorized(['admin']), removePreset);
 
 /**
  * @swagger
@@ -503,7 +503,7 @@ router.delete('/preset/:id', authenticateUser, authorzied(['admin']), removePres
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/checklists', authenticateUser, authorzied(['admin', 'inspector']), getAllChecklists)
+router.get('/checklists', authenticateUser, authorized(['admin', 'inspector']), getAllChecklists)
 
 /**
  * @swagger
@@ -603,7 +603,7 @@ router.get('/checklists', authenticateUser, authorzied(['admin', 'inspector']), 
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/checklist/:id', authenticateUser, authorzied(['admin', 'inspector']), getChecklist)
+router.get('/checklist/:id', authenticateUser, authorized(['admin', 'inspector']), getChecklist)
 
 /**
  * @swagger
@@ -693,7 +693,7 @@ router.get('/checklist/:id', authenticateUser, authorzied(['admin', 'inspector']
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post('/checklist', authenticateUser, authorzied(['admin']), createChecklist)
+router.post('/checklist', authenticateUser, authorized(['admin']), createChecklist)
 
 /**
  * @swagger
@@ -788,7 +788,7 @@ router.post('/checklist', authenticateUser, authorzied(['admin']), createCheckli
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/checklist/:id', authenticateUser, authorzied(['admin']), updateChecklist)
+router.put('/checklist/:id', authenticateUser, authorized(['admin']), updateChecklist)
 
 /**
  * @swagger
@@ -835,6 +835,6 @@ router.put('/checklist/:id', authenticateUser, authorzied(['admin']), updateChec
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/checklist/:id', authenticateUser, authorzied(['admin']), removeChecklist)
+router.delete('/checklist/:id', authenticateUser, authorized(['admin']), removeChecklist)
 
 export default router

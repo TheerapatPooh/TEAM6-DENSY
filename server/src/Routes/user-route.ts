@@ -1,7 +1,7 @@
 import { createUser, getUser, updateProfile, getAllUsers, updateUser, removeUser } from "@Controllers/user-controller.js";
 import { Router } from 'express'
-import { authenticateUser, authorzied } from "@Controllers/util-controller.js";
-import { upload } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized } from "@Controllers/util-controller.js";
+import { profileUpload } from "@Controllers/util-controller.js";
 const router = Router()
 
 /**
@@ -289,7 +289,7 @@ router.get('/user/:id?', authenticateUser, getUser)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post('/user', authenticateUser, authorzied(['admin']), createUser)
+router.post('/user', authenticateUser, authorized(['admin']), createUser)
 
 /**
  * @swagger
@@ -361,7 +361,7 @@ router.post('/user', authenticateUser, authorzied(['admin']), createUser)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/profile', authenticateUser, upload.single('imageProfile'), updateProfile)
+router.put('/profile', authenticateUser, profileUpload.single('imageProfile'), updateProfile)
 
 /**
  * @swagger
@@ -518,6 +518,6 @@ router.put('/user/:id', authenticateUser, updateUser)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/user/:id', authenticateUser, authorzied(['admin']), removeUser)
+router.delete('/user/:id', authenticateUser, authorized(['admin']), removeUser)
 
 export default router

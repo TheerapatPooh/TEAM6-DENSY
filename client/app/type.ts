@@ -146,7 +146,7 @@ export interface IChecklist {
 
 export interface IPatrolResult {
     inspectorId: number
-    id?: number;
+    id: number;
     status: boolean;
     itemId: number;
     zoneId: number;

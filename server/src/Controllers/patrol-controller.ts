@@ -484,7 +484,7 @@ export async function getAllPatrols(req: Request, res: Response) {
           patrolChecklist.checklist.items.forEach((item) => {
             item.itemZones.forEach((itemZone) => {
               count++;
-              if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
+              if (!itemZone.zone.supervisor && (patrol.status === "scheduled" || patrol.status === "pending")) {
                 disabled = true;
               }
             });
