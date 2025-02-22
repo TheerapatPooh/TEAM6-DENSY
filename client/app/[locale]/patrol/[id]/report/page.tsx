@@ -534,19 +534,22 @@ export default function Page() {
             description="NoDefectsPatrolDescription"
           />
         ) : (
-          defects.map((defect: IDefect) => {
-            return (
-              <div className="mb-4" key={defect.id}>
-                <ReportDefect
-                  defect={defect}
-                  page={"patrol-view-report"}
-                  response={(defect: IDefect) => {
-                    fetchRealtimeData(defect, "edit");
-                  }}
-                />
-              </div>
-            );
-          })
+          defects
+            .slice() // สร้างสำเนาเพื่อไม่แก้ไข array ต้นฉบับ
+            .reverse() // กลับลำดับจากตัวสุดท้ายไปตัวแรก
+            .map((defect: IDefect) => {
+              return (
+                <div className="mb-4" key={defect.id}>
+                  <ReportDefect
+                    defect={defect}
+                    page={"patrol-view-report"}
+                    response={(defect: IDefect) => {
+                      fetchRealtimeData(defect, "edit");
+                    }}
+                  />
+                </div>
+              );
+            })
         )}
       </ScrollArea>
     </div>

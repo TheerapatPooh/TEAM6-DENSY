@@ -50,7 +50,7 @@ export default function Page() {
         // Fetch users
         const users = await fetchData(
           "get",
-          "/users?profile=true&image=true&user=true&role=supervisor",
+          "/users?profile=true&image=true&user=true&roles=supervisor",
           true
         );
         setAllSupervisors(users);

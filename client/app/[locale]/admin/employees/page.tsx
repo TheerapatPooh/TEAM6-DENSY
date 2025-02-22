@@ -156,7 +156,6 @@ export default function Page() {
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
-      console.log("Window width:", window.innerWidth);
     };
 
     window.addEventListener("resize", handleResize);
@@ -927,7 +926,7 @@ export default function Page() {
                       <div className="flex items-center gap-2">
                         <div>
                           {employee.profile.name ? (
-                            <Avatar className="custom-shadow h-[35px] w-[35px]">
+                            <Avatar className="custom-shadow h-[35px] w-[35px] items-center">
                               <AvatarImage
                                 src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
                               />

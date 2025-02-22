@@ -1,6 +1,6 @@
 import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, commentPatrol, schedulePatrolStatusUpdate, getAllPatrolDefects, getPatrolUsers } from "@Controllers/patrol-controller.js";
 import { Router } from 'express'
-import { authenticateUser, authorzied } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized } from "@Controllers/util-controller.js";
 const router = Router()
 
 /**
@@ -162,7 +162,7 @@ const router = Router()
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/patrol/:id?/defects', authenticateUser, authorzied(['admin', 'inspector']), getAllPatrolDefects)
+router.get('/patrol/:id?/defects', authenticateUser, authorized(['admin', 'inspector']), getAllPatrolDefects)
 
 /**
  * @swagger
@@ -313,7 +313,7 @@ router.get('/patrol/:id?/defects', authenticateUser, authorzied(['admin', 'inspe
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/patrol/:id', authenticateUser, authorzied(['admin', 'inspector']), getPatrol)
+router.get('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']), getPatrol)
 
 /**
  * @swagger
@@ -402,7 +402,7 @@ router.get('/patrol/:id', authenticateUser, authorzied(['admin', 'inspector']), 
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/patrols', authenticateUser, authorzied(['admin', 'inspector']), getAllPatrols)
+router.get('/patrols', authenticateUser, authorized(['admin', 'inspector']), getAllPatrols)
 
 /**
  * @swagger
@@ -496,7 +496,7 @@ router.get('/patrols', authenticateUser, authorzied(['admin', 'inspector']), get
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post('/patrol', authenticateUser, authorzied(['admin', 'inspector']), createPatrol)
+router.post('/patrol', authenticateUser, authorized(['admin', 'inspector']), createPatrol)
 
 /**
  * @swagger
@@ -620,7 +620,7 @@ router.post('/patrol', authenticateUser, authorzied(['admin', 'inspector']), cre
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/patrol/:id/start', authenticateUser, authorzied(['admin', 'inspector']), startPatrol)
+router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspector']), startPatrol)
 
 /**
  * @swagger
@@ -758,7 +758,7 @@ router.put('/patrol/:id/start', authenticateUser, authorzied(['admin', 'inspecto
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/patrol/:id/finish', authenticateUser, authorzied(['admin', 'inspector']), finishPatrol)
+router.put('/patrol/:id/finish', authenticateUser, authorized(['admin', 'inspector']), finishPatrol)
 
 /**
  * @swagger
@@ -795,7 +795,7 @@ router.put('/patrol/:id/finish', authenticateUser, authorzied(['admin', 'inspect
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/patrol/:id', authenticateUser, authorzied(['admin', 'inspector']), removePatrol)
+router.delete('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']), removePatrol)
 
 /**
  * @swagger
@@ -869,7 +869,7 @@ router.delete('/patrol/:id', authenticateUser, authorzied(['admin', 'inspector']
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post('/patrol/:id/comment', authenticateUser, authorzied(['admin', 'inspector']), commentPatrol);
+router.post('/patrol/:id/comment', authenticateUser, authorized(['admin', 'inspector']), commentPatrol);
 
 /**
  * @swagger
@@ -928,7 +928,7 @@ router.post('/patrol/:id/comment', authenticateUser, authorzied(['admin', 'inspe
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/patrol/:id/user', authenticateUser, authorzied(['admin', 'inspector']), getPatrolUsers)
+router.get('/patrol/:id/user', authenticateUser, authorized(['admin', 'inspector']), getPatrolUsers)
 
 schedulePatrolStatusUpdate();
 

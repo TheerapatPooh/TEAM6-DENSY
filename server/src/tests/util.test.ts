@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { authenticateUser, authorzied, getAllNotifications, login, logout, markAllAsRead, removeAllNotifications, removeOldNotifications, updateNotification } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized, getAllNotifications, login, logout, markAllAsRead, removeAllNotifications, removeOldNotifications, updateNotification } from "@Controllers/util-controller.js";
 import { prismaMock } from "./_mocks_/prisma.mock";
 import { allNotificationMock, createNotificationMock, decodeMock, notificationMock, updateNotificationMock, userMock } from "./_mocks_/util.mock";
 
@@ -268,10 +268,10 @@ describe('removeAllNotifications', () => {
   });
 });
 
-describe('authorzied', () => {
+describe('authorized', () => {
   test('ควรอนุญาตให้ผู้ใช้ที่มีบทบาทใน allowedRoles ผ่านได้', async () => {
     const allowedRoles = ["admin", "inspector"];
-    const middleware = authorzied(allowedRoles);
+    const middleware = authorized(allowedRoles);
 
     const req = mockRequest({}, {}, {}, { role: "inspector", userId: 3 }, {});
     const res = mockResponse();

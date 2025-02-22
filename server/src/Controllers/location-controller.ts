@@ -133,9 +133,10 @@ export async function getZone(req: Request, res: Response) {
 
     // Authorization Check
     if (dashboard === "true" && role !== 'admin') {
-      return res.status(403).json({
+      res.status(403).json({
         message: `Access Denied: Requires admin privileges`
       })
+      return 
     }
 
     if (!dashboard) {
@@ -157,12 +158,14 @@ export async function getZone(req: Request, res: Response) {
       })
 
       if (!zone) {
-        return res.status(404).json({
+        res.status(404).json({
           message: "Zone not found"
         })
+        return 
       }
 
-      return res.status(200).json(zone)
+      res.status(200).json(zone)
+      return 
     }
 
     const zoneWithData = await prisma.zone.findUnique({
@@ -236,9 +239,10 @@ export async function getZone(req: Request, res: Response) {
     })
 
     if (!zoneWithData || !allData) {
-      return res.status(404).json({
+      res.status(404).json({
         message: "Zone not found"
       })
+      return 
     }
 
     let defectReported = 0
@@ -475,11 +479,13 @@ export async function getZone(req: Request, res: Response) {
       }
     }
 
-    return res.status(200).json(result)
+    res.status(200).json(result)
+    return
 
   } catch (error) {
     console.error("Server Error:", error)
-    return res.status(500).json("Internal server error")
+    res.status(500).json("Internal server error")
+    return 
   }
 }
 

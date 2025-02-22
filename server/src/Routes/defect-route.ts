@@ -1,6 +1,6 @@
 import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
-import { authenticateUser, authorzied, upload } from "@Controllers/util-controller.js";
+import { authenticateUser, authorized, upload } from "@Controllers/util-controller.js";
 
 const router = Router()
 
@@ -87,7 +87,7 @@ const router = Router()
  *       500:
  *         description: เกิดข้อผิดพลาดในเซิร์ฟเวอร์
  */
-router.get('/defect/:id', authenticateUser, authorzied(['admin', 'supervisor']), getDefect)
+router.get('/defect/:id', authenticateUser, authorized(['admin', 'supervisor']), getDefect)
 
 /**
  * @swagger
@@ -204,7 +204,7 @@ router.get('/defect/:id', authenticateUser, authorzied(['admin', 'supervisor']),
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/defects', authenticateUser, authorzied(['admin', 'supervisor']), getAllDefects)
+router.get('/defects', authenticateUser, authorized(['admin', 'supervisor']), getAllDefects)
 
 /**
  * @swagger
@@ -257,7 +257,7 @@ router.get('/defects', authenticateUser, authorzied(['admin', 'supervisor']), ge
  */
 router.post('/defect', (req, res, next) => {
   next();
-}, upload.array('imageFiles', 10), authenticateUser, authorzied(['admin', 'inspector']), createDefect);
+}, upload.array('imageFiles', 10), authenticateUser, authorized(['admin', 'inspector']), createDefect);
 
 /**
  * @swagger
@@ -384,7 +384,7 @@ router.post('/defect', (req, res, next) => {
  *       500:
  *         description: Internal server error
  */
-router.put('/defect/:id', upload.array('imageFiles', 10), authenticateUser, authorzied(['admin', 'inspector', 'supervisor']), updateDefect);
+router.put('/defect/:id', upload.array('imageFiles', 10), authenticateUser, authorized(['admin', 'inspector', 'supervisor']), updateDefect);
 
 /**
  * @swagger
@@ -441,7 +441,7 @@ router.put('/defect/:id', upload.array('imageFiles', 10), authenticateUser, auth
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']), deleteDefect)
+router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']), deleteDefect)
 
 /**
  * @swagger
@@ -542,7 +542,7 @@ router.delete('/defect/:id', authenticateUser, authorzied(['admin', 'inspector']
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/comments', authenticateUser, authorzied(['admin', 'supervisor']), getAllComments)
+router.get('/comments', authenticateUser, authorized(['admin', 'supervisor']), getAllComments)
 
 /**
  * @swagger
@@ -636,6 +636,6 @@ router.get('/comments', authenticateUser, authorzied(['admin', 'supervisor']), g
  *                   type: string
  *                   example: "Internal server error"
  */
-router.put('/comment/:id', authenticateUser, authorzied(['admin', 'supervisor']), confirmComment)
+router.put('/comment/:id', authenticateUser, authorized(['admin', 'supervisor']), confirmComment)
 
 export default router

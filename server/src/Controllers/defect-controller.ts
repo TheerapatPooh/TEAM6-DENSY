@@ -4,6 +4,7 @@ import { createNotification } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from "fs";
 import path from "path";
+import { timeStamp } from "console";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -923,7 +924,7 @@ export async function getAllComments(req: Request, res: Response) {
 
       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
         andConditions.push({
-          startTime: {
+          timestamp: {
             gte: start,
             lte: end,
           },

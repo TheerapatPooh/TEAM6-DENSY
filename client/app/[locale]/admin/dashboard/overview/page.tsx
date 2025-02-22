@@ -4,7 +4,7 @@ import React, { useCallback, useRef } from 'react'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import {
   DropdownMenu,
@@ -473,7 +473,7 @@ export default function Page() {
 
   useEffect(() => {
     removeLocalStoragePatrolCompleted()
-  },[allPatrols] )
+  }, [allPatrols])
 
   useEffect(() => {
     if (socket && isConnected) {
@@ -482,14 +482,14 @@ export default function Page() {
         socket.off("patrol_result_update", handleResultUpdate);
       };
     }
-  }, [socket, isConnected, handleResultUpdate]); 
+  }, [socket, isConnected, handleResultUpdate]);
 
   useEffect(() => {
     if (socket && isConnected && allPatrols) {
       allPatrols.forEach((patrol) => {
         if (!joinedRoomsRef.current.has(patrol.id)) {
           socket.emit("join_room", patrol.id);
-          joinedRoomsRef.current.add(patrol.id); 
+          joinedRoomsRef.current.add(patrol.id);
         }
       });
     }
@@ -706,14 +706,13 @@ export default function Page() {
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
 
       {/* Table */}
       <div>
         <ScrollArea
-          className="rounded-md w-full">
-          <Table className='overflow-hidden sm:w-max lg:w-full'>
+          className="rounded-md w-full whitespace-nowrap">
+          <Table className=' sm:w-max lg:w-full'>
             <TableHeader>
               <TableRow className="grid grid-cols-12 w-full">
                 <TableHead className='sm:col-span-1 lg:col-span-1'>
@@ -850,6 +849,7 @@ export default function Page() {
               </ScrollArea>
             </TableBody>
           </Table>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
         {isDialogOpen && (

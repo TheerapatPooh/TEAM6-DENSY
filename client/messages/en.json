@@ -162,7 +162,7 @@
     "Role": "Role",
     "Active": "Active",
     "Inactive": "Inactive",
-    "Id": "Id",
+    "Id": "ID",
     "FullName": "Full Name",
     "Deactivate": "Deactivate",
     "Activate": "Activate",
@@ -554,15 +554,12 @@
     "TotalReport": "Total Report",
     "DefectCompleted": "Defect Completed",
     "DefectPending": "Defect Pending",
-
-    "ChecklistPass": "Checklist Pass",
+    "TotalPass": "Total Passes",
     "TotalFails": "Total Fails",
     "TotalReports": "Total Reports",
     "TotalComments": "Total Comments",
     "DefectReported": "Defect Reported",
     "PatrolDuration": "Patrol Duration",
     "PatrolDurationDescription": "Monitor the time taken for each patrol to analyze the duration of each inspection round."
-
-
   }
 }

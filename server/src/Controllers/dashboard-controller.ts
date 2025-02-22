@@ -96,7 +96,7 @@ export async function getDefectCategory(req: Request, res: Response) {
     }
     const allDefects = await prisma.defect.findMany({
       where: {
-        ...(patrolId ? patrolFilter : { ...dateFilter, ...zoneFilter }),
+        ...(patrolId ? patrolFilter : { startTime: dateFilter, ...zoneFilter }),
       },
       include: {
         supervisor: {

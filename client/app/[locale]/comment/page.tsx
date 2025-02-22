@@ -160,8 +160,8 @@ export default function Page() {
   const [filter, setFilter] = useState<IFilterComment | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
-    by: "Date",
-    order: "Ascending",
+    by: "CommentDate",
+    order: "Descending",
   });
 
   const applyFilter = () => {
@@ -270,7 +270,7 @@ export default function Page() {
               onValueChange={(value) => handleSortChange("by", value)}
             >
               <DropdownMenuRadioItem
-                value="Date"
+                value="CommentDate"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
@@ -396,7 +396,7 @@ export default function Page() {
           <ScrollArea
             className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
           >
-            {allComments.length === 0 ? (
+            {allComments?.length === 0 ? (
               <tr className="flex w-full h-full">
                 <td colSpan={5} className="w-full text-center py-6">
                   <NotFound

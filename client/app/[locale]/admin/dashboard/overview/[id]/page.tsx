@@ -425,7 +425,6 @@ export default function page() {
                             <BadgeCustom
                                 iconName={getPatrolStatusVariant(patrol.status).iconName}
                                 showIcon={true}
-                                showTime={false}
                                 variant={getPatrolStatusVariant(patrol.status).variant}
                             >
                                 {s(patrol.status)}
@@ -642,7 +641,7 @@ export default function page() {
                                                 </td>
                                             </tr>
                                         ) : (defects.map((defect, index) => (
-                                            <TableRow key={index} className="grid grid-cols-12 w-full">
+                                            <TableRow key={index} className="grid grid-cols-12 w-full items-center">
                                                 <TableCell className="sm:text-sm lg:text-base sm:col-span-3 sm:w-[200px] lg:col-span-2 flex items-center min-w-0">
                                                     <TooltipProvider>
                                                         <Tooltip>
@@ -655,15 +654,13 @@ export default function page() {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </TableCell>
-                                                <TableCell className='sm:col-span-1  lg:col-span-2'>
+                                                <TableCell className="sm:text-sm lg:text-base sm:col-span-1 lg:col-span-2 flex items-center">
                                                     <BadgeCustom
                                                         iconName={getItemTypeVariant(defect.type).iconName}
                                                         showIcon={true}
-                                                        showTime={false}
                                                         shape='square'
                                                         variant={getItemTypeVariant(defect.type).variant}
                                                         hideText={windowWidth > 1024 ? false : true}
-
                                                     >
                                                         {s(defect.type)}
                                                     </BadgeCustom>
@@ -690,7 +687,7 @@ export default function page() {
                                                 <TableCell className='sm:col-span-2 lg:col-span-2'>
                                                     <p>{z(defect.zone.name)}</p>
                                                 </TableCell>
-                                                <TableCell className='sm:col-span-2 lg:col-span-2'>
+                                                <TableCell className='sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center'>
                                                     <BadgeCustom
                                                         iconName={getDefectStatusVariant(defect.status).iconName}
                                                         showIcon={true}
@@ -720,7 +717,7 @@ export default function page() {
                                 <h1 className="text-2xl font-semibold text-card-foreground">
                                     {d("PatrolDuration")}
                                 </h1>
-                                <div className='flex flex-col pt-6'>
+                                <div className='flex flex-col'>
                                     <RadialChart duration={patrol.duration} />
                                 </div>
                             </div>

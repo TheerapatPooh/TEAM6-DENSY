@@ -377,7 +377,7 @@ export async function sendEmail(email: string, subject: string, message: string)
  * Output: 
  * - ทำ Function  ต่อไป
 **/
-export function authorzied(allowedRoles: string[]) {
+export function authorized(allowedRoles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const userRole = (req as any).user.role;
 

@@ -475,6 +475,12 @@ export const sortData = (data: any, sort: { by: string; order: string }) => {
         ? new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
         : new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     );
+  } else if (sort.by === "CommentDate") {
+    sortedData.sort((a, b) =>
+      sort.order === "Ascending"
+        ? new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        : new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
   }
   return sortedData
 }
