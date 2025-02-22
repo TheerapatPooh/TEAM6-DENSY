@@ -33,10 +33,7 @@ import {
 } from "@/components/ui/select";
 import {
   IPatrol,
-  IPatrolChecklist,
-  patrolStatus,
   IPreset,
-  IPresetChecklist,
   IPatrolResult,
 } from "@/app/type";
 import { IFilterPatrol } from "@/app/type";

@@ -255,9 +255,7 @@ router.get('/defects', authenticateUser, authorized(['admin', 'supervisor']), ge
  *       500:
  *         description: Internal server error
  */
-router.post('/defect', (req, res, next) => {
-  next();
-}, upload.array('imageFiles', 10), authenticateUser, authorized(['admin', 'inspector']), createDefect);
+router.post('/defect', authenticateUser, authorized(['admin', 'inspector']), createDefect);
 
 /**
  * @swagger
@@ -384,7 +382,7 @@ router.post('/defect', (req, res, next) => {
  *       500:
  *         description: Internal server error
  */
-router.put('/defect/:id', upload.array('imageFiles', 10), authenticateUser, authorized(['admin', 'inspector', 'supervisor']), updateDefect);
+router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 'supervisor']), defectUpload.array('imageFiles', 10), updateDefect);
 
 /**
  * @swagger

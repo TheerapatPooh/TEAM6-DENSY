@@ -91,7 +91,8 @@ export async function updateProfile(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
     if (!req.file) {
-      return res.status(400).json({ error: 'No image uploaded' });
+      res.status(400).json({ error: 'No image uploaded' });
+      return 
     }
 
     // 1. ดึงข้อมูลรูปเก่าจากฐานข้อมูลก่อนอัปเดต

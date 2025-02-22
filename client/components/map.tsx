@@ -109,18 +109,17 @@ export default function Map({ onZoneSelect, disable, initialSelectedZones, toggl
   const getGradientColors = (isSelected: boolean): (string | number)[] => {
     if (isSelected) {
       return [
-        0, '#C16975', // สีเริ่มต้น (บนสุด) จาก accent-gradient
-        1, '#FB0023', // สีสิ้นสุด (ล่างสุด) จาก accent-gradient
+        0, '#AF4141', // สีเริ่มต้น (บนสุด) จาก accent-gradient
+        1, '#EE2B2B', // สีสิ้นสุด (ล่างสุด) จาก accent-gradient
       ];
     } else {
-      const secondaryColor = getCSSVariableValue('--secondary') || '#DCE2EC'; // ดึงสี secondary จาก CSS variables หรือใช้ fallback
+      const secondaryColor = getCSSVariableValue('--secondary') || '#DDE3ED'; // ดึงสี secondary จาก CSS variables หรือใช้ fallback
       return [
         0, secondaryColor, // สีเมื่อไม่ได้เลือกใช้ secondary
         1, secondaryColor
       ];
     }
   }
-
 
   const handleZoneSelect = (zoneId: number) => {
     if (disable) return;

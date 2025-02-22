@@ -2,7 +2,6 @@
 
 import { IDefect, IDefectCategory, IPatrol, IPatrolResult, IUser } from '@/app/type'
 import BadgeCustom from '@/components/badge-custom'
-import defect from '@/components/defect'
 import Loading from '@/components/loading'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -57,7 +56,6 @@ export default function page() {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [hoverState, setHoverState] = useState<{ [key: string]: { isHovered: boolean; isClicked: boolean } }>({});
-
 
     const getPatrolData = async () => {
         if (params.id) {
@@ -388,13 +386,19 @@ export default function page() {
                                     <AlertDialogAction
                                         className="bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 rounded-md px-4 text-lg font-bold"
                                         onClick={() => {
-                                            exportData(patrol, patrol.results);
-                                            handleCloseDialog();
-                                            toast({
-                                                variant: "success",
-                                                title: a("ExportReportPatrolTitle"),
-                                                description: a("ExportReportPatrolDescription"),
-                                            });
+                                            patrol.status !== "completed"
+                                                ? (toast({
+                                                    variant: "error",
+                                                    title: a("ExportPatrolNoData"),
+                                                    description: a("ExportPatrolStatusNotCompleteDescription"),
+                                                }),
+                                                    handleCloseDialog())
+                                                : (exportData(patrol, patrol.results),
+                                                    toast({
+                                                        variant: "success",
+                                                        title: a("ExportReportPatrolTitle"),
+                                                        description: a("ExportReportPatrolDescription"),
+                                                    }));
                                         }}
                                     >
                                         <span className="material-symbols-outlined text-2xl me-2">
