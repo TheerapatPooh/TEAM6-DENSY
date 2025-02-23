@@ -266,15 +266,21 @@ export async function getAllUsers(req: Request, res: Response) {
       whereClause.active = active === "true"; // Convert "true"/"false" string to boolean
     }
 
+    
     // Add search functionality with priority on profile.name, then username
     if (search) {
+      const searchNumber = Number(search);
+    
       whereClause.OR = [
-        { id: Number(search) }, // Exact match for id if it's a number
-        { profile: { name: { contains: search } } }, // Search on profile name (case-insensitive)
-        { username: { contains: search } }, // Search on username if profile name is not found
+        { profile: { name: { contains: search } } }, // Search by profile name
+        { username: { contains: search } }, // Search by username
       ];
+    
+      // If search is a valid number, add exact id match separately
+      if (!isNaN(searchNumber)) {
+        whereClause.OR.push({ id: searchNumber });
+      }
     }
-
 
     // Fetch users from the database with the specified filters
     const allUsers = await prisma.user.findMany({

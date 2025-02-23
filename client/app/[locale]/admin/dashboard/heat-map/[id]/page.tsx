@@ -1,5 +1,12 @@
 "use client";
-import { ICommonDefectItem, IDefectCategory, IFilterDefect, itemType, IZone, defectStatus } from "@/app/type";
+import {
+  ICommonDefectItem,
+  IDefectCategory,
+  IFilterDefect,
+  itemType,
+  IZone,
+  defectStatus,
+} from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import DashboardCard from "@/components/dashboard-card";
 import { DonutGraph } from "@/components/donut-graph";
@@ -9,7 +16,15 @@ import { PieGraph } from "@/components/pie-graph";
 import Textfield from "@/components/textfield";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -21,8 +36,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 import {
   fetchData,
   formatTime,
@@ -54,11 +82,11 @@ export default function Page() {
     };
 
     // เพิ่ม event listener สำหรับ resize
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // ลบ event listener เมื่อคอมโพเนนต์ถูกทำลาย
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -69,7 +97,13 @@ export default function Page() {
     }));
   };
 
-  const defectStatus: defectStatus[] = ["reported", "completed", "pending_inspection", "in_progress", "resolved"]
+  const defectStatus: defectStatus[] = [
+    "reported",
+    "completed",
+    "pending_inspection",
+    "in_progress",
+    "resolved",
+  ];
 
   const initialFilter = {
     defectStatus: "All",
@@ -78,8 +112,8 @@ export default function Page() {
   };
 
   const getStoredFilter = () => {
-    if (typeof window !== 'undefined') {
-      const storedFilter = localStorage.getItem('dashboardDefectsFilter');
+    if (typeof window !== "undefined") {
+      const storedFilter = localStorage.getItem("dashboardDefectsFilter");
       if (storedFilter) {
         return JSON.parse(storedFilter);
       }
@@ -87,7 +121,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
+  const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter());
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "DefectDate",
     order: "Ascending",
@@ -105,12 +139,11 @@ export default function Page() {
           return {
             defectStatus: "All",
             defectTypes: [],
-            dateRange: { start: undefined, end: undefined }
-          }
+            dateRange: { start: undefined, end: undefined },
+          };
         }
       });
-    }
-    else {
+    } else {
       setFilter((prev) => {
         if (prev) {
           return {
@@ -124,14 +157,14 @@ export default function Page() {
   };
 
   const applyFilter = () => {
-    getData()
+    getData();
   };
 
   const resetFilter = () => {
-    setFilter(initialFilter)
+    setFilter(initialFilter);
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (event: any) => {
     setSearchTerm(event.target.value);
@@ -145,8 +178,6 @@ export default function Page() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
-
-  
 
   const getData = async () => {
     const { startDate, endDate } = getMonthRange(selectedMonth);
@@ -165,12 +196,24 @@ export default function Page() {
     }
     if (startDate) queryParams.startDate = startDate.toISOString();
     if (endDate) queryParams.endDate = endDate.toISOString();
-    queryParams.zoneId = params.id.toString()
+    queryParams.zoneId = params.id.toString();
 
     const queryString = new URLSearchParams(queryParams).toString();
-    const zone = await fetchData("get", `/zone/${params.id}?dashboard=true&${queryString}`, true);
-    const defectCategory = await fetchData("get", `/dashboard/defect-category?${queryString}`, true);
-    const commonDefects = await fetchData("get", `/dashboard/common-defects?${queryString}`, true);
+    const zone = await fetchData(
+      "get",
+      `/zone/${params.id}?dashboard=true&${queryString}`,
+      true
+    );
+    const defectCategory = await fetchData(
+      "get",
+      `/dashboard/defect-category?${queryString}`,
+      true
+    );
+    const commonDefects = await fetchData(
+      "get",
+      `/dashboard/common-defects?${queryString}`,
+      true
+    );
     // fetch data
     setZone(zone);
     setDefectCategory(defectCategory);
@@ -187,7 +230,7 @@ export default function Page() {
   }, [selectedMonth, searchTerm]);
 
   useEffect(() => {
-    localStorage.setItem('dashboardDefectsFilter', JSON.stringify(filter));
+    localStorage.setItem("dashboardDefectsFilter", JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -196,13 +239,15 @@ export default function Page() {
       const sortedData = sortData(zone.dashboard.defects, sort);
 
       // เปรียบเทียบค่าก่อนและหลังการ sorted ถ้าไม่เท่ากันให้ทำการอัปเดตเฉพาะ defects
-      if (JSON.stringify(sortedData) !== JSON.stringify(zone.dashboard.defects)) {
-        setZone(prevState => ({
+      if (
+        JSON.stringify(sortedData) !== JSON.stringify(zone.dashboard.defects)
+      ) {
+        setZone((prevState) => ({
           ...prevState,
           dashboard: {
             ...prevState.dashboard,
-            defects: sortedData
-          }
+            defects: sortedData,
+          },
         }));
       }
     }
@@ -230,14 +275,16 @@ export default function Page() {
             <p className="text-lg font-semibold">{t("supervisor")}</p>
           </div>
           <div className="flex items-center gap-1">
-            <Avatar className="custom-shadow h-[35px] w-[35px]">
-              <AvatarImage
-                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile?.image?.path}`}
-              />
-              <AvatarFallback id={zone.supervisor.id.toString()}>
-                {getInitials(zone.supervisor.profile?.name)}
-              </AvatarFallback>
-            </Avatar>
+            <UserTooltip user={zone.supervisor}>
+              <Avatar className="custom-shadow h-[35px] w-[35px]">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile?.image?.path}`}
+                />
+                <AvatarFallback id={zone.supervisor.id.toString()}>
+                  {getInitials(zone.supervisor.profile?.name)}
+                </AvatarFallback>
+              </Avatar>
+            </UserTooltip>
 
             <p className="text-card-foreground text-lg">
               {zone.supervisor.profile?.name}
@@ -305,13 +352,20 @@ export default function Page() {
               <h1 className="text-2xl font-semibold text-card-foreground">
                 {d("DefectCategory")}
               </h1>
-              <DonutGraph key={JSON.stringify(defectCategory.chartData)} chartData={defectCategory.chartData} trend={defectCategory.trend} />
+              <DonutGraph
+                key={JSON.stringify(defectCategory.chartData)}
+                chartData={defectCategory.chartData}
+                trend={defectCategory.trend}
+              />
             </div>
             <div className="flex flex-col py-4 px-6 w-full rounded-md custom-shadow bg-card">
               <h1 className="text-2xl font-semibold text-card-foreground">
                 {d("CommonDefects")}
               </h1>
-              <PieGraph key={JSON.stringify(commonDefects)} chartData={commonDefects} />
+              <PieGraph
+                key={JSON.stringify(commonDefects)}
+                chartData={commonDefects}
+              />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -328,32 +382,52 @@ export default function Page() {
           ${isSortOpen ? "border border-destructive" : "border-none"}`}
               >
                 <span className="material-symbols-outlined">swap_vert</span>
-                <div className="text-lg">{t('Sort')}</div>
+                <div className="text-lg">{t("Sort")}</div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="p-2 gap-2">
-                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                  {t("SortBy")}
+                </DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={sort.by}
-                  onValueChange={(value) => handleSortChange('by', value)}
+                  onValueChange={(value) => handleSortChange("by", value)}
                 >
-                  <DropdownMenuRadioItem value="DefectDate" className="text-base" onSelect={(e) => e.preventDefault()}>
-                    {t('Date')}
+                  <DropdownMenuRadioItem
+                    value="DefectDate"
+                    className="text-base"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {t("Date")}
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
-                    {t('Status')}
+                  <DropdownMenuRadioItem
+                    value="Status"
+                    className="text-base"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {t("Status")}
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
 
-                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
+                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                  {t("Order")}
+                </DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={sort.order}
-                  onValueChange={(value) => handleSortChange('order', value)}
+                  onValueChange={(value) => handleSortChange("order", value)}
                 >
-                  <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                    {t('Ascending')}
+                  <DropdownMenuRadioItem
+                    value="Ascending"
+                    className="text-base"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {t("Ascending")}
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                    {t('Descending')}
+                  <DropdownMenuRadioItem
+                    value="Descending"
+                    className="text-base"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {t("Descending")}
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
@@ -365,33 +439,42 @@ export default function Page() {
           ${isFilterOpen ? "border border-destructive" : "border-none"}`}
               >
                 <span className="material-symbols-outlined">page_info</span>
-                <div className="text-lg">{t('Filter')}</div>
+                <div className="text-lg">{t("Filter")}</div>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="flex flex-col justify-center gap-2 p-2 z-50"
                 align="end"
               >
                 <div>
-                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                    {t("Status")}
+                  </DropdownMenuLabel>
                   <Select
-                    value={filter?.defectStatus || 'All'}
+                    value={filter?.defectStatus || "All"}
                     onValueChange={(value) =>
                       setFilter({
                         defectStatus: value,
                         defectTypes: filter?.defectTypes || [],
-                        dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
+                        dateRange: {
+                          start: filter?.dateRange.start,
+                          end: filter?.dateRange.end,
+                        },
                       })
                     }
                   >
                     <SelectTrigger className="">
                       <SelectValue
-                        placeholder={filter?.defectStatus === 'All' ? t('All') : filter?.defectStatus}
+                        placeholder={
+                          filter?.defectStatus === "All"
+                            ? t("All")
+                            : filter?.defectStatus
+                        }
                       />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>{t('Status')}</SelectLabel>
-                        <SelectItem value="All">{t('All')}</SelectItem>
+                        <SelectLabel>{t("Status")}</SelectLabel>
+                        <SelectItem value="All">{t("All")}</SelectItem>
                         {defectStatus.map((status) => (
                           <SelectItem value={status} key={status}>
                             {s(status)}
@@ -402,10 +485,14 @@ export default function Page() {
                   </Select>
                 </div>
                 <div>
-                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Type')}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                    {t("Type")}
+                  </DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
                     checked={filter?.defectTypes.includes("safety")}
-                    onCheckedChange={(checked) => toggleTypeFilter("safety", checked)}
+                    onCheckedChange={(checked) =>
+                      toggleTypeFilter("safety", checked)
+                    }
                     onSelect={(e) => e.preventDefault()}
                   >
                     <BadgeCustom
@@ -413,13 +500,15 @@ export default function Page() {
                       variant="green"
                       showIcon={true}
                       iconName="verified_user"
-                      children={s('safety')}
+                      children={s("safety")}
                       shape="square"
                     />
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={filter?.defectTypes.includes("environment")}
-                    onCheckedChange={(checked) => toggleTypeFilter("environment", checked)}
+                    onCheckedChange={(checked) =>
+                      toggleTypeFilter("environment", checked)
+                    }
                     onSelect={(e) => e.preventDefault()}
                   >
                     <BadgeCustom
@@ -427,13 +516,15 @@ export default function Page() {
                       variant="blue"
                       showIcon={true}
                       iconName="psychiatry"
-                      children={s('environment')}
+                      children={s("environment")}
                       shape="square"
                     />
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={filter?.defectTypes.includes("maintenance")}
-                    onCheckedChange={(checked) => toggleTypeFilter("maintenance", checked)}
+                    onCheckedChange={(checked) =>
+                      toggleTypeFilter("maintenance", checked)
+                    }
                     onSelect={(e) => e.preventDefault()}
                   >
                     <BadgeCustom
@@ -441,7 +532,7 @@ export default function Page() {
                       variant="red"
                       showIcon={true}
                       iconName="build"
-                      children={s('maintenance')}
+                      children={s("maintenance")}
                       shape="square"
                     />
                   </DropdownMenuCheckboxItem>
@@ -449,28 +540,37 @@ export default function Page() {
 
                 <div className="flex w-full justify-end mt-4 gap-2">
                   <Button size="sm" variant="secondary" onClick={resetFilter}>
-                    {t('Reset')}
+                    {t("Reset")}
                   </Button>
-                  <Button size="sm" variant="primary" onClick={applyFilter}>{t('Apply')}</Button>
+                  <Button size="sm" variant="primary" onClick={applyFilter}>
+                    {t("Apply")}
+                  </Button>
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
-
           </div>
           <Table className="overflow-hidden min-h-[calc(100vh-860px)]">
             <TableHeader>
               <TableRow className="grid grid-cols-12 w-full">
-                <TableHead className="sm:col-span-3 lg:col-span-4">{t("Name")}</TableHead>
-                <TableHead className="sm:col-span-2 lg:col-span-2">{t("Type")}</TableHead>
-                <TableHead className="sm:col-span-2 lg:col-span-2">{t("Reporter")}</TableHead>
-                <TableHead className="sm:col-span-3 lg:col-span-2">{t("Timestamp")}</TableHead>
-                <TableHead className="sm:col-span-2 lg:col-span-2">{t("Status")}</TableHead>
+                <TableHead className="sm:col-span-3 lg:col-span-4">
+                  {t("Name")}
+                </TableHead>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
+                  {t("Type")}
+                </TableHead>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
+                  {t("Reporter")}
+                </TableHead>
+                <TableHead className="sm:col-span-3 lg:col-span-2">
+                  {t("Timestamp")}
+                </TableHead>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
+                  {t("Status")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <ScrollArea
-                className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-860px)]"
-              >
+              <ScrollArea className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-860px)]">
                 {zone.dashboard.defects?.length === 0 ? (
                   <tr className="flex w-full h-full">
                     <td colSpan={5} className="w-full text-center py-6">
@@ -490,8 +590,13 @@ export default function Page() {
                             <TooltipTrigger asChild>
                               <span className="truncate">{defect.name}</span>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom" className="ml-[129px]">
-                              <p className="max-w-[200px] break-words">{defect.name}</p>
+                            <TooltipContent
+                              side="bottom"
+                              className="ml-[129px]"
+                            >
+                              <p className="max-w-[200px] break-words">
+                                {defect.name}
+                              </p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -509,14 +614,16 @@ export default function Page() {
                       </TableCell>
                       <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex gap-2 items-center">
                         {defect.user?.profile?.name ? (
-                          <Avatar>
-                            <AvatarImage
-                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
-                            />
-                            <AvatarFallback id={defect.user.id.toString()}>
-                              {getInitials(defect.user.profile.name)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <UserTooltip user={defect.user}>
+                            <Avatar className="custom-shadow h-[35px] w-[35px]">
+                              <AvatarImage
+                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
+                              />
+                              <AvatarFallback id={defect.user.id.toString()}>
+                                {getInitials(defect.user.profile.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </UserTooltip>
                         ) : (
                           <Skeleton className="h-12 w-12 rounded-full bg-input" />
                         )}
@@ -525,18 +632,24 @@ export default function Page() {
                             defect.user.profile.name
                           ) : (
                             <div className="text-destructive">
-                              <div className="text-[14px]">No profile is provided</div>
+                              <div className="text-[14px]">
+                                No profile is provided
+                              </div>
                             </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="sm:text-sm lg:text-base sm:col-span-3 lg:col-span-2 flex items-center">
-                        {formatTime(defect.startTime,locale)}
+                        {formatTime(defect.startTime, locale)}
                       </TableCell>
                       <TableCell className="sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex items-center">
                         <BadgeCustom
-                          variant={getDefectStatusVariant(defect.status).variant}
-                          iconName={getDefectStatusVariant(defect.status).iconName}
+                          variant={
+                            getDefectStatusVariant(defect.status).variant
+                          }
+                          iconName={
+                            getDefectStatusVariant(defect.status).iconName
+                          }
                           showIcon={true}
                           hideText={windowWidth > 1024 ? false : true}
                         >

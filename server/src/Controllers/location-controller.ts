@@ -194,7 +194,15 @@ export async function getZone(req: Request, res: Response) {
                     user: {
                       select: {
                         id: true,
-                        profile: true
+                        role:true,
+                        email:true,
+                        profile: {
+                          select:{
+                          name:true,
+                          image:true,
+                          tel:true
+
+                        }}
                       }
                     }
                   }
