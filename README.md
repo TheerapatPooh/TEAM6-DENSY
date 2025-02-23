@@ -41,6 +41,7 @@
 │
 ├── Jenkinsfile/               # 🤖 CI/CD Workflows
 └── docker-compose.yml      # 🐳 Container Orchestration
+```
 
 ## 🚀 วิธีการเริ่มต้นใช้งาน
 
@@ -110,7 +111,7 @@ Error: Cannot find module 'C:\SE_3\TEAM6-DENSY\server\dist\Utils\seed.js'
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
-    "seed": "tsx src/Utils/seed",
+    "seed": "tsx src/Utils/seed",  ✅ **แก้ไขตรงนี้เพื่อแก้ปัญหา**
     "lint": "node -e \"const fs = require('fs'); const date = new Date(); const dateString = date.toISOString().split('T')[0].replace(/-/g, '_'); const timeString = date.toTimeString().split(' ')[0].replace(/:/g, '_'); const fileName = `lintReports/lintReport_${dateString}_${timeString}.json`; fs.mkdirSync('lintReports', { recursive: true }); require('child_process').execSync(`eslint . --format json -o ${fileName}`);\" && tsx eslint-report.ts"
 }
 ```
