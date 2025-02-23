@@ -21,7 +21,11 @@ export function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("refreshToken")?.value;
   const isLoginPage = req.nextUrl.pathname === `/${locale}/login`
   const isProfilePage = currentPathname.startsWith(`/${locale}/profile`);
+  const isForgotPasswordPage = currentPathname.startsWith(`/${locale}/login/forgot-password`)
 
+  if (isForgotPasswordPage) {
+    return response;
+  }
 
   if (!authToken && !refreshToken && !isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))

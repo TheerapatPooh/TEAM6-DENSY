@@ -129,8 +129,8 @@
     "CreatePreset": "Create Preset",
     "Version": "Version",
     "SelectZones": "Select Zones",
-    "FilterByZone": "Filter by Zone",
-    "PleaseSelectTheZonesToDisplayOnlyTheRelevantData": "Please select the zones to display only the relevant data.",
+    "FilterByZoneTitle": "Filter by Zone",
+    "FilterByZoneDescription": "Please select the zones to display only the relevant data.",
     "Done": "Done",
     "DateModified": "Date modified",
     "CreatePatrolPreset": "Create Patrol Preset",
@@ -186,7 +186,8 @@
     "DocID": "Doc ID",
     "Progress": "Progress",
     "Result": "Result",
-    "PatrolList": "Patrol List"
+    "PatrolList": "Patrol List",
+    "ResetPassword": "Reset Password"
   },
   "Status": {
     "pending": "Pending",
@@ -518,7 +519,21 @@
     "ReportDefectErrorInvalidImage": "Invalid Image",
     "ReportDefectErrorInvalidImageMessage": "Please upload an image in a supported format (png, jpeg, jpg, gif).",
     "LoginTooManyTitle": "Too Many Login Attempts",
-    "LoginTooManyDescription": "You have attempted to log in too many times. Please wait 15 minutes and try again."
+    "LoginTooManyDescription": "You have attempted to log in too many times. Please wait 15 minutes and try again.",
+    "ForgotPasswordTitle": "Forgot Password?",
+    "ForgotPasswordDescription": "Enter your email and we'll send you a link to reset your password.",
+    "ForgotPasswordConfirmTitle": "Are you sure you want to send a password reset link?",
+    "ForgotPasswordConfirmDescription": "Please confirm to send an email with a link to reset your password.",
+    "InvalidEmailInlineValidate": "Invalid email format. Please enter a valid email address.",
+    "InvalidEmailTitle": "Invalid Email",
+    "InvalidEmailDescription": "Please enter a valid email address.",
+    "ResetLinkCompletedTitle": "Password Reset Link Sent",
+    "ResetLinkCompletedDescription": "We have sent a password reset link to your email. Please check your inbox.",
+    "ProfileNewPassMinLength": "Password must be at least 8 characters long.",
+    "InvalidTokenTitle": "Invalid or Expired Token",
+    "InvalidTokenDescription": "The provided token is invalid or has expired.",
+    "ResetPasswordConfirmTitle": "Are you sure you want to reset your password?",
+    "ResetPasswordConfirmDescription": "Please confirm to reset your password."
   },
   "Month": {
     "AllTime": "All Time",
