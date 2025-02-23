@@ -42,7 +42,7 @@ app.use(
         connectSrc: [
           "'self'",
           "ws://localhost:4000", // อนุญาต WebSocket
-          "http://localhost:3000" // อนุญาต HTTP
+          process.env.CLIENT_URL || 'http://localhost:3000'
         ],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
