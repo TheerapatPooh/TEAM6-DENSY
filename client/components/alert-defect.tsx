@@ -565,7 +565,7 @@ export default function AlertDefect({
             <div className="flex flex-col gap-1 justify-between w-full">
               <div className="text-sm font-semibold">{t("Image")}</div>
               <div className="grid grid-cols-2 pr-2 gap-4">
-                <div className="flex flex-col gap-1 flex-1 rounded-md custom-shadow">
+                <div className="flex flex-col gap-1 flex-1 rounded-md">
                   <div
                     className="flex h-full w-full rounded-[10px] bg-secondary justify-center items-center"
                     onDragOver={handleDragOver}

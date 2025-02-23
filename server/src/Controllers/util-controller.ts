@@ -189,6 +189,8 @@ export async function refreshToken(req: Request, res: Response) {
     const session = await prisma.session.findUnique({ where: { userId: decoded.userId } });
 
     if (!session || session.token !== decoded.sessionId) {
+      res.clearCookie("authToken");
+      res.clearCookie("refreshToken");
       res.status(401).json({ message: "Session expired, please login again" });
       return
     }
