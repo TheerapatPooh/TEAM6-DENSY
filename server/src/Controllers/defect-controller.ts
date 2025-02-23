@@ -5,6 +5,7 @@ import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from "fs";
 import path from "path";
 import { timeStamp } from "console";
+import { tr } from "@faker-js/faker";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -128,8 +129,13 @@ export async function createDefect(req: Request, res: Response) {
                     supervisor: {
                       select: {
                         id: true,
+                        email:true,
+                        username:true,
+                        role:true,
                         profile: {
-                          include: {
+                          select: {
+                            tel:true,
+                            name:true,
                             image: true,
                           },
                         },
@@ -163,8 +169,12 @@ export async function createDefect(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
+            username:true,
+            email:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true,
               },
@@ -174,8 +184,11 @@ export async function createDefect(req: Request, res: Response) {
         user: {
           select: {
             id: true,
+            username:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true,
               },
@@ -211,8 +224,11 @@ export async function getDefect(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
+            username:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true,
               },
@@ -228,9 +244,12 @@ export async function getDefect(req: Request, res: Response) {
                     id: true,
                     role: true,
                     email: true,
+                    username:true,
                     createdAt: true,
                     profile: {
-                      include: {
+                      select: {
+                        tel:true,
+                        name:true,
                         image: true,
                       },
                     },
@@ -245,9 +264,12 @@ export async function getDefect(req: Request, res: Response) {
             id: true,
             role: true,
             email: true,
+            username:true,
             createdAt: true,
             profile: {
-              include: {
+              select: {
+                tel:true,
+                name:true,
                 image: true,
               },
             },
@@ -261,8 +283,12 @@ export async function getDefect(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
+                        username:true,
+                        email:true,
+                        role:true,
                         profile: {
                           select: {
+                            tel:true,
                             name: true,
                             image: true
                           }
@@ -434,8 +460,12 @@ export async function getAllDefects(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
+            username:true,
+            email:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true
               }
@@ -458,6 +488,7 @@ export async function getAllDefects(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
               select: {
                 id: true,
@@ -480,6 +511,7 @@ export async function getAllDefects(req: Request, res: Response) {
                     role: true,
                     email: true,
                     createdAt: true,
+                    username:true,
                     profile: {
                       select: {
                         id: true,
@@ -623,8 +655,12 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
         supervisor: {
           select: {
             id: true,
+            username:true,
+            email:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true
               }
@@ -652,8 +688,13 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
                     supervisor: {
                       select: {
                         id: true,
+                        username:true,
+                        email:true,
+                        role:true,
                         profile: {
-                          include: {
+                          select: {
+                            tel:true,
+                            name:true,
                             image: true,
                           },
                         },
@@ -688,8 +729,11 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
-              include: {
+              select: {
+                tel:true,
+                name:true,
                 image: true,
               },
             },
@@ -907,6 +951,7 @@ export async function getAllComments(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
               select: {
                 id: true,
@@ -975,6 +1020,7 @@ export async function confirmComment(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
               select: {
                 id: true,

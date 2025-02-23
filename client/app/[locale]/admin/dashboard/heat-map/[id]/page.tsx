@@ -307,7 +307,7 @@ export default function Page() {
         </div>
       </div>
       <ScrollArea
-        className="h-full w-full rounded-md flex-1 
+        className=" max-h-full h-full w-full rounded-md flex-1 
     [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-280px)]"
       >
         <div className="flex flex-col gap-4">
@@ -570,7 +570,7 @@ export default function Page() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <ScrollArea className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-860px)]">
+              <ScrollArea className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-660px)] min-h-[calc(100vh-660px)]">
                 {zone.dashboard.defects?.length === 0 ? (
                   <tr className="flex w-full h-full">
                     <td colSpan={5} className="w-full text-center py-6">

@@ -1,6 +1,6 @@
 /**
  * คำอธิบาย:
- *   คอมโพเนนต์ ProfileDropdown ใช้สำหรับแสดงเมนูโปรไฟล์ของผู้ใช้งาน 
+ *   คอมโพเนนต์ ProfileDropdown ใช้สำหรับแสดงเมนูโปรไฟล์ของผู้ใช้งาน
  *   โดยจะแสดงข้อมูลผู้ใช้เช่นรูปประจำตัวและชื่อผู้ใช้ พร้อมปุ่มเมนูย่อยเพื่อทำการจัดการโปรไฟล์หรือออกจากระบบ
  *
  * Input:
@@ -13,7 +13,7 @@
  *       - Profile: สำหรับไปยังหน้าจัดการโปรไฟล์ของผู้ใช้งาน
  *       - Logout: สำหรับออกจากระบบ
  *
-**/
+ **/
 
 "use client";
 import React, { useState, useEffect, useRef } from "react";
@@ -31,6 +31,7 @@ import { fetchData, logout } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IUser } from "@/app/type";
+import { UserTooltip } from "./user-tooltip";
 
 export default function ProfileDropdown() {
   const t = useTranslations("General");
@@ -39,7 +40,6 @@ export default function ProfileDropdown() {
   const [profile, setProfile] = useState<IUser>();
   const router = useRouter();
   const locale = useLocale();
-
 
   const handleLogout = async () => {
     await logout();
@@ -52,7 +52,7 @@ export default function ProfileDropdown() {
     return nameParts.length === 1
       ? nameParts[0].charAt(0).toUpperCase()
       : nameParts[0].charAt(0).toUpperCase() +
-      nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+          nameParts[nameParts.length - 1].charAt(0).toUpperCase();
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -63,7 +63,11 @@ export default function ProfileDropdown() {
 
   const getData = async () => {
     try {
-      const profilefetch = await fetchData("get", "/user?profile=true&image=true", true);
+      const profilefetch = await fetchData(
+        "get",
+        "/user?profile=true&image=true",
+        true
+      );
       setProfile(profilefetch);
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
@@ -90,9 +94,6 @@ export default function ProfileDropdown() {
     };
   }, []);
 
-
-
-
   if (!mounted) {
     return null;
   }
@@ -109,12 +110,16 @@ export default function ProfileDropdown() {
           >
             <div className="flex items-center gap-2">
               {profile ? (
-                <Avatar>
-                  <AvatarImage src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${profile.profile.image?.path}`} />
-                  <AvatarFallback id={profile.id.toString()}>
-                    {getInitials(profile.profile.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <UserTooltip user={profile}>
+                  <Avatar>
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${profile.profile.image?.path}`}
+                    />
+                    <AvatarFallback id={profile.id.toString()}>
+                      {getInitials(profile.profile.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </UserTooltip>
               ) : (
                 <Skeleton className="h-12 w-12 rounded-full" />
               )}
@@ -127,8 +132,9 @@ export default function ProfileDropdown() {
               </div>
             </div>
             <span
-              className={`material-symbols-outlined inline-block transition-transform duration-300 ${isFlipped ? "rotate-180" : "rotate-0"
-                }`}
+              className={`material-symbols-outlined inline-block transition-transform duration-300 ${
+                isFlipped ? "rotate-180" : "rotate-0"
+              }`}
             >
               stat_minus_1
             </span>
@@ -138,17 +144,16 @@ export default function ProfileDropdown() {
           <DropdownMenuLabel className="w-[226px] text-lg font-semibold">
             {t("MyAccount")}
           </DropdownMenuLabel>
-          <DropdownMenuItem className="rounded-md" onClick={() => router.push(`/${locale}/profile`)}
+          <DropdownMenuItem
+            className="rounded-md"
+            onClick={() => router.push(`/${locale}/profile`)}
           >
             <div className="flex gap-1 w-full items-center">
               <span className="material-symbols-outlined">account_circle</span>
               <div>{t("Profile")}</div>
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            className="rounded-md"
-            onClick={handleLogout}
-          >
+          <DropdownMenuItem className="rounded-md" onClick={handleLogout}>
             <div className="flex gap-1 w-full h-full items-center hover:text-destructive">
               <span className="material-symbols-outlined">logout</span>
               <div>{t("Logout")}</div>

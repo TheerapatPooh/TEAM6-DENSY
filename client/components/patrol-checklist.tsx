@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ PatrolChecklist ใช้สำหรับแสดงรายการตรวจสอบของ Patrol
- * Input: 
+ * Input:
  * - user: ข้อมูลของผู้ใช้
  * - patrolChecklist: ข้อมูลของ PatrolChecklist
  * - disabled: สถานะการใช้งานของปุ่ม
@@ -46,15 +46,15 @@ import AlertDefect from "./alert-defect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
+import { UserTooltip } from "./user-tooltip";
 
 interface IPatrolChecklistProps {
   patrolStatus: patrolStatus;
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
-  handleResult: (
-    result: IPatrolResult) => void;
+  handleResult: (result: IPatrolResult) => void;
   patrolResults: IPatrolResult[];
-  response?: (defect: IDefect) => void
+  response?: (defect: IDefect) => void;
 }
 
 export default function PatrolChecklist({
@@ -67,24 +67,24 @@ export default function PatrolChecklist({
 }: IPatrolChecklistProps) {
   const [mounted, setMounted] = useState<boolean>(false);
   const [comments, setComments] = useState<{ [key: string]: string }>({});
-  const [patrolResultState, setPatrolResultState] = useState<IPatrolResult[]>(patrolResults);
+  const [patrolResultState, setPatrolResultState] =
+    useState<IPatrolResult[]>(patrolResults);
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
-  const param = useParams()
-  const locale = useLocale()
+  const param = useParams();
+  const locale = useLocale();
 
   const handleCreateComment = async (
     message: string,
     patrolResultId: number,
     supervisorId: number
   ) => {
-
     const data = {
       message: message,
       patrolResultId: patrolResultId,
-      supervisorId: supervisorId
+      supervisorId: supervisorId,
     };
 
     try {
@@ -92,7 +92,7 @@ export default function PatrolChecklist({
         "post",
         `/patrol/${param.id}/comment`,
         true,
-        data,
+        data
       );
       if (!message) {
         toast({
@@ -107,28 +107,34 @@ export default function PatrolChecklist({
           description: a("PatrolCreateCommentDescription"),
         });
       }
-      fetchRealtimeComment(comment, patrolResultId)
+      fetchRealtimeComment(comment, patrolResultId);
     } catch (error) {
       console.error("Error creating Comment:", error);
     }
   };
 
   const fetchRealtimeComment = (comment: IComment, patrolResultId: number) => {
-    setPatrolResultState(prevState => prevState.map(pr => {
-      if (pr.id === patrolResultId) {
-        return {
-          ...pr,
-          comments: pr.comments ? [...pr.comments, comment] : [comment]
-        };
-      }
-      return pr;
-    }));
-  }
+    setPatrolResultState((prevState) =>
+      prevState.map((pr) => {
+        if (pr.id === patrolResultId) {
+          return {
+            ...pr,
+            comments: pr.comments ? [...pr.comments, comment] : [comment],
+          };
+        }
+        return pr;
+      })
+    );
+  };
 
-  const handleCommentChange = (itemId: number, zoneId: number, value: string) => {
-    setComments(prev => ({
+  const handleCommentChange = (
+    itemId: number,
+    zoneId: number,
+    value: string
+  ) => {
+    setComments((prev) => ({
       ...prev,
-      [`${itemId}-${zoneId}`]: value
+      [`${itemId}-${zoneId}`]: value,
     }));
   };
 
@@ -140,10 +146,16 @@ export default function PatrolChecklist({
   };
 
   const fetchRealtimeData = (defect: IDefect) => {
-    response(defect)
-  }
+    response(defect);
+  };
 
-  const handleClick = (id: number, inspectorId: number, itemId: number, zoneId: number, status: boolean) => {
+  const handleClick = (
+    id: number,
+    inspectorId: number,
+    itemId: number,
+    zoneId: number,
+    status: boolean
+  ) => {
     if (!disabled) {
       handleResult({ id, inspectorId, itemId, zoneId, status });
     }
@@ -151,28 +163,32 @@ export default function PatrolChecklist({
 
   useEffect(() => {
     if (patrolChecklist) {
-      setMounted(true)
+      setMounted(true);
     }
-  }, [])
+  }, []);
 
   if (!mounted) {
     return (
       <Skeleton className="flex h-16 items-center">
         <Skeleton className="flex h-10 ms-4 w-56 bg-card"></Skeleton>
       </Skeleton>
-    )
+    );
   }
 
   const checkResultStatusChecklist = (checklistId: number): boolean => {
-    const checklistResults = patrolResults.filter(result =>
-      patrolChecklist.checklist.id === checklistId &&
-      patrolChecklist.checklist.items.some(item =>
-        item.id === result.itemId &&
-        item.itemZones.some(itemZone => itemZone.zone.id === result.zoneId)
-      )
+    const checklistResults = patrolResults.filter(
+      (result) =>
+        patrolChecklist.checklist.id === checklistId &&
+        patrolChecklist.checklist.items.some(
+          (item) =>
+            item.id === result.itemId &&
+            item.itemZones.some(
+              (itemZone) => itemZone.zone.id === result.zoneId
+            )
+        )
     );
 
-    return checklistResults.every(result => result.status !== null);
+    return checklistResults.every((result) => result.status !== null);
   };
 
   return (
@@ -180,32 +196,42 @@ export default function PatrolChecklist({
       <Accordion type="single" collapsible defaultValue="item-1">
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger className="flex flex-row  hover:no-underline text-2xl font-bold p-0">
-            <div key={patrolChecklist.checklist.id} className="flex flex-row items-center gap-3">
-              {checkResultStatusChecklist(patrolChecklist.checklist.id) ?
-                null
-                :
-                <span className="material-symbols-outlined text-destructive">error</span>
-              }
+            <div
+              key={patrolChecklist.checklist.id}
+              className="flex flex-row items-center gap-3"
+            >
+              {checkResultStatusChecklist(
+                patrolChecklist.checklist.id
+              ) ? null : (
+                <span className="material-symbols-outlined text-destructive">
+                  error
+                </span>
+              )}
               <p>{patrolChecklist.checklist.title}</p>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="p-0" >
+          <AccordionContent className="p-0">
             <div className="flex items-center gap-2 mb-2 mt-2">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span className="material-symbols-outlined">person_search</span>
                 <p className="text-lg font-semibold">{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-1">
-                <Avatar className="custom-shadow h-[35px] w-[35px]">
-                  <AvatarImage
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
-                  />
-                  <AvatarFallback id={patrolChecklist.inspector.id.toString()}>
-                    {getInitials(patrolChecklist.inspector.profile.name)}
-                  </AvatarFallback>
-                </Avatar>
-
-                <p className="text-card-foreground text-lg">{patrolChecklist.inspector.profile.name}</p>
+                <UserTooltip user={patrolChecklist.inspector}>
+                  <Avatar className="custom-shadow h-[35px] w-[35px]">
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${patrolChecklist.inspector.profile.image?.path}`}
+                    />
+                    <AvatarFallback
+                      id={patrolChecklist.inspector.id.toString()}
+                    >
+                      {getInitials(patrolChecklist.inspector.profile.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </UserTooltip>
+                <p className="text-card-foreground text-lg">
+                  {patrolChecklist.inspector.profile.name}
+                </p>
               </div>
             </div>
             <div>
@@ -216,8 +242,12 @@ export default function PatrolChecklist({
                       <div className="flex items-center justify-between w-full pe-2">
                         <p className="text-xl font-semibold">{item.name}</p>
                         <BadgeCustom
-                          variant={getItemTypeVariant(item.type as itemType).variant}
-                          iconName={getItemTypeVariant(item.type as itemType).iconName}
+                          variant={
+                            getItemTypeVariant(item.type as itemType).variant
+                          }
+                          iconName={
+                            getItemTypeVariant(item.type as itemType).iconName
+                          }
                           showIcon={true}
                           shape="square"
                         >
@@ -227,12 +257,18 @@ export default function PatrolChecklist({
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col gap-4">
                       {item.itemZones.flatMap((itemZone: IItemZone) => {
-                        const existingResult = getExistingResult(item.id, itemZone.zone.id);
+                        const existingResult = getExistingResult(
+                          item.id,
+                          itemZone.zone.id
+                        );
 
-                        const supervisor = itemZone.zone.supervisor
+                        const supervisor = itemZone.zone.supervisor;
 
                         return (
-                          <div key={itemZone.zone.id} className="bg-background rounded-md px-4 py-2">
+                          <div
+                            key={itemZone.zone.id}
+                            className="bg-background rounded-md px-4 py-2"
+                          >
                             <div className="flex flex-row justify-between sm:items-end lg:items-center">
                               <div className="flex flex-col w-full">
                                 <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2">
@@ -244,45 +280,78 @@ export default function PatrolChecklist({
                                       {t("Zone")}
                                     </p>
                                   </div>
-                                  <p className="text-base">{z(itemZone.zone.name)}</p>
+                                  <p className="text-base">
+                                    {z(itemZone.zone.name)}
+                                  </p>
                                 </div>
 
                                 <div className="flex sm:flex-col sm:items-start lg:flex-row lg:items-center w-full gap-2">
                                   <div className="flex items-center text-muted-foreground gap-1">
-                                    <span className="material-symbols-outlined">engineering</span>
-                                    <p className="text-base font-semibold">{t("supervisor")}</p>
+                                    <span className="material-symbols-outlined">
+                                      engineering
+                                    </span>
+                                    <p className="text-base font-semibold">
+                                      {t("supervisor")}
+                                    </p>
                                   </div>
 
                                   <div className="flex items-center gap-1">
+                                    <UserTooltip user={supervisor}>
                                     <Avatar className="custom-shadow h-[35px] w-[35px]">
                                       <AvatarImage
                                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${supervisor.profile.image?.path}`}
                                       />
-                                      <AvatarFallback id={supervisor.id.toString()}>
+                                      <AvatarFallback
+                                        id={supervisor.id.toString()}
+                                      >
                                         {getInitials(supervisor.profile?.name)}
                                       </AvatarFallback>
                                     </Avatar>
-                                    <p className="text-card-foreground text-base truncate">{supervisor.profile?.name}</p>
+                                    </UserTooltip>
+                                    <p className="text-card-foreground text-base truncate">
+                                      {supervisor.profile?.name}
+                                    </p>
                                   </div>
-
                                 </div>
                               </div>
                               <div className="flex gap-2">
                                 <Button
                                   variant={
-                                    existingResult?.status ===
-                                      true ? "success" : "secondary"
+                                    existingResult?.status === true
+                                      ? "success"
+                                      : "secondary"
                                   }
-                                  className={`w-[155px] ${existingResult?.status ===
-                                    null ? "bg-secondary text-card-foreground" : ""
-                                    } ${existingResult?.status === true ? "bg-green hover:bg-green text-card" : ""
-                                    } ${existingResult?.status === false ? "bg-secondary hover:bg-secondary" : ""
-                                    } ${disabled ? " cursor-not-allowed opacity-50" : ""
-                                    }
+                                  className={`w-[155px] ${
+                                    existingResult?.status === null
+                                      ? "bg-secondary text-card-foreground"
+                                      : ""
+                                  } ${
+                                    existingResult?.status === true
+                                      ? "bg-green hover:bg-green text-card"
+                                      : ""
+                                  } ${
+                                    existingResult?.status === false
+                                      ? "bg-secondary hover:bg-secondary"
+                                      : ""
+                                  } ${
+                                    disabled
+                                      ? " cursor-not-allowed opacity-50"
+                                      : ""
+                                  }
                                                                     `}
                                   onClick={() => {
-                                    if (patrolStatus === 'on_going' && !existingResult?.status === true || existingResult?.status === null) {
-                                      handleClick(existingResult.id, patrolChecklist.inspector.id, existingResult.itemId, existingResult.zoneId, true);
+                                    if (
+                                      (patrolStatus === "on_going" &&
+                                        !existingResult?.status === true) ||
+                                      existingResult?.status === null
+                                    ) {
+                                      handleClick(
+                                        existingResult.id,
+                                        patrolChecklist.inspector.id,
+                                        existingResult.itemId,
+                                        existingResult.zoneId,
+                                        true
+                                      );
                                     }
                                   }}
                                 >
@@ -293,19 +362,41 @@ export default function PatrolChecklist({
                                 </Button>
                                 <Button
                                   variant={
-                                    existingResult?.status ===
-                                      false ? "fail" : "secondary"
+                                    existingResult?.status === false
+                                      ? "fail"
+                                      : "secondary"
                                   }
-                                  className={`w-[155px] ${existingResult?.status ===
-                                    null ? "bg-secondary text-card-foreground" : ""
-                                    } ${existingResult?.status === false ? "bg-destructive hover:bg-destructive text-card" : ""
-                                    } ${existingResult?.status === true ? "bg-secondary hover:bg-secondary" : ""
-                                    } ${disabled ? " cursor-not-allowed opacity-50" : ""
-                                    }
+                                  className={`w-[155px] ${
+                                    existingResult?.status === null
+                                      ? "bg-secondary text-card-foreground"
+                                      : ""
+                                  } ${
+                                    existingResult?.status === false
+                                      ? "bg-destructive hover:bg-destructive text-card"
+                                      : ""
+                                  } ${
+                                    existingResult?.status === true
+                                      ? "bg-secondary hover:bg-secondary"
+                                      : ""
+                                  } ${
+                                    disabled
+                                      ? " cursor-not-allowed opacity-50"
+                                      : ""
+                                  }
                                                                     `}
                                   onClick={() => {
-                                    if (patrolStatus === 'on_going' && !existingResult?.status === false || existingResult?.status === null) {
-                                      handleClick(existingResult.id, patrolChecklist.inspector.id, existingResult.itemId, existingResult.zoneId, false);
+                                    if (
+                                      (patrolStatus === "on_going" &&
+                                        !existingResult?.status === false) ||
+                                      existingResult?.status === null
+                                    ) {
+                                      handleClick(
+                                        existingResult.id,
+                                        patrolChecklist.inspector.id,
+                                        existingResult.itemId,
+                                        existingResult.zoneId,
+                                        false
+                                      );
                                     }
                                   }}
                                 >
@@ -317,40 +408,67 @@ export default function PatrolChecklist({
                               </div>
                             </div>
 
-                            {(existingResult?.status === false) && (
+                            {existingResult?.status === false && (
                               <div className="flex flex-col items-start gap-4 mt-2">
                                 <AlertDefect
-                                  userId={ patrolChecklist.inspector.id }
+                                  userId={patrolChecklist.inspector.id}
                                   item={item}
                                   type={"report"}
                                   result={existingResult}
                                   patrolResults={patrolResults}
-                                  response={(defect: IDefect) => (
+                                  response={(defect: IDefect) =>
                                     fetchRealtimeData(defect)
-                                  )}
+                                  }
                                 />
 
                                 <div className="flex flex-col items-start w-full gap-2">
-                                  {patrolResultState.flatMap(pr => pr.comments ?? []).map((comment: IComment) =>
-                                    comment.patrolResultId === existingResult.id ?
-                                      (
-                                        <div key={comment.timestamp} className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2" >
-                                          <div className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status ? 'bg-primary' : 'bg-green'}`} />
-                                          <p className="text-muted-foreground text-xl font-semibold">{formatTime(comment.timestamp, locale)}</p>
+                                  {patrolResultState
+                                    .flatMap((pr) => pr.comments ?? [])
+                                    .map((comment: IComment) =>
+                                      comment.patrolResultId ===
+                                      existingResult.id ? (
+                                        <div
+                                          key={comment.timestamp}
+                                          className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2"
+                                        >
+                                          <div
+                                            className={`flex justify-center items-center w-3 h-3 rounded-full ${
+                                              !comment.status
+                                                ? "bg-primary"
+                                                : "bg-green"
+                                            }`}
+                                          />
+                                          <p className="text-muted-foreground text-xl font-semibold">
+                                            {formatTime(
+                                              comment.timestamp,
+                                              locale
+                                            )}
+                                          </p>
                                           <div className="flex items-end">
-                                            <p className="text-xl">{comment.message}</p>
+                                            <p className="text-xl">
+                                              {comment.message}
+                                            </p>
                                           </div>
                                         </div>
-                                      )
-                                      : null
-                                  )}
+                                      ) : null
+                                    )}
                                   <Textarea
                                     key={`${item.id}-${itemZone.zone.id}`}
                                     className="min-h-[120px] bg-secondary border-none text-xl"
                                     placeholder={`${t("Comment")}...`}
                                     disabled={disabled}
-                                    value={comments[`${item.id}-${itemZone.zone.id}`] || ""}
-                                    onChange={(e) => handleCommentChange(item.id, itemZone.zone.id, e.target.value)}
+                                    value={
+                                      comments[
+                                        `${item.id}-${itemZone.zone.id}`
+                                      ] || ""
+                                    }
+                                    onChange={(e) =>
+                                      handleCommentChange(
+                                        item.id,
+                                        itemZone.zone.id,
+                                        e.target.value
+                                      )
+                                    }
                                   />
                                 </div>
 
@@ -360,10 +478,16 @@ export default function PatrolChecklist({
                                     size={"lg"}
                                     disabled={disabled}
                                     onClick={() => {
-                                      handleCreateComment(comments[`${item.id}-${itemZone.zone.id}`], existingResult.id, supervisor.id)
-                                      setComments(prev => ({
+                                      handleCreateComment(
+                                        comments[
+                                          `${item.id}-${itemZone.zone.id}`
+                                        ],
+                                        existingResult.id,
+                                        supervisor.id
+                                      );
+                                      setComments((prev) => ({
                                         ...prev,
-                                        [`${item.id}-${itemZone.zone.id}`]: ""
+                                        [`${item.id}-${itemZone.zone.id}`]: "",
                                       }));
                                     }}
                                   >
@@ -376,7 +500,7 @@ export default function PatrolChecklist({
                               </div>
                             )}
                           </div>
-                        )
+                        );
                       })}
                     </AccordionContent>
                   </AccordionItem>

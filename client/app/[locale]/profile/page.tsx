@@ -439,14 +439,16 @@ export default function page() {
       <div className="flex justify-between px-6 py-4 bg-card rounded-md custom-shadow">
         <div className="flex flex-row">
           {userData.profile ? (
-            <Avatar className="h-32 w-32 mr-6">
-              <AvatarImage
-                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`}
-              />
-              <AvatarFallback id={userData.id?.toString()}>
-                <p className="text-4xl">{getInitials(userData.profile.name)}</p>
-              </AvatarFallback>
-            </Avatar>
+              <Avatar className="h-32 w-32 mr-6">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`}
+                />
+                <AvatarFallback id={userData.id?.toString()}>
+                  <p className="text-4xl">
+                    {getInitials(userData.profile.name)}
+                  </p>
+                </AvatarFallback>
+              </Avatar>
           ) : (
             <Skeleton className="h-12 w-12 rounded-full" />
           )}
@@ -580,7 +582,7 @@ export default function page() {
                 <p>{z(userData.zone.name)}</p>
               </AlertDialogTrigger>
 
-              <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
+              <AlertDialogContent className="w-full sm:w-[50%] md:w-[70%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
                 <div className="flex flex-col gap-1">
                   <div className="text-muted-foreground flex items-center gap-1">
                     <span className="material-symbols-outlined">
@@ -672,7 +674,7 @@ export default function page() {
                       className="text-xl font-normal bg-secondary"
                     ></Input>
                     {emailError && (
-                      <p className="ttext-sm font-light text-destructive italic mt-1">
+                      <p className="text-sm font-light text-destructive italic mt-1">
                         {emailError}
                       </p>
                     )}

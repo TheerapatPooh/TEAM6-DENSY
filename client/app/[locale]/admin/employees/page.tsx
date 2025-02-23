@@ -916,7 +916,7 @@ export default function Page() {
                 <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-300px)]">
                   {sortedUser.map((employee, index) => (
                     <TableRow key={index} className="grid grid-cols-12">
-                      <TableCell className="sm:text-sm lg:text-base sm:col-span-1 lg:col-span-1   items-center min-w-0">
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-1 lg:col-span-1 flex items-center  items-center min-w-0">
                         {employee.id}
                       </TableCell>
                       <TableCell className="sm:text-sm lg:text-base sm:col-span-4 lg:col-span-3 flex  items-center">
@@ -1026,7 +1026,7 @@ export default function Page() {
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
 
-                                  <div className="flex flex-col gap-1 pointer-events-none">
+                                  <div className="flex flex-col gap-1 pointer-events-none w-96">
                                     <label> {t("Username")}</label>
                                     <Textfield
                                       className="bg-secondary cursor-not-allowed "
@@ -1038,7 +1038,7 @@ export default function Page() {
                                     />
                                   </div>
 
-                                  <div className=" flex flex-col gap-4">
+                                  <div className=" flex flex-col gap-4  w-96 h-auto">
                                     <div>
                                       <label>{t("Password")}</label>
                                       <Textfield
@@ -1078,7 +1078,7 @@ export default function Page() {
                                     )}
                                   </div>
 
-                                  <div className="">
+                                  <div className="w-96 h-auto">
                                     <label>{t("Role")}</label>
                                     <div className="relative bg-secondary rounded-md">
                                       <Select
@@ -1090,7 +1090,7 @@ export default function Page() {
                                           }
                                         }}
                                       >
-                                        <SelectTrigger className="bg-secondary w-full p-2 rounded-md border-none">
+                                        <SelectTrigger className="bg-secondary w-96 h-auto p-2  rounded-md border-none">
                                           <SelectValue placeholder="" />
                                         </SelectTrigger>
                                         <SelectContent>

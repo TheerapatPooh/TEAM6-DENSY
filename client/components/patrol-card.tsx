@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ PatrolCard ใช้สำหรับแสดงข้อมูลของการตรวจสอบสถานที่ โดยแสดงข้อมูลเช่น วันที่, สถานะ, รายการตรวจสอบ, ผู้ตรวจสอบ และอื่นๆ
- * Input: 
+ * Input:
  * - id: รหัสการตรวจสอบ
  * - date: วันที่ของการตรวจสอบ
  * - status: สถานะของการตรวจสอบ
@@ -32,14 +32,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { formatPatrolId, formatTime, getInitials, getPatrolStatusVariant } from "@/lib/utils";
+import {
+  formatPatrolId,
+  formatTime,
+  getInitials,
+  getPatrolStatusVariant,
+} from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import BadgeCustom from "@/components/badge-custom";
+import { UserTooltip } from "./user-tooltip";
 
 export interface IPatrolCard {
   id: number;
@@ -48,7 +58,7 @@ export interface IPatrolCard {
   preset: IPreset;
   itemCounts: number;
   inspectors: IUser[];
-  onRemoveSuccess,
+  onRemoveSuccess;
 }
 
 export function PatrolCard({
@@ -58,7 +68,7 @@ export function PatrolCard({
   preset,
   itemCounts,
   inspectors = [],
-  onRemoveSuccess
+  onRemoveSuccess,
 }: IPatrolCard) {
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -71,8 +81,8 @@ export function PatrolCard({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
-  const router = useRouter()
-  const locale = useLocale()
+  const router = useRouter();
+  const locale = useLocale();
 
   const getPatrolData = async () => {
     try {
@@ -80,8 +90,12 @@ export function PatrolCard({
       let countFails = 0;
       let countDefects = 0;
 
-      if (status !== 'pending' && status !== 'scheduled') {
-        const resultFetch: Partial<IPatrol> = await fetchData("get", `/patrol/${id}?result=true`, true);
+      if (status !== "pending" && status !== "scheduled") {
+        const resultFetch: Partial<IPatrol> = await fetchData(
+          "get",
+          `/patrol/${id}?result=true`,
+          true
+        );
         if (resultFetch?.results) {
           for (const patrolResult of resultFetch.results) {
             if (patrolResult.status === false) {
@@ -122,8 +136,8 @@ export function PatrolCard({
   };
 
   const handleDetail = () => {
-    router.push(`/${locale}/patrol/${id}/detail`)
-  }
+    router.push(`/${locale}/patrol/${id}/detail`);
+  };
 
   const handleDialogResult = (result: boolean) => {
     setIsDialogOpen(false);
@@ -143,7 +157,7 @@ export function PatrolCard({
   };
 
   const removePatrol = async () => {
-    if (status !== 'pending') {
+    if (status !== "pending") {
       toast({
         variant: "error",
         title: a("PatrolRemoveErrorTitle"),
@@ -154,25 +168,26 @@ export function PatrolCard({
     try {
       await fetchData("delete", `/patrol/${id}`, true);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
     if (onRemoveSuccess) {
       onRemoveSuccess(id); // เรียก Callback หลังลบสำเร็จ
     }
-  }
+  };
 
   if (!mounted) {
-    return (
-      null
-    )
+    return null;
   }
 
   return (
-    <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
+    <Card
+      className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer"
+      onClick={() => handleDetail()}
+    >
       <CardHeader className="flex flex-row gap-0 p-0 justify-between">
         <div className="flex flex-col justify-between items-start gap-4 truncate">
           <CardDescription className="text-lg font-semibold text-muted-foreground">
-            {formatTime(date,locale,false)}
+            {formatTime(date, locale, false)}
           </CardDescription>
           <CardTitle className="text-card-foreground text-2xl truncate w-full">
             {preset.title}
@@ -206,19 +221,21 @@ export function PatrolCard({
               </span>
               {inspectors.length > 0 && (
                 <div className="flex items-center me-1 truncate max-w-[190px]">
-                  <p className="text-xl me-2.5 truncate">{inspectors[0].profile.name}</p>
+                  <p className="text-xl me-2.5 truncate">
+                    {inspectors[0].profile.name}
+                  </p>
                 </div>
               )}
               {inspectors.map((inspector, idx) => {
                 return (
-                  <Avatar key={idx} className="custom-shadow ms-[-10px]">
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                    />
-                    <AvatarFallback id={inspector.id.toString()}>
-                      {getInitials(inspector.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                    <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                      <AvatarImage
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                      />
+                      <AvatarFallback id={inspector.id.toString()}>
+                        {getInitials(inspector.profile.name)}
+                      </AvatarFallback>
+                    </Avatar>
                 );
               })}
 
@@ -228,42 +245,39 @@ export function PatrolCard({
                   <span className="absolute text-card-foreground text-base font-semibold">
                     +{inspectors.length - 5}
                   </span>
-                  <AvatarFallback id={'0'}></AvatarFallback>
+                  <AvatarFallback id={"0"}></AvatarFallback>
                 </Avatar>
               )}
             </div>
           </HoverCardTrigger>
           <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
             <div className="flex items-center justify-center gap-1">
-              <span className="material-symbols-outlined">
-                person_search
-              </span>
-              <p className="text-lg font-semibold">
-                {t("InspectorList")}
-              </p>
+              <span className="material-symbols-outlined">person_search</span>
+              <p className="text-lg font-semibold">{t("InspectorList")}</p>
             </div>
             {inspectors.map((inspector, idx) => {
               return (
-                <div key={idx} className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary">
-                  <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                    />
-                    <AvatarFallback id={inspector.id.toString()}>
-                      {getInitials(inspector.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                <div
+                  key={idx}
+                  className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
+                >
+                  <UserTooltip user={inspector}>
+                    <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                      <AvatarImage
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                      />
+                      <AvatarFallback id={inspector.id.toString()}>
+                        {getInitials(inspector.profile.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </UserTooltip>
                   <p className="text-lg">{inspector.profile.name}</p>
                 </div>
               );
             })}
             <div className="flex items-center justify-between w-full text-muted-foreground">
-              <p className="text-lg font-semibold">
-                {t("Total")}
-              </p>
-              <p className="text-lg font-semibold">
-                {inspectors.length}
-              </p>
+              <p className="text-lg font-semibold">{t("Total")}</p>
+              <p className="text-lg font-semibold">{inspectors.length}</p>
             </div>
           </HoverCardContent>
         </HoverCard>
@@ -279,9 +293,7 @@ export function PatrolCard({
             <p className="text-xl font-semibold">{fails}</p>
           </div>
           <div className="flex gap-1 text-destructive items-center">
-            <span className="material-symbols-outlined">
-              error
-            </span>
+            <span className="material-symbols-outlined">error</span>
             <p className="text-xl font-semibold">{defects}</p>
           </div>
           <div className="ml-auto items-center">
@@ -295,16 +307,22 @@ export function PatrolCard({
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="p-0">
-                <DropdownMenuItem onClick={(e) => {
-                  handleDetail()
-                }}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    handleDetail();
+                  }}
+                >
                   <h1>{t("Detail")}</h1>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation()
-                  handleRemovePatrol()
-                }}>
-                  <h1 className="text-destructive cursor-pointer">{t("Delete")}</h1>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemovePatrol();
+                  }}
+                >
+                  <h1 className="text-destructive cursor-pointer">
+                    {t("Delete")}
+                  </h1>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
