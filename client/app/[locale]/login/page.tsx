@@ -20,12 +20,22 @@ import Image from 'next/image'
 import LanguageSelect from '@/components/language-select';
 import ModeToggle from '@/components/mode-toggle';
 import Textfield from '@/components/textfield';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { useLocale, useTranslations } from "next-intl";
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
     Form,
@@ -35,13 +45,15 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 
-import { login } from '@/lib/utils';
+import { fetchData, login } from '@/lib/utils';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import EmblaAutoplay from 'embla-carousel-autoplay'
 import { useTheme } from 'next-themes';
 import { LoginSchema } from '@/app/type';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { AlertCustom } from '@/components/alert-custom';
 
 export default function LoginPage() {
     const { resolvedTheme } = useTheme()
@@ -52,6 +64,10 @@ export default function LoginPage() {
     const autoplayOptions = EmblaAutoplay({ delay: 3000, stopOnInteraction: false });
     const router = useRouter();
     const locale = useLocale()
+    const [email, setEmail] = useState<string>(null)
+    const [isAlertOpen, setIsAlertOpen] = useState(false)
+    const [isConfirmAlertOpen, setIsConfirmAlertOpen] = useState(false)
+    const [emailError, setEmailError] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -62,12 +78,25 @@ export default function LoginPage() {
         },
     })
 
+    const handleInputEmail = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { value } = e.target;
+        setEmail(value)
+    };
+
+    const handleOpenAlert = () => setIsAlertOpen(true);
+    const handleCloseAlert = () => {
+        setIsAlertOpen(false)
+        setEmailError(null)
+        setEmail(null)
+    };
+    const handleOpenConfirmAlert = () => setIsConfirmAlertOpen(true)
+    const handleCloseConfirmAlert = () => setIsConfirmAlertOpen(false)
+
     useEffect(() => {
         setMounted(true)
     }, [])
-    if (!mounted) {
-        return null
-    }
 
     function onSubmit(values: z.infer<typeof LoginSchema>) {
         startTransition(async () => {
@@ -82,7 +111,7 @@ export default function LoginPage() {
             } else if (result.error === "Too many login attempts, please try again later") {
                 toast({
                     variant: "error",
-                    title: a("LoginTooManyTitle"), 
+                    title: a("LoginTooManyTitle"),
                     description: a("LoginTooManyDescription"),
                 });
             } else {
@@ -96,6 +125,40 @@ export default function LoginPage() {
             }
         });
     }
+
+    const sendForgotPasswordEmail = async (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            setEmailError(a("InvalidEmailInlineValidate"))
+            toast({
+                variant: "error",
+                title: (a("InvalidEmailTitle")),
+                description: (a("InvalidEmailDescription")),
+            });
+            return;
+        }
+
+        try {
+            const response = await fetchData("post", `/send-email-reset-password`, true, { email });
+            toast({
+                variant: "success",
+                title: (a("ResetLinkCompletedTitle")),
+                description: (a("ResetLinkCompletedDescription")),
+            });
+            setEmailError(null)
+            setEmail(null)
+            handleCloseAlert()
+            return response
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    if (!mounted) {
+        return null
+    }
+
     return (
         <section className="bg-card flex lg:grid lg:grid-cols-2 h-screen p-2">
             {/* แสดงรูปภาพเฉพาะจอที่มีขนาด sm ขึ้นไป */}
@@ -151,7 +214,7 @@ export default function LoginPage() {
                 <div className='flex w-full'>
                     <div className='lg:hidden'>
                         <Image
-                            className="flex items-center "
+                            className="absolute"
                             src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
                             alt="Logo"
                             width={250}
@@ -223,7 +286,7 @@ export default function LoginPage() {
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button className='text-sm font-medium' variant='link'>{t('ForgotPassword')}</Button>
+                                        <Button type="button" className='text-sm font-medium' variant='link' onClick={() => handleOpenAlert()}>{t('ForgotPassword')}</Button>
                                     </div>
                                     <Button className='w-full' size="lg" disabled={isPending}>
                                         {t('Login')}
@@ -237,7 +300,85 @@ export default function LoginPage() {
                     </div>
                 </div>
             </div>
-        </section>
 
+            <AlertDialog open={isAlertOpen}>
+                <AlertDialogContent className="sm:w-[90%] xl:w-[60%] h-fit px-6 py-4">
+                    <AlertDialogHeader>
+                        <div className="flex flex-col justify-center items-center gap-4">
+                            <AlertDialogTitle className="flex flex-col justify-center items-center text-2xl font-bold text-card-foreground">
+                                <Image
+                                    src={loginCover3} // ใช้ path จาก state
+                                    alt="First Image"
+                                    width={100}
+                                    height={100}
+                                    className="rounded-md object-fit cursor-pointer w-[250px] h-[250px]"
+                                    unoptimized
+                                />
+                                <p>{a("ForgotPasswordTitle")}</p>
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-base text-input">
+                                <p>{a("ForgotPasswordDescription")}</p>
+                            </AlertDialogDescription>
+                        </div>
+                    </AlertDialogHeader>
+
+                    <div className="flex flex-col">
+                        <Textfield
+                            name="confirmNewPassword"
+                            className="text-base bg-secondary"
+                            type="email"
+                            showIcon={true}
+                            iconName="mail"
+                            placeholder="supervisor@gmail.com"
+                            onChange={handleInputEmail}
+                        />
+
+                        {emailError && (
+                            <p className="text-sm font-light text-destructive italic mt-1">
+                                {emailError}
+                            </p>
+                        )}
+                    </div>
+
+                    <AlertDialogFooter>
+                        <div className="flex items-end justify-end gap-2">
+                            <AlertDialogCancel onClick={() => {
+                                handleCloseAlert()
+                            }}>
+                                {t('Cancel')}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                className={buttonVariants({ variant: 'primary', size: 'lg' })}
+                                onClick={() => handleOpenConfirmAlert()}
+                            >
+                                <span className="material-symbols-outlined text-card w-[22px] h-[22px] items-center">
+                                    send
+                                </span>
+                                {t('Send')}
+                            </AlertDialogAction>
+                        </div>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {isConfirmAlertOpen && (
+                <AlertCustom
+                    title={a("ForgotPasswordConfirmTitle")}
+                    description={a("ForgotPasswordConfirmDescription")}
+                    primaryButtonText={t("Confirm")}
+                    primaryIcon="check"
+                    secondaryButtonText={t("Cancel")}
+                    backResult={(backResult) => {
+                        if (backResult) {
+                            sendForgotPasswordEmail(email)
+                        }
+                        handleCloseConfirmAlert()
+                    }}
+                />
+            )}
+
+        </section>
     );
 }
+
+

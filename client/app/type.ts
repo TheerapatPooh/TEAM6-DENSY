@@ -18,6 +18,7 @@ export interface IUser {
     department?: string | null;
     createdAt?: string;
     active?: boolean;
+    resetToken?: string;
 
     presets?: IPreset[];
     checklists?: IChecklist[]

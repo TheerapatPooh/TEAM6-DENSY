@@ -17,15 +17,15 @@ export function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("refreshToken")?.value;
   const isLoginPage = req.nextUrl.pathname === `/${locale}/login`
   const isProfilePage = currentPathname.startsWith(`/${locale}/profile`);
+  const isForgotPasswordPage = currentPathname.startsWith(`/${locale}/login/forgot-password`)
   const isRefreshPage = currentPathname.startsWith(`/${locale}/refresh`);
 
+  if (isForgotPasswordPage || isRefreshPage) {
+    return response;
+  }
 
   if (!authToken && !refreshToken && !isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
-  }
-
-  if (isRefreshPage) {
-    return response;
   }
 
   if (!authToken && refreshToken && !isRefreshPage) {

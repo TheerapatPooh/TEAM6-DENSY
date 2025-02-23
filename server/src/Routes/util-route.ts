@@ -1,4 +1,4 @@
-import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications, refreshToken } from "@Controllers/util-controller.js";
+import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications, refreshToken, sendEmailResetPassword, resetForgotPassword, verifyToken } from "@Controllers/util-controller.js";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 
@@ -285,5 +285,8 @@ router.delete("/notifications", authenticateUser, removeAllNotifications);
  */
 router.put("/notifications/mark-all-read", authenticateUser, markAllAsRead);
 removeOldNotifications()
+router.post("/send-email-reset-password", sendEmailResetPassword)
+router.put("/reset-password", resetForgotPassword)
+router.get("/verify-token", verifyToken)
 
 export default router
