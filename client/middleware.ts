@@ -20,16 +20,12 @@ export function middleware(req: NextRequest) {
   const isForgotPasswordPage = currentPathname.startsWith(`/${locale}/login/forgot-password`)
   const isRefreshPage = currentPathname.startsWith(`/${locale}/refresh`);
 
-  if (isForgotPasswordPage) {
+  if (isForgotPasswordPage || isRefreshPage) {
     return response;
   }
 
   if (!authToken && !refreshToken && !isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
-  }
-
-  if (isRefreshPage) {
-    return response;
   }
 
   if (!authToken && refreshToken && !isRefreshPage) {
