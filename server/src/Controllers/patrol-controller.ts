@@ -65,13 +65,13 @@ export async function getPatrol(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
-                                username:true,
-                                email:true,
-                                role:true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
                                     name: true,
-                                    tel:true,
+                                    tel: true,
                                     image: true,
                                   },
                                 },
@@ -90,12 +90,12 @@ export async function getPatrol(req: Request, res: Response) {
                 id: true,
                 email: true,
                 department: true,
-                username:true,
+                username: true,
                 role: true,
                 profile: {
                   select: {
                     name: true,
-                    tel:true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -109,13 +109,13 @@ export async function getPatrol(req: Request, res: Response) {
               supervisor: {
                 select: {
                   id: true,
-                  username:true,
-                  email:true,
-                  role:true,
+                  username: true,
+                  email: true,
+                  role: true,
                   profile: {
                     select: {
                       name: true,
-                      tel:true,
+                      tel: true,
                       image: true,
                     },
                   },
@@ -130,11 +130,11 @@ export async function getPatrol(req: Request, res: Response) {
                       email: true,
                       department: true,
                       role: true,
-                      username:true,
+                      username: true,
                       profile: {
                         select: {
                           name: true,
-                          tel:true,
+                          tel: true,
                           image: true,
                         },
                       },
@@ -321,13 +321,13 @@ export async function getAllPatrols(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
-                                username:true,
-                                email:true,
-                                role:true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
                                     name: true,
-                                    tel:true,
+                                    tel: true,
                                     image: true,
                                   },
                                 },
@@ -345,12 +345,12 @@ export async function getAllPatrols(req: Request, res: Response) {
               select: {
                 id: true,
                 email: true,
-                username:true,
-                role:true,
+                username: true,
+                role: true,
                 profile: {
                   select: {
-                    tel:true,
-                    name:true,
+                    tel: true,
+                    name: true,
                     image: true,
                   },
                 },
@@ -395,12 +395,12 @@ export async function getAllPatrols(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
-                                username:true,
-                                email:true,
-                                role:true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
-                                    tel:true,
+                                    tel: true,
                                     name: true,
                                     image: true,
                                   },
@@ -419,12 +419,12 @@ export async function getAllPatrols(req: Request, res: Response) {
               select: {
                 id: true,
                 email: true,
-                username:true,
-                role:true,
+                username: true,
+                role: true,
                 profile: {
                   select: {
-                    name:true,
-                    tel:true,
+                    name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -567,12 +567,12 @@ export async function getPatrolUsers(req: Request, res: Response) {
               select: {
                 id: true,
                 username: true,
-                email:true,
-                role:true,
+                email: true,
+                role: true,
                 profile: {
                   select: {
                     id: true,
-                    tel:true,
+                    tel: true,
                     name: true,
                     image: true,
                   },
@@ -708,12 +708,12 @@ export async function createPatrol(req: Request, res: Response) {
               select: {
                 id: true,
                 email: true,
-                username:true,
-                role:true,
+                username: true,
+                role: true,
                 profile: {
                   select: {
-                    name:true,
-                    tel:true,
+                    name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -865,12 +865,12 @@ export async function startPatrol(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
-                                username:true,
-                                email:true,
-                                role:true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
-                                    tel:true,
+                                    tel: true,
                                     name: true,
                                     image: true,
                                   },
@@ -891,11 +891,11 @@ export async function startPatrol(req: Request, res: Response) {
                 email: true,
                 department: true,
                 role: true,
-                username:true,
+                username: true,
                 profile: {
                   select: {
                     name: true,
-                    tel:true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -908,12 +908,12 @@ export async function startPatrol(req: Request, res: Response) {
             supervisor: {
               select: {
                 id: true,
-                username:true,
-                email:true,
-                role:true,
+                username: true,
+                email: true,
+                role: true,
                 profile: {
                   select: {
-                    tel:true,
+                    tel: true,
                     name: true,
                     image: true,
                   },
@@ -929,10 +929,10 @@ export async function startPatrol(req: Request, res: Response) {
                     email: true,
                     department: true,
                     role: true,
-                    username:true,
+                    username: true,
                     profile: {
                       select: {
-                        tel:true,
+                        tel: true,
                         name: true,
                         image: true,
                       },
@@ -1038,12 +1038,12 @@ export async function finishPatrol(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
-                                username:true,
-                                email:true,
-                                role:true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
-                                    tel:true,
+                                    tel: true,
                                     name: true,
                                     image: true,
                                   },
@@ -1066,8 +1066,8 @@ export async function finishPatrol(req: Request, res: Response) {
                 role:true,
                 profile: {
                   select: {
-                    name:true,
-                    tel:true,
+                    name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -1085,12 +1085,12 @@ export async function finishPatrol(req: Request, res: Response) {
                     id: true,
                     email: true,
                     department: true,
-                    username:true,
+                    username: true,
                     role: true,
                     profile: {
                       select: {
                         name: true,
-                        tel:true,
+                        tel: true,
                         image: true,
                       },
                     },
@@ -1345,12 +1345,12 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
           supervisor: {
             select: {
               id: true,
-              username:true,
-              email:true,
-              role:true,
+              username: true,
+              email: true,
+              role: true,
               profile: {
                 select: {
-                  tel:true,
+                  tel: true,
                   name: true,
                   image: true,
                 },
@@ -1368,13 +1368,13 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                       supervisor: {
                         select: {
                           id: true,
-                          username:true,
-                          email:true,
-                          role:true,
+                          username: true,
+                          email: true,
+                          role: true,
                           profile: {
                             select: {
-                              tel:true,
-                              name:true,
+                              tel: true,
+                              name: true,
                               image: true,
                             },
                           },
@@ -1418,12 +1418,12 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
           supervisor: {
             select: {
               id: true,
-              username:true,
-              email:true,
-              role:true,
+              username: true,
+              email: true,
+              role: true,
               profile: {
                 select: {
-                  tel:true,
+                  tel: true,
                   name: true,
                   image: true,
                 },
@@ -1451,13 +1451,13 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                       supervisor: {
                         select: {
                           id: true,
-                          username:true,
-                          email:true,
-                          role:true,
+                          username: true,
+                          email: true,
+                          role: true,
                           profile: {
                             select: {
-                              tel:true,
-                              name:true,
+                              tel: true,
+                              name: true,
                               image: true,
                             },
                           },
