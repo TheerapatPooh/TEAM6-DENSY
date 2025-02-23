@@ -282,12 +282,10 @@ export default function Page() {
 
   // Reset filters to default
   const resetFilters = async () => {
-    const data = await fetchData("get", `/checklists`, true);
     setTempSelectedZones([]); // Reset temp selected zones
     setTempDateRange({}); // Reset temp date range
     setSelectedZones([]); // Clear applied zones
     setSelectedDateRange({}); // Clear applied date range
-    setFilteredChecklists(data); // Reset to all checklists
   };
 
   const [sortedChecklists, setSortedChecklists] = useState<
@@ -501,7 +499,7 @@ export default function Page() {
               <Button size="sm" variant="secondary" onClick={resetFilters}>
                 {t("Reset")}
               </Button>
-              <Button size="sm" onClick={applyFilters}>
+              <Button variant="primary" size="sm" onClick={applyFilters}>
                 {t("Apply")}
               </Button>
             </div>

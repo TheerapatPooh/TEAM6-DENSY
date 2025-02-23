@@ -40,6 +40,11 @@ jest.mock('jsonwebtoken', () => ({
 describe('login', () => {
   test('ควรเข้าสู่ระบบได้สำเร็จ', async () => {
     prismaMock.user.findUnique.mockResolvedValue(userMock);
+    prismaMock.session.create.mockResolvedValue({
+      userId: userMock.id,
+      token: "mockSessionId",
+      expiresAt: new Date(),
+    });
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue("mockToken");
 
@@ -53,37 +58,41 @@ describe('login', () => {
         password: "testpassword",
         rememberMe: true,
       },
-      { role: "inspector", userId: 3 },
+      {},
       {});
 
     const res = mockResponse();
 
     await login(req, res);
     expect(bcrypt.compare).toHaveBeenCalledWith("testpassword", "hashedPassword");
-
     expect(jwt.sign).toHaveBeenCalledWith(
       {
         userId: 1,
         role: "inspector",
-        iat: 1702310400,
-        exp: expect.any(Number),
+        sessionId: expect.any(String),
+
       },
-      expect.any(String)
+      expect.any(String),
+      { expiresIn: "1h" }
     );
 
     expect(res.cookie).toHaveBeenCalledWith("authToken", "mockToken", expect.any(Object));
+    expect(res.cookie).toHaveBeenCalledWith("refreshToken", expect.any(String), expect.any(Object));
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ message: "Login Success", token: "mockToken" });
+    expect(res.json).toHaveBeenCalledWith({ message: "Login Success", accessToken: "mockToken", refreshToken: expect.any(String) });
   });
 });
 
 describe('logout', () => {
   test('ควรออกจากระบบได้สำเร็จ', async () => {
+    (jwt.verify as jest.Mock).mockReturnValue({ userId: 1, role: "inspector" });
+    prismaMock.session.deleteMany.mockResolvedValue({ count: 1 });
+
     const req = mockRequest(
       {},
       {},
       {},
-      { role: "inspector", userId: 3 },
+      {},
       { authToken: "mockToken" });
 
     const res = mockResponse();
@@ -95,7 +104,11 @@ describe('logout', () => {
       secure: false,
       sameSite: 'lax',
     });
-
+    expect(res.clearCookie).toHaveBeenCalledWith("refreshToken", expect.objectContaining({
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    }));
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: "Logout successful" });
   });
@@ -103,18 +116,26 @@ describe('logout', () => {
 
 describe('authenticateUser', () => {
   test('ควรยืนยันตัวตนผู้ใช้งานได้สำเร็จ', async () => {
+    (jwt.verify as jest.Mock).mockReturnValue(decodeMock);
+    const now = new Date();
+    prismaMock.session.findUnique.mockResolvedValue({
+      id: 1,
+      userId: decodeMock.userId,
+      token: decodeMock.sessionId,
+      expiresAt: new Date(now.getTime() + 60 * 60 * 1000),
+    });
+
     const req = mockRequest(
       {},
       {},
       {},
-      { role: "inspector", userId: 3 },
+      {},
       { authToken: "mockToken" });
 
     const res = mockResponse();
     const next = jest.fn();
-    (jwt.verify as jest.Mock).mockReturnValue(decodeMock);
 
-    authenticateUser(req, res, next);
+    await authenticateUser(req, res, next);
     expect(req.user).toEqual(decodeMock);
     expect(next).toHaveBeenCalled();
   });

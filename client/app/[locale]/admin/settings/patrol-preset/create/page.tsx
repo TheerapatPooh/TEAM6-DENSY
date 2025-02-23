@@ -36,12 +36,13 @@ import {
 } from "@/components/ui/accordion";
 import BadgeCustom from "@/components/badge-custom";
 import Loading from "@/components/loading";
-import { fetchData, getItemTypeVariant } from "@/lib/utils";
+import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { IChecklist, IItem, IItemZone } from "@/app/type";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 import { useRouter } from "next/navigation";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function page() {
   const [allChecklists, setAllChecklists] = useState<[]>([]);
@@ -445,12 +446,24 @@ export default function page() {
                                                 {t("supervisor")}
                                               </p>
                                               <div className="flex flex-row items-center">
-                                                <Avatar className="mr-1 h-6 w-6">
-                                                  <AvatarImage />
-                                                  <AvatarFallback
-                                                    id={itemZone.zone.supervisor.id.toString()}
-                                                  ></AvatarFallback>
-                                                </Avatar>
+                                                <UserTooltip
+                                                  user={
+                                                    itemZone.zone.supervisor
+                                                  }
+                                                >
+                                                  <Avatar className="mr-1 h-6 w-6">
+                                                    <AvatarImage />
+                                                    <AvatarFallback
+                                                      id={itemZone.zone.supervisor.id.toString()}
+                                                    >
+                                                      {getInitials(
+                                                        itemZone.zone.supervisor
+                                                          .profile.name
+                                                      )}
+                                                    </AvatarFallback>
+                                                  </Avatar>
+                                                </UserTooltip>
+
                                                 <p className="text-lg">
                                                   {
                                                     itemZone.zone.supervisor

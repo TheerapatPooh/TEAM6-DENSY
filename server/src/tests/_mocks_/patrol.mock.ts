@@ -422,6 +422,7 @@ export const allPatrolsResponseMock = [
     {
         "id": 3,
         "date": "2025-01-11T17:00:00.000Z",
+        "disabled": false,
         "status": "on_going",
         "preset": {
             "id": 1,

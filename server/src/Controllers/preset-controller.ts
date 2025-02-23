@@ -364,8 +364,11 @@ export async function getAllPresets(req: Request, res: Response) {
           select: {
             id: true,
             username: true,
+            email:true,
+            role:true,            
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: {
                   select: { path: true },
@@ -526,8 +529,11 @@ export async function getChecklist(req: Request, res: Response) {
                           select: {
                             id: true,
                             role: true,
+                            username:true,
+                            email:true,
                             profile: {
                               select: {
+                                image:true,
                                 id: true,
                                 name: true,
                                 age: true,
@@ -626,9 +632,12 @@ export async function getAllChecklists(req: Request, res: Response) {
             id: true,
             username: true,
             email: true,
+            role:true,
             profile: {
-              include: {
-                image: true,
+              select: {
+                name:true,
+                tel:true,
+                image:true,
               },
             },
           },
@@ -647,7 +656,15 @@ export async function getAllChecklists(req: Request, res: Response) {
                     supervisor: {
                       select: {
                         id: true,
-                        profile: true,
+                        username:true,
+                        email:true,
+                        role:true,
+                        profile: {
+                          select:{
+                            name:true,
+                            tel:true,
+                            image:true
+                        }},
                       },
                     },
                   },

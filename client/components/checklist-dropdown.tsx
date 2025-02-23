@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ ChecklistDropdown ใช้สำหรับแสดง Dropdown ของ Checklist และ Inspector ที่เป็นผู้รับผิดชอบในการตรวจสอบ
- * Input: 
+ * Input:
  * - checklist: ข้อมูลของ Checklist ที่ต้องการแสดง
  * - handleselectUser: ฟังก์ชันที่ใช้สำหรับเลือก Inspector จาก Dropdown
  * Output:
@@ -22,13 +22,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IChecklist, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { UserTooltip } from "./user-tooltip";
 
 interface IChecklistDropdown {
   checklist: IChecklist;
   handleselectUser: (user: IUser) => void;
 }
 
-export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDropdown) {
+export function ChecklistDropdown({
+  checklist,
+  handleselectUser,
+}: IChecklistDropdown) {
   const [userData, setUserData] = useState<IUser[]>([]);
   const [selectUser, setSelectUser] = useState<IUser | null>(null);
   const [accordionValue, setAccordionValue] = useState<string | null>();
@@ -36,7 +40,11 @@ export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDro
   useEffect(() => {
     const getData = async () => {
       try {
-        const users = await fetchData("get", "/users?profile=true&image=true&roles=inspector", true);
+        const users = await fetchData(
+          "get",
+          "/users?profile=true&image=true&roles=inspector",
+          true
+        );
         setUserData(users);
       } catch (error) {
         console.error("Failed to fetch patrol data:", error);
@@ -59,7 +67,8 @@ export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDro
         collapsible
         className="w-full"
         value={accordionValue}
-        onValueChange={setAccordionValue}>
+        onValueChange={setAccordionValue}
+      >
         <AccordionItem
           value="item-1"
           className="bg-secondary rounded-md w-full px-6 py-4 border-none custom-shadow"
@@ -69,14 +78,16 @@ export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDro
               <p className="text-2xl font-bold">{checklist.title}</p>
               <div className="flex  w-[200px] gap-2 items-center mr-[100px]">
                 {selectUser ? (
-                  <Avatar>
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser.profile.image?.path}`}
-                    />
-                    <AvatarFallback id={selectUser.id.toString()}>
-                      {getInitials(selectUser.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserTooltip user={selectUser}>
+                    <Avatar>
+                      <AvatarImage
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser.profile.image?.path}`}
+                      />
+                      <AvatarFallback id={selectUser.id.toString()}>
+                        {getInitials(selectUser.profile.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </UserTooltip>
                 ) : null}
                 <p className="font-semibold text-lg text-muted-foreground">
                   {selectUser
@@ -95,7 +106,11 @@ export function ChecklistDropdown({ checklist, handleselectUser }: IChecklistDro
                 {t("inspector")}
               </p>
             </div>
-            <UserDropdown users={userData} onUserSelect={handleUserSelect} selectUser={selectUser} />
+            <UserDropdown
+              users={userData}
+              onUserSelect={handleUserSelect}
+              selectUser={selectUser}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

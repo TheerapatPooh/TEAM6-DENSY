@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast } from "@/app/type";
+import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast, role } from "@/app/type";
 import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
@@ -612,6 +612,31 @@ export const getItemTypeVariant = (type: itemType) => {
       break;
   }
   return { iconName, variant };
+};
+
+export const getUserVariant = (role: role) => {
+  let iconName: string
+  let variant: keyof typeof badgeVariants
+  let variantName: string
+
+  switch (role) {
+    case "supervisor":
+      iconName = 'engineering'
+      variant = 'yellow'
+      variantName = 'supervisor'
+      break;
+    case "inspector":
+      iconName = 'person_search'
+      variant = 'red'
+      variantName = 'inspector'
+      break;
+    default:
+      iconName = 'manage_accounts'
+      variant = 'blue'
+      variantName = 'admin'
+      break;
+  }
+  return { iconName, variant, variantName };
 };
 
 export function formatTime(timestamp: string, locale: string, showTime: boolean = true) {

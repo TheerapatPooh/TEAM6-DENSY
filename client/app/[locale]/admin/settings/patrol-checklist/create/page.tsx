@@ -615,60 +615,6 @@ export default function Page() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                  {/* <DropdownMenu
-                    key={item.id}
-                    open={openStatesZone[item.id] || false} // Open state for this dropdown
-                    onOpenChange={(isOpen) =>
-                      handleOpenChangeZone(item.id, isOpen)
-                    } // Update open state on change
-                  >
-                    <DropdownMenuTrigger className="flex items-center gap-2 w-full px-4 py-2 truncate rounded cursor-pointer">
-                      <ChevronDownIcon
-                        className={`transition-transform duration-200 ${
-                          openStatesZone[item.id] ? "rotate-180" : "rotate-0"
-                        }`}
-                      />
-                      <p className="w-[305px] truncate text-base font-semibold text-muted-foreground text-center">
-                        {selectedZones[item.id]?.length > 0
-                          ? selectedZones[item.id]
-                              .map(
-                                (zoneId) =>
-                                  allZones.find((zone) => zone.id === zoneId)
-                                    ?.name
-                              )
-                              .join(", ")
-                          : "Select Zones"}
-                      </p>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent
-                      align="start"
-                      side="bottom"
-                      className="bg-white border border-gray-200 shadow-lg rounded w-64 p-2"
-                    >
-                      <ScrollArea className="h-72 rounded-md">
-                        {allZones.map((zone) => (
-                          <DropdownMenuItem
-                            key={zone.id}
-                            className="flex items-center gap-2 cursor-default"
-                            onSelect={(e) => e.preventDefault()} // Prevent dropdown from closing
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                selectedZones[item.id]?.includes(zone.id) ||
-                                false
-                              }
-                              onChange={() =>
-                                handleZoneChange(item.id, zone.id)
-                              }
-                            />
-                            <p className="truncate">{zone.name}</p>
-                          </DropdownMenuItem>
-                        ))}
-                      </ScrollArea>
-                    </DropdownMenuContent>
-                  </DropdownMenu> */}
                 </TableCell>
                 <TableCell
                   onClick={() => {

@@ -151,7 +151,7 @@ export async function getZone(req: Request, res: Response) {
               role: true,
               department: true,
               createdAt: true,
-              profile: { include: { image: true } },
+              profile: { select: { image: true,tel:true,name:true } },
             },
           },
         },
@@ -179,7 +179,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { include: { image: true } },
+            profile: { select: { image: true,tel:true,name:true } },
           },
         },
         itemZones: {
@@ -194,7 +194,16 @@ export async function getZone(req: Request, res: Response) {
                     user: {
                       select: {
                         id: true,
-                        profile: true
+                        role:true,
+                        email:true,
+                        username:true,
+                        profile: {
+                          select:{
+                          name:true,
+                          image:true,
+                          tel:true
+
+                        }}
                       }
                     }
                   }
@@ -222,7 +231,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { include: { image: true } },
+            profile: { select: { image: true,tel:true,name:true } },
           },
         },
         itemZones: {
@@ -362,7 +371,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { include: { image: true } },
+            profile: { select: { image: true,tel:true,name:true } },
           },
         },
         itemZones: {
@@ -402,7 +411,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { include: { image: true } },
+            profile: { select: { image: true,tel:true,name:true } },
           },
         },
         itemZones: {
@@ -539,11 +548,8 @@ export async function getLocation(req: Request, res: Response) {
                 role: true,
                 department: true,
                 createdAt: true,
-                profile: {
-                  include: {
-                    image: true,
-                  },
-                },
+                profile: { select: { image: true,tel:true,name:true } },
+
               },
             },
           },
@@ -611,11 +617,8 @@ export async function updateSupervisor(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: {
-              include: {
-                image: true,
-              },
-            },
+            profile: { select: { image: true,tel:true,name:true } },
+
           },
         },
       },

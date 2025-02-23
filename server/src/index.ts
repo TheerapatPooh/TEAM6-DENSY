@@ -17,8 +17,8 @@ import { ParsedQs } from 'qs';
 
 dotenv.config()
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fileName = fileURLToPath(import.meta.url);
+const dirName = path.dirname(fileName);
 const app = express()
 const PORT = process.env.SERVER_PORT
 
@@ -42,7 +42,7 @@ app.use(
         connectSrc: [
           "'self'",
           "ws://localhost:4000", // อนุญาต WebSocket
-          "http://localhost:3000" // อนุญาต HTTP
+          process.env.CLIENT_URL || 'http://localhost:3000'
         ],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
@@ -71,11 +71,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/uploads', express.static(path.join(__dirname, '../../server/uploads')));
+app.use('/uploads', express.static(path.join(dirName, '../../server/uploads')));
 app.use(bodyParse.json({ limit: '10mb' }))
 app.use(express.json())
 
-readdirSync(path.join(__dirname, 'Routes')).map(async (file) => {
+readdirSync(path.join(dirName, 'Routes')).map(async (file) => {
   const route = await import(`./Routes/${file}`);
   app.use('/api', route.default || route);
 });

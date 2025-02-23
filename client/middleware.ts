@@ -13,15 +13,12 @@ export function middleware(req: NextRequest) {
   const localeMatch = currentPathname.match(/^\/(en|th)(\/|$)/)
   const locale = localeMatch ? localeMatch[1] : 'en'
 
-  if (currentPathname.startsWith(`/${locale}/refresh`)) {
-    return response;
-  }
-
   const authToken = req.cookies.get("authToken")?.value
   const refreshToken = req.cookies.get("refreshToken")?.value;
   const isLoginPage = req.nextUrl.pathname === `/${locale}/login`
   const isProfilePage = currentPathname.startsWith(`/${locale}/profile`);
   const isForgotPasswordPage = currentPathname.startsWith(`/${locale}/login/forgot-password`)
+  const isRefreshPage = currentPathname.startsWith(`/${locale}/refresh`);
 
   if (isForgotPasswordPage) {
     return response;
@@ -31,7 +28,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
   }
 
-  if (!authToken && refreshToken) {
+  if (isRefreshPage) {
+    return response;
+  }
+
+  if (!authToken && refreshToken && !isRefreshPage) {
     return NextResponse.redirect(new URL(`/${locale}/refresh`, req.url));
   }
 
