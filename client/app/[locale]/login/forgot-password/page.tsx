@@ -106,20 +106,24 @@ export default function page() {
         userForm.append("token", token)
 
         try {
-            await fetchData(
+            const response = await fetchData(
                 "put",
                 "/reset-password",
                 true,
                 userForm
             );
-            setNewPassError(null);
-            setConfirmPasswordError(null);
+            if (response.status === 200) {
+                setNewPassError(null);
+                setConfirmPasswordError(null);
 
-            toast({
-                variant: "success",
-                title: a("ProfileUpdateTitle"),
-                description: a("ProfileUpdateDescription"),
-            });
+                toast({
+                    variant: "success",
+                    title: a("PasswordResetCompletedTitle"),
+                    description: a("PasswordResetCompletedDescription"),
+                });
+                router.push(`/${locale}/login`);
+            }
+
         } catch (error) {
             console.error("Error updating password:", error);
             toast({
@@ -163,11 +167,6 @@ export default function page() {
         } catch (error) {
             console.error('Error verifying token:', error);
             setIsValidToken(false);
-            toast({
-                variant: "error",
-                title: "Error",
-                description: "There was an error verifying the token."
-            });
             router.push(`/${locale}/login`);
         }
     };

@@ -810,7 +810,7 @@ export async function resetForgotPassword(req: Request, res: Response) {
       }
     });
 
-    res.status(200).json({ message: 'Password successfully updated.' });
+    res.status(200).json({ message: 'Password successfully updated.', status: 200 });
     return
   } catch (error) {
     console.error('Error resetting password:', error);
