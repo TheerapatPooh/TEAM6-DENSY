@@ -8,6 +8,8 @@ import nodemailer from 'nodemailer';
 import fs from "fs";
 import path from "path";
 import { DefectStatus } from "@prisma/client";
+import { v4 as uuidv4 } from "uuid";
+
 declare global {
   namespace Express {
     interface Request {
@@ -15,6 +17,10 @@ declare global {
     }
   }
 }
+
+// Generate a JWT token and set it as a cookie with an expiration time
+const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey";
+const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || "refreshSecretKey";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับ login เข้าสู่ระบบ
@@ -43,26 +49,44 @@ export async function login(req: Request, res: Response) {
       return;
     }
 
-    // Generate a JWT token and set it as a cookie with an expiration time
-    const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey";
-    const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
-    const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + maxAge / 1000;
-    const token = jwt.sign({ userId: user.id, role: user.role, iat, exp }, jwtSecret);
+    if (!user.active) {
+      res.status(403).json({ message: "Your account is inactive. Please contact support." });
+      return;
+    }
 
-    res.cookie("authToken", token, {
+    await prisma.session.deleteMany({ where: { userId: user.id } });
+    const sessionId = uuidv4();
+    const expiresAt = new Date(Date.now() + (rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000));
+    await prisma.session.create({
+      data: {
+        userId: user.id,
+        token: sessionId,
+        expiresAt: expiresAt,
+      },
+    });
+
+    const accessToken = jwt.sign({ userId: user.id, role: user.role, sessionId }, jwtSecret, { expiresIn: "1h" });
+    const refreshToken = jwt.sign({ userId: user.id, role: user.role, sessionId }, jwtRefreshSecret, { expiresIn: "7d" });
+
+    res.cookie("authToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production" ? true : false,
       sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
-      maxAge: maxAge,
+      maxAge: 60 * 60 * 1000,
     });
 
-    res.status(200).json({ message: "Login Success", token });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({ message: "Login Success", accessToken, refreshToken });
     return
   } catch (error) {
     res.status(500).json({ message: `Internal server error: ${error}` });
   }
-
 }
 
 /**
@@ -73,8 +97,26 @@ export async function login(req: Request, res: Response) {
 **/
 export async function logout(req: Request, res: Response) {
   try {
+    const token = req.cookies.authToken;
+
+    if (!token) {
+      res.status(200).json({ message: "Already logged out" });
+      return
+    }
+
+    // ตรวจสอบ JWT Token
+    const decoded: any = jwt.verify(token, jwtSecret);
+
+    // ลบ session ออกจากฐานข้อมูล
+    await prisma.session.deleteMany({ where: { userId: decoded.userId } });
+
     // Clear the cookie named "authToken"
     res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax'
+    });
+    res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production" ? true : false,
       sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax'
@@ -95,7 +137,7 @@ export async function logout(req: Request, res: Response) {
  * - ถ้า Token ถูกต้อง: ส่งต่อการทำงานไปยังฟังก์ชันถัดไป (next middleware)
  * - ถ้า TOken ไม่ถูกต้อง: JSON message แจ้งเตือนข้อผิดพลาด เช่น "Access Denied" หรือ "Invalid Token"
 **/
-export function authenticateUser(req: Request, res: Response, next: NextFunction) {
+export async function authenticateUser(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies.authToken;
 
   if (!token) {
@@ -104,8 +146,28 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
   }
 
   try {
-    const jwtSecret = process.env.JWT_SECRET || "defaultSecretKey";
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as JwtPayload;
+
+    const session = await prisma.session.findUnique({
+      where: { userId: decoded.userId },
+    });
+
+    if (!session || session.token !== decoded.sessionId ) {
+      res.clearCookie("authToken");
+      res.clearCookie("refreshToken");
+      res.status(401).json({ message: "Session expired" });
+      return
+    }
+
+    // เพิ่มตรวจสอบเวลา Session หมดอายุ
+    if (session && new Date() > session.expiresAt) {
+      await prisma.session.delete({ where: { id: session.id } });
+      res.clearCookie("authToken");
+      res.clearCookie("refreshToken");
+      res.status(401).json({ message: "Session expired" });
+      return
+    }
+
     req.user = decoded;
     next();
   } catch (error) {
@@ -113,6 +175,54 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
     return
   }
 }
+
+export async function refreshToken(req: Request, res: Response) {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    res.status(401).json({ message: "No refresh token provided" });
+  }
+
+  try {
+    const decoded: any = jwt.verify(refreshToken, jwtRefreshSecret);
+
+    // ตรวจสอบ session ใน MySQL
+    const session = await prisma.session.findUnique({ where: { userId: decoded.userId } });
+
+    if (!session || session.token !== decoded.sessionId) {
+      res.clearCookie("authToken");
+      res.clearCookie("refreshToken");
+      res.status(401).json({ message: "Session expired, please login again" });
+      return
+    }
+    if (new Date() > session.expiresAt) {
+      await prisma.session.delete({ where: { id: session.id } });
+      res.clearCookie("authToken");
+      res.clearCookie("refreshToken");
+      res.status(401).json({ message: "Session expired" });
+      return
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+
+    // สร้าง accessToken ใหม่
+    const newAccessToken = jwt.sign({ userId: decoded.userId, role: user?.role, sessionId: decoded.sessionId }, jwtSecret, {
+      expiresIn: "1h",
+    });
+
+    res.cookie("authToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
+      maxAge: 60 * 60 * 1000, // 1 ชั่วโมง
+    });
+
+    res.status(200).json({ accessToken: newAccessToken });
+    return
+  } catch (error) {
+    res.status(403).json({ message: "Invalid refresh token" });
+  }
+}
+
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูลการแจ้งเตือน

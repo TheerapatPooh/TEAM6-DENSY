@@ -1,11 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast } from "@/app/type";
+import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast, role } from "@/app/type";
 import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
-import Defect from "@/components/defect";
 
 
 const ExcelJS = require("exceljs");
@@ -13,28 +12,63 @@ const ExcelJS = require("exceljs");
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export async function refreshAccessToken() {
+  try {
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, {
+      withCredentials: true,
+    });
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh-token`, {}, {
+      withCredentials: true,
+      headers: { "X-CSRF-Token": csrfToken },
+    });
+
+    return response.data.accessToken;
+  } catch (error) {
+    console.error("Failed to refresh token", error);
+    return null;
+  }
+}
+
 export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values)
   if (!validatedFields.success) {
     return { error: "Invalid field!" }
   }
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`,
+      values,
+      {
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
+        withCredentials: true
+      })
     return response.data
   } catch (error: any) {
     return { error: error.response?.data?.message || "Login failed" };
   }
 }
 
-
 export async function logout() {
   try {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, {
+      headers: {
+        "X-CSRF-Token": csrfToken,
+      },
+      withCredentials: true
+    })
   } catch (error: any) {
     throw new Error("Logout failed", error);
   }
 }
-
 
 export async function fetchData(
   type: "get" | "delete" | "post" | "put",
@@ -44,15 +78,14 @@ export async function fetchData(
   form?: boolean
 ) {
   try {
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
     const config: AxiosRequestConfig = {
       withCredentials: credential,
-      headers: form
-        ? {
-          "Content-Type": "multipart/form-data",
-        }
-        : {
-          "Content-Type": "application/json",
-        },
+      headers: {
+        "X-CSRF-Token": csrfToken,
+        "Content-Type": form ? "multipart/form-data" : "application/json",
+      },
     };
 
     let response;
@@ -82,8 +115,6 @@ export async function fetchData(
     };
   }
 }
-
-
 
 export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
@@ -581,6 +612,31 @@ export const getItemTypeVariant = (type: itemType) => {
       break;
   }
   return { iconName, variant };
+};
+
+export const getUserVariant = (role: role) => {
+  let iconName: string
+  let variant: keyof typeof badgeVariants
+  let variantName: string
+
+  switch (role) {
+    case "supervisor":
+      iconName = 'engineering'
+      variant = 'yellow'
+      variantName = 'supervisor'
+      break;
+    case "inspector":
+      iconName = 'person_search'
+      variant = 'red'
+      variantName = 'inspector'
+      break;
+    default:
+      iconName = 'manage_accounts'
+      variant = 'blue'
+      variantName = 'admin'
+      break;
+  }
+  return { iconName, variant, variantName };
 };
 
 export function formatTime(timestamp: string, locale: string, showTime: boolean = true) {

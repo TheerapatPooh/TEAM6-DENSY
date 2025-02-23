@@ -51,6 +51,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotFound from "@/components/not-found";
+import { UserTooltip } from "@/components/user-tooltip";
+import { VersionTooltip } from "@/components/version-tooltip";
 
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
@@ -243,7 +245,6 @@ export default function Page() {
     setTempDateRange({});
     setSelectedZones([]);
     setSelectedDateRange({});
-    setFilteredPresets(data); // รีเซ็ตข้อมูลที่กรองแล้วเป็นทั้งหมด
   };
 
   const [sortedPresets, setSortedPresets] = useState<IPresetWithExtras[]>([]);
@@ -460,14 +461,14 @@ export default function Page() {
               <Button size="sm" variant="secondary" onClick={resetFilters}>
                 {t("Reset")}
               </Button>
-              <Button size="sm" onClick={applyFilters}>
+              <Button variant="primary" size="sm" onClick={applyFilters}>
                 {t("Apply")}
               </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <ScrollArea className="h-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-290px)]">
+      <ScrollArea className="h-full overflow-hidden rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-290px)]">
         <div className="space-y-4">
           {(() => {
             return sortedPresets.length > 0 ? (
@@ -484,75 +485,14 @@ export default function Page() {
                     <div className="flex flex-col gap-4 min-w-0">
                       <div className="flex flex-col gap-1 justify-start items-start">
                         {/* Version with Tooltip */}
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
-                              >
-                                <span className="material-symbols-outlined mr-1">
-                                  history
-                                </span>
-                                {t("Version")} {preset.version}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="bottom"
-                              className="ml-[129px]"
-                            >
-                              <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                                <span className="text-card-foreground text-lg font-bold flex items-center ">
-                                  <span className="material-symbols-outlined mr-1">
-                                    history
-                                  </span>
-                                  {t("Version")} {preset.version}
-                                </span>
-                                <div className="flex flex-col justify-start items-start ">
-                                  <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                    <div className="text-muted-foreground">
-                                      {t("UpdateBy")}
-                                    </div>
-                                    {preset.user.profile ? (
-                                      <Avatar>
-                                        <AvatarImage
-                                          src={`${
-                                            process.env.NEXT_PUBLIC_UPLOAD_URL
-                                          }/${
-                                            (preset as any)
-                                              .updateByUserImagePath
-                                          }`}
-                                        />
-                                        <AvatarFallback
-                                          id={preset.user.id.toString()}
-                                        >
-                                          {getInitials(preset.updateByUserName)}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    ) : (
-                                      <Skeleton className="h-12 w-12 rounded-full" />
-                                    )}
-                                    {(preset as any).updateByUserName}
-                                  </div>
-                                  <div className="flex gap-2 text-muted-foreground">
-                                    <div className="text-muted-foreground">
-                                      {t("UpdateAt")}
-                                    </div>
-                                    {formatTime(preset.updatedAt,locale)}
-                                  </div>
-                                </div>
-                                <div className="flex justify-between w-full">
-                                  <div className="font-bold text-lg text-muted-foreground">
-                                    {t("Total")}
-                                  </div>
-                                  <div className="font-bold text-lg text-muted-foreground">
-                                    {preset.version} {t("Version")}
-                                  </div>
-                                </div>
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                          <VersionTooltip object={preset}>
+                            <div className="flex justify-center">
+                              <span className="material-symbols-outlined mr-1">
+                                history
+                              </span>
+                              {t("Version")} {preset.version}
+                            </div>
+                          </VersionTooltip>
                         {/* Title */}
                         <h2 className="text-xl font-semibold truncate">
                           {preset.title}

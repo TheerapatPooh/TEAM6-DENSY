@@ -1,5 +1,15 @@
 // tests/_mocks_/prisma.mock.ts
 export const prismaMock = {
+    session: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+        count: jest.fn()
+    },
     patrol: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
@@ -28,7 +38,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    defect:{
+    defect: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -37,7 +47,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    user:{
+    user: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -47,7 +57,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
     },
     comment: {
-        upsert:  jest.fn(),
+        upsert: jest.fn(),
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -56,7 +66,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    profile:{
+    profile: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -66,7 +76,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
     },
     zone: {
-        upsert:  jest.fn(),
+        upsert: jest.fn(),
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -75,7 +85,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    image:{
+    image: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -93,7 +103,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     },
-    notification:{
+    notification: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -103,7 +113,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
         updateMany: jest.fn(),
     },
-    preset:{
+    preset: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -113,7 +123,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
         updateMany: jest.fn(),
     },
-    presetChecklist:{
+    presetChecklist: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -123,7 +133,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
         updateMany: jest.fn(),
     },
-    checklist:{
+    checklist: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -133,7 +143,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
         updateMany: jest.fn(),
     },
-    item:{
+    item: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -143,7 +153,7 @@ export const prismaMock = {
         deleteMany: jest.fn(),
         updateMany: jest.fn(),
     },
-    itemZone:{
+    itemZone: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -154,7 +164,7 @@ export const prismaMock = {
         updateMany: jest.fn(),
     },
 
-   
+
     defectImage: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
@@ -164,7 +174,7 @@ export const prismaMock = {
         delete: jest.fn(),
         deleteMany: jest.fn(),
     }
-   
+
     // Mock method อื่น ๆ ที่ใช้ในโค้ดจริง
 };
 

@@ -149,7 +149,7 @@ export default function page() {
   };
 
   const handleUpdateUserData = async () => {
-    let update = false
+    let update = false;
     let showErrorToast = false;
     setCurrentPassError(null);
     setNewPassError(null);
@@ -163,7 +163,7 @@ export default function page() {
     const userForm = new FormData();
 
     // name
-    if (formData?.name === null || formData?.name === '') {
+    if (formData?.name === null || formData?.name === "") {
       setNameError(a("ProfileNameRequire"));
       showErrorToast = true;
     } else if (formData?.name && formData?.name !== userData.profile.name) {
@@ -172,26 +172,37 @@ export default function page() {
     }
 
     //  email
-    if (formData?.email === null || formData?.email === '') {
+    if (formData?.email === null || formData?.email === "") {
       setEmailError(a("ProfileEmailRequire"));
       showErrorToast = true;
     } else if (formData?.email && formData?.email !== userData.email) {
-      if (formData?.email && formData.email.trim() && /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+      if (
+        formData?.email &&
+        formData.email.trim() &&
+        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)
+      ) {
         userForm.append("email", formData.email);
         update = true;
-      }
-      else {
+      } else {
         setEmailError(a("ProfileEmailInvalid"));
         showErrorToast = true;
       }
     }
 
     //  age
-    if (formData?.age !== undefined && formData?.age.toString() === '') {
+    if (formData?.age !== undefined && formData?.age.toString() === "") {
       setAgeError(a("ProfileAgeRequire"));
       showErrorToast = true;
-    } else if (formData?.age && formData?.age.toString() !== userData.profile?.age?.toString()) {
-      if (formData?.age && !isNaN(Number(formData.age)) && Number(formData.age) <= 120 && Number(formData.age) > 0) {
+    } else if (
+      formData?.age &&
+      formData?.age.toString() !== userData.profile?.age?.toString()
+    ) {
+      if (
+        formData?.age &&
+        !isNaN(Number(formData.age)) &&
+        Number(formData.age) <= 120 &&
+        Number(formData.age) > 0
+      ) {
         userForm.append("age", formData.age.toString());
         update = true;
       } else {
@@ -201,7 +212,7 @@ export default function page() {
     }
 
     //  tel
-    if (formData?.tel === null || formData?.tel === '') {
+    if (formData?.tel === null || formData?.tel === "") {
       setTelError(a("ProfileTelRequire"));
       showErrorToast = true;
     } else if (formData?.tel && formData?.tel !== userData.profile.tel) {
@@ -215,10 +226,13 @@ export default function page() {
     }
 
     //  address
-    if (formData?.address === null || formData?.address === '') {
+    if (formData?.address === null || formData?.address === "") {
       setAddressError(a("ProfileAddressRequire"));
       showErrorToast = true;
-    } else if (formData?.address && formData?.address !== userData.profile.address) {
+    } else if (
+      formData?.address &&
+      formData?.address !== userData.profile.address
+    ) {
       userForm.append("address", formData.address);
       update = true;
     }
@@ -282,15 +296,22 @@ export default function page() {
       setCurrentPassError(a("ProfileCurrentPassRequire"));
       showErrorToast = true;
     }
-
     if (!formData?.newPassword) {
       setNewPassError(a("ProfileNewPassRequire"));
       showErrorToast = true;
     }
-
     if (!formData?.confirmPassword) {
       setConfirmPassError(a("ProfileConfirmPassRequire"));
       showErrorToast = true;
+    }
+    if (formData?.newPassword && formData?.confirmPassword) {
+      if (formData?.newPassword.length < 8) {
+        setNewPassError("Password must be at least 8 characters long.");
+      }
+      if (formData?.confirmPassword.length < 8) {
+        setConfirmPassError("Password must be at least 8 characters long.");
+        return;
+      }
     }
 
     // If there's any error, show toast and stop
@@ -336,7 +357,7 @@ export default function page() {
               try {
                 await fetchData("post", `/logout`, true);
                 window.location.reload();
-              } catch (error) { }
+              } catch (error) {}
             }
           } catch (error) {
             console.error("Error updating password:", error);
@@ -418,14 +439,16 @@ export default function page() {
       <div className="flex justify-between px-6 py-4 bg-card rounded-md custom-shadow">
         <div className="flex flex-row">
           {userData.profile ? (
-            <Avatar className="h-32 w-32 mr-6">
-              <AvatarImage
-                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`}
-              />
-              <AvatarFallback id={userData.id?.toString()}>
-                <p className="text-4xl">{getInitials(userData.profile.name)}</p>
-              </AvatarFallback>
-            </Avatar>
+              <Avatar className="h-32 w-32 mr-6">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${userData.profile.image?.path}`}
+                />
+                <AvatarFallback id={userData.id?.toString()}>
+                  <p className="text-4xl">
+                    {getInitials(userData.profile.name)}
+                  </p>
+                </AvatarFallback>
+              </Avatar>
           ) : (
             <Skeleton className="h-12 w-12 rounded-full" />
           )}
@@ -531,8 +554,8 @@ export default function page() {
               userData.role === "supervisor"
                 ? "yellow"
                 : userData.role === "inspector"
-                  ? "red"
-                  : "blue"
+                ? "red"
+                : "blue"
             }
             showIcon={true}
             shape="square"
@@ -540,8 +563,8 @@ export default function page() {
               userData.role === "supervisor"
                 ? "engineering"
                 : userData.role === "inspector"
-                  ? "person_search"
-                  : "manage_accounts"
+                ? "person_search"
+                : "manage_accounts"
             }
           >
             {t(userData.role)}
@@ -559,7 +582,7 @@ export default function page() {
                 <p>{z(userData.zone.name)}</p>
               </AlertDialogTrigger>
 
-              <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
+              <AlertDialogContent className="w-full sm:w-[50%] md:w-[70%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
                 <div className="flex flex-col gap-1">
                   <div className="text-muted-foreground flex items-center gap-1">
                     <span className="material-symbols-outlined">
@@ -651,7 +674,7 @@ export default function page() {
                       className="text-xl font-normal bg-secondary"
                     ></Input>
                     {emailError && (
-                      <p className="ttext-sm font-light text-destructive italic mt-1">
+                      <p className="text-sm font-light text-destructive italic mt-1">
                         {emailError}
                       </p>
                     )}

@@ -516,7 +516,9 @@
     "ExportPatrolNoDataDescription": "No available patrol data or no patrol selected.",
     "ExportPatrolStatusNotCompleteDescription": "Patrol has not been completed.",
     "ReportDefectErrorInvalidImage": "Invalid Image",
-    "ReportDefectErrorInvalidImageMessage": "Please upload an image in a supported format (png, jpeg, jpg, gif)."
+    "ReportDefectErrorInvalidImageMessage": "Please upload an image in a supported format (png, jpeg, jpg, gif).",
+    "LoginTooManyTitle": "Too Many Login Attempts",
+    "LoginTooManyDescription": "You have attempted to log in too many times. Please wait 15 minutes and try again."
   },
   "Month": {
     "AllTime": "All Time",

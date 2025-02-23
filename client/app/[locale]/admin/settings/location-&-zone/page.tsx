@@ -1,13 +1,12 @@
 /**
  * คำอธิบาย:
  *  หน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงหน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
  * - แสดง Zone ที่มี Supervisor ในระบบทั้งหมด
  **/
-
 
 "use client";
 import { IUser, IZone } from "@/app/type";
@@ -29,6 +28,7 @@ import Map from "@/components/map";
 import Loading from "@/components/loading";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function Page() {
   const t = useTranslations("General");
@@ -62,7 +62,7 @@ export default function Page() {
       }
     };
     getData();
-    setMounted(true)
+    setMounted(true);
   }, []);
 
   const handleDialogResult = (result: boolean) => {
@@ -117,18 +117,17 @@ export default function Page() {
                 supervisor: null, // Set the supervisor to null
               };
             }
-        
+
             // If the zone's id matches res.id, return the updated zone (res)
             if (zone.id === res.id) {
               return res;
             }
-        
+
             // Return the zone unchanged if no condition is met
             return zone;
           });
         });
-        
-        
+
         toast({
           variant: "success",
           title: a("ZoneUpdateSuccessTitle"),
@@ -137,18 +136,17 @@ export default function Page() {
         // Reset selections
         setSelectUser(null);
         setSelectZone(null);
-
       }
-      setSelectUser(null)
-      setSelectZone(null)
+      setSelectUser(null);
+      setSelectZone(null);
     } catch (error) {
-      console.error(error)
+      console.error(error);
       alert("Failed to save data. Please try again.");
     }
   };
 
   if (!mounted) {
-    return <Loading />
+    return <Loading />;
   }
 
   return (
@@ -180,19 +178,30 @@ export default function Page() {
         </div>
 
         <div className="flex gap-2 ">
-          <span className="material-symbols-outlined text-muted-foreground">location_on</span>
-          <p className="text-base font-semibold text-muted-foreground">{t("Zone")}</p>
+          <span className="material-symbols-outlined text-muted-foreground">
+            location_on
+          </span>
+          <p className="text-base font-semibold text-muted-foreground">
+            {t("Zone")}
+          </p>
         </div>
 
         <div className="flex justify-center items-center bg-secondary w-full rounded-md py-8">
-          <Map disable={false} toggle={true} onZoneSelect={(zones) => handleZoneSelect(zones[0])}
+          <Map
+            disable={false}
+            toggle={true}
+            onZoneSelect={(zones) => handleZoneSelect(zones[0])}
           />
         </div>
 
         <div className="flex gap-2 justify-between w-fit">
           <div className="flex gap-1 items-center ">
-            <span className="material-symbols-outlined text-muted-foreground">engineering</span>
-            <p className="text-muted-foreground text-base font-semibold">{t("supervisor")}</p>
+            <span className="material-symbols-outlined text-muted-foreground">
+              engineering
+            </span>
+            <p className="text-muted-foreground text-base font-semibold">
+              {t("supervisor")}
+            </p>
           </div>
           <UserDropdown
             color="secondary"
@@ -231,20 +240,22 @@ export default function Page() {
                 <div className="flex items-center gap-2">
                   {zone.supervisor ? (
                     // ถ้ามี zone.supervisor
-                    <>
-                      {/* Check if supervisor has an image */}
-                      <Avatar className="custom-shadow h-[35px] w-[35px]">
-                        <AvatarImage
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile.image?.path}`}
-                        />
-                        <AvatarFallback id={zone.supervisor.id.toString()}>
-                          {getInitials(zone.supervisor.profile.name)}
-                        </AvatarFallback>
-                      </Avatar>
+                    <UserTooltip user={zone.supervisor}>
+                      <div className="flex items-center gap-2">
+                        {/* Check if supervisor has an image */}
+                        <Avatar className="custom-shadow h-[35px] w-[35px]">
+                          <AvatarImage
+                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile.image?.path}`}
+                          />
+                          <AvatarFallback id={zone.supervisor.id.toString()}>
+                            {getInitials(zone.supervisor.profile.name)}
+                          </AvatarFallback>
+                        </Avatar>
 
-                      {/* Supervisor Name */}
-                      <p>{zone.supervisor.profile.name}</p>
-                    </>
+                        {/* Supervisor Name */}
+                        <p>{zone.supervisor.profile.name}</p>
+                      </div>
+                    </UserTooltip>
                   ) : (
                     // ถ้าไม่มี zone.supervisor
                     <p>No supervisor assigned</p>

@@ -278,10 +278,6 @@ export const createUserResponseMock={
     }
   }
 
-export const updateProfileMock={
-    "id": 1,
-}
-
 export const updateUserMock={
     "username": 'updatedUser',
     "email": 'updated@example.com',

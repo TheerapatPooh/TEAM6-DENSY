@@ -9,7 +9,7 @@ export const userMock = {
     active: true,
 };
 
-export const decodeMock = { userId: 1, role: "inspector" };
+export const decodeMock = { userId: 1, role: "inspector", sessionId: "mockSessionId" };
 
 export const allNotificationMock = [
     {

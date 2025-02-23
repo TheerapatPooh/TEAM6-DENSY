@@ -103,8 +103,12 @@ export async function getDefectCategory(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
+            email:true,
+            username:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true,
               },
@@ -121,8 +125,11 @@ export async function getDefectCategory(req: Request, res: Response) {
                     role: true,
                     email: true,
                     createdAt: true,
+                    username:true,
                     profile: {
-                      include: {
+                      select: {
+                        tel:true,
+                        name:true,
                         image: true,
                       },
                     },
@@ -138,8 +145,11 @@ export async function getDefectCategory(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
-              include: {
+              select: {
+                tel:true,
+                name:true,
                 image: true,
               },
             },
@@ -153,8 +163,12 @@ export async function getDefectCategory(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
+                        username:true,
+                        email:true,
+                        role:true,
                         profile: {
                           select: {
+                            tel:true,
                             name: true,
                             image: true,
                           },
@@ -293,8 +307,11 @@ export async function getCommonDefects(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
+            username:true,
+            role:true,
             profile: {
               select: {
+                tel:true,
                 name: true,
                 image: true,
               },
@@ -311,8 +328,11 @@ export async function getCommonDefects(req: Request, res: Response) {
                     role: true,
                     email: true,
                     createdAt: true,
+                    username:true,
                     profile: {
-                      include: {
+                      select: {
+                        tel:true,
+                        name:true,
                         image: true,
                       },
                     },
@@ -328,8 +348,11 @@ export async function getCommonDefects(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
-              include: {
+              select: {
+                tel:true,
+                name:true,
                 image: true,
               },
             },
@@ -343,8 +366,12 @@ export async function getCommonDefects(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
+                        username:true,
+                        email:true,
+                        role:true,
                         profile: {
                           select: {
+                            tel:true,
                             name: true,
                             image: true,
                           },
@@ -585,9 +612,12 @@ export async function getDefectReported(req: Request, res: Response) {
                 user: {
                   select: {
                     id: true,
+                    username:true,
+                    role:true,
                     profile: {
                       select: {
                         id: true,
+                        tel:true,
                         name: true,
                         image: { select: { path: true } }
                       }

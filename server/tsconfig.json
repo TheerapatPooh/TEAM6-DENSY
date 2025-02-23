@@ -6,7 +6,7 @@
       "@Controllers/*": ["src/Controllers/*"],
       "@prisma/*": ["prisma/*"],
       "@Routes/*": ["src/Routes/*"],
-      "@tests/*": ["src/tests/*"],
+      "@Tests/*": ["src/Tests/*"],
       "@uploads/*": ["src/uploads/*"],
       "@Utils/*": ["src/Utils/*"]
     },

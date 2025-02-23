@@ -1,7 +1,14 @@
-import { authenticateUser,removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications } from "@Controllers/util-controller.js";
+import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications, refreshToken } from "@Controllers/util-controller.js";
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
+const loginLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 15 นาที
+    max: 5, // อนุญาตให้ลองล็อกอินได้ 5 ครั้ง
+    message: { message: "Too many login attempts, please try again later" },
+    headers: true,
+});
 
 /**
  * @swagger
@@ -60,7 +67,9 @@ const router = Router();
  *                   type: string
  *                   example: "Internal Server Error"
  */
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
+
+router.post("/refresh-token", refreshToken); 
 
 /**
  * @swagger

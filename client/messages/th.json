@@ -516,7 +516,9 @@
     "ExportPatrolNoDataDescription": "ไม่มีข้อมูลการตรวจตรา หรือยังไม่ได้เลือกการตรวจตรา",
     "ExportPatrolStatusNotCompleteDescription": "การตรวจตรายังไม่สิ้นสุด",
     "ReportDefectErrorInvalidImage": "รูปภาพไม่ถูกต้อง",
-    "ReportDefectErrorInvalidImageMessage": "กรุณาอัปโหลดรูปภาพในรูปแบบที่รองรับ (png, jpeg, jpg, gif)"
+    "ReportDefectErrorInvalidImageMessage": "กรุณาอัปโหลดรูปภาพในรูปแบบที่รองรับ (png, jpeg, jpg, gif)",
+    "LoginTooManyTitle": "ล็อกอินมากเกินไป",
+    "LoginTooManyDescription": "คุณพยายามล็อกอินหลายครั้งเกินไป กรุณารอ 15 นาทีแล้วลองใหม่"
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",

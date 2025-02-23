@@ -70,6 +70,7 @@ describe('getPatrol', () => {
                                                                 id: true,
                                                                 profile: {
                                                                     select: {
+                                                                        image: true,
                                                                         name: true,
                                                                     },
                                                                 },
@@ -116,6 +117,17 @@ describe('getPatrol', () => {
                                                 image: true,
                                             },
                                         },
+                                    },
+                                },
+                            },
+                        },
+                        supervisor: {
+                            select: {
+                                id: true,
+                                profile: {
+                                    select: {
+                                        name: true,
+                                        image: true,
                                     },
                                 },
                             },

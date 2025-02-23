@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ UserDropdown ใช้สำหรับแสดง Dropdown ของ User ที่สามารถเลือกได้
- * Input: 
+ * Input:
  * - users: IUser[] รายชื่อของ User ที่สามารถเลือกได้
  * - onUserSelect: (selectUser: IUser) => void ฟังก์ชันที่ใช้สำหรับเลือก User
  * - selectUser: IUser | null ข้อมูลของ User ที่ถูกเลือก
@@ -12,13 +12,19 @@
  **/
 
 import React, { useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserTooltip } from "./user-tooltip";
 
 interface IUserDropdown {
   users: IUser[];
@@ -27,7 +33,12 @@ interface IUserDropdown {
   color?: string;
 }
 
-const UserDropdown: React.FC<IUserDropdown> = ({ users, onUserSelect, selectUser, color = "card", }) => {
+const UserDropdown: React.FC<IUserDropdown> = ({
+  users,
+  onUserSelect,
+  selectUser,
+  color = "card",
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelectUser = (user: IUser) => {
@@ -45,22 +56,25 @@ const UserDropdown: React.FC<IUserDropdown> = ({ users, onUserSelect, selectUser
         >
           <div className="flex items-center gap-2">
             {selectUser && (
-              <Avatar>
-                <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser?.profile?.image?.path}`}
-                />
-                <AvatarFallback id={selectUser.id.toString()}>
-                  {getInitials(selectUser.profile.name)}
-                </AvatarFallback>
-              </Avatar>
+              <UserTooltip user={selectUser}>
+                <Avatar>
+                  <AvatarImage
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${selectUser?.profile?.image?.path}`}
+                  />
+                  <AvatarFallback id={selectUser.id.toString()}>
+                    {getInitials(selectUser.profile.name)}
+                  </AvatarFallback>
+                </Avatar>
+              </UserTooltip>
             )}
             <p className="font-normal text-muted-foreground">
               {selectUser ? selectUser.profile.name : t("SelectAUser")}
             </p>
           </div>
           <span
-            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"
-              }`}
+            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${
+              isOpen ? "rotate-180" : "rotate-0"
+            }`}
           >
             expand_more
           </span>
@@ -75,14 +89,16 @@ const UserDropdown: React.FC<IUserDropdown> = ({ users, onUserSelect, selectUser
                 className="flex items-center w-[300px] gap-2"
                 onClick={() => handleSelectUser(user)}
               >
-                <Avatar>
-                  <AvatarImage
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`}
-                  />
-                  <AvatarFallback id={user.id.toString()}>
-                    {getInitials(user.profile.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <UserTooltip user={user}>
+                  <Avatar>
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${user?.profile?.image?.path}`}
+                    />
+                    <AvatarFallback id={user.id.toString()}>
+                      {getInitials(user.profile.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </UserTooltip>
                 <p className="font-normal text-lg text-muted-foreground">
                   {user.profile.name}
                 </p>
