@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +21,7 @@ export interface IUserTooltip {
 }
 
 export function VersionTooltip({ object, children }: IUserTooltip) {
+  const triggerContainerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("General");
   const locale = useLocale();
   const [open, setOpen] = useState(false);
@@ -43,7 +44,11 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
       openType.current = null;
     }
   };
-
+  // Modify the existing wheel handler
+  const handleWheel = useCallback(() => {
+    handleClose();
+  }, []);
+  
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // เคลียร์ timeout ของ hover ทันทีเมื่อมีการคลิก
@@ -59,29 +64,47 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
     setOpen(false);
     openType.current = null;
   };
-
+  
   useEffect(() => {
     const handleScroll = () => {
+      // Original first effect's logic
       if (openType.current === 'hover') {
         handleClose();
-      } else if (openType.current === 'click') {
-        if (window.innerWidth <= 768) {
-          handleClose();
-        }
+      } else if (openType.current === 'click' && window.innerWidth <= 768) {
+        handleClose();
       }
+      
+      // Second effect's logic
+      handleClose();
     };
+  
     const handleWheel = () => {
       handleClose();
     };
-
-    window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+  
+    // Find scroll area parent
+    const scrollArea = triggerContainerRef.current?.closest(
+      '[data-radix-scroll-area-viewport], .scroll-area'
+    );
+  
+    // Add event listeners
+    if (scrollArea) {
+      scrollArea.addEventListener('scroll', handleScroll);
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('wheel', handleWheel, { passive: true });
-
+  
     return () => {
-      window.removeEventListener('scroll', handleScroll, true);
+      // Cleanup listeners
+      if (scrollArea) {
+        scrollArea.removeEventListener('scroll', handleScroll);
+      }
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('wheel', handleWheel);
     };
-  }, []);
+  }, []); // Keep dependency array empty since all functions are stable
+
+
 
   const TooltipContent = ({ object }: { object: any }) => {
     return (
@@ -144,6 +167,7 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
         }}
       >
         <div
+          ref={triggerContainerRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
@@ -160,6 +184,7 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
             zIndex={0}
             side="bottom"
             align="start"
+            onBlur={() => handleClose()}
             onClick={(e) => e.stopPropagation()}
           >
             <TooltipContent object={object} />
@@ -168,6 +193,7 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
             className="w-full z-[100] px-6 py-4"
             side="bottom"
             align="start"
+            onBlur={() => handleClose()}
             onInteractOutside={(e) => {
               const target = e.target as HTMLElement;
               const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');

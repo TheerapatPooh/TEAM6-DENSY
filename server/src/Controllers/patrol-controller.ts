@@ -1060,6 +1060,7 @@ export async function finishPatrol(req: Request, res: Response) {
             },
             inspector: {
               select: {
+                id:true,
                 username:true,
                 email:true,
                 role:true,

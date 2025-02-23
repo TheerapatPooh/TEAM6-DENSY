@@ -54,6 +54,8 @@ import { DatePickerWithRange } from "@/components/date-picker";
 import dynamic from "next/dynamic";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotFound from "@/components/not-found";
+import { VersionTooltip } from "@/components/version-tooltip";
+import { ZoneTooltip } from "@/components/zone-tooltip";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
@@ -473,7 +475,9 @@ export default function Page() {
                     <div className="flex justify-center bg-secondary rounded-lg py-4">
                       <Map
                         disable={false}
-                        initialSelectedZones={selectedZones.map((zone) => zone.id)}
+                        initialSelectedZones={selectedZones.map(
+                          (zone) => zone.id
+                        )}
                         onZoneSelect={(zones: IZone[]) =>
                           setTempSelectedZones(zones)
                         }
@@ -524,71 +528,17 @@ export default function Page() {
                   <div className="flex flex-col gap-4  min-w-0">
                     {/* Left Section */}
                     <div className="gap-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
-                            >
-                              <span className="material-symbols-outlined mr-1">
-                                history
-                              </span>
-                              {t("Version")} {checklist.version}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="ml-[129px]">
-                            <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                              <span className="text-card-foreground text-lg font-bold flex items-center ">
-                                <span className="material-symbols-outlined mr-1">
-                                  history
-                                </span>
-                                {t("Version")} {checklist.version}
-                              </span>
-                              <div className="flex flex-col justify-start items-start ">
-                                <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                  <div className="text-muted-foreground">
-                                    {t("UpdateBy")}
-                                  </div>
-                                  {checklist.user.profile ? (
-                                    <Avatar>
-                                      <AvatarImage
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.user.profile.image?.path}`}
-                                      />
-                                      <AvatarFallback
-                                        id={checklist.user.id.toString()}
-                                      >
-                                        {getInitials(
-                                          checklist.user.profile.name
-                                        )}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ) : (
-                                    <Skeleton className="h-12 w-12 rounded-full" />
-                                  )}
-
-                                  {checklist.user.profile.name}
-                                </div>
-                                <div className="flex gap-2 text-muted-foreground">
-                                  <div className="text-muted-foreground">
-                                    {t("UpdateAt")}
-                                  </div>
-                                  {formatTime(checklist.updatedAt,locale)}
-                                </div>
-                              </div>
-
-                              <div className="flex justify-between  w-full">
-                                <div className="font-bold text-lg text-muted-foreground">
-                                  {t("Total")}
-                                </div>
-                                <div className="font-bold text-lg text-muted-foreground">
-                                  {checklist.versionCount} {t("Version")}
-                                </div>
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <VersionTooltip object={checklist}>
+                        <Button
+                          variant="ghost"
+                          className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
+                        >
+                          <span className="material-symbols-outlined mr-1">
+                            history
+                          </span>
+                          {t("Version")} {checklist.version}
+                        </Button>
+                      </VersionTooltip>
 
                       <h2 className="text-2xl font-semibold truncate">
                         {checklist.title}
@@ -602,37 +552,13 @@ export default function Page() {
                           location_on
                         </span>
 
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <p className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                       <ZoneTooltip zonesName={checklist.zones}>
+                       <p className="text-base text-muted-foreground  truncate w-[700px] whitespace-nowrap min-w-0">
                                 {checklist.zones
                                   .map((zone) => z(zone))
                                   .join(", ")}
                               </p>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="bottom"
-                              align="start"
-                              sideOffset={10}
-                              className="bg-card custom-shadow rounded-md p-4 w-fit"
-                            >
-                              <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-                                {t("Zone")}
-                              </h3>
-                              <ScrollArea className="h-32 rounded-md bg-card">
-                                {checklist.zones.map((zone) => (
-                                  <div
-                                    key={zone}
-                                    className="text-sm text-foreground"
-                                  >
-                                    - {z(zone)}
-                                  </div>
-                                ))}
-                              </ScrollArea>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                       </ZoneTooltip>
                       </div>
                       <div className="flex gap-2">
                         <div className="flex items-center">

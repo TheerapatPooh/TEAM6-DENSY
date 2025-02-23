@@ -72,6 +72,7 @@ import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserTooltip } from "@/components/user-tooltip";
+import { TextTooltip } from "@/components/text-tooltip";
 
 export default function Page() {
   const t = useTranslations("General");
@@ -418,7 +419,9 @@ export default function Page() {
               allComments.map((comment, index) => (
                 <TableRow key={index} className="grid grid-cols-12">
                   <TableCell className="font-medium sm:col-span-3 lg:col-span-5">
-                    {comment.message}
+                    <TextTooltip object={comment.message}>
+                      <div className=" truncate max-w-[400px]">{comment.message}</div>
+                    </TextTooltip>
                   </TableCell>
                   <TableCell className="font-medium sm:col-span-2 lg:col-span-2">
                     {formatTime(comment.timestamp, locale)}

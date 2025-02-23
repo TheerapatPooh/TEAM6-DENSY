@@ -42,6 +42,7 @@ import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { UserTooltip } from "@/components/user-tooltip";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -399,9 +400,11 @@ export default function Page() {
             <p className="text-base font-semibold">{t("Detail")}</p>
 
             <div className="bg-secondary rounded-md h-40 w-full items-center p-4">
-              <p className="text-[20px] text-card-foreground">
-                {defect.description}
-              </p>
+              <Textarea
+                disabled
+                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none  max-h-full h-20 w-full text-base font-normal line-clamp-3"
+                value={defect.description}
+              />
             </div>
           </div>
         </div>

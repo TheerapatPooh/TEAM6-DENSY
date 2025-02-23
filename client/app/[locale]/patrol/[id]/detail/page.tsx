@@ -173,7 +173,9 @@ export default function Page() {
 
             <div className="flex flex-col h-full justify-start w-full">
               <p className="text-2xl font-bold mb-1">{patrol.preset.title}</p>
-              <Progress value={calculateProgress()} />
+              <div className="w-[300px]">
+                <Progress value={calculateProgress()} />
+              </div>
             </div>
           </div>
           <div className="flex flex-row sm:w-full sm:justify-between lg:w-fit items-center gap-2">
