@@ -3,6 +3,39 @@
 ## 📌 ภาพรวม
 โครงการนี้เป็นระบบตรวจสอบความปลอดภัยภายในองค์กร ซึ่งแบ่งออกเป็นสองส่วนหลัก:
 
+### 🎠 คุณสมบัติหลัก
+- 🕵️‍♂️ การลาดตระเวนแบบทีมเรียลไทม์
+- 📍 แผนที่แสดงจุดตรวจสอบแบบอินเตอร์แอคทีฟ
+- 🚨 รายงานปัญหาพร้อมแจ้งเตือนอัตโนมัติ
+- 📊 Dashboard วิเคราะห์ข้อมูลการตรวจสอบ
+- 📑 ระบบออกรายงานอัตโนมัติ (PDF/Excel)
+
+## 🏗️ โครงสร้างโปรเจค
+```bash
+├── client/                 # 🖥️ Frontend (Next.js 14)
+│   ├── app/                # 📂 Page Router
+│   ├── components/         # 🧩 UI Components
+│   ├── context/            # 🧭 Global State Management
+│   ├── lib/                # 📚 Utility Libraries
+├── ├── messages/           # 🌐 Localization Files (i18n)
+│   └── public/             # 🖼️ Static Assets (Images, Fonts, Icons)
+│
+├── server/                 # 🌐 Backend (Express.js)
+│   ├── prisma/             # 🗃️ Database Schema
+│   ├── src/
+│   │   ├── Controllers/    # 🎮 Business Logic
+│   │   ├── Routes/         # 🛣️ API Endpoints
+│   │   ├── Tests/          # 🧪 Unit Tests
+│   │   └── Utils/          # ⚙️ Helper Functions
+│   └── uploads/            # 📁 File Storage
+│
+├── nginx/                  # 🔄 Reverse Proxy Configuration
+│   └── config/
+│       └── nginx.conf      # 🛠️ Load Balancing Setup
+│
+├── Jenkinsfile/               # 🤖 CI/CD Workflows
+└── docker-compose.yml      # 🐳 Container Orchestration
+
 - 🖥️ **Client**: พัฒนาโดยใช้ Next.js และ TypeScript
 - 🖧 **Server**: สร้างขึ้นด้วย Express.js, Prisma และ TypeScript
 - 🗄️ **ฐานข้อมูล**: MySQL
@@ -91,4 +124,3 @@ Error: Cannot find module 'C:\SE_3\TEAM6-DENSY\server\dist\Utils\seed.js'
 - 💬 ตรวจสอบการอัปเดตและพูดคุยผ่าน **Discord Pull Request Channel** ก่อนทำการ Merge การเปลี่ยนแปลงใด ๆ
 - 📝 Commit ต้องเป็นไปตาม Git Commit Convention เพื่อให้โค้ดสามารถติดตามและดูแลรักษาได้ง่าย
 - 🛠️ เขียนโค้ดให้เป็นไปตาม Coding Standard ของทีม เพื่อให้แน่ใจว่าโค้ดมีคุณภาพและสามารถทำงานร่วมกันได้อย่างราบรื่น
-
