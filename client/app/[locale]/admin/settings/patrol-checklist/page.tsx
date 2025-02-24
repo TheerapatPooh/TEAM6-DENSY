@@ -1,14 +1,13 @@
 /**
  * คำอธิบาย:
  *  หน้าแสดงรายการ Checklist ทั้งหมดในระบบ โดยสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงรายการ Checklist ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Checklist แต่ละรายการ และสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
  * - สามารถคลิกเพื่อดูรายละเอียดของ Checklist แต่ละรายการ
  * - สามารถคลิกเพื่อสร้าง Checklist ใหม่ได้
  **/
-
 
 "use client";
 import { IChecklist, IZone } from "@/app/type";
@@ -25,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import {
   DropdownMenu,
@@ -35,7 +34,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 
 import { fetchData, formatTime, getInitials } from "@/lib/utils";
 
@@ -54,12 +52,17 @@ import {
 import { useRouter } from "next/navigation";
 import { DatePickerWithRange } from "@/components/date-picker";
 import dynamic from "next/dynamic";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import NotFound from "@/components/not-found";
+import { VersionTooltip } from "@/components/version-tooltip";
+import { ZoneTooltip } from "@/components/zone-tooltip";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Page() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");
+
   const router = useRouter();
   const locale = useLocale();
   interface IChecklistWithExtras extends IChecklist {
@@ -148,18 +151,17 @@ export default function Page() {
   };
 
   const handleChecklist = (id: number) => {
-    router.push(`/${locale}/admin/settings/checklistview/${id}`);
+    router.push(`/${locale}/admin/settings/patrol-checklist/${id}`);
   };
 
   const handleGoToCreateChecklist = () => {
-    router.push(`/${locale}/admin/settings/create/checklist`);
+    router.push(`/${locale}/admin/settings/patrol-checklist/create`);
   };
   // Modify the getData function to use fetchData
   const getData = async () => {
     try {
-
       // Construct query params for the filters
-      const params = new URLSearchParams(); 
+      const params = new URLSearchParams();
 
       // Add search term to params
       if (searchTerm) {
@@ -282,16 +284,10 @@ export default function Page() {
 
   // Reset filters to default
   const resetFilters = async () => {
-    const data = await fetchData(
-      "get",
-      `/checklists`,
-      true
-    );
     setTempSelectedZones([]); // Reset temp selected zones
     setTempDateRange({}); // Reset temp date range
     setSelectedZones([]); // Clear applied zones
     setSelectedDateRange({}); // Clear applied date range
-    setFilteredChecklists(data); // Reset to all checklists
   };
 
   const [sortedChecklists, setSortedChecklists] = useState<
@@ -320,14 +316,15 @@ export default function Page() {
     setSortedChecklists(sorted); // Update sorted checklists state
   }, [filteredChecklists, sortOption, sortOrder]); // Dependencies to trigger the effect
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 ">
       <div className="flex flex-row justify-between pt-2">
         <div className="text-2xl font-bold">{t("Checklist")}</div>
         <Button
           onClick={() => {
             handleGoToCreateChecklist();
           }}
-          className="flex flex-row gap-2"
+          className="flex flex-row gap-2 custom-shadow"
+          variant="primary"
         >
           <span className="material-symbols-outlined text-2xl">add</span>
           <div className="text-lg">{t("CreateChecklist")}</div>
@@ -451,21 +448,21 @@ export default function Page() {
                     <span className="material-symbols-outlined">
                       location_on
                     </span>
-                    {selectedZones.length > 0
-                      ? selectedZones.map((zone) => zone.name).join(", ")
-                      : t("SelectZones")}
+                    <p className="truncate w-[200px]">
+                      {selectedZones.length > 0
+                        ? selectedZones.map((zone) => z(zone.name)).join(", ")
+                        : t("SelectZones")}
+                    </p>
                   </Button>
                 </AlertDialogTrigger>
 
                 <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-2xl">
-                      {t("FilterByZone")}
+                      {t("FilterByZoneTitle")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                    {t(
-                        "PleaseSelectTheZonesToDisplayOnlyTheRelevantData"
-                      )}
+                      {t("FilterByZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div>
@@ -478,6 +475,9 @@ export default function Page() {
                     <div className="flex justify-center bg-secondary rounded-lg py-4">
                       <Map
                         disable={false}
+                        initialSelectedZones={selectedZones.map(
+                          (zone) => zone.id
+                        )}
                         onZoneSelect={(zones: IZone[]) =>
                           setTempSelectedZones(zones)
                         }
@@ -503,7 +503,7 @@ export default function Page() {
               <Button size="sm" variant="secondary" onClick={resetFilters}>
                 {t("Reset")}
               </Button>
-              <Button size="sm" onClick={applyFilters}>
+              <Button variant="primary" size="sm" onClick={applyFilters}>
                 {t("Apply")}
               </Button>
             </div>
@@ -512,88 +512,35 @@ export default function Page() {
       </div>
 
       {/* Checklist Cards */}
-
-      <div className="space-y-4 p-4 rounded-lg">
-        {filteredChecklists.length > 0 ? (
-          sortedChecklists.map((checklist) => (
-            <div key={checklist.id}>
-              <div>
+      <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-280px)]">
+        <div className="space-y-4  rounded-lg">
+          {sortedChecklists.length > 0 ? (
+            sortedChecklists.map((checklist) => (
+              <div key={checklist.id}>
                 <div
                   onClick={() => {
                     handleChecklist(checklist.id);
                   }}
-                  className={`flex flex-row border-l-[10px] h-[166px] cursor-pointer ${getChecklistColor(
+                  className={`flex flex-row border-l-[10px] truncate h-full cursor-pointer ${getChecklistColor(
                     checklist
-                  )} border-destructive h-[166px] bg-secondary rounded-lg shadow p-2 justify-between`}
+                  )} border-destructive h-[166px] bg-card rounded-lg custom-shadow px-6 py-4 justify-between`}
                 >
-                  <div className="flex flex-col gap-4 ">
+                  <div className="flex flex-col gap-4  min-w-0">
                     {/* Left Section */}
                     <div className="gap-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
-                            >
-                              <span className="material-symbols-outlined mr-1">
-                                history
-                              </span>
-                              {t("Version")} {checklist.version}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="ml-[129px]">
-                            <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                              <span className="text-card-foreground text-lg font-bold flex items-center ">
-                                <span className="material-symbols-outlined mr-1">
-                                  history
-                                </span>
-                                {t("Version")} {checklist.version}
-                              </span>
-                              <div className="flex flex-col justify-start items-start ">
-                                <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                                  <div className="text-muted-foreground">
-                                    {t("UpdateBy")}
-                                  </div>
-                                  {checklist.user.profile.image?.path === "" ? (
-                                    <Avatar>
-                                      <AvatarImage
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${checklist.user.profile.image?.path}`}
-                                      />
-                                      <AvatarFallback id={checklist.user.id.toString()}>
-                                        {getInitials(
-                                          checklist.user.profile.name
-                                        )}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ) : (
-                                    <Skeleton className="h-12 w-12 rounded-full" />
-                                  )}
+                      <VersionTooltip object={checklist}>
+                        <Button
+                          variant="ghost"
+                          className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
+                        >
+                          <span className="material-symbols-outlined mr-1">
+                            history
+                          </span>
+                          {t("Version")} {checklist.version}
+                        </Button>
+                      </VersionTooltip>
 
-                                  {checklist.user.profile.name}
-                                </div>
-                                <div className="flex gap-2 text-muted-foreground">
-                                  <div className="text-muted-foreground">
-                                    {t("UpdateAt")}
-                                  </div>
-                                  {formatTime(checklist.updatedAt)}
-                                </div>
-                              </div>
-
-                              <div className="flex justify-between  w-full">
-                                <div className="font-bold text-lg text-muted-foreground">
-                                  {t("Total")}
-                                </div>
-                                <div className="font-bold text-lg text-muted-foreground">
-                                  {checklist.versionCount}
-                                </div>
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      <h2 className="text-2xl font-semibold">
+                      <h2 className="text-2xl font-semibold truncate">
                         {checklist.title}
                       </h2>
                     </div>
@@ -604,9 +551,14 @@ export default function Page() {
                         <span className="material-symbols-outlined  text-muted-foreground">
                           location_on
                         </span>
-                        <p className="text-base text-muted-foreground truncate">
-                          {checklist.zones.map((zone) => z(zone)).join(", ")}
-                        </p>
+
+                        <ZoneTooltip zonesName={checklist.zones}>
+                          <p className="text-base text-muted-foreground  truncate w-[700px] whitespace-nowrap min-w-0">
+                            {checklist.zones
+                              .map((zone) => z(zone))
+                              .join(", ")}
+                          </p>
+                        </ZoneTooltip>
                       </div>
                       <div className="flex gap-2">
                         <div className="flex items-center">
@@ -636,10 +588,17 @@ export default function Page() {
                       </div>
                     </div>
                   </div>
-                  <div className=" flex flex-row items-end ">
+
+                  <div className="sticky right-[0px]  flex flex-row items-end ">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <span className="material-symbols-outlined">
+                      <DropdownMenuTrigger asChild
+                        className={
+                          buttonVariants({
+                            variant: "ghost",
+                            size: "icon",
+                          })}
+                      >
+                        <span className="material-symbols-outlined text-input">
                           more_vert
                         </span>
                       </DropdownMenuTrigger>
@@ -651,7 +610,9 @@ export default function Page() {
                         className="w-[80px] px-4 py-2"
                         side="bottom"
                       >
-                        <div className="text-lg cursor-pointer ">{t("Detail")}</div>
+                        <div className="text-lg cursor-pointer ">
+                          {t("Edit")}
+                        </div>
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
@@ -663,12 +624,8 @@ export default function Page() {
                         </div>
                         {isDialogOpen && dialogType === "delete" && (
                           <AlertCustom
-                            title={a(
-                              "ChecklistRemoveConfirmTitle")
-                            }
-                            description={a
-                              ("ChecklistRemoveConfirmDescription")
-                            }
+                            title={a("ChecklistRemoveConfirmTitle")}
+                            description={a("ChecklistRemoveConfirmDescription")}
                             primaryButtonText={t("Confirm")}
                             primaryIcon="check"
                             secondaryButtonText={t("Cancel")}
@@ -680,12 +637,18 @@ export default function Page() {
                   </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full min-h-[261px]">
+              <NotFound
+                icon="quick_reference_all"
+                title="NoChecklistsAvailable"
+                description="NoChecklistsDescription"
+              />
             </div>
-          ))
-        ) : (
-          <p>No checklists found.</p>
-        )}
-      </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

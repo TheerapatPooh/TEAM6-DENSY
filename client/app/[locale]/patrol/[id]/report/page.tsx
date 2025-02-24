@@ -47,6 +47,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AlertCustom } from "@/components/alert-custom";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function Page() {
   const {
@@ -253,14 +255,14 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => { };
+                  handleFunction = () => {};
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => { };
+                  handleFunction = () => {};
                   break;
               }
               return (
@@ -326,19 +328,23 @@ export default function Page() {
                                   )}
                                   {inspectors.map((inspector, idx) => {
                                     return (
-                                      <Avatar
-                                        key={idx}
-                                        className="custom-shadow ms-[-10px]"
-                                      >
-                                        <AvatarImage
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                                        />
-                                        <AvatarFallback
-                                          id={inspector.profile.id.toString()}
+                                      <UserTooltip user={inspector}>
+                                        <Avatar
+                                          key={idx}
+                                          className="custom-shadow ms-[-10px]"
                                         >
-                                          {getInitials(inspector.profile.name)}
-                                        </AvatarFallback>
-                                      </Avatar>
+                                          <AvatarImage
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                                          />
+                                          <AvatarFallback
+                                            id={inspector.profile.id.toString()}
+                                          >
+                                            {getInitials(
+                                              inspector.profile.name
+                                            )}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </UserTooltip>
                                     );
                                   })}
 
@@ -368,16 +374,21 @@ export default function Page() {
                                       key={idx}
                                       className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
                                     >
-                                      <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                                        <AvatarImage
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
-                                        />
-                                        <AvatarFallback
-                                          id={inspector.profile.id.toString()}
-                                        >
-                                          {getInitials(inspector.profile.name)}
-                                        </AvatarFallback>
-                                      </Avatar>
+                                      <UserTooltip user={inspector}>
+                                        <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                                          <AvatarImage
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
+                                          />
+                                          <AvatarFallback
+                                            id={inspector.profile.id.toString()}
+                                          >
+                                            {getInitials(
+                                              inspector.profile.name
+                                            )}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </UserTooltip>
+
                                       <p className="text-lg">
                                         {inspector.profile.name}
                                       </p>
@@ -523,9 +534,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <ScrollArea
-        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-220px)]"
-      >
+      <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-220px)]">
         {defects.length === 0 ? (
           <NotFound
             icon="campaign"
@@ -533,19 +542,22 @@ export default function Page() {
             description="NoDefectsPatrolDescription"
           />
         ) : (
-          defects.map((defect: IDefect) => {
-            return (
-              <div className="mb-4" key={defect.id}>
-                <ReportDefect
-                  defect={defect}
-                  page={"patrol-view-report"}
-                  response={(defect: IDefect) => {
-                    fetchRealtimeData(defect, "edit");
-                  }}
-                />
-              </div>
-            );
-          })
+          defects
+            .slice() // สร้างสำเนาเพื่อไม่แก้ไข array ต้นฉบับ
+            .reverse() // กลับลำดับจากตัวสุดท้ายไปตัวแรก
+            .map((defect: IDefect) => {
+              return (
+                <div className="mb-4" key={defect.id}>
+                  <ReportDefect
+                    defect={defect}
+                    page={"patrol-view-report"}
+                    response={(defect: IDefect) => {
+                      fetchRealtimeData(defect, "edit");
+                    }}
+                  />
+                </div>
+              );
+            })
         )}
       </ScrollArea>
     </div>

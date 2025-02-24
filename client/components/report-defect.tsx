@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ ReportDefect ใช้ในการแสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
- * Input: 
+ * Input:
  * - defect: ข้อมูลของ Defect ที่ได้รับจาก API
  * Output:
  * - JSX ของ ReportDefect ที่แสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
@@ -21,9 +21,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchData, formatPatrolId, formatTime, getDefectStatusVariant, getInitials, getItemTypeVariant } from "@/lib/utils";
+import {
+  fetchData,
+  formatPatrolId,
+  formatTime,
+  getDefectStatusVariant,
+  getInitials,
+  getItemTypeVariant,
+} from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AlertDefect from "./alert-defect";
@@ -34,17 +48,22 @@ import { AlertCustom } from "./alert-custom";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { UserTooltip } from "./user-tooltip";
 
 interface IReportDefect {
-  defect: IDefect,
-  page: "patrol-view-detail" | "patrol-defect" | "patrol-view-report"
-  response: (defect: IDefect) => void
+  defect: IDefect;
+  page: "patrol-view-detail" | "patrol-defect" | "patrol-view-report";
+  response: (defect: IDefect) => void;
 }
 
-export default function ReportDefect({ defect, page, response }: IReportDefect) {
+export default function ReportDefect({
+  defect,
+  page,
+  response,
+}: IReportDefect) {
   const s = useTranslations("Status");
-  const t = useTranslations("General")
-  const a = useTranslations("Alert")
+  const t = useTranslations("General");
+  const a = useTranslations("Alert");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -61,19 +80,21 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
     setIsDialogOpen(true);
   };
 
-  const beforeImage = defect.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id === defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
+  const beforeImage =
+    defect.images
+      .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+      .filter((image) => image.image.user.id === defect.userId)
+      .map((image: any) => ({
+        path: image.image.path,
+      })) || null;
 
-  const afterImage = defect.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id !== defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
+  const afterImage =
+    defect.images
+      .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+      .filter((image) => image.image.user.id !== defect.userId)
+      .map((image: any) => ({
+        path: image.image.path,
+      })) || null;
 
   const [isBeforeCarouselOpen, setIsBeforeCarouselOpen] = useState(false);
   const [isAfterCarouselOpen, setIsAfterCarouselOpen] = useState(false);
@@ -112,21 +133,21 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
     status: defectStatus,
     supervisorId: number
   ) => {
-    let title
-    let description
-    if (status === 'pending_inspection') {
-      title = 'ConfirmReworkTitle'
-      description = 'ConfirmReworkDescription'
-    } else if (status === 'completed') {
-      title = 'ConfirmCompleteTitle'
-      description = 'ConfirmCompleteDescription'
+    let title;
+    let description;
+    if (status === "pending_inspection") {
+      title = "ConfirmReworkTitle";
+      description = "ConfirmReworkDescription";
+    } else if (status === "completed") {
+      title = "ConfirmCompleteTitle";
+      description = "ConfirmCompleteDescription";
     }
 
     setPendingAction(() => () => {
-      reworkOrVerifyDefect(id, status, supervisorId)
+      reworkOrVerifyDefect(id, status, supervisorId);
     });
-    setAlertBoxTitle(title)
-    setAlertBoxDescription(description)
+    setAlertBoxTitle(title);
+    setAlertBoxDescription(description);
     handleOpenDialog();
   };
 
@@ -137,26 +158,26 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
   ) => {
     const data = {
       status: status,
-      supervisorId: supervisorId
-    }
+      supervisorId: supervisorId,
+    };
 
     try {
-      let title
-      let description
-      if (data.status === 'pending_inspection') {
-        title = 'ReworkDefectTitle'
-        description = 'ReworkDefectDescription'
-      } else if (status === 'completed') {
-        title = 'CompleteDefectTitle'
-        description = 'CompleteDefectDescription'
+      let title;
+      let description;
+      if (data.status === "pending_inspection") {
+        title = "ReworkDefectTitle";
+        description = "ReworkDefectDescription";
+      } else if (status === "completed") {
+        title = "CompleteDefectTitle";
+        description = "CompleteDefectDescription";
       }
       const updateStatusDefect = await fetchData(
         "put",
         `/defect/${id}`,
         true,
-        data,
+        data
       );
-      response(updateStatusDefect)
+      response(updateStatusDefect);
       toast({
         variant: "success",
         title: a(title),
@@ -165,7 +186,7 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
     } catch (error) {
       console.error("Error creating defect:", error);
     }
-  }
+  };
 
   useEffect(() => {
     if (beforeApi) {
@@ -196,12 +217,12 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
   }, [afterSlideIndex, afterApi]);
 
   const fetchRealtimeData = (defect: IDefect) => {
-    response(defect)
-  }
+    response(defect);
+  };
 
   const navigateToPatrol = (patrolId: number) => {
-    router.push(`/${locale}/patrol/${patrolId}/detail`)
-  }
+    router.push(`/${locale}/patrol/${patrolId}/detail`);
+  };
 
   return (
     <Accordion type="single" collapsible>
@@ -215,7 +236,7 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
               schedule
             </span>
             <span className="text-lg font-bold text-muted-foreground cursor-default ">
-              {formatTime(defect.startTime)}
+              {formatTime(defect.startTime, locale)}
             </span>
             <h2 className="text-lg font-bold text-card-foreground cursor-default ">
               {defect.name}
@@ -226,7 +247,9 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
         <div className="flex justify-between items-center mb-4 mt-2">
           <div className="flex space-x-2">
             {(() => {
-              const { iconName, variant } = getDefectStatusVariant(defect.status);
+              const { iconName, variant } = getDefectStatusVariant(
+                defect.status
+              );
               return (
                 <BadgeCustom
                   variant={variant}
@@ -264,20 +287,24 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                   <p className="text-lg font-semibold">{t("supervisor")}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Avatar className="custom-shadow h-[35px] w-[35px]">
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.patrolResult.itemZone.zone.supervisor.profile.image?.path}`}
-                    />
-                    <AvatarFallback id={defect.patrolResult.itemZone.zone.supervisor.id.toString()}>
-                      {getInitials(defect.patrolResult.itemZone.zone.supervisor.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserTooltip user={defect.supervisor}>
+                    <Avatar className="custom-shadow h-[35px] w-[35px]">
+                      <AvatarImage
+                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.supervisor.profile.image?.path}`}
+                      />
+                      <AvatarFallback id={defect.supervisor.id.toString()}>
+                        {getInitials(defect.supervisor.profile.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </UserTooltip>
 
-                  <p className="text-card-foreground text-lg">{defect.patrolResult.itemZone.zone.supervisor.profile.name}</p>
+                  <p className="text-card-foreground text-lg">
+                    {defect.supervisor.profile.name}
+                  </p>
                 </div>
               </div>
               <div>
-                {defect.status === "reported" as defectStatus && (
+                {defect.status === ("reported" as defectStatus) && (
                   <AlertDefect
                     defect={defect}
                     type={page == "patrol-view-detail" ? "report" : "edit"}
@@ -288,35 +315,43 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
             </div>
 
             {/* Patrol */}
-            {page === "patrol-defect" && (<div className="flex flex-col mb-4">
-              <div className="flex flex-row mb-1">
-                <div className="flex flex-row pr-2 items-center pt-1">
-                  <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none mr-1">
-                    task
-                  </span>
-                  <p className="text-base font-semibold text-muted-foreground  cursor-default user-select-none">
-                    Patrol
-                  </p>
-                </div>
-              </div>
-
-              <Button className="w-fit h-fit bg-secondary" variant="ghost" onClick={() => navigateToPatrol(defect.patrolResult.patrol.id)}>
-                <div className="flex flex-col items-start py-4 px-6">
-                  <p className="text-xl font-semibold text-card-foreground mb-2 cursor-default user-select-none ">
-                    {defect.patrolResult.patrol.preset.title}
-                  </p>
-
-                  <div className="flex flex-row items-center">
-                    <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none pr-2">
-                      description
+            {page === "patrol-defect" && (
+              <div className="flex flex-col mb-4">
+                <div className="flex flex-row mb-1">
+                  <div className="flex flex-row pr-2 items-center pt-1">
+                    <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none mr-1">
+                      task
                     </span>
-                    <p className="text-muted-foreground cursor-default user-select-none">
-                      {formatPatrolId(defect.patrolResult.patrol.id)}
+                    <p className="text-base font-semibold text-muted-foreground  cursor-default user-select-none">
+                      Patrol
                     </p>
                   </div>
                 </div>
-              </Button>
-            </div>)}
+
+                <Button
+                  className="w-fit h-fit bg-secondary"
+                  variant="ghost"
+                  onClick={() =>
+                    navigateToPatrol(defect.patrolResult.patrol.id)
+                  }
+                >
+                  <div className="flex flex-col items-start py-4 px-6">
+                    <p className="text-xl font-semibold text-card-foreground mb-2 cursor-default user-select-none ">
+                      {defect.patrolResult.patrol.preset.title}
+                    </p>
+
+                    <div className="flex flex-row items-center">
+                      <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none pr-2">
+                        description
+                      </span>
+                      <p className="text-muted-foreground cursor-default user-select-none">
+                        {formatPatrolId(defect.patrolResult.patrol.id)}
+                      </p>
+                    </div>
+                  </div>
+                </Button>
+              </div>
+            )}
 
             {/* Detail */}
             <div className="flex flex-col mb-4">
@@ -355,7 +390,10 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
               </div>
 
               <div className="p-2 rounded-md bg-secondary map-container cursor-default user-select-none ">
-                <Map disable={true} initialSelectedZones={[defect.patrolResult.zoneId]} />
+                <Map
+                  disable={true}
+                  initialSelectedZones={[defect.patrolResult.zoneId]}
+                />
               </div>
             </div>
 
@@ -371,14 +409,17 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
 
                 <div className="flex flex-col justify-between gap-4">
                   <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
-                    <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+                    <AspectRatio
+                      ratio={4 / 3}
+                      className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]"
+                    >
                       <div
                         className="flex items-center justify-center cursor-default user-select-none w-full h-full"
                         onClick={() => handleBeforeImageClick()}
                       >
                         {beforeImage &&
-                          beforeImage.length > 0 &&
-                          beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
+                        beforeImage.length > 0 &&
+                        beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
                           <Image
                             src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[beforeSlideIndex].path}`} // ใช้ path จาก state
                             alt="First Image"
@@ -393,7 +434,7 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                               hourglass_empty
                             </span>
                             <p className="text-muted-foreground text-lg font-medium">
-                              {t('WaitingForResults')}
+                              {t("WaitingForResults")}
                             </p>
                           </div>
                         )}
@@ -410,8 +451,11 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                           <div
                             key={index}
                             onClick={() => setBeforeSlideIndex(index)}
-                            className={`flex justify-center w-[128px] h-[128px] cursor-pointer rounded-md ${beforeSlideIndex === index ? 'border border-destructive' : ''
-                              }`}
+                            className={`flex justify-center w-[128px] h-[128px] cursor-pointer rounded-md ${
+                              beforeSlideIndex === index
+                                ? "border border-destructive"
+                                : ""
+                            }`}
                           >
                             <Image
                               src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
@@ -427,55 +471,64 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
 
-                  {isBeforeCarouselOpen && beforeImage && beforeImage.length > 0 && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                      <div className="relative">
-                        <Carousel setApi={setBeforeApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
-                          <CarouselContent>
-                            {beforeImage.map((image, index) => (
-                              <CarouselItem key={index}>
-                                <div className="flex justify-center">
-                                  <Card className="bg-card border-none">
-                                    <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
-                                      <div className="flex items-center justify-center h-full w-full">
-                                        <Image
-                                          className="object-contain w-full h-full"
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
-                                          alt={`${image.path}`}
-                                          width={800}
-                                          height={600}
-                                          priority
-                                          unoptimized
-                                        />
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                </div>
-                              </CarouselItem>
+                  {isBeforeCarouselOpen &&
+                    beforeImage &&
+                    beforeImage.length > 0 && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="relative">
+                          <Carousel
+                            setApi={setBeforeApi}
+                            className="sm:max-w-screen-sm xl:max-w-[1600px]"
+                          >
+                            <CarouselContent>
+                              {beforeImage.map((image, index) => (
+                                <CarouselItem key={index}>
+                                  <div className="flex justify-center">
+                                    <Card className="bg-card border-none">
+                                      <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
+                                        <div className="flex items-center justify-center h-full w-full">
+                                          <Image
+                                            className="object-contain w-full h-full"
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
+                                            alt={`${image.path}`}
+                                            width={800}
+                                            height={600}
+                                            priority
+                                            unoptimized
+                                          />
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                          <div className="flex justify-center mt-4">
+                            {beforeImage.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setBeforeSlideIndex(index)} // ใช้ index ในการเลือก slide
+                                className={`h-3 w-3 rounded-full mx-1 ${
+                                  beforeSlideIndex === index
+                                    ? "bg-white"
+                                    : "bg-gray-400"
+                                }`}
+                                aria-label={`Slide ${index + 1}`}
+                              />
                             ))}
-                          </CarouselContent>
-                          <CarouselPrevious />
-                          <CarouselNext />
-                        </Carousel>
-                        <div className="flex justify-center mt-4">
-                          {beforeImage.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setBeforeSlideIndex(index)} // ใช้ index ในการเลือก slide
-                              className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index ? "bg-white" : "bg-gray-400"}`}
-                              aria-label={`Slide ${index + 1}`}
-                            />
-                          ))}
+                          </div>
                         </div>
+                        <button
+                          onClick={handleCloseBeforeCarousel}
+                          className="absolute top-4 right-4 text-white"
+                        >
+                          Close
+                        </button>
                       </div>
-                      <button
-                        onClick={handleCloseBeforeCarousel}
-                        className="absolute top-4 right-4 text-white"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
 
@@ -489,12 +542,17 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
 
                 <div className="flex flex-col justify-between gap-4">
                   <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
-                    <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+                    <AspectRatio
+                      ratio={4 / 3}
+                      className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]"
+                    >
                       <div
                         className="flex items-center justify-center cursor-default user-select-none w-full h-full"
                         onClick={() => handleAfterImageClick()}
                       >
-                        {afterImage && afterImage.length > 0 && afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
+                        {afterImage &&
+                        afterImage.length > 0 &&
+                        afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
                           <Image
                             src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[afterSlideIndex].path}`} // ใช้ path จาก state
                             alt="Second Image"
@@ -509,14 +567,13 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                               hourglass_empty
                             </span>
                             <p className="text-muted-foreground text-lg font-medium">
-                              {t('WaitingForResults')}
+                              {t("WaitingForResults")}
                             </p>
                           </div>
                         )}
                       </div>
                     </AspectRatio>
                   </div>
-
 
                   {/* Thumbnail images slider */}
                   <ScrollArea className="min-w-full w-full whitespace-nowrap">
@@ -527,8 +584,11 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                           <div
                             key={index}
                             onClick={() => setAfterSlideIndex(index)}
-                            className={`flex justify-center min-w-[128px] h-[128px] cursor-pointer rounded-md ${afterSlideIndex === index ? 'border border-destructive' : ''
-                              }`}
+                            className={`flex justify-center min-w-[128px] h-[128px] cursor-pointer rounded-md ${
+                              afterSlideIndex === index
+                                ? "border border-destructive"
+                                : ""
+                            }`}
                           >
                             <Image
                               src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
@@ -544,56 +604,64 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
 
-
-                  {isAfterCarouselOpen && afterImage && afterImage.length > 0 && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                      <div className="relative">
-                        <Carousel setApi={setAfterApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
-                          <CarouselContent>
-                            {afterImage.map((image, index) => (
-                              <CarouselItem key={index}>
-                                <div className="flex justify-center">
-                                  <Card className="bg-card border-none">
-                                    <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
-                                      <div className="flex items-center justify-center h-full w-full">
-                                        <Image
-                                          className="object-contain w-full h-full"
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
-                                          alt={`${image.path}`}
-                                          width={800}
-                                          height={600}
-                                          priority
-                                          unoptimized
-                                        />
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                </div>
-                              </CarouselItem>
+                  {isAfterCarouselOpen &&
+                    afterImage &&
+                    afterImage.length > 0 && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="relative">
+                          <Carousel
+                            setApi={setAfterApi}
+                            className="sm:max-w-screen-sm xl:max-w-[1600px]"
+                          >
+                            <CarouselContent>
+                              {afterImage.map((image, index) => (
+                                <CarouselItem key={index}>
+                                  <div className="flex justify-center">
+                                    <Card className="bg-card border-none">
+                                      <CardContent className="flex items-center justify-center h-[400px] w-full md:h-[500px] xl:h-[700px] overflow-hidden p-4">
+                                        <div className="flex items-center justify-center h-full w-full">
+                                          <Image
+                                            className="object-contain w-full h-full"
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
+                                            alt={`${image.path}`}
+                                            width={800}
+                                            height={600}
+                                            priority
+                                            unoptimized
+                                          />
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                          <div className="flex justify-center mt-4">
+                            {afterImage.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setAfterSlideIndex(index)} // ใช้ index ในการเลือก slide
+                                className={`h-3 w-3 rounded-full mx-1 ${
+                                  afterSlideIndex === index
+                                    ? "bg-white"
+                                    : "bg-gray-400"
+                                }`}
+                                aria-label={`Slide ${index + 1}`}
+                              />
                             ))}
-                          </CarouselContent>
-                          <CarouselPrevious />
-                          <CarouselNext />
-                        </Carousel>
-                        <div className="flex justify-center mt-4">
-                          {afterImage.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setAfterSlideIndex(index)} // ใช้ index ในการเลือก slide
-                              className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index ? "bg-white" : "bg-gray-400"}`}
-                              aria-label={`Slide ${index + 1}`}
-                            />
-                          ))}
+                          </div>
                         </div>
+                        <button
+                          onClick={handleCloseAfterCarousel}
+                          className="absolute top-4 right-4 text-white"
+                        >
+                          Close
+                        </button>
                       </div>
-                      <button
-                        onClick={handleCloseAfterCarousel}
-                        className="absolute top-4 right-4 text-white"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             </div>
@@ -612,13 +680,33 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
             <div>
               {defect.status === "resolved" && page === "patrol-defect" && (
                 <div className="flex space-x-2 justify-end">
-                  <Button variant="destructive" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "pending_inspection", defect.patrolResult.itemZone.zone.supervisor.id)}>
+                  <Button
+                    variant="destructive"
+                    size={"lg"}
+                    onClick={() =>
+                      handleReworkOrVerifyDefect(
+                        defect.id,
+                        "pending_inspection",
+                        defect.supervisor.id
+                      )
+                    }
+                  >
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       cancel
                     </span>
                     Rework
                   </Button>
-                  <Button variant="success" size={"lg"} onClick={() => handleReworkOrVerifyDefect(defect.id, "completed", defect.patrolResult.itemZone.zone.supervisor.id)}>
+                  <Button
+                    variant="success"
+                    size={"lg"}
+                    onClick={() =>
+                      handleReworkOrVerifyDefect(
+                        defect.id,
+                        "completed",
+                        defect.supervisor.id
+                      )
+                    }
+                  >
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       check_circle
                     </span>
@@ -630,6 +718,6 @@ export default function ReportDefect({ defect, page, response }: IReportDefect) 
           </div>
         </AccordionContent>
       </AccordionItem>
-    </Accordion >
+    </Accordion>
   );
 }

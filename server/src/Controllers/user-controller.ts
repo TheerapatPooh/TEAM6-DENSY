@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
+import { uploadsPath } from "@Controllers/util-controller.js";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง User ใหม่
@@ -89,72 +90,58 @@ export async function createUser(req: Request, res: Response) {
 export async function updateProfile(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
-    const imagePath = req.file?.filename || ""; // ถ้าไม่มีก็เป็นสตริงว่าง
+    if (!req.file) {
+      res.status(400).json({ error: 'No image uploaded' });
+      return 
+    }
 
-    // ค้นหาผู้ใช้จากฐานข้อมูลตาม userId
-
-    const user = await prisma.user.findUnique({
+    // 1. ดึงข้อมูลรูปเก่าจากฐานข้อมูลก่อนอัปเดต
+    const currentUser = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
-        profile: {
-          include: {
-            image: true,
-          },
-        },
-      },
+      include: { profile: { include: { image: true } } }
     });
-    // ถ้าผู้ใช้ไม่พบ ส่งสถานะ 404 และข้อความ error
+    const oldImagePath = currentUser?.profile?.image?.path;
+    const newImagePath = path.join("profiles", userId.toString(), req.file.filename);
+    const updatedProfile = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        profile: {
+          upsert: {
+            create: {
+              image: {
+                create: {
+                  path: newImagePath,
+                  updatedBy: userId
+                }
+              }
+            },
+            update: {
+              image: {
+                upsert: {
+                  create: {
+                    path: newImagePath,
+                    updatedBy: userId
+                  },
+                  update: {
+                    path: newImagePath,
+                    updatedBy: userId
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      include: { profile: { include: { image: true } } }
+    });
 
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-    // ฟังก์ชันที่ใช้ในการหาพาธของโฟลเดอร์ที่เก็บไฟล์อัปโหลด
-
-    function getUploadsPath(): string {
-      const currentDir = process.cwd();
-      return path.join(currentDir, "uploads");// คืนค่าพาธที่เก็บไฟล์
-    }
-
-    const uploadsPath = getUploadsPath();// กำหนดพาธของโฟลเดอร์ uploads
-
-    // ลบไฟล์ภาพเก่าถ้ามี (ถ้ามีไฟล์ภาพที่ผู้ใช้เคยอัปโหลด)
-    if (imagePath && user.profile?.image) {
-      const oldImagePath = path.join(uploadsPath, user.profile.image.path);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+    // 4. ลบไฟล์รูปเก่าจากระบบถ้ามี
+    if (oldImagePath) {
+      const fullOldPath = path.join(uploadsPath, oldImagePath);
+      if (fs.existsSync(fullOldPath)) {
+        fs.unlinkSync(fullOldPath);
       }
     }
-
-    let image = null;
-    if (imagePath) {
-      // อัปเดตหรือสร้างข้อมูลภาพใหม่ในฐานข้อมูล
-      image = await prisma.image.upsert({
-        where: { id: user.profile?.image?.id || 0 },
-        update: {
-          path: imagePath,
-          updatedBy: userId,
-          profiles: {
-            connect: { id: user.profile?.id },
-          },
-        },
-        create: {
-          path: imagePath,
-          updatedBy: userId,
-          profiles: {
-            connect: { id: user.profile?.id },
-          },
-        },
-      });
-    }
-
-    // อัปเดตข้อมูลโปรไฟล์ของผู้ใช้ในฐานข้อมูล
-    const updatedProfile = await prisma.profile.update({
-      where: { userId: userId },
-      data: {
-        imageId: image?.id || null, // ถ้ามีภาพให้เชื่อมโยง id ของภาพเข้าไป
-      },
-    });
 
     res.status(200).json(updatedProfile);
     return;
@@ -279,12 +266,20 @@ export async function getAllUsers(req: Request, res: Response) {
       whereClause.active = active === "true"; // Convert "true"/"false" string to boolean
     }
 
+    
     // Add search functionality with priority on profile.name, then username
     if (search) {
+      const searchNumber = Number(search);
+    
       whereClause.OR = [
-        { profile: { name: { contains: search } } }, // Search on profile name (case-insensitive)
-        { username: { contains: search } }, // Search on username if profile name is not found
+        { profile: { name: { contains: search } } }, // Search by profile name
+        { username: { contains: search } }, // Search by username
       ];
+    
+      // If search is a valid number, add exact id match separately
+      if (!isNaN(searchNumber)) {
+        whereClause.OR.push({ id: searchNumber });
+      }
     }
 
     // Fetch users from the database with the specified filters
@@ -343,7 +338,7 @@ export async function updateUser(req: Request, res: Response) {
     const loggedInUserId = (req as any).user.userId;
     const loggedInUserRole = (req as any).user.role;
     const id = parseInt(req.params.id, 10);
-    const { username, name, age, email, tel, address, password, role, department } =
+    const { username, name, age, email, tel, address, password, role, department, active } =
       req.body;
     const updateUser: any = {};
     const updateProfile: any = {};
@@ -357,6 +352,7 @@ export async function updateUser(req: Request, res: Response) {
     if (age !== undefined) updateProfile.age = parseInt(age, 10);
     if (tel !== undefined) updateProfile.tel = tel;
     if (address !== undefined) updateProfile.address = address;
+    if (active !== undefined) updateUser.active = active;
 
     // ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของบัญชีที่กำลังถูกอัปเดต หรือเป็น admin
     if (loggedInUserId !== id && loggedInUserRole !== "admin") {

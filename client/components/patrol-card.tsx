@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ PatrolCard ใช้สำหรับแสดงข้อมูลของการตรวจสอบสถานที่ โดยแสดงข้อมูลเช่น วันที่, สถานะ, รายการตรวจสอบ, ผู้ตรวจสอบ และอื่นๆ
- * Input: 
+ * Input:
  * - id: รหัสการตรวจสอบ
  * - date: วันที่ของการตรวจสอบ
  * - status: สถานะของการตรวจสอบ
@@ -31,23 +31,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEffect, useState } from "react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
-import { formatPatrolId, getInitials } from "@/lib/utils";
+import {
+  formatPatrolId,
+  formatTime,
+  getInitials,
+  getPatrolStatusVariant,
+} from "@/lib/utils";
 import { fetchData } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
+import BadgeCustom from "@/components/badge-custom";
+import { UserTooltip } from "./user-tooltip";
+import { PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover } from "@radix-ui/react-popover";
+import { TextTooltip } from "./text-tooltip";
 
 export interface IPatrolCard {
   id: number;
-  date: Date;
+  date: string;
   status: patrolStatus;
   preset: IPreset;
   itemCounts: number;
   inspectors: IUser[];
-  onRemoveSuccess,
+  onRemoveSuccess;
 }
 
 export function PatrolCard({
@@ -57,31 +71,22 @@ export function PatrolCard({
   preset,
   itemCounts,
   inspectors = [],
-  onRemoveSuccess
+  onRemoveSuccess,
 }: IPatrolCard) {
   const [isClicked, setIsClicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
+  const triggerContainerRef = useRef<HTMLDivElement>(null);
 
   const [mounted, setMounted] = useState(false);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
-  const router = useRouter()
-  const locale = useLocale()
-
-  const formattedDate =
-    date instanceof Date
-      ? date.toLocaleDateString(`${locale}-GB`, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      : "N/A"; // Fallback if date is not valid
-
+  const router = useRouter();
+  const locale = useLocale();
 
   const getPatrolData = async () => {
     try {
@@ -89,8 +94,12 @@ export function PatrolCard({
       let countFails = 0;
       let countDefects = 0;
 
-      if (status !== 'pending' && status !== 'scheduled') {
-        const resultFetch: Partial<IPatrol> = await fetchData("get", `/patrol/${id}?result=true`, true);
+      if (status !== "pending" && status !== "scheduled") {
+        const resultFetch: Partial<IPatrol> = await fetchData(
+          "get",
+          `/patrol/${id}?result=true`,
+          true
+        );
         if (resultFetch?.results) {
           for (const patrolResult of resultFetch.results) {
             if (patrolResult.status === false) {
@@ -118,21 +127,9 @@ export function PatrolCard({
   const t = useTranslations("General");
   const a = useTranslations("Alert");
 
-  const handleClick = () => {
-    setIsClicked((prev) => !prev);
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
   const handleDetail = () => {
-    router.push(`/${locale}/patrol/${id}/detail`)
-  }
+    router.push(`/${locale}/patrol/${id}/detail`);
+  };
 
   const handleDialogResult = (result: boolean) => {
     setIsDialogOpen(false);
@@ -152,7 +149,7 @@ export function PatrolCard({
   };
 
   const removePatrol = async () => {
-    if (status !== 'pending') {
+    if (status !== "pending") {
       toast({
         variant: "error",
         title: a("PatrolRemoveErrorTitle"),
@@ -163,85 +160,197 @@ export function PatrolCard({
     try {
       await fetchData("delete", `/patrol/${id}`, true);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
     if (onRemoveSuccess) {
       onRemoveSuccess(id); // เรียก Callback หลังลบสำเร็จ
     }
-  }
+  };
+
+  const [open, setOpen] = useState(false);
+  const openType = useRef<"hover" | "click" | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (openType.current !== "click") {
+      timeoutRef.current = setTimeout(() => {
+        openType.current = "hover";
+        setOpen(true);
+      }, 300);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (openType.current === "hover") {
+      setOpen(false);
+      openType.current = null;
+    }
+  };
+  // Modify the existing wheel handler
+  const handleWheel = useCallback(() => {
+    handleClose();
+  }, []);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // เคลียร์ timeout ของ hover ทันทีเมื่อมีการคลิก
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    openType.current = "click";
+    setOpen(true); // เปิด Popover โดยตรง
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    openType.current = null;
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (openType.current === "hover") {
+        handleClose();
+      } else if (openType.current === "click") {
+        if (window.innerWidth <= 768) {
+          handleClose();
+        }
+      }
+    };
+    handleWheel;
+
+    window.addEventListener("scroll", handleScroll, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      handleClose();
+    };
+
+    // Detect both window scroll and Scroll Area scroll
+    const scrollArea = triggerContainerRef.current?.closest(
+      "[data-radix-scroll-area-viewport], .scroll-area" // Add your Scroll Area's class/attribute
+    );
+
+    if (scrollArea) {
+      scrollArea.addEventListener("scroll", handleScroll);
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (scrollArea) {
+        scrollArea.removeEventListener("scroll", handleScroll);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const TooltipContent = () => {
+    return (
+      <div >
+        <div className="flex items-center justify-center gap-1">
+          <span className="material-symbols-outlined">person_search</span>
+          <p className="text-lg font-semibold">{t("InspectorList")}</p>
+        </div>
+        {inspectors.map((inspector, idx) => (
+          <div
+            key={idx}
+            className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
+          >
+            <UserTooltip user={inspector}>
+              <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                />
+                <AvatarFallback id={inspector.id.toString()}>
+                  {getInitials(inspector.profile.name)}
+                </AvatarFallback>
+              </Avatar>
+            </UserTooltip>
+            <p className="text-lg">{inspector.profile.name}</p>
+          </div>
+        ))}
+        <div className="flex items-center justify-between w-full text-muted-foreground">
+          <p className="text-lg font-semibold">{t("Total")}</p>
+          <p className="text-lg font-semibold">{inspectors.length}</p>
+        </div>
+      </div>
+    );
+  };
 
   if (!mounted) {
-    return (
-      null
-    )
+    return null;
   }
 
   return (
-    <Card className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer" onClick={() => handleDetail()}>
+    <Card
+      className="flex flex-col custom-shadow border-none w-full px-6 py-4 h-fit gap-4  hover:bg-secondary cursor-pointer"
+      onClick={() => handleDetail()}
+    >
       <CardHeader className="flex flex-row gap-0 p-0 justify-between">
         <div className="flex flex-col justify-between items-start gap-4 truncate">
           <CardDescription className="text-lg font-semibold text-muted-foreground">
-            {formattedDate}
+            {formatTime(date, locale, false)}
           </CardDescription>
-          <CardTitle className="text-card-foreground text-2xl truncate w-full">
+          <TextTooltip object={preset.title}>
+          <CardTitle className="text-card-foreground text-2xl truncate w-[300px]">
             {preset.title}
           </CardTitle>
+          </TextTooltip>
         </div>
-        {status === ("pending" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-primary/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-primary">
-              hourglass_top
-            </span>
-          </div>
-        ) : status === ("scheduled" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-yellow/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-yellow">
-              event_available
-            </span>
-          </div>
-        ) : status === ("on_going" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-purple/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-purple">
-              cached
-            </span>
-          </div>
-        ) : status === ("completed" as patrolStatus) ? (
-          <div className="flex items-center justify-center rounded-full bg-green/20 w-9 h-9 custom-shadow">
-            <span className="material-symbols-outlined text-green">
-              check
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center rounded-full bg-red-300/40 w-10 h-10 custom-shadow">
-            <span className="material-symbols-outlined text-red-500">
-              error
-            </span>
-          </div>
-        )}
-
+        <BadgeCustom
+          variant={getPatrolStatusVariant(status).variant}
+          iconName={getPatrolStatusVariant(status).iconName}
+          showIcon={true}
+          hideText={true}
+        />
       </CardHeader>
       <CardContent className="flex flex-col gap-2 p-0">
         <div className="flex text-muted-foreground items-center gap-1">
           <span className="material-symbols-outlined">description</span>
           <p className="text-lg font-normal">{formatPatrolId(id)}</p>
         </div>
-        <HoverCard open={isClicked || isHovered}>
-          <HoverCardTrigger
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick();
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            asChild
-          >
-            <div className="flex text-muted-foreground items-center">
+
+        <Popover
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleClose()
+      }}
+    >
+      <HoverCard
+        open={open && openType.current === 'hover'}
+        onOpenChange={(isHoverOpen) => {
+          if (!isHoverOpen && openType.current === 'hover') handleClose();
+        }}
+      >
+        <div
+          ref={triggerContainerRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <HoverCardTrigger asChild>
+            <PopoverTrigger asChild>
+              <div className="cursor-pointer" onClick={handleClick}>
+              <div className="flex text-muted-foreground items-center">
               <span className="material-symbols-outlined me-1">
                 person_search
               </span>
               {inspectors.length > 0 && (
                 <div className="flex items-center me-1 truncate max-w-[190px]">
-                  <p className="text-xl me-2.5 truncate">{inspectors[0].profile.name}</p>
+                  <p className="text-xl me-2.5 truncate">
+                    {inspectors[0].profile.name}
+                  </p>
                 </div>
               )}
               {inspectors.map((inspector, idx) => {
@@ -263,45 +372,43 @@ export function PatrolCard({
                   <span className="absolute text-card-foreground text-base font-semibold">
                     +{inspectors.length - 5}
                   </span>
-                  <AvatarFallback id={'0'}></AvatarFallback>
+                  <AvatarFallback id={"0"}></AvatarFallback>
                 </Avatar>
               )}
             </div>
+              </div>
+            </PopoverTrigger>
           </HoverCardTrigger>
-          <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
-            <div className="flex items-center justify-center gap-1">
-              <span className="material-symbols-outlined">
-                person_search
-              </span>
-              <p className="text-lg font-semibold">
-                {t("InspectorList")}
-              </p>
-            </div>
-            {inspectors.map((inspector, idx) => {
-              return (
-                <div key={idx} className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary">
-                  <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                    />
-                    <AvatarFallback id={inspector.id.toString()}>
-                      {getInitials(inspector.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-lg">{inspector.profile.name}</p>
-                </div>
-              );
-            })}
-            <div className="flex items-center justify-between w-full text-muted-foreground">
-              <p className="text-lg font-semibold">
-                {t("Total")}
-              </p>
-              <p className="text-lg font-semibold">
-                {inspectors.length}
-              </p>
-            </div>
+
+          <HoverCardContent
+            className="w-full px-6 py-4"
+            zIndex={0}
+            side="bottom"
+            align="start"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TooltipContent/>
           </HoverCardContent>
-        </HoverCard>
+          <PopoverContent
+            className="w-full z-[100] px-6 py-4"
+            side="bottom"
+            align="start"
+            onInteractOutside={(e) => {
+              const target = e.target as HTMLElement;
+              const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
+              const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+
+              if (isUserTooltipContent || isUserTooltipTrigger) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <TooltipContent />
+          </PopoverContent>
+        </div>
+      </HoverCard>
+    </Popover>
+
       </CardContent>
       <CardFooter className="p-0 gap-0">
         <div className="flex gap-2 items-center w-full">
@@ -314,9 +421,7 @@ export function PatrolCard({
             <p className="text-xl font-semibold">{fails}</p>
           </div>
           <div className="flex gap-1 text-destructive items-center">
-            <span className="material-symbols-outlined">
-              error
-            </span>
+            <span className="material-symbols-outlined">error</span>
             <p className="text-xl font-semibold">{defects}</p>
           </div>
           <div className="ml-auto items-center">
@@ -330,16 +435,22 @@ export function PatrolCard({
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="p-0">
-                <DropdownMenuItem onClick={(e) => {
-                  handleDetail()
-                }}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    handleDetail();
+                  }}
+                >
                   <h1>{t("Detail")}</h1>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation()
-                  handleRemovePatrol()
-                }}>
-                  <h1 className="text-destructive cursor-pointer">{t("Delete")}</h1>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemovePatrol();
+                  }}
+                >
+                  <h1 className="text-destructive cursor-pointer">
+                    {t("Delete")}
+                  </h1>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

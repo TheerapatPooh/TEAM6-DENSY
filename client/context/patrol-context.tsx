@@ -42,7 +42,6 @@ interface IPatrolContext {
     formatTimeDate: (dateStr: string) => string
     formatId: (id: number) => string
     formatDate: (dateStr: string) => string
-
 }
 
 const PatrolContext = createContext<IPatrolContext | undefined>(undefined);
@@ -171,8 +170,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const getPatrolData = async () => {
         if (params.id) {
             try {
-                const data = await fetchData("get", `/patrol/${params.id}?preset=true`, true);
-                const result = await fetchData("get", `/patrol/${params.id}?result=true`, true);
+                const data = await fetchData("get", `/patrol/${params.id}?preset=true&result=true`, true);
                 const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
                 const otherResults = localStorage.getItem(`otherResults_${data.id}`);
                 if (savedResults) {
@@ -182,7 +180,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                     setOtherResults(JSON.parse(otherResults));
                 }
                 setPatrol(data);
-                setPatrolResults(result.results)
+                setPatrolResults(data.results)
             } catch (error) {
                 console.error("Failed to fetch patrol data:", error);
             }
@@ -235,7 +233,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const handleResult = (result: IPatrolResult) => {
         setResults((prevResults) => {
             const existingIndex = prevResults.findIndex(
-                (r) => r.itemId === result.itemId && r.zoneId === result.zoneId
+                (r) => r.id === result.id
             );
 
             if (existingIndex !== -1) {
@@ -480,16 +478,33 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [socket, patrol?.id]);
 
     useEffect(() => {
+        mergeResults(results)
+
         if (socket && isConnected && results.length > 0 && patrol) {
-            const uniqueResults = results.map(
-                ({ inspectorId, id, itemId, zoneId, status }) => ({
-                    inspectorId,
-                    id,
-                    itemId,
-                    zoneId,
-                    status,
-                })
-            );
+            const uniqueResults = results.map(({ inspectorId, id, itemId, zoneId, status }) => {
+                let existingResult = patrolResults.find(
+                    (patrolResult) => patrolResult.itemId === itemId && patrolResult.zoneId === zoneId
+                );
+                if (existingResult) {
+                    return {
+                        inspectorId,
+                        id: existingResult.id,
+                        itemId,
+                        zoneId,
+                        status,
+                        patrolId: patrol.id,
+                    };
+                } else {
+                    return {
+                        inspectorId,
+                        id,
+                        itemId,
+                        zoneId,
+                        status,
+                        patrolId: patrol.id,
+                    };
+                }
+            });
 
             const hasChanged =
                 uniqueResults.length !== lastEmittedResults.current.length ||

@@ -45,16 +45,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function Page() {
   const {
     patrol,
     patrolResults,
-    results,
     user,
     lock,
     isAlertOpen,
-    mounted,
     canFinish,
     countDefects,
     countFails,
@@ -173,8 +172,10 @@ export default function Page() {
             </AlertDialog>
 
             <div className="flex flex-col h-full justify-start w-full">
-              <p className="text-2xl font-bold mb-1">{patrol.preset.title}</p>
-              <Progress value={calculateProgress()} />
+              <p className="text-2xl font-bold mb-1 text-start">{patrol.preset.title}</p>
+              <div className="w-[300px]">
+                <Progress value={calculateProgress()} />
+              </div>
             </div>
           </div>
           <div className="flex flex-row sm:w-full sm:justify-between lg:w-fit items-center gap-2">
@@ -328,19 +329,23 @@ export default function Page() {
                                   )}
                                   {inspectors.map((inspector, idx) => {
                                     return (
-                                      <Avatar
-                                        key={idx}
-                                        className="custom-shadow ms-[-10px]"
-                                      >
-                                        <AvatarImage
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                                        />
-                                        <AvatarFallback
-                                          id={inspector.profile.id.toString()}
+                                      <UserTooltip user={inspector}>
+                                        <Avatar
+                                          key={idx}
+                                          className="custom-shadow ms-[-10px]"
                                         >
-                                          {getInitials(inspector.profile.name)}
-                                        </AvatarFallback>
-                                      </Avatar>
+                                          <AvatarImage
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                                          />
+                                          <AvatarFallback
+                                            id={inspector.profile.id.toString()}
+                                          >
+                                            {getInitials(
+                                              inspector.profile.name
+                                            )}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </UserTooltip>
                                     );
                                   })}
 
@@ -370,16 +375,21 @@ export default function Page() {
                                       key={idx}
                                       className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
                                     >
-                                      <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                                        <AvatarImage
-                                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
-                                        />
-                                        <AvatarFallback
-                                          id={inspector.profile.id.toString()}
-                                        >
-                                          {getInitials(inspector.profile.name)}
-                                        </AvatarFallback>
-                                      </Avatar>
+                                      <UserTooltip user={inspector}>
+                                        <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                                          <AvatarImage
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
+                                          />
+                                          <AvatarFallback
+                                            id={inspector.profile.id.toString()}
+                                          >
+                                            {getInitials(
+                                              inspector.profile.name
+                                            )}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </UserTooltip>
+
                                       <p className="text-lg">
                                         {inspector.profile.name}
                                       </p>
@@ -525,27 +535,26 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <ScrollArea
-        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-260px)]"
-      >        {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
-        <div className="rounded-md mb-4">
-          {user?.profile.name === pc.inspector.profile.name ? (
-            <PatrolChecklist
-              handleResult={handleResult}
-              results={results}
-              patrolChecklist={pc}
-              disabled={patrol.status === "on_going" && !lock ? false : true}
-              patrolResult={patrolResults}
-              user={user}
-              response={(defect: IDefect) => {
-                fetchRealtimeData(defect, "create");
-              }}
-            />
-          ) : (
-            <div></div>
-          )}
-        </div>
-      ))}
+      <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-224px)]">
+        {" "}
+        {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
+          <div className="rounded-md mb-4">
+            {user?.profile.name === pc.inspector.profile.name ? (
+              <PatrolChecklist
+                handleResult={handleResult}
+                patrolStatus={patrol.status}
+                patrolChecklist={pc}
+                disabled={patrol.status === "on_going" && !lock ? false : true}
+                patrolResults={patrolResults}
+                response={(defect: IDefect) => {
+                  fetchRealtimeData(defect, "create");
+                }}
+              />
+            ) : (
+              <div></div>
+            )}
+          </div>
+        ))}
       </ScrollArea>
     </div>
   );

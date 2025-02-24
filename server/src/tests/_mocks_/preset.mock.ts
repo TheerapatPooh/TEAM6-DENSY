@@ -106,8 +106,8 @@ export const allPresetsMock =
     [
         {
             "id": 1,
-            "title": "Daily Cleanliness Check",
-            "description": "การตรวจสอบความสะอาดและความปลอดภัยในพื้นที่ทำงานประจำวัน โดยเฉพาะการดูแลพื้นและความสะอาดของพื้นที่ต้อนรับ",
+            "title": "ASSEMBLY LINE ZONE",
+            "description": "โซนสำหรับการประกอบชิ้นส่วนและผลิตสินค้า ตรวจสอบความเรียบร้อยของสายการผลิตและเครื่องจักร",
             "version": 1,
             "latest": true,
             "updatedAt": "2024-10-06T10:16:12.000Z",
@@ -115,57 +115,65 @@ export const allPresetsMock =
             "presetChecklists": [
                 {
                     "presetId": 1,
-                    "checklistId": 3,
+                    "checklistId": 1,
                     "checklist": {
-                        "id": 3,
-                        "title": "Cleanliness Inspection",
+                        "id": 1,
+                        "title": "Safety Inspection",
                         "version": 1,
                         "latest": true,
-                        "updatedAt": "2024-10-06T10:05:15.000Z",
+                        "updatedAt": "2024-10-06T10:05:09.000Z",
                         "updatedBy": 1,
                         "items": [
                             {
-                                "id": 8,
-                                "name": "Floor Cleanliness Check",
-                                "type": "environment",
-                                "checklistId": 3,
+                                "id": 1,
+                                "name": "Fire Extinguisher Check",
+                                "type": "safety",
+                                "checklistId": 1,
                                 "itemZones": [
                                     {
-                                        "itemId": 8,
-                                        "zoneId": 4,
+                                        "itemId": 1,
+                                        "zoneId": 2,
                                         "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
                                             "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    },
-                                    {
-                                        "itemId": 8,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
+                                            "userId": 4
                                         }
                                     }
                                 ]
                             },
                             {
-                                "id": 9,
-                                "name": "Trash Disposal Check",
-                                "type": "environment",
-                                "checklistId": 3,
+                                "id": 2,
+                                "name": "Emergency Exit Sign Check",
+                                "type": "safety",
+                                "checklistId": 1,
                                 "itemZones": [
                                     {
-                                        "itemId": 9,
-                                        "zoneId": 6,
+                                        "itemId": 2,
+                                        "zoneId": 2,
                                         "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
                                             "locationId": 1,
-                                            "userId": 8
+                                            "userId": 4
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "name": "First Aid Kit Check",
+                                "type": "safety",
+                                "checklistId": 1,
+                                "itemZones": [
+                                    {
+                                        "itemId": 3,
+                                        "zoneId": 2,
+                                        "zone": {
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
+                                            "locationId": 1,
+                                            "userId": 4
                                         }
                                     }
                                 ]
@@ -175,105 +183,6 @@ export const allPresetsMock =
                 },
                 {
                     "presetId": 1,
-                    "checklistId": 4,
-                    "checklist": {
-                        "id": 4,
-                        "title": "Security Inspection",
-                        "version": 1,
-                        "latest": true,
-                        "updatedAt": "2024-10-06T10:05:25.000Z",
-                        "updatedBy": 1,
-                        "items": [
-                            {
-                                "id": 10,
-                                "name": "CCTV Functionality Check",
-                                "type": "safety",
-                                "checklistId": 4,
-                                "itemZones": [
-                                    {
-                                        "itemId": 10,
-                                        "zoneId": 2,
-                                        "zone": {
-                                            "id": 2,
-                                            "name": "assembly_line_zone",
-                                            "locationId": 1,
-                                            "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 10,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    },
-                                    {
-                                        "itemId": 10,
-                                        "zoneId": 4,
-                                        "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
-                                            "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 11,
-                                "name": "Access Control System Check",
-                                "type": "safety",
-                                "checklistId": 4,
-                                "itemZones": [
-                                    {
-                                        "itemId": 11,
-                                        "zoneId": 4,
-                                        "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
-                                            "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    },
-                                    {
-                                        "itemId": 11,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ],
-            "user": {
-                "id": 1,
-                "username": "admin",
-                "profile": {
-                    "name": "Admin Mhee",
-                    "image": null
-                }
-            }
-        },
-        {
-            "id": 2,
-            "title": "Weekly Maintenance",
-            "description": "ตรวจสอบบำรุงรักษาเครื่องจักรและอุปกรณ์ประจำสัปดาห์ เพื่อให้แน่ใจว่าอุปกรณ์ทุกอย่างทำงานอย่างมีประสิทธิภาพ",
-            "version": 1,
-            "latest": true,
-            "updatedAt": "2024-10-06T10:17:46.000Z",
-            "updatedBy": 1,
-            "presetChecklists": [
-                {
-                    "presetId": 2,
                     "checklistId": 2,
                     "checklist": {
                         "id": 2,
@@ -284,8 +193,26 @@ export const allPresetsMock =
                         "updatedBy": 1,
                         "items": [
                             {
-                                "id": 5,
+                                "id": 4,
                                 "name": "Electrical Panel Inspection",
+                                "type": "maintenance",
+                                "checklistId": 2,
+                                "itemZones": [
+                                    {
+                                        "itemId": 4,
+                                        "zoneId": 2,
+                                        "zone": {
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
+                                            "locationId": 1,
+                                            "userId": 4
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 5,
+                                "name": "Air Conditioning System Check",
                                 "type": "maintenance",
                                 "checklistId": 2,
                                 "itemZones": [
@@ -297,534 +224,24 @@ export const allPresetsMock =
                                             "name": "assembly_line_zone",
                                             "locationId": 1,
                                             "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 5,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
                                         }
                                     }
                                 ]
                             },
                             {
                                 "id": 6,
-                                "name": "Air Conditioning System Check",
-                                "type": "maintenance",
-                                "checklistId": 2,
-                                "itemZones": [
-                                    {
-                                        "itemId": 6,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
-                                        }
-                                    },
-                                    {
-                                        "itemId": 6,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 7,
                                 "name": "Lighting System Check",
                                 "type": "maintenance",
                                 "checklistId": 2,
                                 "itemZones": [
                                     {
-                                        "itemId": 7,
-                                        "zoneId": 2,
-                                        "zone": {
-                                            "id": 2,
-                                            "name": "assembly_line_zone",
-                                            "locationId": 1,
-                                            "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 7,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                {
-                    "presetId": 2,
-                    "checklistId": 5,
-                    "checklist": {
-                        "id": 5,
-                        "title": "Equipment Inspection",
-                        "version": 1,
-                        "latest": true,
-                        "updatedAt": "2024-10-06T10:05:43.000Z",
-                        "updatedBy": 1,
-                        "items": [
-                            {
-                                "id": 12,
-                                "name": "Server Equipment Inspection",
-                                "type": "maintenance",
-                                "checklistId": 5,
-                                "itemZones": [
-                                    {
-                                        "itemId": 12,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 13,
-                                "name": "Forklift Maintenance",
-                                "type": "maintenance",
-                                "checklistId": 5,
-                                "itemZones": [
-                                    {
-                                        "itemId": 13,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ],
-            "user": {
-                "id": 1,
-                "username": "admin",
-                "profile": {
-                    "name": "Admin Mhee",
-                    "image": null
-                }
-            }
-        },
-        {
-            "id": 3,
-            "title": "Monthly Safety Check",
-            "description": "การตรวจสอบความปลอดภัยในโซนสำคัญประจำเดือน รวมถึงอุปกรณ์รักษาความปลอดภัยและความพร้อมของระบบรักษาความปลอดภัยต่าง ๆ",
-            "version": 1,
-            "latest": true,
-            "updatedAt": "2024-10-06T10:18:04.000Z",
-            "updatedBy": 1,
-            "presetChecklists": [
-                {
-                    "presetId": 3,
-                    "checklistId": 1,
-                    "checklist": {
-                        "id": 1,
-                        "title": "Safety Inspection",
-                        "version": 1,
-                        "latest": true,
-                        "updatedAt": "2024-10-06T10:05:09.000Z",
-                        "updatedBy": 1,
-                        "items": [
-                            {
-                                "id": 2,
-                                "name": "Fire Extinguisher Check",
-                                "type": "safety",
-                                "checklistId": 1,
-                                "itemZones": [
-                                    {
-                                        "itemId": 2,
-                                        "zoneId": 2,
-                                        "zone": {
-                                            "id": 2,
-                                            "name": "assembly_line_zone",
-                                            "locationId": 1,
-                                            "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 2,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 3,
-                                "name": "Emergency Exit Sign Check",
-                                "type": "safety",
-                                "checklistId": 1,
-                                "itemZones": [
-                                    {
-                                        "itemId": 3,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    },
-                                    {
-                                        "itemId": 3,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 4,
-                                "name": "First Aid Kit Check",
-                                "type": "safety",
-                                "checklistId": 1,
-                                "itemZones": [
-                                    {
-                                        "itemId": 4,
-                                        "zoneId": 4,
-                                        "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
-                                            "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    },
-                                    {
-                                        "itemId": 4,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                {
-                    "presetId": 3,
-                    "checklistId": 4,
-                    "checklist": {
-                        "id": 4,
-                        "title": "Security Inspection",
-                        "version": 1,
-                        "latest": true,
-                        "updatedAt": "2024-10-06T10:05:25.000Z",
-                        "updatedBy": 1,
-                        "items": [
-                            {
-                                "id": 10,
-                                "name": "CCTV Functionality Check",
-                                "type": "safety",
-                                "checklistId": 4,
-                                "itemZones": [
-                                    {
-                                        "itemId": 10,
-                                        "zoneId": 2,
-                                        "zone": {
-                                            "id": 2,
-                                            "name": "assembly_line_zone",
-                                            "locationId": 1,
-                                            "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 10,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    },
-                                    {
-                                        "itemId": 10,
-                                        "zoneId": 4,
-                                        "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
-                                            "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 11,
-                                "name": "Access Control System Check",
-                                "type": "safety",
-                                "checklistId": 4,
-                                "itemZones": [
-                                    {
-                                        "itemId": 11,
-                                        "zoneId": 4,
-                                        "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
-                                            "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    },
-                                    {
-                                        "itemId": 11,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ],
-            "user": {
-                "id": 1,
-                "username": "admin",
-                "profile": {
-                    "name": "Admin Mhee",
-                    "image": null
-                }
-            }
-        },
-        {
-            "id": 4,
-            "title": "Quarterly Full Inspection",
-            "description": "การตรวจสอบเต็มรูปแบบทุก 3 เดือน รวมถึงความปลอดภัย การบำรุงรักษาอุปกรณ์ และความสะอาดของพื้นที่ทั้งหมด",
-            "version": 1,
-            "latest": true,
-            "updatedAt": "2024-10-06T10:18:22.000Z",
-            "updatedBy": 1,
-            "presetChecklists": [
-                {
-                    "presetId": 4,
-                    "checklistId": 1,
-                    "checklist": {
-                        "id": 1,
-                        "title": "Safety Inspection",
-                        "version": 1,
-                        "latest": true,
-                        "updatedAt": "2024-10-06T10:05:09.000Z",
-                        "updatedBy": 1,
-                        "items": [
-                            {
-                                "id": 2,
-                                "name": "Fire Extinguisher Check",
-                                "type": "safety",
-                                "checklistId": 1,
-                                "itemZones": [
-                                    {
-                                        "itemId": 2,
-                                        "zoneId": 2,
-                                        "zone": {
-                                            "id": 2,
-                                            "name": "assembly_line_zone",
-                                            "locationId": 1,
-                                            "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 2,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 3,
-                                "name": "Emergency Exit Sign Check",
-                                "type": "safety",
-                                "checklistId": 1,
-                                "itemZones": [
-                                    {
-                                        "itemId": 3,
-                                        "zoneId": 3,
-                                        "zone": {
-                                            "id": 3,
-                                            "name": "raw_materials_storage_zone",
-                                            "locationId": 1,
-                                            "userId": 5
-                                        }
-                                    },
-                                    {
-                                        "itemId": 3,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 4,
-                                "name": "First Aid Kit Check",
-                                "type": "safety",
-                                "checklistId": 1,
-                                "itemZones": [
-                                    {
-                                        "itemId": 4,
-                                        "zoneId": 4,
-                                        "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
-                                            "locationId": 1,
-                                            "userId": 6
-                                        }
-                                    },
-                                    {
-                                        "itemId": 4,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                {
-                    "presetId": 4,
-                    "checklistId": 2,
-                    "checklist": {
-                        "id": 2,
-                        "title": "Maintenance Inspection",
-                        "version": 1,
-                        "latest": true,
-                        "updatedAt": "2024-10-06T10:05:10.000Z",
-                        "updatedBy": 1,
-                        "items": [
-                            {
-                                "id": 5,
-                                "name": "Electrical Panel Inspection",
-                                "type": "maintenance",
-                                "checklistId": 2,
-                                "itemZones": [
-                                    {
-                                        "itemId": 5,
-                                        "zoneId": 2,
-                                        "zone": {
-                                            "id": 2,
-                                            "name": "assembly_line_zone",
-                                            "locationId": 1,
-                                            "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 5,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 6,
-                                "name": "Air Conditioning System Check",
-                                "type": "maintenance",
-                                "checklistId": 2,
-                                "itemZones": [
-                                    {
                                         "itemId": 6,
-                                        "zoneId": 5,
-                                        "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
-                                            "locationId": 1,
-                                            "userId": 7
-                                        }
-                                    },
-                                    {
-                                        "itemId": 6,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                "id": 7,
-                                "name": "Lighting System Check",
-                                "type": "maintenance",
-                                "checklistId": 2,
-                                "itemZones": [
-                                    {
-                                        "itemId": 7,
                                         "zoneId": 2,
                                         "zone": {
                                             "id": 2,
                                             "name": "assembly_line_zone",
                                             "locationId": 1,
                                             "userId": 4
-                                        }
-                                    },
-                                    {
-                                        "itemId": 7,
-                                        "zoneId": 6,
-                                        "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
-                                            "locationId": 1,
-                                            "userId": 8
                                         }
                                     }
                                 ]
@@ -833,7 +250,7 @@ export const allPresetsMock =
                     }
                 },
                 {
-                    "presetId": 4,
+                    "presetId": 1,
                     "checklistId": 3,
                     "checklist": {
                         "id": 3,
@@ -844,47 +261,145 @@ export const allPresetsMock =
                         "updatedBy": 1,
                         "items": [
                             {
-                                "id": 8,
+                                "id": 7,
                                 "name": "Floor Cleanliness Check",
                                 "type": "environment",
                                 "checklistId": 3,
                                 "itemZones": [
                                     {
-                                        "itemId": 8,
-                                        "zoneId": 4,
+                                        "itemId": 7,
+                                        "zoneId": 2,
                                         "zone": {
-                                            "id": 4,
-                                            "name": "quality_control_zone",
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
                                             "locationId": 1,
-                                            "userId": 6
+                                            "userId": 4
                                         }
-                                    },
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 8,
+                                "name": "Trash Disposal Check",
+                                "type": "environment",
+                                "checklistId": 3,
+                                "itemZones": [
                                     {
                                         "itemId": 8,
-                                        "zoneId": 6,
+                                        "zoneId": 2,
                                         "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
                                             "locationId": 1,
-                                            "userId": 8
+                                            "userId": 4
                                         }
                                     }
                                 ]
                             },
                             {
                                 "id": 9,
-                                "name": "Trash Disposal Check",
+                                "name": "Water Quality Inspection",
                                 "type": "environment",
                                 "checklistId": 3,
                                 "itemZones": [
                                     {
                                         "itemId": 9,
-                                        "zoneId": 6,
+                                        "zoneId": 2,
                                         "zone": {
-                                            "id": 6,
-                                            "name": "customer_service_zone",
+                                            "id": 2,
+                                            "name": "assembly_line_zone",
                                             "locationId": 1,
-                                            "userId": 8
+                                            "userId": 4
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "user": {
+                "id": 1,
+                "username": "admin",
+                "email": null,
+                "role": "admin",
+                "profile": {
+                    "tel": "0949999999",
+                    "name": "Admin Mhee",
+                    "image": null
+                }
+            }
+        },
+        {
+            "id": 2,
+            "title": "RAW MATERIALS STORAGE ZONE",
+            "description": "พื้นที่จัดเก็บวัตถุดิบก่อนนำเข้าสู่กระบวนการผลิต ตรวจสอบความพร้อมของวัตถุดิบและความปลอดภัยในการจัดเก็บ",
+            "version": 1,
+            "latest": true,
+            "updatedAt": "2024-10-06T10:17:46.000Z",
+            "updatedBy": 1,
+            "presetChecklists": [
+                {
+                    "presetId": 2,
+                    "checklistId": 4,
+                    "checklist": {
+                        "id": 4,
+                        "title": "Safety Inspection",
+                        "version": 1,
+                        "latest": true,
+                        "updatedAt": "2024-10-06T10:05:09.000Z",
+                        "updatedBy": 1,
+                        "items": [
+                            {
+                                "id": 10,
+                                "name": "CCTV Functionality Check",
+                                "type": "safety",
+                                "checklistId": 4,
+                                "itemZones": [
+                                    {
+                                        "itemId": 10,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 11,
+                                "name": "Access Control System Check",
+                                "type": "safety",
+                                "checklistId": 4,
+                                "itemZones": [
+                                    {
+                                        "itemId": 11,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 12,
+                                "name": "Emergency Exit Sign Check",
+                                "type": "safety",
+                                "checklistId": 4,
+                                "itemZones": [
+                                    {
+                                        "itemId": 12,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
                                         }
                                     }
                                 ]
@@ -893,42 +408,128 @@ export const allPresetsMock =
                     }
                 },
                 {
-                    "presetId": 4,
+                    "presetId": 2,
                     "checklistId": 5,
                     "checklist": {
                         "id": 5,
-                        "title": "Equipment Inspection",
+                        "title": "Environmental Inspection",
                         "version": 1,
                         "latest": true,
-                        "updatedAt": "2024-10-06T10:05:43.000Z",
+                        "updatedAt": "2024-10-06T10:05:45.000Z",
                         "updatedBy": 1,
                         "items": [
                             {
-                                "id": 12,
-                                "name": "Server Equipment Inspection",
-                                "type": "maintenance",
+                                "id": 13,
+                                "name": "Work Area Inspection",
+                                "type": "environment",
                                 "checklistId": 5,
                                 "itemZones": [
                                     {
-                                        "itemId": 12,
-                                        "zoneId": 5,
+                                        "itemId": 13,
+                                        "zoneId": 3,
                                         "zone": {
-                                            "id": 5,
-                                            "name": "it_zone",
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
                                             "locationId": 1,
-                                            "userId": 7
+                                            "userId": 5
                                         }
                                     }
                                 ]
                             },
                             {
-                                "id": 13,
-                                "name": "Forklift Maintenance",
-                                "type": "maintenance",
+                                "id": 14,
+                                "name": "Machinery Safety Inspection",
+                                "type": "environment",
                                 "checklistId": 5,
                                 "itemZones": [
                                     {
-                                        "itemId": 13,
+                                        "itemId": 14,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 15,
+                                "name": "Ventilation System Inspection",
+                                "type": "environment",
+                                "checklistId": 5,
+                                "itemZones": [
+                                    {
+                                        "itemId": 15,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "presetId": 2,
+                    "checklistId": 6,
+                    "checklist": {
+                        "id": 6,
+                        "title": "Cleanliness Inspection",
+                        "version": 1,
+                        "latest": true,
+                        "updatedAt": "2024-10-06T10:05:15.000Z",
+                        "updatedBy": 1,
+                        "items": [
+                            {
+                                "id": 16,
+                                "name": "Floor Cleanliness Check",
+                                "type": "environment",
+                                "checklistId": 6,
+                                "itemZones": [
+                                    {
+                                        "itemId": 16,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 17,
+                                "name": "Trash Disposal Check",
+                                "type": "environment",
+                                "checklistId": 6,
+                                "itemZones": [
+                                    {
+                                        "itemId": 17,
+                                        "zoneId": 3,
+                                        "zone": {
+                                            "id": 3,
+                                            "name": "raw_materials_storage_zone",
+                                            "locationId": 1,
+                                            "userId": 5
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 18,
+                                "name": "Water Quality Inspection",
+                                "type": "environment",
+                                "checklistId": 6,
+                                "itemZones": [
+                                    {
+                                        "itemId": 18,
                                         "zoneId": 3,
                                         "zone": {
                                             "id": 3,
@@ -946,30 +547,175 @@ export const allPresetsMock =
             "user": {
                 "id": 1,
                 "username": "admin",
+                "email": null,
+                "role": "admin",
                 "profile": {
+                    "tel": "0949999999",
                     "name": "Admin Mhee",
                     "image": null
                 }
             }
-        }
+        },
     ]
 export const allPresetsResponseMock = [
     {
         "id": 1,
-        "title": "Daily Cleanliness Check",
-        "description": "การตรวจสอบความสะอาดและความปลอดภัยในพื้นที่ทำงานประจำวัน โดยเฉพาะการดูแลพื้นและความสะอาดของพื้นที่ต้อนรับ",
+        "title": "ASSEMBLY LINE ZONE",
+        "description": "โซนสำหรับการประกอบชิ้นส่วนและผลิตสินค้า ตรวจสอบความเรียบร้อยของสายการผลิตและเครื่องจักร",
         "version": 1,
         "updatedAt": "2024-10-06T10:16:12.000Z",
+        "user": {
+            "id": 1,
+            "username": "admin",
+            "email": null,
+            "role": "admin",
+            "profile": {
+                "tel": "0949999999",
+                "name": "Admin Mhee",
+                "image": null
+            }
+        },
         "updateByUserName": "Admin Mhee",
-        "updateByUserImagePath": "",
         "zones": [
-            "quality_control_zone",
-            "customer_service_zone",
-            "assembly_line_zone",
-            "raw_materials_storage_zone",
-            "it_zone"
+            "assembly_line_zone"
         ],
         "presetChecklists": [
+            {
+                "presetId": 1,
+                "checklistId": 1,
+                "checklist": {
+                    "id": 1,
+                    "title": "Safety Inspection",
+                    "version": 1,
+                    "latest": true,
+                    "updatedAt": "2024-10-06T10:05:09.000Z",
+                    "updatedBy": 1,
+                    "items": [
+                        {
+                            "id": 1,
+                            "name": "Fire Extinguisher Check",
+                            "type": "safety",
+                            "checklistId": 1,
+                            "itemZones": [
+                                {
+                                    "itemId": 1,
+                                    "zoneId": 2,
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "locationId": 1,
+                                        "userId": 4
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 2,
+                            "name": "Emergency Exit Sign Check",
+                            "type": "safety",
+                            "checklistId": 1,
+                            "itemZones": [
+                                {
+                                    "itemId": 2,
+                                    "zoneId": 2,
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "locationId": 1,
+                                        "userId": 4
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 3,
+                            "name": "First Aid Kit Check",
+                            "type": "safety",
+                            "checklistId": 1,
+                            "itemZones": [
+                                {
+                                    "itemId": 3,
+                                    "zoneId": 2,
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "locationId": 1,
+                                        "userId": 4
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "presetId": 1,
+                "checklistId": 2,
+                "checklist": {
+                    "id": 2,
+                    "title": "Maintenance Inspection",
+                    "version": 1,
+                    "latest": true,
+                    "updatedAt": "2024-10-06T10:05:10.000Z",
+                    "updatedBy": 1,
+                    "items": [
+                        {
+                            "id": 4,
+                            "name": "Electrical Panel Inspection",
+                            "type": "maintenance",
+                            "checklistId": 2,
+                            "itemZones": [
+                                {
+                                    "itemId": 4,
+                                    "zoneId": 2,
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "locationId": 1,
+                                        "userId": 4
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 5,
+                            "name": "Air Conditioning System Check",
+                            "type": "maintenance",
+                            "checklistId": 2,
+                            "itemZones": [
+                                {
+                                    "itemId": 5,
+                                    "zoneId": 2,
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "locationId": 1,
+                                        "userId": 4
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 6,
+                            "name": "Lighting System Check",
+                            "type": "maintenance",
+                            "checklistId": 2,
+                            "itemZones": [
+                                {
+                                    "itemId": 6,
+                                    "zoneId": 2,
+                                    "zone": {
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
+                                        "locationId": 1,
+                                        "userId": 4
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
             {
                 "presetId": 1,
                 "checklistId": 3,
@@ -982,73 +728,13 @@ export const allPresetsResponseMock = [
                     "updatedBy": 1,
                     "items": [
                         {
-                            "id": 8,
+                            "id": 7,
                             "name": "Floor Cleanliness Check",
                             "type": "environment",
                             "checklistId": 3,
                             "itemZones": [
                                 {
-                                    "itemId": 8,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
-                                    }
-                                },
-                                {
-                                    "itemId": 8,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 9,
-                            "name": "Trash Disposal Check",
-                            "type": "environment",
-                            "checklistId": 3,
-                            "itemZones": [
-                                {
-                                    "itemId": 9,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "presetId": 1,
-                "checklistId": 4,
-                "checklist": {
-                    "id": 4,
-                    "title": "Security Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:25.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 10,
-                            "name": "CCTV Functionality Check",
-                            "type": "safety",
-                            "checklistId": 4,
-                            "itemZones": [
-                                {
-                                    "itemId": 10,
+                                    "itemId": 7,
                                     "zoneId": 2,
                                     "zone": {
                                         "id": 2,
@@ -1056,53 +742,41 @@ export const allPresetsResponseMock = [
                                         "locationId": 1,
                                         "userId": 4
                                     }
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "id": 8,
+                            "name": "Trash Disposal Check",
+                            "type": "environment",
+                            "checklistId": 3,
+                            "itemZones": [
                                 {
-                                    "itemId": 10,
-                                    "zoneId": 3,
+                                    "itemId": 8,
+                                    "zoneId": 2,
                                     "zone": {
-                                        "id": 3,
-                                        "name": "raw_materials_storage_zone",
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
                                         "locationId": 1,
-                                        "userId": 5
-                                    }
-                                },
-                                {
-                                    "itemId": 10,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
+                                        "userId": 4
                                     }
                                 }
                             ]
                         },
                         {
-                            "id": 11,
-                            "name": "Access Control System Check",
-                            "type": "safety",
-                            "checklistId": 4,
+                            "id": 9,
+                            "name": "Water Quality Inspection",
+                            "type": "environment",
+                            "checklistId": 3,
                             "itemZones": [
                                 {
-                                    "itemId": 11,
-                                    "zoneId": 4,
+                                    "itemId": 9,
+                                    "zoneId": 2,
                                     "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
+                                        "id": 2,
+                                        "name": "assembly_line_zone",
                                         "locationId": 1,
-                                        "userId": 6
-                                    }
-                                },
-                                {
-                                    "itemId": 11,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
+                                        "userId": 4
                                     }
                                 }
                             ]
@@ -1111,297 +785,40 @@ export const allPresetsResponseMock = [
                 }
             }
         ],
-        "versionCount": 1
+        "versionCount": 1,
+        "disabled": false
     },
     {
         "id": 2,
-        "title": "Weekly Maintenance",
-        "description": "ตรวจสอบบำรุงรักษาเครื่องจักรและอุปกรณ์ประจำสัปดาห์ เพื่อให้แน่ใจว่าอุปกรณ์ทุกอย่างทำงานอย่างมีประสิทธิภาพ",
+        "title": "RAW MATERIALS STORAGE ZONE",
+        "description": "พื้นที่จัดเก็บวัตถุดิบก่อนนำเข้าสู่กระบวนการผลิต ตรวจสอบความพร้อมของวัตถุดิบและความปลอดภัยในการจัดเก็บ",
         "version": 1,
         "updatedAt": "2024-10-06T10:17:46.000Z",
+        "user": {
+            "id": 1,
+            "username": "admin",
+            "email": null,
+            "role": "admin",
+            "profile": {
+                "tel": "0949999999",
+                "name": "Admin Mhee",
+                "image": null
+            }
+        },
         "updateByUserName": "Admin Mhee",
-        "updateByUserImagePath": "",
         "zones": [
-            "assembly_line_zone",
-            "it_zone",
-            "customer_service_zone",
             "raw_materials_storage_zone"
         ],
         "presetChecklists": [
             {
                 "presetId": 2,
-                "checklistId": 2,
+                "checklistId": 4,
                 "checklist": {
-                    "id": 2,
-                    "title": "Maintenance Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:10.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 5,
-                            "name": "Electrical Panel Inspection",
-                            "type": "maintenance",
-                            "checklistId": 2,
-                            "itemZones": [
-                                {
-                                    "itemId": 5,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 5,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 6,
-                            "name": "Air Conditioning System Check",
-                            "type": "maintenance",
-                            "checklistId": 2,
-                            "itemZones": [
-                                {
-                                    "itemId": 6,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
-                                    }
-                                },
-                                {
-                                    "itemId": 6,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 7,
-                            "name": "Lighting System Check",
-                            "type": "maintenance",
-                            "checklistId": 2,
-                            "itemZones": [
-                                {
-                                    "itemId": 7,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 7,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "presetId": 2,
-                "checklistId": 5,
-                "checklist": {
-                    "id": 5,
-                    "title": "Equipment Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:43.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 12,
-                            "name": "Server Equipment Inspection",
-                            "type": "maintenance",
-                            "checklistId": 5,
-                            "itemZones": [
-                                {
-                                    "itemId": 12,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 13,
-                            "name": "Forklift Maintenance",
-                            "type": "maintenance",
-                            "checklistId": 5,
-                            "itemZones": [
-                                {
-                                    "itemId": 13,
-                                    "zoneId": 3,
-                                    "zone": {
-                                        "id": 3,
-                                        "name": "raw_materials_storage_zone",
-                                        "locationId": 1,
-                                        "userId": 5
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        ],
-        "versionCount": 1
-    },
-    {
-        "id": 3,
-        "title": "Monthly Safety Check",
-        "description": "การตรวจสอบความปลอดภัยในโซนสำคัญประจำเดือน รวมถึงอุปกรณ์รักษาความปลอดภัยและความพร้อมของระบบรักษาความปลอดภัยต่าง ๆ",
-        "version": 1,
-        "updatedAt": "2024-10-06T10:18:04.000Z",
-        "updateByUserName": "Admin Mhee",
-        "updateByUserImagePath": "",
-        "zones": [
-            "assembly_line_zone",
-            "raw_materials_storage_zone",
-            "customer_service_zone",
-            "quality_control_zone",
-            "it_zone"
-        ],
-        "presetChecklists": [
-            {
-                "presetId": 3,
-                "checklistId": 1,
-                "checklist": {
-                    "id": 1,
+                    "id": 4,
                     "title": "Safety Inspection",
                     "version": 1,
                     "latest": true,
                     "updatedAt": "2024-10-06T10:05:09.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 2,
-                            "name": "Fire Extinguisher Check",
-                            "type": "safety",
-                            "checklistId": 1,
-                            "itemZones": [
-                                {
-                                    "itemId": 2,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 2,
-                                    "zoneId": 3,
-                                    "zone": {
-                                        "id": 3,
-                                        "name": "raw_materials_storage_zone",
-                                        "locationId": 1,
-                                        "userId": 5
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 3,
-                            "name": "Emergency Exit Sign Check",
-                            "type": "safety",
-                            "checklistId": 1,
-                            "itemZones": [
-                                {
-                                    "itemId": 3,
-                                    "zoneId": 3,
-                                    "zone": {
-                                        "id": 3,
-                                        "name": "raw_materials_storage_zone",
-                                        "locationId": 1,
-                                        "userId": 5
-                                    }
-                                },
-                                {
-                                    "itemId": 3,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 4,
-                            "name": "First Aid Kit Check",
-                            "type": "safety",
-                            "checklistId": 1,
-                            "itemZones": [
-                                {
-                                    "itemId": 4,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
-                                    }
-                                },
-                                {
-                                    "itemId": 4,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "presetId": 3,
-                "checklistId": 4,
-                "checklist": {
-                    "id": 4,
-                    "title": "Security Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:25.000Z",
                     "updatedBy": 1,
                     "items": [
                         {
@@ -1412,32 +829,12 @@ export const allPresetsResponseMock = [
                             "itemZones": [
                                 {
                                     "itemId": 10,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 10,
                                     "zoneId": 3,
                                     "zone": {
                                         "id": 3,
                                         "name": "raw_materials_storage_zone",
                                         "locationId": 1,
                                         "userId": 5
-                                    }
-                                },
-                                {
-                                    "itemId": 10,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
                                     }
                                 }
                             ]
@@ -1450,77 +847,6 @@ export const allPresetsResponseMock = [
                             "itemZones": [
                                 {
                                     "itemId": 11,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
-                                    }
-                                },
-                                {
-                                    "itemId": 11,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        ],
-        "versionCount": 1
-    },
-    {
-        "id": 4,
-        "title": "Quarterly Full Inspection",
-        "description": "การตรวจสอบเต็มรูปแบบทุก 3 เดือน รวมถึงความปลอดภัย การบำรุงรักษาอุปกรณ์ และความสะอาดของพื้นที่ทั้งหมด",
-        "version": 1,
-        "updatedAt": "2024-10-06T10:18:22.000Z",
-        "updateByUserName": "Admin Mhee",
-        "updateByUserImagePath": "",
-        "zones": [
-            "assembly_line_zone",
-            "raw_materials_storage_zone",
-            "customer_service_zone",
-            "quality_control_zone",
-            "it_zone"
-        ],
-        "presetChecklists": [
-            {
-                "presetId": 4,
-                "checklistId": 1,
-                "checklist": {
-                    "id": 1,
-                    "title": "Safety Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:09.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 2,
-                            "name": "Fire Extinguisher Check",
-                            "type": "safety",
-                            "checklistId": 1,
-                            "itemZones": [
-                                {
-                                    "itemId": 2,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 2,
                                     "zoneId": 3,
                                     "zone": {
                                         "id": 3,
@@ -1531,256 +857,42 @@ export const allPresetsResponseMock = [
                                 }
                             ]
                         },
-                        {
-                            "id": 3,
-                            "name": "Emergency Exit Sign Check",
-                            "type": "safety",
-                            "checklistId": 1,
-                            "itemZones": [
-                                {
-                                    "itemId": 3,
-                                    "zoneId": 3,
-                                    "zone": {
-                                        "id": 3,
-                                        "name": "raw_materials_storage_zone",
-                                        "locationId": 1,
-                                        "userId": 5
-                                    }
-                                },
-                                {
-                                    "itemId": 3,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 4,
-                            "name": "First Aid Kit Check",
-                            "type": "safety",
-                            "checklistId": 1,
-                            "itemZones": [
-                                {
-                                    "itemId": 4,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
-                                    }
-                                },
-                                {
-                                    "itemId": 4,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "presetId": 4,
-                "checklistId": 2,
-                "checklist": {
-                    "id": 2,
-                    "title": "Maintenance Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:10.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 5,
-                            "name": "Electrical Panel Inspection",
-                            "type": "maintenance",
-                            "checklistId": 2,
-                            "itemZones": [
-                                {
-                                    "itemId": 5,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 5,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 6,
-                            "name": "Air Conditioning System Check",
-                            "type": "maintenance",
-                            "checklistId": 2,
-                            "itemZones": [
-                                {
-                                    "itemId": 6,
-                                    "zoneId": 5,
-                                    "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
-                                        "locationId": 1,
-                                        "userId": 7
-                                    }
-                                },
-                                {
-                                    "itemId": 6,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 7,
-                            "name": "Lighting System Check",
-                            "type": "maintenance",
-                            "checklistId": 2,
-                            "itemZones": [
-                                {
-                                    "itemId": 7,
-                                    "zoneId": 2,
-                                    "zone": {
-                                        "id": 2,
-                                        "name": "assembly_line_zone",
-                                        "locationId": 1,
-                                        "userId": 4
-                                    }
-                                },
-                                {
-                                    "itemId": 7,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "presetId": 4,
-                "checklistId": 3,
-                "checklist": {
-                    "id": 3,
-                    "title": "Cleanliness Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:15.000Z",
-                    "updatedBy": 1,
-                    "items": [
-                        {
-                            "id": 8,
-                            "name": "Floor Cleanliness Check",
-                            "type": "environment",
-                            "checklistId": 3,
-                            "itemZones": [
-                                {
-                                    "itemId": 8,
-                                    "zoneId": 4,
-                                    "zone": {
-                                        "id": 4,
-                                        "name": "quality_control_zone",
-                                        "locationId": 1,
-                                        "userId": 6
-                                    }
-                                },
-                                {
-                                    "itemId": 8,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 9,
-                            "name": "Trash Disposal Check",
-                            "type": "environment",
-                            "checklistId": 3,
-                            "itemZones": [
-                                {
-                                    "itemId": 9,
-                                    "zoneId": 6,
-                                    "zone": {
-                                        "id": 6,
-                                        "name": "customer_service_zone",
-                                        "locationId": 1,
-                                        "userId": 8
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            },
-            {
-                "presetId": 4,
-                "checklistId": 5,
-                "checklist": {
-                    "id": 5,
-                    "title": "Equipment Inspection",
-                    "version": 1,
-                    "latest": true,
-                    "updatedAt": "2024-10-06T10:05:43.000Z",
-                    "updatedBy": 1,
-                    "items": [
                         {
                             "id": 12,
-                            "name": "Server Equipment Inspection",
-                            "type": "maintenance",
-                            "checklistId": 5,
+                            "name": "Emergency Exit Sign Check",
+                            "type": "safety",
+                            "checklistId": 4,
                             "itemZones": [
                                 {
                                     "itemId": 12,
-                                    "zoneId": 5,
+                                    "zoneId": 3,
                                     "zone": {
-                                        "id": 5,
-                                        "name": "it_zone",
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
                                         "locationId": 1,
-                                        "userId": 7
+                                        "userId": 5
                                     }
                                 }
                             ]
-                        },
+                        }
+                    ]
+                }
+            },
+            {
+                "presetId": 2,
+                "checklistId": 5,
+                "checklist": {
+                    "id": 5,
+                    "title": "Environmental Inspection",
+                    "version": 1,
+                    "latest": true,
+                    "updatedAt": "2024-10-06T10:05:45.000Z",
+                    "updatedBy": 1,
+                    "items": [
                         {
                             "id": 13,
-                            "name": "Forklift Maintenance",
-                            "type": "maintenance",
+                            "name": "Work Area Inspection",
+                            "type": "environment",
                             "checklistId": 5,
                             "itemZones": [
                                 {
@@ -1794,13 +906,118 @@ export const allPresetsResponseMock = [
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "id": 14,
+                            "name": "Machinery Safety Inspection",
+                            "type": "environment",
+                            "checklistId": 5,
+                            "itemZones": [
+                                {
+                                    "itemId": 14,
+                                    "zoneId": 3,
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "locationId": 1,
+                                        "userId": 5
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 15,
+                            "name": "Ventilation System Inspection",
+                            "type": "environment",
+                            "checklistId": 5,
+                            "itemZones": [
+                                {
+                                    "itemId": 15,
+                                    "zoneId": 3,
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "locationId": 1,
+                                        "userId": 5
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "presetId": 2,
+                "checklistId": 6,
+                "checklist": {
+                    "id": 6,
+                    "title": "Cleanliness Inspection",
+                    "version": 1,
+                    "latest": true,
+                    "updatedAt": "2024-10-06T10:05:15.000Z",
+                    "updatedBy": 1,
+                    "items": [
+                        {
+                            "id": 16,
+                            "name": "Floor Cleanliness Check",
+                            "type": "environment",
+                            "checklistId": 6,
+                            "itemZones": [
+                                {
+                                    "itemId": 16,
+                                    "zoneId": 3,
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "locationId": 1,
+                                        "userId": 5
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 17,
+                            "name": "Trash Disposal Check",
+                            "type": "environment",
+                            "checklistId": 6,
+                            "itemZones": [
+                                {
+                                    "itemId": 17,
+                                    "zoneId": 3,
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "locationId": 1,
+                                        "userId": 5
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 18,
+                            "name": "Water Quality Inspection",
+                            "type": "environment",
+                            "checklistId": 6,
+                            "itemZones": [
+                                {
+                                    "itemId": 18,
+                                    "zoneId": 3,
+                                    "zone": {
+                                        "id": 3,
+                                        "name": "raw_materials_storage_zone",
+                                        "locationId": 1,
+                                        "userId": 5
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
             }
         ],
-        "versionCount": 1
-    }
+        "versionCount": 1,
+        "disabled": false
+    },
 ]
 
 export const checklistResponseMock = {

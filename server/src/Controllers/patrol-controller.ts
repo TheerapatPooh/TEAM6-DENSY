@@ -1,12 +1,18 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification } from "@Controllers/util-controller.js";
-import { NotificationType, PatrolStatus, User, ItemType, DefectStatus } from "@prisma/client";
+import {
+  NotificationType,
+  PatrolStatus,
+  User,
+  ItemType,
+  DefectStatus,
+} from "@prisma/client";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
  * Input:
- * - req.query: { preset: boolean, result: boolean } 
+ * - req.query: { preset: boolean, result: boolean }
  * - req.params.id: number (ID ของ Patrol ที่ต้องการดึงข้อมูล)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol รวมถึง preset และ result หากร้องขอ
@@ -18,6 +24,7 @@ export async function getPatrol(req: Request, res: Response) {
     const includeResult = req.query.result === "true";
 
     const userId = (req as any).user.userId;
+    const role = (req as any).user.role;
     const patrolId = parseInt(req.params.id, 10);
     let patrol: any;
 
@@ -26,7 +33,7 @@ export async function getPatrol(req: Request, res: Response) {
         id: patrolId,
         patrolChecklists: {
           some: {
-            userId: userId,
+            userId: role === "admin" ? undefined : userId,
           },
         },
       },
@@ -37,7 +44,7 @@ export async function getPatrol(req: Request, res: Response) {
               id: true,
               title: true,
               description: true,
-              version: true
+              version: true,
             },
           }
           : undefined,
@@ -58,9 +65,14 @@ export async function getPatrol(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
                                     name: true,
+                                    tel: true,
+                                    image: true,
                                   },
                                 },
                               },
@@ -78,10 +90,12 @@ export async function getPatrol(req: Request, res: Response) {
                 id: true,
                 email: true,
                 department: true,
+                username: true,
                 role: true,
                 profile: {
                   select: {
                     name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -92,6 +106,21 @@ export async function getPatrol(req: Request, res: Response) {
         results: includeResult
           ? {
             include: {
+              supervisor: {
+                select: {
+                  id: true,
+                  username: true,
+                  email: true,
+                  role: true,
+                  profile: {
+                    select: {
+                      name: true,
+                      tel: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
               defects: true,
               comments: {
                 include: {
@@ -101,9 +130,11 @@ export async function getPatrol(req: Request, res: Response) {
                       email: true,
                       department: true,
                       role: true,
+                      username: true,
                       profile: {
                         select: {
                           name: true,
+                          tel: true,
                           image: true,
                         },
                       },
@@ -126,7 +157,7 @@ export async function getPatrol(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -143,11 +174,12 @@ export async function getAllPatrols(req: Request, res: Response) {
   try {
     const { status, preset, startDate, endDate, search } = req.query;
     const userId = (req as any).user.userId;
+    const role = (req as any).user.role;
     // สร้างเงื่อนไขหลัก สำหรับค้นหา
     const whereConditions: any = {
       patrolChecklists: {
         some: {
-          userId: userId,
+          userId: role === "admin" ? undefined : userId,
         },
       },
     };
@@ -286,6 +318,21 @@ export async function getAllPatrols(req: Request, res: Response) {
                           select: {
                             id: true,
                             name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                role: true,
+                                profile: {
+                                  select: {
+                                    name: true,
+                                    tel: true,
+                                    image: true,
+                                  },
+                                },
+                              },
+                            }
                           },
                         },
                       },
@@ -298,8 +345,12 @@ export async function getAllPatrols(req: Request, res: Response) {
               select: {
                 id: true,
                 email: true,
+                username: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    tel: true,
+                    name: true,
                     image: true,
                   },
                 },
@@ -307,46 +358,181 @@ export async function getAllPatrols(req: Request, res: Response) {
             },
           },
         },
+        results: {
+          select: {
+            status: true,
+            defects: true,
+          }
+        }
+      },
+    });
+
+    const allPatrolsAdmin = await prisma.patrol.findMany({
+      where: whereConditions,
+      include: {
+        preset: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            version: true,
+          },
+        },
+        patrolChecklists: {
+          include: {
+            checklist: {
+              select: {
+                id: true,
+                title: true,
+                items: {
+                  include: {
+                    itemZones: {
+                      select: {
+                        zone: {
+                          select: {
+                            id: true,
+                            name: true,
+                            supervisor: {
+                              select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                role: true,
+                                profile: {
+                                  select: {
+                                    tel: true,
+                                    name: true,
+                                    image: true,
+                                  },
+                                },
+                              },
+                            }
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            inspector: {
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                role: true,
+                profile: {
+                  select: {
+                    name: true,
+                    tel: true,
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        results: {
+          select: {
+            id: true,
+            status: true,
+            defects: true,
+          }
+        }
       },
     });
 
     // จัดกลุ่ม patrols โดยใช้ id และรวม Inspectors และ Item Counts
     const groupedPatrols: Record<number, any> = {};
 
-    allPatrols.forEach((patrol) => {
-      if (!groupedPatrols[patrol.id]) {
-        groupedPatrols[patrol.id] = {
-          id: patrol.id,
-          date: patrol.date,
-          status: patrol.status,
-          preset: patrol.preset,
-          itemCounts: {},
-          inspectors: [],
-        };
-      }
-
-      let count = 0;
-      patrol.patrolChecklists.forEach((patrolChecklist) => {
-        // นับจำนวน item แต่ละประเภท
-        patrolChecklist.checklist.items.forEach((item) => {
-          item.itemZones.forEach((_itemZone) => {
-            count++;
-          });
-        });
-        groupedPatrols[patrol.id].itemCounts = count;
-
-        // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
-        const inspector = patrolChecklist.inspector;
-        if (
-          inspector &&
-          !groupedPatrols[patrol.id].inspectors.some(
-            (ins: any) => ins.id === inspector.id
-          )
-        ) {
-          groupedPatrols[patrol.id].inspectors.push(inspector);
+    if (role === "admin") {
+      allPatrolsAdmin.forEach((patrol) => {
+        if (!groupedPatrols[patrol.id]) {
+          groupedPatrols[patrol.id] = {
+            id: patrol.id,
+            date: patrol.date,
+            startTime: patrol.startTime,
+            endTime: patrol.endTime,
+            duration: patrol.duration,
+            status: patrol.status,
+            preset: patrol.preset,
+            patrolChecklists: patrol.patrolChecklists,
+            itemCounts: {},
+            inspectors: [],
+            results: patrol.results,
+            disabled: false,
+          };
         }
+
+        let count = 0;
+        let disabled = false;
+        patrol.patrolChecklists.forEach((patrolChecklist) => {
+          // นับจำนวน item แต่ละประเภท
+          patrolChecklist.checklist.items.forEach((item) => {
+            item.itemZones.forEach((itemZone) => {
+              count++;
+              if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
+                disabled = true;
+              }
+            });
+          });
+          groupedPatrols[patrol.id].itemCounts = count;
+
+          // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
+          const inspector = patrolChecklist.inspector;
+          if (
+            inspector &&
+            !groupedPatrols[patrol.id].inspectors.some(
+              (ins: any) => ins.id === inspector.id
+            )
+          ) {
+            groupedPatrols[patrol.id].inspectors.push(inspector);
+          }
+        });
+        groupedPatrols[patrol.id].disabled = disabled;
       });
-    });
+    } else {
+      allPatrols.forEach((patrol) => {
+        if (!groupedPatrols[patrol.id]) {
+          groupedPatrols[patrol.id] = {
+            id: patrol.id,
+            date: patrol.date,
+            status: patrol.status,
+            preset: patrol.preset,
+            itemCounts: {},
+            inspectors: [],
+            disabled: false,
+          };
+        }
+
+        let count = 0;
+        let disabled = false;
+        patrol.patrolChecklists.forEach((patrolChecklist) => {
+          // นับจำนวน item แต่ละประเภท
+          patrolChecklist.checklist.items.forEach((item) => {
+            item.itemZones.forEach((itemZone) => {
+              count++;
+              if (!itemZone.zone.supervisor && (patrol.status === "scheduled" || patrol.status === "pending")) {
+                disabled = true;
+              }
+            });
+          });
+          groupedPatrols[patrol.id].itemCounts = count;
+
+          // เพิ่ม Inspector ถ้ายังไม่มีในรายการ
+          const inspector = patrolChecklist.inspector;
+          if (
+            inspector &&
+            !groupedPatrols[patrol.id].inspectors.some(
+              (ins: any) => ins.id === inspector.id
+            )
+          ) {
+            groupedPatrols[patrol.id].inspectors.push(inspector);
+          }
+        });
+        groupedPatrols[patrol.id].disabled = disabled;
+      });
+    }
 
     // แปลงกลุ่ม patrols เป็น array
     const result = Object.values(groupedPatrols);
@@ -354,7 +540,7 @@ export async function getAllPatrols(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -381,9 +567,12 @@ export async function getPatrolUsers(req: Request, res: Response) {
               select: {
                 id: true,
                 username: true,
+                email: true,
+                role: true,
                 profile: {
                   select: {
                     id: true,
+                    tel: true,
                     name: true,
                     image: true,
                   },
@@ -409,7 +598,7 @@ export async function getPatrolUsers(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -519,8 +708,12 @@ export async function createPatrol(req: Request, res: Response) {
               select: {
                 id: true,
                 email: true,
+                username: true,
+                role: true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -561,7 +754,7 @@ export async function createPatrol(req: Request, res: Response) {
       res.status(201).json(result);
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
@@ -624,6 +817,7 @@ export async function startPatrol(req: Request, res: Response) {
               itemId: items.id,
               zoneId: zones.zone.id,
               patrolId: patrolId,
+              supervisorId: zones.zone.supervisor.id,
             },
           });
           // ส่งการแจ้งเตือนให้กับผู้ตรวจสอบถ้ายังไม่ได้แจ้งเตือน
@@ -671,9 +865,14 @@ export async function startPatrol(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
+                                    tel: true,
                                     name: true,
+                                    image: true,
                                   },
                                 },
                               },
@@ -692,9 +891,11 @@ export async function startPatrol(req: Request, res: Response) {
                 email: true,
                 department: true,
                 role: true,
+                username: true,
                 profile: {
                   select: {
                     name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -704,6 +905,21 @@ export async function startPatrol(req: Request, res: Response) {
         },
         results: {
           include: {
+            supervisor: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                profile: {
+                  select: {
+                    tel: true,
+                    name: true,
+                    image: true,
+                  },
+                },
+              },
+            },
             defects: true,
             comments: {
               include: {
@@ -713,8 +929,10 @@ export async function startPatrol(req: Request, res: Response) {
                     email: true,
                     department: true,
                     role: true,
+                    username: true,
                     profile: {
                       select: {
+                        tel: true,
                         name: true,
                         image: true,
                       },
@@ -732,7 +950,7 @@ export async function startPatrol(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -778,7 +996,7 @@ export async function finishPatrol(req: Request, res: Response) {
       res.status(400).json({ message: "Cannot finish patrol." });
       return;
     }
-    const duration = calculateDuration(startTime);    // คำนวณระยะเวลาที่ใช้ในการทำ Patrol
+    const duration = calculateDuration(startTime); // คำนวณระยะเวลาที่ใช้ในการทำ Patrol
     // อัปเดตสถานะของ Patrol จาก 'on_going' เป็น 'completed' และบันทึกเวลาเสร็จสิ้น
     await prisma.patrol.update({
       where: {
@@ -820,9 +1038,14 @@ export async function finishPatrol(req: Request, res: Response) {
                             supervisor: {
                               select: {
                                 id: true,
+                                username: true,
+                                email: true,
+                                role: true,
                                 profile: {
                                   select: {
+                                    tel: true,
                                     name: true,
+                                    image: true,
                                   },
                                 },
                               },
@@ -836,9 +1059,15 @@ export async function finishPatrol(req: Request, res: Response) {
               },
             },
             inspector: {
-              include: {
+              select: {
+                id:true,
+                username:true,
+                email:true,
+                role:true,
                 profile: {
-                  include: {
+                  select: {
+                    name: true,
+                    tel: true,
                     image: true,
                   },
                 },
@@ -856,10 +1085,12 @@ export async function finishPatrol(req: Request, res: Response) {
                     id: true,
                     email: true,
                     department: true,
+                    username: true,
                     role: true,
                     profile: {
                       select: {
                         name: true,
+                        tel: true,
                         image: true,
                       },
                     },
@@ -905,7 +1136,7 @@ export async function finishPatrol(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -944,7 +1175,7 @@ export async function removePatrol(req: Request, res: Response) {
     });
     return;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -1111,6 +1342,21 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
           },
         },
         include: {
+          supervisor: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              role: true,
+              profile: {
+                select: {
+                  tel: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
           patrolResult: {
             select: {
               zoneId: true,
@@ -1122,8 +1368,13 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                       supervisor: {
                         select: {
                           id: true,
+                          username: true,
+                          email: true,
+                          role: true,
                           profile: {
-                            include: {
+                            select: {
+                              tel: true,
+                              name: true,
                               image: true,
                             },
                           },
@@ -1164,6 +1415,21 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
       const defects = await prisma.defect.findMany({
         where: whereConditions,
         include: {
+          supervisor: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              role: true,
+              profile: {
+                select: {
+                  tel: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
           patrolResult: {
             select: {
               patrol: {
@@ -1185,8 +1451,13 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
                       supervisor: {
                         select: {
                           id: true,
+                          username: true,
+                          email: true,
+                          role: true,
                           profile: {
-                            include: {
+                            select: {
+                              tel: true,
+                              name: true,
                               image: true,
                             },
                           },
@@ -1225,7 +1496,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
       return;
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
@@ -1244,7 +1515,7 @@ export async function commentPatrol(req: Request, res: Response) {
     const userId = (req as any).user.userId;
     const patrolId = parseInt(req.params.id, 10);
     // รับข้อมูลจาก request body
-    const { message, patrolResultId } = req.body;
+    const { message, patrolResultId, supervisorId } = req.body;
 
     // ตรวจสอบว่าข้อมูลที่ส่งมาครบถ้วน
     if (!message || !patrolResultId) {
@@ -1264,7 +1535,7 @@ export async function commentPatrol(req: Request, res: Response) {
       },
     });
     if (!validPatrol) {
-      res.status(403).json({ message: "Patrol or checklist not found" });
+      res.status(404).json({ message: "Patrol or checklist not found" });
       return;
     }
 
@@ -1275,16 +1546,17 @@ export async function commentPatrol(req: Request, res: Response) {
         timestamp: new Date(),
         userId: userId,
         patrolResultId: parseInt(patrolResultId, 10),
+        supervisorId: parseInt(supervisorId, 10),
       },
     });
 
-    // const notification = `new_comment`;
-    // await createNotification({
-    //   message: notification,
-    //   type: "request" as NotificationType,
-    //   url: `/comment/${newComment.id}`,
-    //   userId: supervisorId,
-    // });
+    const notification = `new_comment`;
+    await createNotification({
+      message: notification,
+      type: "request" as NotificationType,
+      url: `/comment/${newComment.id}`,
+      userId: supervisorId,
+    });
 
     // ส่งข้อมูลคอมเมนต์พร้อมวันที่และเวลาที่บันทึกกลับไป
     let result = newComment;
@@ -1311,15 +1583,16 @@ export async function checkAndUpdatePendingPatrols() {
     });
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);    // ตั้งเวลาเป็นเวลา 00:00:00.000 ของวันนี้
+    today.setHours(0, 0, 0, 0); // ตั้งเวลาเป็นเวลา 00:00:00.000 ของวันนี้
     // วนลูปผ่านแต่ละ Patrol
     for (const patrol of patrols) {
       const patrolDate = new Date(patrol.date);
-      patrolDate.setHours(0, 0, 0, 0);      // ตั้งเวลาเป็น 00:00:00.000 ของวันที่ Patrol
+      patrolDate.setHours(0, 0, 0, 0); // ตั้งเวลาเป็น 00:00:00.000 ของวันที่ Patrol
       // ถ้าหากวันที่ Patrol ตรงกับวันที่ปัจจุบัน
       if (patrolDate.getTime() === today.getTime()) {
         try {
-          await prisma.patrol.update({          // อัปเดตสถานะของ Patrol เป็น "scheduled"
+          await prisma.patrol.update({
+            // อัปเดตสถานะของ Patrol เป็น "scheduled"
             where: {
               id: patrol.id,
             },
@@ -1339,7 +1612,7 @@ export async function checkAndUpdatePendingPatrols() {
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับกำหนดเวลาอัปเดตสถานะของ Patrol อัตโนมัติทุกเที่ยงคืน
- * Input: - 
+ * Input: -
  * Output: ไม่มี Output ที่ส่งกลับ (ฟังก์ชันทำงานเบื้องหลัง)
  **/
 export function schedulePatrolStatusUpdate() {

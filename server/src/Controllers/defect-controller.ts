@@ -1,9 +1,11 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification } from "@Controllers/util-controller.js";
+import { createNotification, deleteImages, handleDefectImagesUpdate } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 import fs from "fs";
 import path from "path";
+import { timeStamp } from "console";
+import { tr } from "@faker-js/faker";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -24,8 +26,6 @@ export async function createDefect(req: Request, res: Response) {
       patrolResultId,
       supervisorId,
     } = req.body;
-    const imageFiles = req.files as Express.Multer.File[];
-
     const validPatrol = await prisma.patrol.findFirst({
       //เช็คว่า Patrol มีอยู่จริงหรือไม่
       where: {
@@ -60,6 +60,7 @@ export async function createDefect(req: Request, res: Response) {
         status: "reported" as DefectStatus,
         startTime: new Date(),
         user: { connect: { id: parseInt(defectUserId) } },
+        supervisor: { connect: { id: parseInt(supervisorId) } },
         patrolResult: { connect: { id: parseInt(patrolResultId) } },
       },
     });
@@ -91,28 +92,7 @@ export async function createDefect(req: Request, res: Response) {
       }
     };
     updateResult(patrolResultId);
-    if (Array.isArray(imageFiles)) {
-      for (const imageFile of imageFiles) {
-        const imagePath = imageFile.filename;
-        const image = await prisma.image.create({
-          data: {
-            path: imagePath,
-            updatedBy: parseInt(defectUserId),
-          },
-        });
 
-        if (image) {
-          await prisma.defectImage.create({
-            data: {
-              defectId: newDefect.id,
-              imageId: image.id,
-            },
-          });
-        }
-      }
-    } else {
-      console.error("No files uploaded or incorrect file structure.");
-    }
     const message = `report_defect`;
     const supervisor = parseInt(supervisorId, 10);
 
@@ -149,8 +129,13 @@ export async function createDefect(req: Request, res: Response) {
                     supervisor: {
                       select: {
                         id: true,
+                        email:true,
+                        username:true,
+                        role:true,
                         profile: {
-                          include: {
+                          select: {
+                            tel:true,
+                            name:true,
                             image: true,
                           },
                         },
@@ -181,13 +166,42 @@ export async function createDefect(req: Request, res: Response) {
             },
           },
         },
+        supervisor: {
+          select: {
+            id: true,
+            username:true,
+            email:true,
+            role:true,
+            profile: {
+              select: {
+                tel:true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            username:true,
+            role:true,
+            profile: {
+              select: {
+                tel:true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        }
       },
     });
 
     res.status(201).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -207,6 +221,20 @@ export async function getDefect(req: Request, res: Response) {
         id: Number(id),
       },
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            username:true,
+            role:true,
+            profile: {
+              select: {
+                tel:true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
         images: {
           include: {
             image: {
@@ -216,9 +244,12 @@ export async function getDefect(req: Request, res: Response) {
                     id: true,
                     role: true,
                     email: true,
+                    username:true,
                     createdAt: true,
                     profile: {
-                      include: {
+                      select: {
+                        tel:true,
+                        name:true,
                         image: true,
                       },
                     },
@@ -233,9 +264,12 @@ export async function getDefect(req: Request, res: Response) {
             id: true,
             role: true,
             email: true,
+            username:true,
             createdAt: true,
             profile: {
-              include: {
+              select: {
+                tel:true,
+                name:true,
                 image: true,
               },
             },
@@ -249,7 +283,16 @@ export async function getDefect(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
-                        profile: true,
+                        username:true,
+                        email:true,
+                        role:true,
+                        profile: {
+                          select: {
+                            tel:true,
+                            name: true,
+                            image: true
+                          }
+                        },
                       },
                     },
                   },
@@ -272,7 +315,7 @@ export async function getDefect(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -290,15 +333,7 @@ export async function getAllDefects(req: Request, res: Response) {
     const { status, type, startDate, endDate, search } = req.query;
     // สร้างเงื่อนไขหลัก
     const whereConditions: any = {
-      patrolResult: {
-        itemZone: {
-          zone: {
-            supervisor: {
-              id: userId,
-            },
-          },
-        },
-      },
+      supervisorId: userId,
     };
 
     const andConditions: any[] = [];
@@ -422,6 +457,21 @@ export async function getAllDefects(req: Request, res: Response) {
     const defects = await prisma.defect.findMany({
       where: whereConditions,
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            username:true,
+            email:true,
+            role:true,
+            profile: {
+              select: {
+                tel:true,
+                name: true,
+                image: true
+              }
+            },
+          },
+        },
         patrolResult: {
           select: {
             zoneId: true,
@@ -438,6 +488,7 @@ export async function getAllDefects(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
               select: {
                 id: true,
@@ -460,6 +511,7 @@ export async function getAllDefects(req: Request, res: Response) {
                     role: true,
                     email: true,
                     createdAt: true,
+                    username:true,
                     profile: {
                       select: {
                         id: true,
@@ -482,17 +534,17 @@ export async function getAllDefects(req: Request, res: Response) {
     return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: `Internal server error: ${error}`});
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
 
-function getUploadsPath(): string {
-  const currentDir = process.cwd();
-  return path.join(currentDir, "uploads"); // Adjust path as needed
-}
+// function getUploadsPath(): string {
+//   const currentDir = process.cwd();
+//   return path.join(currentDir, "uploads"); // Adjust path as needed
+// }
 
-const uploadsPath = getUploadsPath();
+// const uploadsPath = getUploadsPath();
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect
@@ -527,101 +579,14 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
     }
 
     if (newImageFiles?.length) {
-      //หารูปที่อยู่ในระบบ ค้นหาภาพที่เกี่ยวข้องกับ Defect นี้
-      const existingDefectImages = await prisma.defectImage.findMany({
-        where: { defectId: Number(id) },
-        select: { imageId: true },
-      });
-
-      const defectImagesBySupervisor = await prisma.image.findMany({
-        // ค้นหาข้อมูลเกี่ยวกับภาพที่มีอยู่ในระบบ
-        where: {
-          id: { in: existingDefectImages.map((img) => img.imageId) },
-        },
-        select: { id: true, updatedBy: true },
-      });
-
-      if (status === ("reported" as DefectStatus)) {
-        // หากสถานะเป็น "reported" ให้ลบภาพทั้งหมดที่เกี่ยวข้อง
-        const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
-        // ค้นหาภาพที่ต้องการลบ
-        const imagesToDelete = await prisma.image.findMany({
-          where: { id: { in: imageIdsToDelete } },
-          select: { path: true },
-        });
-        // ลบไฟล์ภาพจากที่เก็บ
-        for (const image of imagesToDelete) {
-          const filePath = path.join(uploadsPath, image.path);
-          try {
-            fs.unlinkSync(filePath);
-          } catch (error) {
-            console.error(`Failed to delete file at ${filePath}:`, error);
-          }
-        }
-        // ลบข้อมูลจากฐานข้อมูล
-        await prisma.defectImage.deleteMany({
-          where: { defectId: Number(id) },
-        });
-        await prisma.image.deleteMany({
-          where: { id: { in: imageIdsToDelete } },
-        });
-      }
-
-      if (
-        status === ("resolved" as DefectStatus) &&
-        deleteExistingImages === "true"
-      ) {
-        // หากสถานะเป็น "resolved" และต้องการลบภาพที่เกี่ยวข้องกับ supervisor
-        const imageIdsToDelete = defectImagesBySupervisor
-          .filter((image) => image.updatedBy === parseInt(supervisorId, 10))
-          .map((image) => image.id);
-
-        const imagesToDelete = await prisma.image.findMany({
-          where: { id: { in: imageIdsToDelete } },
-          select: { path: true },
-        });
-
-        for (const image of imagesToDelete) {
-          const filePath = path.join(uploadsPath, image.path);
-          try {
-            fs.unlinkSync(filePath);
-          } catch (error) {
-            console.error(`Failed to delete file at ${filePath}:`, error);
-          }
-        }
-
-        // ลบข้อมูลใน defectImage และ image สำหรับ imageIds ที่เลือกไว้
-        await prisma.defectImage.deleteMany({
-          where: {
-            defectId: Number(id),
-            imageId: { in: imageIdsToDelete },
-          },
-        });
-
-        await prisma.image.deleteMany({
-          where: { id: { in: imageIdsToDelete } },
-        });
-      }
-      // บันทึกไฟล์ภาพใหม่ลงในฐานข้อมูล
-      for (const file of newImageFiles) {
-        const image = await prisma.image.create({
-          data: {
-            path: file.filename,
-            updatedBy: parseInt(
-              status === ("reported" as DefectStatus)
-                ? defectUserId
-                : supervisorId,
-              10
-            ),
-          },
-        });
-        await prisma.defectImage.create({
-          data: {
-            defectId: Number(id),
-            imageId: image.id,
-          },
-        });
-      }
+      await handleDefectImagesUpdate(Number(id), status, {
+        updatedBy: status === 'reported'
+          ? Number(defectUserId)
+          : Number(supervisorId),
+        supervisorId: Number(supervisorId),
+        deleteExistingImages: deleteExistingImages === 'true',
+        files: newImageFiles
+      })
     }
     // สร้างข้อมูลสำหรับการอัปเดต Defect
     const updateData: any = {};
@@ -687,6 +652,21 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
       // Response
       where: { id: Number(id) },
       include: {
+        supervisor: {
+          select: {
+            id: true,
+            username:true,
+            email:true,
+            role:true,
+            profile: {
+              select: {
+                tel:true,
+                name: true,
+                image: true
+              }
+            },
+          },
+        },
         patrolResult: {
           select: {
             patrol: {
@@ -708,8 +688,13 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
                     supervisor: {
                       select: {
                         id: true,
+                        username:true,
+                        email:true,
+                        role:true,
                         profile: {
-                          include: {
+                          select: {
+                            tel:true,
+                            name:true,
                             image: true,
                           },
                         },
@@ -744,8 +729,11 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
-              include: {
+              select: {
+                tel:true,
+                name:true,
                 image: true,
               },
             },
@@ -756,8 +744,8 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
   }
 }
 
@@ -771,20 +759,27 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
 export async function deleteDefect(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user.userId;
-
     const { id } = req.params;
 
+    // ตรวจสอบ defect ว่ามีอยู่จริง
     const defect = await prisma.defect.findUnique({
-      where: {
-        id: Number(id),
-      },
+      where: { id: Number(id) },
     });
-
     if (!defect) {
-      //เช็ค defect
       res.status(404).json({ message: "Defect not found" });
       return;
     }
+    const validPatrol = await prisma.patrol.findFirst({
+      where: {
+        results: { some: { id: defect.patrolResultId } },
+        patrolChecklists: { some: { userId } },
+      },
+    });
+    if (!validPatrol) {
+      res.status(403).json({ message: "Unauthorized access" });
+      return;
+    }
+
     // ค้นหาภาพที่เกี่ยวข้องกับ Defect นี้
     const existingDefectImages = await prisma.defectImage.findMany({
       where: { defectId: Number(id) },
@@ -793,59 +788,17 @@ export async function deleteDefect(req: Request, res: Response): Promise<void> {
     // ดึง IDs ของภาพที่จะลบ
     const imageIdsToDelete = existingDefectImages.map((img) => img.imageId);
     // ค้นหาข้อมูลภาพที่จะลบ
-    const imagesToDelete = await prisma.image.findMany({
-      where: { id: { in: imageIdsToDelete } },
-      select: { path: true },
-    });
-    // ลบไฟล์ภาพจากที่เก็บในระบบ
-    for (const image of imagesToDelete) {
-      const filePath = path.join(uploadsPath, image.path);
-      try {
-        fs.unlinkSync(filePath);
-      } catch (error) {
-        console.error(`Failed to delete file at ${filePath}:`, error);
-      }
-    }
-    // ลบข้อมูลในฐานข้อมูลที่เชื่อมโยงกับ Defect และภาพ
-    await prisma.defectImage.deleteMany({
-      where: { defectId: Number(id) },
-    });
-    await prisma.image.deleteMany({
-      where: { id: { in: imageIdsToDelete } },
-    });
-    // ตรวจสอบว่าผู้ใช้งานมีสิทธิ์ใน Patrol ที่เกี่ยวข้องกับ Defect นี้หรือไม่
-    const validPatrol = await prisma.patrol.findFirst({
-      where: {
-        results: {
-          some: {
-            id: defect.patrolResultId,
-          },
-        },
-        patrolChecklists: {
-          some: {
-            userId: userId,
-          },
-        },
-      },
-    });
-    // หากไม่พบ Patrol ที่เกี่ยวข้องกับผู้ใช้งานให้แสดงข้อผิดพลาด 404
-    if (!validPatrol) {
-      res
-        .status(404)
-        .json({ message: "You are not associated with this Patrol" });
-      return;
-    }
-    // ลบข้อมูล Defect จากฐานข้อมูล
+    await deleteImages(imageIdsToDelete);
+
+    // ลบ defect หลัก
     await prisma.defect.delete({
-      where: {
-        id: Number(id),
-      },
+      where: { id: Number(id) },
     });
     res.status(200).json({ message: "Defect deleted successfully" });
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -863,15 +816,7 @@ export async function getAllComments(req: Request, res: Response) {
     const { status, startDate, endDate, search } = req.query;
     // สร้างเงื่อนไขหลัก
     const whereConditions: any = {
-      patrolResult: {
-        itemZone: {
-          zone: {
-            supervisor: {
-              id: userId,
-            },
-          },
-        },
-      },
+      supervisorId: userId,
     };
 
     const andConditions: any[] = [];
@@ -889,7 +834,7 @@ export async function getAllComments(req: Request, res: Response) {
 
       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
         andConditions.push({
-          startTime: {
+          timestamp: {
             gte: start,
             lte: end,
           },
@@ -1006,6 +951,7 @@ export async function getAllComments(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
               select: {
                 id: true,
@@ -1023,8 +969,8 @@ export async function getAllComments(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }
@@ -1074,6 +1020,7 @@ export async function confirmComment(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
+            username:true,
             profile: {
               select: {
                 id: true,
@@ -1098,8 +1045,8 @@ export async function confirmComment(req: Request, res: Response) {
     res.status(200).json(result);
     return;
   } catch (error) {
-    console.error(error)
-    res.status(500).json({message: `Internal server error: ${error}`});
+    console.error(error);
+    res.status(500).json({ message: `Internal server error: ${error}` });
     return;
   }
 }

@@ -68,9 +68,14 @@ describe('getPatrol', () => {
                                                         supervisor: {
                                                             select: {
                                                                 id: true,
+                                                                username: true,
+                                                                email: true,
+                                                                role: true,
                                                                 profile: {
                                                                     select: {
                                                                         name: true,
+                                                                        tel: true,
+                                                                        image: true,
                                                                     },
                                                                 },
                                                             },
@@ -88,10 +93,12 @@ describe('getPatrol', () => {
                                 id: true,
                                 email: true,
                                 department: true,
+                                username: true,
                                 role: true,
                                 profile: {
                                     select: {
                                         name: true,
+                                        tel: true,
                                         image: true,
                                     },
                                 },
@@ -110,12 +117,29 @@ describe('getPatrol', () => {
                                         email: true,
                                         department: true,
                                         role: true,
+                                        username: true,
                                         profile: {
                                             select: {
                                                 name: true,
                                                 image: true,
+                                                tel: true
                                             },
                                         },
+                                    },
+                                },
+                            },
+                        },
+                        supervisor: {
+                            select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                role: true,
+                                profile: {
+                                    select: {
+                                        name: true,
+                                        tel: true,
+                                        image: true,
                                     },
                                 },
                             },

@@ -45,7 +45,9 @@ describe('getZone', () => {
                         department: true,
                         createdAt: true,
                         profile: {
-                            include: {
+                            select: {
+                                name: true,
+                                tel: true,
                                 image: true
                             }
                         }
@@ -102,16 +104,13 @@ describe('getLocation', () => {
                                 role: true,
                                 department: true,
                                 createdAt: true,
-                                profile: {
-                                    include: {
-                                        image: true
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                profile: { select: { image: true, tel: true, name: true } },
+
+                            },
+                        },
+                    },
                 },
-            }
+            },
         });
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(locationMock);
@@ -145,8 +144,10 @@ describe('updateSupervisor', () => {
                         department: true,
                         createdAt: true,
                         profile: {
-                            include: {
-                                image: true
+                            select: {
+                                image: true,
+                                name: true,
+                                tel: true
                             }
                         }
                     }

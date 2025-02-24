@@ -1,26 +1,30 @@
+/**
+ * คำอธิบาย:
+ *  หน้าแสดงรายการ Preset ทั้งหมดในระบบ โดยสามารถค้นหา Preset ได้ และสามารถค้นหา Preset ตาม Zone และ Date ได้
+ * Input:
+ * - ไม่มี
+ * Output:
+ * - แสดงรายการ Preset ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Preset แต่ละรายการ และสามารถค้นหา Preset ได้ และสามารถค้นหา Preset ตาม Zone และ Date ได้
+ * - สามารถคลิกเพื่อดูรายละเอียดของ Preset แต่ละรายการ
+ * - สามารถคลิกเพื่อสร้าง Preset ใหม่ได้
+ **/
+
 "use client";
 import { IPreset, IZone } from "@/app/type";
 import Textfield from "@/components/textfield";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchData, formatTime } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
+import { fetchData, formatTime, getInitials } from "@/lib/utils";
+
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +42,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@radix-ui/react-tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import NotFound from "@/components/not-found";
+import { UserTooltip } from "@/components/user-tooltip";
+import { VersionTooltip } from "@/components/version-tooltip";
+import { ZoneTooltip } from "@/components/zone-tooltip";
+import { TextTooltip } from "@/components/text-tooltip";
 
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
@@ -47,38 +64,105 @@ export default function Page() {
   const t = useTranslations("General");
   const z = useTranslations("Zone");
 
-  const [allPreset, setAllPreset] = useState<IPreset[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State สำหรับเปิด/ปิด Dialog
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null); // เก็บ Action ที่จะลบ
+  const router = useRouter();
+  const locale = useLocale();
+  interface IPresetWithExtras extends IPreset {
+    updateByUserName: string;
+    updateByUserImagePath: string;
+  }
 
-  const handleOpenDialog = () => {
+  // ลบจาก API removePreset
+  const removePreset = async (id: number) => {
+    toast({
+      variant: "success",
+      title: a("PresetRemoveSuccessTitle"),
+      description: a("PresetRemoveSuccessDescription"),
+    });
+    try {
+      const response = await fetchData("delete", `/preset/${id}`, true);
+
+      if (response) {
+        setAllPreset((prevPresets) =>
+          prevPresets.filter((preset) => preset.id !== id)
+        );
+        setFilteredPresets((prev) => prev.filter((preset) => preset.id !== id));
+      } else {
+        console.error("Failed to delete Preset: No response from API");
+      }
+    } catch (error) {
+      console.error("An error occurred while deleting the preset:", error);
+    }
+  };
+
+  const handleRemovePreset = (id: number) => {
+    setPendingAction(() => () => removePreset(id)); // ตั้งค่า Action ที่จะลบ
+    setDialogType("delete");
     setIsDialogOpen(true);
   };
+
+  const [allPreset, setAllPreset] = useState<IPresetWithExtras[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // State สำหรับเปิด/ปิด Dialog
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null); // เก็บ Action ที่จะลบ
+  const [dialogType, setDialogType] = useState<string>("");
 
   const handleDialogResult = (result: boolean) => {
     setIsDialogOpen(false);
     if (result && pendingAction) {
       pendingAction(); // Execute the pending action
       setPendingAction(null); // Clear the pending action
+      setDialogType("");
     }
   };
 
-  const router = useRouter();
-  const locale = useLocale();
-
-  const handleEdit = (id: number) => {
-    router.push(`/${locale}/admin/settings/patrol-preset/${id}`);
-  };
   const handleCreatePreset = () => {
     router.push(`/${locale}/admin/settings/patrol-preset/create`);
   };
 
   const getData = async () => {
     try {
-      const data = await fetchData("get", "/presets", true);
-      setAllPreset(data);
+      // Construct query params for the filters
+      const params = new URLSearchParams();
+
+      // Add search term to params
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+
+      // Add selected zones to params
+      if (selectedZones.length > 0) {
+        params.append(
+          "zones",
+          selectedZones.map((zone) => zone.name).join(",")
+        );
+      }
+
+      // Add date range to params
+      if (selectedDateRange?.from) {
+        params.append("startDate", selectedDateRange.from.toISOString());
+      }
+      if (selectedDateRange?.to) {
+        params.append("endDate", selectedDateRange.to.toISOString());
+      }
+
+      // Fetch data using fetchData utility with query params
+      const data = await fetchData(
+        "get",
+        `/presets?${params.toString()}`,
+        true
+      );
+
+      // Validate data format
+      if (!Array.isArray(data)) {
+        console.error("Invalid data format:", data);
+        return []; // Return empty array if data format is incorrect
+      }
+
+      setFilteredPresets(data); // Initially set filtered data to all data
+
+      return data; // Return fetched data
     } catch (error) {
-      console.error("Failed to fetch presets:", error);
+      console.error("Failed to fetch preset data:", error); // Log error
+      return []; // Return empty array on error
     }
   };
 
@@ -86,53 +170,10 @@ export default function Page() {
     getData();
   }, []);
 
-  const handleRemovePreset = (id: number) => {
-    setPendingAction(() => () => removePreset(id)); // ตั้งค่า Action ที่จะลบ
-    handleOpenDialog(); // เปิด Dialog ยืนยัน
-  };
-  const handleRemoveSuccess = (id: number) => {
-    setAllPreset((prevPresets) =>
-      prevPresets.filter((preset) => preset.id !== id)
-    );
-
-    toast({
-      variant: "success",
-      title: a("PresetRemoveSuccessTitle"),
-      description: a("PresetRemoveSuccessDescription"),
-    });
-  };
-  // ลบจาก API removePreset
-  const removePreset = async (id: number) => {
-    try {
-      await fetchData("delete", `/preset/${id}`, true);
-      handleRemoveSuccess(id);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
   // search bar
-
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  // State สำหรับเก็บ sort type และ order
-  const [sort, setSort] = useState<{ by: string; order: string }>({
-    by: "ID", // default: sort by ID
-    order: "Ascending", // default: ascending order
-  });
-
-  // ฟังก์ชันเปลี่ยนค่า Sort Type และ Order
-  const handleSortChange = (type: string, value: string) => {
-    setSort((prevSort) => ({
-      ...prevSort,
-      [type]: value,
-    }));
-  };
-
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [sortOption, setSortOption] = useState<"Name" | "ModifiedDate">("Name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedZones, setSelectedZones] = useState<IZone[]>([]);
   const [tempSelectedZones, setTempSelectedZones] = useState<IZone[]>([]);
   const [selectedDateRange, setSelectedDateRange] = useState<{
@@ -143,145 +184,129 @@ export default function Page() {
     from?: Date;
     to?: Date;
   }>({});
-  const [filteredPreset, setFilteredPresets] = useState<IPreset[]>(allPreset);
+  const [filteredPreset, setFilteredPresets] =
+    useState<IPresetWithExtras[]>(allPreset);
 
-  const filteredPresets = allPreset.filter((preset) => {
-    const lowerSearchTerm = searchTerm.toLowerCase();
+  // Filter by search term
+  const filterBySearchTerm = (presets: IPresetWithExtras[]) => {
+    if (!searchTerm) return presets;
 
-    // ค้นหาใน title, description และ zones
-    const titleMatch = preset.title.toLowerCase().includes(lowerSearchTerm);
-    const descriptionMatch = preset.description
-      .toLowerCase()
-      .includes(lowerSearchTerm);
-    const zonesMatch =
-      preset.zones &&
-      Array.isArray(preset.zones) &&
-      preset.zones.some((zone: string | { name: string }) => {
-        const zoneKey = typeof zone === "string" ? zone : zone?.name;
-        if (!zoneKey) return false;
+    const cleanSearch = searchTerm.toLowerCase().trim();
 
-        const translatedZone = z(zoneKey);
-        return translatedZone.toLowerCase().includes(lowerSearchTerm);
-      });
+    return presets.filter((preset) => {
+      const titleMatch = preset.title.toLowerCase().includes(cleanSearch);
+      const descMatch = preset.description?.toLowerCase().includes(cleanSearch);
+      return titleMatch || descMatch;
+    });
+  };
+  // Fetch and apply search filter on search term change
+  useEffect(() => {
+    const fetchAndFilter = async () => {
+      const freshData = await getData(); // Fetch fresh data
+      const filtered = filterBySearchTerm(freshData); // Apply search term filter
+      setFilteredPresets(filtered); // Update state with filtered data
+    };
+    fetchAndFilter();
+  }, [searchTerm]); // Trigger fetch when search term changes
 
-    // เพิ่มเงื่อนไข selectedZones
-    const selectedZonesMatch =
-      selectedZones.length === 0 || // ถ้าไม่มีการเลือกโซน จะแสดงทั้งหมด
-      (preset.zones &&
-        preset.zones.some((zone: string | { name: string }) => {
-          const zoneKey = typeof zone === "string" ? zone : zone?.name;
-          return selectedZones.some(
-            (selectedZone) =>
-              selectedZone.name.toLowerCase() === zoneKey.toLowerCase()
-          );
-        }));
+  // Apply filters (zones, date range, and search term)
+  const applyFilters = async () => {
+    const freshData = await getData(); // Fetch fresh data
 
-    return (titleMatch || descriptionMatch || zonesMatch) && selectedZonesMatch;
-  });
+    // Update selected filters
+    setSelectedZones(tempSelectedZones);
+    setSelectedDateRange(tempDateRange);
 
-  // ฟังก์ชันจัดเรียงข้อมูล
-  const sortedPresets = filteredPresets.sort((a, b) => {
-    if (sort.by === "Date") {
-      // จัดเรียงตามวันที่อัปเดต
-      const dateA = new Date(a.updatedAt).getTime();
-      const dateB = new Date(b.updatedAt).getTime();
-
-      if (sort.order === "Ascending") {
-        return dateA - dateB; // น้อยไปมาก (วันที่เก่าก่อน)
-      } else {
-        return dateB - dateA; // มากไปน้อย (วันที่ใหม่ก่อน)
-      }
-    } else if (sort.by === "Alphabet") {
-      // จัดเรียงตามชื่อ (title)
-      const titleA = a.title.toLowerCase();
-      const titleB = b.title.toLowerCase();
-
-      if (sort.order === "Ascending") {
-        return titleA.localeCompare(titleB); // A-Z
-      } else {
-        return titleB.localeCompare(titleA); // Z-A
-      }
-    }
-    return 0; // หากไม่มีเงื่อนไข
-  });
-
-  const applyFilters = () => {
-    const filtered = allPreset.filter((preset) => {
+    // Apply filters for zones and date range
+    const filtered = freshData.filter((preset) => {
       const matchesZones =
-        tempSelectedZones.length === 0 || // ถ้าไม่มีการเลือก Zone จะแสดงทั้งหมด
+        tempSelectedZones.length === 0 || // If no zones are selected, show all
         preset.zones.some((zone) =>
-          tempSelectedZones.some((selectedZone) => {
-            const zoneName = zone?.name?.toLowerCase(); // ตรวจสอบ zone.name
-            const selectedZoneName = selectedZone?.name?.toLowerCase(); // ตรวจสอบ selectedZone.name
-  
-            return zoneName && selectedZoneName && zoneName === selectedZoneName;
-          })
+          tempSelectedZones.some(
+            (selectedZone) =>
+              selectedZone.name.toLowerCase() === zone.name.toLowerCase()
+          )
         );
-  
+
       const matchesDateRange =
         (!tempDateRange?.from ||
           new Date(preset.updatedAt) >= tempDateRange.from) &&
         (!tempDateRange?.to || new Date(preset.updatedAt) <= tempDateRange.to);
-  
+
       return matchesZones && matchesDateRange;
     });
-  
-    // อัปเดต filteredPreset
-    setSelectedZones(tempSelectedZones);
-    setSelectedDateRange(tempDateRange);
-    setFilteredPresets(filtered);
+
+    // Apply search term filter
+    const filteredWithSearch = filterBySearchTerm(filtered);
+    setFilteredPresets(filteredWithSearch); // Update the filtered state
   };
-  
 
-  useEffect(() => {
-    const fetchAndFilter = async () => {
-      const freshData = allPreset; // ใช้ข้อมูลที่มีอยู่
-      const filtered = freshData.filter((preset) => {
-        const matchesDateRange =
-          (!tempDateRange?.from ||
-            new Date(preset.updatedAt) >= tempDateRange.from) &&
-          (!tempDateRange?.to ||
-            new Date(preset.updatedAt) <= tempDateRange.to);
-
-        return matchesDateRange;
-      });
-
-      setFilteredPresets(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-    };
-
-    fetchAndFilter();
-  }, [tempDateRange]); // ทำงานเมื่อ tempDateRange เปลี่ยนแปลง
-
-  const resetFilters = () => {
+  const resetFilters = async () => {
+    const data = await fetchData("get", `/presets`, true);
     setTempSelectedZones([]);
     setTempDateRange({});
     setSelectedZones([]);
     setSelectedDateRange({});
-    setFilteredPresets(allPreset); // รีเซ็ตข้อมูลที่กรองแล้วเป็นทั้งหมด
+  };
+
+  const [sortedPresets, setSortedPresets] = useState<IPresetWithExtras[]>([]);
+
+  useEffect(() => {
+    const sorted = [...filteredPreset].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortOption === "Name") {
+        comparison = a.title.localeCompare(b.title);
+      } else if (sortOption === "ModifiedDate") {
+        comparison =
+          new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    setSortedPresets(sorted); // Update sorted checklists state
+  }, [filteredPreset, sortOption, sortOrder]); // Dependencies to trigger the effect
+
+  const handleEdit = (id: number) => {
+    // Find the preset by id from the sortedPresets array
+    const preset = sortedPresets.find((p) => p.id === id);
+
+    // Redirect to the error page if preset or zones are missing
+    if (!preset?.zones?.length || !preset.zones.every((zone) => zone.userId)) {
+      router.push(
+        `/${locale}/admin/settings/patrol-preset/error/unassinged-zone`
+      );
+    } else {
+      // If all zones have a userId, navigate to the patrol preset page
+      router.push(`/${locale}/admin/settings/patrol-preset/${id}`);
+    }
   };
 
   return (
-    <div>
-      <div className="mb-4"></div>
-      <div className="flex flex-row justify-between mb-4">
+    <div className="flex flex-col gap-4 ">
+      <div className="flex flex-row justify-between pt-2">
         <div className="text-2xl font-bold">{t("SettingsPatrolPreset")}</div>
-        <Button className="flex flex-row gap-2" onClick={handleCreatePreset}>
+        <Button
+          variant="primary"
+          className="flex flex-row gap-2"
+          onClick={handleCreatePreset}
+        >
           <span className="material-symbols-outlined text-2xl">add</span>
           <div className="text-lg">{t("CreatePreset")}</div>
         </Button>
       </div>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2">
         <Textfield
           iconName="search"
           showIcon={true}
           placeholder={t("Search")}
-          onChange={handleSearch}
+          onChange={(e) => setSearchTerm(e.target.value)}
           value={searchTerm}
         />
-        <DropdownMenu onOpenChange={(open) => setIsSortOpen(open)}>
+        <DropdownMenu>
           <DropdownMenuTrigger
-            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium 
-      ${isSortOpen ? "border border-destructive" : "border-none"}`}
+            className={`custom-shadow px-[10px] bg-card w-auto h-[40px] gap-[10px] inline-flex items-center justify-center rounded-md text-sm font-medium `}
           >
             <span className="material-symbols-outlined">swap_vert</span>
             <div className="text-lg">{t("Sort")}</div>
@@ -292,18 +317,20 @@ export default function Page() {
               {t("SortBy")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
-              value={sort.by}
-              onValueChange={(value) => handleSortChange("by", value)}
+              value={sortOption}
+              onValueChange={(value) =>
+                setSortOption(value as "Name" | "ModifiedDate")
+              }
             >
               <DropdownMenuRadioItem
-                value="Alphabet"
+                value="Name"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
                 {t("Name")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                value="Date"
+                value="ModifiedDate"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
@@ -316,18 +343,18 @@ export default function Page() {
               {t("Order")}
             </DropdownMenuLabel>
             <DropdownMenuRadioGroup
-              value={sort.order}
-              onValueChange={(value) => handleSortChange("order", value)}
+              value={sortOrder}
+              onValueChange={(value) => setSortOrder(value as "desc" | "asc")}
             >
               <DropdownMenuRadioItem
-                value="Ascending"
+                value="asc"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
                 {t("Ascending")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                value="Descending"
+                value="desc"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
@@ -374,57 +401,63 @@ export default function Page() {
                 >
                   <Button
                     variant={"secondary"}
-                    className="w-full h-[36px] rounded-md bg-secondary justify-start text-left gap-[13px] font-normal text-base pl-2"
+                    className="w-full h-[36px] rounded-md bg-secondary justify-start text-left gap-[13px] font-normal text-base pl-2 flex"
                   >
-                    <span className="material-symbols-outlined ml-1">
+                    <span className="material-symbols-outlined ml-1 shrink-0">
                       location_on
                     </span>
-                    {selectedZones.length > 0
-                      ? selectedZones.map((zone) => z(zone.name)).join(", ")
-                      : t("SelectZones")}
+                    <p className="truncate w-[200px]">
+                      {selectedZones.length > 0
+                        ? selectedZones.map((zone) => z(zone.name)).join(", ")
+                        : t("SelectZones")}
+                    </p>
                   </Button>
                 </AlertDialogTrigger>
 
                 <AlertDialogContent className="w-full sm:w-[40%] md:w-[50%] lg:w-[100%] max-w-[1200px] rounded-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-2xl">
-                      {t("FilterByZone")}
+                      {t("FilterByZoneTitle")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                      {t(
-                        "PleaseSelectTheZonesToDisplayOnlyTheRelevantData"
-                      )}
+                      {t("FilterByZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div>
-                    <div className="text-muted-foreground flex items-center">
-                      <span className="material-symbols-outlined">
-                        location_on
-                      </span>
-                      {t("Zone")}
-                    </div>
-                    <div className="flex justify-center bg-secondary rounded-lg py-4">
-                      <Map
-                        disable={false}
-                        onZoneSelect={(zones: IZone[]) =>
-                          setTempSelectedZones(zones)
-                        } // อัปเดต tempSelectedZones
-                      />
-                    </div>
-                  </div>
 
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-primary"
-                      onClick={() => {
-                        // กด Done แค่เซฟชั่วคราวใน tempSelectedZones
-                        setTempSelectedZones(tempSelectedZones);
-                      }}
-                    >
-                      {t("Done")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
+                  <AlertDialogContent className="w-full sm:w-[50%] md:w-[70%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="text-muted-foreground flex items-center gap-1">
+                        <span className="material-symbols-outlined">
+                          location_on
+                        </span>
+                        <p>{t("Zone")}</p>
+                      </div>
+                      <div className=" flex justify-center bg-secondary rounded-md py-4">
+                        <Map
+                          disable={false}
+                          initialSelectedZones={selectedZones.map(
+                            (zone) => zone.id
+                          )}
+                          onZoneSelect={(zones: IZone[]) =>
+                            setTempSelectedZones(zones)
+                          } // อัปเดต tempSelectedZones
+                        />
+                      </div>
+                    </div>
+
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-primary"
+                        onClick={() => {
+                          // กด Done แค่เซฟชั่วคราวใน tempSelectedZones
+                          setSelectedZones(tempSelectedZones);
+                        }}
+                      >
+                        {t("Done")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
@@ -433,158 +466,152 @@ export default function Page() {
               <Button size="sm" variant="secondary" onClick={resetFilters}>
                 {t("Reset")}
               </Button>
-              <Button size="sm" onClick={applyFilters}>
+              <Button variant="primary" size="sm" onClick={applyFilters}>
                 {t("Apply")}
               </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <ScrollArea className="h-full overflow-hidden rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-290px)]">
+        <div className="space-y-4">
+          {(() => {
+            return sortedPresets.length > 0 ? (
+              sortedPresets.map((preset) => (
+                <div
+                  onClick={() => {
+                    handleEdit(preset.id);
+                  }}
+                  key={preset.id}
+                  className="bg-card rounded-lg custom-shadow p-4 cursor-pointer h-[219px]"
+                >
+                  {/* Title and Details */}
+                  <div className="flex justify-between overflow-hidden text-ellipsis">
+                    <div className="flex flex-col gap-4 min-w-0">
+                      <div className="flex flex-col gap-1 justify-start items-start">
+                        {/* Version with Tooltip */}
+                        <VersionTooltip object={preset}>
+                          <div className="flex justify-center">
+                            <span className="material-symbols-outlined mr-1">
+                              history
+                            </span>
+                            {t("Version")} {preset.version}
+                          </div>
+                        </VersionTooltip>
+                        {/* Title */}
+                        <h2 className="text-xl font-semibold truncate">
+                          {preset.title}
+                        </h2>
+                      </div>
+                      {/* Zones */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="material-symbols-outlined">
+                          location_on
+                        </span>
+                        <ZoneTooltip zones={preset.zones}>
+                          <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-[600px] truncate min-w-0">
+                            {preset.zones && preset.zones.length > 0
+                              ? preset.zones.map((zone, index) => (
+                                <span
+                                  key={index}
+                                  className={
+                                    zone.userId ? "" : "  text-destructive"
+                                  }
+                                >
+                                  {z(zone.name)}
+                                  {index < preset.zones.length - 1 && ", "}
+                                </span>
+                              ))
+                              : z("NoZonesAvailable")}
+                          </div>
+                        </ZoneTooltip>
+                      </div>
+                      {/* Description */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="material-symbols-outlined">
+                          data_info_alert
+                        </span>
+                        <TextTooltip object={preset.description}>
 
-      <div className="space-y-4">
-        {filteredPresets.map((preset) => (
-          <div
-            key={preset.id}
-            className="bg-card rounded-lg shadow p-4  h-[220px]"
-          >
-            {/* Version with Tooltip */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-card-foreground text-base flex items-center hover:bg-secondary m-0 p-0"
-                  >
-                    <span className="material-symbols-outlined mr-1">
-                      history
-                    </span>
-                    {t("Version")} {preset.version}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="ml-[129px]">
-                  <div className="flex flex-col gap-4 items-start bg-card rounded-lg h-[175px] w-[300px] px-6 py-4">
-                    <span className="text-card-foreground text-lg font-bold flex items-center ">
-                      <span className="material-symbols-outlined mr-1">
-                        history
-                      </span>
-                      {t("Version")} {preset.version}
-                    </span>
-                    <div className="flex flex-col justify-start items-start ">
-                      <div className="flex flex-row justify-center items-center gap-2 text-muted-foreground">
-                        <div className="text-muted-foreground">
-                          {t("UpdateBy")}
-                        </div>
-                        {(preset as any).updateByUserImagePath ? (
-                          <Avatar>
-                            <AvatarImage
-                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${
-                                (preset as any).updateByUserImagePath
-                              }`}
-                            />
-                            <AvatarFallback>
-                              {(preset as any).updateByUserName
-                                ?.charAt(0)
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <Skeleton className="h-12 w-12 rounded-full" />
-                        )}
-                        {(preset as any).updateByUserName}
-                      </div>
-                      <div className="flex gap-2 text-muted-foreground">
-                        <div className="text-muted-foreground">
-                          {t("UpdateAt")}
-                        </div>
-                        {formatTime(preset.updatedAt)}
-                      </div>
-                      <div className="flex justify-between w-full">
-                        <div className="font-bold text-lg text-muted-foreground">
-                          {t("Total")}
-                        </div>
-                        <div className="font-bold text-lg text-muted-foreground">
-                          {preset.version} {t("Version")}
-                        </div>
+                          <div className="text-sm text-muted-foreground truncate w-[700px]">
+                            {preset.description}
+                          </div>
+                        </TextTooltip>
+
                       </div>
                     </div>
+
+                    {/* Action Buttons */}
                   </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                  <div className="flex flex-row justify-end items-end ">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild
+                        className={
+                          buttonVariants({
+                          variant: "ghost",
+                          size: "icon",
+                        })}
+                      >
+                        <span className="material-symbols-outlined text-input">
+                          more_vert
+                        </span>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="w-[80px] px-4 py-2"
+                        side="bottom"
+                      >
+                        <div
+                          onClick={() => {
+                            handleEdit(preset.id);
+                          }}
+                          key={preset.id}
+                          className="text-lg cursor-pointer "
+                        >
+                          {t("Edit")}
+                        </div>
 
-            {/* Title and Details */}
-            <div className="flex justify-between">
-              <div className="flex flex-col gap-2">
-                {/* Title */}
-                <h2 className="text-xl font-semibold">{preset.title}</h2>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemovePreset(preset.id);
+                          }}
+                          className="text-destructive text-lg cursor-pointer hover:text-transparent-50"
+                        >
+                          {t("Delete")}
+                        </div>
 
-                {/* Zones */}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="material-symbols-outlined">location_on</span>
-                  <p className="truncate">
-                    {preset.zones && preset.zones.length > 0
-                      ? preset.zones.map((zone) => z(zone)).join(", ")
-                      : z("NoZonesAvailable")}{" "}
-                  </p>
-                </div>
-
-                {/* Description */}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="material-symbols-outlined">
-                    data_info_alert
-                  </span>
-                  <div className="text-sm text-muted-foreground">
-                    {preset.description}
+                        {/* แสดง AlertCustom เฉพาะเมื่อ dialogType === "delete" */}
+                        {isDialogOpen && dialogType === "delete" && (
+                          <AlertCustom
+                            title={a("PresetRemoveConfirmTitle")}
+                            description={a("PresetRemoveConfirmDescription")}
+                            primaryButtonText={t("Confirm")}
+                            primaryIcon="check"
+                            secondaryButtonText={t("Cancel")}
+                            backResult={(result) => handleDialogResult(result)}
+                          />
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-            </div>
-            <div className="flex flex-col items-end gap-2 mt-5">
-              <DropdownMenu>
-                <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" className="w-[45px] h-[45px]">
-                    <span className="material-symbols-outlined items-center text-input">
-                      more_vert
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="p-0">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      handleEdit(preset.id);
-                    }}
-                  >
-                    <h1>{t("Detail")}</h1>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemovePreset(preset.id);
-                    }}
-                  >
-                    <h1 className="text-destructive cursor-pointer">
-                      {t("Delete")}
-                    </h1>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {isDialogOpen && (
-                <AlertCustom
-                  title={a("PresetRemoveConfirmTitle")}
-                  description={a("PresetRemoveConfirmDescription")}
-                  primaryButtonText={t("Confirm")}
-                  primaryIcon="check"
-                  secondaryButtonText={t("Cancel")}
-                  backResult={handleDialogResult}
+              ))
+            ) : (
+              <div className="col-span-full min-h-[261px]">
+                <NotFound
+                  icon="quick_reference_all"
+                  title="NoFoundPresetsAvailable"
+                  description="NotFoundPresetsDescription"
                 />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+              </div>
+            );
+          })()}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

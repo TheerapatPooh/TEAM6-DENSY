@@ -1,53 +1,47 @@
 // __mocks__/patrol.mock.ts
 export const patrolMock = {
     "id": 3,
-    "date": "2024-01-11T17:00:00.000Z",
-    "startTime": "2025-01-12T11:13:21.517Z",
-    "endTime": null,
-    "duration": null,
-    "status": "on_going",
+    "date": "2025-02-22T17:00:00.000Z",
+    "startTime": "2025-02-23T14:54:08.462Z",
+    "endTime": "2025-02-23T15:12:16.422Z",
+    "duration": "0h 18m 7s",
+    "status": "completed",
     "presetId": 1,
     "preset": {
         "id": 1,
-        "title": "Daily Cleanliness Check",
-        "description": "การตรวจสอบความสะอาดและความปลอดภัยในพื้นที่ทำงานประจำวัน โดยเฉพาะการดูแลพื้นและความสะอาดของพื้นที่ต้อนรับ"
+        "title": "ASSEMBLY LINE ZONE",
+        "description": "โซนสำหรับการประกอบชิ้นส่วนและผลิตสินค้า ตรวจสอบความเรียบร้อยของสายการผลิตและเครื่องจักร",
+        "version": 1
     },
     "patrolChecklists": [
         {
-            "id": 5,
+            "id": 7,
             "patrolId": 3,
-            "checklistId": 3,
+            "checklistId": 1,
             "userId": 3,
             "checklist": {
-                "id": 3,
-                "title": "Cleanliness Inspection",
+                "id": 1,
+                "title": "Safety Inspection",
                 "items": [
                     {
-                        "id": 8,
-                        "name": "Floor Cleanliness Check",
-                        "type": "environment",
-                        "checklistId": 3,
+                        "id": 1,
+                        "name": "Fire Extinguisher Check",
+                        "type": "safety",
+                        "checklistId": 1,
                         "itemZones": [
                             {
                                 "zone": {
-                                    "id": 4,
-                                    "name": "quality_control_zone",
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
                                     "supervisor": {
-                                        "id": 6,
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
                                         "profile": {
-                                            "name": "David Wilson"
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "zone": {
-                                    "id": 6,
-                                    "name": "customer_service_zone",
-                                    "supervisor": {
-                                        "id": 8,
-                                        "profile": {
-                                            "name": "Jack Danial"
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
                                         }
                                     }
                                 }
@@ -55,19 +49,49 @@ export const patrolMock = {
                         ]
                     },
                     {
-                        "id": 9,
-                        "name": "Trash Disposal Check",
-                        "type": "environment",
-                        "checklistId": 3,
+                        "id": 2,
+                        "name": "Emergency Exit Sign Check",
+                        "type": "safety",
+                        "checklistId": 1,
                         "itemZones": [
                             {
                                 "zone": {
-                                    "id": 6,
-                                    "name": "customer_service_zone",
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
                                     "supervisor": {
-                                        "id": 8,
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
                                         "profile": {
-                                            "name": "Jack Danial"
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 3,
+                        "name": "First Aid Kit Check",
+                        "type": "safety",
+                        "checklistId": 1,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
+                                    "supervisor": {
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
+                                        "profile": {
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
                                         }
                                     }
                                 }
@@ -80,9 +104,11 @@ export const patrolMock = {
                 "id": 3,
                 "email": null,
                 "department": null,
+                "username": "inspector2",
                 "role": "inspector",
                 "profile": {
                     "name": "Jame Smith",
+                    "tel": "0987654321",
                     "image": {
                         "id": 1,
                         "path": "1728239317254-Scan_20220113 (2).png",
@@ -93,19 +119,19 @@ export const patrolMock = {
             }
         },
         {
-            "id": 6,
+            "id": 8,
             "patrolId": 3,
-            "checklistId": 4,
+            "checklistId": 2,
             "userId": 2,
             "checklist": {
-                "id": 4,
-                "title": "Security Inspection",
+                "id": 2,
+                "title": "Maintenance Inspection",
                 "items": [
                     {
-                        "id": 10,
-                        "name": "CCTV Functionality Check",
-                        "type": "safety",
-                        "checklistId": 4,
+                        "id": 4,
+                        "name": "Electrical Panel Inspection",
+                        "type": "maintenance",
+                        "checklistId": 2,
                         "itemZones": [
                             {
                                 "zone": {
@@ -113,32 +139,13 @@ export const patrolMock = {
                                     "name": "assembly_line_zone",
                                     "supervisor": {
                                         "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
                                         "profile": {
-                                            "name": "Michael Johnson"
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "zone": {
-                                    "id": 3,
-                                    "name": "raw_materials_storage_zone",
-                                    "supervisor": {
-                                        "id": 5,
-                                        "profile": {
-                                            "name": "Emily Davis"
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "zone": {
-                                    "id": 4,
-                                    "name": "quality_control_zone",
-                                    "supervisor": {
-                                        "id": 6,
-                                        "profile": {
-                                            "name": "David Wilson"
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
                                         }
                                     }
                                 }
@@ -146,31 +153,49 @@ export const patrolMock = {
                         ]
                     },
                     {
-                        "id": 11,
-                        "name": "Access Control System Check",
-                        "type": "safety",
-                        "checklistId": 4,
+                        "id": 5,
+                        "name": "Air Conditioning System Check",
+                        "type": "maintenance",
+                        "checklistId": 2,
                         "itemZones": [
                             {
                                 "zone": {
-                                    "id": 4,
-                                    "name": "quality_control_zone",
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
                                     "supervisor": {
-                                        "id": 6,
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
                                         "profile": {
-                                            "name": "David Wilson"
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
                                         }
                                     }
                                 }
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        "id": 6,
+                        "name": "Lighting System Check",
+                        "type": "maintenance",
+                        "checklistId": 2,
+                        "itemZones": [
                             {
                                 "zone": {
-                                    "id": 5,
-                                    "name": "it_zone",
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
                                     "supervisor": {
-                                        "id": 7,
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
                                         "profile": {
-                                            "name": "Sophia Taylor"
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
                                         }
                                     }
                                 }
@@ -183,9 +208,110 @@ export const patrolMock = {
                 "id": 2,
                 "email": null,
                 "department": null,
+                "username": "inspector1",
                 "role": "inspector",
                 "profile": {
                     "name": "John Doe",
+                    "tel": "1234567890",
+                    "image": null
+                }
+            }
+        },
+        {
+            "id": 9,
+            "patrolId": 3,
+            "checklistId": 3,
+            "userId": 2,
+            "checklist": {
+                "id": 3,
+                "title": "Cleanliness Inspection",
+                "items": [
+                    {
+                        "id": 7,
+                        "name": "Floor Cleanliness Check",
+                        "type": "environment",
+                        "checklistId": 3,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
+                                    "supervisor": {
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
+                                        "profile": {
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 8,
+                        "name": "Trash Disposal Check",
+                        "type": "environment",
+                        "checklistId": 3,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
+                                    "supervisor": {
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
+                                        "profile": {
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 9,
+                        "name": "Water Quality Inspection",
+                        "type": "environment",
+                        "checklistId": 3,
+                        "itemZones": [
+                            {
+                                "zone": {
+                                    "id": 2,
+                                    "name": "assembly_line_zone",
+                                    "supervisor": {
+                                        "id": 4,
+                                        "username": "supervisor2",
+                                        "email": "supervisor2@example.com",
+                                        "role": "supervisor",
+                                        "profile": {
+                                            "name": "Michael Johnson",
+                                            "tel": "1122334455",
+                                            "image": null
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "inspector": {
+                "id": 2,
+                "email": null,
+                "department": null,
+                "username": "inspector1",
+                "role": "inspector",
+                "profile": {
+                    "name": "John Doe",
+                    "tel": "1234567890",
                     "image": null
                 }
             }
@@ -193,74 +319,191 @@ export const patrolMock = {
     ],
     "results": [
         {
-            "id": 1,
-            "status": null,
-            "itemId": 8,
-            "zoneId": 4,
-            "patrolId": 3,
-            "defects": [],
-            "comments": []
-        },
-        {
-            "id": 2,
-            "status": null,
-            "itemId": 8,
-            "zoneId": 6,
-            "patrolId": 3,
-            "defects": [],
-            "comments": []
-        },
-        {
-            "id": 3,
-            "status": null,
-            "itemId": 9,
-            "zoneId": 6,
-            "patrolId": 3,
-            "defects": [],
-            "comments": []
-        },
-        {
-            "id": 4,
-            "status": null,
-            "itemId": 10,
+            "id": 19,
+            "status": true,
+            "itemId": 1,
             "zoneId": 2,
             "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
             "defects": [],
             "comments": []
         },
         {
-            "id": 5,
-            "status": null,
-            "itemId": 10,
-            "zoneId": 3,
+            "id": 20,
+            "status": true,
+            "itemId": 2,
+            "zoneId": 2,
             "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
             "defects": [],
             "comments": []
         },
         {
-            "id": 6,
-            "status": null,
-            "itemId": 10,
-            "zoneId": 4,
+            "id": 21,
+            "status": true,
+            "itemId": 3,
+            "zoneId": 2,
             "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
             "defects": [],
             "comments": []
         },
         {
-            "id": 7,
-            "status": null,
-            "itemId": 11,
-            "zoneId": 4,
+            "id": 22,
+            "status": true,
+            "itemId": 4,
+            "zoneId": 2,
             "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
             "defects": [],
             "comments": []
         },
         {
-            "id": 8,
-            "status": null,
-            "itemId": 11,
-            "zoneId": 5,
+            "id": 23,
+            "status": false,
+            "itemId": 5,
+            "zoneId": 2,
             "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 24,
+            "status": true,
+            "itemId": 6,
+            "zoneId": 2,
+            "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 25,
+            "status": true,
+            "itemId": 7,
+            "zoneId": 2,
+            "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 26,
+            "status": true,
+            "itemId": 8,
+            "zoneId": 2,
+            "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
+            "defects": [],
+            "comments": []
+        },
+        {
+            "id": 27,
+            "status": true,
+            "itemId": 9,
+            "zoneId": 2,
+            "patrolId": 3,
+            "supervisorId": 4,
+            "supervisor": {
+                "id": 4,
+                "username": "supervisor2",
+                "email": "supervisor2@example.com",
+                "role": "supervisor",
+                "profile": {
+                    "name": "Michael Johnson",
+                    "tel": "1122334455",
+                    "image": null
+                }
+            },
             "defects": [],
             "comments": []
         }
@@ -422,6 +665,7 @@ export const allPatrolsResponseMock = [
     {
         "id": 3,
         "date": "2025-01-11T17:00:00.000Z",
+        "disabled": false,
         "status": "on_going",
         "preset": {
             "id": 1,

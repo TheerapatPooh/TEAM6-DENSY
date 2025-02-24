@@ -55,7 +55,6 @@ export default function Page() {
       const queryString = buildQueryString(filter, searchTerm);
       const data = await fetchData("get", `/defects?${queryString}`, true);
       setAllDefects(data);
-      setDefectType(filter.defectTypes)
     } catch (error) {
       console.error("Failed to fetch patrol data:", error);
     }
@@ -87,12 +86,10 @@ export default function Page() {
   };
 
   const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
-  const [defectType, setDefectType] = useState<string[] | null>([])
-
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "DefectDate",
-    order: "Ascending",
+    order: "Descending",
   });
 
   const toggleTypeFilter = (type: itemType, checked: boolean) => {
@@ -127,7 +124,6 @@ export default function Page() {
 
   const applyFilter = () => {
     getAllDefects()
-    setDefectType(filter.defectTypes)
   };
 
   const resetFilter = () => {
@@ -367,11 +363,11 @@ export default function Page() {
         className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
       >
         <div className="flex flex-col gap-y-4">
-          {allDefects.length === 0 || defectType.length === 0 ? (
+          {allDefects.length === 0 ? (
             <NotFound
               icon="campaign"
-              title="NoDefectsFoundTitle"
-              description="NoDefectsFoundDescription"
+              title="NoDefectsReported"
+              description="NoDefectsDescription"
             />
           ) : (
             allDefects.map((defect) => (

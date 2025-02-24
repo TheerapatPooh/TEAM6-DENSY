@@ -60,6 +60,7 @@
     "react-konva": "^18.2.10",
     "react-lines-ellipsis": "^0.15.4",
     "react-swipeable-list": "^1.10.0",
+    "recharts": "^2.15.1",
     "sharp": "^0.33.5",
     "socket.io-client": "^4.8.0",
     "sonner": "^1.5.0",

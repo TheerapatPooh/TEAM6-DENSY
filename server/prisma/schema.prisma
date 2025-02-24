@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
 }
 
@@ -14,25 +14,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Session {
+  id        Int      @id @default(autoincrement()) @map("session_id")
+  userId    Int      @unique @map("session_user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique @map("session_token")
+  createdAt DateTime @default(now()) @map("session_created_at")
+  expiresAt DateTime @map("session_expires_at")
+}
+
 model User {
-  id          Int      @id @default(autoincrement()) @map("us_id")
-  username    String   @unique @map("us_username")
-  email       String?  @unique @map("us_email")
-  password    String   @map("us_password")
-  role        Role     @map("us_role")
-  department  String?  @map("us_department")
-  createdAt   DateTime @default(now()) @map("us_created_at")
-  active      Boolean @default(true)@map("us_active")
-          
-  presets        Preset[]
-  comments       Comment[]
-  profile        Profile?
-  notifications  Notification[]
-  defects        Defect[]
-  zone          Zone?
-  patrolChecklists PatrolChecklist[]
-  images           Image[]
-  Checklists       Checklist[]
+  id                Int       @id @default(autoincrement()) @map("us_id")
+  username          String    @unique @map("us_username")
+  email             String?   @unique @map("us_email")
+  password          String    @map("us_password")
+  role              Role      @map("us_role")
+  department        String?   @map("us_department")
+  createdAt         DateTime  @default(now()) @map("us_created_at")
+  active            Boolean   @default(true) @map("us_active")
+
+  resetToken        String?   @map("us_reset_token")
+  resetTokenExpires DateTime? @map("us_reset_token_expires")
+  
+  presets            Preset[]
+  comments           Comment[]
+  profile            Profile?
+  notifications      Notification[]
+  defects            Defect[]
+  supervisedDefects  Defect[]          @relation(name: "DefectSupervisor")
+  supervisedComments Comment[]         @relation(name: "CommentSupervisor")
+  zone               Zone?
+  patrolChecklists   PatrolChecklist[]
+  images             Image[]
+  Checklists         Checklist[]
+  PatrolResult       PatrolResult[]
+  Session            Session?
 
   @@map("users")
 }
@@ -46,9 +62,11 @@ model Defect {
   startTime      DateTime     @default(now()) @map("df_start_time")
   endTime        DateTime     @default(now()) @map("df_finish_time")
   userId         Int          @map("df_us_id")
+  supervisorId   Int          @map("df_su_id")
   patrolResultId Int          @map("df_pr_id")
 
   user         User          @relation(fields: [userId], references: [id])
+  supervisor   User          @relation(name: "DefectSupervisor", fields: [supervisorId], references: [id])
   patrolResult PatrolResult  @relation(fields: [patrolResultId], references: [id])
   images       DefectImage[]
 
@@ -158,16 +176,18 @@ model Checklist {
 }
 
 model PatrolResult {
-  id       Int      @id @default(autoincrement()) @map("pr_id")
-  status   Boolean? @map("pr_status")
-  itemId   Int      @map("pr_itze_it_id")
-  zoneId   Int      @map("pr_itze_ze_id")
-  patrolId Int      @map("pr_pt_id")
+  id           Int      @id @default(autoincrement()) @map("pr_id")
+  status       Boolean? @map("pr_status")
+  itemId       Int      @map("pr_itze_it_id")
+  zoneId       Int      @map("pr_itze_ze_id")
+  patrolId     Int      @map("pr_pt_id")
+  supervisorId Int      @map("pr_su_id")
 
-  comments Comment[]
-  defects  Defect[]
-  itemZone ItemZone  @relation(fields: [itemId, zoneId], references: [itemId, zoneId])
-  patrol   Patrol    @relation(fields: [patrolId], references: [id])
+  comments   Comment[]
+  defects    Defect[]
+  itemZone   ItemZone  @relation(fields: [itemId, zoneId], references: [itemId, zoneId])
+  patrol     Patrol    @relation(fields: [patrolId], references: [id])
+  supervisor User      @relation(fields: [supervisorId], references: [id])
 
   @@map("patrol_results")
 }
@@ -188,11 +208,11 @@ model Zone {
   id         Int    @id @default(autoincrement()) @map("ze_id")
   name       String @map("ze_name")
   locationId Int    @map("ze_lt_id")
-  userId     Int?    @unique @map("ze_us_id")
+  userId     Int?   @unique @map("ze_us_id")
 
   itemZones  ItemZone[]
   location   Location   @relation(fields: [locationId], references: [id])
-  supervisor User?       @relation(fields: [userId], references: [id])
+  supervisor User?      @relation(fields: [userId], references: [id])
 
   @@map("zones")
 }
@@ -225,8 +245,10 @@ model Comment {
   status         Boolean  @default(false)
   userId         Int      @map("cm_us_id")
   patrolResultId Int      @map("cm_pr_id")
+  supervisorId   Int      @map("df_su_id")
 
   user         User         @relation(fields: [userId], references: [id])
+  supervisor   User         @relation(name: "CommentSupervisor", fields: [supervisorId], references: [id])
   patrolResult PatrolResult @relation(fields: [patrolResultId], references: [id])
 
   @@map("comments")

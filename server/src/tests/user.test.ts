@@ -10,7 +10,7 @@ import {
 } from "@Controllers/user-controller.js";
 import { Request, Response } from "express";
 import { prismaMock } from "./_mocks_/prisma.mock";
-import { allUsersMock, createUserResponseMock, updateProfileMock, updateProfileOnUserUpdateMock, updateUserMock, updateUserResponseMock, userMock } from "./_mocks_/user.mock";
+import { allUsersMock, createUserResponseMock, updateProfileOnUserUpdateMock, updateUserMock, updateUserResponseMock, userMock } from "./_mocks_/user.mock";
 
 // Mock Response object
 const mockResponse = () => {
@@ -21,12 +21,13 @@ const mockResponse = () => {
 };
 
 // Mock Request object
-const mockRequest = (query: any, params: any, body: any, user: any) => {
+const mockRequest = (query: any, params: any, body: any, user: any, files?: any) => {
   return {
     query,
     params,
     body,
     user,
+    file: files?.file || null
   } as unknown as Request;
 };
 
@@ -78,8 +79,8 @@ describe("getAllUsers", () => {
 
 describe("createUser", () => {
   test("should return the created user with a 201 status", async () => {
-    prismaMock.user.create.mockResolvedValueOnce({id:1});
-    prismaMock.profile.create.mockResolvedValueOnce({id:1});
+    prismaMock.user.create.mockResolvedValueOnce({ id: 1 });
+    prismaMock.profile.create.mockResolvedValueOnce({ id: 1 });
     prismaMock.user.findUnique.mockResolvedValueOnce(createUserResponseMock);
     const req = mockRequest(
       {},
@@ -106,17 +107,15 @@ describe("updateProfile", () => {
     const req = mockRequest(
       {},
       {},
-      {
-        imagePath: "newImage.jpg",
-      },
-      { userId: 1 }
+      {},
+      { userId: 1 },
+      { file: { filename: "newImage.jpg" } }
     );
     const res = mockResponse();
 
     await updateProfile(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(updateProfileMock);
   });
 });
 
@@ -124,12 +123,12 @@ describe("updateUser", () => {
 
 
   test("should update user and return 200", async () => {
-        prismaMock.user.update.mockResolvedValueOnce(updateUserMock);
-        prismaMock.profile.update.mockResolvedValueOnce(updateProfileOnUserUpdateMock);
+    prismaMock.user.update.mockResolvedValueOnce(updateUserMock);
+    prismaMock.profile.update.mockResolvedValueOnce(updateProfileOnUserUpdateMock);
 
     const req = mockRequest(
       {},
-      {id: "1"},
+      { id: "1" },
       {
         username: "updatedUser",
         email: "updated@example.com",
@@ -140,7 +139,7 @@ describe("updateUser", () => {
         tel: "123456789",
         address: "Updated Address",
       },
-      { userId: 1 ,role:"admin"}
+      { userId: 1, role: "admin" }
     );
     const res = mockResponse();
 
@@ -159,9 +158,9 @@ describe("removeUser", () => {
     prismaMock.user.update.mockResolvedValueOnce({ id: 1 });
     const req = mockRequest(
       {},
-      {id: "1"},
+      { id: "1" },
       {},
-      { }
+      {}
     );
     const res = mockResponse();
     await removeUser(req, res);

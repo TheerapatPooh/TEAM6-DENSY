@@ -1,14 +1,13 @@
 /**
  * คำอธิบาย:
- *  หน้านี้แสดงรายการคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา 
- * Input: 
+ *  หน้านี้แสดงรายการคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงรายละเอียดของคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
  * - สามารถกรองข้อมูลได้ตามช่วงวันที่ และสถานะของคำแนะนำ
  * - สามารถอัพเดทสถานะของคำแนะนำได้
  **/
-
 
 "use client";
 import { IFilterComment, IComment, itemType } from "@/app/type";
@@ -52,7 +51,7 @@ import {
   getItemTypeVariant,
   sortData,
 } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { formatTime } from "@/lib/utils";
@@ -72,6 +71,8 @@ import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserTooltip } from "@/components/user-tooltip";
+import { TextTooltip } from "@/components/text-tooltip";
 
 export default function Page() {
   const t = useTranslations("General");
@@ -83,6 +84,7 @@ export default function Page() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [allComments, setAllComments] = useState<IComment[]>([]);
+  const locale = useLocale();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -156,11 +158,13 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<IFilterComment | null>(getStoredFilter());
+  const [filter, setFilter] = useState<IFilterComment | null>(
+    getStoredFilter()
+  );
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
-    by: "Date",
-    order: "Ascending",
+    by: "CommentDate",
+    order: "Descending",
   });
 
   const applyFilter = () => {
@@ -269,7 +273,7 @@ export default function Page() {
               onValueChange={(value) => handleSortChange("by", value)}
             >
               <DropdownMenuRadioItem
-                value="Date"
+                value="CommentDate"
                 className="text-base"
                 onSelect={(e) => e.preventDefault()}
               >
@@ -384,19 +388,25 @@ export default function Page() {
       <Table>
         <TableHeader>
           <TableRow className="grid grid-cols-12 w-full">
-            <TableHead className="sm:col-span-3 lg:col-span-5">{t("Message")}</TableHead>
-            <TableHead className="sm:col-span-2 lg:col-span-2">{t("Date")}</TableHead>
-            <TableHead className="sm:col-span-3 lg:col-span-2">{t("Status")}</TableHead>
-            <TableHead className="sm:col-span-3 lg:col-span-2">{t("inspector")}</TableHead>
+            <TableHead className="sm:col-span-3 lg:col-span-5">
+              {t("Message")}
+            </TableHead>
+            <TableHead className="sm:col-span-2 lg:col-span-2">
+              {t("Date")}
+            </TableHead>
+            <TableHead className="sm:col-span-3 lg:col-span-2">
+              {t("Status")}
+            </TableHead>
+            <TableHead className="sm:col-span-3 lg:col-span-2">
+              {t("inspector")}
+            </TableHead>
             <TableHead className="sm:col-span-1 lg:col-span-1"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <ScrollArea
-            className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
-          >
-            {allComments.length === 0 ? (
-              <tr className="w-full h-full">
+          <ScrollArea className="rounded-md w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]">
+            {allComments?.length === 0 ? (
+              <tr className="flex w-full h-full">
                 <td colSpan={5} className="w-full text-center py-6">
                   <NotFound
                     icon="chat"
@@ -408,9 +418,13 @@ export default function Page() {
             ) : (
               allComments.map((comment, index) => (
                 <TableRow key={index} className="grid grid-cols-12">
-                  <TableCell className="font-medium sm:col-span-3 lg:col-span-5">{comment.message}</TableCell>
+                  <TableCell className="font-medium sm:col-span-3 lg:col-span-5">
+                    <TextTooltip object={comment.message}>
+                      <div className=" truncate max-w-[400px]">{comment.message}</div>
+                    </TextTooltip>
+                  </TableCell>
                   <TableCell className="font-medium sm:col-span-2 lg:col-span-2">
-                    {formatTime(comment.timestamp)}
+                    {formatTime(comment.timestamp, locale)}
                   </TableCell>
                   <TableCell className="font-medium sm:col-span-3 lg:col-span-2">
                     <BadgeCustom
@@ -425,14 +439,16 @@ export default function Page() {
                   </TableCell>
                   <TableCell className="font-medium sm:col-span-3 lg:col-span-2 flex flex-row gap-2 items-center">
                     {comment.user.profile.name ? (
-                      <Avatar>
-                        <AvatarImage
-                          src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
-                        />
-                        <AvatarFallback id={comment.user.id.toString()}>
-                          {getInitials(comment.user.profile.name)}
-                        </AvatarFallback>
-                      </Avatar>
+                      <UserTooltip user={comment.user}>
+                        <Avatar>
+                          <AvatarImage
+                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${comment.user.profile.image?.path}`}
+                          />
+                          <AvatarFallback id={comment.user.id.toString()}>
+                            {getInitials(comment.user.profile.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </UserTooltip>
                     ) : (
                       <Skeleton className="h-12 w-12 rounded-full bg-input" />
                     )}
@@ -442,7 +458,9 @@ export default function Page() {
                       ) : (
                         <div className="text-destructive">
                           {comment.user.username}
-                          <div className="text-[14px]">No profile is provided</div>
+                          <div className="text-[14px]">
+                            No profile is provided
+                          </div>
                         </div>
                       )}
                     </div>
@@ -477,7 +495,7 @@ export default function Page() {
                             <AlertDialogContent className="px-6 py-4 gap-4">
                               <div className="flex flex-col gap-2">
                                 <p className="text-lg font-semibold text-muted-foreground">
-                                  {formatTime(comment.timestamp)}
+                                  {formatTime(comment.timestamp, locale)}
                                 </p>
                                 <p className="text-2xl font-bold text-card-foreground">
                                   {

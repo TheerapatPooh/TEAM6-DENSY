@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *  หน้าแสดงรายละเอียดข้อบกพร่องตาม id ที่ระบุ
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - แสดงรายละเอียดข้อบกพร่องตาม id ที่ระบุ และสามารถดำเนินการต่อได้ตามสถานะของข้อบกพร่องนั้นๆ
@@ -25,7 +25,12 @@ import React, { useEffect, useState } from "react";
 import Loading from "@/components/loading";
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
-import { fetchData, formatTime, getDefectStatusVariant, getItemTypeVariant } from "@/lib/utils";
+import {
+  fetchData,
+  formatTime,
+  getDefectStatusVariant,
+  getItemTypeVariant,
+} from "@/lib/utils";
 import { IDefect } from "@/app/type";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { getInitials } from "@/lib/utils";
@@ -36,6 +41,8 @@ import AlertDefect from "@/components/alert-defect";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { UserTooltip } from "@/components/user-tooltip";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -52,8 +59,8 @@ export default function Page() {
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
   const a = useTranslations("Alert");
-  const router = useRouter()
-  const locale = useLocale()
+  const router = useRouter();
+  const locale = useLocale();
 
   // Handle before image click
   const handleBeforeImageClick = () => {
@@ -128,10 +135,15 @@ export default function Page() {
     };
 
     try {
-      const response = await fetchData("put", `/defect/${defect.id}`, true, data);
+      const response = await fetchData(
+        "put",
+        `/defect/${defect.id}`,
+        true,
+        data
+      );
       if (response) {
-        setDefect(response)
-      };
+        setDefect(response);
+      }
     } catch (error) {
       console.error("Update Fail", error);
     }
@@ -139,7 +151,7 @@ export default function Page() {
 
   const handleAcceptDefect = () => {
     setPendingAction(() => () => {
-      handleDefectUpdate("in_progress")
+      handleDefectUpdate("in_progress");
       toast({
         variant: "success",
         title: a("DefectAcceptTitle"),
@@ -162,8 +174,8 @@ export default function Page() {
   };
 
   const fetchRealtimeData = (defect: IDefect) => {
-    setDefect(defect)
-  }
+    setDefect(defect);
+  };
 
   if (!mounted) {
     return <Loading />;
@@ -173,19 +185,21 @@ export default function Page() {
     return notFound();
   }
 
-  const beforeImage = defect?.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id === defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
+  const beforeImage =
+    defect?.images
+      .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+      .filter((image) => image.image.user.id === defect.userId)
+      .map((image: any) => ({
+        path: image.image.path,
+      })) || null;
 
-  const afterImage = defect?.images
-    .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
-    .filter((image) => image.image.user.id !== defect.userId)
-    .map((image: any) => ({
-      path: image.image.path,
-    })) || null;
+  const afterImage =
+    defect?.images
+      .sort((a, b) => b.image.id - a.image.id) // เรียงจาก id ล่าสุดไปเก่าสุด
+      .filter((image) => image.image.user.id !== defect.userId)
+      .map((image: any) => ({
+        path: image.image.path,
+      })) || null;
 
   return (
     <div className="bg-card rounded-md custom-shadow flex flex-col px-6 py-4 gap-4">
@@ -193,17 +207,21 @@ export default function Page() {
       <div className="w-full  flex justify-between">
         <div>
           <div className="text-xl font-semibold text-muted-foreground flex items-center gap-1">
-            <span className="material-symbols-outlined text-2xl">
-              schedule
-            </span>
-            <p>{formatTime(defect.startTime)}</p>
+            <span className="material-symbols-outlined text-2xl">schedule</span>
+            <p>{formatTime(defect.startTime, locale)}</p>
           </div>
           <h1 className="text-2xl font-bold text-card-foreground">
             {defect.name}
           </h1>
         </div>
         <div className="flex gap-2">
-          <Button variant={"secondary"} size="lg" onClick={() => router.push(`/${locale}/defect`)}>{t("Back")}</Button>
+          <Button
+            variant={"secondary"}
+            size="lg"
+            onClick={() => router.push(`/${locale}/defect`)}
+          >
+            {t("Back")}
+          </Button>
           {(() => {
             let iconName: string;
             let text: string;
@@ -264,32 +282,35 @@ export default function Page() {
             }
             return (
               <>
-                {defect.status === "in_progress" ?
+                {defect.status === "in_progress" ? (
                   <AlertDefect
                     defect={defect}
                     type={"resolve"}
                     response={(defect: IDefect) => {
-                      fetchRealtimeData(defect)
-                    }} /> :
-
-                  defect.status === "resolved" ?
-                    <AlertDefect
-                      defect={defect}
-                      type={"edit-resolve"}
-                      response={(defect: IDefect) => {
-                        fetchRealtimeData(defect)
-                      }} /> :
-
-                    <Button
-                      size="lg"
-                      variant={variant}
-                      onClick={handleFunction}
-                      disabled={disabled}
-                    >
-                      <span className="material-symbols-outlined">{iconName}</span>
-                      {t(text)}
-                    </Button>
-                }
+                      fetchRealtimeData(defect);
+                    }}
+                  />
+                ) : defect.status === "resolved" ? (
+                  <AlertDefect
+                    defect={defect}
+                    type={"edit-resolve"}
+                    response={(defect: IDefect) => {
+                      fetchRealtimeData(defect);
+                    }}
+                  />
+                ) : (
+                  <Button
+                    size="lg"
+                    variant={variant}
+                    onClick={handleFunction}
+                    disabled={disabled}
+                  >
+                    <span className="material-symbols-outlined">
+                      {iconName}
+                    </span>
+                    {t(text)}
+                  </Button>
+                )}
               </>
             );
           })()}
@@ -319,7 +340,10 @@ export default function Page() {
 
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
-          <BadgeCustom variant={getDefectStatusVariant(defect.status).variant} showIcon={true}>
+          <BadgeCustom
+            variant={getDefectStatusVariant(defect.status).variant}
+            showIcon={true}
+          >
             <div className="flex justify-center gap-2">
               <span className="material-symbols-outlined">
                 {getDefectStatusVariant(defect.status).iconName}
@@ -328,7 +352,11 @@ export default function Page() {
             </div>
           </BadgeCustom>
 
-          <BadgeCustom shape="square" variant={getItemTypeVariant(defect.type).variant} showIcon={true}>
+          <BadgeCustom
+            shape="square"
+            variant={getItemTypeVariant(defect.type).variant}
+            showIcon={true}
+          >
             <div className="flex justify-center gap-2">
               <span className="material-symbols-outlined">
                 {getItemTypeVariant(defect.type).iconName}
@@ -342,18 +370,22 @@ export default function Page() {
           <div className="flex-col items-center gap-2">
             <div className="flex gap-2">
               <div className="flex items-center gap-1 text-base font-semibold text-muted-foreground">
-                <span className="material-symbols-outlined ">person_search</span>
+                <span className="material-symbols-outlined ">
+                  person_search
+                </span>
                 <p>{t("inspector")}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Avatar className="h-[35px] w-[35px]">
-                  <AvatarImage
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
-                  />
-                  <AvatarFallback id={defect.user.id.toString()}>
-                    {getInitials(defect.user.profile.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <UserTooltip user={defect.user}>
+                  <Avatar className="h-[35px] w-[35px]">
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${defect.user.profile.image?.path}`}
+                    />
+                    <AvatarFallback id={defect.user.id.toString()}>
+                      {getInitials(defect.user.profile.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </UserTooltip>
                 <p>{defect.user.profile.name}</p>
               </div>
             </div>
@@ -368,9 +400,11 @@ export default function Page() {
             <p className="text-base font-semibold">{t("Detail")}</p>
 
             <div className="bg-secondary rounded-md h-40 w-full items-center p-4">
-              <p className="text-[20px] text-card-foreground">
-                {defect.description}
-              </p>
+              <Textarea
+                disabled
+                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none  max-h-full h-20 w-full text-base font-normal line-clamp-3"
+                value={defect.description}
+              />
             </div>
           </div>
         </div>
@@ -388,14 +422,17 @@ export default function Page() {
 
           <div className="flex flex-col justify-between gap-4">
             <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
-              <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+              <AspectRatio
+                ratio={4 / 3}
+                className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]"
+              >
                 <div
                   className="flex items-center justify-center cursor-default user-select-none w-full h-full"
                   onClick={() => handleBeforeImageClick()}
                 >
                   {beforeImage &&
-                    beforeImage.length > 0 &&
-                    beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
+                  beforeImage.length > 0 &&
+                  beforeImage[beforeSlideIndex].path ? ( // ใช้ beforeSlideIndex ที่อัปเดต
                     <Image
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${beforeImage[beforeSlideIndex].path}`} // ใช้ path จาก state
                       alt="First Image"
@@ -410,7 +447,7 @@ export default function Page() {
                         hourglass_empty
                       </span>
                       <p className="text-muted-foreground text-lg font-medium">
-                        {t('WaitingForResults')}
+                        {t("WaitingForResults")}
                       </p>
                     </div>
                   )}
@@ -427,8 +464,11 @@ export default function Page() {
                     <div
                       key={index}
                       onClick={() => setBeforeSlideIndex(index)}
-                      className={`flex justify-center w-[128px] h-[128px] cursor-pointer rounded-md ${beforeSlideIndex === index ? 'border border-destructive' : ''
-                        }`}
+                      className={`flex justify-center w-[128px] h-[128px] cursor-pointer rounded-md ${
+                        beforeSlideIndex === index
+                          ? "border border-destructive"
+                          : ""
+                      }`}
                     >
                       <Image
                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
@@ -447,7 +487,10 @@ export default function Page() {
             {isBeforeCarouselOpen && beforeImage && beforeImage.length > 0 && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="relative">
-                  <Carousel setApi={setBeforeApi} className="sm:max-w-screen-sm xl:max-w-[1600px]">
+                  <Carousel
+                    setApi={setBeforeApi}
+                    className="sm:max-w-screen-sm xl:max-w-[1600px]"
+                  >
                     <CarouselContent>
                       {beforeImage.map((image, index) => (
                         <CarouselItem key={index}>
@@ -479,7 +522,11 @@ export default function Page() {
                       <button
                         key={index}
                         onClick={() => setBeforeSlideIndex(index)} // ใช้ index ในการเลือก slide
-                        className={`h-3 w-3 rounded-full mx-1 ${beforeSlideIndex === index ? "bg-white" : "bg-gray-400"}`}
+                        className={`h-3 w-3 rounded-full mx-1 ${
+                          beforeSlideIndex === index
+                            ? "bg-white"
+                            : "bg-gray-400"
+                        }`}
                         aria-label={`Slide ${index + 1}`}
                       />
                     ))}
@@ -506,12 +553,17 @@ export default function Page() {
 
           <div className="flex flex-col justify-between gap-4">
             <div className="flex sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
-              <AspectRatio ratio={4 / 3} className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]">
+              <AspectRatio
+                ratio={4 / 3}
+                className="bg-secondary rounded-md sm:max-h-[263px] xl:min-h-[500px] xl:max-h-[700px]"
+              >
                 <div
                   className="flex items-center justify-center cursor-default user-select-none w-full h-full"
                   onClick={() => handleAfterImageClick()}
                 >
-                  {afterImage && afterImage.length > 0 && afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
+                  {afterImage &&
+                  afterImage.length > 0 &&
+                  afterImage[afterSlideIndex].path ? ( // ใช้ afterSlideIndex ที่อัปเดต
                     <Image
                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${afterImage[afterSlideIndex].path}`} // ใช้ path จาก state
                       alt="Second Image"
@@ -526,14 +578,13 @@ export default function Page() {
                         hourglass_empty
                       </span>
                       <p className="text-muted-foreground text-lg font-medium">
-                        {t('WaitingForResults')}
+                        {t("WaitingForResults")}
                       </p>
                     </div>
                   )}
                 </div>
               </AspectRatio>
             </div>
-
 
             {/* Thumbnail images slider */}
             <ScrollArea className="min-w-full w-full whitespace-nowrap">
@@ -544,8 +595,11 @@ export default function Page() {
                     <div
                       key={index}
                       onClick={() => setAfterSlideIndex(index)}
-                      className={`flex justify-center min-w-[128px] h-[128px] cursor-pointer rounded-md ${afterSlideIndex === index ? 'border border-destructive' : ''
-                        }`}
+                      className={`flex justify-center min-w-[128px] h-[128px] cursor-pointer rounded-md ${
+                        afterSlideIndex === index
+                          ? "border border-destructive"
+                          : ""
+                      }`}
                     >
                       <Image
                         src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${image.path}`}
@@ -561,11 +615,13 @@ export default function Page() {
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
 
-
             {isAfterCarouselOpen && afterImage && afterImage.length > 0 && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="relative">
-                <Carousel setApi={setAfterApi} className="sm:max-w-screen-sm lg:max-w-[1600px]">
+                  <Carousel
+                    setApi={setAfterApi}
+                    className="sm:max-w-screen-sm lg:max-w-[1600px]"
+                  >
                     <CarouselContent>
                       {afterImage.map((image, index) => (
                         <CarouselItem key={index}>
@@ -597,7 +653,9 @@ export default function Page() {
                       <button
                         key={index}
                         onClick={() => setAfterSlideIndex(index)} // ใช้ index ในการเลือก slide
-                        className={`h-3 w-3 rounded-full mx-1 ${afterSlideIndex === index ? "bg-white" : "bg-gray-400"}`}
+                        className={`h-3 w-3 rounded-full mx-1 ${
+                          afterSlideIndex === index ? "bg-white" : "bg-gray-400"
+                        }`}
                         aria-label={`Slide ${index + 1}`}
                       />
                     ))}

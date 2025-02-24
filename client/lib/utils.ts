@@ -1,11 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast } from "@/app/type";
+import { IPatrol, IPatrolResult, defectStatus, patrolStatus, itemType, IToast, role } from "@/app/type";
 import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
-import Defect from "@/components/defect";
 
 
 const ExcelJS = require("exceljs");
@@ -13,28 +12,63 @@ const ExcelJS = require("exceljs");
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export async function refreshAccessToken() {
+  try {
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, {
+      withCredentials: true,
+    });
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh-token`, {}, {
+      withCredentials: true,
+      headers: { "X-CSRF-Token": csrfToken },
+    });
+
+    return response.data.accessToken;
+  } catch (error) {
+    console.error("Failed to refresh token", error);
+    return null;
+  }
+}
+
 export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values)
   if (!validatedFields.success) {
     return { error: "Invalid field!" }
   }
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`, values, { withCredentials: true })
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`,
+      values,
+      {
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
+        withCredentials: true
+      })
     return response.data
   } catch (error: any) {
     return { error: error.response?.data?.message || "Login failed" };
   }
 }
 
-
 export async function logout() {
   try {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, { withCredentials: true });
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {}, {
+      headers: {
+        "X-CSRF-Token": csrfToken,
+      },
+      withCredentials: true
+    })
   } catch (error: any) {
     throw new Error("Logout failed", error);
   }
 }
-
 
 export async function fetchData(
   type: "get" | "delete" | "post" | "put",
@@ -44,15 +78,14 @@ export async function fetchData(
   form?: boolean
 ) {
   try {
+    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, { withCredentials: true });
+    const csrfToken = csrfResponse.data.csrfToken;
     const config: AxiosRequestConfig = {
       withCredentials: credential,
-      headers: form
-        ? {
-          "Content-Type": "multipart/form-data",
-        }
-        : {
-          "Content-Type": "application/json",
-        },
+      headers: {
+        "X-CSRF-Token": csrfToken,
+        "Content-Type": form ? "multipart/form-data" : "application/json",
+      },
     };
 
     let response;
@@ -82,8 +115,6 @@ export async function fetchData(
     };
   }
 }
-
-
 
 export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
   try {
@@ -475,6 +506,12 @@ export const sortData = (data: any, sort: { by: string; order: string }) => {
         ? new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
         : new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     );
+  } else if (sort.by === "CommentDate") {
+    sortedData.sort((a, b) =>
+      sort.order === "Ascending"
+        ? new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        : new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
   }
   return sortedData
 }
@@ -577,28 +614,51 @@ export const getItemTypeVariant = (type: itemType) => {
   return { iconName, variant };
 };
 
-export function formatTime(timestamp: string) {
-  const date = new Date(timestamp).toLocaleDateString(
-    "th-TH",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }
-  );
+export const getUserVariant = (role: role) => {
+  let iconName: string
+  let variant: keyof typeof badgeVariants
+  let variantName: string
 
-  const time = new Date(timestamp).toLocaleTimeString(
-    "th-TH",
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    }
-  );
-  return date + " " + time
+  switch (role) {
+    case "supervisor":
+      iconName = 'engineering'
+      variant = 'yellow'
+      variantName = 'supervisor'
+      break;
+    case "inspector":
+      iconName = 'person_search'
+      variant = 'red'
+      variantName = 'inspector'
+      break;
+    default:
+      iconName = 'manage_accounts'
+      variant = 'blue'
+      variantName = 'admin'
+      break;
+  }
+  return { iconName, variant, variantName };
+};
+
+export function formatTime(timestamp: string, locale: string, showTime: boolean = true) {
+  let language = locale === "th" ? "th-TH" : "en-GB";
+
+  const date = new Date(timestamp).toLocaleDateString(language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  if (!showTime) return date;
+
+  const time = new Date(timestamp).toLocaleTimeString(language, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  return `${date} ${time}`;
 }
-
 export function formatPatrolId(id: number): string {
   let newId = id.toString().padStart(4, '0'); // ทำให้เป็นเลข 4 หลัก เติมศูนย์ข้างหน้า
   return `P${newId}`; // ใส่ P ด้านหน้า
@@ -670,3 +730,24 @@ export function getNotificationToast(key: string): IToast | null {
       return null;
   }
 }
+
+const today = new Date();
+
+export const getMonthRange = (month: string) => {
+  if (month === "AllTime") return { startDate: undefined, endDate: undefined };
+
+  const dateParts = month.split(" ");
+  const year = parseInt(dateParts[1]);
+  const monthIndex = new Date(`${dateParts[0]} 1, ${year}`).getMonth();
+
+  const startDate = new Date(year, monthIndex, 1);
+  const endDate = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+  return { startDate, endDate };
+};
+
+const monthFormatter = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
+
+export const monthOptions = ["AllTime", ...Array.from({ length: 12 }, (_, i) => {
+  const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+  return monthFormatter.format(date);
+})];
