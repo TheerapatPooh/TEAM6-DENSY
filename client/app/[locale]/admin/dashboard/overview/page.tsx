@@ -777,7 +777,7 @@ export default function Page() {
                             </Tooltip>
                           </TooltipProvider>
                         </TableCell>
-                        <TableCell className='sm:col-span-1 lg:col-span-2'>
+                        <TableCell className='sm:col-span-1 lg:col-span-2 flex'>
                           <BadgeCustom
                             iconName={getPatrolStatusVariant(patrol.status).iconName}
                             showIcon={true}

@@ -11,7 +11,6 @@ import { preset_checklists } from '@Utils/data/preset-checklist.js';
 import { presets } from '@Utils/data/presets.js';
 import { profiles } from '@Utils/data/profiles.js';
 import { zones } from '@Utils/data/zones.js';
-import { images } from '@Utils/data/images.js';
 
 
 const prisma = new PrismaClient();
@@ -30,8 +29,6 @@ async function main() {
   await prisma.location.createMany({ data: locations });
   logProgress();
   await prisma.user.createMany({ data: users });
-  logProgress();
-  await prisma.image.createMany({ data: images });
   logProgress();
   await prisma.profile.createMany({ data: profiles });
   logProgress();

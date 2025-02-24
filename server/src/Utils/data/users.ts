@@ -9,7 +9,9 @@ export const users: User[] = [
     role: 'admin',
     department: null,
     createdAt: new Date('2024-10-06T16:49:43.000Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null,
   },
   {
     id: 2,
@@ -19,7 +21,9 @@ export const users: User[] = [
     role: 'inspector',
     department: null,
     createdAt: new Date('2024-10-06T09:50:18.955Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 3,
@@ -29,7 +33,9 @@ export const users: User[] = [
     role: 'inspector',
     department: null,
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 4,
@@ -39,7 +45,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'R&D',
     createdAt: new Date('2024-10-06T09:51:09.771Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 5,
@@ -49,7 +57,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Assemblyline',
     createdAt: new Date('2024-10-06T09:51:12.275Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 6,
@@ -59,7 +69,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Raw Materials Storage',
     createdAt: new Date('2024-10-06T09:51:14.185Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 7,
@@ -69,7 +81,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Quality Control',
     createdAt: new Date('2024-10-06T09:51:28.164Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 8,
@@ -79,7 +93,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'IT',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 9,
@@ -89,7 +105,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Customer Service',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 10,
@@ -99,7 +117,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Prototype',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 11,
@@ -109,7 +129,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Manager Office',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 12,
@@ -119,7 +141,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Water Supply',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 13,
@@ -129,7 +153,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Maintenance',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 14,
@@ -139,7 +165,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Server Room',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 15,
@@ -149,7 +177,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Storage',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 16,
@@ -159,7 +189,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Warehouse',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 17,
@@ -169,7 +201,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Electrical',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 18,
@@ -179,7 +213,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Engineering',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 19,
@@ -189,7 +225,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Training Simulation',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 20,
@@ -199,7 +237,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Work Station A',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 21,
@@ -209,7 +249,9 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Work Station B',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
   {
     id: 22,
@@ -219,6 +261,8 @@ export const users: User[] = [
     role: 'supervisor',
     department: 'Testing Lab',
     createdAt: new Date('2024-10-06T10:27:09.916Z'),
-    active: true
+    active: true,
+    resetToken: null,
+    resetTokenExpires: null
   },
 ];

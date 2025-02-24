@@ -445,12 +445,12 @@ export default function page() {
                     onClick={() => {
                       patrol.status !== "completed"
                         ? (toast({
-                            variant: "error",
-                            title: a("ExportPatrolNoData"),
-                            description: a(
-                              "ExportPatrolStatusNotCompleteDescription"
-                            ),
-                          }),
+                          variant: "error",
+                          title: a("ExportPatrolNoData"),
+                          description: a(
+                            "ExportPatrolStatusNotCompleteDescription"
+                          ),
+                        }),
                           handleCloseDialog())
                         : (exportData(patrol, patrol.results),
                           toast({
@@ -506,7 +506,6 @@ export default function page() {
                 }
               >
                 <HoverCardTrigger
-                className="border"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleClick("overview", e);
@@ -709,9 +708,8 @@ export default function page() {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-
-                <TableBody>
-                  <ScrollArea className="rounded-md w-full lg:[&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-500px)] sm:[&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-888px)]">
+                <TableBody className="block overflow-hidden">
+                  <ScrollArea className="h-[300px]">
                     {defects?.length === 0 ? (
                       <tr className="flex sm:w-[654px] sm:h-[388px] lg:w-full lg:h-full">
                         <td colSpan={5} className="w-full text-center py-0">
@@ -806,6 +804,7 @@ export default function page() {
                         </TableRow>
                       ))
                     )}
+                    <ScrollBar orientation="vertical" />
                   </ScrollArea>
                 </TableBody>
               </Table>
