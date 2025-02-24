@@ -130,7 +130,7 @@
     "Version": "เวอร์ชัน",
     "SelectZones": "เลือกพื้นที่",
     "FilterByZoneTitle": "กรองตามพื้นที่",
-    "FilterbyZoneDescription": "โปรดเลือกพื้นที่เพื่อแสดงเฉพาะข้อมูลที่เกี่ยวข้อง.",
+    "FilterByZoneDescription": "โปรดเลือกพื้นที่เพื่อแสดงเฉพาะข้อมูลที่เกี่ยวข้อง.",
     "Done": "ตกลง",
     "DateModified": "วันที่แก้ไข",
     "CreatePatrolPreset": "สร้างรูปแบบตรวจตรา",
@@ -186,7 +186,8 @@
     "DocID": "หมายเลขเอกสาร",
     "Progress": "ความคืบหน้า",
     "Result": "ผลลัพธ์",
-    "PatrolList": "รายการตรวจตรา"
+    "PatrolList": "รายการตรวจตรา",
+    "ResetPassword": "ตั้งรหัสผ่านใหม่"
   },
   "Status": {
     "pending": "รอดำเนินการ",
@@ -518,7 +519,23 @@
     "ReportDefectErrorInvalidImage": "รูปภาพไม่ถูกต้อง",
     "ReportDefectErrorInvalidImageMessage": "กรุณาอัปโหลดรูปภาพในรูปแบบที่รองรับ (png, jpeg, jpg, gif)",
     "LoginTooManyTitle": "ล็อกอินมากเกินไป",
-    "LoginTooManyDescription": "คุณพยายามล็อกอินหลายครั้งเกินไป กรุณารอ 15 นาทีแล้วลองใหม่"
+    "LoginTooManyDescription": "คุณพยายามล็อกอินหลายครั้งเกินไป กรุณารอ 15 นาทีแล้วลองใหม่",
+    "ForgotPasswordTitle": "ลืมรหัสผ่าน?",
+    "ForgotPasswordDescription": "กรอกอีเมลของคุณ แล้วเราจะส่งลิงก์ให้คุณตั้งรหัสผ่านใหม่",
+    "ForgotPasswordConfirmTitle": "คุณแน่ใจหรือไม่ว่าต้องการส่งลิงก์ตั้งรหัสผ่านใหม่?",
+    "ForgotPasswordConfirmDescription": "โปรดยืนยันเพื่อส่งอีเมลที่มีลิงก์สำหรับตั้งรหัสผ่านใหม่",
+    "InvalidEmailInlineValidate": "รูปแบบอีเมลไม่ถูกต้อง โปรดระบุอีเมลที่ถูกต้อง",
+    "InvalidEmailTitle": "อีเมลไม่ถูกต้อง",
+    "InvalidEmailDescription": "กรุณาระบุที่อยู่อีเมลที่ถูกต้อง",
+    "ResetLinkCompletedTitle": "ส่งลิงก์ตั้งรหัสผ่านใหม่แล้ว",
+    "ResetLinkCompletedDescription": "เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลของคุณ กรุณาตรวจสอบกล่องจดหมาย",
+    "ProfileNewPassMinLength": "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร",
+    "InvalidTokenTitle": "โทเค็นไม่ถูกต้องหรือหมดอายุ",
+    "InvalidTokenDescription": "โทเค็นที่ให้มาไม่ถูกต้องหรือหมดอายุแล้ว",
+    "ResetPasswordConfirmTitle": "คุณแน่ใจหรือว่าต้องการตั้งรหัสผ่านใหม่?",
+    "ResetPasswordConfirmDescription": "โปรดยืนยันเพื่อตั้งรหัสผ่านใหม่ของคุณ",
+    "PasswordResetCompletedTitle": "ตั้งรหัสผ่านใหม่สำเร็จ",
+    "PasswordResetCompletedDescription": "คุณได้ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว สามารถเข้าสู่ระบบได้ทันที"
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",

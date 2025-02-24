@@ -24,15 +24,18 @@ model Session {
 }
 
 model User {
-  id         Int      @id @default(autoincrement()) @map("us_id")
-  username   String   @unique @map("us_username")
-  email      String?  @unique @map("us_email")
-  password   String   @map("us_password")
-  role       Role     @map("us_role")
-  department String?  @map("us_department")
-  createdAt  DateTime @default(now()) @map("us_created_at")
-  active     Boolean  @default(true) @map("us_active")
+  id                Int       @id @default(autoincrement()) @map("us_id")
+  username          String    @unique @map("us_username")
+  email             String?   @unique @map("us_email")
+  password          String    @map("us_password")
+  role              Role      @map("us_role")
+  department        String?   @map("us_department")
+  createdAt         DateTime  @default(now()) @map("us_created_at")
+  active            Boolean   @default(true) @map("us_active")
 
+  resetToken        String?   @map("us_reset_token")
+  resetTokenExpires DateTime? @map("us_reset_token_expires")
+  
   presets            Preset[]
   comments           Comment[]
   profile            Profile?

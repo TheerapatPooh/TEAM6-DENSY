@@ -9,6 +9,9 @@ import fs from "fs";
 import path from "path";
 import { DefectStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
+import { randomBytes } from 'node:crypto';
+import { tr } from "@faker-js/faker";
+
 
 declare global {
   namespace Express {
@@ -152,7 +155,7 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
       where: { userId: decoded.userId },
     });
 
-    if (!session || session.token !== decoded.sessionId ) {
+    if (!session || session.token !== decoded.sessionId) {
       res.clearCookie("authToken");
       res.clearCookie("refreshToken");
       res.status(401).json({ message: "Session expired" });
@@ -738,4 +741,113 @@ export const deleteImages = async (imageIds: number[]) => {
       }
     })
   ])
+}
+
+export async function sendEmailResetPassword(req: Request, res: Response) {
+  const { email } = req.body;
+
+  if (!email) {
+    res.status(400).json({ message: "Email is required" });
+    return
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return
+  }
+
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      resetToken: token,
+      resetTokenExpires: expiresAt,
+    },
+  });
+
+  // สร้างลิงก์ reset password
+  const resetLink = `${process.env.CLIENT_URL}/en/login/forgot-password?token=${token}`;
+
+  // ส่งอีเมล
+  const emailSubject = "Reset Your Password";
+  const emailMessage = `Click the link to reset your password: ${resetLink}`;
+
+  await sendEmail(email, emailSubject, emailMessage);
+
+  res.status(200).json({ message: "Reset password email sent" });
+  return
+}
+
+export async function resetForgotPassword(req: Request, res: Response) {
+  try {
+    const { token, newPassword } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: { resetToken: token },
+      select: {
+        id: true,
+        password: true,
+      }
+    });
+
+    if (!user) {
+      res.status(404).json({ message: 'Invalid token or user not found.' });
+      return
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // อัปเดตผู้ใช้ด้วยรหัสผ่านใหม่และรีเซ็ต token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpires: null
+      }
+    });
+
+    res.status(200).json({ message: 'Password successfully updated.', status: 200 });
+    return
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Server error, please try again later.' });
+    return
+  }
+}
+
+export async function verifyToken(req: Request, res: Response) {
+  try {
+    const token = req.query.token
+
+    if (!token) {
+      res.status(400).json({ message: "Token is required" });
+      return
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { resetToken: token.toString() },
+      select: {
+        resetTokenExpires: true
+      }
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "Token not found or invalid" });
+      return
+    }
+
+    if (user.resetTokenExpires && new Date(user.resetTokenExpires) < new Date()) {
+      res.status(404).json({ message: "Token has expired" });
+      return;
+    }
+
+    res.status(200).json({ status: 200, message: "Token is valid" });
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    res.status(500).json({ message: "Server error" });
+  }
 }

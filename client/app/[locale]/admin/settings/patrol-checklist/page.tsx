@@ -462,7 +462,7 @@ export default function Page() {
                       {t("FilterByZoneTitle")}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-base">
-                      {t("FilterbyZoneDescription")}
+                      {t("FilterByZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div>
