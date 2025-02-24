@@ -144,7 +144,7 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
   const token = req.cookies.authToken;
 
   if (!token) {
-    res.status(401).json({ message: "Access Denied, No Token Provided" });
+    res.status(401).json({ status: 401, message: "Access Denied, No Token Provided" });
     return;
   }
 

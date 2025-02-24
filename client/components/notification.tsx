@@ -68,7 +68,7 @@ export default function Notification() {
         const [key, ...dynamicParts] = message.split('-');
         let content = dynamicParts.join('-');
         if (isValidDateFormat(content)) {
-            content = formatTime(content,locale)
+            content = formatTime(content, locale)
         }
         else if (content) {
             content = z(content)
@@ -80,6 +80,10 @@ export default function Notification() {
     const fetchNotifications = async () => {
         try {
             const data = await fetchData("get", "/notifications", true);
+            if (data.status === 401) {
+                window.location.reload()
+                router.push(`/${locale}/refresh`)
+            }
             setAllNotifications(data);
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
@@ -184,7 +188,7 @@ export default function Notification() {
                     [...prevNotifications, data].sort((a, b) =>
                         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
                     )
-                ); 
+                );
                 const notification = formatMessage(data.message)
                 const toastData = getNotificationToast(notification.key)
 
