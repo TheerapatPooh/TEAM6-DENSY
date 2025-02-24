@@ -12,7 +12,7 @@
 "use client";
 import { IPreset, IZone } from "@/app/type";
 import Textfield from "@/components/textfield";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
@@ -423,38 +423,41 @@ export default function Page() {
                       {t("FilterByZoneDescription")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div>
-                    <div className="text-muted-foreground flex items-center">
-                      <span className="material-symbols-outlined">
-                        location_on
-                      </span>
-                      {t("Zone")}
-                    </div>
-                    <div className="flex justify-center bg-secondary rounded-lg py-4">
-                      <Map
-                        disable={false}
-                        initialSelectedZones={selectedZones.map(
-                          (zone) => zone.id
-                        )}
-                        onZoneSelect={(zones: IZone[]) =>
-                          setTempSelectedZones(zones)
-                        } // อัปเดต tempSelectedZones
-                      />
-                    </div>
-                  </div>
 
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-primary"
-                      onClick={() => {
-                        // กด Done แค่เซฟชั่วคราวใน tempSelectedZones
-                        setSelectedZones(tempSelectedZones);
-                      }}
-                    >
-                      {t("Done")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
+                  <AlertDialogContent className="w-full sm:w-[50%] md:w-[70%] lg:w-[100%] max-w-[1200px] rounded-md px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="text-muted-foreground flex items-center gap-1">
+                        <span className="material-symbols-outlined">
+                          location_on
+                        </span>
+                        <p>{t("Zone")}</p>
+                      </div>
+                      <div className=" flex justify-center bg-secondary rounded-md py-4">
+                        <Map
+                          disable={false}
+                          initialSelectedZones={selectedZones.map(
+                            (zone) => zone.id
+                          )}
+                          onZoneSelect={(zones: IZone[]) =>
+                            setTempSelectedZones(zones)
+                          } // อัปเดต tempSelectedZones
+                        />
+                      </div>
+                    </div>
+
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-primary"
+                        onClick={() => {
+                          // กด Done แค่เซฟชั่วคราวใน tempSelectedZones
+                          setSelectedZones(tempSelectedZones);
+                        }}
+                      >
+                        {t("Done")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
@@ -509,16 +512,16 @@ export default function Page() {
                           <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-[600px] truncate min-w-0">
                             {preset.zones && preset.zones.length > 0
                               ? preset.zones.map((zone, index) => (
-                                  <span
-                                    key={index}
-                                    className={
-                                      zone.userId ? "" : "  text-destructive"
-                                    }
-                                  >
-                                    {z(zone.name)}
-                                    {index < preset.zones.length - 1 && ", "}
-                                  </span>
-                                ))
+                                <span
+                                  key={index}
+                                  className={
+                                    zone.userId ? "" : "  text-destructive"
+                                  }
+                                >
+                                  {z(zone.name)}
+                                  {index < preset.zones.length - 1 && ", "}
+                                </span>
+                              ))
                               : z("NoZonesAvailable")}
                           </div>
                         </ZoneTooltip>
@@ -530,9 +533,9 @@ export default function Page() {
                         </span>
                         <TextTooltip object={preset.description}>
 
-                        <div className="text-sm text-muted-foreground truncate w-[700px]">
+                          <div className="text-sm text-muted-foreground truncate w-[700px]">
                             {preset.description}
-                        </div>
+                          </div>
                         </TextTooltip>
 
                       </div>
@@ -542,7 +545,13 @@ export default function Page() {
                   </div>
                   <div className="flex flex-row justify-end items-end ">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger asChild
+                        className={
+                          buttonVariants({
+                          variant: "ghost",
+                          size: "icon",
+                        })}
+                      >
                         <span className="material-symbols-outlined text-input">
                           more_vert
                         </span>
