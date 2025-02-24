@@ -625,11 +625,10 @@ export default function Page() {
                             <Button
                               key={index}
                               variant={"outline"}
-                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${
-                                selectedPreset === preset
-                                  ? "border-destructive"
-                                  : "border-transparent"
-                              } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
+                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
+                                ? "border-destructive"
+                                : "border-transparent"
+                                } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
                               onClick={() => setSelectedPreset(preset)}
                             >
                               {/* Title */}
@@ -639,12 +638,12 @@ export default function Page() {
                               {/* Zone */}
 
                               <ZoneTooltip zonesName={preset.zones}>
-                                <div className="flex flex-row justify-center items-center w-full gap-1 truncate">
+                                <div className="flex flex-row justify-start items-center w-auto gap-1 lg:max-w-[400px] sm:max-w-[620px] truncate">
                                   {/* Positioned Icon */}
                                   <span className="material-symbols-outlined text-2xl text-muted-foreground">
                                     location_on
                                   </span>
-                                  <p className="text-muted-foreground text-left w-[600px] truncate  text-base font-semibold">
+                                  <p className="text-muted-foreground min-w-0 text-start truncate overflow-hidden text-base font-semibold whitespace-nowrap text-ellipsis">
                                     {preset.zones
                                       .map((zone) => z(zone))
                                       .join(", ")}
@@ -659,15 +658,15 @@ export default function Page() {
                                 </span>
                                 {/* Positioned Textarea */}
                                 <div className="w-full h-full ">
-                                <TextTooltip object={preset.description}>
-                                  <Textarea
-                                    disabled
-                                    className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none  max-h-full h-20 w-full text-base font-normal line-clamp-3"
-                                    value={preset.description}
-                                  />
-                                </TextTooltip>
+                                  <TextTooltip object={preset.description}>
+                                    <Textarea
+                                      disabled
+                                      className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none  max-h-full h-20 w-full text-base font-normal line-clamp-3"
+                                      value={preset.description}
+                                    />
+                                  </TextTooltip>
                                 </div>
-                 
+
                               </div>
                             </Button>
                           ))
