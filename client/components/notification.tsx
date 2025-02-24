@@ -208,7 +208,7 @@ export default function Notification() {
             };
         }
         fetchNotifications();
-    }, [socket, isConnected]);
+    }, [isConnected]);
 
     useEffect(() => {
         setUnreadCount(allNotifications.filter(notification => !notification.read).length);
