@@ -506,6 +506,7 @@ export default function page() {
                 }
               >
                 <HoverCardTrigger
+                className="border"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleClick("overview", e);

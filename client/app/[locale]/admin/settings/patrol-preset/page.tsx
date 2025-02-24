@@ -53,6 +53,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import NotFound from "@/components/not-found";
 import { UserTooltip } from "@/components/user-tooltip";
 import { VersionTooltip } from "@/components/version-tooltip";
+import { ZoneTooltip } from "@/components/zone-tooltip";
+import { TextTooltip } from "@/components/text-tooltip";
 
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
@@ -485,14 +487,14 @@ export default function Page() {
                     <div className="flex flex-col gap-4 min-w-0">
                       <div className="flex flex-col gap-1 justify-start items-start">
                         {/* Version with Tooltip */}
-                          <VersionTooltip object={preset}>
-                            <div className="flex justify-center">
-                              <span className="material-symbols-outlined mr-1">
-                                history
-                              </span>
-                              {t("Version")} {preset.version}
-                            </div>
-                          </VersionTooltip>
+                        <VersionTooltip object={preset}>
+                          <div className="flex justify-center">
+                            <span className="material-symbols-outlined mr-1">
+                              history
+                            </span>
+                            {t("Version")} {preset.version}
+                          </div>
+                        </VersionTooltip>
                         {/* Title */}
                         <h2 className="text-xl font-semibold truncate">
                           {preset.title}
@@ -503,63 +505,36 @@ export default function Page() {
                         <span className="material-symbols-outlined">
                           location_on
                         </span>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
-                                {preset.zones && preset.zones.length > 0
-                                  ? preset.zones.map((zone, index) => (
-                                      <span
-                                        key={index}
-                                        className={
-                                          zone.userId ? "" : "text-destructive"
-                                        }
-                                      >
-                                        {z(zone.name)}
-                                        {index < preset.zones.length - 1 &&
-                                          ", "}
-                                      </span>
-                                    ))
-                                  : z("NoZonesAvailable")}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="bottom"
-                              align="start"
-                              sideOffset={10}
-                              className="bg-card custom-shadow rounded-md p-4 w-fit"
-                            >
-                              <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-                                {t("Zone")}
-                              </h3>
-                              <ScrollArea className="h-32 rounded-md bg-card">
-                                {preset.zones.map((zone, index) => (
-                                  <div className="text-sm text-foreground">
-                                    -{" "}
-                                    <span
-                                      key={index}
-                                      className={
-                                        zone.userId ? "" : "text-destructive"
-                                      }
-                                    >
-                                      {z(zone.name)}
-                                      {index < preset.zones.length - 1 && ", "}
-                                    </span>
-                                  </div>
-                                ))}
-                              </ScrollArea>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <ZoneTooltip zones={preset.zones}>
+                          <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-[600px] truncate min-w-0">
+                            {preset.zones && preset.zones.length > 0
+                              ? preset.zones.map((zone, index) => (
+                                  <span
+                                    key={index}
+                                    className={
+                                      zone.userId ? "" : "  text-destructive"
+                                    }
+                                  >
+                                    {z(zone.name)}
+                                    {index < preset.zones.length - 1 && ", "}
+                                  </span>
+                                ))
+                              : z("NoZonesAvailable")}
+                          </div>
+                        </ZoneTooltip>
                       </div>
                       {/* Description */}
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <span className="material-symbols-outlined">
                           data_info_alert
                         </span>
-                        <div className="text-sm text-muted-foreground truncate">
-                          {preset.description}
+                        <TextTooltip object={preset.description}>
+
+                        <div className="text-sm text-muted-foreground truncate w-[700px]">
+                            {preset.description}
                         </div>
+                        </TextTooltip>
+
                       </div>
                     </div>
 

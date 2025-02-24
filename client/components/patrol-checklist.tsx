@@ -47,6 +47,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 import { UserTooltip } from "./user-tooltip";
+import { TextTooltip } from "./text-tooltip";
 
 interface IPatrolChecklistProps {
   patrolStatus: patrolStatus;
@@ -445,9 +446,11 @@ export default function PatrolChecklist({
                                             )}
                                           </p>
                                           <div className="flex items-end">
-                                            <p className="text-xl">
+                                            <TextTooltip object={comment.message} >
+                                            <p className="text-xl truncate w-[500px]">
                                               {comment.message}
                                             </p>
+                                            </TextTooltip>
                                           </div>
                                         </div>
                                       ) : null

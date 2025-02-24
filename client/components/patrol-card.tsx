@@ -31,7 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   HoverCard,
   HoverCardContent,
@@ -50,6 +50,9 @@ import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import BadgeCustom from "@/components/badge-custom";
 import { UserTooltip } from "./user-tooltip";
+import { PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover } from "@radix-ui/react-popover";
+import { TextTooltip } from "./text-tooltip";
 
 export interface IPatrolCard {
   id: number;
@@ -75,6 +78,7 @@ export function PatrolCard({
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
+  const triggerContainerRef = useRef<HTMLDivElement>(null);
 
   const [mounted, setMounted] = useState(false);
 
@@ -123,18 +127,6 @@ export function PatrolCard({
   const t = useTranslations("General");
   const a = useTranslations("Alert");
 
-  const handleClick = () => {
-    setIsClicked((prev) => !prev);
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
   const handleDetail = () => {
     router.push(`/${locale}/patrol/${id}/detail`);
   };
@@ -175,6 +167,128 @@ export function PatrolCard({
     }
   };
 
+  const [open, setOpen] = useState(false);
+  const openType = useRef<"hover" | "click" | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (openType.current !== "click") {
+      timeoutRef.current = setTimeout(() => {
+        openType.current = "hover";
+        setOpen(true);
+      }, 300);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (openType.current === "hover") {
+      setOpen(false);
+      openType.current = null;
+    }
+  };
+  // Modify the existing wheel handler
+  const handleWheel = useCallback(() => {
+    handleClose();
+  }, []);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // เคลียร์ timeout ของ hover ทันทีเมื่อมีการคลิก
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    openType.current = "click";
+    setOpen(true); // เปิด Popover โดยตรง
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    openType.current = null;
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (openType.current === "hover") {
+        handleClose();
+      } else if (openType.current === "click") {
+        if (window.innerWidth <= 768) {
+          handleClose();
+        }
+      }
+    };
+    handleWheel;
+
+    window.addEventListener("scroll", handleScroll, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      handleClose();
+    };
+
+    // Detect both window scroll and Scroll Area scroll
+    const scrollArea = triggerContainerRef.current?.closest(
+      "[data-radix-scroll-area-viewport], .scroll-area" // Add your Scroll Area's class/attribute
+    );
+
+    if (scrollArea) {
+      scrollArea.addEventListener("scroll", handleScroll);
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (scrollArea) {
+        scrollArea.removeEventListener("scroll", handleScroll);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const TooltipContent = () => {
+    return (
+      <div >
+        <div className="flex items-center justify-center gap-1">
+          <span className="material-symbols-outlined">person_search</span>
+          <p className="text-lg font-semibold">{t("InspectorList")}</p>
+        </div>
+        {inspectors.map((inspector, idx) => (
+          <div
+            key={idx}
+            className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
+          >
+            <UserTooltip user={inspector}>
+              <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                />
+                <AvatarFallback id={inspector.id.toString()}>
+                  {getInitials(inspector.profile.name)}
+                </AvatarFallback>
+              </Avatar>
+            </UserTooltip>
+            <p className="text-lg">{inspector.profile.name}</p>
+          </div>
+        ))}
+        <div className="flex items-center justify-between w-full text-muted-foreground">
+          <p className="text-lg font-semibold">{t("Total")}</p>
+          <p className="text-lg font-semibold">{inspectors.length}</p>
+        </div>
+      </div>
+    );
+  };
+
   if (!mounted) {
     return null;
   }
@@ -189,9 +303,11 @@ export function PatrolCard({
           <CardDescription className="text-lg font-semibold text-muted-foreground">
             {formatTime(date, locale, false)}
           </CardDescription>
-          <CardTitle className="text-card-foreground text-2xl truncate w-full">
+          <TextTooltip object={preset.title}>
+          <CardTitle className="text-card-foreground text-2xl truncate w-[300px]">
             {preset.title}
           </CardTitle>
+          </TextTooltip>
         </div>
         <BadgeCustom
           variant={getPatrolStatusVariant(status).variant}
@@ -205,17 +321,28 @@ export function PatrolCard({
           <span className="material-symbols-outlined">description</span>
           <p className="text-lg font-normal">{formatPatrolId(id)}</p>
         </div>
-        <HoverCard open={isClicked || isHovered}>
-          <HoverCardTrigger
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick();
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            asChild
-          >
-            <div className="flex text-muted-foreground items-center">
+
+        <Popover
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleClose()
+      }}
+    >
+      <HoverCard
+        open={open && openType.current === 'hover'}
+        onOpenChange={(isHoverOpen) => {
+          if (!isHoverOpen && openType.current === 'hover') handleClose();
+        }}
+      >
+        <div
+          ref={triggerContainerRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <HoverCardTrigger asChild>
+            <PopoverTrigger asChild>
+              <div className="cursor-pointer" onClick={handleClick}>
+              <div className="flex text-muted-foreground items-center">
               <span className="material-symbols-outlined me-1">
                 person_search
               </span>
@@ -228,14 +355,14 @@ export function PatrolCard({
               )}
               {inspectors.map((inspector, idx) => {
                 return (
-                    <Avatar key={idx} className="custom-shadow ms-[-10px]">
-                      <AvatarImage
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                      />
-                      <AvatarFallback id={inspector.id.toString()}>
-                        {getInitials(inspector.profile.name)}
-                      </AvatarFallback>
-                    </Avatar>
+                  <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                    />
+                    <AvatarFallback id={inspector.id.toString()}>
+                      {getInitials(inspector.profile.name)}
+                    </AvatarFallback>
+                  </Avatar>
                 );
               })}
 
@@ -249,38 +376,39 @@ export function PatrolCard({
                 </Avatar>
               )}
             </div>
+              </div>
+            </PopoverTrigger>
           </HoverCardTrigger>
-          <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
-            <div className="flex items-center justify-center gap-1">
-              <span className="material-symbols-outlined">person_search</span>
-              <p className="text-lg font-semibold">{t("InspectorList")}</p>
-            </div>
-            {inspectors.map((inspector, idx) => {
-              return (
-                <div
-                  key={idx}
-                  className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
-                >
-                  <UserTooltip user={inspector}>
-                    <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                      <AvatarImage
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                      />
-                      <AvatarFallback id={inspector.id.toString()}>
-                        {getInitials(inspector.profile.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </UserTooltip>
-                  <p className="text-lg">{inspector.profile.name}</p>
-                </div>
-              );
-            })}
-            <div className="flex items-center justify-between w-full text-muted-foreground">
-              <p className="text-lg font-semibold">{t("Total")}</p>
-              <p className="text-lg font-semibold">{inspectors.length}</p>
-            </div>
+
+          <HoverCardContent
+            className="w-full px-6 py-4"
+            zIndex={0}
+            side="bottom"
+            align="start"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TooltipContent/>
           </HoverCardContent>
-        </HoverCard>
+          <PopoverContent
+            className="w-full z-[100] px-6 py-4"
+            side="bottom"
+            align="start"
+            onInteractOutside={(e) => {
+              const target = e.target as HTMLElement;
+              const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
+              const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+
+              if (isUserTooltipContent || isUserTooltipTrigger) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <TooltipContent />
+          </PopoverContent>
+        </div>
+      </HoverCard>
+    </Popover>
+
       </CardContent>
       <CardFooter className="p-0 gap-0">
         <div className="flex gap-2 items-center w-full">

@@ -3,7 +3,7 @@
  *  หน้าที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
  *  โดยสามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
  *
- * Input: 
+ * Input:
  * - ไม่มี
  * Output:
  * - หน้า Patrol ที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
@@ -51,10 +51,7 @@ import { fetchData } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { ChecklistDropdown } from "@/components/checklist-dropdown";
-import {
-  DatePicker,
-  DatePickerWithRange,
-} from "@/components/date-picker";
+import { DatePicker, DatePickerWithRange } from "@/components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Select,
@@ -75,16 +72,24 @@ import {
 import { IUser, IFilterPatrol } from "@/app/type";
 import { sortData } from "@/lib/utils";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
+import { DateRange, DateRange as DayPickerDateRange } from "react-day-picker";
 import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 import NotFound from "@/components/not-found";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ZoneTooltip } from "@/components/zone-tooltip";
+import { TextTooltip } from "@/components/text-tooltip";
 
 export default function Page() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
-  const z = useTranslations('Zone')
+  const z = useTranslations("Zone");
   const [loading, setLoading] = useState<boolean>(true);
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
@@ -95,7 +100,9 @@ export default function Page() {
 
   const [selectedPreset, setSelectedPreset] = useState<IPreset>();
   const [selectedDate, setSelectedDate] = useState<string>();
-  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>([]);
+  const [patrolChecklist, setPatrolChecklist] = useState<IPatrolChecklist[]>(
+    []
+  );
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -150,14 +157,16 @@ export default function Page() {
       return;
     }
 
-    if (patrolChecklist.length !== selectedPreset.presetChecklists.length ||
-      !patrolChecklist.every((item) => item.userId !== null)) {
+    if (
+      patrolChecklist.length !== selectedPreset.presetChecklists.length ||
+      !patrolChecklist.every((item) => item.userId !== null)
+    ) {
       toast({
         variant: "error",
         title: a("PatrolCreateErrorMissingInspectorTitle"),
         description: a("PatrolCreateErrorMissingInspectorDescription"),
       });
-      return
+      return;
     }
 
     const data = {
@@ -175,16 +184,18 @@ export default function Page() {
         title: a("PatrolCreateTitle"),
         description: a("PatrolCreateDescription"),
       });
-      setPatrolChecklist([])
-      setSelectedDate(null)
-      setSelectedPreset(null)
+      setPatrolChecklist([]);
+      setSelectedDate(null);
+      setSelectedPreset(null);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   };
 
   const handleRemoveSuccess = (id: number) => {
-    setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== id));
+    setAllPatrols((prevPatrols) =>
+      prevPatrols.filter((patrol) => patrol.id !== id)
+    );
     toast({
       variant: "success",
       title: a("PatrolRemoveSuccessTitle"),
@@ -224,8 +235,8 @@ export default function Page() {
   };
 
   const getStoredFilter = () => {
-    if (typeof window !== 'undefined') {
-      const storedFilter = localStorage.getItem('filter');
+    if (typeof window !== "undefined") {
+      const storedFilter = localStorage.getItem("filter");
       if (storedFilter) {
         return JSON.parse(storedFilter);
       }
@@ -233,7 +244,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<IFilterPatrol | null>(getStoredFilter())
+  const [filter, setFilter] = useState<IFilterPatrol | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -252,12 +263,11 @@ export default function Page() {
           return {
             presetTitle: "All",
             patrolStatuses: [],
-            dateRange: { start: undefined, end: undefined }
-          }
+            dateRange: { start: undefined, end: undefined },
+          };
         }
       });
-    }
-    else {
+    } else {
       setFilter((prev) => {
         if (prev) {
           return {
@@ -271,11 +281,11 @@ export default function Page() {
   };
 
   const applyFilter = () => {
-    getPatrolData()
+    getPatrolData();
   };
 
   const resetFilter = () => {
-    setFilter(initialFilter)
+    setFilter(initialFilter);
   };
 
   const handleDateSelect = (dateRange: DateRange) => {
@@ -288,18 +298,21 @@ export default function Page() {
       patrolStatuses: filter?.patrolStatuses || [],
       dateRange: {
         start: startDate || undefined,
-        end: endDate || undefined
-      }
+        end: endDate || undefined,
+      },
     });
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (event: any) => {
     setSearchTerm(event.target.value);
   };
 
-  const buildQueryString = (filter: IFilterPatrol | null, searchTerm: string) => {
+  const buildQueryString = (
+    filter: IFilterPatrol | null,
+    searchTerm: string
+  ) => {
     const params: Record<string, string | undefined> = {};
 
     // เพิ่ม search term ถ้ามี
@@ -320,7 +333,7 @@ export default function Page() {
       params.startDate = filter?.dateRange.start.toISOString();
     }
 
-    // เพิ่ม endDate 
+    // เพิ่ม endDate
     if (filter?.dateRange?.end) {
       params.endDate = filter?.dateRange?.end.toISOString();
     }
@@ -349,8 +362,8 @@ export default function Page() {
 
   useEffect(() => {
     getPatrolData();
-    getPresetData()
-    setLoading(false)
+    getPresetData();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -358,7 +371,7 @@ export default function Page() {
   }, [searchTerm]);
 
   useEffect(() => {
-    localStorage.setItem('filter', JSON.stringify(filter));
+    localStorage.setItem("filter", JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -370,11 +383,11 @@ export default function Page() {
 
   useEffect(() => {
     if (selectedDate !== null || selectedDate !== undefined) {
-      setDateError(null)
+      setDateError(null);
     }
-  }, [selectedDate])
+  }, [selectedDate]);
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
 
   return (
@@ -393,32 +406,52 @@ export default function Page() {
     ${isSortOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg">{t('Sort')}</div>
+            <div className="text-lg">{t("Sort")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="p-2 gap-2">
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+              {t("SortBy")}
+            </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.by}
-              onValueChange={(value) => handleSortChange('by', value)}
+              onValueChange={(value) => handleSortChange("by", value)}
             >
-              <DropdownMenuRadioItem value="Doc No." className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('DocNo')}
+              <DropdownMenuRadioItem
+                value="Doc No."
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("DocNo")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Date')}
+              <DropdownMenuRadioItem
+                value="Date"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Date")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+              {t("Order")}
+            </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.order}
-              onValueChange={(value) => handleSortChange('order', value)}
+              onValueChange={(value) => handleSortChange("order", value)}
             >
-              <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Ascending')}
+              <DropdownMenuRadioItem
+                value="Ascending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Ascending")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Descending')}
+              <DropdownMenuRadioItem
+                value="Descending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Descending")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -430,14 +463,16 @@ export default function Page() {
     ${isFilterOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg">{t('Filter')}</div>
+            <div className="text-lg">{t("Filter")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="flex flex-col justify-center gap-2 p-2 z-50"
             align="end"
           >
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Date')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Date")}
+              </DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
@@ -446,10 +481,14 @@ export default function Page() {
               />
             </div>
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Status")}
+              </DropdownMenuLabel>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("pending")}
-                onCheckedChange={(checked) => toggleStatusFilter("pending", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("pending", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -462,7 +501,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("scheduled")}
-                onCheckedChange={(checked) => toggleStatusFilter("scheduled", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("scheduled", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -475,7 +516,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("on_going")}
-                onCheckedChange={(checked) => toggleStatusFilter("on_going", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("on_going", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -488,7 +531,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("completed")}
-                onCheckedChange={(checked) => toggleStatusFilter("completed", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("completed", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -499,29 +544,37 @@ export default function Page() {
                   children="Complete"
                 />
               </DropdownMenuCheckboxItem>
-
             </div>
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Preset')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Preset")}
+              </DropdownMenuLabel>
               <Select
-                value={filter?.presetTitle || 'All'}
+                value={filter?.presetTitle || "All"}
                 onValueChange={(value) =>
                   setFilter({
                     presetTitle: value,
                     patrolStatuses: filter?.patrolStatuses || [],
-                    dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
+                    dateRange: {
+                      start: filter?.dateRange.start,
+                      end: filter?.dateRange.end,
+                    },
                   })
                 }
               >
                 <SelectTrigger className="">
                   <SelectValue
-                    placeholder={filter?.presetTitle === 'All' ? t('All') : filter?.presetTitle}
+                    placeholder={
+                      filter?.presetTitle === "All"
+                        ? t("All")
+                        : filter?.presetTitle
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>{t('Preset')}</SelectLabel>
-                    <SelectItem value="All">{t('All')}</SelectItem>
+                    <SelectLabel>{t("Preset")}</SelectLabel>
+                    <SelectItem value="All">{t("All")}</SelectItem>
                     {allPresets &&
                       allPresets.map((preset) => (
                         <SelectItem value={preset.title} key={preset.id}>
@@ -534,17 +587,16 @@ export default function Page() {
             </div>
             <div className="flex w-full justify-end mt-4 gap-2">
               <Button size="sm" variant="secondary" onClick={resetFilter}>
-                {t('Reset')}
+                {t("Reset")}
               </Button>
-              <Button variant="primary" size="sm" onClick={applyFilter}>{t('Apply')}</Button>
+              <Button variant="primary" size="sm" onClick={applyFilter}>
+                {t("Apply")}
+              </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
-      <ScrollArea
-        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
-      >
+      <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {/* Create Patrol Card with AlertDialog */}
           <AlertDialog>
@@ -555,24 +607,29 @@ export default function Page() {
               <AlertDialogHeader className="flex">
                 <div className="flex flex-col gap-1">
                   <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
-                    {t('PatrolPreset')}
+                    {t("PatrolPreset")}
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-base text-input">
-                    {t('PleaseSelectAPresetForThePatrol')}
+                    {t("PleaseSelectAPresetForThePatrol")}
                   </AlertDialogDescription>
                 </div>
                 <div className="flex items-center justify-center pt-2">
                   <ScrollArea className="h-[500px] w-full rounded-md border-none pr-4 overflow-y-auto">
                     <div className="grid sm:grid-cols-1 xl:grid-cols-2 gap-4">
                       {(() => {
-                        const availablePresets = allPresets ? allPresets.filter((preset) => !preset.disabled) : [];
+                        const availablePresets = allPresets
+                          ? allPresets.filter((preset) => !preset.disabled)
+                          : [];
                         return availablePresets.length > 0 ? (
                           availablePresets.map((preset, index) => (
                             <Button
                               key={index}
                               variant={"outline"}
-                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset ? "border-destructive" : "border-transparent"
-                                } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
+                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${
+                                selectedPreset === preset
+                                  ? "border-destructive"
+                                  : "border-transparent"
+                              } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
                               onClick={() => setSelectedPreset(preset)}
                             >
                               {/* Title */}
@@ -580,18 +637,20 @@ export default function Page() {
                                 {preset.title}
                               </p>
                               {/* Zone */}
-                              <div className="flex flex-row w-full h-full gap-1">
-                                {/* Positioned Icon */}
-                                <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                                  location_on
-                                </span>
-                                {/* Zones */}
-                                <Textarea
-                                  disabled
-                                  className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-semibold line-clamp-3"
-                                  value={preset.zones.map((zone) => z(zone)).join(", ")}
-                                />
-                              </div>
+
+                              <ZoneTooltip zonesName={preset.zones}>
+                                <div className="flex flex-row justify-center items-center w-full gap-1 truncate">
+                                  {/* Positioned Icon */}
+                                  <span className="material-symbols-outlined text-2xl text-muted-foreground">
+                                    location_on
+                                  </span>
+                                  <p className="text-muted-foreground text-left w-[600px] truncate  text-base font-semibold">
+                                    {preset.zones
+                                      .map((zone) => z(zone))
+                                      .join(", ")}
+                                  </p>
+                                </div>
+                              </ZoneTooltip>
                               {/* Description */}
                               <div className="flex flex-row w-full h-full gap-1">
                                 {/* Positioned Icon */}
@@ -599,11 +658,16 @@ export default function Page() {
                                   data_info_alert
                                 </span>
                                 {/* Positioned Textarea */}
-                                <Textarea
-                                  disabled
-                                  className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none leading-tight h-full w-full text-base font-normal line-clamp-3"
-                                  value={preset.description}
-                                />
+                                <div className="w-full h-full ">
+                                <TextTooltip object={preset.description}>
+                                  <Textarea
+                                    disabled
+                                    className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none  max-h-full h-20 w-full text-base font-normal line-clamp-3"
+                                    value={preset.description}
+                                  />
+                                </TextTooltip>
+                                </div>
+                 
                               </div>
                             </Button>
                           ))
@@ -623,13 +687,16 @@ export default function Page() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <div className="flex items-end justify-end gap-2">
-                  <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                  <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                   <AlertDialogAction
-                    className={buttonVariants({ variant: 'primary', size: 'lg' })}
+                    className={buttonVariants({
+                      variant: "primary",
+                      size: "lg",
+                    })}
                     onClick={() => setSecondDialog(true)}
                     disabled={isNextButtonDisabled}
                   >
-                    {t('Next')}
+                    {t("Next")}
                     <span className="material-symbols-outlined text-2xl">
                       chevron_right
                     </span>
@@ -645,36 +712,49 @@ export default function Page() {
               <AlertDialogHeader>
                 <div className="flex flex-col gap-1">
                   <AlertDialogTitle className="text-2xl font-bold text-card-foreground">
-                    {t('PatrolPreset')}
+                    {t("PatrolPreset")}
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-base text-input">
-                    {t('PleaseSelectAPresetForThePatrol')}
+                    {t("PleaseSelectAPresetForThePatrol")}
                   </AlertDialogDescription>
                 </div>
                 <div className="flex flex-col gap-1 pt-2">
-                  <p className="text-sm font-semibold text-muted-foreground"> {t('Date')}</p>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    {" "}
+                    {t("Date")}
+                  </p>
                   <DatePicker
                     handleSelectedTime={(time: string) => setSelectedDate(time)}
                   />
                   {dateError && (
-                    <p className="text-sm font-light italic text-destructive mt-1">{a(dateError)}</p>
+                    <p className="text-sm font-light italic text-destructive mt-1">
+                      {a(dateError)}
+                    </p>
                   )}
                 </div>
               </AlertDialogHeader>
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold text-muted-foreground"> {t('Checklist')}</p>
+                <p className="text-sm font-semibold text-muted-foreground">
+                  {" "}
+                  {t("Checklist")}
+                </p>
                 <div className="grid grid-cols-1">
                   <ScrollArea className="pr-2 h-96 w-full rounded-md overflow-visible overflow-y-clip">
                     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 xl:grid-cols-1 gap-4">
-                      {selectedPreset?.presetChecklists.flatMap((presetChecklist: IPresetChecklist) => (
-                        <ChecklistDropdown
-                          key={presetChecklist.checklist.id}
-                          checklist={presetChecklist.checklist}
-                          handleselectUser={(selectedUser: IUser) => {
-                            handleSelectUser(presetChecklist.checklist.id, selectedUser.id);
-                          }}
-                        />
-                      ))}
+                      {selectedPreset?.presetChecklists.flatMap(
+                        (presetChecklist: IPresetChecklist) => (
+                          <ChecklistDropdown
+                            key={presetChecklist.checklist.id}
+                            checklist={presetChecklist.checklist}
+                            handleselectUser={(selectedUser: IUser) => {
+                              handleSelectUser(
+                                presetChecklist.checklist.id,
+                                selectedUser.id
+                              );
+                            }}
+                          />
+                        )
+                      )}
                     </div>
                   </ScrollArea>
                 </div>
@@ -682,21 +762,25 @@ export default function Page() {
 
               <AlertDialogFooter>
                 <div className="flex items-end justify-end gap-2">
-                  <AlertDialogCancel onClick={() => {
-                    setSecondDialog(false)
-                    setDateError(null)
-                  }
-                  }>
-                    {t('Cancel')}
+                  <AlertDialogCancel
+                    onClick={() => {
+                      setSecondDialog(false);
+                      setDateError(null);
+                    }}
+                  >
+                    {t("Cancel")}
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className={`${buttonVariants({ variant: 'primary', size: 'lg' })} gap-2`}
+                    className={`${buttonVariants({
+                      variant: "primary",
+                      size: "lg",
+                    })} gap-2`}
                     onClick={handleCreatePatrol}
                   >
                     <span className="material-symbols-outlined text-2xl">
                       note_add
                     </span>
-                    {t('NewPatrol')}
+                    {t("NewPatrol")}
                   </AlertDialogAction>
                 </div>
               </AlertDialogFooter>
@@ -716,14 +800,16 @@ export default function Page() {
 
           {(() => {
             // กรอง preset ที่ไม่ได้ disabled
-            const availablePatrols = allPatrols ? allPatrols.filter((patrol) => !patrol.disabled) : [];
+            const availablePatrols = allPatrols
+              ? allPatrols.filter((patrol) => !patrol.disabled)
+              : [];
 
             return availablePatrols.length > 0 ? (
               availablePatrols.map((patrol) => (
                 <PatrolCard
                   key={patrol.id}
                   status={patrol.status as patrolStatus}
-                  date={(patrol.date)}
+                  date={patrol.date}
                   preset={patrol.preset}
                   id={patrol.id}
                   itemCounts={patrol.itemCounts}
@@ -733,11 +819,14 @@ export default function Page() {
               ))
             ) : (
               <div className="col-span-full min-h-[261px]">
-                <NotFound icon="task" title="NoPatrolsAvailable" description="NoPatrolsDescription" />
+                <NotFound
+                  icon="task"
+                  title="NoPatrolsAvailable"
+                  description="NoPatrolsDescription"
+                />
               </div>
             );
           })()}
-
         </div>
       </ScrollArea>
     </div>

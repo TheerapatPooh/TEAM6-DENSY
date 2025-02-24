@@ -28,6 +28,7 @@ export interface IUserTooltip {
 }
 
 export function UserTooltip({ user, children }: IUserTooltip) {
+  const triggerContainerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("General");
   const [open, setOpen] = useState(false);
   const openType = useRef<'hover' | 'click' | null>(null);
@@ -88,6 +89,34 @@ export function UserTooltip({ user, children }: IUserTooltip) {
       window.removeEventListener('wheel', handleWheel);
     };
   }, []);
+
+
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      handleClose();
+    };
+
+    // Detect both window scroll and Scroll Area scroll
+    const scrollArea = triggerContainerRef.current?.closest(
+      '[data-radix-scroll-area-viewport], .scroll-area' // Add your Scroll Area's class/attribute
+    );
+
+    if (scrollArea) {
+      scrollArea.addEventListener('scroll', handleScroll);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      if (scrollArea) {
+        scrollArea.removeEventListener('scroll', handleScroll);
+      }
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
 
   const TooltipContent = ({ object }: { object: any }) => {
     return (
@@ -163,6 +192,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
         }}
       >
         <div
+          ref={triggerContainerRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
