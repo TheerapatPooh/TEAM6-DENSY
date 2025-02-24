@@ -147,7 +147,7 @@ export function RadialChart({ duration }) {
                                                     y={(viewBox.cy || 0) + 24}
                                                     className="fill-muted-foreground"
                                                 >
-                                                    {t("hour")}
+                                                    {t("Hour")}
                                                 </tspan>
                                             </text>
                                         )

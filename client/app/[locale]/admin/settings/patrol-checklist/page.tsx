@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import {
   DropdownMenu,
@@ -521,7 +521,7 @@ export default function Page() {
                   onClick={() => {
                     handleChecklist(checklist.id);
                   }}
-                  className={`flex flex-row border-l-[10px] truncate h-[166px] cursor-pointer ${getChecklistColor(
+                  className={`flex flex-row border-l-[10px] truncate h-full cursor-pointer ${getChecklistColor(
                     checklist
                   )} border-destructive h-[166px] bg-card rounded-lg custom-shadow px-6 py-4 justify-between`}
                 >
@@ -546,19 +546,19 @@ export default function Page() {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex flex-col gap-2 text-gray-500 ">
-                      <div className="flex flex-row gap-2 ">
+                    <div className="flex flex-col gap-2 text-gray-500">
+                      <div className="flex flex-row gap-2">
                         <span className="material-symbols-outlined  text-muted-foreground">
                           location_on
                         </span>
 
-                       <ZoneTooltip zonesName={checklist.zones}>
-                       <p className="text-base text-muted-foreground  truncate w-[700px] whitespace-nowrap min-w-0">
-                                {checklist.zones
-                                  .map((zone) => z(zone))
-                                  .join(", ")}
-                              </p>
-                       </ZoneTooltip>
+                        <ZoneTooltip zonesName={checklist.zones}>
+                          <p className="text-base text-muted-foreground  truncate w-[700px] whitespace-nowrap min-w-0">
+                            {checklist.zones
+                              .map((zone) => z(zone))
+                              .join(", ")}
+                          </p>
+                        </ZoneTooltip>
                       </div>
                       <div className="flex gap-2">
                         <div className="flex items-center">
@@ -591,7 +591,13 @@ export default function Page() {
 
                   <div className="sticky right-[0px]  flex flex-row items-end ">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger asChild
+                        className={
+                          buttonVariants({
+                            variant: "ghost",
+                            size: "icon",
+                          })}
+                      >
                         <span className="material-symbols-outlined text-input">
                           more_vert
                         </span>
