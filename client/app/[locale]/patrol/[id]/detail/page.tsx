@@ -172,7 +172,7 @@ export default function Page() {
             </AlertDialog>
 
             <div className="flex flex-col h-full justify-start w-full">
-              <p className="text-2xl font-bold mb-1">{patrol.preset.title}</p>
+              <p className="text-2xl font-bold mb-1 text-start">{patrol.preset.title}</p>
               <div className="w-[300px]">
                 <Progress value={calculateProgress()} />
               </div>
@@ -256,14 +256,14 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
               }
               return (

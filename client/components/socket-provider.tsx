@@ -39,7 +39,7 @@ export const SocketProvider = ({
         const socketInstance = ClientIO(process.env.NEXT_PUBLIC_SOCKET_URL, {
             withCredentials: true,
             transports: ["websocket"],
-            secure: process.env.NODE_ENV === 'production'
+            secure: true
         })
 
         socketInstance.on("connect", () => {
