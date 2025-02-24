@@ -437,6 +437,8 @@ export async function getAllPatrols(req: Request, res: Response) {
             id: true,
             status: true,
             defects: true,
+            itemId: true,
+            zoneId: true
           }
         }
       },

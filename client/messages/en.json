@@ -580,6 +580,7 @@
     "TotalComments": "Total Comments",
     "DefectReported": "Defect Reported",
     "PatrolDuration": "Patrol Duration",
-    "PatrolDurationDescription": "Monitor the time taken for each patrol to analyze the duration of each inspection round."
+    "PatrolDurationDescription": "Monitor the time taken for each patrol to analyze the duration of each inspection round.",
+    "Duration": "Duration"
   }
 }
