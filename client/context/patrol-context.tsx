@@ -13,13 +13,10 @@ import { useTranslations } from "next-intl";
 interface IPatrolContext {
     patrol: IPatrol | null;
     patrolResults: IPatrolResult[];
-    results: IPatrolResult[];
-    otherResults: IPatrolResult[];
     user: IUser | null;
     lock: boolean;
     isAlertOpen: boolean;
-    handleResult: (result: IPatrolResult) => void;
-    mergeResults: (newResults: IPatrolResult[]) => void;
+    handleResult: (patrolResult: IPatrolResult) => void;
     toggleLock: () => void;
     handleStartPatrol: () => void;
     handleFinishPatrol: () => void;
@@ -50,9 +47,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const [patrol, setPatrol] = useState<IPatrol | null>(null);
-    const [results, setResults] = useState<IPatrolResult[]>([]);
     const [defects, setDefects] = useState<IDefect[]>([]);
-    const [otherResults, setOtherResults] = useState<IPatrolResult[]>([]);
     const [patrolResults, setPatrolResults] = useState<IPatrolResult[]>([]);
     const [user, setUser] = useState<IUser | null>(null);
     const { socket, isConnected } = useSocket();
@@ -74,7 +69,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         patrol?.patrolChecklists.forEach(patrolChecklist => {
             // นับจำนวน item แต่ละประเภท
             patrolChecklist.checklist.items.forEach(item => {
-                item.itemZones.forEach(itemZone => {
+                item.itemZones.forEach(() => {
                     itemCounts++
                 })
             });
@@ -171,16 +166,34 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         if (params.id) {
             try {
                 const data = await fetchData("get", `/patrol/${params.id}?preset=true&result=true`, true);
-                const savedResults = localStorage.getItem(`patrolResults_${data.id}`);
-                const otherResults = localStorage.getItem(`otherResults_${data.id}`);
-                if (savedResults) {
-                    setResults(JSON.parse(savedResults));
-                }
-                if (otherResults) {
-                    setOtherResults(JSON.parse(otherResults));
-                }
                 setPatrol(data);
-                setPatrolResults(data.results)
+                // ดึงข้อมูลจาก localStorage เมื่อ patrol.id มีค่า
+                const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
+                let mergedResults = [...data.results]; // เริ่มต้นด้วยข้อมูลจาก server
+
+                if (savedResults) {
+                    const savedResultsParsed = JSON.parse(savedResults);
+
+                    // รวมข้อมูลจาก localStorage เข้ากับข้อมูลจาก server
+                    savedResultsParsed.forEach((savedResult: IPatrolResult) => {
+                        const existingIndex = mergedResults.findIndex((r) => r.id === savedResult.id);
+
+                        if (existingIndex !== -1) {
+                            // ถ้ามีผลลัพธ์ใน server ที่มี id เดียวกัน, ให้รวมข้อมูล (ไม่ทับ)
+                            mergedResults[existingIndex] = {
+                                ...mergedResults[existingIndex],
+                                ...savedResult,
+                            };
+                        } else {
+                            // ถ้าไม่มี, ให้เพิ่มผลลัพธ์จาก localStorage ไป
+                            mergedResults.push(savedResult);
+                        }
+                    });
+                }
+                console.log("mergedResults", mergedResults)
+
+                // อัปเดต state ด้วยข้อมูลที่รวมกัน
+                setPatrolResults(mergedResults);
             } catch (error) {
                 console.error("Failed to fetch patrol data:", error);
             }
@@ -208,41 +221,30 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const toggleLock = () => setLock((prev) => !prev);
 
-    const mergeResults = (newResults: IPatrolResult[]) => {
-        setPatrolResults((prevPatrolResult = []) => {
-            const updatedResults = prevPatrolResult.map((res) => {
-                const matchingResult = newResults.find(
-                    (newRes) =>
-                        res.itemId === newRes.itemId && res.zoneId === newRes.zoneId
-                );
-                return matchingResult ? { ...res, ...matchingResult } : res;
-            });
-
-            const newUniqueResults = newResults.filter(
-                (newRes) =>
-                    !updatedResults.some(
-                        (res) =>
-                            res.itemId === newRes.itemId && res.zoneId === newRes.zoneId
-                    )
-            );
-
-            return [...updatedResults, ...newUniqueResults];
-        });
-    }
-
-    const handleResult = (result: IPatrolResult) => {
-        setResults((prevResults) => {
+    const handleResult = (patrolResult: IPatrolResult) => {
+        setPatrolResults((prevResults) => {
             const existingIndex = prevResults.findIndex(
-                (r) => r.id === result.id
+                (r) => r.id === patrolResult.id
             );
 
+            let updatedResults;
             if (existingIndex !== -1) {
-                const updatedResults = [...prevResults];
-                updatedResults[existingIndex] = result;
-                return updatedResults;
+                updatedResults = [...prevResults];
+                updatedResults[existingIndex] = {
+                    ...updatedResults[existingIndex],
+                    ...patrolResult,
+                };
             } else {
-                return [...prevResults, result];
+                updatedResults = [...prevResults, patrolResult];
             }
+            if (socket && patrol?.id) {
+                socket.emit("update_patrol_result", {
+                    patrolId: patrol.id,
+                    result: patrolResult
+                });
+            }
+
+            return updatedResults
         });
     };
 
@@ -263,6 +265,10 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 true,
                 data
             );
+            socket.emit("start_patrol", {
+                patrolId: patrol.id,
+                patrolData: startPatrol,
+            });
             setPatrol(startPatrol)
             setPatrolResults(startPatrol.results)
             toast({
@@ -278,25 +284,10 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const handleFinishPatrol = async () => {
         if (!patrol) return;
 
-        const updatedResults = patrolResults.map((result) => {
-            const matchedResult = patrolResults.find(
-                (res) => res.itemId === result.itemId && res.zoneId === result.zoneId
-            );
-
-            if (matchedResult && result.status !== null) {
-                return {
-                    id: matchedResult.id,
-                    status: result.status,
-                };
-            }
-
-            return null;
-        });
-
         const data = {
             status: patrol.status,
             checklists: patrol.patrolChecklists,
-            results: updatedResults,
+            results: patrol.results,
             startTime: patrol.startTime
         };
 
@@ -313,24 +304,27 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         if (data.results.length === resultCount) {
             try {
                 localStorage.removeItem(`patrolResults_${patrol.id}`);
-                localStorage.removeItem(`otherResults_${patrol.id}`);
                 const finishPatrol = await fetchData(
                     "put",
                     `/patrol/${patrol.id}/finish`,
                     true,
                     data
                 );
+                socket.emit("finish_patrol", {
+                    patrolId: patrol.id,
+                    patrolData: finishPatrol
+                });
+                setPatrol(finishPatrol)
+
                 toast({
                     variant: "default",
                     title: a("PatrolFinishTitle"),
                     description: a("PatrolFinishDescription"),
                 });
-                setPatrol(finishPatrol)
             } catch (error) {
                 console.error("Error finishing patrol:", error);
             }
         }
-        // window.location.reload()
     };
 
     const getUserData = async () => {
@@ -382,160 +376,78 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         };
         fetchData();
-    }, []);
+    }, [patrol?.id])
 
     useEffect(() => {
-        if (otherResults) {
-            mergeResults(otherResults);
+        if (patrol?.id && patrolResults) {
+            // บันทึกข้อมูล patrolResults ลง localStorage ด้วย key patrolResults_<patrol.id>
+            localStorage.setItem(
+                `patrolResults_${patrol.id}`,
+                JSON.stringify(patrolResults)
+            );
         }
-    }, [otherResults]);
+    }, [patrolResults]);
 
     useEffect(() => {
         if (socket && isConnected && patrol?.id && user?.id) {
-            socket.emit("join_room", patrol.id);
+            socket.emit("join_patrol", patrol.id);
 
-            const handleResultUpdate = (updatedResults: IPatrolResult[]) => {
-                const currentUserResults = updatedResults.filter(
-                    (res) => res.inspectorId === user.id
-                );
-
-                const otherUserResults = updatedResults.filter(
-                    (res) => res.inspectorId !== user.id
-                );
-
-                // Avoid unnecessary updates to localStorage
-                if (currentUserResults.length > 0) {
-                    const savedResults = localStorage.getItem(
-                        `patrolResults_${patrol.id}`
-                    );
-                    const parsedResults: IPatrolResult[] = savedResults
-                        ? JSON.parse(savedResults)
-                        : [];
-                    if (
-                        JSON.stringify(parsedResults) !== JSON.stringify(currentUserResults)
-                    ) {
-                        localStorage.setItem(
-                            `patrolResults_${patrol.id}`,
-                            JSON.stringify(currentUserResults)
-                        );
-                    }
-                }
-
-                if (otherUserResults.length > 0) {
-                    const savedOtherResults = localStorage.getItem(
-                        `otherResults_${patrol.id}`
-                    );
-                    const parsedOtherResults: IPatrolResult[] = savedOtherResults
-                        ? JSON.parse(savedOtherResults)
-                        : [];
-                    if (
-                        JSON.stringify(parsedOtherResults) !==
-                        JSON.stringify(otherUserResults)
-                    ) {
-                        localStorage.setItem(
-                            `otherResults_${patrol.id}`,
-                            JSON.stringify(otherUserResults)
-                        );
-                    }
-                }
-
-                setOtherResults(otherUserResults);
-                mergeResults([...results, ...otherUserResults]);
+            // รับข้อมูลเริ่มต้นเมื่อเข้าร่วมห้อง
+            const handleInitialData = (initialResults: IPatrolResult[]) => {
+                setPatrolResults(prev => {
+                    const merged = [...prev];
+                    initialResults.forEach(result => {
+                        const existingIndex = merged.findIndex(r => r.id === result.id);
+                        if (existingIndex !== -1) {
+                            merged[existingIndex] = {
+                                ...merged[existingIndex],
+                                ...result
+                            };
+                        } else {
+                            merged.push(result);
+                        }
+                    });
+                    return merged;
+                });
             };
 
+            // รับข้อมูลอัปเดตแบบ real-time
+            const handleResultUpdate = (incomingResult: IPatrolResult) => { // รับทีละรายการ
+                setPatrolResults((prev) => {
+                    const existingIndex = prev.findIndex(r => r.id === incomingResult.id);
+                    if (existingIndex !== -1) {
+                        const updated = [...prev];
+                        updated[existingIndex] = { ...updated[existingIndex], ...incomingResult };
+                        return updated;
+                    }
+                    return [...prev, incomingResult];
+                });
+            };
+
+            const handlePatrolStarted = (data: { patrolId: string; patrolData: IPatrol }) => {
+                setPatrol(data.patrolData);
+                setPatrolResults(data.patrolData.results);
+            };
+
+
+            const handlePatrolFinished = (data: { patrolId: string; patrolData: IPatrol }) => {
+                localStorage.removeItem(`patrolResults_${data.patrolId}`);
+                setPatrol(data.patrolData);
+            };
+
+            socket.on("initial_patrol_data", handleInitialData);
+            socket.on("patrol_started", handlePatrolStarted);
             socket.on("patrol_result_update", handleResultUpdate);
+            socket.on("patrol_finished", handlePatrolFinished);
 
             return () => {
+                socket.off("initial_patrol_data", handleInitialData);
+                socket.off("patrol_started", handlePatrolStarted);
                 socket.off("patrol_result_update", handleResultUpdate);
+                socket.off("patrol_finished", handlePatrolFinished);
             };
         }
-    }, [socket, isConnected, patrol?.id, user?.id, results]);
-
-    const lastEmittedResults = useRef<IPatrolResult[]>([]);
-
-    useEffect(() => {
-        if (socket && patrol?.id) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const handleNewUserJoin = (userId: string) => {
-
-                const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
-                if (savedResults) {
-                    try {
-                        const parsedResults: IPatrolResult[] = JSON.parse(savedResults);
-                        socket.emit("patrol_result_update", parsedResults, patrol.id);
-                    } catch (error) {
-                        console.error("Error parsing saved results:", error);
-                    }
-                }
-            };
-
-            socket.on("new_user_joined", handleNewUserJoin);
-
-            return () => {
-                socket.off("new_user_joined", handleNewUserJoin);
-            };
-        }
-    }, [socket, patrol?.id]);
-
-    useEffect(() => {
-        mergeResults(results)
-
-        if (socket && isConnected && results.length > 0 && patrol) {
-            const uniqueResults = results.map(({ inspectorId, id, itemId, zoneId, status }) => {
-                let existingResult = patrolResults.find(
-                    (patrolResult) => patrolResult.itemId === itemId && patrolResult.zoneId === zoneId
-                );
-                if (existingResult) {
-                    return {
-                        inspectorId,
-                        id: existingResult.id,
-                        itemId,
-                        zoneId,
-                        status,
-                        patrolId: patrol.id,
-                    };
-                } else {
-                    return {
-                        inspectorId,
-                        id,
-                        itemId,
-                        zoneId,
-                        status,
-                        patrolId: patrol.id,
-                    };
-                }
-            });
-
-            const hasChanged =
-                uniqueResults.length !== lastEmittedResults.current.length ||
-                uniqueResults.some(
-                    (result, index) =>
-                        result.id !== lastEmittedResults.current[index]?.id ||
-                        result.itemId !== lastEmittedResults.current[index]?.itemId ||
-                        result.zoneId !== lastEmittedResults.current[index]?.zoneId ||
-                        result.status !== lastEmittedResults.current[index]?.status
-                );
-
-            if (hasChanged) {
-                socket.emit("patrol_result_update", uniqueResults, patrol.id);
-                mergeResults([...results, ...uniqueResults]);
-                localStorage.setItem(
-                    `patrolResults_${patrol.id}`,
-                    JSON.stringify(results)
-                );
-
-                lastEmittedResults.current = results;
-            }
-        }
-    }, [results]);
-
-    useEffect(() => {
-        const savedResults = localStorage.getItem(`patrolResults_${patrol?.id}`);
-        if (savedResults) {
-            const parsedResults = JSON.parse(savedResults);
-            setResults(parsedResults);
-        }
-    }, [patrol?.id]);
+    }, [socket, isConnected, patrol?.id, user?.id]);
 
     if (!mounted) {
         return <Loading />;
@@ -550,8 +462,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
             value={{
                 patrol,
                 patrolResults,
-                results,
-                otherResults,
+                // results,
                 user,
                 lock,
                 isAlertOpen,
@@ -573,7 +484,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 toggleLock,
                 calculateProgress,
                 handleResult,
-                mergeResults,
                 handleStartPatrol,
                 fetchRealtimeData,
                 handleFinishPatrol,
