@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
@@ -64,11 +64,12 @@ export default function Page() {
   const t = useTranslations("General");
   const s = useTranslations("Status");
 
+  const [socketData, setSocketData] = useState<IPatrolResult[]>([]);
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
 
   const [dateError, setDateError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [mounted, setMounted] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string>();
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
@@ -82,6 +83,37 @@ export default function Page() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const router = useRouter();
   const locale = useLocale();
+
+  const mergedPatrols = useMemo(() => {
+    if (!socketData || socketData.length === 0) {
+      return allPatrols;
+    }
+
+    const updatedPatrols = allPatrols.map((patrol) => {
+      if (patrol.results && patrol.results.length > 0) {
+        const updatedResults = patrol.results.map((existingResult) => {
+          const matchingSocketResult = socketData.find((result) => result.id === existingResult.id);
+          return matchingSocketResult ? { ...existingResult, ...matchingSocketResult } : existingResult;
+        });
+
+        const newResults = socketData.filter((socketResult) =>
+          !patrol.results.some((existingResult) => existingResult.id === socketResult.id)
+        );
+
+        return { ...patrol, results: [...updatedResults, ...newResults] };
+      }
+      return patrol;
+    });
+
+    return updatedPatrols;
+  }, [allPatrols, socketData]); // ทำงานเฉพาะเมื่อ allPatrols หรือ socketData เปลี่ยนแปลง
+
+  // ใช้ useEffect เพื่อตั้งค่า allPatrols ถ้า mergedPatrols เปลี่ยนแปลง
+  useEffect(() => {
+    if (JSON.stringify(allPatrols) !== JSON.stringify(mergedPatrols)) {
+      setAllPatrols(mergedPatrols);
+    }
+  }, [mergedPatrols]);
 
   const getPatrolData = async () => {
     try {
@@ -103,38 +135,6 @@ export default function Page() {
   };
 
   const joinedRoomsRef = useRef(new Set());
-
-  const handleResultUpdate = useCallback((updatedResults: IPatrolResult[]) => {
-    setAllPatrols((prevPatrols) =>
-      prevPatrols.map((updatePatrol) => {
-        const updatedResultsForPatrol = updatePatrol.results.map((result) => {
-          const matchingResult = updatedResults.find((updatedResult) => updatedResult.id === result.id);
-          return matchingResult
-            ? { ...result, status: matchingResult.status, defects: matchingResult.defects || [] }
-            : result;
-        });
-
-        // คัดเฉพาะผลลัพธ์ที่ตรงกับ patrolId นี้เท่านั้น
-        const filteredUpdatedResults = updatedResults.filter((result) => result.patrolId === updatePatrol.id);
-
-        if (filteredUpdatedResults.length > 0) {
-          // ดึงค่าที่เคยเก็บใน localStorage (ถ้ามี)
-          const existingResults = JSON.parse(localStorage.getItem(`patrol_${updatePatrol.id}`) || "[]");
-
-          // รวมค่าใหม่เข้าไปในอาร์เรย์โดยหลีกเลี่ยงค่าซ้ำ
-          const updatedStorageResults = [
-            ...existingResults.filter((res: IPatrolResult) => !filteredUpdatedResults.some((upd) => upd.id === res.id)),
-            ...filteredUpdatedResults,
-          ];
-
-          // เซ็ตค่าเป็นอาร์เรย์เฉพาะของ patrol นี้
-          localStorage.setItem(`patrol_${updatePatrol.id}`, JSON.stringify(updatedStorageResults));
-        }
-
-        return { ...updatePatrol, results: updatedResultsForPatrol };
-      })
-    );
-  }, []);
 
   const countPatrolResult = (results: IPatrolResult[]) => {
     let fail = 0;
@@ -268,7 +268,6 @@ export default function Page() {
   const applyFilter = () => {
     const fetchData = async () => {
       await getPatrolData()
-      await initializePatrols()
     };
     fetchData();
   };
@@ -325,15 +324,6 @@ export default function Page() {
     }
 
     return new URLSearchParams(params).toString();
-  };
-
-  const removeLocalStoragePatrolCompleted = () => {
-    allPatrols.forEach(patrol => {
-      if (patrol.status === 'completed') {
-        const localStorageKey = `patrol_${patrol.id}`;
-        localStorage.removeItem(localStorageKey);
-      }
-    });
   };
 
   const formatId = (id: number): string => {
@@ -405,94 +395,12 @@ export default function Page() {
     return (checkedResults / totalResults) * 100;
   };
 
-  const initializePatrols = () => {
-    setAllPatrols((prevPatrols) =>
-      prevPatrols?.map((updatePatrol) => {
-        const resultLocal = localStorage.getItem(`patrol_${updatePatrol.id}`);
-        let parsedResults: IPatrolResult[] = [];
-
-        if (resultLocal) {
-          try {
-            parsedResults = JSON.parse(resultLocal);
-          } catch (error) {
-            console.error(`Error parsing localStorage for patrol_${updatePatrol.id}:`, error);
-          }
-        }
-
-        // ตรวจสอบว่า parsedResults มีข้อมูลหรือไม่
-        if (parsedResults.length > 0) {
-          // อัปเดตค่า status สำหรับแต่ละ result ใน updatePatrol
-          const updatedResultsForPatrol = updatePatrol.results.map((result) => {
-            const matchingResult = parsedResults.find(
-              (parsedResult) =>
-                String(parsedResult.patrolId) === String(updatePatrol.id) && // แปลงเป็น string
-                String(parsedResult.id) === String(result.id) // แปลงเป็น string
-            );
-
-            return matchingResult
-              ? { ...result, status: matchingResult.status } // อัปเดตค่า status
-              : result; // ถ้าไม่พบให้ใช้ค่าเดิม
-          });
-
-          // อัปเดต allPatrols ด้วย results ใหม่
-          return { ...updatePatrol, results: updatedResultsForPatrol };
-        }
-
-        // ถ้าไม่มีข้อมูลใน localStorage ให้คืนค่า updatePatrol เดิม
-        return updatePatrol;
-      })
-    );
-  };
-
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       await getPresetData();
       await getPatrolData();
-      await initializePatrols()
-
-      setTimeout(() => {
-        removeLocalStoragePatrolCompleted();
-      }, 1000); // หน่วงเวลา 1 วินาที
-
-      setLoading(false);
     };
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getPatrolData();
-      await initializePatrols()
-    };
-    fetchData();
-  }, [searchTerm]);
-
-  useEffect(() => {
-    removeLocalStoragePatrolCompleted()
-  }, [allPatrols])
-
-  useEffect(() => {
-    if (socket && isConnected) {
-      socket.on("patrol_result_update", handleResultUpdate);
-      return () => {
-        socket.off("patrol_result_update", handleResultUpdate);
-      };
-    }
-  }, [socket, isConnected, handleResultUpdate]);
-
-  useEffect(() => {
-    if (socket && isConnected && allPatrols) {
-      allPatrols.forEach((patrol) => {
-        if (!joinedRoomsRef.current.has(patrol.id)) {
-          socket.emit("join_room", patrol.id);
-          joinedRoomsRef.current.add(patrol.id);
-        }
-      });
-    }
-  }, [socket, isConnected]);
-
-  useEffect(() => {
     // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -508,6 +416,113 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    const fetchData = async () => {
+      await getPatrolData();
+    };
+    fetchData();
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const initializeSocketListeners = () => {
+      allPatrols.forEach((patrol) => {
+        if (!joinedRoomsRef.current.has(patrol.id)) {
+          socket.emit("join_patrol", patrol.id);
+          joinedRoomsRef.current.add(patrol.id);
+        }
+      });
+      // ฟังก์ชันรับข้อมูลเริ่มต้นจาก socket
+      const handleInitialData = (initialResults: IPatrolResult[]) => {
+        if (initialResults.length <= 0) {
+          return;
+        }
+        // ตั้งค่า socketData ให้เป็นข้อมูลที่รับมาจาก socket
+        setSocketData(prevData => {
+          // อัปเดตข้อมูลที่ตรงกันหรือลงข้อมูลใหม่
+          const updatedResults = initialResults.map((incomingResult) => {
+            // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
+            const existingIndex = prevData.findIndex(result => result.id === incomingResult.id);
+
+            if (existingIndex !== -1) {
+              // ถ้ามี id ตรงกัน, อัปเดตข้อมูลใน existing result
+              return {
+                ...prevData[existingIndex],  // ข้อมูลเดิม
+                ...incomingResult,            // ข้อมูลใหม่ที่มาจาก initialResults
+              };
+            }
+
+            // ถ้าไม่มี id ตรงกัน, ให้เพิ่มข้อมูลใหม่
+            return incomingResult;
+          });
+
+          // เช็คผลลัพธ์ใหม่ที่ไม่มีใน prevData
+          const newResults = initialResults.filter(result =>
+            !prevData.some(existingResult => existingResult.id === result.id)
+          );
+
+          // รวมข้อมูลเดิมที่อัปเดตและผลลัพธ์ใหม่
+          return [...updatedResults, ...newResults];
+        });
+      };
+
+      // ฟังก์ชันที่ใช้ในการอัปเดตข้อมูลผลลัพธ์
+      const handleResultUpdate = (incomingResult: IPatrolResult) => {
+        setSocketData(prevData => {
+          // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
+          const updatedResults = prevData.map(existingResult => {
+            if (existingResult.id === incomingResult.id) {
+              return {
+                ...existingResult,   // ข้อมูลเดิม
+                ...incomingResult,   // ข้อมูลใหม่ที่มาจาก incomingResult
+              };
+            }
+            return existingResult;
+          });
+
+          // ถ้าไม่มีผลลัพธ์จาก incomingResult ใน prevData, ให้เพิ่มเข้าไป
+          if (!prevData.some(existingResult => existingResult.id === incomingResult.id)) {
+            return [...updatedResults, incomingResult];
+          }
+
+          return updatedResults;
+        });
+      };
+
+      // อัปเดตสถานะเมื่อ patrol เริ่ม
+      const handlePatrolStarted = (data: { patrolId: string; patrolData: IPatrol }) => {
+        setAllPatrols((prevPatrols) =>
+          prevPatrols.map((patrol) =>
+            patrol.id === parseInt(data.patrolId, 10) ? { ...patrol, ...data.patrolData } : patrol
+          )
+        );
+      };
+
+      // อัปเดตสถานะเมื่อ patrol จบ
+      const handlePatrolFinished = (data: { patrolId: string; patrolData: IPatrol }) => {
+        setAllPatrols((prevPatrols) =>
+          prevPatrols.map((patrol) =>
+            patrol.id === parseInt(data.patrolId, 10) ? { ...patrol, ...data.patrolData } : patrol
+          )
+        );
+      };
+
+
+      socket.on("initial_patrol_data", handleInitialData);
+      socket.on("patrol_result_update", handleResultUpdate);
+      socket.on("patrol_started", handlePatrolStarted);
+      socket.on("patrol_finished", handlePatrolFinished);
+      setMounted(true);
+      return () => {
+        socket.off("initial_patrol_data", handleInitialData);
+        socket.off("patrol_result_update", handleResultUpdate);
+        socket.off("patrol_started", handlePatrolStarted);
+        socket.off("patrol_finished", handlePatrolFinished);
+      };
+    };
+
+    initializeSocketListeners();
+  }, [socket, isConnected]);
+
+  useEffect(() => {
     localStorage.setItem('filter', JSON.stringify(filter));
   }, [filter]);
 
@@ -516,7 +531,7 @@ export default function Page() {
     if (JSON.stringify(sortedData) !== JSON.stringify(allPatrols)) {
       setAllPatrols(sortedData);
     }
-  }, [sort, allPatrols]);
+  }, [sort]);
 
   useEffect(() => {
     if (selectedDate !== null || selectedDate !== undefined) {
@@ -524,7 +539,12 @@ export default function Page() {
     }
   }, [selectedDate])
 
-  if (loading) {
+  useEffect(() => {
+
+    console.log(allPatrols, "all")
+  }, [allPatrols]);
+
+  if (!mounted) {
     return <Loading />
   }
 

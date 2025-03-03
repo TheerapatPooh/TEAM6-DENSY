@@ -20,7 +20,6 @@ export function initSocketIO(server: http.Server) {
         socket.on('join_room', (userId: string) => {
             socket.join(userId);
             socket.broadcast.emit("new_user_joined", userId);
-
         });
 
         socket.on('join_patrol', (patrolId: string) => {
