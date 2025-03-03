@@ -18,8 +18,9 @@ export function initSocketIO(server: http.Server) {
     io.on('connection', (socket) => {
 
         socket.on('join_room', (userId: string) => {
+            if (!userId) return;  // ป้องกันการ join ห้องที่ไม่มี userId
             socket.join(userId);
-            socket.broadcast.emit("new_user_joined", userId);
+            socket.to(userId).emit("new_user_joined", userId);
         });
 
         socket.on('join_patrol', (patrolId: string) => {

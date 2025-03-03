@@ -89,24 +89,21 @@ export default function Page() {
       return allPatrols;
     }
 
-    const updatedPatrols = allPatrols.map((patrol) => {
-      if (patrol.results && patrol.results.length > 0) {
-        const updatedResults = patrol.results.map((existingResult) => {
+    return allPatrols.map((patrol) => {
+      if (!patrol.results || patrol.results.length === 0) {
+        return patrol;
+      }
+
+      const updatedResults = patrol.results
+        .map((existingResult) => {
           const matchingSocketResult = socketData.find((result) => result.id === existingResult.id);
           return matchingSocketResult ? { ...existingResult, ...matchingSocketResult } : existingResult;
-        });
+        })
+        .filter((result) => result.id); // กรองเฉพาะที่มี id เท่านั้น
 
-        const newResults = socketData.filter((socketResult) =>
-          !patrol.results.some((existingResult) => existingResult.id === socketResult.id)
-        );
-
-        return { ...patrol, results: [...updatedResults, ...newResults] };
-      }
-      return patrol;
+      return { ...patrol, results: updatedResults };
     });
-
-    return updatedPatrols;
-  }, [allPatrols, socketData]); // ทำงานเฉพาะเมื่อ allPatrols หรือ socketData เปลี่ยนแปลง
+  }, [allPatrols, socketData]);
 
   // ใช้ useEffect เพื่อตั้งค่า allPatrols ถ้า mergedPatrols เปลี่ยนแปลง
   useEffect(() => {

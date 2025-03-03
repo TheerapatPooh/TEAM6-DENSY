@@ -190,7 +190,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                         }
                     });
                 }
-                console.log("mergedResults", mergedResults)
 
                 // อัปเดต state ด้วยข้อมูลที่รวมกัน
                 setPatrolResults(mergedResults);
