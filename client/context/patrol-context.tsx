@@ -170,7 +170,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 // ดึงข้อมูลจาก localStorage เมื่อ patrol.id มีค่า
                 const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
                 let mergedResults = [...data.results]; // เริ่มต้นด้วยข้อมูลจาก server
-                console.log(mergedResults)
                 if (savedResults) {
                     const savedResultsParsed = JSON.parse(savedResults);
 
@@ -458,7 +457,10 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
 
             const handlePatrolFinished = (data: { patrolId: string; patrolData: IPatrol }) => {
                 localStorage.removeItem(`patrolResults_${data.patrolId}`);
-                getPatrolData();
+                const fetchData = async () => {
+                    await getPatrolData()
+                };
+                fetchData();
             };
 
             socket.on("initial_patrol_data", handleInitialData);

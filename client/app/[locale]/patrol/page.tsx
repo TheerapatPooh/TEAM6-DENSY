@@ -22,7 +22,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CreatePatrolCard, PatrolCard } from "@/components/patrol-card";
 import Textfield from "@/components/textfield";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -68,6 +68,7 @@ import {
   patrolStatus,
   IPreset,
   IPresetChecklist,
+  IPatrolResult,
 } from "@/app/type";
 import { IUser, IFilterPatrol } from "@/app/type";
 import { sortData } from "@/lib/utils";
@@ -92,6 +93,7 @@ export default function Page() {
   const t = useTranslations("General");
   const z = useTranslations("Zone");
   const [loading, setLoading] = useState<boolean>(true);
+  const [socketData, setSocketData] = useState<IPatrolResult[]>([]);
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
@@ -179,7 +181,7 @@ export default function Page() {
 
     try {
       const response = await fetchData("post", "/patrol", true, data);
-      // 🔹 Broadcast ข้อมูลให้ทุกคนเห็นแบบ Real-time
+      // Broadcast ข้อมูลให้ทุกคนเห็นแบบ Real-time
       socket.emit("new_patrol", response);
       setSecondDialog(false);
       toast({
@@ -363,20 +365,161 @@ export default function Page() {
     }
   };
 
+  const mergedPatrols = useMemo(() => {
+    if (!socketData || socketData.length === 0) {
+      return allPatrols;
+    }
+
+    return allPatrols.map((patrol) => {
+      if (!patrol.results || patrol.results.length === 0) {
+        return patrol;
+      }
+
+      const updatedResults = patrol.results
+        .map((existingResult) => {
+          const matchingSocketResult = socketData.find((result) => result.id === existingResult.id);
+          return matchingSocketResult ? { ...existingResult, ...matchingSocketResult } : existingResult;
+        })
+        .filter((result) => result.id); // กรองเฉพาะที่มี id เท่านั้น
+
+      return { ...patrol, results: [...updatedResults] };
+    });
+  }, [allPatrols, socketData]);
+
+  // ใช้ useEffect เพื่อตั้งค่า allPatrols ถ้า mergedPatrols เปลี่ยนแปลง
+  useEffect(() => {
+    if (JSON.stringify(allPatrols) !== JSON.stringify(mergedPatrols)) {
+      setAllPatrols([...mergedPatrols]);
+    }
+  }, [mergedPatrols]);
+
+  const joinedRoomsRef = useRef(new Set());
+
   useEffect(() => {
     getPatrolData();
     getPresetData();
-    setLoading(false);
-    const handleNewPatrol = (newPatrol) => {
-      setAllPatrols((prev) => [...prev, newPatrol]);
-    };
-
-    socket.on("patrol_created", handleNewPatrol);
-
-    return () => {
-      socket.off("patrol_created", handleNewPatrol);
-    };
   }, []);
+
+  useEffect(() => {
+    const initializeSocketListeners = () => {
+      // ฟังก์ชันรับข้อมูลเริ่มต้นจาก socket
+      const handleInitialData = (initialResults: IPatrolResult[]) => {
+        if (initialResults.length <= 0) {
+          return;
+        }
+        // ตั้งค่า socketData ให้เป็นข้อมูลที่รับมาจาก socket
+        setSocketData(prevData => {
+          // อัปเดตข้อมูลที่ตรงกันหรือลงข้อมูลใหม่
+          const updatedResults = initialResults.map((incomingResult) => {
+            // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
+            const existingIndex = prevData.findIndex(result => result.id === incomingResult.id);
+
+            if (existingIndex !== -1) {
+              // ถ้ามี id ตรงกัน, อัปเดตข้อมูลใน existing result
+              return {
+                ...prevData[existingIndex],  // ข้อมูลเดิม
+                ...incomingResult,            // ข้อมูลใหม่ที่มาจาก initialResults
+              };
+            }
+
+            // ถ้าไม่มี id ตรงกัน, ให้เพิ่มข้อมูลใหม่
+            return incomingResult;
+          });
+
+          // เช็คผลลัพธ์ใหม่ที่ไม่มีใน prevData
+          const newResults = initialResults.filter(result =>
+            !prevData.some(existingResult => existingResult.id === result.id)
+          );
+
+          // รวมข้อมูลเดิมที่อัปเดตและผลลัพธ์ใหม่
+          return [...updatedResults, ...newResults];
+        });
+      };
+
+      // ฟังก์ชันที่ใช้ในการอัปเดตข้อมูลผลลัพธ์
+      const handleResultUpdate = (incomingResult: IPatrolResult) => {
+        setSocketData(prevData => {
+          // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
+          const updatedResults = prevData.map(existingResult => {
+            if (existingResult.id === incomingResult.id) {
+              return {
+                ...existingResult,   // ข้อมูลเดิม
+                ...incomingResult,   // ข้อมูลใหม่ที่มาจาก incomingResult
+              };
+            }
+            return existingResult;
+          });
+
+          // ถ้าไม่มีผลลัพธ์จาก incomingResult ใน prevData, ให้เพิ่มเข้าไป
+          if (!prevData.some(existingResult => existingResult.id === incomingResult.id)) {
+            return [...updatedResults, incomingResult];
+          }
+
+          return updatedResults;
+        });
+      };
+
+      // อัปเดตสถานะเมื่อ patrol เริ่ม
+      const handlePatrolStarted = async (data: { patrolId: string; patrolData: IPatrol }) => {
+        if (!joinedRoomsRef.current.has(data.patrolId)) {
+          socket.emit("join_patrol", data.patrolId);
+          joinedRoomsRef.current.add(data.patrolId);
+        }
+        await getPatrolData();
+      };
+
+      // อัปเดตสถานะเมื่อ patrol จบ
+      const handlePatrolFinished = async (data: { patrolId: string; patrolData: IPatrol }) => {
+        await getPatrolData();
+      };
+
+      // อัปเดตข้อมูลเมื่อมี Patrol ใหม่
+      const handleNewPatrol = async (newPatrol) => {
+        await getPatrolData();
+
+        if (!joinedRoomsRef.current.has(newPatrol.id)) {
+          socket.emit("join_patrol", newPatrol.id);
+          joinedRoomsRef.current.add(newPatrol.id);
+        }
+      };
+
+      // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ 
+      const handlePatrolDeleted = (patrolId) => {
+        setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== patrolId));
+        if (!joinedRoomsRef.current.has(patrolId)) {
+          socket.emit("join_patrol", patrolId);
+          joinedRoomsRef.current.add(patrolId);
+        }
+      };
+
+      socket.on("initial_patrol_data", handleInitialData);
+      socket.on("patrol_result_update", handleResultUpdate);
+      socket.on("patrol_started", handlePatrolStarted);
+      socket.on("patrol_finished", handlePatrolFinished);
+      socket.on("patrol_created", handleNewPatrol);
+      socket.on("patrol_deleted", handlePatrolDeleted);
+      setLoading(false);
+      return () => {
+        socket.off("initial_patrol_data", handleInitialData);
+        socket.off("patrol_result_update", handleResultUpdate);
+        socket.off("patrol_started", handlePatrolStarted);
+        socket.off("patrol_finished", handlePatrolFinished);
+        socket.off("patrol_created", handleNewPatrol);
+        socket.off("patrol_deleted", handlePatrolDeleted);
+      };
+    };
+
+    initializeSocketListeners();
+  }, [socket, isConnected]);
+
+  useEffect(() => {
+    allPatrols.forEach((patrol) => {
+      if (!joinedRoomsRef.current.has(patrol.id) && patrol.status === 'on_going' || patrol.status === 'scheduled') {
+        socket.emit("join_patrol", patrol.id);
+        joinedRoomsRef.current.add(patrol.id);
+      }
+    });
+  }, [allPatrols])
 
   useEffect(() => {
     getPatrolData();
@@ -823,7 +966,7 @@ export default function Page() {
                   date={patrol.date}
                   preset={patrol.preset}
                   id={patrol.id}
-                  itemCounts={patrol.itemCounts}
+                  results={[...(patrol.results ?? [])]}
                   inspectors={patrol.inspectors}
                   onRemoveSuccess={handleRemoveSuccess}
                 />

@@ -207,8 +207,8 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
             if (resultItem.status === true) {
               statusText = "Passed";
               totalPass++;
-            } 
-            
+            }
+
             if (resultItem.status === false) {
               statusText = "Failed";
               totalFails++; // เพิ่มจำนวน fail
@@ -220,13 +220,13 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
               totalComments += commendCount; // เพิ่มจำนวน commend
               totalFails--;
             }
-            
+
             if (resultItem.defects && resultItem.defects.length > 0) {
               statusText = "Defected";
               defectCount = resultItem.defects.length;
               totalDefects += defectCount; // เพิ่มจำนวน defect
               totalFails--;
-            } 
+            }
           }
 
           // เพิ่มแถวข้อมูลลงใน worksheet
@@ -746,3 +746,20 @@ export const monthOptions = ["AllTime", ...Array.from({ length: 12 }, (_, i) => 
   const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
   return monthFormatter.format(date);
 })];
+
+export const countPatrolResult = (results: IPatrolResult[]) => {
+  let fail = 0;
+  let defect = 0;
+
+  results?.forEach((result) => {
+    if (result.status === false) {
+      fail++;
+    }
+
+    if (Array.isArray(result.defects) && result.defects.length > 0) {
+      defect++;
+    }
+  });
+
+  return { fail, defect };
+};

@@ -8,6 +8,7 @@ import {
   ItemType,
   DefectStatus,
 } from "@prisma/client";
+import { getIOInstance } from "@Utils/socket.js";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
@@ -358,12 +359,7 @@ export async function getAllPatrols(req: Request, res: Response) {
             },
           },
         },
-        results: {
-          select: {
-            status: true,
-            defects: true,
-          }
-        }
+        results: true
       },
     });
 
@@ -438,9 +434,10 @@ export async function getAllPatrols(req: Request, res: Response) {
             status: true,
             defects: true,
             itemId: true,
-            zoneId: true
+            zoneId: true,
+            comments: true
           }
-        }
+        },
       },
     });
 
@@ -503,6 +500,7 @@ export async function getAllPatrols(req: Request, res: Response) {
             preset: patrol.preset,
             itemCounts: {},
             inspectors: [],
+            results: patrol.results,
             disabled: false,
           };
         }
@@ -753,6 +751,22 @@ export async function createPatrol(req: Request, res: Response) {
           result.inspectors.push(inspector);
         }
       });
+      const admins = await prisma.user.findMany({ where: { role: 'admin' } });
+
+      const inspectorIds = createdPatrol.patrolChecklists.map(pc => pc.inspector.id);
+      const io = getIOInstance();
+
+      // รวม Admins และ Inspectors เข้าด้วยกัน
+      const allUserIds = [
+        ...inspectorIds,
+        ...admins.map(admin => admin.id) // เพิ่ม Admins เข้าไป
+      ];
+
+      // ส่ง event "patrol_created" ไปยังทั้ง Inspector และ Admin
+      allUserIds.forEach(userId => {
+        io.to(`notif_${userId}`).emit("patrol_created", createdPatrol);
+      });
+
       res.status(201).json(result);
     }
   } catch (error) {

@@ -19,13 +19,15 @@ export function initSocketIO(server: http.Server) {
 
         socket.on('join_room', (userId: string) => {
             if (!userId) return;  // ป้องกันการ join ห้องที่ไม่มี userId
-            socket.join(userId);
-            socket.to(userId).emit("new_user_joined", userId);
+            const notifRoom = `notif_${userId}`
+            socket.join(notifRoom);
+            socket.to(notifRoom).emit("new_user_joined", userId);
         });
 
         socket.on('join_patrol', (patrolId: string) => {
-            socket.join(patrolId);
-
+            const patrolRoom = `patrol_${patrolId}`;
+            socket.join(patrolRoom);
+            
             // ส่งข้อมูลทั้งหมดใน patrol ให้ผู้ใช้ที่เพิ่งเข้าร่วม
             const currentResults = patrolResultsMap.get(patrolId) || [];
             socket.emit('initial_patrol_data', currentResults);
@@ -33,8 +35,9 @@ export function initSocketIO(server: http.Server) {
 
         socket.on("start_patrol", (data) => {
             const { patrolId, patrolData } = data;
+            const patrolRoom = `patrol_${patrolId}`;
             // ส่งกลับให้ทุกคนในห้องยกเว้นผู้ส่งเดิม
-            socket.broadcast.to(patrolId).emit("patrol_started", {
+            socket.broadcast.to(patrolRoom).emit("patrol_started", {
                 patrolId,
                 patrolData: patrolData
             });
@@ -42,6 +45,8 @@ export function initSocketIO(server: http.Server) {
 
         socket.on("update_patrol_result", (data) => {
             const { patrolId, result } = data;
+            const patrolRoom = `patrol_${patrolId}`;
+
             // อัปเดตข้อมูลใน Map
             const currentResults = patrolResultsMap.get(patrolId) || [];
             const existingIndex = currentResults.findIndex(r => r.id === result.id);
@@ -57,20 +62,21 @@ export function initSocketIO(server: http.Server) {
 
             patrolResultsMap.set(patrolId, currentResults);
             // ส่งกลับให้ทุกคนในห้องยกเว้นผู้ส่งเดิม
-            socket.broadcast.to(patrolId).emit("patrol_result_update", result);
+            socket.broadcast.to(patrolRoom).emit("patrol_result_update", result);
         });
 
         socket.on("finish_patrol", (data) => {
             const { patrolId, patrolData } = data;
+            const patrolRoom = `patrol_${patrolId}`;
             // ส่งกลับให้ทุกคนในห้องยกเว้นผู้ส่งเดิม
-            socket.broadcast.to(patrolId).emit("patrol_finished", {
+            socket.broadcast.to(patrolRoom).emit("patrol_finished", {
                 patrolId,
                 patrolData: patrolData
             });
         });
 
-        socket.on("new_patrol", (newPatrol) => {
-            io.emit("patrol_created", newPatrol); 
+        socket.on("delete_patrol", (patrolId) => {
+            io.emit("patrol_deleted", patrolId); 
         });
     });
 
