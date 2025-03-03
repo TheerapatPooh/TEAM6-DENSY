@@ -1,6 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification } from "@Controllers/util-controller.js";
+import { createNotification, deleteImages } from "@Controllers/util-controller.js";
 import {
   NotificationType,
   PatrolStatus,
@@ -1062,10 +1062,10 @@ export async function finishPatrol(req: Request, res: Response) {
             },
             inspector: {
               select: {
-                id:true,
-                username:true,
-                email:true,
-                role:true,
+                id: true,
+                username: true,
+                email: true,
+                role: true,
                 profile: {
                   select: {
                     name: true,
@@ -1154,17 +1154,74 @@ export async function removePatrol(req: Request, res: Response) {
   try {
     const patrolId = parseInt(req.params.id, 10);
 
+    if (isNaN(patrolId)) {
+      res.status(400).json({ message: "Invalid patrol ID" });
+      return;
+    }
+
     await prisma.patrolChecklist.deleteMany({
       where: {
         patrolId: patrolId,
       },
     });
 
-    await prisma.patrolResult.deleteMany({
+    const patrolResults = await prisma.patrolResult.findMany({
       where: {
-        patrolId: patrolId,
+        patrolId: patrolId
       },
+      select: {
+        id: true
+      }
     });
+
+    if (Array.isArray(patrolResults) && patrolResults.length > 0) {
+      const patrolResultIds = patrolResults.map(patrolResult => patrolResult.id);
+
+      const defects = await prisma.defect.findMany({
+        where: {
+          patrolResultId: { in: patrolResultIds }
+        },
+        select: {
+          id: true
+        }
+      });
+
+      if (Array.isArray(defects) && defects.length > 0) {
+        const defectIds = defects.map(defect => defect.id);
+
+        const images = await prisma.defectImage.findMany({
+          where: {
+            defectId: { in: defectIds }
+          },
+          select: {
+            imageId: true
+          }
+        }) || [];
+
+        if (Array.isArray(images) && images.length > 0) {
+          const imageIds = images.map(image => image.imageId);
+          await deleteImages(imageIds);
+        }
+      }
+
+      await prisma.defect.deleteMany({
+        where: {
+          patrolResultId: { in: patrolResultIds }
+        }
+      });
+
+      await prisma.comment.deleteMany({
+        where: {
+          patrolResultId: { in: patrolResultIds }
+        }
+      });
+
+      await prisma.patrolResult.deleteMany({
+        where: {
+          patrolId: patrolId,
+        },
+      });
+    }
 
     await prisma.patrol.delete({
       where: {

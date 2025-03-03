@@ -67,6 +67,7 @@ export default function Page() {
   const [socketData, setSocketData] = useState<IPatrolResult[]>([]);
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
+  const [selectedPatrolId, setSelectedPatrolId] = useState<number | null>(null);
 
   const [dateError, setDateError] = useState<string | null>(null);
   const [mounted, setMounted] = useState<boolean>(false);
@@ -77,7 +78,6 @@ export default function Page() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const { socket, isConnected } = useSocket();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -158,36 +158,25 @@ export default function Page() {
     setIsAlertOpen(false)
   }
 
-  const handleDialogResult = (result: boolean) => {
-    setIsDialogOpen(false);
-    if (result && pendingAction) {
-      pendingAction(); // Execute the pending action
-      setPendingAction(null); // Clear the pending action
-    }
-  };
-
-  const handleRemovePatrol = (status: string, patrolId: number) => {
-    setPendingAction(() => () => removePatrol(status, patrolId));
-    handleOpenDialog();
-  };
-
-  const handleOpenDialog = () => {
+  const handleOpenDialog = (patrolId: number) => {
+    setSelectedPatrolId(patrolId);
     setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedPatrolId(null)
+    setIsDialogOpen(false);
+  };
+
+  const handleRemovePatrol = (patrolId: number) => {
+    removePatrol(patrolId)
   };
 
   const handleDetail = (patrolId: number) => {
     router.push(`/${locale}/admin/dashboard/overview/${patrolId}`)
   }
 
-  const removePatrol = async (status: string, patrolId: number) => {
-    if (status !== 'pending') {
-      toast({
-        variant: "error",
-        title: a("PatrolRemoveErrorTitle"),
-        description: a("PatrolRemoveErrorDescription"),
-      });
-      return;
-    }
+  const removePatrol = async (patrolId: number) => {
     try {
       await fetchData("delete", `/patrol/${patrolId}`, true);
       toast({
@@ -554,11 +543,6 @@ export default function Page() {
     }
   }, [selectedDate])
 
-  useEffect(() => {
-
-    console.log(allPatrols, "all")
-  }, [allPatrols]);
-
   if (!mounted) {
     return <Loading />
   }
@@ -865,7 +849,7 @@ export default function Page() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={(e) => {
                                     e.stopPropagation()
-                                    handleRemovePatrol(patrol.status, patrol.id)
+                                    handleOpenDialog(patrol.id)
                                   }}>
                                     <h1 className="text-destructive cursor-pointer">{t("Delete")}</h1>
                                   </DropdownMenuItem>
@@ -891,7 +875,12 @@ export default function Page() {
             primaryButtonText={t("Confirm")}
             primaryIcon="check"
             secondaryButtonText={t("Cancel")}
-            backResult={handleDialogResult}
+            backResult={(backResult) => {
+              if (backResult) {
+                handleRemovePatrol(selectedPatrolId)
+              }
+              handleCloseDialog()
+            }}
           ></AlertCustom>
         )}
 
