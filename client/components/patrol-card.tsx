@@ -61,6 +61,7 @@ export interface IPatrolCard {
   date: string;
   status: patrolStatus;
   preset: IPreset;
+  itemCounts: number;
   results: IPatrolResult[];
   inspectors: IUser[];
   onRemoveSuccess;
@@ -71,6 +72,7 @@ export function PatrolCard({
   date,
   status,
   preset,
+  itemCounts,
   results,
   inspectors = [],
   onRemoveSuccess,
@@ -93,7 +95,7 @@ export function PatrolCard({
 
   const getPatrolData = async () => {
     try {
-      let countItems = results.length;
+      let countItems = itemCounts;
       let countFails = countPatrolResult(results).fail;
       let countDefects = countPatrolResult(results).defect;
 
