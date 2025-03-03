@@ -32,7 +32,7 @@ import {
   getPatrolStatusVariant,
 } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import Map from "@/components/map";
 import React, { useEffect, useState } from "react";
 import {
@@ -127,12 +127,6 @@ export default function page() {
       }
     }
   };
-  const inspectors = patrol?.patrolChecklists
-    .map((checklist) => checklist.inspector) // ดึง inspector ออกจาก patrolChecklists
-    .filter(
-      (inspector, index, self) =>
-        self.findIndex((i) => i.id === inspector.id) === index // กรอง inspector ที่ซ้ำกันออก
-    );
 
   const handleOpenDialog = () => {
     setIsAlertOpen(true);
@@ -243,6 +237,17 @@ export default function page() {
   if (!mounted) {
     return <Loading />;
   }
+
+  if (mounted && !patrol?.id) {
+    return notFound();
+  }
+
+  const inspectors = patrol?.patrolChecklists
+    .map((checklist) => checklist.inspector) // ดึง inspector ออกจาก patrolChecklists
+    .filter(
+      (inspector, index, self) =>
+        self.findIndex((i) => i.id === inspector.id) === index // กรอง inspector ที่ซ้ำกันออก
+    );
 
   return (
     <div className="flex flex-col gap-4">
