@@ -63,6 +63,9 @@ export default function page() {
 
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
+  const [alreadyExiistError, setAlreadyExiistError] = useState<string | null>(
+    null
+  );
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   const [checklistError, setChecklistError] = useState<string | null>(null);
   const router = useRouter();
@@ -164,7 +167,20 @@ export default function page() {
     };
 
     try {
-      await fetchData("post", `/preset`, true, data);
+      const response = await fetchData("post", `/preset`, true, data);
+
+      if (response?.error) {
+        // Handle API error
+        console.error("API Error:", response.status, response.data);
+        toast({
+          variant: "error",
+          title: a("CreatePresetFailTitle"),
+          description: `${a("CreatePresetFailDescription")} ${
+            formPreset.title
+          } ${a("AlreadyExists")}`,
+        });
+        return;
+      }
 
       // ถ้าสำเร็จ
       toast({
@@ -214,8 +230,8 @@ export default function page() {
           </Button>
 
           <Button variant="primary" onClick={() => handleOpenDialog()}>
-            <span className="material-symbols-outlined mr-2">save</span>
-            {t("Save")}
+            <span className="material-symbols-outlined">add</span>
+            {t("Create")}
           </Button>
         </div>
       </div>
