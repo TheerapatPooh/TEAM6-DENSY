@@ -68,6 +68,10 @@ export function initSocketIO(server: http.Server) {
                 patrolData: patrolData
             });
         });
+
+        socket.on("new_patrol", (newPatrol) => {
+            io.emit("patrol_created", newPatrol); 
+        });
     });
 
     return io;

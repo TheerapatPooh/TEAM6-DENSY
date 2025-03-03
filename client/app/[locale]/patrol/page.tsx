@@ -85,6 +85,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ZoneTooltip } from "@/components/zone-tooltip";
 import { TextTooltip } from "@/components/text-tooltip";
+import { useSocket } from "@/components/socket-provider";
 
 export default function Page() {
   const a = useTranslations("Alert");
@@ -94,6 +95,7 @@ export default function Page() {
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
   const [secondDialog, setSecondDialog] = useState(false);
+  const { socket, isConnected } = useSocket();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -177,6 +179,8 @@ export default function Page() {
 
     try {
       const response = await fetchData("post", "/patrol", true, data);
+      // 🔹 Broadcast ข้อมูลให้ทุกคนเห็นแบบ Real-time
+      socket.emit("new_patrol", response);
       setSecondDialog(false);
       setAllPatrols((prev) => [...prev, response]);
       toast({
@@ -364,6 +368,15 @@ export default function Page() {
     getPatrolData();
     getPresetData();
     setLoading(false);
+    const handleNewPatrol = (newPatrol) => {
+      setAllPatrols((prev) => [...prev, newPatrol]);
+    };
+
+    socket.on("patrol_created", handleNewPatrol);
+
+    return () => {
+      socket.off("patrol_created", handleNewPatrol);
+    };
   }, []);
 
   useEffect(() => {
