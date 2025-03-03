@@ -502,17 +502,35 @@ export default function Page() {
         );
       };
 
+      // อัปเดตรายการ patrol 
+      const handleNewPatrol = (newPatrol) => {
+        setAllPatrols((prev) => {
+          const existingIndex = prev.findIndex((patrol) => patrol.id === newPatrol.id);
+
+          if (existingIndex !== -1) {
+            // 🔹 อัปเดตข้อมูล Patrol ถ้ามี ID เดียวกัน
+            const updatedPatrols = [...prev];
+            updatedPatrols[existingIndex] = { ...prev[existingIndex], ...newPatrol };
+            return updatedPatrols;
+          } else {
+            // 🔹 ถ้าไม่มี ID นี้ ให้เพิ่มเข้าไป
+            return [...prev, newPatrol];
+          }
+        });
+      };
 
       socket.on("initial_patrol_data", handleInitialData);
       socket.on("patrol_result_update", handleResultUpdate);
       socket.on("patrol_started", handlePatrolStarted);
       socket.on("patrol_finished", handlePatrolFinished);
+      socket.on("patrol_created", handleNewPatrol);
       setMounted(true);
       return () => {
         socket.off("initial_patrol_data", handleInitialData);
         socket.off("patrol_result_update", handleResultUpdate);
         socket.off("patrol_started", handlePatrolStarted);
         socket.off("patrol_finished", handlePatrolFinished);
+        socket.off("patrol_created", handleNewPatrol);
       };
     };
 

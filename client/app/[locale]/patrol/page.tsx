@@ -182,7 +182,6 @@ export default function Page() {
       // 🔹 Broadcast ข้อมูลให้ทุกคนเห็นแบบ Real-time
       socket.emit("new_patrol", response);
       setSecondDialog(false);
-      setAllPatrols((prev) => [...prev, response]);
       toast({
         variant: "success",
         title: a("PatrolCreateTitle"),

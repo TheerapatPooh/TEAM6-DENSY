@@ -359,6 +359,28 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 prevDefects.map((d) => (d.id === defect.id ? defect : d))
             );
         }
+        // อัปเดต patrolResults
+        setPatrolResults((prevResults) => {
+            return prevResults.map((patrolResult) => {
+                if (patrolResult.id === defect.patrolResultId) {
+                    const updatedPatrolResult = {
+                        ...patrolResult,
+                        defects: [...patrolResult.defects, defect],
+                    };
+
+                    // ส่งเฉพาะ `patrolResult` ที่อัปเดตไปยังเซิร์ฟเวอร์
+                    if (socket && patrolResult.id) {
+                        socket.emit("update_patrol_result", {
+                            patrolId: patrolResult.patrolId,
+                            result: updatedPatrolResult,
+                        });
+                    }
+
+                    return updatedPatrolResult;
+                }
+                return patrolResult;
+            });
+        });
     };
 
     useEffect(() => {
@@ -385,6 +407,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 JSON.stringify(patrolResults)
             );
         }
+        console.log("patrolResults", patrolResults)
     }, [patrolResults]);
 
     useEffect(() => {
@@ -427,7 +450,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 setPatrol(data.patrolData);
                 setPatrolResults(data.patrolData.results);
             };
-
 
             const handlePatrolFinished = (data: { patrolId: string; patrolData: IPatrol }) => {
                 localStorage.removeItem(`patrolResults_${data.patrolId}`);
