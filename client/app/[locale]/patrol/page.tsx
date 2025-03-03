@@ -965,6 +965,7 @@ export default function Page() {
                   status={patrol.status as patrolStatus}
                   date={patrol.date}
                   preset={patrol.preset}
+                  itemCounts={patrol.itemCounts}
                   id={patrol.id}
                   results={[...(patrol.results ?? [])]}
                   inspectors={patrol.inspectors}

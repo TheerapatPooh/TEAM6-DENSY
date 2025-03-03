@@ -291,7 +291,7 @@ export async function createNotification({ message, type, url, userId }: any) {
 
     // Emit an event to notify the client in real-time
     const io = getIOInstance();
-    io.to(userId).emit('new_notification', result);
+    io.to(`notif_${userId}`).emit('new_notification', result);
 
     return notification;
   } catch (error) {
