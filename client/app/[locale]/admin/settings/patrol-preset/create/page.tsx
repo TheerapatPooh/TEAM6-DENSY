@@ -63,9 +63,6 @@ export default function page() {
 
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
-  const [alreadyExiistError, setAlreadyExiistError] = useState<string | null>(
-    null
-  );
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   const [checklistError, setChecklistError] = useState<string | null>(null);
   const router = useRouter();

@@ -168,31 +168,6 @@ jest.mock('@Utils/socket.js', () => ({
   }),
 }));
 
-// describe('createNotification', () => {
-//   test('ควรสร้าง Notification และเรียก emit ผ่าน IOInstance ได้สำเร็จ', async () => {
-//     prismaMock.notification.create.mockResolvedValue(notificationMock);
-//     prismaMock.user.findUnique.mockResolvedValue(createNotificationMock);
-
-//     const message = "notification test";
-//     const type = "request";
-//     const url = "/patrol/3";
-//     const userId = 3;
-
-//     const data = { message, type, url, userId };
-//     console.log('Test input data:', data);
-
-//     await createNotification(data);
-//     console.log('Prisma Mock Calls:', prismaMock.notification.create.mock.calls);
-
-//     expect(prismaMock.notification.create).toHaveBeenCalledTimes(1);
-
-//     // expect(prismaMock.notification.create).toHaveBeenCalledWith(notificationMock);
-//     expect(getIOInstance).toHaveBeenCalled();
-//     expect(getIOInstance().to).toHaveBeenCalledWith(userId);
-//     expect(getIOInstance().emit).toHaveBeenCalledWith('new_notification', notificationMock);
-//   });
-// });
-
 describe('updateNotification', () => {
   test('ควรเปลี่ยนสถานะ Notification เป็น "อ่านแล้ว"', async () => {
     prismaMock.notification.update.mockResolvedValueOnce(updateNotificationMock);
