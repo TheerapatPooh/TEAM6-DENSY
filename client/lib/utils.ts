@@ -221,23 +221,31 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
           );
 
           let statusText = "N/A";
-          let defectCount = 0;
+          let defectCount, commendCount = 0;
           if (resultItem) {
             if (resultItem.status === true) {
               statusText = "Passed";
               totalPass++;
-            } else if (resultItem.status === false) {
-              statusText = "Commented";
+            } 
+            
+            if (resultItem.status === false) {
+              statusText = "Failed";
               totalFails++; // เพิ่มจำนวน fail
-              totalComments++; // เพิ่มจำนวน comment
             }
 
+            if (resultItem.comments && resultItem.comments.length > 0) {
+              statusText = "Commented";
+              commendCount = resultItem.comments.length;
+              totalComments += commendCount; // เพิ่มจำนวน commend
+              totalFails--;
+            }
+            
             if (resultItem.defects && resultItem.defects.length > 0) {
               statusText = "Defected";
               defectCount = resultItem.defects.length;
               totalDefects += defectCount; // เพิ่มจำนวน defect
-              totalComments -= defectCount; // ลดจำนวน comment
-            }
+              totalFails--;
+            } 
           }
 
           // เพิ่มแถวข้อมูลลงใน worksheet
@@ -277,7 +285,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // หาตำแหน่งของโรวปัจจุบัน
     const sumRowIdx = worksheet.rowCount;
     // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
-    worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 4);
+    worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 5);
     // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
     sumRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
     sumRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
@@ -311,18 +319,22 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
             if (resultItem.status === true) {
               statusText = "Passed";
             } else if (resultItem.status === false) {
-              statusText = "Commented";
+              statusText = "Failed";
             }
 
             if (resultItem.defects && resultItem.defects.length > 0) {
               statusText = "Defected";
+            }
+
+            if (resultItem.comments && resultItem.comments.length > 0) {
+              statusText = "Commented";
             }
           }
 
           // หาโซนใน zoneStatusCount หรือเพิ่มใหม่
           let zoneEntry = zoneStatusCount.find(entry => entry.zoneName === zoneName);
           if (!zoneEntry) {
-            zoneEntry = { zoneName, Passed: 0, Commented: 0, Defected: 0, "N/A": 0 };
+            zoneEntry = { zoneName, Passed: 0, Failed: 0, Commented: 0, Defected: 0, "N/A": 0 };
             zoneStatusCount.push(zoneEntry);
           }
 
@@ -338,7 +350,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     }
 
     // เพิ่มส่วนหัวของตารางสำหรับสรุปผล
-    const zoneSummaryHeaderRow = worksheet.addRow(["Zone Name", "Passed", "Commented", "Defected"]);
+    const zoneSummaryHeaderRow = worksheet.addRow(["Zone Name", "Passed", "Failed", "Commented", "Defected"]);
     zoneSummaryHeaderRow.eachCell((cell) => {
       cell.font = { bold: true, size: 12 }; // ทำให้หัวตารางตัวหนา
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
@@ -356,6 +368,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       const summaryRow = worksheet.addRow([
         zoneEntry.zoneName,
         zoneEntry.Passed,
+        zoneEntry.Failed,
         zoneEntry.Commented,
         zoneEntry.Defected,
       ]);
@@ -376,6 +389,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     const totalRow = worksheet.addRow([
       "Total",
       totalPassed,
+      totalFails,
       totalCommented,
       totalDefected
     ]);
@@ -428,7 +442,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // เพิ่มแถวตัวเลขสำหรับ Pass และ Fail
     const passFailCountRow = worksheet.addRow([
       totalPassed, // จำนวน Pass
-      totalCommented + totalDefected, // รวมจำนวน Fail
+      totalCommented + totalFails + totalDefected, // รวมจำนวน Fail
     ]);
 
     passFailCountRow.eachCell((cell) => {
