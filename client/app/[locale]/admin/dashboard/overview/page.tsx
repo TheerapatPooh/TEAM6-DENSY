@@ -813,21 +813,24 @@ export default function Page() {
                           <p>{formatTime(patrol.date, locale, false)}</p>
                         </TableCell>
                         <TableCell className='sm:col-span-2 lg:col-span-2'>
-                          <div className='flex flex-row gap-2'>
-                            <div className="flex gap-1 text-primary items-center">
-                              <span className="material-symbols-outlined">checklist</span>
-                              <p className="text-xl font-semibold">{patrol.itemCounts}</p>
+                          <div className='flex justify-between'>
+                            <div className='flex flex-row gap-2' >
+                              <div className="flex gap-1 text-primary items-center">
+                                <span className="material-symbols-outlined">checklist</span>
+                                <p className="text-xl font-semibold">{patrol.itemCounts}</p>
+                              </div>
+                              <div className="flex gap-1 text-orange items-center">
+                                <span className="material-symbols-outlined">close</span>
+                                <p className="text-xl font-semibold">{countPatrolResult(patrol.results).fail}</p>
+                              </div>
+                              <div className="flex gap-1 text-destructive items-center">
+                                <span className="material-symbols-outlined">
+                                  error
+                                </span>
+                                <p className="text-xl font-semibold">{countPatrolResult(patrol.results).defect}</p>
+                              </div>
                             </div>
-                            <div className="flex gap-1 text-orange items-center">
-                              <span className="material-symbols-outlined">close</span>
-                              <p className="text-xl font-semibold">{countPatrolResult(patrol.results).fail}</p>
-                            </div>
-                            <div className="flex gap-1 text-destructive items-center">
-                              <span className="material-symbols-outlined">
-                                error
-                              </span>
-                              <p className="text-xl font-semibold">{countPatrolResult(patrol.results).defect}</p>
-                            </div>
+
                             <div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>

@@ -15,7 +15,7 @@ import { getIOInstance } from "@Utils/socket.js";
  * Input:
  * - req.query: { preset: boolean, result: boolean }
  * - req.params.id: number (ID ของ Patrol ที่ต้องการดึงข้อมูล)
- * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number , role: string} (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol รวมถึง preset และ result หากร้องขอ
  **/
 export async function getPatrol(req: Request, res: Response) {
@@ -168,7 +168,7 @@ export async function getPatrol(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ทั้งหมดตามสถานะ
  * Input:
  * - req.query: { status, preset, startDate, endDate, search } ("status", "preset", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
- * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number, role: string } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Patrol และข้อมูลที่เกี่ยวข้อง
  **/
 export async function getAllPatrols(req: Request, res: Response) {
@@ -1258,6 +1258,7 @@ export async function removePatrol(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมดใน Patrol
  * Input:
  * - req.params.id: number (ID ของ Patrol)
+ * - req.query: { status, type, startDate, endDate, search } ("status", "type", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect และข้อมูลที่เกี่ยวข้อง
  **/
@@ -1579,7 +1580,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับเพิ่มความคิดเห็นใน Patrol
  * Input:
  * - req.params.id: number (ID ของ Patrol)
- * - req.body: { message: String, patrolResultId: number } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
+ * - req.body: { message: String, patrolResultId: number, supervisorId } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูลความคิดเห็นที่ถูกบันทึก
  **/

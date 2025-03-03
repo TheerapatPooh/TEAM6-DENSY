@@ -2,6 +2,12 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { calculateTrend } from "@Controllers/util-controller.js";
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล HeatMap ของ Defects ในแต่ละ Zone
+ * Input:
+ * - req.query: { startDate: string, endDate: string } (ตัวกรองวันที่)
+ * Output: JSON object ข้อมูล HeatMap โดยแสดงจำนวน Defects ในแต่ละ Zone
+ **/
 export async function getHeatMap(req: Request, res: Response) {
   try {
     const { startDate, endDate } = req.query;
@@ -63,6 +69,12 @@ export async function getHeatMap(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect Category และคำนวณแนวโน้มการเกิด Defects
+ * Input:
+ * - req.query: { startDate: string, endDate: string, patrolId: string, zoneId: string } (ตัวกรองสำหรับวันที่, patrolId, zoneId)
+ * Output: JSON object ข้อมูล Defect Category พร้อมด้วยแนวโน้มการเกิด Defects ระหว่างเดือนปัจจุบันและเดือนก่อนหน้า
+ **/
 export async function getDefectCategory(req: Request, res: Response) {
   try {
     const { startDate, endDate, patrolId, zoneId } = req.query;
@@ -103,12 +115,12 @@ export async function getDefectCategory(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
-            email:true,
-            username:true,
-            role:true,
+            email: true,
+            username: true,
+            role: true,
             profile: {
               select: {
-                tel:true,
+                tel: true,
                 name: true,
                 image: true,
               },
@@ -125,11 +137,11 @@ export async function getDefectCategory(req: Request, res: Response) {
                     role: true,
                     email: true,
                     createdAt: true,
-                    username:true,
+                    username: true,
                     profile: {
                       select: {
-                        tel:true,
-                        name:true,
+                        tel: true,
+                        name: true,
                         image: true,
                       },
                     },
@@ -145,11 +157,11 @@ export async function getDefectCategory(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
-            username:true,
+            username: true,
             profile: {
               select: {
-                tel:true,
-                name:true,
+                tel: true,
+                name: true,
                 image: true,
               },
             },
@@ -163,12 +175,12 @@ export async function getDefectCategory(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
-                        username:true,
-                        email:true,
-                        role:true,
+                        username: true,
+                        email: true,
+                        role: true,
                         profile: {
                           select: {
-                            tel:true,
+                            tel: true,
                             name: true,
                             image: true,
                           },
@@ -274,6 +286,12 @@ export async function getDefectCategory(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Common Defects และคำนวณจำนวน Defects ที่เกิดขึ้นมากที่สุด
+ * Input:
+ * - req.query: { startDate: string, endDate: string, zoneId: string } (ตัวกรองสำหรับวันที่, zoneId)
+ * Output: JSON object ที่ประกอบด้วย Common Defects 5 ตัวที่พบมากที่สุด พร้อมสีที่กำหนด
+ **/
 export async function getCommonDefects(req: Request, res: Response) {
   try {
     const { startDate, endDate, zoneId } = req.query;
@@ -307,11 +325,11 @@ export async function getCommonDefects(req: Request, res: Response) {
         supervisor: {
           select: {
             id: true,
-            username:true,
-            role:true,
+            username: true,
+            role: true,
             profile: {
               select: {
-                tel:true,
+                tel: true,
                 name: true,
                 image: true,
               },
@@ -328,11 +346,11 @@ export async function getCommonDefects(req: Request, res: Response) {
                     role: true,
                     email: true,
                     createdAt: true,
-                    username:true,
+                    username: true,
                     profile: {
                       select: {
-                        tel:true,
-                        name:true,
+                        tel: true,
+                        name: true,
                         image: true,
                       },
                     },
@@ -348,11 +366,11 @@ export async function getCommonDefects(req: Request, res: Response) {
             role: true,
             email: true,
             createdAt: true,
-            username:true,
+            username: true,
             profile: {
               select: {
-                tel:true,
-                name:true,
+                tel: true,
+                name: true,
                 image: true,
               },
             },
@@ -366,12 +384,12 @@ export async function getCommonDefects(req: Request, res: Response) {
                   include: {
                     supervisor: {
                       select: {
-                        username:true,
-                        email:true,
-                        role:true,
+                        username: true,
+                        email: true,
+                        role: true,
                         profile: {
                           select: {
-                            tel:true,
+                            tel: true,
                             name: true,
                             image: true,
                           },
@@ -430,6 +448,12 @@ export async function getCommonDefects(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับคำนวณอัตราการเสร็จสมบูรณ์ของการตรวจตรา (Patrol Completion Rate)
+ * Input:
+ * - req.query: { startDate: string, endDate: string } (ตัวกรองสำหรับวันที่)
+ * Output: JSON object ที่ประกอบด้วยข้อมูลสำหรับแสดงผลในกราฟ Radial chart และเปอร์เซ็นต์ของการตรวจสอบที่เสร็จสมบูรณ์
+ **/
 export async function getPatrolCompletionRate(req: Request, res: Response) {
   try {
     const { startDate, endDate } = req.query;
@@ -594,6 +618,12 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล defects ที่แจ้งปัญหาจากการตรวจตรา (patrol) โดยอ้างอิงจาก patrolId
+ * Input:
+ * - req.params.id: patrolId (รหัสของการตรวจสอบ)
+ * Output: JSON object ที่ประกอบด้วยข้อมูลของ defects ที่ถูกรายงาน พร้อมข้อมูลของ zone ที่เกี่ยวข้อง
+ **/
 export async function getDefectReported(req: Request, res: Response) {
   try {
     const patrolId = parseInt(req.params.id, 10);
@@ -612,12 +642,12 @@ export async function getDefectReported(req: Request, res: Response) {
                 user: {
                   select: {
                     id: true,
-                    username:true,
-                    role:true,
+                    username: true,
+                    role: true,
                     profile: {
                       select: {
                         id: true,
-                        tel:true,
+                        tel: true,
                         name: true,
                         image: { select: { path: true } }
                       }
