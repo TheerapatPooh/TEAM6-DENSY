@@ -290,9 +290,6 @@ export async function getAllPatrols(req: Request, res: Response) {
       whereConditions.AND = andConditions;
     }
 
-    // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
-    // console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
-
     const allPatrols = await prisma.patrol.findMany({
       where: whereConditions,
       select: {
