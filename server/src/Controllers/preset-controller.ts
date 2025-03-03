@@ -16,6 +16,19 @@ export async function createPreset(req: Request, res: Response) {
   try {
     const { title, description, checklists } = req.body;
     const userId = (req as any).user.userId;
+
+    // ตรวจสอบว่า Prest ที่มีชื่อเดียวกันมีอยู่แล้วหรือไม่
+    const existingPrest = await prisma.preset.findFirst({
+      where: { title },
+    });
+
+    if (existingPrest) {
+      res
+        .status(400)
+        .json({ message: `Preset with title "${title}" already exists` });
+      return;
+    }
+
     // ตรวจสอบข้อมูลที่จำเป็น
     if (!title || !description || !userId) {
       res.status(400).json({ message: "Missing required fields" });
@@ -70,11 +83,7 @@ export async function updatePreset(req: Request, res: Response) {
     const presetId = parseInt(req.params.id, 10);
 
     // ตรวจสอบข้อมูลที่จำเป็น
-    if (
-      !title ||
-      !description ||
-      !Array.isArray(checklists)
-    ) {
+    if (!title || !description || !Array.isArray(checklists)) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -295,7 +304,6 @@ export async function getAllPresets(req: Request, res: Response) {
     const { zones, startDate, endDate, search, latest } = req.query;
     const userRole = (req as any).user.role;
 
-
     const whereClause: any = {
       latest: latest === "false" ? undefined : true,
     };
@@ -332,13 +340,13 @@ export async function getAllPresets(req: Request, res: Response) {
       }
     }
 
-    if (search) {  // Use decodedSearch instead of raw search
+    if (search) {
+      // Use decodedSearch instead of raw search
       whereClause.OR = [
         { title: { contains: search } },
         { description: { contains: search } },
       ];
     }
-      
 
     const presets = await prisma.preset.findMany({
       where: whereClause,
@@ -364,11 +372,11 @@ export async function getAllPresets(req: Request, res: Response) {
           select: {
             id: true,
             username: true,
-            email:true,
-            role:true,            
+            email: true,
+            role: true,
             profile: {
               select: {
-                tel:true,
+                tel: true,
                 name: true,
                 image: {
                   select: { path: true },
@@ -395,9 +403,7 @@ export async function getAllPresets(req: Request, res: Response) {
     }, {} as Record<string, number>);
 
     const result = presets.map((preset) => {
-      
-
-      let uniqueZones
+      let uniqueZones;
 
       if (userRole === "admin") {
         const zones = preset.presetChecklists.flatMap((checklist) =>
@@ -408,16 +414,16 @@ export async function getAllPresets(req: Request, res: Response) {
             }))
           )
         );
-         uniqueZones = Array.from(
+        uniqueZones = Array.from(
           new Map(zones.map((zone) => [zone.name, zone])).values()
         );
-      }else{
+      } else {
         const zones = preset.presetChecklists.flatMap((checklist) =>
           checklist.checklist.items.flatMap((item) =>
             item.itemZones.map((itemZone) => itemZone.zone.name)
           )
         );
-          uniqueZones = Array.from(new Set(zones));
+        uniqueZones = Array.from(new Set(zones));
       }
 
       const disabled = preset.presetChecklists.some((checklist) =>
@@ -529,11 +535,11 @@ export async function getChecklist(req: Request, res: Response) {
                           select: {
                             id: true,
                             role: true,
-                            username:true,
-                            email:true,
+                            username: true,
+                            email: true,
                             profile: {
                               select: {
-                                image:true,
+                                image: true,
                                 id: true,
                                 name: true,
                                 age: true,
@@ -577,7 +583,7 @@ export async function getChecklist(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ทั้งหมด
  * Input:
- * - req.query: {zones, startDate, endDate, search}
+ * - req.query: {zones, startDate, endDate, search, latest}
  * Output: JSON array ข้อมูลของ Checklist รวมถึงการนับจำนวน Item แต่ละประเภท
  **/
 export async function getAllChecklists(req: Request, res: Response) {
@@ -632,12 +638,12 @@ export async function getAllChecklists(req: Request, res: Response) {
             id: true,
             username: true,
             email: true,
-            role:true,
+            role: true,
             profile: {
               select: {
-                name:true,
-                tel:true,
-                image:true,
+                name: true,
+                tel: true,
+                image: true,
               },
             },
           },
@@ -656,15 +662,16 @@ export async function getAllChecklists(req: Request, res: Response) {
                     supervisor: {
                       select: {
                         id: true,
-                        username:true,
-                        email:true,
-                        role:true,
+                        username: true,
+                        email: true,
+                        role: true,
                         profile: {
-                          select:{
-                            name:true,
-                            tel:true,
-                            image:true
-                        }},
+                          select: {
+                            name: true,
+                            tel: true,
+                            image: true,
+                          },
+                        },
                       },
                     },
                   },

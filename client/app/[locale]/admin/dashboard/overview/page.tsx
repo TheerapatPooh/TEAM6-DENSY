@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLocale, useTranslations } from "next-intl";
-import { exportData, fetchData, formatTime, getPatrolStatusVariant } from "@/lib/utils";
+import { countPatrolResult, exportData, fetchData, formatTime, getPatrolStatusVariant } from "@/lib/utils";
 import {
   DatePickerWithRange,
 } from "@/components/date-picker";
@@ -64,11 +64,13 @@ export default function Page() {
   const t = useTranslations("General");
   const s = useTranslations("Status");
 
+  const [socketData, setSocketData] = useState<IPatrolResult[]>([]);
   const [allPatrols, setAllPatrols] = useState<IPatrol[]>([]);
   const [allPresets, setAllPresets] = useState<IPreset[]>();
+  const [selectedPatrolId, setSelectedPatrolId] = useState<number | null>(null);
 
   const [dateError, setDateError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [mounted, setMounted] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string>();
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
@@ -76,12 +78,39 @@ export default function Page() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const { socket, isConnected } = useSocket();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const router = useRouter();
   const locale = useLocale();
+
+  const mergedPatrols = useMemo(() => {
+    if (!socketData || socketData.length === 0) {
+      return allPatrols;
+    }
+
+    return allPatrols.map((patrol) => {
+      if (!patrol.results || patrol.results.length === 0) {
+        return patrol;
+      }
+
+      const updatedResults = patrol.results
+        .map((existingResult) => {
+          const matchingSocketResult = socketData.find((result) => result.id === existingResult.id);
+          return matchingSocketResult ? { ...existingResult, ...matchingSocketResult } : existingResult;
+        })
+        .filter((result) => result.id); // กรองเฉพาะที่มี id เท่านั้น
+
+      return { ...patrol, results: updatedResults };
+    });
+  }, [allPatrols, socketData]);
+
+  // ใช้ useEffect เพื่อตั้งค่า allPatrols ถ้า mergedPatrols เปลี่ยนแปลง
+  useEffect(() => {
+    if (JSON.stringify(allPatrols) !== JSON.stringify(mergedPatrols)) {
+      setAllPatrols(mergedPatrols);
+    }
+  }, [mergedPatrols]);
 
   const getPatrolData = async () => {
     try {
@@ -104,55 +133,6 @@ export default function Page() {
 
   const joinedRoomsRef = useRef(new Set());
 
-  const handleResultUpdate = useCallback((updatedResults: IPatrolResult[]) => {
-    setAllPatrols((prevPatrols) =>
-      prevPatrols.map((updatePatrol) => {
-        const updatedResultsForPatrol = updatePatrol.results.map((result) => {
-          const matchingResult = updatedResults.find((updatedResult) => updatedResult.id === result.id);
-          return matchingResult
-            ? { ...result, status: matchingResult.status, defects: matchingResult.defects || [] }
-            : result;
-        });
-
-        // คัดเฉพาะผลลัพธ์ที่ตรงกับ patrolId นี้เท่านั้น
-        const filteredUpdatedResults = updatedResults.filter((result) => result.patrolId === updatePatrol.id);
-
-        if (filteredUpdatedResults.length > 0) {
-          // ดึงค่าที่เคยเก็บใน localStorage (ถ้ามี)
-          const existingResults = JSON.parse(localStorage.getItem(`patrol_${updatePatrol.id}`) || "[]");
-
-          // รวมค่าใหม่เข้าไปในอาร์เรย์โดยหลีกเลี่ยงค่าซ้ำ
-          const updatedStorageResults = [
-            ...existingResults.filter((res: IPatrolResult) => !filteredUpdatedResults.some((upd) => upd.id === res.id)),
-            ...filteredUpdatedResults,
-          ];
-
-          // เซ็ตค่าเป็นอาร์เรย์เฉพาะของ patrol นี้
-          localStorage.setItem(`patrol_${updatePatrol.id}`, JSON.stringify(updatedStorageResults));
-        }
-
-        return { ...updatePatrol, results: updatedResultsForPatrol };
-      })
-    );
-  }, []);
-
-  const countPatrolResult = (results: IPatrolResult[]) => {
-    let fail = 0;
-    let defect = 0;
-
-    results?.forEach((result) => {
-      if (result.status === false) {
-        fail++;
-      }
-
-      if (Array.isArray(result.defects) && result.defects.length > 0) {
-        defect++;
-      }
-    });
-
-    return { fail, defect };
-  };
-
   const handleOpenAlert = () => {
     setIsAlertOpen(true);
   };
@@ -161,38 +141,28 @@ export default function Page() {
     setIsAlertOpen(false)
   }
 
-  const handleDialogResult = (result: boolean) => {
-    setIsDialogOpen(false);
-    if (result && pendingAction) {
-      pendingAction(); // Execute the pending action
-      setPendingAction(null); // Clear the pending action
-    }
-  };
-
-  const handleRemovePatrol = (status: string, patrolId: number) => {
-    setPendingAction(() => () => removePatrol(status, patrolId));
-    handleOpenDialog();
-  };
-
-  const handleOpenDialog = () => {
+  const handleOpenDialog = (patrolId: number) => {
+    setSelectedPatrolId(patrolId);
     setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedPatrolId(null)
+    setIsDialogOpen(false);
+  };
+
+  const handleRemovePatrol = (patrolId: number) => {
+    removePatrol(patrolId)
   };
 
   const handleDetail = (patrolId: number) => {
     router.push(`/${locale}/admin/dashboard/overview/${patrolId}`)
   }
 
-  const removePatrol = async (status: string, patrolId: number) => {
-    if (status !== 'pending') {
-      toast({
-        variant: "error",
-        title: a("PatrolRemoveErrorTitle"),
-        description: a("PatrolRemoveErrorDescription"),
-      });
-      return;
-    }
+  const removePatrol = async (patrolId: number) => {
     try {
       await fetchData("delete", `/patrol/${patrolId}`, true);
+      socket.emit("delete_patrol", patrolId);
       toast({
         variant: "success",
         title: a("PatrolRemoveSuccessTitle"),
@@ -268,7 +238,6 @@ export default function Page() {
   const applyFilter = () => {
     const fetchData = async () => {
       await getPatrolData()
-      await initializePatrols()
     };
     fetchData();
   };
@@ -325,15 +294,6 @@ export default function Page() {
     }
 
     return new URLSearchParams(params).toString();
-  };
-
-  const removeLocalStoragePatrolCompleted = () => {
-    allPatrols.forEach(patrol => {
-      if (patrol.status === 'completed') {
-        const localStorageKey = `patrol_${patrol.id}`;
-        localStorage.removeItem(localStorageKey);
-      }
-    });
   };
 
   const formatId = (id: number): string => {
@@ -405,94 +365,12 @@ export default function Page() {
     return (checkedResults / totalResults) * 100;
   };
 
-  const initializePatrols = () => {
-    setAllPatrols((prevPatrols) =>
-      prevPatrols?.map((updatePatrol) => {
-        const resultLocal = localStorage.getItem(`patrol_${updatePatrol.id}`);
-        let parsedResults: IPatrolResult[] = [];
-
-        if (resultLocal) {
-          try {
-            parsedResults = JSON.parse(resultLocal);
-          } catch (error) {
-            console.error(`Error parsing localStorage for patrol_${updatePatrol.id}:`, error);
-          }
-        }
-
-        // ตรวจสอบว่า parsedResults มีข้อมูลหรือไม่
-        if (parsedResults.length > 0) {
-          // อัปเดตค่า status สำหรับแต่ละ result ใน updatePatrol
-          const updatedResultsForPatrol = updatePatrol.results.map((result) => {
-            const matchingResult = parsedResults.find(
-              (parsedResult) =>
-                String(parsedResult.patrolId) === String(updatePatrol.id) && // แปลงเป็น string
-                String(parsedResult.id) === String(result.id) // แปลงเป็น string
-            );
-
-            return matchingResult
-              ? { ...result, status: matchingResult.status } // อัปเดตค่า status
-              : result; // ถ้าไม่พบให้ใช้ค่าเดิม
-          });
-
-          // อัปเดต allPatrols ด้วย results ใหม่
-          return { ...updatePatrol, results: updatedResultsForPatrol };
-        }
-
-        // ถ้าไม่มีข้อมูลใน localStorage ให้คืนค่า updatePatrol เดิม
-        return updatePatrol;
-      })
-    );
-  };
-
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       await getPresetData();
       await getPatrolData();
-      await initializePatrols()
-
-      setTimeout(() => {
-        removeLocalStoragePatrolCompleted();
-      }, 1000); // หน่วงเวลา 1 วินาที
-
-      setLoading(false);
     };
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getPatrolData();
-      await initializePatrols()
-    };
-    fetchData();
-  }, [searchTerm]);
-
-  useEffect(() => {
-    removeLocalStoragePatrolCompleted()
-  }, [allPatrols])
-
-  useEffect(() => {
-    if (socket && isConnected) {
-      socket.on("patrol_result_update", handleResultUpdate);
-      return () => {
-        socket.off("patrol_result_update", handleResultUpdate);
-      };
-    }
-  }, [socket, isConnected, handleResultUpdate]);
-
-  useEffect(() => {
-    if (socket && isConnected && allPatrols) {
-      allPatrols.forEach((patrol) => {
-        if (!joinedRoomsRef.current.has(patrol.id)) {
-          socket.emit("join_room", patrol.id);
-          joinedRoomsRef.current.add(patrol.id);
-        }
-      });
-    }
-  }, [socket, isConnected]);
-
-  useEffect(() => {
     // ฟังก์ชันที่ใช้เพื่ออัพเดตความกว้างหน้าจอ
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -508,6 +386,146 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    const fetchData = async () => {
+      await getPatrolData();
+    };
+    fetchData();
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const initializeSocketListeners = () => {
+      // ฟังก์ชันรับข้อมูลเริ่มต้นจาก socket
+      const handleInitialData = (initialResults: IPatrolResult[]) => {
+        if (initialResults.length <= 0) {
+          return;
+        }
+        // ตั้งค่า socketData ให้เป็นข้อมูลที่รับมาจาก socket
+        setSocketData(prevData => {
+          // อัปเดตข้อมูลที่ตรงกันหรือลงข้อมูลใหม่
+          const updatedResults = initialResults.map((incomingResult) => {
+            // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
+            const existingIndex = prevData.findIndex(result => result.id === incomingResult.id);
+
+            if (existingIndex !== -1) {
+              // ถ้ามี id ตรงกัน, อัปเดตข้อมูลใน existing result
+              return {
+                ...prevData[existingIndex],  // ข้อมูลเดิม
+                ...incomingResult,            // ข้อมูลใหม่ที่มาจาก initialResults
+              };
+            }
+
+            // ถ้าไม่มี id ตรงกัน, ให้เพิ่มข้อมูลใหม่
+            return incomingResult;
+          });
+
+          // เช็คผลลัพธ์ใหม่ที่ไม่มีใน prevData
+          const newResults = initialResults.filter(result =>
+            !prevData.some(existingResult => existingResult.id === result.id)
+          );
+
+          // รวมข้อมูลเดิมที่อัปเดตและผลลัพธ์ใหม่
+          return [...updatedResults, ...newResults];
+        });
+      };
+
+      // ฟังก์ชันที่ใช้ในการอัปเดตข้อมูลผลลัพธ์
+      const handleResultUpdate = (incomingResult: IPatrolResult) => {
+        setSocketData(prevData => {
+          // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
+          const updatedResults = prevData.map(existingResult => {
+            if (existingResult.id === incomingResult.id) {
+              return {
+                ...existingResult,   // ข้อมูลเดิม
+                ...incomingResult,   // ข้อมูลใหม่ที่มาจาก incomingResult
+              };
+            }
+            return existingResult;
+          });
+
+          // ถ้าไม่มีผลลัพธ์จาก incomingResult ใน prevData, ให้เพิ่มเข้าไป
+          if (!prevData.some(existingResult => existingResult.id === incomingResult.id)) {
+            return [...updatedResults, incomingResult];
+          }
+
+          return updatedResults;
+        });
+      };
+
+      // อัปเดตสถานะเมื่อ patrol เริ่ม
+      const handlePatrolStarted = async (data: { patrolId: string; patrolData: IPatrol }) => {
+        if (!joinedRoomsRef.current.has(data.patrolId)) {
+          socket.emit("join_patrol", data.patrolId);
+          joinedRoomsRef.current.add(data.patrolId);
+        }
+        await getPatrolData();
+      };
+
+      // อัปเดตสถานะเมื่อ patrol จบ
+      const handlePatrolFinished = async (data: { patrolId: string; patrolData: IPatrol }) => {
+        await getPatrolData();
+      };
+
+      // อัปเดตข้อมูลเมื่อมี Patrol ใหม่
+      const handleNewPatrol = (newPatrol) => {
+        if (!joinedRoomsRef.current.has(newPatrol.id)) {
+          socket.emit("join_patrol", newPatrol.id);
+          joinedRoomsRef.current.add(newPatrol.id);
+        }
+
+        setAllPatrols((prev) => {
+          const existingIndex = prev.findIndex((patrol) => patrol.id === newPatrol.id);
+
+          if (existingIndex !== -1) {
+            const updatedPatrols = [...prev];
+            updatedPatrols[existingIndex] = { ...prev[existingIndex], ...newPatrol };
+            return updatedPatrols;
+          } else {
+            return [...prev, newPatrol];
+          }
+        });
+
+
+      };
+
+      // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ 
+      const handlePatrolDeleted = (patrolId) => {
+        setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== patrolId));
+        if (!joinedRoomsRef.current.has(patrolId)) {
+          socket.emit("join_patrol", patrolId);
+          joinedRoomsRef.current.add(patrolId);
+        }
+      };
+      socket.on("initial_patrol_data", handleInitialData);
+      socket.on("patrol_result_update", handleResultUpdate);
+      socket.on("patrol_started", handlePatrolStarted);
+      socket.on("patrol_finished", handlePatrolFinished);
+      socket.on("patrol_created", handleNewPatrol);
+      socket.on("patrol_deleted", handlePatrolDeleted);
+      setMounted(true);
+      return () => {
+        socket.off("initial_patrol_data", handleInitialData);
+        socket.off("patrol_result_update", handleResultUpdate);
+        socket.off("patrol_started", handlePatrolStarted);
+        socket.off("patrol_finished", handlePatrolFinished);
+        socket.off("patrol_created", handleNewPatrol);
+        socket.off("patrol_deleted", handlePatrolDeleted);
+
+      };
+    };
+
+    initializeSocketListeners();
+  }, [socket, isConnected]);
+
+  useEffect(() => {
+    allPatrols.forEach((patrol) => {
+      if (!joinedRoomsRef.current.has(patrol.id) && patrol.status === 'on_going' || patrol.status === 'scheduled') {
+        socket.emit("join_patrol", patrol.id);
+        joinedRoomsRef.current.add(patrol.id);
+      }
+    });
+  }, [allPatrols])
+
+  useEffect(() => {
     localStorage.setItem('filter', JSON.stringify(filter));
   }, [filter]);
 
@@ -516,7 +534,7 @@ export default function Page() {
     if (JSON.stringify(sortedData) !== JSON.stringify(allPatrols)) {
       setAllPatrols(sortedData);
     }
-  }, [sort, allPatrols]);
+  }, [sort]);
 
   useEffect(() => {
     if (selectedDate !== null || selectedDate !== undefined) {
@@ -524,7 +542,7 @@ export default function Page() {
     }
   }, [selectedDate])
 
-  if (loading) {
+  if (!mounted) {
     return <Loading />
   }
 
@@ -797,21 +815,24 @@ export default function Page() {
                           <p>{formatTime(patrol.date, locale, false)}</p>
                         </TableCell>
                         <TableCell className='sm:col-span-2 lg:col-span-2'>
-                          <div className='flex flex-row gap-2'>
-                            <div className="flex gap-1 text-primary items-center">
-                              <span className="material-symbols-outlined">checklist</span>
-                              <p className="text-xl font-semibold">{patrol.itemCounts}</p>
+                          <div className='flex justify-between'>
+                            <div className='flex flex-row gap-2' >
+                              <div className="flex gap-1 text-primary items-center">
+                                <span className="material-symbols-outlined">checklist</span>
+                                <p className="text-xl font-semibold">{patrol.itemCounts}</p>
+                              </div>
+                              <div className="flex gap-1 text-orange items-center">
+                                <span className="material-symbols-outlined">close</span>
+                                <p className="text-xl font-semibold">{countPatrolResult(patrol.results).fail}</p>
+                              </div>
+                              <div className="flex gap-1 text-destructive items-center">
+                                <span className="material-symbols-outlined">
+                                  error
+                                </span>
+                                <p className="text-xl font-semibold">{countPatrolResult(patrol.results).defect}</p>
+                              </div>
                             </div>
-                            <div className="flex gap-1 text-orange items-center">
-                              <span className="material-symbols-outlined">close</span>
-                              <p className="text-xl font-semibold">{countPatrolResult(patrol.results).fail}</p>
-                            </div>
-                            <div className="flex gap-1 text-destructive items-center">
-                              <span className="material-symbols-outlined">
-                                error
-                              </span>
-                              <p className="text-xl font-semibold">{countPatrolResult(patrol.results).defect}</p>
-                            </div>
+
                             <div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
@@ -830,7 +851,7 @@ export default function Page() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={(e) => {
                                     e.stopPropagation()
-                                    handleRemovePatrol(patrol.status, patrol.id)
+                                    handleOpenDialog(patrol.id)
                                   }}>
                                     <h1 className="text-destructive cursor-pointer">{t("Delete")}</h1>
                                   </DropdownMenuItem>
@@ -856,7 +877,12 @@ export default function Page() {
             primaryButtonText={t("Confirm")}
             primaryIcon="check"
             secondaryButtonText={t("Cancel")}
-            backResult={handleDialogResult}
+            backResult={(backResult) => {
+              if (backResult) {
+                handleRemovePatrol(selectedPatrolId)
+              }
+              handleCloseDialog()
+            }}
           ></AlertCustom>
         )}
 

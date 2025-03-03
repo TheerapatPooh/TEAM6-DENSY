@@ -451,6 +451,8 @@
     "ChecklistNoChangeDescription": "คุณยังไม่ได้ทำการเปลี่ยนแปลง ในชุดตรวจตราของคุณ",
     "CreateChecklistFailTitle": "ไม่สามารถสร้างชุดตรวจตราได้",
     "CreateChecklistFailDescription": "มีชุดตรวจตราชื่อ ",
+    "CreatePresetFailTitle": "ไม่สามารถสร้างรูปแบบตรวจตราได้",
+    "CreatePresetFailDescription": "มีรูปแบบตรวจตราชื่อ ",
     "AlreadyExists": "อยู่แล้ว โปรดใช้ชื่ออื่น",
     "FailEditChecklist": "ไม่สามารถแก้ไขรายการชุดตรวจตราได้",
     "EditChecklistSuccess": "แก้ไขรายการชุดตรวจตราได้สำเร็จ",
@@ -580,6 +582,7 @@
     "TotalComments": "จำนวนข้อเสนอแนะ",
     "DefectReported": "ปัญหาที่แจ้ง",
     "PatrolDuration": "ระยะเวลาการตรวจตรา",
-    "PatrolDurationDescription": "ติดตามระยะเวลาในการตรวจตราเพื่อวิเคราะห์ระยะเวลาที่ใช้ในแต่ละรอบการตรวจสอบ"
+    "PatrolDurationDescription": "ติดตามระยะเวลาในการตรวจตราเพื่อวิเคราะห์ระยะเวลาที่ใช้ในแต่ละรอบการตรวจสอบ",
+    "Duration": "ระยะเวลา"
   }
 }

@@ -10,8 +10,6 @@ import path from "path";
 import { DefectStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { randomBytes } from 'node:crypto';
-import { tr } from "@faker-js/faker";
-
 
 declare global {
   namespace Express {
@@ -179,6 +177,14 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับรีเฟรช Access Token โดยตรวจสอบ Refresh Token และสถานะเซสชันของผู้ใช้
+ * Input: 
+ * - req.cookies.refreshToken: String (Refresh Token ของผู้ใช้ที่ใช้สำหรับออก Access Token ใหม่)
+ * Output: 
+ * - ถ้า Refresh Token ถูกต้องและเซสชันยังคงอยู่: คืนค่า Access Token ใหม่
+ * - ถ้า Refresh Token ไม่ถูกต้อง หรือเซสชันหมดอายุ: คืนค่า JSON message แจ้งเตือน เช่น "Session expired" หรือ "Invalid refresh token"
+ **/
 export async function refreshToken(req: Request, res: Response) {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
@@ -225,7 +231,6 @@ export async function refreshToken(req: Request, res: Response) {
     res.status(403).json({ message: "Invalid refresh token" });
   }
 }
-
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูลการแจ้งเตือน
@@ -286,7 +291,7 @@ export async function createNotification({ message, type, url, userId }: any) {
 
     // Emit an event to notify the client in real-time
     const io = getIOInstance();
-    io.to(userId).emit('new_notification', result);
+    io.to(`notif_${userId}`).emit('new_notification', result);
 
     return notification;
   } catch (error) {
@@ -334,7 +339,15 @@ export async function markAllAsRead(req: Request, res: Response) {
   }
 }
 
-// Function to mark a specific notification as read by checking its ID
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับเปลี่ยนสถานะการแจ้งเตือนให้เป็น "อ่านแล้ว"
+ * Input:
+ * - req.params.id: String (ID ของการแจ้งเตือนที่ต้องการเปลี่ยนสถานะ)
+ * Output:
+ * - ถ้าพบการแจ้งเตือนที่ยังไม่ได้อ่าน: อัปเดตสถานะเป็น "อ่านแล้ว" และคืนค่า JSON message "Notification marked as read"
+ * - ถ้าไม่พบการแจ้งเตือนที่ยังไม่ได้อ่าน: คืนค่า JSON message "No unread notifications found"
+ * - ถ้ามีข้อผิดพลาดเกิดขึ้น: คืนค่า JSON message "Internal server error"
+ **/
 export async function markAsRead(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -482,6 +495,17 @@ export function authorized(allowedRoles: string[]) {
   };
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับคำนวณ Trend เป็นเปอร์เซ็นต์
+ * Input:
+ * - current: number (ค่าปัจจุบัน)
+ * - previous: number (ค่าก่อนหน้า)
+ * Output:
+ * - ค่าร้อยละของการเปลี่ยนแปลงระหว่างค่าปัจจุบันและค่าก่อนหน้า
+ * - ถ้า previous เป็น 0:
+ *   - คืนค่า 100 ถ้า current มากกว่า 0 (แสดงการเพิ่มขึ้นเต็มที่)
+ *   - คืนค่า 0 ถ้า current เท่ากับ 0 (ไม่มีการเปลี่ยนแปลง)
+ **/
 export const calculateTrend = (current: number, previous: number): number => {
   if (previous === 0) return current > 0 ? 100 : 0;
   return Number((((current - previous) / previous) * 100).toFixed(2));
@@ -489,14 +513,14 @@ export const calculateTrend = (current: number, previous: number): number => {
 
 
 /**
- * คำอธิบาย: ฟังก์ชันสำหรับอัพโหลดรูปภาพโดยใช้ multer
+ * คำอธิบาย: ฟังก์ชันสำหรับกำหนดการจัดเก็บไฟล์อัปโหลดโดยใช้ multer
  * Input: 
- * - req.file: Object (ไฟล์รูปภาพที่อัปโหลด โดย multer จะทำการจัดการและเพิ่มลงใน `uploads/`)
- * - req.body: Object (ข้อมูลเพิ่มเติมที่แนบมากับการอัปโหลดรูปภาพ)
+ * - req.file: Object (ไฟล์รูปภาพที่อัปโหลด โดย multer จะจัดเก็บลงใน `uploads/profiles/{userId}/`)
+ * - req.user.userId: Number (ID ของผู้ใช้ ใช้กำหนดโฟลเดอร์และชื่อไฟล์)
  * Output: 
- * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บในโฟลเดอร์ `uploads/` พร้อมกับชื่อไฟล์ที่ไม่ซ้ำกัน
- * - req.file: Object (รายละเอียดของไฟล์ที่ถูกอัปโหลด เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
-**/
+ * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บใน `uploads/profiles/{userId}/` 
+ * - req.file: Object (รายละเอียดของไฟล์ เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
+ **/
 const profileStorage = multer.diskStorage({
   destination: (req, file, callback) => {
     const userId = (req as any).user.userId;
@@ -513,6 +537,17 @@ const profileStorage = multer.diskStorage({
   },
 });
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับกำหนดการจัดเก็บไฟล์อัปโหลดของ defect โดยใช้ multer
+ * Input: 
+ * - req.params.id: String (ID ของ defect ที่ใช้กำหนดโฟลเดอร์จัดเก็บ)
+ * - req.body.status: String (สถานะของ defect ใช้ระบุโฟลเดอร์ย่อย เช่น 'reported' หรือสถานะอื่น ๆ)
+ * - req.file: Object (ไฟล์รูปภาพ defect ที่อัปโหลด)
+ * Output: 
+ * - ไฟล์ที่อัปโหลดจะถูกจัดเก็บใน `uploads/defects/{id}/{folderType}/`
+ *   - `{folderType}` จะเป็น `before` ถ้าสถานะเป็น 'reported' และเป็น `after` สำหรับสถานะอื่น ๆ
+ * - req.file: Object (รายละเอียดของไฟล์ เช่น ชื่อไฟล์, ขนาดไฟล์, และประเภทของไฟล์)
+ **/
 const defectStorage = multer.diskStorage({
   destination: (req, file, callback) => {
     const id = req.params.id;
@@ -537,11 +572,17 @@ const defectStorage = multer.diskStorage({
   },
 });
 
-
 // Export the multer upload middleware
 export const profileUpload = multer({ storage: profileStorage });
 export const defectUpload = multer({ storage: defectStorage });
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับคืนค่า path ของโฟลเดอร์ที่ใช้เก็บไฟล์อัปโหลด
+ * Input: 
+ * - ไม่มีพารามิเตอร์รับเข้า
+ * Output: 
+ * - String: เส้นทางของโฟลเดอร์ `uploads` โดยอ้างอิงจากตำแหน่งปัจจุบันของโปรเจกต์
+ **/
 function getUploadsPath(): string {
   const currentDir = process.cwd();
   return path.join(currentDir, "uploads"); // Adjust path as needed
@@ -549,6 +590,17 @@ function getUploadsPath(): string {
 
 export const uploadsPath = getUploadsPath();
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับอัปโหลดรูปภาพของ defect และจัดเก็บไฟล์ในโฟลเดอร์ที่เหมาะสม
+ * Input: 
+ * - req.params.id: String (รหัสของ defect ที่ต้องการอัปโหลดรูป)
+ * - req.body.status: String (สถานะของ defect ที่ใช้กำหนดโฟลเดอร์ปลายทาง เช่น 'reported' หรือ 'resolved')
+ * - req.files: Array<Express.Multer.File> (ไฟล์รูปภาพที่ถูกอัปโหลด)
+ * - req.user.userId: String (รหัสผู้ใช้งานที่ทำการอัปโหลด)
+ * Output: 
+ * - หากอัปโหลดสำเร็จ: JSON message `{ message: "Files uploaded successfully", images: [...] }`
+ * - หากเกิดข้อผิดพลาด: JSON message `{ error: "File upload failed" }`
+ **/
 export const uploadDefectImages = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
@@ -572,6 +624,17 @@ export const uploadDefectImages = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับจัดการการอัปโหลดรูปภาพของ defect และบันทึกข้อมูลลงฐานข้อมูล
+ * Input: 
+ * - defectId: number (รหัสของ defect ที่ต้องการอัปโหลดรูป)
+ * - status: DefectStatus (สถานะของ defect ที่ใช้กำหนดประเภทของโฟลเดอร์ เช่น 'reported' หรือ 'resolved')
+ * - updatedBy: number (รหัสผู้ใช้งานที่ทำการอัปโหลด)
+ * - files: Express.Multer.File[] (รายการไฟล์รูปภาพที่อัปโหลด)
+ * Output: 
+ * - คืนค่ารายการรูปภาพที่ถูกสร้างขึ้น พร้อมข้อมูลที่เกี่ยวข้อง
+ * - ข้อมูลรูปภาพถูกบันทึกในฐานข้อมูลตาราง `image` และมีการเชื่อมโยงกับ defect ในตาราง `defectImage`
+ **/
 export const handleDefectImagesUpload = async (
   defectId: number,
   status: DefectStatus,
@@ -614,7 +677,15 @@ export const handleDefectImagesUpload = async (
   return createdImages;
 };
 
-// ฟังก์ชันจัดกลุ่มรูปภาพตามช่วงเวลา
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับจัดกลุ่มรูปภาพตาม timestamp โดยพิจารณาค่าความแตกต่างของเวลา
+ * Input: 
+ * - images: Array<{ id, timestamp, updatedBy, path }> (อาร์เรย์ของรูปภาพที่มีข้อมูลเกี่ยวกับ id, timestamp, updatedBy และ path)
+ * - thresholdMs: number (ค่าความแตกต่างของเวลาที่ใช้เป็นเกณฑ์ในการจัดกลุ่ม (หน่วยเป็นมิลลิวินาที))
+ * Output: 
+ * - คืนค่าอาร์เรย์ของกลุ่มรูปภาพที่จัดกลุ่มตามเงื่อนไขของ thresholdMs
+ * - รูปภาพที่มี timestamp ใกล้เคียงกันภายในช่วง thresholdMs จะถูกจัดอยู่ในกลุ่มเดียวกัน
+ **/
 const groupImagesByTimestamp = (
   images: Array<{
     id: number;
@@ -649,6 +720,20 @@ const groupImagesByTimestamp = (
   return groups;
 };
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับอัปเดตรูปภาพของ defect ตามสถานะที่กำหนด โดยรองรับการลบภาพเดิมและเพิ่มภาพใหม่
+ * Input: 
+ * - defectId: number (รหัสของ defect)
+ * - status: DefectStatus (สถานะของ defect ที่ใช้กำหนดเงื่อนไขการอัปเดตรูปภาพ)
+ * - options: Object (ตัวเลือกเพิ่มเติม)
+ *    - updatedBy: number (รหัสผู้ใช้ที่อัปเดต)
+ *    - supervisorId?: number (รหัสของ supervisor กรณีที่ต้องการลบภาพของ supervisor)
+ *    - deleteExistingImages?: boolean (ตัวเลือกเพื่อลบภาพเดิม หากเป็น true จะลบภาพเดิมตามเงื่อนไข)
+ *    - files: Express.Multer.File[] (อาร์เรย์ของไฟล์ที่ต้องการอัปโหลด)
+ * Output: 
+ * - ดำเนินการลบภาพเดิมตามเงื่อนไขที่กำหนด
+ * - ดำเนินการอัปโหลดภาพใหม่และเชื่อมโยงกับ defect
+ **/
 export const handleDefectImagesUpdate = async (
   defectId: number,
   status: DefectStatus,
@@ -711,7 +796,14 @@ export const handleDefectImagesUpdate = async (
   )
 }
 
-// ฟังก์ชันช่วยลบภาพ
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับลบภาพ defect ออกจากระบบ โดยทำการลบไฟล์ภาพและข้อมูลที่เกี่ยวข้องจากฐานข้อมูล
+ * Input:
+ * - imageIds: number[] (อาร์เรย์ของ imageId ที่ต้องการลบ)
+ * Output:
+ * - ลบไฟล์ภาพที่เก็บอยู่ในระบบ
+ * - ลบข้อมูลภาพออกจากฐานข้อมูล รวมถึงการเชื่อมโยงกับ defect
+ **/
 export const deleteImages = async (imageIds: number[]) => {
   if (imageIds.length === 0) return
 
@@ -743,6 +835,14 @@ export const deleteImages = async (imageIds: number[]) => {
   ])
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับส่งอีเมลรีเซ็ตรหัสผ่านให้ผู้ใช้
+ * Input:
+ * - req.body.email: string (อีเมลของผู้ใช้ที่ต้องการรีเซ็ตรหัสผ่าน)
+ * Output:
+ * - ส่งอีเมลที่มีลิงก์สำหรับการรีเซ็ตรหัสผ่าน
+ * - หากอีเมลไม่พบในฐานข้อมูลหรือไม่ระบุอีเมล จะมีการตอบกลับด้วยรหัสสถานะที่เหมาะสม
+ **/
 export async function sendEmailResetPassword(req: Request, res: Response) {
   const { email } = req.body;
 
@@ -781,6 +881,15 @@ export async function sendEmailResetPassword(req: Request, res: Response) {
   return
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับรีเซ็ตรหัสผ่านของผู้ใช้
+ * Input:
+ * - req.body.token: string (โทเค็นที่ใช้ในการรีเซ็ตรหัสผ่าน)
+ * - req.body.newPassword: string (รหัสผ่านใหม่ที่ผู้ใช้ต้องการตั้ง)
+ * Output:
+ * - อัปเดตรหัสผ่านของผู้ใช้ในฐานข้อมูลและลบโทเค็นรีเซ็ตรหัสผ่าน
+ * - หากโทเค็นไม่ถูกต้องหรือผู้ใช้ไม่พบในฐานข้อมูล จะตอบกลับด้วยข้อความแสดงข้อผิดพลาด
+ **/
 export async function resetForgotPassword(req: Request, res: Response) {
   try {
     const { token, newPassword } = req.body;
@@ -819,6 +928,15 @@ export async function resetForgotPassword(req: Request, res: Response) {
   }
 }
 
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับตรวจสอบความถูกต้องของโทเค็นการรีเซ็ตรหัสผ่าน
+ * Input:
+ * - req.query.token: string (โทเค็นที่ใช้ในการรีเซ็ตรหัสผ่าน)
+ * Output:
+ * - ตรวจสอบว่าโทเค็นที่ส่งมาถูกต้องและยังไม่หมดอายุ
+ * - หากโทเค็นไม่พบหรือหมดอายุ จะตอบกลับด้วยข้อความแสดงข้อผิดพลาด
+ * - หากโทเค็นถูกต้อง จะตอบกลับสถานะว่า "Token is valid"
+ **/
 export async function verifyToken(req: Request, res: Response) {
   try {
     const token = req.query.token

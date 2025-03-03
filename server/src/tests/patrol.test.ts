@@ -5,6 +5,7 @@ import { commentPatrol, createPatrol, finishPatrol, getAllPatrolDefects, getAllP
 import { Request, Response } from 'express';
 import { allPatrolsMock, allPatrolsResponseMock, createPatrolMock, createPatrolResponseMock, finishPatrolMock, patrolCommentsMock, patrolDefectsMock, patrolMock, startPatrolMock } from './_mocks_/patrol.mock';
 import { prismaMock } from './_mocks_/prisma.mock';
+import { getIOInstance } from '../Utils/socket';
 
 // Mock Response object
 const mockResponse = () => {
@@ -23,6 +24,10 @@ const mockRequest = (query: any, params: any, body: any, user: any) => {
         user,
     } as unknown as Request;
 };
+
+jest.mock('@Utils/socket.js', () => ({
+    getIOInstance: jest.fn()
+  }));
 
 describe('getPatrol', () => {
     test('ควรดึงข้อมูล Patrol ตามเงื่อนไข Inspector ได้ถูกต้อง', async () => {
@@ -169,8 +174,23 @@ describe('getAllPatrols', () => {
 
 describe('createPatrol', () => {
     test('ควรสร้างข้อมูล Patrol ได้สำเร็จ', async () => {
+        // Mock Prisma
         prismaMock.patrol.create.mockResolvedValueOnce({ id: 5 });
         prismaMock.patrol.findUnique.mockResolvedValueOnce(createPatrolMock);
+        prismaMock.user.findMany.mockResolvedValueOnce([
+            { id: 1, role: 'admin', email: 'admin1@example.com' },
+            { id: 2, role: 'admin', email: 'admin2@example.com' }
+        ]);
+
+        // Mock Socket.io
+        const mockIO = {
+            to: jest.fn().mockReturnThis(),
+            emit: jest.fn()
+        };
+
+        (getIOInstance as jest.Mock).mockReturnValue(mockIO);
+
+        // สร้าง request และ response จำลอง
         const req = mockRequest(
             {},
             {},
@@ -182,12 +202,19 @@ describe('createPatrol', () => {
                     { checklistId: 5, userId: 3 },
                 ],
             },
-            { role: "inspector", userId: 3 });
+            { role: "inspector", userId: 3 }
+        );
         const res = mockResponse();
 
         await createPatrol(req, res);
+
+        // ตรวจสอบผลลัพธ์
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(createPatrolResponseMock);
+
+        // ตรวจสอบว่า Socket.io ถูกเรียกถูกต้อง
+        expect(mockIO.to).toHaveBeenCalledTimes(4); // 2 inspectors + 2 admins
+        expect(mockIO.emit).toHaveBeenCalledWith("patrol_created", createPatrolMock);
     });
 });
 
