@@ -170,7 +170,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 // ดึงข้อมูลจาก localStorage เมื่อ patrol.id มีค่า
                 const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
                 let mergedResults = [...data.results]; // เริ่มต้นด้วยข้อมูลจาก server
-
+                console.log(mergedResults)
                 if (savedResults) {
                     const savedResultsParsed = JSON.parse(savedResults);
 
@@ -286,7 +286,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         const data = {
             status: patrol.status,
             checklists: patrol.patrolChecklists,
-            results: patrol.results,
+            results: patrolResults,
             startTime: patrol.startTime
         };
 
@@ -400,15 +400,20 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [patrol?.id])
 
     useEffect(() => {
-        if (patrol?.id && patrolResults) {
+        if (patrol && patrol.status !== 'on_going') {
+            localStorage.removeItem(`patrolResults_${patrol.id}`);
+        }
+    }, [patrol])
+
+    useEffect(() => {
+        if (patrol?.id && patrolResults && patrol.status === 'on_going') {
             // บันทึกข้อมูล patrolResults ลง localStorage ด้วย key patrolResults_<patrol.id>
             localStorage.setItem(
                 `patrolResults_${patrol.id}`,
                 JSON.stringify(patrolResults)
             );
         }
-        console.log("patrolResults", patrolResults)
-    }, [patrolResults]);
+    }, [patrolResults, patrol]);
 
     useEffect(() => {
         if (socket && isConnected && patrol?.id && user?.id) {
@@ -453,7 +458,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
 
             const handlePatrolFinished = (data: { patrolId: string; patrolData: IPatrol }) => {
                 localStorage.removeItem(`patrolResults_${data.patrolId}`);
-                setPatrol(data.patrolData);
+                getPatrolData();
             };
 
             socket.on("initial_patrol_data", handleInitialData);
