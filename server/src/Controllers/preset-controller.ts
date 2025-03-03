@@ -583,7 +583,7 @@ export async function getChecklist(req: Request, res: Response) {
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Checklist ทั้งหมด
  * Input:
- * - req.query: {zones, startDate, endDate, search}
+ * - req.query: {zones, startDate, endDate, search, latest}
  * Output: JSON array ข้อมูลของ Checklist รวมถึงการนับจำนวน Item แต่ละประเภท
  **/
 export async function getAllChecklists(req: Request, res: Response) {
