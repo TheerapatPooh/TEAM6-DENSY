@@ -111,6 +111,7 @@ export default function Page() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
 
   const isNextButtonDisabled = !selectedPreset;
 
@@ -181,8 +182,6 @@ export default function Page() {
 
     try {
       const response = await fetchData("post", "/patrol", true, data);
-      // Broadcast ข้อมูลให้ทุกคนเห็นแบบ Real-time
-      socket.emit("new_patrol", response);
       setSecondDialog(false);
       toast({
         variant: "success",
@@ -346,6 +345,15 @@ export default function Page() {
     return new URLSearchParams(params).toString();
   };
 
+  const getUserData = async () => {
+    try {
+      const userfetch = await fetchData("get", "/user?profile=true&image=true", true);
+      setUser(userfetch);
+    } catch (error) {
+      console.error("Failed to fetch profile data:", error);
+    }
+  };
+
   const getPatrolData = async () => {
     try {
       const queryString = buildQueryString(filter, searchTerm);
@@ -396,12 +404,17 @@ export default function Page() {
   const joinedRoomsRef = useRef(new Set());
 
   useEffect(() => {
+    getUserData();
     getPatrolData();
     getPresetData();
   }, []);
 
   useEffect(() => {
     const initializeSocketListeners = () => {
+      if (user?.id) {
+        socket.emit('join_room', user.id);
+      }
+
       // ฟังก์ชันรับข้อมูลเริ่มต้นจาก socket
       const handleInitialData = (initialResults: IPatrolResult[]) => {
         if (initialResults.length <= 0) {
@@ -475,12 +488,11 @@ export default function Page() {
 
       // อัปเดตข้อมูลเมื่อมี Patrol ใหม่
       const handleNewPatrol = async (newPatrol) => {
-        await getPatrolData();
-
         if (!joinedRoomsRef.current.has(newPatrol.id)) {
           socket.emit("join_patrol", newPatrol.id);
           joinedRoomsRef.current.add(newPatrol.id);
         }
+        await getPatrolData();
       };
 
       // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ 
@@ -510,7 +522,7 @@ export default function Page() {
     };
 
     initializeSocketListeners();
-  }, [socket, isConnected]);
+  }, [socket, isConnected, user?.id]);
 
   useEffect(() => {
     allPatrols.forEach((patrol) => {

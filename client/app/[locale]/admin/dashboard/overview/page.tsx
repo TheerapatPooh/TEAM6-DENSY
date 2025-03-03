@@ -467,6 +467,11 @@ export default function Page() {
 
       // อัปเดตข้อมูลเมื่อมี Patrol ใหม่
       const handleNewPatrol = (newPatrol) => {
+        if (!joinedRoomsRef.current.has(newPatrol.id)) {
+          socket.emit("join_patrol", newPatrol.id);
+          joinedRoomsRef.current.add(newPatrol.id);
+        }
+
         setAllPatrols((prev) => {
           const existingIndex = prev.findIndex((patrol) => patrol.id === newPatrol.id);
 
@@ -479,10 +484,7 @@ export default function Page() {
           }
         });
 
-        if (!joinedRoomsRef.current.has(newPatrol.id)) {
-          socket.emit("join_patrol", newPatrol.id);
-          joinedRoomsRef.current.add(newPatrol.id);
-        }
+
       };
 
       // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ 
