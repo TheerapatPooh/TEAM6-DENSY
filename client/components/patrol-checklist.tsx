@@ -140,7 +140,7 @@ export default function PatrolChecklist({
   };
 
   const getExistingResult = (itemId: number, zoneId: number) => {
-    const result = patrolResults.find(
+    const result = patrolResultState.find(
       (res) => res.itemId === itemId && res.zoneId === zoneId
     );
     return result;
@@ -329,19 +329,20 @@ export default function PatrolChecklist({
                                       : "secondary"
                                   }
                                   className={`w-[155px] ${existingResult?.status === null
-                                      ? "bg-secondary text-card-foreground"
-                                      : ""
+                                    ? "bg-secondary text-card-foreground"
+                                    : ""
                                     } ${existingResult?.status === true
                                       ? "bg-green hover:bg-green text-card"
                                       : ""
                                     } ${existingResult?.status === false
                                       ? "bg-secondary hover:bg-secondary"
                                       : ""
-                                    } ${disabled
+                                    } ${disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)
                                       ? " cursor-not-allowed opacity-50"
                                       : ""
                                     }
                                                                     `}
+                                  disabled={disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)}
                                   onClick={() => {
                                     if (
                                       (patrolStatus === "on_going" &&
@@ -370,19 +371,20 @@ export default function PatrolChecklist({
                                       : "secondary"
                                   }
                                   className={`w-[155px] ${existingResult?.status === null
-                                      ? "bg-secondary text-card-foreground"
-                                      : ""
+                                    ? "bg-secondary text-card-foreground"
+                                    : ""
                                     } ${existingResult?.status === false
                                       ? "bg-destructive hover:bg-destructive text-card"
                                       : ""
                                     } ${existingResult?.status === true
                                       ? "bg-secondary hover:bg-secondary"
                                       : ""
-                                    } ${disabled
+                                    } ${disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)
                                       ? " cursor-not-allowed opacity-50"
                                       : ""
                                     }
                                                                     `}
+                                  disabled={disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)}
                                   onClick={() => {
                                     if (
                                       (patrolStatus === "on_going" &&
@@ -432,8 +434,8 @@ export default function PatrolChecklist({
                                         >
                                           <div
                                             className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status
-                                                ? "bg-primary"
-                                                : "bg-green"
+                                              ? "bg-primary"
+                                              : "bg-green"
                                               }`}
                                           />
                                           <p className="text-muted-foreground text-xl font-semibold">
