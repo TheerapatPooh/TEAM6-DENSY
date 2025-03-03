@@ -451,6 +451,8 @@
     "ChecklistNoChangeDescription": "You have not made any changes to your checklist",
     "CreateChecklistFailTitle": "Unable to create checklist",
     "CreateChecklistFailDescription": "A checklist with title",
+    "CreatePresetFailTitle": "Unable to create preset",
+    "CreatePresetFailDescription": "A preset with title ",
     "AlreadyExists": "already exists.",
     "FailEditChecklist": "Fail to Edit Patrol Checklist",
     "EditChecklistSuccess": "Edit Patrol Checklist Successfully",
