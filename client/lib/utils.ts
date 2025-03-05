@@ -5,6 +5,7 @@ import { badgeVariants } from "@/components/badge-custom";
 import { LoginSchema } from '@/app/type';
 import axios, { AxiosRequestConfig } from "axios";
 import { z } from "zod";
+import { comment } from "postcss";
 
 
 const ExcelJS = require("exceljs");
@@ -162,8 +163,8 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       { width: 30 },
       { width: 25 },
       { width: 25 },
-      { width: 15 },
-      { width: 20 },
+      { width: 25 },
+      { width: 25 },
     ];
 
     let totalFails = 0;
@@ -181,7 +182,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       // หาตำแหน่งของโรวปัจจุบัน
       const titleRowIdx = worksheet.rowCount;
       // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
-      worksheet.mergeCells(titleRowIdx, 0, titleRowIdx, 3);
+      worksheet.mergeCells(titleRowIdx, 0, titleRowIdx, 5);
       // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
       titleRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
       titleRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
@@ -195,7 +196,9 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       titleRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // พื้นหลังสีแดง
 
       // ตั้งค่าคอลัมน์พร้อมกับหัวข้อและคีย์
-      const headerRow = worksheet.addRow(["Item Name", "Zone Name", "Status"]);
+      const headerRow = worksheet.addRow(["Item Name", "Zone Name", "Status", "Annotation", ""]);
+      const headerRowIdx = worksheet.rowCount;
+      worksheet.mergeCells(headerRowIdx , 4, headerRowIdx, 5);
 
       // จัดกึ่งกลางหัวตาราง ตัวหนา มีกรอบ
       headerRow.eachCell((cell) => {
@@ -210,67 +213,108 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F1F1' } };  // พื้นหลังสีเทาอ่อน
       });
 
-      // วนลูปผ่านรายการใน Checklist
+      // Loop Items ใน Checklist
       for (const item of checklist.items) {
-        // วนลูปผ่าน itemZone
+        // Loop Zones ใน Item
         for (const itemZone of item.itemZones) {
           const zoneName = formatZoneName(itemZone.zone.name);
-          // หา result ที่ตรงกับ item และ zone นี้
           const resultItem = result.find(
-            (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
+              (r) => r.itemId === item.id && r.zoneId === itemZone.zone.id
           );
-
+  
           let statusText = "N/A";
-          let defectCount, commendCount = 0;
+          let annotationDetails = [];
+  
           if (resultItem) {
             if (resultItem.status === true) {
-              statusText = "Passed";
-              totalPass++;
-            } 
-            
-            if (resultItem.status === false) {
-              statusText = "Failed";
-              totalFails++; // เพิ่มจำนวน fail
+                statusText = "Passed";
+                totalPass++;
+            } else if (resultItem.status === false) {
+                statusText = "Failed";
+                totalFails++;
             }
 
-            if (resultItem.comments && resultItem.comments.length > 0) {
+            if (resultItem.comments?.length > 0) {
               statusText = "Commented";
-              commendCount = resultItem.comments.length;
-              totalComments += commendCount; // เพิ่มจำนวน commend
+              totalComments += resultItem.comments.length;
               totalFails--;
+
+              // Loop เก็บข้อมูล Commends เข้าใน Annotations
+              for (const comment of resultItem.comments) {
+                  annotationDetails.push([formatDateTime(comment.timestamp), comment.message]);
+              }
             }
-            
-            if (resultItem.defects && resultItem.defects.length > 0) {
+
+            if (resultItem.defects?.length > 0) {
               statusText = "Defected";
-              defectCount = resultItem.defects.length;
-              totalDefects += defectCount; // เพิ่มจำนวน defect
+              totalDefects += resultItem.defects.length;
               totalFails--;
-            } 
+
+              // Loop เก็บข้อมูล Defects เข้าใน Annotations
+              for (const defect of resultItem.defects) {
+                annotationDetails.push([formatDateTime(defect.startTime), defect.description]);
+              }
+            }
+          }
+    
+          // เพิ่มข้อมูลของแต่ละ Rows
+          const startRow = worksheet.rowCount + 1;
+          worksheet.addRow([item.name, zoneName, statusText, "-"]);
+  
+          // ถ้ามี Comments หรือ Defects จะเพิ่ม Annotation rows
+          if (annotationDetails.length > 0) {
+            // กำหนด Subrows ของ Annotation ของ Commend
+            if (statusText === "Commented") {
+              worksheet.getCell(`D${startRow}`).value = "Comments DateTime"; 
+              worksheet.getCell(`E${startRow}`).value = "Comments Detail";
+              worksheet.getCell(`D${startRow}`).font = { bold: true };
+              worksheet.getCell(`E${startRow}`).font = { bold: true };
+            // กำหนด Subrows ของ Annotation ของ Defect
+            } else if (statusText === "Defected") {
+              worksheet.getCell(`D${startRow}`).value = "Defects DateTime"; 
+              worksheet.getCell(`E${startRow}`).value = "Defects Detail";
+              worksheet.getCell(`D${startRow}`).font = { bold: true };
+              worksheet.getCell(`E${startRow}`).font = { bold: true };
+            }
+            // Loop แสดงข้อมูลของ Annotations
+            for (const [timestamp, detail] of annotationDetails) {
+                const annotationRow = worksheet.addRow(["", "", "", timestamp, detail]);
+                annotationRow.eachCell(cell => {
+                    cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+                    cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+                });
+            }
+          }else {
+            // Merge columns D และ E ของ Annotation
+            const annotationRowIndex = worksheet.rowCount;
+            worksheet.mergeCells(`D${annotationRowIndex}:E${annotationRowIndex}`);
+        
+            worksheet.getCell(`D${annotationRowIndex}`).alignment = { 
+                horizontal: 'center', vertical: 'middle', wrapText: true 
+            };
+        
+            worksheet.getCell(`D${annotationRowIndex}`).border = { 
+                top: { style: 'thin' }, 
+                bottom: { style: 'thin' }, 
+                left: { style: 'thin' }, 
+                right: { style: 'thin' } 
+            };
           }
 
-          // เพิ่มแถวข้อมูลลงใน worksheet
-          const dataRow = worksheet.addRow([item.name, zoneName, statusText]);
-          dataRow.font = { size: 12 };
+          // Merge Item Name, Zone Name, และ Status เมื่อ Annotations มีหลาย Rows
+          const endRow = worksheet.rowCount;
+          if (endRow > startRow) {
+            worksheet.mergeCells(`A${startRow}:A${endRow}`);
+            worksheet.mergeCells(`B${startRow}:B${endRow}`);
+            worksheet.mergeCells(`C${startRow}:C${endRow}`);
+          }
 
-          dataRow.eachCell((cell) => {
-            cell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-            cell.border = {
-              left: { style: 'thin' },
-              right: { style: 'thin' }
-            };
-          });
-
-
-
-          dataRow.eachCell((cell) => {
-            cell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-            cell.border = {
-              left: { style: 'thin' },
-              right: { style: 'thin' }
-            };
-          });
+          for (let row = startRow; row <= endRow; row++) {
+            worksheet.getRow(row).eachCell(cell => {
+                cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+            });
+          }
         }
       }
       const columnCount = headerRow.cellCount;
@@ -285,7 +329,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     // หาตำแหน่งของโรวปัจจุบัน
     const sumRowIdx = worksheet.rowCount;
     // Merge โดยใส่ค่า (ตน.ปัจจุบัน, ตน.เริ่มต้น, ตน.ปัจจุบัน, ตน.สิ้นสุด)
-    worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 5);
+    worksheet.mergeCells(sumRowIdx, 0, sumRowIdx, 4);
     // ตั้งค่าโรวให้ตัวหนา จัดกึ่งกลาง และเพิ่มขอบ
     sumRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
     sumRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
@@ -350,7 +394,7 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     }
 
     // เพิ่มส่วนหัวของตารางสำหรับสรุปผล
-    const zoneSummaryHeaderRow = worksheet.addRow(["Zone Name", "Passed", "Failed", "Commented", "Defected"]);
+    const zoneSummaryHeaderRow = worksheet.addRow(["Zone Name", "Passed", "Commented", "Defected"]);
     zoneSummaryHeaderRow.eachCell((cell) => {
       cell.font = { bold: true, size: 12 }; // ทำให้หัวตารางตัวหนา
       cell.alignment = { horizontal: "center", vertical: "middle" }; // จัดกึ่งกลาง
@@ -368,7 +412,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
       const summaryRow = worksheet.addRow([
         zoneEntry.zoneName,
         zoneEntry.Passed,
-        zoneEntry.Failed,
         zoneEntry.Commented,
         zoneEntry.Defected,
       ]);
@@ -389,7 +432,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     const totalRow = worksheet.addRow([
       "Total",
       totalPassed,
-      totalFails,
       totalCommented,
       totalDefected
     ]);
