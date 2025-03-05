@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { refreshAccessToken } from "@/lib/utils";
+import { fetchData } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/loading";
 import { useLocale } from "next-intl";
@@ -12,8 +12,8 @@ export default function RefreshPage() {
     useEffect(() => {
         async function refresh() {
             try {
-                const result = await refreshAccessToken();
-                if (result.status === 401) {
+                const result = await fetchData("post",'/refresh-token',true)
+                if (result.status !== 200) {
                     router.push(`/${locale}/login`);
                 }
                 router.push(`/`);

@@ -14,25 +14,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function refreshAccessToken() {
-  try {
-    const csrfResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/csrf-token`, {
-      withCredentials: true,
-    });
-    const csrfToken = csrfResponse.data.csrfToken;
-
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh-token`, {}, {
-      withCredentials: true,
-      headers: { "X-CSRF-Token": csrfToken },
-    });
-
-    return response.data.accessToken;
-  } catch (error) {
-    console.error("Failed to refresh token", error);
-    return null;
-  }
-}
-
 export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values)
   if (!validatedFields.success) {
@@ -807,3 +788,20 @@ export const monthOptions = ["AllTime", ...Array.from({ length: 12 }, (_, i) => 
   const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
   return monthFormatter.format(date);
 })];
+
+export const countPatrolResult = (results: IPatrolResult[]) => {
+  let fail = 0;
+  let defect = 0;
+
+  results?.forEach((result) => {
+    if (result.status === false) {
+      fail++;
+    }
+
+    if (Array.isArray(result.defects) && result.defects.length > 0) {
+      defect++;
+    }
+  });
+
+  return { fail, defect };
+};

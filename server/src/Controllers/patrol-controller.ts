@@ -1,6 +1,6 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification } from "@Controllers/util-controller.js";
+import { createNotification, deleteImages } from "@Controllers/util-controller.js";
 import {
   NotificationType,
   PatrolStatus,
@@ -8,13 +8,14 @@ import {
   ItemType,
   DefectStatus,
 } from "@prisma/client";
+import { getIOInstance } from "@Utils/socket.js";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ตาม ID
  * Input:
  * - req.query: { preset: boolean, result: boolean }
  * - req.params.id: number (ID ของ Patrol ที่ต้องการดึงข้อมูล)
- * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number , role: string} (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูล Patrol รวมถึง preset และ result หากร้องขอ
  **/
 export async function getPatrol(req: Request, res: Response) {
@@ -167,7 +168,7 @@ export async function getPatrol(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Patrol ทั้งหมดตามสถานะ
  * Input:
  * - req.query: { status, preset, startDate, endDate, search } ("status", "preset", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
- * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
+ * - req.user: { userId: number, role: string } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Patrol และข้อมูลที่เกี่ยวข้อง
  **/
 export async function getAllPatrols(req: Request, res: Response) {
@@ -289,9 +290,6 @@ export async function getAllPatrols(req: Request, res: Response) {
       whereConditions.AND = andConditions;
     }
 
-    // บันทึก query ที่สร้างขึ้นสำหรับการดีบัก
-    // console.log('Generated Query:', JSON.stringify(whereConditions, null, 2));
-
     const allPatrols = await prisma.patrol.findMany({
       where: whereConditions,
       select: {
@@ -358,12 +356,7 @@ export async function getAllPatrols(req: Request, res: Response) {
             },
           },
         },
-        results: {
-          select: {
-            status: true,
-            defects: true,
-          }
-        }
+        results: true
       },
     });
 
@@ -438,9 +431,10 @@ export async function getAllPatrols(req: Request, res: Response) {
             status: true,
             defects: true,
             itemId: true,
-            zoneId: true
+            zoneId: true,
+            comments: true
           }
-        }
+        },
       },
     });
 
@@ -503,6 +497,7 @@ export async function getAllPatrols(req: Request, res: Response) {
             preset: patrol.preset,
             itemCounts: {},
             inspectors: [],
+            results: patrol.results,
             disabled: false,
           };
         }
@@ -753,6 +748,22 @@ export async function createPatrol(req: Request, res: Response) {
           result.inspectors.push(inspector);
         }
       });
+      const admins = await prisma.user.findMany({ where: { role: 'admin' } });
+
+      const inspectorIds = createdPatrol.patrolChecklists.map(pc => pc.inspector.id);
+      const io = getIOInstance();
+
+      // รวม Admins และ Inspectors เข้าด้วยกัน
+      const allUserIds = [
+        ...inspectorIds,
+        ...admins.map(admin => admin.id) // เพิ่ม Admins เข้าไป
+      ];
+
+      // ส่ง event "patrol_created" ไปยังทั้ง Inspector และ Admin
+      allUserIds.forEach(userId => {
+        io.to(`notif_${userId}`).emit("patrol_created", createdPatrol);
+      });
+
       res.status(201).json(result);
     }
   } catch (error) {
@@ -1062,10 +1073,10 @@ export async function finishPatrol(req: Request, res: Response) {
             },
             inspector: {
               select: {
-                id:true,
-                username:true,
-                email:true,
-                role:true,
+                id: true,
+                username: true,
+                email: true,
+                role: true,
                 profile: {
                   select: {
                     name: true,
@@ -1154,17 +1165,74 @@ export async function removePatrol(req: Request, res: Response) {
   try {
     const patrolId = parseInt(req.params.id, 10);
 
+    if (isNaN(patrolId)) {
+      res.status(400).json({ message: "Invalid patrol ID" });
+      return;
+    }
+
     await prisma.patrolChecklist.deleteMany({
       where: {
         patrolId: patrolId,
       },
     });
 
-    await prisma.patrolResult.deleteMany({
+    const patrolResults = await prisma.patrolResult.findMany({
       where: {
-        patrolId: patrolId,
+        patrolId: patrolId
       },
+      select: {
+        id: true
+      }
     });
+
+    if (Array.isArray(patrolResults) && patrolResults.length > 0) {
+      const patrolResultIds = patrolResults.map(patrolResult => patrolResult.id);
+
+      const defects = await prisma.defect.findMany({
+        where: {
+          patrolResultId: { in: patrolResultIds }
+        },
+        select: {
+          id: true
+        }
+      });
+
+      if (Array.isArray(defects) && defects.length > 0) {
+        const defectIds = defects.map(defect => defect.id);
+
+        const images = await prisma.defectImage.findMany({
+          where: {
+            defectId: { in: defectIds }
+          },
+          select: {
+            imageId: true
+          }
+        }) || [];
+
+        if (Array.isArray(images) && images.length > 0) {
+          const imageIds = images.map(image => image.imageId);
+          await deleteImages(imageIds);
+        }
+      }
+
+      await prisma.defect.deleteMany({
+        where: {
+          patrolResultId: { in: patrolResultIds }
+        }
+      });
+
+      await prisma.comment.deleteMany({
+        where: {
+          patrolResultId: { in: patrolResultIds }
+        }
+      });
+
+      await prisma.patrolResult.deleteMany({
+        where: {
+          patrolId: patrolId,
+        },
+      });
+    }
 
     await prisma.patrol.delete({
       where: {
@@ -1187,6 +1255,7 @@ export async function removePatrol(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Defect ทั้งหมดใน Patrol
  * Input:
  * - req.params.id: number (ID ของ Patrol)
+ * - req.query: { status, type, startDate, endDate, search } ("status", "type", "startDate", "endDate" ใช้สำหรับ filter ข้อมูล และ search ใช้สำหรับค้นหาชื่อ inspector หรืออื่นๆ )
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON array ข้อมูล Defect และข้อมูลที่เกี่ยวข้อง
  **/
@@ -1508,7 +1577,7 @@ export async function getAllPatrolDefects(req: Request, res: Response) {
  * คำอธิบาย: ฟังก์ชันสำหรับเพิ่มความคิดเห็นใน Patrol
  * Input:
  * - req.params.id: number (ID ของ Patrol)
- * - req.body: { message: String, patrolResultId: number } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
+ * - req.body: { message: String, patrolResultId: number, supervisorId } (ข้อความความคิดเห็นและ ID ของผลลัพธ์)
  * - req.user: { userId: number } (บทบาทและ ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * Output: JSON object ข้อมูลความคิดเห็นที่ถูกบันทึก
  **/

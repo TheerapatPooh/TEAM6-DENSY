@@ -37,8 +37,9 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { patrolStatus, IUser, IPreset, IPatrol } from "@/app/type";
+import { patrolStatus, IUser, IPreset, IPatrol, IPatrolResult } from "@/app/type";
 import {
+  countPatrolResult,
   formatPatrolId,
   formatTime,
   getInitials,
@@ -53,6 +54,7 @@ import { UserTooltip } from "./user-tooltip";
 import { PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Popover } from "@radix-ui/react-popover";
 import { TextTooltip } from "./text-tooltip";
+import { useSocket } from "./socket-provider";
 
 export interface IPatrolCard {
   id: number;
@@ -60,6 +62,7 @@ export interface IPatrolCard {
   status: patrolStatus;
   preset: IPreset;
   itemCounts: number;
+  results: IPatrolResult[];
   inspectors: IUser[];
   onRemoveSuccess;
 }
@@ -70,6 +73,7 @@ export function PatrolCard({
   status,
   preset,
   itemCounts,
+  results,
   inspectors = [],
   onRemoveSuccess,
 }: IPatrolCard) {
@@ -84,6 +88,7 @@ export function PatrolCard({
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const { socket, isConnected } = useSocket();
 
   const router = useRouter();
   const locale = useLocale();
@@ -91,10 +96,10 @@ export function PatrolCard({
   const getPatrolData = async () => {
     try {
       let countItems = itemCounts;
-      let countFails = 0;
-      let countDefects = 0;
+      let countFails = countPatrolResult(results).fail;
+      let countDefects = countPatrolResult(results).defect;
 
-      if (status !== "pending" && status !== "scheduled") {
+      if (status === "completed") {
         const resultFetch: Partial<IPatrol> = await fetchData(
           "get",
           `/patrol/${id}?result=true`,
@@ -122,7 +127,7 @@ export function PatrolCard({
   useEffect(() => {
     getPatrolData();
     setMounted(true);
-  }, []);
+  }, [results]);
 
   const t = useTranslations("General");
   const a = useTranslations("Alert");
@@ -159,6 +164,7 @@ export function PatrolCard({
     }
     try {
       await fetchData("delete", `/patrol/${id}`, true);
+      socket.emit("delete_patrol", id);
     } catch (error) {
       console.error(error);
     }

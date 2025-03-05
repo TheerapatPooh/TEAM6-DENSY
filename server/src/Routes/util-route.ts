@@ -69,7 +69,33 @@ const loginLimiter = rateLimit({
  */
 router.post("/login", loginLimiter, login);
 
-router.post("/refresh-token", refreshToken); 
+/**
+ * @swagger
+ * /refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     description: ใช้ refresh token เพื่อขอ access token ใหม่ หาก session ยังไม่หมดอายุ
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Access token ใหม่ถูกสร้างสำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: Access token ใหม่
+ *       401:
+ *         description: ไม่มี refresh token หรือ session หมดอายุ
+ *       403:
+ *         description: Refresh token ไม่ถูกต้อง
+ */
+router.post("/refresh-token", refreshToken);
 
 /**
  * @swagger
@@ -284,9 +310,156 @@ router.delete("/notifications", authenticateUser, removeAllNotifications);
  *                   example: "Internal server error"
  */
 router.put("/notifications/mark-all-read", authenticateUser, markAllAsRead);
+
 removeOldNotifications()
+
+/**
+ * @swagger
+ * /api/send-email-reset-password:
+ *   post:
+ *     summary: ส่งอีเมลสำหรับรีเซ็ตรหัสผ่าน
+ *     description: ส่งอีเมลที่มีลิงก์สำหรับรีเซ็ตรหัสผ่านไปยังผู้ใช้ที่ร้องขอ
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *                 description: อีเมลของผู้ใช้ที่ต้องการรีเซ็ตรหัสผ่าน
+ *     responses:
+ *       200:
+ *         description: ส่งอีเมลรีเซ็ตรหัสผ่านสำเร็จ
+ *       400:
+ *         description: ไม่มีการส่งอีเมลมาใน request
+ *       404:
+ *         description: ไม่พบผู้ใช้ที่มีอีเมลนี้
+ */
 router.post("/send-email-reset-password", sendEmailResetPassword)
+
+/**
+ * @swagger
+ * /api/reset-password:
+ *   put:
+ *     summary: Reset password using a reset token
+ *     description: อัปเดตรหัสผ่านใหม่โดยใช้โทเค็นรีเซ็ตรหัสผ่าน
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: โทเค็นสำหรับรีเซ็ตรหัสผ่าน
+ *                 example: "123456abcdef"
+ *               newPassword:
+ *                 type: string
+ *                 description: รหัสผ่านใหม่ของผู้ใช้
+ *                 example: "NewSecurePassword123!"
+ *     responses:
+ *       200:
+ *         description: Password successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Password successfully updated."
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *       404:
+ *         description: Invalid token or user not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid token or user not found."
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error, please try again later."
+ */
 router.put("/reset-password", resetForgotPassword)
+
+/**
+ * @swagger
+ * /api/verify-token:
+ *   get:
+ *     summary: Verify reset password token
+ *     description: ตรวจสอบความถูกต้องของโทเค็นรีเซ็ตรหัสผ่าน
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         description: โทเค็นที่ใช้ในการรีเซ็ตรหัสผ่าน
+ *         schema:
+ *           type: string
+ *           example: "123456abcdef"
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Token is valid"
+ *       400:
+ *         description: Token is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token is required"
+ *       404:
+ *         description: Token not found, invalid, or expired
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token not found or invalid"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ */
 router.get("/verify-token", verifyToken)
 
 export default router

@@ -12,7 +12,6 @@ import { tr } from "@faker-js/faker";
  * Input:
  * - req as any user.userId: Int (ID ของผู้ใช้งานที่กำลังล็อกอิน)
  * - req.body: { name: String, description: String, type: ItemType, defectUserId: Int, patrolResultId: Int, supervisorId: Int }
- * - req.files: Array<Express.Multer.File> (ไฟล์รูปภาพใหม่)
  * Output: JSON object ข้อมูล Defect ที่ถูกสร้าง พร้อมกับอัปเดตสถานะของ patrolResult
  **/
 export async function createDefect(req: Request, res: Response) {
@@ -538,13 +537,6 @@ export async function getAllDefects(req: Request, res: Response) {
     return;
   }
 }
-
-// function getUploadsPath(): string {
-//   const currentDir = process.cwd();
-//   return path.join(currentDir, "uploads"); // Adjust path as needed
-// }
-
-// const uploadsPath = getUploadsPath();
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับอัปเดต Defect

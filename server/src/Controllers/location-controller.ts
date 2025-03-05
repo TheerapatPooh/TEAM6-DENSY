@@ -4,11 +4,20 @@ import { calculateTrend, createNotification } from "@Controllers/util-controller
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
 
 /**
- * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Zone
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อมูล Zone โดยการกรองด้วยเงื่อนไขต่าง ๆ และคำนวณข้อมูลสถิติเกี่ยวกับ Defect
  * Input:
- * - req.params.id: Int (ID ของ Zone)
- * Output: JSON object ข้อมูล Zone
- **/
+ * - req.params.id: number (ID ของ Zone)
+ * - req.query: {
+ *     dashboard: string (ตัวเลือกการแสดงผลแดชบอร์ด),
+ *     startDate: string (วันที่เริ่มต้นในการกรองข้อมูล),
+ *     endDate: string (วันที่สิ้นสุดในการกรองข้อมูล),
+ *     status: string (สถานะของ Defect ที่ต้องการกรอง),
+ *     type: string (ชนิดของ Defect ที่ต้องการกรอง),
+ *     search: string (คำค้นหาที่ใช้ในการกรองข้อมูล)
+ * }
+ * - req.user: { role: string } (บทบาทของผู้ใช้งานที่ล็อกอิน)
+ * Output: JSON object ที่ประกอบไปด้วยข้อมูล Zone, สถิติเกี่ยวกับ Defect, และข้อมูลแดชบอร์ด
+ */
 export async function getZone(req: Request, res: Response) {
   try {
     const { dashboard, startDate, endDate, status, type, search } = req.query;
@@ -136,7 +145,7 @@ export async function getZone(req: Request, res: Response) {
       res.status(403).json({
         message: `Access Denied: Requires admin privileges`
       })
-      return 
+      return
     }
 
     if (!dashboard) {
@@ -151,7 +160,7 @@ export async function getZone(req: Request, res: Response) {
               role: true,
               department: true,
               createdAt: true,
-              profile: { select: { image: true,tel:true,name:true } },
+              profile: { select: { image: true, tel: true, name: true } },
             },
           },
         },
@@ -161,11 +170,11 @@ export async function getZone(req: Request, res: Response) {
         res.status(404).json({
           message: "Zone not found"
         })
-        return 
+        return
       }
 
       res.status(200).json(zone)
-      return 
+      return
     }
 
     const zoneWithData = await prisma.zone.findUnique({
@@ -179,7 +188,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { select: { image: true,tel:true,name:true } },
+            profile: { select: { image: true, tel: true, name: true } },
           },
         },
         itemZones: {
@@ -194,16 +203,17 @@ export async function getZone(req: Request, res: Response) {
                     user: {
                       select: {
                         id: true,
-                        role:true,
-                        email:true,
-                        username:true,
+                        role: true,
+                        email: true,
+                        username: true,
                         profile: {
-                          select:{
-                          name:true,
-                          image:true,
-                          tel:true
+                          select: {
+                            name: true,
+                            image: true,
+                            tel: true
 
-                        }}
+                          }
+                        }
                       }
                     }
                   }
@@ -231,7 +241,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { select: { image: true,tel:true,name:true } },
+            profile: { select: { image: true, tel: true, name: true } },
           },
         },
         itemZones: {
@@ -251,7 +261,7 @@ export async function getZone(req: Request, res: Response) {
       res.status(404).json({
         message: "Zone not found"
       })
-      return 
+      return
     }
 
     let defectReported = 0
@@ -371,7 +381,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { select: { image: true,tel:true,name:true } },
+            profile: { select: { image: true, tel: true, name: true } },
           },
         },
         itemZones: {
@@ -411,7 +421,7 @@ export async function getZone(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { select: { image: true,tel:true,name:true } },
+            profile: { select: { image: true, tel: true, name: true } },
           },
         },
         itemZones: {
@@ -494,7 +504,7 @@ export async function getZone(req: Request, res: Response) {
   } catch (error) {
     console.error("Server Error:", error)
     res.status(500).json("Internal server error")
-    return 
+    return
   }
 }
 
@@ -548,7 +558,7 @@ export async function getLocation(req: Request, res: Response) {
                 role: true,
                 department: true,
                 createdAt: true,
-                profile: { select: { image: true,tel:true,name:true } },
+                profile: { select: { image: true, tel: true, name: true } },
 
               },
             },
@@ -617,7 +627,7 @@ export async function updateSupervisor(req: Request, res: Response) {
             role: true,
             department: true,
             createdAt: true,
-            profile: { select: { image: true,tel:true,name:true } },
+            profile: { select: { image: true, tel: true, name: true } },
 
           },
         },

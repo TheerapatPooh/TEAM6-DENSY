@@ -636,6 +636,79 @@ router.get('/comments', authenticateUser, authorized(['admin', 'supervisor']), g
  */
 router.put('/comment/:id', authenticateUser, authorized(['admin', 'supervisor']), confirmComment)
 
+/**
+ * @swagger
+ * /api/defect/{id}/upload:
+ *   put:
+ *     summary: Upload defect images
+ *     description: อัปโหลดไฟล์ภาพที่เกี่ยวข้องกับข้อบกพร่อง
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID ของข้อบกพร่องที่ต้องการอัปโหลดภาพ
+ *         schema:
+ *           type: integer
+ *           example: 123
+ *       - in: formData
+ *         name: status
+ *         required: true
+ *         description: สถานะของข้อบกพร่อง (ก่อนหรือหลัง)
+ *         schema:
+ *           type: string
+ *           enum: [reported, resolved]
+ *           example: "reported"
+ *       - in: formData
+ *         name: imageFiles
+ *         required: true
+ *         description: ไฟล์ภาพที่จะอัปโหลด
+ *         type: array
+ *         items:
+ *           type: file
+ *           description: ภาพที่ต้องการอัปโหลด
+ *     responses:
+ *       200:
+ *         description: ไฟล์ภาพอัปโหลดสำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Files uploaded successfully"
+ *                 images:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       filename:
+ *                         type: string
+ *                         example: "123_20230325123000_image1.jpg"
+ *                       path:
+ *                         type: string
+ *                         example: "uploads/defects/123/before/123_20230325123000_image1.jpg"
+ *       400:
+ *         description: ขาดข้อมูลที่จำเป็น (defectId หรือ status)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "defectId and status are required"
+ *       500:
+ *         description: การอัปโหลดไฟล์ล้มเหลว
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "File upload failed"
+ */
 router.put(
   '/defect/:id/upload',
   authenticateUser,
