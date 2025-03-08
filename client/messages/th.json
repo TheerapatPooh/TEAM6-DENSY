@@ -537,7 +537,8 @@
     "ResetPasswordConfirmTitle": "คุณแน่ใจหรือว่าต้องการตั้งรหัสผ่านใหม่?",
     "ResetPasswordConfirmDescription": "โปรดยืนยันเพื่อตั้งรหัสผ่านใหม่ของคุณ",
     "PasswordResetCompletedTitle": "ตั้งรหัสผ่านใหม่สำเร็จ",
-    "PasswordResetCompletedDescription": "คุณได้ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว สามารถเข้าสู่ระบบได้ทันที"
+    "PasswordResetCompletedDescription": "คุณได้ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว สามารถเข้าสู่ระบบได้ทันที",
+    "NoCommentsOrDeFectsFound": "กรุณาแสดงความคิดเห็นหรือแจ้งปัญหาที่พบ"
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",
