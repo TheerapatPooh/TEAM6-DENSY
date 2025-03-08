@@ -537,7 +537,8 @@
     "ResetPasswordConfirmTitle": "Are you sure you want to reset your password?",
     "ResetPasswordConfirmDescription": "Please confirm to reset your password.",
     "PasswordResetCompletedTitle": "Password Reset Successful",
-    "PasswordResetCompletedDescription": "Your password has been successfully reset. You can now log in with your new password."
+    "PasswordResetCompletedDescription": "Your password has been successfully reset. You can now log in with your new password.",
+    "NoCommentsOrDeFectsFound": "Please provide your feedback or report any defects encountered."
   },
   "Month": {
     "AllTime": "All Time",
