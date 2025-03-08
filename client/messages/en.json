@@ -268,7 +268,7 @@
     "defect_resolved": "The defect you reported has been successfully resolved.",
     "defect_accept": "The defect you reported has been accepted and is under review.",
     "defect_completed": "The defect has been successfully resolved. Please review the completed work.",
-    "defect_pending_inspection": "The defect is pending inspection. Please complete the review as soon as possible."
+    "defect_pending_inspection": "The defect has not been approved. Please revise and resubmit for inspection."
   },
   "Sidebar": {
     "Dashboard": "Dashboard",
