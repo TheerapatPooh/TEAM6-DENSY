@@ -155,14 +155,14 @@ export function TextTooltip({ object, children }: IUserTooltip) {
           </HoverCardTrigger>
 
           <HoverCardContent
-            className="w-full px-6 py-4"
+            className="w-full px-2.5 py-1.5 bg-card-foreground text-card"
             zIndex={0}
             side="bottom"
             align="start"
             onClick={(e) => e.stopPropagation()}
           ></HoverCardContent>
           <PopoverContent
-            className="w-full z-[100] px-6 py-4"
+            className="w-full z-[100] px-2.5 py-1.5 bg-card-foreground text-card"
             side="bottom"
             align="start"
             onInteractOutside={(e) => {

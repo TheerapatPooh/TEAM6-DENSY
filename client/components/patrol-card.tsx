@@ -284,7 +284,7 @@ export function PatrolCard({
                 </AvatarFallback>
               </Avatar>
             </UserTooltip>
-            <p className="text-lg">{inspector.profile.name}</p>
+            <p className="text-lg truncate">{inspector.profile.name}</p>
           </div>
         ))}
         <div className="flex items-center justify-between w-full text-muted-foreground">
@@ -310,9 +310,9 @@ export function PatrolCard({
             {formatTime(date, locale, false)}
           </CardDescription>
           <TextTooltip object={preset.title}>
-          <CardTitle className="text-card-foreground text-2xl truncate w-[300px]">
-            {preset.title}
-          </CardTitle>
+            <CardTitle className="text-card-foreground text-2xl truncate w-[300px]">
+              {preset.title}
+            </CardTitle>
           </TextTooltip>
         </div>
         <BadgeCustom
@@ -327,94 +327,92 @@ export function PatrolCard({
           <span className="material-symbols-outlined">description</span>
           <p className="text-lg font-normal">{formatPatrolId(id)}</p>
         </div>
-
         <Popover
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose()
-      }}
-    >
-      <HoverCard
-        open={open && openType.current === 'hover'}
-        onOpenChange={(isHoverOpen) => {
-          if (!isHoverOpen && openType.current === 'hover') handleClose();
-        }}
-      >
-        <div
-          ref={triggerContainerRef}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          open={open}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) handleClose()
+          }}
         >
-          <HoverCardTrigger asChild>
-            <PopoverTrigger asChild>
-              <div className="cursor-pointer" onClick={handleClick}>
-              <div className="flex text-muted-foreground items-center">
-              <span className="material-symbols-outlined me-1">
-                person_search
-              </span>
-              {inspectors.length > 0 && (
-                <div className="flex items-center me-1 truncate max-w-[190px]">
-                  <p className="text-xl me-2.5 truncate">
-                    {inspectors[0].profile.name}
-                  </p>
-                </div>
-              )}
-              {inspectors.map((inspector, idx) => {
-                return (
-                  <Avatar key={idx} className="custom-shadow ms-[-10px]">
-                    <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                    />
-                    <AvatarFallback id={inspector.id.toString()}>
-                      {getInitials(inspector.profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                );
-              })}
-
-              {inspectors.length > 5 && (
-                <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
-                  <AvatarImage src="" />
-                  <span className="absolute text-card-foreground text-base font-semibold">
-                    +{inspectors.length - 5}
-                  </span>
-                  <AvatarFallback id={"0"}></AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-              </div>
-            </PopoverTrigger>
-          </HoverCardTrigger>
-
-          <HoverCardContent
-            className="w-full px-6 py-4"
-            zIndex={0}
-            side="bottom"
-            align="start"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <TooltipContent/>
-          </HoverCardContent>
-          <PopoverContent
-            className="w-full z-[100] px-6 py-4"
-            side="bottom"
-            align="start"
-            onInteractOutside={(e) => {
-              const target = e.target as HTMLElement;
-              const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
-              const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
-
-              if (isUserTooltipContent || isUserTooltipTrigger) {
-                e.preventDefault();
-              }
+          <HoverCard
+            open={open && openType.current === 'hover'}
+            onOpenChange={(isHoverOpen) => {
+              if (!isHoverOpen && openType.current === 'hover') handleClose();
             }}
           >
-            <TooltipContent />
-          </PopoverContent>
-        </div>
-      </HoverCard>
-    </Popover>
+            <div
+              ref={triggerContainerRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <HoverCardTrigger asChild>
+                <PopoverTrigger asChild>
+                  <div className="cursor-pointer" onClick={handleClick}>
+                    <div className="flex text-muted-foreground items-center">
+                      <span className="material-symbols-outlined me-1">
+                        person_search
+                      </span>
+                      {inspectors.length > 0 && (
+                        <div className="flex items-center me-1 truncate max-w-[190px]">
+                          <p className="text-xl me-2.5 truncate">
+                            {inspectors[0].profile.name}
+                          </p>
+                        </div>
+                      )}
+                      {inspectors.map((inspector, idx) => {
+                        return (
+                          <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                            <AvatarImage
+                              src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                            />
+                            <AvatarFallback id={inspector.id.toString()}>
+                              {getInitials(inspector.profile.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        );
+                      })}
 
+                      {inspectors.length > 5 && (
+                        <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
+                          <AvatarImage src="" />
+                          <span className="absolute text-card-foreground text-base font-semibold">
+                            +{inspectors.length - 5}
+                          </span>
+                          <AvatarFallback id={"0"}></AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
+                  </div>
+                </PopoverTrigger>
+              </HoverCardTrigger>
+
+              <HoverCardContent
+                className="w-[300px] px-6 py-4"
+                zIndex={0}
+                side="bottom"
+                align="start"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <TooltipContent />
+              </HoverCardContent>
+              <PopoverContent
+                className="w-[300px] z-[100] px-6 py-4"
+                side="bottom"
+                align="start"
+                onInteractOutside={(e) => {
+                  const target = e.target as HTMLElement;
+                  const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
+                  const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+
+                  if (isUserTooltipContent || isUserTooltipTrigger) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <TooltipContent />
+              </PopoverContent>
+            </div>
+          </HoverCard>
+        </Popover>
       </CardContent>
       <CardFooter className="p-0 gap-0">
         <div className="flex gap-2 items-center w-full">

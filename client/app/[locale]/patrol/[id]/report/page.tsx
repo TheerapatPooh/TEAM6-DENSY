@@ -27,7 +27,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardFooter } from "@/components/ui/card";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -49,6 +49,7 @@ import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertCustom } from "@/components/alert-custom";
 import { UserTooltip } from "@/components/user-tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function Page() {
   const {
@@ -85,9 +86,61 @@ export default function Page() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
+  const [open, setOpen] = useState(false);
+  const openType = useRef<"hover" | "click" | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const triggerContainerRef = useRef<HTMLDivElement>(null);
 
   const inspectors = patrolUser;
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // เคลียร์ timeout ของ hover ทันทีเมื่อมีการคลิก
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    openType.current = "click";
+    setOpen(true); // เปิด Popover โดยตรง
+  };
 
+  const handleClose = () => {
+    setOpen(false);
+    openType.current = null;
+  };
+
+  const TooltipContent = () => {
+    return (
+      <div >
+        <div className="flex items-center justify-center gap-1">
+          <span className="material-symbols-outlined">person_search</span>
+          <p className="text-lg font-semibold">{t("InspectorList")}</p>
+        </div>
+        {inspectors.map((inspector, idx) => (
+          <div
+            key={idx}
+            className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
+          >
+            <UserTooltip user={inspector}>
+              <Avatar className="custom-shadow ms-[-10px] me-2.5">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                />
+                <AvatarFallback id={inspector.id.toString()}>
+                  {getInitials(inspector.profile.name)}
+                </AvatarFallback>
+              </Avatar>
+            </UserTooltip>
+            <p className="text-lg truncate">{inspector.profile.name}</p>
+          </div>
+        ))}
+        <div className="flex items-center justify-between w-full text-muted-foreground">
+          <p className="text-lg font-semibold">{t("Total")}</p>
+          <p className="text-lg font-semibold">{inspectors.length}</p>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="flex flex-col gap-4">
       {/* TabList และ Title */}
@@ -173,8 +226,10 @@ export default function Page() {
             </AlertDialog>
 
             <div className="flex flex-col h-full justify-start w-full">
-              <p className="text-2xl font-bold mb-1">{patrol.preset.title}</p>
-              <Progress value={calculateProgress()} />
+              <p className="text-2xl font-bold mb-1 text-start">{patrol.preset.title}</p>
+              <div className="w-[300px]">
+                <Progress value={calculateProgress()} />
+              </div>
             </div>
           </div>
           <div className="flex flex-row sm:w-full sm:justify-between lg:w-fit items-center gap-2">
@@ -223,15 +278,6 @@ export default function Page() {
               let disabled: boolean;
               let handleFunction: any;
               switch (patrol.status as patrolStatus) {
-                case "completed":
-                  variant = "outline";
-                  iconName = "ios_share";
-                  text = "Export";
-                  disabled = false;
-                  handleFunction = () => {
-                    // handleOpenExportPatrol()
-                  };
-                  break;
                 case "on_going":
                   variant = "primary";
                   iconName = "Check";
@@ -255,14 +301,14 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
+                  handleFunction = () => { };
                   break;
               }
               return (
@@ -306,105 +352,92 @@ export default function Page() {
                               </p>
                             </div>
 
-                            <HoverCard open={isHovered}>
-                              <HoverCardTrigger
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                            <Popover
+                              open={open}
+                              onOpenChange={(isOpen) => {
+                                if (!isOpen) handleClose()
+                              }}
+                            >
+                              <HoverCard
+                                open={open && openType.current === 'hover'}
+                                onOpenChange={(isHoverOpen) => {
+                                  if (!isHoverOpen && openType.current === 'hover') handleClose();
                                 }}
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
-                                asChild
                               >
-                                <div className="flex text-muted-foreground items-center">
-                                  <span className="material-symbols-outlined me-1">
-                                    person_search
-                                  </span>
-                                  {inspectors.length > 0 && (
-                                    <div className="flex items-center me-1 truncate max-w-[190px]">
-                                      <p className="text-xl me-2.5 truncate">
-                                        {inspectors[0].profile.name}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {inspectors.map((inspector, idx) => {
-                                    return (
-                                      <UserTooltip user={inspector}>
-                                        <Avatar
-                                          key={idx}
-                                          className="custom-shadow ms-[-10px]"
-                                        >
-                                          <AvatarImage
-                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
-                                          />
-                                          <AvatarFallback
-                                            id={inspector.profile.id.toString()}
-                                          >
-                                            {getInitials(
-                                              inspector.profile.name
-                                            )}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                      </UserTooltip>
-                                    );
-                                  })}
+                                <div
+                                  ref={triggerContainerRef}
+                                  onMouseEnter={handleMouseEnter}
+                                  onMouseLeave={handleMouseLeave}
+                                >
+                                  <HoverCardTrigger asChild>
+                                    <PopoverTrigger asChild>
+                                      <div className="cursor-pointer" onClick={handleClick}>
+                                        <div className="flex text-muted-foreground items-center">
+                                          <span className="material-symbols-outlined me-1">
+                                            person_search
+                                          </span>
+                                          {inspectors.length > 0 && (
+                                            <div className="flex items-center me-1 truncate max-w-[190px]">
+                                              <p className="text-xl me-2.5 truncate">
+                                                {inspectors[0].profile.name}
+                                              </p>
+                                            </div>
+                                          )}
+                                          {inspectors.map((inspector, idx) => {
+                                            return (
+                                              <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                                                <AvatarImage
+                                                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
+                                                />
+                                                <AvatarFallback id={inspector.id.toString()}>
+                                                  {getInitials(inspector.profile.name)}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                            );
+                                          })}
 
-                                  {inspectors.length > 5 && (
-                                    <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
-                                      <AvatarImage src="" />
-                                      <span className="absolute text-card-foreground text-[16px] font-semibold">
-                                        +{inspectors.length - 5}
-                                      </span>
-                                      <AvatarFallback id={"0"}></AvatarFallback>
-                                    </Avatar>
-                                  )}
-                                </div>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
-                                <div className="flex items-center justify-center gap-1">
-                                  <span className="material-symbols-outlined">
-                                    person_search
-                                  </span>
-                                  <p className="text-lg font-semibold">
-                                    {t("InspectorList")}
-                                  </p>
-                                </div>
-                                {inspectors.map((inspector, idx) => {
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
-                                    >
-                                      <UserTooltip user={inspector}>
-                                        <Avatar className="custom-shadow ms-[-10px] me-2.5">
-                                          <AvatarImage
-                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
-                                          />
-                                          <AvatarFallback
-                                            id={inspector.profile.id.toString()}
-                                          >
-                                            {getInitials(
-                                              inspector.profile.name
-                                            )}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                      </UserTooltip>
+                                          {inspectors.length > 5 && (
+                                            <Avatar className="custom-shadow flex items-center justify-center ms-[-10px]">
+                                              <AvatarImage src="" />
+                                              <span className="absolute text-card-foreground text-base font-semibold">
+                                                +{inspectors.length - 5}
+                                              </span>
+                                              <AvatarFallback id={"0"}></AvatarFallback>
+                                            </Avatar>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </PopoverTrigger>
+                                  </HoverCardTrigger>
 
-                                      <p className="text-lg">
-                                        {inspector.profile.name}
-                                      </p>
-                                    </div>
-                                  );
-                                })}
-                                <div className="flex items-center justify-between w-full text-muted-foreground">
-                                  <p className="text-lg font-semibold">
-                                    {t("Total")}
-                                  </p>
-                                  <p className="text-lg font-semibold">
-                                    {inspectors.length}
-                                  </p>
+                                  <HoverCardContent
+                                    className="w-[300px] px-6 py-4"
+                                    zIndex={0}
+                                    side="bottom"
+                                    align="start"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <TooltipContent />
+                                  </HoverCardContent>
+                                  <PopoverContent
+                                    className="w-[300px] z-[100] px-6 py-4"
+                                    side="bottom"
+                                    align="start"
+                                    onInteractOutside={(e) => {
+                                      const target = e.target as HTMLElement;
+                                      const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
+                                      const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+
+                                      if (isUserTooltipContent || isUserTooltipTrigger) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                  >
+                                    <TooltipContent />
+                                  </PopoverContent>
                                 </div>
-                              </HoverCardContent>
-                            </HoverCard>
+                              </HoverCard>
+                            </Popover>
 
                             <CardFooter className="p-0 gap-0">
                               <div className="flex gap-2 items-center w-full">

@@ -56,6 +56,7 @@ export default function Notification() {
     const [user, setUser] = useState<IUser>()
     const { socket, isConnected } = useSocket()
     const [unreadCount, setUnreadCount] = useState(0);
+    const isMounted = useRef(false);
 
     const router = useRouter()
 
@@ -180,15 +181,18 @@ export default function Notification() {
     }, [])
 
     useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+
         if (socket && isConnected && user?.id) {
             socket.emit('join_room', user.id);
             // ฟังก์ชันรับ event 'new_notification'
             socket.on('new_notification', (data: INotification) => {
-                setAllNotifications((prevNotifications) =>
-                    [...prevNotifications, data].sort((a, b) =>
-                        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                    )
-                );
+                setAllNotifications(prev => [...prev, data].sort((a, b) => 
+                    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                ));
                 const notification = formatMessage(data.message)
                 const toastData = getNotificationToast(notification.key)
 
@@ -208,7 +212,7 @@ export default function Notification() {
             };
         }
         fetchNotifications();
-    }, [socket, isConnected]);
+    }, [socket, isConnected, user?.id]);
 
     useEffect(() => {
         setUnreadCount(allNotifications.filter(notification => !notification.read).length);
