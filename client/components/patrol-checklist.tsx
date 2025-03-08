@@ -18,6 +18,7 @@
 
 import { Button } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
+import { useSocket } from "@/components/socket-provider";
 import {
   Accordion,
   AccordionContent,
@@ -54,6 +55,7 @@ interface IPatrolChecklistProps {
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
   handleResult: (result: IPatrolResult) => void;
+  handleUpdateResult: (result: IPatrolResult[]) => void;
   patrolResults: IPatrolResult[];
   response?: (defect: IDefect) => void;
 }
@@ -63,9 +65,11 @@ export default function PatrolChecklist({
   patrolChecklist,
   disabled,
   handleResult,
+  handleUpdateResult,
   patrolResults,
   response,
 }: IPatrolChecklistProps) {
+  const { socket } = useSocket();
   const [mounted, setMounted] = useState<boolean>(false);
   const [comments, setComments] = useState<{ [key: string]: string }>({});
   const [patrolResultState, setPatrolResultState] =
@@ -95,6 +99,7 @@ export default function PatrolChecklist({
         true,
         data
       );
+
       if (!message) {
         toast({
           variant: "error",
@@ -108,24 +113,36 @@ export default function PatrolChecklist({
           description: a("PatrolCreateCommentDescription"),
         });
       }
-      fetchRealtimeComment(comment, patrolResultId);
+
+      const newPatrolResultState = patrolResultState.map((pr) => {
+        if (pr.id === patrolResultId) {
+          const updatedPatrolResult = {
+            ...pr,
+            comments: [...(pr.comments || []), comment],
+          };
+      
+          if (socket && pr.patrolId) {
+            socket.emit("update_patrol_result", {
+              patrolId: pr.patrolId,
+              result: updatedPatrolResult,
+            });
+          }
+      
+          return updatedPatrolResult;
+        }
+        return pr;
+      });
+      
+
+     
+
+      setPatrolResultState(newPatrolResultState);
+      console.log(newPatrolResultState)
+
+      await handleUpdateResult(newPatrolResultState);
     } catch (error) {
       console.error("Error creating Comment:", error);
     }
-  };
-
-  const fetchRealtimeComment = (comment: IComment, patrolResultId: number) => {
-    setPatrolResultState((prevState) =>
-      prevState.map((pr) => {
-        if (pr.id === patrolResultId) {
-          return {
-            ...pr,
-            comments: pr.comments ? [...pr.comments, comment] : [comment],
-          };
-        }
-        return pr;
-      })
-    );
   };
 
   const handleCommentChange = (
@@ -311,7 +328,9 @@ export default function PatrolChecklist({
                                         <AvatarFallback
                                           id={supervisor.id.toString()}
                                         >
-                                          {getInitials(supervisor.profile?.name)}
+                                          {getInitials(
+                                            supervisor.profile?.name
+                                          )}
                                         </AvatarFallback>
                                       </Avatar>
                                     </UserTooltip>
@@ -328,21 +347,35 @@ export default function PatrolChecklist({
                                       ? "success"
                                       : "secondary"
                                   }
-                                  className={`w-[155px] ${existingResult?.status === null
-                                    ? "bg-secondary text-card-foreground"
-                                    : ""
-                                    } ${existingResult?.status === true
+                                  className={`w-[155px] ${
+                                    existingResult?.status === null
+                                      ? "bg-secondary text-card-foreground"
+                                      : ""
+                                  } ${
+                                    existingResult?.status === true
                                       ? "bg-green hover:bg-green text-card"
                                       : ""
-                                    } ${existingResult?.status === false
+                                  } ${
+                                    existingResult?.status === false
                                       ? "bg-secondary hover:bg-secondary"
                                       : ""
-                                    } ${disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)
+                                  } ${
+                                    disabled ||
+                                    (existingResult?.defects &&
+                                      existingResult.defects.length > 0) ||
+                                    (existingResult?.comments &&
+                                      existingResult.comments.length > 0)
                                       ? " cursor-not-allowed opacity-50"
                                       : ""
-                                    }
+                                  }
                                                                     `}
-                                  disabled={disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)}
+                                  disabled={
+                                    disabled ||
+                                    (existingResult?.defects &&
+                                      existingResult.defects.length > 0) ||
+                                    (existingResult?.comments &&
+                                      existingResult.comments.length > 0)
+                                  }
                                   onClick={() => {
                                     if (
                                       (patrolStatus === "on_going" &&
@@ -370,21 +403,35 @@ export default function PatrolChecklist({
                                       ? "fail"
                                       : "secondary"
                                   }
-                                  className={`w-[155px] ${existingResult?.status === null
-                                    ? "bg-secondary text-card-foreground"
-                                    : ""
-                                    } ${existingResult?.status === false
+                                  className={`w-[155px] ${
+                                    existingResult?.status === null
+                                      ? "bg-secondary text-card-foreground"
+                                      : ""
+                                  } ${
+                                    existingResult?.status === false
                                       ? "bg-destructive hover:bg-destructive text-card"
                                       : ""
-                                    } ${existingResult?.status === true
+                                  } ${
+                                    existingResult?.status === true
                                       ? "bg-secondary hover:bg-secondary"
                                       : ""
-                                    } ${disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)
+                                  } ${
+                                    disabled ||
+                                    (existingResult?.defects &&
+                                      existingResult.defects.length > 0) ||
+                                    (existingResult?.comments &&
+                                      existingResult.comments.length > 0)
                                       ? " cursor-not-allowed opacity-50"
                                       : ""
-                                    }
+                                  }
                                                                     `}
-                                  disabled={disabled || (existingResult?.defects && existingResult.defects.length > 0) || (existingResult?.comments && existingResult.comments.length > 0)}
+                                  disabled={
+                                    disabled ||
+                                    (existingResult?.defects &&
+                                      existingResult.defects.length > 0) ||
+                                    (existingResult?.comments &&
+                                      existingResult.comments.length > 0)
+                                  }
                                   onClick={() => {
                                     if (
                                       (patrolStatus === "on_going" &&
@@ -427,16 +474,17 @@ export default function PatrolChecklist({
                                     .flatMap((pr) => pr.comments ?? [])
                                     .map((comment: IComment) =>
                                       comment.patrolResultId ===
-                                        existingResult.id ? (
+                                      existingResult.id ? (
                                         <div
                                           key={comment.timestamp}
                                           className="flex flex-row items-center bg-secondary rounded-md w-full px-6 py-4 gap-2"
                                         >
                                           <div
-                                            className={`flex justify-center items-center w-3 h-3 rounded-full ${!comment.status
-                                              ? "bg-primary"
-                                              : "bg-green"
-                                              }`}
+                                            className={`flex justify-center items-center w-3 h-3 rounded-full ${
+                                              !comment.status
+                                                ? "bg-primary"
+                                                : "bg-green"
+                                            }`}
                                           />
                                           <p className="text-muted-foreground text-xl font-semibold">
                                             {formatTime(
@@ -445,7 +493,9 @@ export default function PatrolChecklist({
                                             )}
                                           </p>
                                           <div className="flex items-end">
-                                            <TextTooltip object={comment.message} >
+                                            <TextTooltip
+                                              object={comment.message}
+                                            >
                                               <p className="text-xl truncate w-[500px]">
                                                 {comment.message}
                                               </p>
@@ -454,6 +504,15 @@ export default function PatrolChecklist({
                                         </div>
                                       ) : null
                                     )}
+                                  <div>
+                                    {existingResult?.comments?.length > 0 ||
+                                    existingResult?.defects?.length > 0 ? (
+                                      null
+                                    ) : (
+                                      <div className="text-destructive">{a("NoCommentsOrDeFectsFound")}</div>
+                                    )}
+                                  </div>
+
                                   <Textarea
                                     key={`${item.id}-${itemZone.zone.id}`}
                                     className="min-h-[120px] bg-secondary border-none text-xl"
@@ -461,7 +520,7 @@ export default function PatrolChecklist({
                                     disabled={disabled}
                                     value={
                                       comments[
-                                      `${item.id}-${itemZone.zone.id}`
+                                        `${item.id}-${itemZone.zone.id}`
                                       ] || ""
                                     }
                                     onChange={(e) =>
@@ -482,7 +541,7 @@ export default function PatrolChecklist({
                                     onClick={() => {
                                       handleCreateComment(
                                         comments[
-                                        `${item.id}-${itemZone.zone.id}`
+                                          `${item.id}-${itemZone.zone.id}`
                                         ],
                                         existingResult.id,
                                         supervisor.id

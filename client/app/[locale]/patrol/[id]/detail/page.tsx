@@ -70,6 +70,7 @@ export default function Page() {
     itemCounts,
     toggleLock,
     calculateProgress,
+    handleUpdateResult,
     handleResult,
     fetchRealtimeData,
     handleStartPatrol,
@@ -573,6 +574,7 @@ export default function Page() {
             {user?.profile.name === pc.inspector.profile.name ? (
               <PatrolChecklist
                 handleResult={handleResult}
+                handleUpdateResult={handleUpdateResult}
                 patrolStatus={patrol.status}
                 patrolChecklist={pc}
                 disabled={patrol.status === "on_going" && !lock ? false : true}
