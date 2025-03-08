@@ -323,7 +323,7 @@ export default function page() {
                           onMouseLeave={() => handleMouseLeave("export")}
                           asChild
                         >
-                          <div className="flex text-muted-foreground items-center">
+                          <div className="flex text-muted-foreground items-center cursor-pointer">
                             <span className="material-symbols-outlined me-1">
                               person_search
                             </span>
@@ -364,7 +364,7 @@ export default function page() {
                         <HoverCardContent
                           side="bottom"
                           align="start"
-                          className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow"
+                          className="flex flex-col w-[300px] border-none gap-4 px-6 py-4 custom-shadow"
                         >
                           <div className="flex items-center justify-center gap-1">
                             <span className="material-symbols-outlined">
@@ -376,27 +376,22 @@ export default function page() {
                           </div>
                           {inspectors.map((inspector, idx) => {
                             return (
-                              <UserTooltip user={inspector}>
-                                <div
-                                  key={idx}
-                                  className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
-                                >
+                              <div
+                                key={idx}
+                                className="flex items-center cursor-pointer w-full py-2 gap-1 border-b-2 border-secondary"
+                              >
+                                <UserTooltip user={inspector}>
                                   <Avatar className="custom-shadow ms-[-10px] me-2.5">
                                     <AvatarImage
-                                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector.profile.image?.path}`}
+                                      src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                     />
-                                    <AvatarFallback
-                                      id={inspector.id.toString()}
-                                    >
+                                    <AvatarFallback id={inspector.id.toString()}>
                                       {getInitials(inspector.profile.name)}
                                     </AvatarFallback>
                                   </Avatar>
-
-                                  <p className="text-lg">
-                                    {inspector.profile.name}
-                                  </p>
-                                </div>
-                              </UserTooltip>
+                                </UserTooltip>
+                                <p className="text-lg truncate">{inspector.profile.name}</p>
+                              </div>
                             );
                           })}
                           <div className="flex items-center justify-between w-full text-muted-foreground">
@@ -519,7 +514,7 @@ export default function page() {
                   onMouseLeave={() => handleMouseLeave("overview")}
                   asChild
                 >
-                  <div className="flex text-muted-foreground items-center">
+                  <div className="flex text-muted-foreground cursor-pointer items-center">
                     <span className="material-symbols-outlined me-1">
                       person_search
                     </span>
@@ -554,7 +549,11 @@ export default function page() {
                     )}
                   </div>
                 </HoverCardTrigger>
-                <HoverCardContent className="flex flex-col w-fit border-none gap-4 px-6 py-4 custom-shadow">
+                <HoverCardContent
+                  side="bottom"
+                  align="start"
+                  className="flex flex-col w-[300px] border-none gap-4 px-6 py-4 custom-shadow"
+                >
                   <div className="flex items-center justify-center gap-1">
                     <span className="material-symbols-outlined">
                       person_search
@@ -565,11 +564,11 @@ export default function page() {
                   </div>
                   {inspectors.map((inspector, idx) => {
                     return (
-                      <UserTooltip user={inspector}>
-                        <div
-                          key={idx}
-                          className="flex items-center w-full py-2 gap-1 border-b-2 border-secondary"
-                        >
+                      <div
+                        key={idx}
+                        className="flex items-center cursor-pointer w-full py-2 gap-1 border-b-2 border-secondary"
+                      >
+                        <UserTooltip user={inspector}>
                           <Avatar className="custom-shadow ms-[-10px] me-2.5">
                             <AvatarImage
                               src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
@@ -578,14 +577,18 @@ export default function page() {
                               {getInitials(inspector.profile.name)}
                             </AvatarFallback>
                           </Avatar>
-                          <p className="text-lg">{inspector.profile.name}</p>
-                        </div>
-                      </UserTooltip>
+                        </UserTooltip>
+                        <p className="text-lg truncate">{inspector.profile.name}</p>
+                      </div>
                     );
                   })}
                   <div className="flex items-center justify-between w-full text-muted-foreground">
-                    <p className="text-lg font-semibold">{t("Total")}</p>
-                    <p className="text-lg font-semibold">{inspectors.length}</p>
+                    <p className="text-lg font-semibold">
+                      {t("Total")}
+                    </p>
+                    <p className="text-lg font-semibold">
+                      {inspectors.length}
+                    </p>
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -778,7 +781,7 @@ export default function page() {
                                     </AvatarFallback>
                                   </Avatar>
 
-                                  <p className="text-card-foreground text-lg xl:block">
+                                  <p className="text-card-foreground text-lg xl:block truncate">
                                     {defect.user.profile.name}
                                   </p>
                                 </div>

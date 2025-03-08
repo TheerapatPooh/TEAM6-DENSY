@@ -138,7 +138,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
         </div>
 
         {/* User Info Section */}
-        <div className="text-card-foreground flex flex-col w-full">
+        <div className="text-card-foreground flex flex-col w-[280px]">
           {user.profile.name ? (
             <div className="flex flex-col gap-2">
               <div className="text-lg font-semibold truncate w-full">

@@ -54,7 +54,7 @@ const UserDropdown: React.FC<IUserDropdown> = ({
           variant="outline"
           className={`w-full h-full justify-between bg-${color} hover:bg-background border-none`}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full">
             {selectUser && (
               <UserTooltip user={selectUser}>
                 <Avatar>
@@ -67,17 +67,16 @@ const UserDropdown: React.FC<IUserDropdown> = ({
                 </Avatar>
               </UserTooltip>
             )}
-            <p className="font-normal text-muted-foreground">
+            <p className="font-normal text-start text-muted-foreground truncate w-full">
               {selectUser ? selectUser.profile.name : t("SelectAUser")}
             </p>
+            <span
+              className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"
+                }`}
+            >
+              expand_more
+            </span>
           </div>
-          <span
-            className={`material-symbols-outlined text-muted-foreground inline-block transition-transform duration-300 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
-          >
-            expand_more
-          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className={`p-0`}>
@@ -99,7 +98,7 @@ const UserDropdown: React.FC<IUserDropdown> = ({
                     </AvatarFallback>
                   </Avatar>
                 </UserTooltip>
-                <p className="font-normal text-lg text-muted-foreground">
+                <p className="font-normal text-lg truncate text-muted-foreground">
                   {user.profile.name}
                 </p>
               </DropdownMenuItem>

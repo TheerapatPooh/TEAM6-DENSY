@@ -280,9 +280,9 @@ export async function createNotification({ message, type, url, userId }: any) {
     });
 
     // Send an email notification if the user's email exists
-    if (user?.email) {
-      const emailSubject = 'New Notification';
-      const emailMessage = `You have a new notification: ${message}. Check it here: ${url}`;
+    if (user?.email && isEmailNotificationRequired(message)) {
+      const emailSubject = getEmailSubject(message);
+      const emailMessage = getNotificationMessage(message, url);
 
       await sendEmail(user.email, emailSubject, emailMessage);
     }
@@ -297,6 +297,70 @@ export async function createNotification({ message, type, url, userId }: any) {
   } catch (error) {
     console.error("Error creating notification", error);
   }
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงหัวข้ออีเมลตามประเภทของการแจ้งเตือน
+ * Input: 
+ * - message: string (ข้อความที่ระบุประเภทของการแจ้งเตือน เช่น 'report_defect', 'defect_completed', หรือ 'defect_pending_inspection')
+ * Output: 
+ * - string (หัวข้ออีเมลที่เกี่ยวข้องกับประเภทของการแจ้งเตือน)
+ */
+function getEmailSubject(message: string): string {
+  const subjects: Record<string, string> = {
+    "report_defect": "New Defect Reported - Immediate Action Required",
+    "defect_completed": "Defect Resolved - Inspection Passed",
+    "defect_pending_inspection": "Defect Rework Required - Previous Fix Not Approved",
+  };
+
+  return subjects[message] || "New Notification";
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับตรวจสอบว่าอีเมลควรถูกส่งหรือไม่ตามประเภทของการแจ้งเตือน
+ * Input: 
+ * - message: string (ประเภทของการแจ้งเตือน เช่น 'defect_completed', 'defect_pending_inspection', หรือ 'report_defect')
+ * Output: 
+ * - boolean (ค่าคืนที่เป็น true หากอีเมลควรถูกส่ง, false หากไม่ควรส่ง)
+ */
+function isEmailNotificationRequired(message: string): boolean {
+  return ["defect_completed", "defect_pending_inspection", "report_defect"].includes(message);
+}
+
+/**
+ * คำอธิบาย: ฟังก์ชันสำหรับดึงข้อความแจ้งเตือนตามประเภทของการแจ้งเตือน
+ * Input: 
+ * - message: string (ประเภทของการแจ้งเตือน เช่น 'report_defect', 'defect_completed', หรือ 'defect_pending_inspection')
+ * - url: string (URL สำหรับการเข้าถึงข้อมูลเพิ่มเติม)
+ * Output: 
+ * - string (ข้อความแจ้งเตือนที่รวมทั้งภาษาอังกฤษและภาษาไทย พร้อมลิงก์เพื่อเชื่อมต่อ)
+ */
+function getNotificationMessage(message: string, url: string): string {
+  const messages: Record<string, { en: string; th: string }> = {
+    "report_defect": {
+      en: "An issue has been reported in your assigned zone. Please check immediately.",
+      th: "มีการแจ้งปัญหาในโซนที่คุณรับผิดชอบ กรุณาตรวจสอบทันที",
+    },
+    "defect_completed": {
+      en: "The defect has been successfully resolved. Please review the completed work.",
+      th: "ปัญหาได้รับการแก้ไขเสร็จสมบูรณ์แล้ว กรุณาตรวจสอบผลการแก้ไข",
+    },
+    "defect_pending_inspection": {
+      en: "The defect has not been approved. Please revise and resubmit for inspection.",
+      th: "ปัญหายังไม่ได้รับการอนุมัติ กรุณาดำเนินการแก้ไขและส่งตรวจใหม่",
+    },
+  };
+
+  const selectedMessage = messages[message];
+  if (!selectedMessage) return "You have a new notification.";
+
+  return `
+  ${selectedMessage.en}<br><br>
+  Check it here: ${process.env.CLIENT_URL}/en${url}<br><br>
+  <hr><br><br>
+  ${selectedMessage.th}<br><br>
+  คลิกที่นี่: ${process.env.CLIENT_URL}/th${url}
+`;
 }
 
 /**
@@ -465,11 +529,28 @@ const transporter = nodemailer.createTransport({
 **/
 export async function sendEmail(email: string, subject: string, message: string) {
   try {
+    const logoUrl = "https://drive.google.com/uc?export=view&id=1DpK74AifxmbKcDjZQ7KM0_Qnu1svq3Oi"
+
+    const htmlMessage = `
+      <html>
+        <body style="text-align: center; font-family: Arial, sans-serif;">
+          <div style="margin-bottom: 20px;">
+            <img src="${logoUrl}" alt="Logo" style="max-width: 200px;"/>
+          </div>
+          
+          <div>
+            <p>${message}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: subject,
       text: message,
+      html: htmlMessage
     });
   } catch (error) {
     console.error('Error sending email:', error);
@@ -869,11 +950,15 @@ export async function sendEmailResetPassword(req: Request, res: Response) {
   });
 
   // สร้างลิงก์ reset password
-  const resetLink = `${process.env.CLIENT_URL}/en/login/forgot-password?token=${token}`;
+  const resetLinkEN = `${process.env.CLIENT_URL}/en/login/forgot-password?token=${token}`;
+  const resetLinkTH = `${process.env.CLIENT_URL}/th/login/forgot-password?token=${token}`;
 
   // ส่งอีเมล
   const emailSubject = "Reset Your Password";
-  const emailMessage = `Click the link to reset your password: ${resetLink}`;
+  const emailMessage =
+    `Click the link to reset your password: ${resetLinkEN}<hr>
+   คลิกลิงก์เพื่อตั้งรหัสผ่านใหม่ของคุณ: ${resetLinkTH}
+  `;
 
   await sendEmail(email, emailSubject, emailMessage);
 

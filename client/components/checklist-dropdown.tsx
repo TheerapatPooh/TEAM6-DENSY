@@ -89,7 +89,7 @@ export function ChecklistDropdown({
                     </Avatar>
                   </UserTooltip>
                 ) : null}
-                <p className="font-semibold text-lg text-muted-foreground">
+                <p className="font-semibold text-lg text-muted-foreground truncate">
                   {selectUser
                     ? selectUser.profile.name
                     : t("SelectAnInspector")}

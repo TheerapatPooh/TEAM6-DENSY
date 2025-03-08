@@ -901,7 +901,6 @@ export default function Page() {
               </AlertDialogHeader>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-muted-foreground">
-                  {" "}
                   {t("Checklist")}
                 </p>
                 <div className="grid grid-cols-1">

@@ -17,6 +17,7 @@ interface IPatrolContext {
     lock: boolean;
     isAlertOpen: boolean;
     handleResult: (patrolResult: IPatrolResult) => void;
+    handleUpdateResult: (patrolResult: IPatrolResult[]) => void;
     toggleLock: () => void;
     handleStartPatrol: () => void;
     handleFinishPatrol: () => void;
@@ -210,9 +211,8 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     const calculateProgress = () => {
         if (!patrol) return 0;
         const checkedResults = patrolResults.filter(
-            (res) => res.status !== null
+            (res) => res.status !== null && (res.status === false ? (res.comments?.length > 0 || res.defects?.length > 0) : true)
         ).length;
-
         if (totalResults === 0) return 0;
         return (checkedResults / totalResults) * 100;
     };
@@ -246,6 +246,10 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         });
     };
 
+    const handleUpdateResult =(patrolResult: IPatrolResult[]) => {
+        setPatrolResults(patrolResult)
+    };
+    
     const handleStartPatrol = async () => {
         setIsAlertOpen(false)
 
@@ -491,6 +495,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
                 patrol,
                 patrolResults,
                 // results,
+                handleUpdateResult,
                 user,
                 lock,
                 isAlertOpen,
