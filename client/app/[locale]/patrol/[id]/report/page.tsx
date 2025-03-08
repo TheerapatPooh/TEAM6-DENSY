@@ -140,7 +140,7 @@ export default function Page() {
       </div>
     );
   };
-  
+
   return (
     <div className="flex flex-col gap-4">
       {/* TabList และ Title */}
@@ -278,6 +278,13 @@ export default function Page() {
               let disabled: boolean;
               let handleFunction: any;
               switch (patrol.status as patrolStatus) {
+                case "completed":
+                  variant = "outline";
+                  iconName = "ios_share";
+                  text = "Export";
+                  disabled = false;
+                  handleFunction = () => { };
+                  break;
                 case "on_going":
                   variant = "primary";
                   iconName = "Check";

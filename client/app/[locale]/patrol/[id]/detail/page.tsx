@@ -70,7 +70,6 @@ export default function Page() {
     itemCounts,
     toggleLock,
     calculateProgress,
-    handleUpdateResult,
     handleResult,
     fetchRealtimeData,
     handleStartPatrol,
@@ -140,7 +139,7 @@ export default function Page() {
       </div>
     );
   };
-  
+
   return (
     <div className="flex flex-col gap-4 overflow-hidden">
       {/* TabList และ Title */}
@@ -278,6 +277,13 @@ export default function Page() {
               let disabled: boolean;
               let handleFunction: any;
               switch (patrol.status as patrolStatus) {
+                case "completed":
+                  variant = "outline";
+                  iconName = "ios_share";
+                  text = "Export";
+                  disabled = false;
+                  handleFunction = () => { };
+                  break;
                 case "on_going":
                   variant = "primary";
                   iconName = "Check";
@@ -574,7 +580,6 @@ export default function Page() {
             {user?.profile.name === pc.inspector.profile.name ? (
               <PatrolChecklist
                 handleResult={handleResult}
-                handleUpdateResult={handleUpdateResult}
                 patrolStatus={patrol.status}
                 patrolChecklist={pc}
                 disabled={patrol.status === "on_going" && !lock ? false : true}
