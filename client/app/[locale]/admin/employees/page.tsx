@@ -175,7 +175,7 @@ export default function Page() {
   const form = useForm();
   const { handleSubmit } = form;
 
-  const onSubmit = () => {};
+  const onSubmit = () => { };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -254,11 +254,11 @@ export default function Page() {
       const updatedUsers = prevUsers.map((user) =>
         user.id === userId
           ? {
-              ...user,
-              ...(data.role && { role: data.role }), // Update role if needed
-              ...(password && { password: data.password }), // Update password if needed
-              active: data.active, // Update active status
-            }
+            ...user,
+            ...(data.role && { role: data.role }), // Update role if needed
+            ...(password && { password: data.password }), // Update password if needed
+            active: data.active, // Update active status
+          }
           : user
       );
 
@@ -792,17 +792,16 @@ export default function Page() {
                   <DropdownMenuCheckboxItem
                     key={role.value}
                     checked={selectedRoles.includes(role.value)}
-                    className={`text-base ${
-                      selectedRoles.includes(role.value) ? "bg-muted/50" : ""
-                    }`}
+                    className={`text-base ${selectedRoles.includes(role.value) ? "bg-muted/50" : ""
+                      }`}
                     onSelect={(e) => {
                       e.preventDefault();
                       // Toggle role selection in the array
                       setSelectedRoles((prevSelectedRoles) =>
                         prevSelectedRoles.includes(role.value)
                           ? prevSelectedRoles.filter(
-                              (item) => item !== role.value
-                            )
+                            (item) => item !== role.value
+                          )
                           : [...prevSelectedRoles, role.value]
                       );
                     }}
@@ -811,15 +810,15 @@ export default function Page() {
                       shape="square"
                       variant={
                         role.variant as
-                          | "blue"
-                          | "red"
-                          | "yellow"
-                          | "green"
-                          | "default"
-                          | "secondary"
-                          | "mint"
-                          | "orange"
-                          | "purple"
+                        | "blue"
+                        | "red"
+                        | "yellow"
+                        | "green"
+                        | "default"
+                        | "secondary"
+                        | "mint"
+                        | "orange"
+                        | "purple"
                       }
                       iconName={role.icon}
                       showIcon={true}
@@ -837,9 +836,8 @@ export default function Page() {
                     <DropdownMenuRadioItem
                       key={status.value}
                       value={status.value}
-                      className={`text-base ${
-                        selectedStatus === status.value ? "bg-muted/50" : ""
-                      }`}
+                      className={`text-base ${selectedStatus === status.value ? "bg-muted/50" : ""
+                        }`}
                       onSelect={(e) => {
                         if (
                           status.value === "true" ||
@@ -854,15 +852,15 @@ export default function Page() {
                       <BadgeCustom
                         variant={
                           status.variant as
-                            | "blue"
-                            | "red"
-                            | "yellow"
-                            | "green"
-                            | "default"
-                            | "secondary"
-                            | "mint"
-                            | "orange"
-                            | "purple"
+                          | "blue"
+                          | "red"
+                          | "yellow"
+                          | "green"
+                          | "default"
+                          | "secondary"
+                          | "mint"
+                          | "orange"
+                          | "purple"
                         }
                       >
                         <div className="flex flex-row justify-center items-center gap-2 w-[105px]">
@@ -894,7 +892,7 @@ export default function Page() {
         {/* Header */}
         {sortedUser.length > 0 ? (
           <div className="bg-secondary rounded-lg border-none">
-          <Table className="overflow-hidden min-h-[calc(100vh-860px)]">
+            <Table className="overflow-hidden min-h-[calc(100vh-860px)]">
               <TableHeader>
                 <TableRow className="grid grid-cols-12 w-full">
                   <TableHead className="sm:col-span-1 lg:col-span-1">
@@ -916,13 +914,13 @@ export default function Page() {
                 <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-300px)]">
                   {sortedUser.map((employee, index) => (
                     <TableRow key={index} className="grid grid-cols-12">
-                      <TableCell className="sm:text-sm lg:text-base sm:col-span-1 lg:col-span-1 flex items-center  items-center min-w-0">
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-1 lg:col-span-1 flex items-center min-w-0">
                         {employee.id}
                       </TableCell>
-                      <TableCell className="sm:text-sm lg:text-base sm:col-span-4 lg:col-span-3 flex  items-center">
-                        <div className="flex items-center gap-2">
+                      <TableCell className="sm:text-sm lg:text-base sm:col-span-4 lg:col-span-3 flex items-center">
+                        <div className="flex items-center gap-2 w-full">
                           <UserTooltip user={employee}>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 md:w-[220px] xl:w-[440px]">
                               <Avatar className="custom-shadow h-[35px] w-[35px]">
                                 <AvatarImage
                                   src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${employee.profile.image?.path}`}
@@ -931,19 +929,16 @@ export default function Page() {
                                   {getInitials(employee.profile.name)}
                                 </AvatarFallback>
                               </Avatar>
-
-                              <div>
-                                {employee.profile.name ? (
-                                  employee.profile.name
-                                ) : (
-                                  <div className="text-destructive">
-                                    {employee.username}
-                                    <div className="text-[14px]">
-                                      {t("NoProfileProvided")}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+                              {employee.profile.name ? (
+                                <p className="truncate">
+                                  {employee.profile.name}
+                                </p>
+                              ) : (
+                                <p className="text-[14px] text-destructive truncate">
+                                  {employee.username}
+                                  {t("NoProfileProvided")}
+                                </p>
+                              )}
                             </div>
                           </UserTooltip>
                         </div>
@@ -1032,7 +1027,7 @@ export default function Page() {
                                       className="bg-secondary cursor-not-allowed "
                                       showIcon={true}
                                       iconName="person"
-                                      onChange={() => {}}
+                                      onChange={() => { }}
                                       value={""}
                                       placeholder={employee.username}
                                     />

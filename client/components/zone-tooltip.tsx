@@ -119,13 +119,13 @@ export function ZoneTooltip({ zonesName,zones, children }: IZoneTooltip) {
 
   const TooltipContent =({ object }: { object: any }) => {
     return (
-      <div className="bg-card custom-shadow rounded-md p-4 w-fit flex flex-col items-start justify-start">
+      <div className="custom-shadow rounded-md px-2.5 py-1.5 w-fit flex flex-col items-start justify-start">
         <h3 className="text-sm font-semibold text-muted-foreground mb-2">
           {t("Zone")}
         </h3>
-        <ScrollArea className="h-32 rounded-md bg-card">
+        <ScrollArea className="h-32 rounded-md">
           {(zonesName ?? zones)?.map((zone, index, arr) => (
-            <div key={index} className="text-sm text-foreground text-left">
+            <div key={index} className="text-sm text-left">
               -{" "}
               <span className={zone.userId || zonesName ? "" : "text-destructive"}>
               {z(zone.name || zone)}
@@ -160,7 +160,7 @@ export function ZoneTooltip({ zonesName,zones, children }: IZoneTooltip) {
           </HoverCardTrigger>
 
           <HoverCardContent
-            className="w-full p-0 "
+            className="w-full p-0 bg-card-foreground text-card"
             zIndex={9999}
             side="bottom"
             align="start"
@@ -168,7 +168,7 @@ export function ZoneTooltip({ zonesName,zones, children }: IZoneTooltip) {
           >
           </HoverCardContent>
           <PopoverContent
-            className="w-full p-0"
+            className="w-full p-0 bg-card-foreground text-card"
             side="bottom"
             align="start"
             onInteractOutside={(e) => {
