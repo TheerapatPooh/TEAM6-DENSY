@@ -55,7 +55,6 @@ interface IPatrolChecklistProps {
   patrolChecklist: IPatrolChecklist;
   disabled: boolean;
   handleResult: (result: IPatrolResult) => void;
-  handleUpdateResult: (result: IPatrolResult[]) => void;
   patrolResults: IPatrolResult[];
   response?: (defect: IDefect) => void;
 }
@@ -65,7 +64,6 @@ export default function PatrolChecklist({
   patrolChecklist,
   disabled,
   handleResult,
-  handleUpdateResult,
   patrolResults,
   response,
 }: IPatrolChecklistProps) {
@@ -127,19 +125,16 @@ export default function PatrolChecklist({
               result: updatedPatrolResult,
             });
           }
+          handleResult(updatedPatrolResult);
+
       
           return updatedPatrolResult;
         }
         return pr;
       });
       
-
-     
-
       setPatrolResultState(newPatrolResultState);
-      console.log(newPatrolResultState)
 
-      await handleUpdateResult(newPatrolResultState);
     } catch (error) {
       console.error("Error creating Comment:", error);
     }
