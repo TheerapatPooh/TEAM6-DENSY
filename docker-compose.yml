@@ -27,7 +27,7 @@ services:
       - ./server/.env
       - ./client/.env
     volumes:
-      - ./server/uploads:/app/server/uploads
+      - ${DOCKER_HOST_PATH}/server/uploads:/app/server/uploads
     depends_on:
       - db
     networks:

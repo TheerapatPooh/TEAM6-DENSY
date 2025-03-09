@@ -19,14 +19,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # ติดตั้ง Docker Compose
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose && \
-    ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-
-# หรือถ้าต้องการใช้ Docker Compose แบบ Plugin
-RUN mkdir -p /usr/local/lib/docker/cli-plugins/ && \
-    curl -SL https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose && \
-    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+RUN curl -SL https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
 
 # ติดตั้ง Node.js และ npm
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
