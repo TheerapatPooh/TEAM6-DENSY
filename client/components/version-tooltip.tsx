@@ -1,11 +1,11 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatTime, getInitials } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLocale, useTranslations } from "next-intl";
-import { UserTooltip } from "./user-tooltip";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { UserTooltip } from "@/components/user-tooltip";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export interface IUserTooltip {
   object: any;

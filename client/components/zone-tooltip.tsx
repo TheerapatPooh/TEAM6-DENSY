@@ -8,9 +8,9 @@
 import { ReactNode, useEffect, useRef } from "react";
 import { IZone } from "@/app/type";
 import { useTranslations } from "next-intl";import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { ScrollArea } from "./ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface IZoneTooltip {
   zonesName?: IZone[] | string[];

@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export interface IUserTooltip {
   object: any;

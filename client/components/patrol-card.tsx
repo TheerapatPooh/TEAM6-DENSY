@@ -50,11 +50,11 @@ import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import BadgeCustom from "@/components/badge-custom";
-import { UserTooltip } from "./user-tooltip";
-import { PopoverContent, PopoverTrigger } from "./ui/popover";
+import { UserTooltip } from "@/components/user-tooltip";
+import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Popover } from "@radix-ui/react-popover";
-import { TextTooltip } from "./text-tooltip";
-import { useSocket } from "./socket-provider";
+import { TextTooltip } from "@/components/text-tooltip";
+import { useSocket } from "@/components/socket-provider";
 
 export interface IPatrolCard {
   id: number;

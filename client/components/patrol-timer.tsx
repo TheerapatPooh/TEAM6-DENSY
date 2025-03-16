@@ -12,7 +12,7 @@
 
 'use client'
 import { useEffect, useState } from "react";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface IPatrolTimer {
     days: string;

@@ -24,7 +24,7 @@ import { IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 
 interface IUserDropdown {
   users: IUser[];

@@ -8,7 +8,7 @@
  **/
 
 import React from "react";
-import BadgeCustom from "./badge-custom";
+import BadgeCustom from "@/components/badge-custom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   formatTime,
@@ -19,7 +19,7 @@ import {
 import { IDefect, itemType } from "@/app/type";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function Defect({ defect }: { defect: IDefect }) {
   const s = useTranslations("Status");

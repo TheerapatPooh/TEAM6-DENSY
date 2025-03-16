@@ -31,7 +31,7 @@ import { fetchData, logout } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IUser } from "@/app/type";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function ProfileDropdown() {
   const t = useTranslations("General");

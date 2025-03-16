@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { buttonVariants } from "./ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export interface IAlertCustom {
   title: string;

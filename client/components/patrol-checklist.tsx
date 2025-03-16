@@ -40,13 +40,13 @@ import React, { useState, useEffect } from "react";
 import { fetchData, getInitials, getItemTypeVariant } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatTime } from "@/lib/utils";
-import AlertDefect from "./alert-defect";
+import AlertDefect from "@/components/alert-defect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
-import { UserTooltip } from "./user-tooltip";
-import { TextTooltip } from "./text-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
+import { TextTooltip } from "@/components/text-tooltip";
 
 interface IPatrolChecklistProps {
   patrolStatus: patrolStatus;

@@ -39,11 +39,11 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./ui/tooltip";
-import { Skeleton } from "./ui/skeleton";
+} from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 interface IAlertDefect {
   userId?: number;
   defect?: IDefect;

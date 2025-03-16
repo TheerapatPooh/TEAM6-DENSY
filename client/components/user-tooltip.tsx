@@ -7,14 +7,14 @@
 
 import { ReactNode, useEffect, useRef } from "react";
 import { IUser } from "@/app/type";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials, getUserVariant } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
-import BadgeCustom from "./badge-custom";
+import BadgeCustom from "@/components/badge-custom";
 import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 export interface IUserTooltip {
   user: IUser;
