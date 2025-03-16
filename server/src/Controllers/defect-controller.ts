@@ -2,10 +2,6 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification, deleteImages, handleDefectImagesUpdate } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
-import fs from "fs";
-import path from "path";
-import { timeStamp } from "console";
-import { tr } from "@faker-js/faker";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
