@@ -1,5 +1,14 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ที่ใช้สำหรับแสดงข้อความ Tooltip ที่มีข้อมูลที่ต้องการแสดง
+ * Input: 
+ * - object: ข้อมูลที่ต้องการแสดงใน Tooltip
+ * - children: ข้อความหรือ Element ที่ต้องการแสดง Tooltip
+ * Output:
+ * - JSX ของ Tooltip ที่แสดงข้อมูลที่ต้องการ
+**/
 
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 

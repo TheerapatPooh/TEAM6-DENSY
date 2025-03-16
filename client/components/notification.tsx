@@ -13,7 +13,7 @@
  * - ปุ่ม "Delete All Notifications" สำหรับลบรายการแจ้งเตือนทั้งหมด
  * - ปุ่ม "Mark All As Read" สำหรับเปลี่ยนสถานะแจ้งเตือนทั้งหมดให้เป็น "อ่านแล้ว"
  * - การคลิกแจ้งเตือนเปลี่ยนสถานะเป็น "อ่านแล้ว" และนำทางไปยัง URL ถ้ามี
- **/
+**/
 
 "use client";
 import React, { useEffect, useRef, useState } from "react";

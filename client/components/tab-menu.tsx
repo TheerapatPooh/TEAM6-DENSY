@@ -6,7 +6,7 @@
  * Output:
  * - JSX ของ TabMenu ที่ใช้สำหรับแสดงเมนูย่อยของเมนูหลักที่เกี่ยวข้องกับ path ปัจจุบัน
  * - ถ้าไม่มีเมนูย่อยที่เกี่ยวข้องกับ path ปัจจุบัน จะแสดงข้อความ "No submenu available for this path."
- **/
+**/
 
 import { subMenuList } from '@/constants/menu'
 import { usePathname } from 'next/navigation'

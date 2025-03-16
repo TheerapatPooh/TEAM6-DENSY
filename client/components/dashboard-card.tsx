@@ -1,3 +1,17 @@
+/**
+ * คำอธิบาย:
+ *   ส่วนนี้เป็น Component ที่ใช้แสดงข้อมูลของ Dashboard โดยจะแสดงข้อมูลที่สำคัญของ Dashboard ต่างๆ
+ * Input:
+ * - title: ชื่อของข้อมูล
+ * - value: ค่าของข้อมูล
+ * - trend: ข้อมูลเทียบกับเดือนที่แล้ว
+ * - icon: ไอคอนของข้อมูล
+ * - variant: รูปแบบของข้อมูล
+ * - positive: ข้อมูลเป็นบวกหรือลบ
+ * Output:
+ * - JSX ของ DashboardCard ที่แสดงข้อมูลของ Dashboard ต่างๆ
+**/
+
 import React from 'react'
 import { IDashboardCard } from '@/app/type'
 import { useTranslations } from 'next-intl';

@@ -1,3 +1,8 @@
+/**
+ * คำอธิบาย: ไฟล์นี้ใช้สำหรับการจัดการ middleware ในระบบ
+ * Input: ข้อมูล request จาก client
+ * Output: การจัดการ middleware ในระบบ
+**/
 import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { jwtDecode } from "jwt-decode";
@@ -20,18 +25,22 @@ export function middleware(req: NextRequest) {
   const isForgotPasswordPage = currentPathname.startsWith(`/${locale}/login/forgot-password`)
   const isRefreshPage = currentPathname.startsWith(`/${locale}/refresh`);
 
+  // ถ้าเป็นหน้า login หรือ refresh ให้ return ไปเลย
   if (isForgotPasswordPage || isRefreshPage) {
     return response;
   }
 
+  // ถ้าไม่มี token ให้ redirect ไปหน้า login
   if (!authToken && !refreshToken && !isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
   }
 
+  // ถ้าไม่มี token แต่มี refreshToken ให้ redirect ไปหน้า refresh
   if (!authToken && refreshToken && !isRefreshPage) {
     return NextResponse.redirect(new URL(`/${locale}/refresh`, req.url));
   }
 
+  // ถ้ามี token และเข้าหน้า login ให้ redirect ไปหน้าหลัก
   if (authToken && isLoginPage) {
     return NextResponse.redirect(new URL(`/${locale}`, req.url))
   }
@@ -46,14 +55,17 @@ export function middleware(req: NextRequest) {
         return response;
       }
 
+      // ถ้า role ตรงกับ admin ให้ redirect ไปหน้าที่เกี่ยวกับ admin
       if (userRole === "admin" && !currentPathname.startsWith(`/${locale}/admin`)) {
         return NextResponse.redirect(new URL(`/${locale}/admin/dashboard/overview`, req.url));
       }
 
+      // ถ้า role ตรงกับ inspector ให้ redirect ไปหน้าที่เกี่ยวกับ inspector
       if (userRole === "inspector" && !currentPathname.startsWith(`/${locale}/patrol`)) {
         return NextResponse.redirect(new URL(`/${locale}/patrol`, req.url));
       }
 
+      // ถ้า role ตรงกับ supervisor ให้ redirect ไปหน้าที่เกี่ยวกับ supervisor
       if (userRole === "supervisor" && !currentPathname.startsWith(`/${locale}/defect`) && !currentPathname.startsWith(`/${locale}/comment`)) {
         return NextResponse.redirect(new URL(`/${locale}/defect`, req.url));
       }

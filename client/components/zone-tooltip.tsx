@@ -1,10 +1,13 @@
 /**
  * คำอธิบาย:
- * Input:
-
+ *   คอมโพเนนต์ที่ใช้สำหรับแสดงโซนที่ต้องการในแผนที่
+ * Input: 
+ * - zonesName: ชื่อโซนที่ต้องการแสดง
+ * - zones: โซนที่ต้องการแสดง
  * Output:
- **/
-
+ * - JSX ของโซนที่ต้องการแสดง
+ * - โชว์โซนที่ต้องการแสดงเมื่อมีการ hover หรือ click บนโซนที่ต้องการแสดง
+**/
 import { ReactNode, useEffect, useRef } from "react";
 import { IZone } from "@/app/type";
 import { useTranslations } from "next-intl";import { useState } from "react";

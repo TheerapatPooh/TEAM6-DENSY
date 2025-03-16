@@ -6,7 +6,7 @@
  * Output:
  * - JSX ของ ReportDefect ที่แสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
  * - มีข้อมูลของ Defect และมีปุ่มสำหรับการแก้ไขข้อมูลของ Defect
- **/
+**/
 
 "use client";
 import React, { useEffect, useState } from "react";

@@ -1,3 +1,8 @@
+/**
+ * คำอธิบาย: ไฟล์นี้ใช้สำหรับการจัดการข้อความและการแปลภาษา
+ * Input: ไม่มี
+ * Output: ไม่มี
+**/
 import { notFound } from "next/navigation";
 import { getRequestConfig } from "next-intl/server";
 

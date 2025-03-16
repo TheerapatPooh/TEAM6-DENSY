@@ -11,7 +11,7 @@
  * - onRemoveSuccess: Callback หลังลบสำเร็จ
  * Output:
  * - JSX ของ Card ที่แสดงข้อมูลของ Patrol
- **/
+**/
 
 "use client";
 import {

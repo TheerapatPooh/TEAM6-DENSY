@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ที่ใช้สำหรับแสดงข้อมูลของเวอร์ชั่น
+ *   โดยจะแสดงข้อมูลของเวอร์ชั่นที่เลือกในรูปแบบของ Tooltip
+ * Input: 
+ * - ข้อมูลของเวอร์ชั่น
+ * - ข้อมูลของเวอร์ชั่นที่เลือก
+ * Output:
+ * - JSX ของเวอร์ชั่นที่เลือกในรูปแบบของ Tooltip
+**/
+
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatTime, getInitials } from "@/lib/utils";

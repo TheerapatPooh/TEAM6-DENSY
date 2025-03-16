@@ -8,7 +8,7 @@
  * - toggle: สถานะที่ใช้สำหรับเปิดหรือปิดการเลือกโซนหลายโซน
  * Output:
  * - JSX ของแผนที่ที่แสดงโซนต่างๆ ในสถานที่
- **/
+**/
 
 'use client';
 import { Stage, Layer, Path, Text } from 'react-konva';

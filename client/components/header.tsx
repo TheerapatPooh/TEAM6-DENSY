@@ -10,7 +10,7 @@
  * - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
  *   การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
  * - UI จะแตกต่างกันตาม variant ที่ส่งเข้ามา
- **/
+**/
 
 "use client";
 import React, { useEffect, useState } from "react";

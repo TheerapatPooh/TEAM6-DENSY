@@ -6,7 +6,7 @@
  * Input: -
  * Output:
  * - JSX ของ Sidebar มี 3 menu คือ Dashboard, Users และ Settings และสามารถเปิด-ปิดเมนูด้วยปุ่มที่มี icon 3 เส้น
- **/
+**/
 
 "use client"
 import {

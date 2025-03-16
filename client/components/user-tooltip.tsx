@@ -1,9 +1,11 @@
 /**
  * คำอธิบาย:
- * Input:
-
+ * - คอมโพเนนต์ที่ใช้สำหรับแสดงข้อมูลผู้ใช้งานในรูปแบบของ Tooltip
+ * Input: 
+ * - ข้อมูลผู้ใช้งาน
  * Output:
- **/
+ * - JSX ของ UserTooltip ที่แสดงข้อมูลผู้ใช้งานในรูปแบบของ Tooltip
+**/
 
 import { ReactNode, useEffect, useRef } from "react";
 import { IUser } from "@/app/type";
@@ -115,7 +117,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
   const TooltipContent = ({ }: { object: any }) => {
     return (
       <div className="flex justify-start items-start">
-        {/* Avatar Section */}
+        {/* Avatar Section**/}
         <div className="pr-4">
           {user.profile.name ? (
             <Avatar className="custom-shadow h-[60px] w-[60px]">
@@ -131,7 +133,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
           )}
         </div>
 
-        {/* User Info Section */}
+        {/* User Info Section**/}
         <div className="text-card-foreground flex flex-col w-[280px]">
           {user.profile.name ? (
             <div className="flex flex-col gap-2">
