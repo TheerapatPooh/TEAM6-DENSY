@@ -13,12 +13,13 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 export default function TabMenu({ id }: { id?: string }) {
     const router = useRouter()
     const pathname = usePathname()
     const locale = useLocale()
+    const t = useTranslations('TabMenu')
 
     const pathAfterLang = pathname.replace(/^\/(en|th)/, "");
 
@@ -43,7 +44,7 @@ export default function TabMenu({ id }: { id?: string }) {
                                     <span className="material-symbols-outlined mr-2">
                                         {item.icon}
                                     </span>
-                                    <p className="font-semibold">{item.text}</p>
+                                    <p className="font-semibold">{t(item.text)}</p>
                                 </TabsTrigger>
                             )
                         })}

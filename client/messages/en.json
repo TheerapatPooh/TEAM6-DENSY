@@ -589,5 +589,14 @@
     "timeRangeShort": "< 2 h.",
     "timeRangeMedium": "2-3 h.",
     "timeRangeLong": "> 3 h."
+  },
+  "TabMenu": {
+    "Detail": "Detail",
+    "Report": "Report",
+    "Overview": "Overview",
+    "HeatMap": "Heat Map",
+    "PatrolPreset": "Patrol Preset",
+    "PatrolChecklist": "Patrol Checklist",
+    "Location&Zone": "Location & Zone"
   }
 }
