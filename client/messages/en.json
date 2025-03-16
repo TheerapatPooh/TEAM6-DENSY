@@ -584,6 +584,10 @@
     "DefectReported": "Defect Reported",
     "PatrolDuration": "Patrol Duration",
     "PatrolDurationDescription": "Monitor the time taken for each patrol to analyze the duration of each inspection round.",
-    "Duration": "Duration"
+    "Duration": "Duration",
+    "DurationToolTip": "{hours}h. {minutes}m. {seconds}s.",
+    "timeRangeShort": "< 2 h.",
+    "timeRangeMedium": "2-3 h.",
+    "timeRangeLong": "> 3 h."
   }
 }

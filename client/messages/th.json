@@ -538,7 +538,7 @@
     "ResetPasswordConfirmDescription": "โปรดยืนยันเพื่อตั้งรหัสผ่านใหม่ของคุณ",
     "PasswordResetCompletedTitle": "ตั้งรหัสผ่านใหม่สำเร็จ",
     "PasswordResetCompletedDescription": "คุณได้ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว สามารถเข้าสู่ระบบได้ทันที",
-    "NoCommentsOrDeFectsFound": "กรุณาแสดงความคิดเห็นหรือแจ้งปัญหาที่พบ"
+    "NoCommentsOrDeFectsFound": "กรุณาเขียนข้อเสนอแนะหรือแจ้งปัญหาที่พบ"
   },
   "Month": {
     "AllTime": "ทุกช่วงเวลา",
@@ -584,6 +584,10 @@
     "DefectReported": "ปัญหาที่แจ้ง",
     "PatrolDuration": "ระยะเวลาการตรวจตรา",
     "PatrolDurationDescription": "ติดตามระยะเวลาในการตรวจตราเพื่อวิเคราะห์ระยะเวลาที่ใช้ในแต่ละรอบการตรวจสอบ",
-    "Duration": "ระยะเวลา"
+    "Duration": "ระยะเวลา",
+    "DurationToolTip": "{hours}ช. {minutes}น. {seconds}ว.",
+    "timeRangeShort": "< 2 ช.",
+    "timeRangeMedium": "2-3 ช.",
+    "timeRangeLong": "> 3 ช."
   }
 }
