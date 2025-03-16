@@ -104,7 +104,7 @@ export function GaugeGraph({
               className="stroke-transparent stroke-2 hover:cursor-pointer"
             />
             <ChartLegend
-              content={({ payload }) => (
+              content={() => (
                 <div className="flex flex-col gap-2 items-center">
                   <div className="flex gap-4 justify-center hover:cursor-pointer">
                     <div

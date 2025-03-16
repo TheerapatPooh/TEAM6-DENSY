@@ -6,19 +6,8 @@
  **/
 
 import { ReactNode, useEffect, useRef } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { IUser, IZone } from "@/app/type";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { getInitials, getUserVariant } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
-import { useTranslations } from "next-intl";
-import BadgeCustom from "./badge-custom";
-import { useState } from "react";
+import { IZone } from "@/app/type";
+import { useTranslations } from "next-intl";import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { ScrollArea } from "./ui/scroll-area";
@@ -117,7 +106,7 @@ export function ZoneTooltip({ zonesName,zones, children }: IZoneTooltip) {
 
 
 
-  const TooltipContent =({ object }: { object: any }) => {
+  const TooltipContent =({ }: { object: any }) => {
     return (
       <div className="custom-shadow rounded-md px-2.5 py-1.5 w-fit flex flex-col items-start justify-start">
         <h3 className="text-sm font-semibold text-muted-foreground mb-2">

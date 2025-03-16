@@ -1,5 +1,4 @@
 "use client";
-import { TrendingUp } from "lucide-react";
 import {
   Label,
   PolarGrid,
@@ -12,7 +11,6 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useTranslations } from "next-intl";
 import NotFound from "@/components/not-found";
@@ -61,7 +59,6 @@ export function RadialChart({ duration }) {
 
   const totalDuration = hours + minutes / 60 + seconds / 3600;
   const formattedDuration = totalDuration.toFixed(2);
-  console.log("duration", duration);
 
   let fillColor;
   if (totalDuration < 2) {

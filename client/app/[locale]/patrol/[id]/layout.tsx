@@ -1,18 +1,15 @@
-'use client'
+"use client";
 
-import { PatrolProvider, usePatrol } from '@/context/patrol-context';
+import { PatrolProvider } from "@/context/patrol-context";
 
 export default function PatrolLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-
-    return (
-        <PatrolProvider>
-            <div className="flex flex-col gap-4 px-6 py-4">
-                {children}
-            </div>
-        </PatrolProvider>
-    );
+  return (
+    <PatrolProvider>
+      <div className="flex flex-col gap-4 px-6 py-4">{children}</div>
+    </PatrolProvider>
+  );
 }

@@ -1,12 +1,9 @@
-import { IDefect, IPatrol, IPatrolChecklist, IPatrolResult, IUser } from "@/app/type";
+import { IDefect, IPatrol, IPatrolResult, IUser } from "@/app/type";
 import Loading from "@/components/loading";
 import { useSocket } from "@/components/socket-provider";
-import { Skeleton } from "@/components/ui/skeleton";
 import { fetchData } from "@/lib/utils";
 import { notFound, useParams } from "next/navigation";
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useDebugValue } from "react";
-import { boolean, IpVersion } from "zod";
-import { AlertCustom } from "@/components/alert-custom";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useTranslations } from "next-intl";
 

@@ -6,12 +6,6 @@
  **/
 
 import { ReactNode, useEffect, useRef } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { IUser } from "@/app/type";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { getInitials, getUserVariant } from "@/lib/utils";
@@ -118,7 +112,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
   }, []);
 
 
-  const TooltipContent = ({ object }: { object: any }) => {
+  const TooltipContent = ({ }: { object: any }) => {
     return (
       <div className="flex justify-start items-start">
         {/* Avatar Section */}

@@ -18,11 +18,6 @@ import {
 } from "@/lib/utils";
 import { IDefect, itemType } from "@/app/type";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { useRouter } from "next/navigation";
 import { UserTooltip } from "./user-tooltip";
 

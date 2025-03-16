@@ -11,7 +11,7 @@
 
 "use client";
 import bcrypt from "bcryptjs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
@@ -357,7 +357,9 @@ export default function page() {
               try {
                 await fetchData("post", `/logout`, true);
                 window.location.reload();
-              } catch (error) {}
+              } catch (error) {
+                console.error("Error updating password:", error);
+              }
             }
           } catch (error) {
             console.error("Error updating password:", error);

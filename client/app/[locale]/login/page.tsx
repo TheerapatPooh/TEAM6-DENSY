@@ -52,7 +52,6 @@ import { useTheme } from 'next-themes';
 import { LoginSchema } from '@/app/type';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
 import { AlertCustom } from '@/components/alert-custom';
 
 export default function LoginPage() {

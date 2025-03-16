@@ -5,7 +5,6 @@ import {
   IDefectCategory,
   IPatrol,
   IPatrolResult,
-  IUser,
 } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Loading from "@/components/loading";

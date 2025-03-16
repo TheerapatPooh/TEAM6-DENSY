@@ -5,7 +5,6 @@ import { Pie, PieChart, LabelList } from "recharts";
 
 import {
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   ChartConfig,

@@ -1,16 +1,8 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { IUser } from "@/app/type";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { formatTime, getInitials, getUserVariant } from "@/lib/utils";
+import { formatTime, getInitials } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
 import { useLocale, useTranslations } from "next-intl";
-import BadgeCustom from "./badge-custom";
 import { UserTooltip } from "./user-tooltip";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -44,10 +36,6 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
       openType.current = null;
     }
   };
-  // Modify the existing wheel handler
-  const handleWheel = useCallback(() => {
-    handleClose();
-  }, []);
   
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

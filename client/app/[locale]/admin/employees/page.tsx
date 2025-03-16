@@ -446,7 +446,7 @@ export default function Page() {
   // Handler to save the updated user data
   const handleSave = async (userId: number, index: number) => {
     const updatedUser = userRefs.current[index];
-    const user = allUsers.find((user) => user.id === userId);
+    allUsers.find((user) => user.id === userId);
 
     if (updatedUser) {
       handleUserUpdate(

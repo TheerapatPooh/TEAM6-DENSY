@@ -36,7 +36,6 @@ export default function page() {
 
     const [newPassError, setNewPassError] = useState<string | null>(null);
     const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
-    const [isValidToken, setIsValidToken] = useState<boolean | null>(null)
 
     const [isAlertOpen, setIsAlertOpen] = useState(false)
     const handleOpenAlert = () => setIsAlertOpen(true);
@@ -154,9 +153,7 @@ export default function page() {
             const response = await fetchData("get", `/verify-token?token=${token}`, true);
 
             if (response.status === "200" || response.status === 200) {
-                setIsValidToken(true);
             } else {
-                setIsValidToken(false);
                 toast({
                     variant: "error",
                     title: (a("InvalidTokenTitle")),
@@ -166,7 +163,6 @@ export default function page() {
             }
         } catch (error) {
             console.error('Error verifying token:', error);
-            setIsValidToken(false);
             router.push(`/${locale}/login`);
         }
     };

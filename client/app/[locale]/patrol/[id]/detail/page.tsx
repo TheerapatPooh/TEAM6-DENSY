@@ -46,7 +46,11 @@ import {
 import React, { useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserTooltip } from "@/components/user-tooltip";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function Page() {
   const {
@@ -60,7 +64,6 @@ export default function Page() {
     countFails,
     countItems,
     patrolUser,
-    isHovered,
     formatDate,
     formatId,
     formatTimeDate,
@@ -109,7 +112,7 @@ export default function Page() {
 
   const TooltipContent = () => {
     return (
-      <div >
+      <div>
         <div className="flex items-center justify-center gap-1">
           <span className="material-symbols-outlined">person_search</span>
           <p className="text-lg font-semibold">{t("InspectorList")}</p>
@@ -225,7 +228,9 @@ export default function Page() {
             </AlertDialog>
 
             <div className="flex flex-col h-full justify-start w-full">
-              <p className="text-2xl font-bold mb-1 text-start">{patrol.preset.title}</p>
+              <p className="text-2xl font-bold mb-1 text-start">
+                {patrol.preset.title}
+              </p>
               <div className="w-[300px]">
                 <Progress value={calculateProgress()} />
               </div>
@@ -282,7 +287,7 @@ export default function Page() {
                   iconName = "ios_share";
                   text = "Export";
                   disabled = false;
-                  handleFunction = () => { };
+                  handleFunction = () => {};
                   break;
                 case "on_going":
                   variant = "primary";
@@ -307,14 +312,14 @@ export default function Page() {
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => { };
+                  handleFunction = () => {};
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => { };
+                  handleFunction = () => {};
                   break;
               }
               return (
@@ -361,13 +366,17 @@ export default function Page() {
                             <Popover
                               open={open}
                               onOpenChange={(isOpen) => {
-                                if (!isOpen) handleClose()
+                                if (!isOpen) handleClose();
                               }}
                             >
                               <HoverCard
-                                open={open && openType.current === 'hover'}
+                                open={open && openType.current === "hover"}
                                 onOpenChange={(isHoverOpen) => {
-                                  if (!isHoverOpen && openType.current === 'hover') handleClose();
+                                  if (
+                                    !isHoverOpen &&
+                                    openType.current === "hover"
+                                  )
+                                    handleClose();
                                 }}
                               >
                                 <div
@@ -377,7 +386,10 @@ export default function Page() {
                                 >
                                   <HoverCardTrigger asChild>
                                     <PopoverTrigger asChild>
-                                      <div className="cursor-pointer" onClick={handleClick}>
+                                      <div
+                                        className="cursor-pointer"
+                                        onClick={handleClick}
+                                      >
                                         <div className="flex text-muted-foreground items-center">
                                           <span className="material-symbols-outlined me-1">
                                             person_search
@@ -391,12 +403,19 @@ export default function Page() {
                                           )}
                                           {inspectors.map((inspector, idx) => {
                                             return (
-                                              <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                                              <Avatar
+                                                key={idx}
+                                                className="custom-shadow ms-[-10px]"
+                                              >
                                                 <AvatarImage
                                                   src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                                 />
-                                                <AvatarFallback id={inspector.id.toString()}>
-                                                  {getInitials(inspector.profile.name)}
+                                                <AvatarFallback
+                                                  id={inspector.id.toString()}
+                                                >
+                                                  {getInitials(
+                                                    inspector.profile.name
+                                                  )}
                                                 </AvatarFallback>
                                               </Avatar>
                                             );
@@ -408,7 +427,9 @@ export default function Page() {
                                               <span className="absolute text-card-foreground text-base font-semibold">
                                                 +{inspectors.length - 5}
                                               </span>
-                                              <AvatarFallback id={"0"}></AvatarFallback>
+                                              <AvatarFallback
+                                                id={"0"}
+                                              ></AvatarFallback>
                                             </Avatar>
                                           )}
                                         </div>
@@ -431,10 +452,17 @@ export default function Page() {
                                     align="start"
                                     onInteractOutside={(e) => {
                                       const target = e.target as HTMLElement;
-                                      const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
-                                      const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+                                      const isUserTooltipContent =
+                                        target?.closest?.(
+                                          "[data-radix-tooltip-content]"
+                                        );
+                                      const isUserTooltipTrigger =
+                                        target?.closest?.(".user-tooltip");
 
-                                      if (isUserTooltipContent || isUserTooltipTrigger) {
+                                      if (
+                                        isUserTooltipContent ||
+                                        isUserTooltipTrigger
+                                      ) {
                                         e.preventDefault();
                                       }
                                     }}
@@ -574,7 +602,6 @@ export default function Page() {
         </div>
       </div>
       <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-224px)]">
-        {" "}
         {patrol.patrolChecklists.map((pc: IPatrolChecklist) => (
           <div className="rounded-md mb-4">
             {user?.profile.name === pc.inspector.profile.name ? (

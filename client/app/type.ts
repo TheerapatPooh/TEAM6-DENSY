@@ -1,6 +1,4 @@
 import { z } from "zod"
-import { timeStamp } from 'console';
-import { useTranslations } from "next-intl";
 import { badgeVariants } from "@/components/badge-custom";
 
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"

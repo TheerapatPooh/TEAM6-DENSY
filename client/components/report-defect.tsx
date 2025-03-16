@@ -10,7 +10,7 @@
 
 "use client";
 import React, { useEffect, useState } from "react";
-import { defectStatus, IDefect, IImage, IZone } from "@/app/type";
+import { defectStatus, IDefect } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";

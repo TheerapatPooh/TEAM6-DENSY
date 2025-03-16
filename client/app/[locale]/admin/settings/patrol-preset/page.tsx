@@ -22,8 +22,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
-import { fetchData, formatTime, getInitials } from "@/lib/utils";
+import { fetchData } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -42,16 +41,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotFound from "@/components/not-found";
-import { UserTooltip } from "@/components/user-tooltip";
 import { VersionTooltip } from "@/components/version-tooltip";
 import { ZoneTooltip } from "@/components/zone-tooltip";
 import { TextTooltip } from "@/components/text-tooltip";
@@ -242,7 +233,7 @@ export default function Page() {
   };
 
   const resetFilters = async () => {
-    const data = await fetchData("get", `/presets`, true);
+    await fetchData("get", `/presets`, true);
     setTempSelectedZones([]);
     setTempDateRange({});
     setSelectedZones([]);

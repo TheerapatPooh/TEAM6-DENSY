@@ -35,20 +35,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { fetchData, formatTime, getInitials } from "@/lib/utils";
+import { fetchData } from "@/lib/utils";
 
 import React, { useState, useEffect } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
 import { useRouter } from "next/navigation";
 import { DatePickerWithRange } from "@/components/date-picker";
 import dynamic from "next/dynamic";

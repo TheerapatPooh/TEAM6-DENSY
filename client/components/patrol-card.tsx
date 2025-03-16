@@ -77,8 +77,6 @@ export function PatrolCard({
   inspectors = [],
   onRemoveSuccess,
 }: IPatrolCard) {
-  const [isClicked, setIsClicked] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
@@ -88,7 +86,7 @@ export function PatrolCard({
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const { socket, isConnected } = useSocket();
+  const { socket } = useSocket();
 
   const router = useRouter();
   const locale = useLocale();
@@ -440,7 +438,7 @@ export function PatrolCard({
 
               <DropdownMenuContent align="end" className="p-0">
                 <DropdownMenuItem
-                  onClick={(e) => {
+                  onClick={() => {
                     handleDetail();
                   }}
                 >

@@ -32,7 +32,6 @@ import {
   IItemZone,
   IPatrolChecklist,
   IPatrolResult,
-  IUser,
   IDefect,
   IComment,
   patrolStatus,
@@ -46,7 +45,6 @@ import { formatTime } from "@/lib/utils";
 import AlertDefect from "./alert-defect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
-import { AlertCustom } from "@/components/alert-custom";
 import { UserTooltip } from "./user-tooltip";
 import { TextTooltip } from "./text-tooltip";
 

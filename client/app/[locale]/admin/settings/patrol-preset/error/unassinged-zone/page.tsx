@@ -1,6 +1,5 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 export default function Page() {
   //แปลภาษา
   const t = useTranslations("General");

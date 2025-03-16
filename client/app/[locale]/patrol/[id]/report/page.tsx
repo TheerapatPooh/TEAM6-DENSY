@@ -14,7 +14,6 @@
 "use client";
 import { IDefect, patrolStatus } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
-import Loading from "@/components/loading";
 import PatrolTimer from "@/components/patrol-timer";
 import ReportDefect from "@/components/report-defect";
 import TabMenu from "@/components/tab-menu";
@@ -56,7 +55,6 @@ export default function Page() {
     patrol,
     patrolResults,
     lock,
-    mounted,
     defects,
     canFinish,
     countDefects,
@@ -64,7 +62,6 @@ export default function Page() {
     countItems,
     patrolUser,
     isAlertOpen,
-    isHovered,
     formatDate,
     formatId,
     formatTimeDate,
