@@ -319,7 +319,7 @@ export async function getCommonDefects(req: Request, res: Response) {
     const allDefects = await prisma.defect.findMany({
       where: {
         startTime: dateFilter,
-        ...zoneFilter
+        ...zoneFilter,
       },
       include: {
         supervisor: {
@@ -594,7 +594,14 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
       (currentCompletionRate.noDefect / patrolsCurrentMonth.length) * 100;
     const prevPercent =
       (prevCompletionRate.noDefect / patrolsPreviousMonth.length) * 100;
-    let trend = calculateTrend(8, 3);
+    let trend = calculateTrend(
+      currentPercent > 0 ? currentPercent : 0,
+      prevPercent > 0 ? prevPercent : 0
+    );
+
+    if (!prevPercent || prevPercent === 0) {
+      trend = currentPercent;
+    }
 
     // สร้างข้อมูลสำหรับแสดงผลใน radial chart
     const patrolCompletionRate = [
@@ -608,7 +615,7 @@ export async function getPatrolCompletionRate(req: Request, res: Response) {
       chartData: allPatrols.length !== 0 ? patrolCompletionRate : [],
       percent: !startDate && !endDate ? percent : currentPercent,
       trend: trend,
-    }
+    };
     res.status(200).json(result);
     return;
   } catch (error) {
@@ -649,18 +656,18 @@ export async function getDefectReported(req: Request, res: Response) {
                         id: true,
                         tel: true,
                         name: true,
-                        image: { select: { path: true } }
-                      }
-                    }
-                  }
+                        image: { select: { path: true } },
+                      },
+                    },
+                  },
                 },
                 startTime: true,
                 status: true,
-              }
+              },
             },
           },
-        }
-      }
+        },
+      },
     });
 
     if (!patrol) {
@@ -669,17 +676,17 @@ export async function getDefectReported(req: Request, res: Response) {
     }
 
     // ดึง zone ข้อมูลตาม zoneId
-    const zoneIds = patrol.results.map(result => result.zoneId);
+    const zoneIds = patrol.results.map((result) => result.zoneId);
     const zones = await prisma.zone.findMany({
       where: { id: { in: zoneIds } },
-      select: { id: true, name: true }
+      select: { id: true, name: true },
     });
 
     // รวม defects ทั้งหมดจาก results และผูก zone เข้าไป
-    const defects = patrol.results.flatMap(result =>
-      result.defects.map(defect => ({
+    const defects = patrol.results.flatMap((result) =>
+      result.defects.map((defect) => ({
         ...defect,
-        zone: zones.find(zone => zone.id === result.zoneId) || {}
+        zone: zones.find((zone) => zone.id === result.zoneId) || {},
       }))
     );
 
@@ -691,6 +698,3 @@ export async function getDefectReported(req: Request, res: Response) {
     return;
   }
 }
-
-
-
