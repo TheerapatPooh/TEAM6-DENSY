@@ -16,12 +16,14 @@ datasource db {
 
 // เก็บข้อมูลเซสชันของผู้ใช้แต่ละคน เช่น Token, วันหมดอายุ
 model Session {
-  id        Int      @id @default(autoincrement()) @map("session_id")
-  userId    Int      @unique @map("session_user_id")
+  id        Int      @id @default(autoincrement()) @map("ss_id")
+  userId    Int      @unique @map("ss_user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique @map("session_token")
-  createdAt DateTime @default(now()) @map("session_created_at")
-  expiresAt DateTime @map("session_expires_at")
+  token     String   @unique @map("ss_token")
+  createdAt DateTime @default(now()) @map("ss_created_at")
+  expiresAt DateTime @map("ss_expires_at")
+
+  @@map("sessions")
 }
 
 // เก็บข้อมูลผู้ใช้ เช่น ชื่อผู้ใช้, อีเมล, บทบาท และรหัสผ่าน
@@ -258,10 +260,10 @@ model Comment {
   id             Int      @id @default(autoincrement()) @map("cm_id")
   message        String   @map("cm_message")
   timestamp      DateTime @default(now()) @map("cm_timestamp")
-  status         Boolean  @default(false)
+  status         Boolean  @default(false) @map("cm_status")
   userId         Int      @map("cm_us_id")
   patrolResultId Int      @map("cm_pr_id")
-  supervisorId   Int      @map("df_su_id")
+  supervisorId   Int      @map("cm_su_id")
 
   user         User         @relation(fields: [userId], references: [id])
   supervisor   User         @relation(name: "CommentSupervisor", fields: [supervisorId], references: [id])
