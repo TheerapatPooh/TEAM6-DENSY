@@ -219,9 +219,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
     ];
 
     let totalFails = 0;
-    let totalComments = 0;
-    let totalDefects = 0;
-    let totalPass = 0;
 
     // วนลูปผ่าน patrolChecklist
     for (const patrolChecklist of patrol.patrolChecklists) {
@@ -302,7 +299,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
           if (resultItem) {
             if (resultItem.status === true) {
               statusText = "Passed";
-              totalPass++;
             } else if (resultItem.status === false) {
               statusText = "Failed";
               totalFails++;
@@ -310,7 +306,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
 
             if (resultItem.comments?.length > 0) {
               statusText = "Commented";
-              totalComments += resultItem.comments.length;
               totalFails--;
 
               // Loop เก็บข้อมูล Commends เข้าใน Annotations
@@ -324,7 +319,6 @@ export const exportData = async (patrol: IPatrol, result: IPatrolResult[]) => {
 
             if (resultItem.defects?.length > 0) {
               statusText = "Defected";
-              totalDefects += resultItem.defects.length;
               totalFails--;
 
               // Loop เก็บข้อมูล Defects เข้าใน Annotations

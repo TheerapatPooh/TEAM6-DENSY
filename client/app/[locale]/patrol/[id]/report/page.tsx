@@ -279,46 +279,36 @@ export default function PatrolReportPage() {
                 | null
                 | undefined;
               let disabled: boolean;
-              let handleFunction: any;
               switch (patrol.status as patrolStatus) {
                 case "completed":
                   variant = "outline";
                   iconName = "ios_share";
                   text = "Export";
                   disabled = false;
-                  handleFunction = () => {};
                   break;
                 case "on_going":
                   variant = "primary";
                   iconName = "Check";
                   text = "Finish";
                   disabled = false;
-                  handleFunction = () => {
-                    handleFinishPatrol();
-                  };
                   break;
                 case "scheduled":
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = false;
-                  handleFunction = () => {
-                    handleStartPatrol();
-                  };
                   break;
                 case "pending":
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => {};
                   break;
               }
               return (
