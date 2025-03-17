@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการข้อมูล patrol เช่น การดึงข้อมูล patrol, การสร้าง patrol, การเริ่มต้นและเสร็จสิ้น patrol, การคอมเมนต์หรืออัปเดตสถานะของ patrol, การจัดการผู้ใช้งานใน patrol, และการดึงข้อมูล defect ที่เกี่ยวข้องกับ patrol
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters (เช่น ข้อมูลของ patrol, ข้อมูลของ defect หรือ comment ที่เกี่ยวข้องกับ patrol, หรือ ID ของ patrol ที่ต้องการดำเนินการ)
+ * 
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูลเกี่ยวกับ patrol และ defect ที่ดึงจากฐานข้อมูล
+**/
 import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, commentPatrol, schedulePatrolStatusUpdate, getAllPatrolDefects, getPatrolUsers } from "@Controllers/patrol-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";

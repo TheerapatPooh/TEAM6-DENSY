@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย: 
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการผู้ใช้ เช่น การสร้างผู้ใช้, การดึงข้อมูลผู้ใช้, การอัปเดตโปรไฟล์, การอัปเดตข้อมูลผู้ใช้, และการลบผู้ใช้
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters (เช่น ข้อมูลผู้ใช้ที่ต้องการสร้าง, ข้อมูลโปรไฟล์ที่ต้องการอัปเดต)
+ * 
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูลผู้ใช้ที่ดึงจากฐานข้อมูล
+**/
 import { createUser, getUser, updateProfile, getAllUsers, updateUser, removeUser } from "@Controllers/user-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";

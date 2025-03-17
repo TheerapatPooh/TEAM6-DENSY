@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) ที่เกี่ยวข้องกับการจัดการข้อมูลที่เกี่ยวข้องกับ zones และ locations รวมถึงการอัปเดตข้อมูล supervisor ที่เกี่ยวข้องกับ zone
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters เช่น ข้อมูลของ location หรือ zone ที่ต้องการดึงหรืออัปเดต
+ * 
+ * Output:
+ * - ส่งคืนข้อมูลที่เกี่ยวข้องกับ zones, location หรือข้อความผลการดำเนินการ เช่น ข้อความสำเร็จ, ข้อความผิดพลาด หรือข้อมูลที่ดึงมาจากฐานข้อมูล
+**/
 import { Router } from 'express'
 import { getAllZones, getLocation, getZone, updateSupervisor } from "@Controllers/location-controller.js";
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";

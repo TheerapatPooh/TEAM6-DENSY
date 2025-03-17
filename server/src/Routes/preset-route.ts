@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการ preset และ checklist เช่น การสร้าง preset, การอัปเดต preset, การลบ preset, การดึงข้อมูล checklist และการอัปเดต checklist
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters (เช่น ข้อมูล preset ที่ต้องการสร้างหรืออัปเดต, ID ของ checklist ที่ต้องการดึงหรืออัปเดต)
+ * 
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูล preset และ checklist ที่ดึงจากฐานข้อมูล
+**/
 import { getPreset, getAllPresets, createPreset, updatePreset, getAllChecklists, getChecklist, createChecklist, removeChecklist, removePreset, updateChecklist } from "@Controllers/preset-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";

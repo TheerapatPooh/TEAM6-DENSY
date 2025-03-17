@@ -1,13 +1,38 @@
-import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications, refreshToken, sendEmailResetPassword, resetForgotPassword, verifyToken } from "@Controllers/util-controller.js";
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการการเข้าสู่ระบบ, การจัดการการแจ้งเตือน, การรีเซ็ตรหัสผ่าน, และการยืนยัน token ในแอป
+ * โดยใช้ Express router เพื่อกำหนดและจัดการ API endpoints ต่างๆ
+ *
+ * Input:
+ * - ข้อมูลจาก body หรือ query parameters ที่ส่งมาจากคำขอ (เช่น ข้อมูลการล็อกอิน, ข้อความการแจ้งเตือน, รหัสผ่านที่ลืม)
+ *
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูลที่ดึงจากฐานข้อมูล (เช่น การแจ้งเตือน, การรีเซ็ตรหัสผ่าน)
+**/
+import {
+  authenticateUser,
+  removeOldNotifications,
+  getAllNotifications,
+  login,
+  logout,
+  markAllAsRead,
+  updateNotification,
+  removeNotification,
+  removeAllNotifications,
+  refreshToken,
+  sendEmailResetPassword,
+  resetForgotPassword,
+  verifyToken,
+} from "@Controllers/util-controller.js";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 
 const router = Router();
 const loginLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 15 นาที
-    max: 5, // อนุญาตให้ลองล็อกอินได้ 5 ครั้ง
-    message: { message: "Too many login attempts, please try again later" },
-    headers: true,
+  windowMs: 1 * 60 * 1000, // 15 นาที
+  max: 5, // อนุญาตให้ลองล็อกอินได้ 5 ครั้ง
+  message: { message: "Too many login attempts, please try again later" },
+  headers: true,
 });
 
 /**
@@ -311,7 +336,7 @@ router.delete("/notifications", authenticateUser, removeAllNotifications);
  */
 router.put("/notifications/mark-all-read", authenticateUser, markAllAsRead);
 
-removeOldNotifications()
+removeOldNotifications();
 
 /**
  * @swagger
@@ -341,7 +366,7 @@ removeOldNotifications()
  *       404:
  *         description: ไม่พบผู้ใช้ที่มีอีเมลนี้
  */
-router.post("/send-email-reset-password", sendEmailResetPassword)
+router.post("/send-email-reset-password", sendEmailResetPassword);
 
 /**
  * @swagger
@@ -399,7 +424,7 @@ router.post("/send-email-reset-password", sendEmailResetPassword)
  *                   type: string
  *                   example: "Server error, please try again later."
  */
-router.put("/reset-password", resetForgotPassword)
+router.put("/reset-password", resetForgotPassword);
 
 /**
  * @swagger
@@ -460,6 +485,6 @@ router.put("/reset-password", resetForgotPassword)
  *                   type: string
  *                   example: "Server error"
  */
-router.get("/verify-token", verifyToken)
+router.get("/verify-token", verifyToken);
 
-export default router
+export default router;

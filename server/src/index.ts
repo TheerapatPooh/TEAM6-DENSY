@@ -1,36 +1,47 @@
-import { readdirSync } from 'fs'
-import bodyParse from 'body-parser'
-import express from 'express'
-import dotenv from 'dotenv'
-import cookieParser from 'cookie-parser';
-import path from 'path'
-import http from 'http';
-import corsMiddleware from '@Utils/cors.js'
-import { initSocketIO } from '@Utils/socket.js';
-import { fileURLToPath } from 'url';
-import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
+/**
+ * คำอธิบาย:
+ * ฟังก์ชันหลักสำหรับการตั้งค่าแอพ Express ที่ให้บริการ API และรองรับการเชื่อมต่อกับ Socket.IO
+ *
+ * ฟังก์ชันนี้ทำการตั้งค่าหลักของแอพ เช่น การจัดการกับ CORS, CSRF, HTTP headers, การ sanitize ข้อมูลจาก request,
+ * การให้บริการ Swagger API Documentation, และเชื่อมต่อกับ Socket.IO.
+ * แอพนี้ยังรองรับการให้บริการไฟล์ที่อยู่ในโฟลเดอร์ uploads และเชื่อมต่อกับไฟล์เส้นทางในโฟลเดอร์ Routes
+ *
+ * Input: ไม่มี
+ * Output: เริ่มต้นเซิร์ฟเวอร์และให้บริการที่พอร์ตที่กำหนด
+**/
+import { readdirSync } from "fs";
+import bodyParse from "body-parser";
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import path from "path";
+import http from "http";
+import corsMiddleware from "@Utils/cors.js";
+import { initSocketIO } from "@Utils/socket.js";
+import { fileURLToPath } from "url";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 import csurf from "csurf";
-import helmet from 'helmet';
-import xss from 'xss';
-import { ParsedQs } from 'qs';
+import helmet from "helmet";
+import xss from "xss";
+import { ParsedQs } from "qs";
 
 // โหลด .env และกำหนดค่าพอร์ตจาก .env
-dotenv.config()
+dotenv.config();
 
 // กำหนดค่า path สำหรับไฟล์
 const fileName = fileURLToPath(import.meta.url);
 const dirName = path.dirname(fileName);
 
 // สร้างแอพ Express
-const app = express()
-const PORT = process.env.SERVER_PORT
+const app = express();
+const PORT = process.env.SERVER_PORT;
 
 // ใช้ cookie-parser เพื่อจัดการกับ cookies
 app.use(cookieParser());
 
 // ใช้ middleware สำหรับ CORS
-app.use(corsMiddleware)
+app.use(corsMiddleware);
 
 // กำหนดค่า csrfProtection เพื่อป้องกันการโจมตี CSRF
 const csrfProtection = csurf({ cookie: true });
@@ -52,7 +63,7 @@ app.use(
         connectSrc: [
           "'self'",
           "ws://localhost:4000", // อนุญาต WebSocket
-          process.env.CLIENT_URL || 'http://localhost:3000'
+          process.env.CLIENT_URL || "http://localhost:3000",
         ],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
@@ -84,47 +95,46 @@ app.use((req, res, next) => {
 });
 
 // ให้บริการไฟล์ที่อยู่ในโฟลเดอร์ uploads
-app.use('/uploads', express.static(path.join(dirName, '../../server/uploads')));
+app.use("/uploads", express.static(path.join(dirName, "../../server/uploads")));
 
 // กำหนด body parser ให้รองรับขนาดไฟล์สูงสุดที่ 10MB
-app.use(bodyParse.json({ limit: '10mb' }))
-app.use(express.json())
+app.use(bodyParse.json({ limit: "10mb" }));
+app.use(express.json());
 
 // ดึงไฟล์ทั้งหมดจากโฟลเดอร์ Routes และนำมาจัดการใน Express
-readdirSync(path.join(dirName, 'Routes')).map(async (file) => {
+readdirSync(path.join(dirName, "Routes")).map(async (file) => {
   const route = await import(`./Routes/${file}`);
-  app.use('/api', route.default || route);
+  app.use("/api", route.default || route);
 });
 
 // กำหนดค่าของ Swagger UI สำหรับเอกสาร API
 const swaggerOptions = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'API Documentation',
-      version: '1.0.0',
-      description: 'API Documentation for the API',
+      title: "API Documentation",
+      version: "1.0.0",
+      description: "API Documentation for the API",
     },
 
     servers: [
       {
         url: `http://localhost:${PORT}`,
-      }
+      },
     ],
   },
-  apis: ['./src/Routes/*.ts'],
-}
+  apis: ["./src/Routes/*.ts"],
+};
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // ใช้ swagger-ui เพื่อแสดงเอกสาร API
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // สร้าง HTTP server และเริ่มต้นการเชื่อมต่อ Socket.IO
-const server = http.createServer(app)
+const server = http.createServer(app);
 initSocketIO(server);
 
 // เริ่มต้น server และให้บริการที่พอร์ตที่กำหนด
 server.listen(PORT || 4000, () => {
   console.log(`Server is running at http://0.0.0.0:${PORT}`);
 });
-

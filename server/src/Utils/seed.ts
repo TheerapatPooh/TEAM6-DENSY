@@ -1,22 +1,38 @@
-import { PrismaClient } from '@prisma/client';
-
-import { users } from '@Utils/data/users.js';
-import { checklists } from '@Utils/data/checklists.js';
-import { item_zones } from '@Utils/data/item-zones.js';
-import { items } from '@Utils/data/items.js';
-import { locations } from '@Utils/data/locations.js';
-import { patrol_checklists } from '@Utils/data/patrol-checklists.js';
-import { patrols } from '@Utils/data/patrols.js';
-import { preset_checklists } from '@Utils/data/preset-checklist.js';
-import { presets } from '@Utils/data/presets.js';
-import { profiles } from '@Utils/data/profiles.js';
-import { zones } from '@Utils/data/zones.js';
-
+/**
+ * คำอธิบาย: 
+ * ไฟล์นี้ใช้สำหรับการ Seed ข้อมูลเริ่มต้นลงในฐานข้อมูล Prisma โดยใช้ข้อมูลจากไฟล์ต่างๆ ที่เตรียมไว้
+ * ขั้นตอนในการ seed จะทำทีละขั้นตอนและจะแสดงผลความคืบหน้าตลอดกระบวนการ เพื่อให้ผู้ใช้เห็นสถานะ
+ * ข้อมูลที่ถูก Seed ได้แก่ ข้อมูลเกี่ยวกับ locations, users, profiles, zones, checklists, items, item zones,
+ * presets, preset checklists, patrols, และ patrol checklists
+ * 
+ * ฟังก์ชันหลักที่ใช้ในไฟล์นี้:
+ * - main: ฟังก์ชันที่ใช้ในการทำการ seed ข้อมูลลงในฐานข้อมูล Prisma ทีละขั้นตอน
+ * - logProgress: ฟังก์ชันที่ใช้ในการแสดงผลความคืบหน้าของกระบวนการ seeding
+ * 
+ * Input: 
+ * - ข้อมูลจากไฟล์ต่างๆ ที่ถูก import เข้ามา ได้แก่ locations, users, profiles, zones, checklists, items, item zones,
+ *   presets, preset checklists, patrols, และ patrol checklists
+ * 
+ * Output:
+ * - ข้อมูลถูกเพิ่มลงในฐานข้อมูล Prisma ผ่าน PrismaClient
+**/
+import { PrismaClient } from "@prisma/client";
+import { users } from "@Utils/data/users.js";
+import { checklists } from "@Utils/data/checklists.js";
+import { item_zones } from "@Utils/data/item-zones.js";
+import { items } from "@Utils/data/items.js";
+import { locations } from "@Utils/data/locations.js";
+import { patrol_checklists } from "@Utils/data/patrol-checklists.js";
+import { patrols } from "@Utils/data/patrols.js";
+import { preset_checklists } from "@Utils/data/preset-checklist.js";
+import { presets } from "@Utils/data/presets.js";
+import { profiles } from "@Utils/data/profiles.js";
+import { zones } from "@Utils/data/zones.js";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Start seeding...');
+  console.log("Start seeding...");
 
   const totalSteps = 12; // จำนวนขั้นตอนทั้งหมดที่เราต้องทำ
   let currentStep = 0; // ขั้นตอนปัจจุบัน
@@ -49,7 +65,7 @@ async function main() {
   await prisma.patrolChecklist.createMany({ data: patrol_checklists });
   logProgress();
 
-  console.log('Seeding finished.');
+  console.log("Seeding finished.");
 }
 
 main()

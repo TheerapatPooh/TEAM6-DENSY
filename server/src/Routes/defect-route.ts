@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) ที่เกี่ยวข้องกับการจัดการข้อมูล defects และ comments รวมถึงการอัปโหลดข้อมูลที่เกี่ยวข้องกับ defects
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters เช่น ข้อมูล defect หรือ comment ที่ต้องการดึง, อัปเดต, ลบ หรือสร้าง
+ * 
+ * Output:
+ * - ส่งคืนข้อมูลที่เกี่ยวข้องกับ defects, comments หรือข้อความผลการดำเนินการ เช่น ข้อความสำเร็จ, ข้อความผิดพลาด หรือข้อมูลที่ดึงมาจากฐานข้อมูล
+**/
 import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized, defectUpload, uploadDefectImages } from "@Controllers/util-controller.js";
