@@ -169,7 +169,20 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const totalResults = patrolResults?.length || 0;
   const checkedResults =
-    patrolResults?.filter((res) => res.status !== null).length || 0;
+    patrolResults?.filter((res) => {
+      // ถ้า status เป็น null แสดงว่าไม่ตรวจแล้ว
+      if (res.status === null) return false;
+
+      // ถ้า status เป็น false ต้องมี defects หรือ comments ไม่ว่าง
+      if (res.status === false) {
+        const hasDefects = res.defects && res.defects.length > 0;
+        const hasComments = res.comments && res.comments.length > 0;
+        if (!hasDefects && !hasComments) {
+          return false;
+        }
+      }
+      return true;
+    }).length || 0;
   const canFinish = checkedResults === totalResults;
 
   // ฟังก์ชันสำหรับดึงข้อมูลการตรวจตราจากเซิร์ฟเวอร์
