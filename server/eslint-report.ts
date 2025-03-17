@@ -9,7 +9,6 @@
  * Output:
  *   - ไฟล์ Excel ที่สรุปผลการตรวจสอบ ESLint โดยจัดรูปแบบตามที่กำหนด
 **/
-
 import * as fs from "fs";
 import * as path from "path";
 import ExcelJS from "exceljs";

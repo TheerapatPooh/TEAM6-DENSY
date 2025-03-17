@@ -7,8 +7,7 @@
  * Output:
  * - หน้า Profile ที่แสดงข้อมูลของผู้ใช้ และสามารถแก้ไขข้อมูลส่วนตัวได้
  * - แสดงข้อมูลของผู้ใช้ และสามารถแก้ไขข้อมูลของผู้ใช้ได้
- **/
-
+**/
 "use client";
 import bcrypt from "bcryptjs";
 import React, { useEffect, useState } from "react";
@@ -54,7 +53,7 @@ interface IFormProfile {
   confirmPassword?: string;
 }
 
-export default function page() {
+export default function ProfilePage() {
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [ageError, setAgeError] = useState<string | null>(null);

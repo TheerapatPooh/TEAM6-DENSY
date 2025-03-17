@@ -1,25 +1,14 @@
 /**
  * คำอธิบาย:
- *  หน้าที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
- *  โดยสามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
+ * คอมโพเนนต์ PatrolListPage เป็นหน้าไวสร้างรายการตรวจ Patrol โดยผู้ใช้สามารถเลือก Preset, Inspector ในแต่ละ Checklist และเลือกวันที่ได้
+ * หลังจากที่มีการสร้างใบ Patrol ผู้ตรวจคนอื่นๆ ที่เกี่ยวข้องจะเห็นใบที่สร้างขึ้นและสามารถเห็นผลการตรวจแบบ Realtime ผ่าน Socket
  *
  * Input:
- * - ไม่มี
+ * - ไม่มี (คอมโพเนนต์นี้ไม่มีการรับ props โดยตรง)
  * Output:
- * - หน้า Patrol ที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
- * - สามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
- * - สามารถเลือก Preset และวันที่สำหรับ Patrol ใหม่
- * - สามารถเลือก Inspector ในแต่ละ Checklist ของ Preset ที่เลือกได้
- * - สามารถสร้าง Patrol ใหม่ได้
- * - สามารถลบ Patrol ที่สร้างได้
- * - แสดง Alert ในกรณีที่ต้องการสร้าง Patrol ใหม่
- * - แสดง Alert ในกรณีที่ต้องการลบ Patrol
- * - แสดง Alert ในกรณีที่สร้าง Patrol ใหม่เสร็จสิ้น
- * - แสดง Alert ในกรณีที่ลบ Patrol สำเร็จ
- * - แสดง Alert ในกรณีที่เกิดข้อผิดพลาดในการสร้าง Patrol
- * - แสดง Alert ในกรณีที่เกิดข้อผิดพลาดในการลบ Patrol
- **/
-
+ * - หน้าจอที่แสดงฟอร์มให้ผู้ใช้เลือก Preset, Inspector, Checklist และวันที่ พร้อมกับฟีเจอร์การแสดงผลแบบ Realtime
+ * - เมื่อสร้างใบ Patrol ผู้ตรวจที่เกี่ยวข้องจะเห็นการอัปเดตผลการตรวจผ่าน Socket
+**/
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -82,7 +71,7 @@ import { ZoneTooltip } from "@/components/zone-tooltip";
 import { TextTooltip } from "@/components/text-tooltip";
 import { useSocket } from "@/components/socket-provider";
 
-export default function Page() {
+export default function PatrolListPage() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const z = useTranslations("Zone");

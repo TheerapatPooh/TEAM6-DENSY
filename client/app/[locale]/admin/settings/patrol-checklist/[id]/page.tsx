@@ -6,8 +6,7 @@
  * Output:
  * - แสดงหน้าแก้ไข Checklist ในระบบโดยแสดงช่องกรองข้อมูลของ Checklist
  * - สามารถเพิ่ม ลบ แก้ไข Item ใน Checklist ได้
- **/
-
+**/
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -48,7 +47,7 @@ import {
 import dynamic from "next/dynamic";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
-export default function Page() {
+export default function PatrolChecklistDetailPage() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");

@@ -1,5 +1,18 @@
+/**
+ * คำอธิบาย:  
+ * คอมโพเนนต์ ForgotPasswordPage ใช้สำหรับการรีเซ็ตรหัสผ่าน  
+ * ตรวจสอบ Token ที่ได้รับ และเปลี่ยนรหัสผ่านหากข้อมูลถูกต้อง  
+ *  
+ * Input:  
+ * - newPassword: string (รหัสผ่านใหม่)  
+ * - confirmPassword: string (ยืนยันรหัสผ่านใหม่)  
+ * - token: string (โทเค็นสำหรับการรีเซ็ตรหัสผ่าน)  
+ *  
+ * Output:  
+ * - รีเซ็ตรหัสผ่านสำเร็จ: นำทางไปยังหน้าเข้าสู่ระบบ  
+ * - รีเซ็ตรหัสผ่านล้มเหลว: แสดงข้อความแจ้งเตือน  
+**/
 'use client'
-
 import React, { useEffect, useState } from 'react'
 import loginCover3 from "@/public/assets/img/login_cover_3.png"
 import Image from 'next/image'
@@ -22,7 +35,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export default function page() {
+export default function ForgotPasswordPage() {
     const t = useTranslations('General')
     const a = useTranslations("Alert");
     const [newPassword, setNewPassword] = useState<string | null>(null)

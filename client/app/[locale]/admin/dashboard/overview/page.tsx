@@ -1,5 +1,15 @@
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ OverviewPage แสดงข้อมูลการตรวจ Patrol ทั้งหมด พร้อมกับฟีเจอร์ในการค้นหา (Search), การกรอง (Filter), การจัดเรียง (Sort)
+ * และสามารถดูผลการตรวจแบบ Real-time ผ่าน Socket รวมถึงสามารถลบและส่งออกข้อมูลได้
+ *
+ * Input:
+ * - ไม่มีการรับ input โดยตรง แต่จะมีการใช้ state สำหรับจัดการข้อมูลต่างๆ เช่น socketData, allPatrols, allPresets, selectedPatrolId
+ *
+ * Output:
+ * - แสดงข้อมูลที่เกี่ยวข้องกับ Patrol รวมถึงผลการตรวจ, Progress Bar, และฟังก์ชันต่างๆ เช่น การลบและการส่งออกข้อมูล
+**/
 "use client";
-
 import React, { useMemo, useRef } from "react";
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
@@ -64,7 +74,7 @@ import { Progress } from "@/components/ui/progress";
 import { useSocket } from "@/components/socket-provider";
 import { useRouter } from "next/navigation";
 
-export default function Page() {
+export default function OverviewPage() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");

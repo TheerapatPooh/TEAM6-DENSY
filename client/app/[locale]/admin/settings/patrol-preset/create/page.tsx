@@ -7,8 +7,7 @@
  * - หน้าสร้าง Preset ในระบบ โดยสามารถเพิ่ม Checklist ที่มีอยู่ในระบบเข้าไปใน Preset ได้
  * - สามารถเพิ่ม Checklist ใหม่เข้าไปใน Preset ได้
  * - สามารถลบ Checklist ออกจาก Preset ได้
- **/
-
+**/
 "use client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,7 @@ import { AlertCustom } from "@/components/alert-custom";
 import { useRouter } from "next/navigation";
 import { UserTooltip } from "@/components/user-tooltip";
 
-export default function page() {
+export default function PatrolPresetCreatePage() {
   const [allChecklists, setAllChecklists] = useState<[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectChecklists, setSelectChecklists] = useState<number[]>([]);

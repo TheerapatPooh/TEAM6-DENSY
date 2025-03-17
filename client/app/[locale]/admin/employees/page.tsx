@@ -1,3 +1,15 @@
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ EmployeePage ใช้ในการจัดการและแสดงข้อมูลของผู้ใช้ภายในหน้าผู้ดูแลระบบ (Admin)
+ * โดยรองรับการฟิลเตอร์ข้อมูลตามสถานะ, บทบาท, และคำค้นหา รวมถึงสามารถเพิ่ม, แก้ไข, และยกเลิกการใช้งานผู้ใช้ได้
+ *
+ * Input:
+ * - ไม่มีการรับ input โดยตรง แต่จะมีการใช้ state สำหรับจัดการข้อมูลผู้ใช้ เช่น filteredUsers, selectedRoles, selectedStatus, searchTerm
+ *
+ * Output:
+ * - แสดงข้อมูลผู้ใช้ที่ผ่านการกรองแล้ว รวมถึงฟังก์ชันต่างๆ เช่น การเพิ่ม, แก้ไข, และยกเลิกการใช้งานผู้ใช้
+ * - รองรับการแสดงข้อความแจ้งเตือน (toast) สำหรับการอัปเดตสถานะของผู้ใช้
+**/
 "use client";
 import { IUser, role } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
@@ -51,7 +63,7 @@ import NotFound from "@/components/not-found";
 import { UserTooltip } from "@/components/user-tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function Page() {
+export default function EmployeePage() {
   const t = useTranslations("General");
   const a = useTranslations("Alert");
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -175,7 +187,7 @@ export default function Page() {
   const form = useForm();
   const { handleSubmit } = form;
 
-  const onSubmit = () => { };
+  const onSubmit = () => {};
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
@@ -221,7 +233,7 @@ export default function Page() {
     userId: number,
     password: string,
     role: role,
-    active?: boolean,
+    active?: boolean
   ) => {
     setFilteredUsers((prevUsers) => {
       const user = prevUsers.find((user) => user.id === userId);
@@ -254,11 +266,11 @@ export default function Page() {
       const updatedUsers = prevUsers.map((user) =>
         user.id === userId
           ? {
-            ...user,
-            ...(data.role && { role: data.role }), // Update role if needed
-            ...(password && { password: data.password }), // Update password if needed
-            active: data.active, // Update active status
-          }
+              ...user,
+              ...(data.role && { role: data.role }), // Update role if needed
+              ...(password && { password: data.password }), // Update password if needed
+              active: data.active, // Update active status
+            }
           : user
       );
 
@@ -449,11 +461,7 @@ export default function Page() {
     allUsers.find((user) => user.id === userId);
 
     if (updatedUser) {
-      handleUserUpdate(
-        userId,
-        updatedUser.password,
-        updatedUser.role
-      );
+      handleUserUpdate(userId, updatedUser.password, updatedUser.role);
     } else {
       console.error(`User at index ${userId} is undefined`);
     }
@@ -792,16 +800,17 @@ export default function Page() {
                   <DropdownMenuCheckboxItem
                     key={role.value}
                     checked={selectedRoles.includes(role.value)}
-                    className={`text-base ${selectedRoles.includes(role.value) ? "bg-muted/50" : ""
-                      }`}
+                    className={`text-base ${
+                      selectedRoles.includes(role.value) ? "bg-muted/50" : ""
+                    }`}
                     onSelect={(e) => {
                       e.preventDefault();
                       // Toggle role selection in the array
                       setSelectedRoles((prevSelectedRoles) =>
                         prevSelectedRoles.includes(role.value)
                           ? prevSelectedRoles.filter(
-                            (item) => item !== role.value
-                          )
+                              (item) => item !== role.value
+                            )
                           : [...prevSelectedRoles, role.value]
                       );
                     }}
@@ -810,15 +819,15 @@ export default function Page() {
                       shape="square"
                       variant={
                         role.variant as
-                        | "blue"
-                        | "red"
-                        | "yellow"
-                        | "green"
-                        | "default"
-                        | "secondary"
-                        | "mint"
-                        | "orange"
-                        | "purple"
+                          | "blue"
+                          | "red"
+                          | "yellow"
+                          | "green"
+                          | "default"
+                          | "secondary"
+                          | "mint"
+                          | "orange"
+                          | "purple"
                       }
                       iconName={role.icon}
                       showIcon={true}
@@ -836,8 +845,9 @@ export default function Page() {
                     <DropdownMenuRadioItem
                       key={status.value}
                       value={status.value}
-                      className={`text-base ${selectedStatus === status.value ? "bg-muted/50" : ""
-                        }`}
+                      className={`text-base ${
+                        selectedStatus === status.value ? "bg-muted/50" : ""
+                      }`}
                       onSelect={(e) => {
                         if (
                           status.value === "true" ||
@@ -852,15 +862,15 @@ export default function Page() {
                       <BadgeCustom
                         variant={
                           status.variant as
-                          | "blue"
-                          | "red"
-                          | "yellow"
-                          | "green"
-                          | "default"
-                          | "secondary"
-                          | "mint"
-                          | "orange"
-                          | "purple"
+                            | "blue"
+                            | "red"
+                            | "yellow"
+                            | "green"
+                            | "default"
+                            | "secondary"
+                            | "mint"
+                            | "orange"
+                            | "purple"
                         }
                       >
                         <div className="flex flex-row justify-center items-center gap-2 w-[105px]">
@@ -1027,7 +1037,7 @@ export default function Page() {
                                       className="bg-secondary cursor-not-allowed "
                                       showIcon={true}
                                       iconName="person"
-                                      onChange={() => { }}
+                                      onChange={() => {}}
                                       value={""}
                                       placeholder={employee.username}
                                     />

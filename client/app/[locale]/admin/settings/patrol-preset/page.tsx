@@ -8,7 +8,6 @@
  * - สามารถคลิกเพื่อดูรายละเอียดของ Preset แต่ละรายการ
  * - สามารถคลิกเพื่อสร้าง Preset ใหม่ได้
  **/
-
 "use client";
 import { IPreset, IZone } from "@/app/type";
 import Textfield from "@/components/textfield";
@@ -49,7 +48,7 @@ import { TextTooltip } from "@/components/text-tooltip";
 
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
-export default function Page() {
+export default function PatrolPresetListPage() {
   //แปลภาษา
   const a = useTranslations("Alert");
   const t = useTranslations("General");

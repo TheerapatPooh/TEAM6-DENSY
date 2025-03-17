@@ -7,8 +7,7 @@
  * - แสดงรายการ Checklist ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Checklist แต่ละรายการ และสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
  * - สามารถคลิกเพื่อดูรายละเอียดของ Checklist แต่ละรายการ
  * - สามารถคลิกเพื่อสร้าง Checklist ใหม่ได้
- **/
-
+**/
 "use client";
 import { IChecklist, IZone } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
@@ -49,7 +48,7 @@ import { VersionTooltip } from "@/components/version-tooltip";
 import { ZoneTooltip } from "@/components/zone-tooltip";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
-export default function Page() {
+export default function PatrolChecklistListPage() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");

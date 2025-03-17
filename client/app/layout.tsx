@@ -1,3 +1,21 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ RootLayout เป็น Layout หลักของแอปพลิเคชัน กำหนดโครงสร้างพื้นฐานของ HTML และรวม Provider หลักต่างๆ 
+ *   เช่น การจัดการธีม, การแปลภาษา, WebSocket และการแจ้งเตือน
+ *
+ * Input:
+ * - children: ReactNode (เนื้อหาภายใน Layout)
+ * - params: { locale: string } (กำหนดภาษาของแอปพลิเคชัน)
+ *
+ * Output:
+ * - โครงสร้างพื้นฐานของแอปพลิเคชัน รวมถึง:
+ *   - `ThemeProvider` สำหรับจัดการโหมดธีม (แสง/มืด)
+ *   - `NextIntlClientProvider` สำหรับรองรับการแปลภาษา
+ *   - `SocketProvider` สำหรับเชื่อมต่อ WebSocket
+ *   - `Toaster` สำหรับแสดงการแจ้งเตือน
+ *   - การโหลดฟอนต์ทั้งแบบ Local (`GeistSans`, `GeistMono`) และจาก Google Fonts (`Roboto`, `Manrope`)
+ *   - Metadata ของเว็บไซต์ เช่น `title` และ `description`
+**/
 import type { Metadata } from "next";
 import { ThemeProvider } from '@/components/theme-provider';
 import { NextIntlClientProvider } from 'next-intl';
