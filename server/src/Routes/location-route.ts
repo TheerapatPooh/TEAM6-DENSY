@@ -20,6 +20,8 @@ const router = Router()
  *   get:
  *     summary: Get zone details by ID
  *     description: ดึงข้อมูล Zone และ Supervisor ที่เกี่ยวข้อง
+ *     tags:
+ *       - Location Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -93,6 +95,8 @@ router.get('/zone/:id', authenticateUser, getZone)
  *   get:
  *     summary: Get all zones
  *     description: ดึงข้อมูลทั้งหมดของ Zone
+ *     tags:
+ *       - Location Controller
  *     responses:
  *       200:
  *         description: รายการ Zones ที่พบ
@@ -136,6 +140,8 @@ router.get('/zones', authenticateUser, getAllZones)
  *   get:
  *     summary: Get location details by ID
  *     description: ดึงข้อมูล Location และ Zones ที่เกี่ยวข้อง พร้อมข้อมูล Supervisor
+ *     tags:
+ *       - Location Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -214,10 +220,12 @@ router.get('/location/:id', authenticateUser, getLocation)
 
 /**
  * @swagger
- * /api/zone/{id}/supervisor:
+ * /api/zone/{id}:
  *   put:
  *     summary: Update supervisor for a zone
  *     description: อัปเดตข้อมูลของ Supervisor สำหรับ Zone ที่เลือก โดยการเชื่อมโยง `userId` กับ `zone`
+ *     tags:
+ *       - Location Controller
  *     parameters:
  *       - in: path
  *         name: id

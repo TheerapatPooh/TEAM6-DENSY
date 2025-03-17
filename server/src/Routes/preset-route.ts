@@ -20,6 +20,8 @@ const router = Router()
  *   get:
  *     summary: Get preset details by ID
  *     description: ดึงข้อมูลของ Preset โดยใช้ ID พร้อมข้อมูลที่เกี่ยวข้อง เช่น checklists, items และ zones
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -103,6 +105,8 @@ router.get('/preset/:id', authenticateUser, authorized(['admin', 'inspector']), 
  *   get:
  *     summary: Get all presets
  *     description: ดึงข้อมูลทั้งหมดของ Presets พร้อมข้อมูลที่เกี่ยวข้อง เช่น checklists, items และ zones
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: query
  *         name: latest
@@ -197,6 +201,8 @@ router.get('/presets', authenticateUser, authorized(['admin', 'inspector']), get
  *   post:
  *     summary: Create a new preset
  *     description: สร้าง Preset ใหม่พร้อมเชื่อมโยงกับ checklists ที่เลือก
+ *     tags:
+ *       - Preset Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -271,6 +277,8 @@ router.post('/preset', authenticateUser, authorized(['admin']), createPreset)
  *   put:
  *     summary: Update an existing preset
  *     description: อัปเดตข้อมูลของ Preset โดยเพิ่มเวอร์ชันใหม่ และทำให้ preset เก่าไม่ใช่เวอร์ชันล่าสุด
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -362,6 +370,8 @@ router.put('/preset/:id', authenticateUser, authorized(['admin']), updatePreset)
  *   delete:
  *     summary: Remove a preset by ID
  *     description: ลบข้อมูลของ Preset โดยตรวจสอบว่าไม่มี Patrol ที่เชื่อมโยงกับ Preset นี้
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -409,6 +419,8 @@ router.delete('/preset/:id', authenticateUser, authorized(['admin']), removePres
  *   get:
  *     summary: Get all checklists
  *     description: ดึงข้อมูลทั้งหมดของ Checklists พร้อมกรองตาม zones, startDate, endDate, และ title
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: query
  *         name: zones
@@ -422,14 +434,14 @@ router.delete('/preset/:id', authenticateUser, authorized(['admin']), removePres
  *         schema:
  *           type: string
  *           format: date
- *         description: วันที่เริ่มต้นสำหรับการกรอง
+ *         description: วันที่เริ่มต้นสำหรับการกรอง (YYYY-MM-DD)
  *       - in: query
  *         name: endDate
  *         required: false
  *         schema:
  *           type: string
  *           format: date
- *         description: วันที่สิ้นสุดสำหรับการกรอง
+ *         description: วันที่สิ้นสุดสำหรับการกรอง (YYYY-MM-DD)
  *       - in: query
  *         name: search
  *         required: false
@@ -522,6 +534,8 @@ router.get('/checklists', authenticateUser, authorized(['admin', 'inspector']), 
  *   get:
  *     summary: Get checklist details by ID
  *     description: ดึงข้อมูลของ Checklist โดยใช้ ID พร้อมข้อมูลที่เกี่ยวข้อง เช่น items, itemZones และ zone พร้อมข้อมูล supervisor (ถ้าระบุ query parameter `supervisor=true`)
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -622,6 +636,8 @@ router.get('/checklist/:id', authenticateUser, authorized(['admin', 'inspector']
  *   post:
  *     summary: Create a new checklist
  *     description: สร้าง Checklist ใหม่และเพิ่ม items พร้อมเชื่อมโยงกับ zones
+ *     tags:
+ *       - Preset Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -712,6 +728,8 @@ router.post('/checklist', authenticateUser, authorized(['admin']), createCheckli
  *   put:
  *     summary: Update an existing checklist
  *     description: อัปเดตข้อมูลของ Checklist โดยเพิ่มเวอร์ชันใหม่ และทำให้ checklist เก่าไม่ใช่เวอร์ชันล่าสุด
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -807,6 +825,8 @@ router.put('/checklist/:id', authenticateUser, authorized(['admin']), updateChec
  *   delete:
  *     summary: Deactivate a checklist by ID
  *     description: อัปเดตสถานะของ Checklist ให้เป็นไม่ใช่เวอร์ชันล่าสุด (deactivate) โดยไม่ลบข้อมูล
+ *     tags:
+ *       - Preset Controller
  *     parameters:
  *       - in: path
  *         name: id

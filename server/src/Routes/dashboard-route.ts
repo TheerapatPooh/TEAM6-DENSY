@@ -27,6 +27,8 @@ const router = Router();
  *   get:
  *     summary: Get heat map data
  *     description: ดึงข้อมูล Heat Map โดยสามารถกรองข้อมูลได้ตามช่วงเวลา
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -75,6 +77,8 @@ router.get(
  *   get:
  *     summary: Get defect category data
  *     description: ดึงข้อมูลประเภทของ defects โดยสามารถกรองข้อมูลได้ตาม patrolId, zoneId, และช่วงเวลา
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -138,6 +142,8 @@ router.get(
  *   get:
  *     summary: Get common defects data
  *     description: ดึงข้อมูล defects ที่เกิดขึ้นบ่อยที่สุด โดยสามารถกรองข้อมูลได้ตามช่วงเวลาและ zoneId
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -190,6 +196,8 @@ router.get(
  *   get:
  *     summary: Get patrol completion rate
  *     description: คำนวณอัตราการทำงานของ patrol โดยแยกตามว่ามี defects หรือไม่ และคำนวณเทรนด์ระหว่างเดือนปัจจุบันและเดือนก่อนหน้า
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -243,6 +251,8 @@ router.get(
  *   get:
  *     summary: Get defects reported for a specific patrol
  *     description: ดึงข้อมูล defects ที่รายงานจาก patrol ที่ระบุ พร้อมข้อมูลของ zone ที่เกี่ยวข้อง
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: path
  *         name: id

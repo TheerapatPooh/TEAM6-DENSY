@@ -21,6 +21,8 @@ const router = Router()
  *   get:
  *     summary: Get all users
  *     description: ดึงข้อมูลผู้ใช้ทั้งหมดตามบทบาทที่กำหนด และสามารถกรองข้อมูลโปรไฟล์ รูปภาพ หรือชื่อผู้ใช้
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: query
  *         name: profile
@@ -120,6 +122,8 @@ router.get('/users', authenticateUser, getAllUsers)
  *   get:
  *     summary: Get user information
  *     description: ดึงข้อมูลผู้ใช้ที่ตรงกับ ID หรือข้อมูลของผู้ใช้ที่ล็อกอิน
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -229,6 +233,8 @@ router.get('/user/:id?', authenticateUser, getUser)
  *   post:
  *     summary: Create a new user
  *     description: สร้างผู้ใช้ใหม่พร้อมโปรไฟล์เริ่มต้น
+ *     tags:
+ *       - User Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -308,6 +314,8 @@ router.post('/user', authenticateUser, authorized(['admin']), createUser)
  *   put:
  *     summary: Update user profile
  *     description: อัปเดตข้อมูลโปรไฟล์ของผู้ใช้ รวมถึงการอัปโหลดภาพโปรไฟล์ใหม่
+ *     tags:
+ *       - User Controller
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -380,6 +388,8 @@ router.put('/profile', authenticateUser, profileUpload.single('imageProfile'), u
  *   put:
  *     summary: Update user information
  *     description: อัปเดตข้อมูลผู้ใช้ เช่น username, email, role, name, age, tel, address, และ password
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -490,6 +500,8 @@ router.put('/user/:id', authenticateUser, updateUser)
  *   delete:
  *     summary: Deactivate user account
  *     description: ปิดการใช้งานบัญชีผู้ใช้โดยการอัปเดตสถานะ `active` เป็น `false`
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: path
  *         name: id

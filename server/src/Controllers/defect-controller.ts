@@ -744,7 +744,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
  * - req.params: { id: Int} (ID ของ Defect ที่จะลบ)
  * Output: JSON message ยืนยันการลบ Defect สำเร็จ
  **/
-export async function deleteDefect(req: Request, res: Response): Promise<void> {
+export async function removeDefect(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user.userId;
     const { id } = req.params;

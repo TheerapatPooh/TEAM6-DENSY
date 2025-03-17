@@ -9,7 +9,7 @@
  * Output:
  * - ส่งคืนข้อมูลที่เกี่ยวข้องกับ defects, comments หรือข้อความผลการดำเนินการ เช่น ข้อความสำเร็จ, ข้อความผิดพลาด หรือข้อมูลที่ดึงมาจากฐานข้อมูล
 **/
-import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
+import { createDefect, getDefect, getAllDefects, removeDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized, defectUpload, uploadDefectImages } from "@Controllers/util-controller.js";
 
@@ -21,6 +21,8 @@ const router = Router()
  *   get:
  *     summary: Get defect details by ID
  *     description: ดึงรายละเอียดของ Defect ตาม ID
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -106,6 +108,8 @@ router.get('/defect/:id', authenticateUser, authorized(['admin', 'supervisor']),
  *   get:
  *     summary: Get all defects
  *     description: ดึงข้อมูล Defect ทั้งหมดโดยสามารถกรองข้อมูลได้ตามเงื่อนไข
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: query
  *         name: status
@@ -223,6 +227,8 @@ router.get('/defects', authenticateUser, authorized(['admin', 'supervisor']), ge
  *   post:
  *     summary: Create defect report
  *     description: สร้าง Defect ใหม่พร้อมอัปโหลดภาพ
+ *     tags:
+ *       - Defect Controller
  *     consumes:
  *       - multipart/form-data
  *     requestBody:
@@ -274,6 +280,8 @@ router.post('/defect', authenticateUser, authorized(['admin', 'inspector']), cre
  *   put:
  *     summary: Update defect report
  *     description: อัปเดตข้อมูลของ Defect ตาม ID และสามารถอัปโหลดรูปภาพใหม่ได้
+ *     tags:
+ *       - Defect Controller
  *     consumes:
  *       - multipart/form-data
  *     parameters:
@@ -401,6 +409,8 @@ router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 's
  *   delete:
  *     summary: Delete a defect report
  *     description: ลบ Defect ตาม ID และลบไฟล์รูปภาพที่เกี่ยวข้อง
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -450,7 +460,7 @@ router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 's
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']), deleteDefect)
+router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']), removeDefect)
 
 /**
  * @swagger
@@ -458,6 +468,8 @@ router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']
  *   get:
  *     summary: Get all comments
  *     description: ดึงข้อมูล Comment ทั้งหมดโดยสามารถกรองข้อมูลได้ตามเงื่อนไข
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: query
  *         name: status
@@ -559,6 +571,8 @@ router.get('/comments', authenticateUser, authorized(['admin', 'supervisor']), g
  *   put:
  *     summary: Confirm a comment
  *     description: เปลี่ยนสถานะของ Comment เป็น Confirmed (`status = true`)
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -653,6 +667,8 @@ router.put('/comment/:id', authenticateUser, authorized(['admin', 'supervisor'])
  *   put:
  *     summary: Upload defect images
  *     description: อัปโหลดไฟล์ภาพที่เกี่ยวข้องกับข้อบกพร่อง
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id

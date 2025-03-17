@@ -20,6 +20,8 @@ const router = Router()
  *   get:
  *     summary: Get all defects for a patrol
  *     description: ดึงข้อมูลทั้งหมดของ Defects สำหรับ Patrol ที่กำหนดโดยใช้ `patrolId`
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -181,6 +183,8 @@ router.get('/patrol/:id?/defects', authenticateUser, authorized(['admin', 'inspe
  *   get:
  *     summary: Get patrol details by ID
  *     description: ดึงข้อมูล Patrol โดยใช้ ID พร้อมตัวเลือกการรวมข้อมูล preset และ result
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -332,6 +336,8 @@ router.get('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']), 
  *   get:
  *     summary: Get all patrols
  *     description: ดึงข้อมูลทั้งหมดของ Patrol โดยสามารถกรองตามสถานะ, preset, ช่วงเวลา, และคำค้นหา
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: query
  *         name: status
@@ -421,6 +427,8 @@ router.get('/patrols', authenticateUser, authorized(['admin', 'inspector']), get
  *   post:
  *     summary: Create a new patrol
  *     description: สร้างข้อมูล Patrol ใหม่พร้อมตรวจสอบ checklist และส่งการแจ้งเตือนให้กับผู้ตรวจสอบ
+ *     tags:
+ *       - Patrol Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -515,6 +523,8 @@ router.post('/patrol', authenticateUser, authorized(['admin', 'inspector']), cre
  *   put:
  *     summary: Start a patrol
  *     description: เริ่มต้น Patrol และอัปเดตสถานะจาก "scheduled" เป็น "on_going"
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -639,6 +649,8 @@ router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspecto
  *   put:
  *     summary: Finish a patrol
  *     description: เปลี่ยนสถานะของ Patrol จาก "on_going" เป็น "completed" และอัปเดตข้อมูลที่เกี่ยวข้อง
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -777,6 +789,8 @@ router.put('/patrol/:id/finish', authenticateUser, authorized(['admin', 'inspect
  *   delete:
  *     summary: Delete a patrol and related records
  *     description: ลบข้อมูล Patrol พร้อมข้อมูลที่เกี่ยวข้อง (เช่น PatrolChecklist, PatrolResult)
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -814,6 +828,8 @@ router.delete('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']
  *   post:
  *     summary: Add a comment to a patrol
  *     description: เพิ่มความคิดเห็นให้กับ Patrol โดยเชื่อมโยงกับ `patrolResult` และบันทึกข้อความ
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -834,6 +850,9 @@ router.delete('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']
  *               patrolResultId:
  *                 type: integer
  *                 description: ID ของ PatrolResult ที่ความคิดเห็นนี้จะถูกเชื่อมโยง
+ *               supervisorId:
+ *                 type: integer
+ *                 description: ID ของ SupervisorId ที่เป็นผู้รับผิดชอบใน Zone ที่ถูก Comment
  *     responses:
  *       201:
  *         description: Comment added successfully
@@ -888,6 +907,8 @@ router.post('/patrol/:id/comment', authenticateUser, authorized(['admin', 'inspe
  *   get:
  *     summary: Get patrol users by patrol ID
  *     description: ดึงข้อมูลผู้ใช้ (inspectors) ที่เกี่ยวข้องกับ Patrol โดยใช้ `patrolId`
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
