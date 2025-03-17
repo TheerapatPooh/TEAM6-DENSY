@@ -17,9 +17,9 @@ export default function ProfileLayout({
     children: React.ReactNode;
   }>) {
     return (
-    <>
+    <section>
       <Header variant={"profile"} />
       {children}
-    </>
+    </section>
     );
   }

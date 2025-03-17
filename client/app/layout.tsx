@@ -68,9 +68,9 @@ export default async function RootLayout({
   const messages = await getMessages();
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${manRope.className} antialiased bg-background`}>
+      <body className={`${manRope.className} antialiased bg-background overflow-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <NextIntlClientProvider messages={messages}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
             <SocketProvider>
               {children}
               <Toaster />

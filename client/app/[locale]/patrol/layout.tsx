@@ -18,10 +18,10 @@ export default function PatrolListLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <section>
         <Header variant="inspector" />
         {children}
 
-    </>
+    </section>
   );
 }

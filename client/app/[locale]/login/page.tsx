@@ -180,7 +180,7 @@ export default function LoginPage() {
       {/* แสดงรูปภาพเฉพาะจอที่มีขนาด sm ขึ้นไป */}
       <div className="bg-background hidden lg:inline w-full p-4 rounded-md">
         <Image
-          className="flex items-center "
+          className="flex items-center"
           src={resolvedTheme === "dark" ? darkLogo : lightLogo}
           alt="Logo"
           width={250}

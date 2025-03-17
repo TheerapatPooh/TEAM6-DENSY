@@ -33,7 +33,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex flex-row h-screen">
+    <section className="flex flex-row h-screen">
       <AdminSidebar />
       <div className="flex-grow overflow-x-hidden overflow-y-auto">
         <Header variant="admin" />
@@ -42,6 +42,6 @@ export default function AdminLayout({
           {children}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

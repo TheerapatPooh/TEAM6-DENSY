@@ -17,9 +17,9 @@ export default function CommentLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <section>
       <Header variant="supervisor" />
       <div className="px-6 py-4">{children}</div>
-    </>
+    </section>
   );
 }

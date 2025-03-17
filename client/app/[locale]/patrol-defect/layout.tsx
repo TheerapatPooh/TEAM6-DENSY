@@ -17,9 +17,9 @@ export default function PatrolDefectLayout({
     children: React.ReactNode;
   }>) {
     return (
-    <>
+    <section>
       <Header variant={"inspector"} />
       {children}
-    </>
+    </section>
     );
   }
