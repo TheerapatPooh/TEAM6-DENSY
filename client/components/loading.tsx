@@ -5,7 +5,7 @@
  * - ไม่มี
  * Output:
  * - JSX ของการโหลดข้อมูล
- **/
+**/
 
 import React from 'react'
 

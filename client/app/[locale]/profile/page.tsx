@@ -7,11 +7,10 @@
  * Output:
  * - หน้า Profile ที่แสดงข้อมูลของผู้ใช้ และสามารถแก้ไขข้อมูลส่วนตัวได้
  * - แสดงข้อมูลของผู้ใช้ และสามารถแก้ไขข้อมูลของผู้ใช้ได้
- **/
-
+**/
 "use client";
 import bcrypt from "bcryptjs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import BadgeCustom from "@/components/badge-custom";
@@ -54,7 +53,7 @@ interface IFormProfile {
   confirmPassword?: string;
 }
 
-export default function page() {
+export default function ProfilePage() {
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [ageError, setAgeError] = useState<string | null>(null);
@@ -357,7 +356,9 @@ export default function page() {
               try {
                 await fetchData("post", `/logout`, true);
                 window.location.reload();
-              } catch (error) {}
+              } catch (error) {
+                console.error("Error updating password:", error);
+              }
             }
           } catch (error) {
             console.error("Error updating password:", error);

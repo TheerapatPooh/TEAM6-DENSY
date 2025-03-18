@@ -7,7 +7,7 @@
  * - JSX ของ SocketIndicator ที่แสดงสถานะการเชื่อมต่อกับ Socket ว่าเป็นการเชื่อมต่อแบบ Real-time หรือ Polling
  * - ถ้าเชื่อมต่อแบบ Real-time จะแสดง Badge สีเขียว และข้อความ "Live: Real-time updates"
  * - ถ้าเชื่อมต่อแบบ Polling จะแสดง Badge สีส้ม และข้อความ "Fallback: Polling every 1s"
- **/
+**/
 
 "use client"
 

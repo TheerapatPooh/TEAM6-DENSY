@@ -1,26 +1,22 @@
 /**
  * คำอธิบาย:
- * Input:
-
+ * - คอมโพเนนต์ที่ใช้สำหรับแสดงข้อมูลผู้ใช้งานในรูปแบบของ Tooltip
+ * Input: 
+ * - ข้อมูลผู้ใช้งาน
  * Output:
- **/
+ * - JSX ของ UserTooltip ที่แสดงข้อมูลผู้ใช้งานในรูปแบบของ Tooltip
+**/
 
 import { ReactNode, useEffect, useRef } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { IUser } from "@/app/type";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials, getUserVariant } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
-import BadgeCustom from "./badge-custom";
+import BadgeCustom from "@/components/badge-custom";
 import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 export interface IUserTooltip {
   user: IUser;
@@ -118,10 +114,10 @@ export function UserTooltip({ user, children }: IUserTooltip) {
   }, []);
 
 
-  const TooltipContent = ({ object }: { object: any }) => {
+  const TooltipContent = ({ }: { object: any }) => {
     return (
       <div className="flex justify-start items-start">
-        {/* Avatar Section */}
+        {/* Avatar Section**/}
         <div className="pr-4">
           {user.profile.name ? (
             <Avatar className="custom-shadow h-[60px] w-[60px]">
@@ -137,7 +133,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
           )}
         </div>
 
-        {/* User Info Section */}
+        {/* User Info Section**/}
         <div className="text-card-foreground flex flex-col w-[280px]">
           {user.profile.name ? (
             <div className="flex flex-col gap-2">

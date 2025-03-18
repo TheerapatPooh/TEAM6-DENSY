@@ -7,8 +7,7 @@
  * - แสดงรายการ Checklist ทั้งหมดในระบบ โดยแสดงรายละเอียดของ Checklist แต่ละรายการ และสามารถค้นหา Checklist ได้ และสามารถค้นหา Checklist ตาม Zone และ Date ได้
  * - สามารถคลิกเพื่อดูรายละเอียดของ Checklist แต่ละรายการ
  * - สามารถคลิกเพื่อสร้าง Checklist ใหม่ได้
- **/
-
+**/
 "use client";
 import { IChecklist, IZone } from "@/app/type";
 import { AlertCustom } from "@/components/alert-custom";
@@ -35,20 +34,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { fetchData, formatTime, getInitials } from "@/lib/utils";
+import { fetchData } from "@/lib/utils";
 
 import React, { useState, useEffect } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
 import { useRouter } from "next/navigation";
 import { DatePickerWithRange } from "@/components/date-picker";
 import dynamic from "next/dynamic";
@@ -58,7 +48,7 @@ import { VersionTooltip } from "@/components/version-tooltip";
 import { ZoneTooltip } from "@/components/zone-tooltip";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
-export default function Page() {
+export default function PatrolChecklistListPage() {
   const z = useTranslations("Zone");
   const t = useTranslations("General");
   const a = useTranslations("Alert");

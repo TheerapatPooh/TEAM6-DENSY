@@ -10,12 +10,12 @@
  * - response: ฟังก์ชันที่รับค่า IDefect จากการสร้างหรือแก้ไขปัญหา
  * Output:
  * - JSX ของ AlertDefect ที่มีหัวข้อ, คำอธิบาย, 2 ปุ่ม Action และสามารถแนบไฟล์รูปภาพได้
- **/
+**/
 
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { defectStatus, IDefect } from "@/app/type";
+import { IDefect } from "@/app/type";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -30,7 +30,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { IItem, IItemZone, IPatrolResult } from "@/app/type";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { fetchData, getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -39,12 +39,11 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./ui/tooltip";
-import { Skeleton } from "./ui/skeleton";
+} from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 interface IAlertDefect {
   userId?: number;
   defect?: IDefect;
@@ -296,7 +295,6 @@ export default function AlertDefect({
     id: number,
     files: File[],
     type: string,
-    deleteExistingImages: boolean
   ) => {
     setDetailError(null);
     setFileError(null);

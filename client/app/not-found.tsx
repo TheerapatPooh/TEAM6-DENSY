@@ -1,3 +1,17 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ NotFoundPage ใช้สำหรับแสดงหน้าข้อผิดพลาด 404 (Page Not Found) 
+ *   พร้อมข้อความที่รองรับหลายภาษาโดยใช้ `useTranslations` จาก `next-intl`
+ *
+ * Input:
+ * - ไม่มี Input ที่รับเข้ามาโดยตรง
+ *
+ * Output:
+ * - JSX ของหน้าข้อผิดพลาด 404 ประกอบด้วย:
+ *   - รูปภาพ (`densy.png`) แสดงอยู่ตรงกลางของหน้าจอ
+ *   - ข้อความแจ้งเตือนว่าหน้าไม่พบ (`PageNotFoundTitle`)
+ *   - คำอธิบายเพิ่มเติม (`PageNotFoundDescription`)
+**/
 import { useTranslations } from 'next-intl';
 import React from 'react';
 

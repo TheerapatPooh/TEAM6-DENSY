@@ -1,6 +1,16 @@
-'use client'
-
-import React, { useCallback, useMemo, useRef } from 'react'
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ OverviewPage แสดงข้อมูลการตรวจ Patrol ทั้งหมด พร้อมกับฟีเจอร์ในการค้นหา (Search), การกรอง (Filter), การจัดเรียง (Sort)
+ * และสามารถดูผลการตรวจแบบ Real-time ผ่าน Socket รวมถึงสามารถลบและส่งออกข้อมูลได้
+ *
+ * Input:
+ * - ไม่มีการรับ input โดยตรง แต่จะมีการใช้ state สำหรับจัดการข้อมูลต่างๆ เช่น socketData, allPatrols, allPresets, selectedPatrolId
+ *
+ * Output:
+ * - แสดงข้อมูลที่เกี่ยวข้องกับ Patrol รวมถึงผลการตรวจ, Progress Bar, และฟังก์ชันต่างๆ เช่น การลบและการส่งออกข้อมูล
+**/
+"use client";
+import React, { useMemo, useRef } from "react";
 import { useEffect, useState } from "react";
 import Textfield from "@/components/textfield";
 import { Button } from "@/components/ui/button";
@@ -17,10 +27,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLocale, useTranslations } from "next-intl";
-import { countPatrolResult, exportData, fetchData, formatTime, getPatrolStatusVariant } from "@/lib/utils";
 import {
-  DatePickerWithRange,
-} from "@/components/date-picker";
+  countPatrolResult,
+  exportData,
+  fetchData,
+  formatTime,
+  getPatrolStatusVariant,
+} from "@/lib/utils";
+import { DatePickerWithRange } from "@/components/date-picker";
 import BadgeCustom from "@/components/badge-custom";
 import {
   Select,
@@ -31,20 +45,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  IPatrol,
-  IPreset,
-  IPatrolResult,
-} from "@/app/type";
+import { IPatrol, IPreset, IPatrolResult } from "@/app/type";
 import { IFilterPatrol } from "@/app/type";
 import { sortData } from "@/lib/utils";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DateRange, DateRange as DayPickerDateRange } from 'react-day-picker';
+import { DateRange, DateRange as DayPickerDateRange } from "react-day-picker";
 import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 import NotFound from "@/components/not-found";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 import {
   Table,
@@ -54,12 +69,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
-import { useSocket } from '@/components/socket-provider';
-import { useRouter } from 'next/navigation';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { useSocket } from "@/components/socket-provider";
+import { useRouter } from "next/navigation";
 
-export default function Page() {
+export default function OverviewPage() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const s = useTranslations("Status");
@@ -69,9 +84,7 @@ export default function Page() {
   const [allPresets, setAllPresets] = useState<IPreset[]>();
   const [selectedPatrolId, setSelectedPatrolId] = useState<number | null>(null);
 
-  const [dateError, setDateError] = useState<string | null>(null);
   const [mounted, setMounted] = useState<boolean>(false);
-  const [selectedDate, setSelectedDate] = useState<string>();
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -96,8 +109,12 @@ export default function Page() {
 
       const updatedResults = patrol.results
         .map((existingResult) => {
-          const matchingSocketResult = socketData.find((result) => result.id === existingResult.id);
-          return matchingSocketResult ? { ...existingResult, ...matchingSocketResult } : existingResult;
+          const matchingSocketResult = socketData.find(
+            (result) => result.id === existingResult.id
+          );
+          return matchingSocketResult
+            ? { ...existingResult, ...matchingSocketResult }
+            : existingResult;
         })
         .filter((result) => result.id); // กรองเฉพาะที่มี id เท่านั้น
 
@@ -138,8 +155,8 @@ export default function Page() {
   };
 
   const handleCloseAlert = () => {
-    setIsAlertOpen(false)
-  }
+    setIsAlertOpen(false);
+  };
 
   const handleOpenDialog = (patrolId: number) => {
     setSelectedPatrolId(patrolId);
@@ -147,17 +164,17 @@ export default function Page() {
   };
 
   const handleCloseDialog = () => {
-    setSelectedPatrolId(null)
+    setSelectedPatrolId(null);
     setIsDialogOpen(false);
   };
 
   const handleRemovePatrol = (patrolId: number) => {
-    removePatrol(patrolId)
+    removePatrol(patrolId);
   };
 
   const handleDetail = (patrolId: number) => {
-    router.push(`/${locale}/admin/dashboard/overview/${patrolId}`)
-  }
+    router.push(`/${locale}/admin/dashboard/overview/${patrolId}`);
+  };
 
   const removePatrol = async (patrolId: number) => {
     try {
@@ -168,11 +185,11 @@ export default function Page() {
         title: a("PatrolRemoveSuccessTitle"),
         description: a("PatrolRemoveSuccessDescription"),
       });
-      getPatrolData()
+      getPatrolData();
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   // search sort filter
   const handleSortChange = (type: string, value: string) => {
@@ -189,8 +206,8 @@ export default function Page() {
   };
 
   const getStoredFilter = () => {
-    if (typeof window !== 'undefined') {
-      const storedFilter = localStorage.getItem('filter');
+    if (typeof window !== "undefined") {
+      const storedFilter = localStorage.getItem("filter");
       if (storedFilter) {
         return JSON.parse(storedFilter);
       }
@@ -198,7 +215,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<IFilterPatrol | null>(getStoredFilter())
+  const [filter, setFilter] = useState<IFilterPatrol | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "Doc No.",
@@ -217,12 +234,11 @@ export default function Page() {
           return {
             presetTitle: "All",
             patrolStatuses: [],
-            dateRange: { start: undefined, end: undefined }
-          }
+            dateRange: { start: undefined, end: undefined },
+          };
         }
       });
-    }
-    else {
+    } else {
       setFilter((prev) => {
         if (prev) {
           return {
@@ -237,13 +253,13 @@ export default function Page() {
 
   const applyFilter = () => {
     const fetchData = async () => {
-      await getPatrolData()
+      await getPatrolData();
     };
     fetchData();
   };
 
   const resetFilter = () => {
-    setFilter(initialFilter)
+    setFilter(initialFilter);
   };
 
   const handleDateSelect = (dateRange: DateRange) => {
@@ -256,18 +272,21 @@ export default function Page() {
       patrolStatuses: filter?.patrolStatuses || [],
       dateRange: {
         start: startDate || undefined,
-        end: endDate || undefined
-      }
+        end: endDate || undefined,
+      },
     });
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (event: any) => {
     setSearchTerm(event.target.value);
   };
 
-  const buildQueryString = (filter: IFilterPatrol | null, searchTerm: string) => {
+  const buildQueryString = (
+    filter: IFilterPatrol | null,
+    searchTerm: string
+  ) => {
     const params: Record<string, string | undefined> = {};
 
     // เพิ่ม search term ถ้ามี
@@ -288,7 +307,7 @@ export default function Page() {
       params.startDate = filter?.dateRange.start.toISOString();
     }
 
-    // เพิ่ม endDate 
+    // เพิ่ม endDate
     if (filter?.dateRange?.end) {
       params.endDate = filter?.dateRange?.end.toISOString();
     }
@@ -297,7 +316,7 @@ export default function Page() {
   };
 
   const formatId = (id: number): string => {
-    return `P${id.toString().padStart(4, '0')}`;
+    return `P${id.toString().padStart(4, "0")}`;
   };
 
   const handleCheckboxChange = (patrolId: number, checked: boolean) => {
@@ -315,7 +334,10 @@ export default function Page() {
     setCheckedItems(newCheckedItems);
   };
 
-  const exportPatrol = (allPatrols: IPatrol[], checkedItems: Record<string, boolean>) => {
+  const exportPatrol = (
+    allPatrols: IPatrol[],
+    checkedItems: Record<string, boolean>
+  ) => {
     const selectedPatrols = allPatrols.filter((p) => checkedItems[p.id]);
 
     if (allPatrols.length === 0 || selectedPatrols.length === 0) {
@@ -327,7 +349,9 @@ export default function Page() {
       return;
     }
 
-    const hasIncompletePatrol = selectedPatrols.some((patrol) => patrol.status !== "completed");
+    const hasIncompletePatrol = selectedPatrols.some(
+      (patrol) => patrol.status !== "completed"
+    );
 
     if (hasIncompletePatrol) {
       toast({
@@ -377,11 +401,11 @@ export default function Page() {
     };
 
     // เพิ่ม event listener สำหรับ resize
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // ลบ event listener เมื่อคอมโพเนนต์ถูกทำลาย
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -400,17 +424,19 @@ export default function Page() {
           return;
         }
         // ตั้งค่า socketData ให้เป็นข้อมูลที่รับมาจาก socket
-        setSocketData(prevData => {
+        setSocketData((prevData) => {
           // อัปเดตข้อมูลที่ตรงกันหรือลงข้อมูลใหม่
           const updatedResults = initialResults.map((incomingResult) => {
             // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
-            const existingIndex = prevData.findIndex(result => result.id === incomingResult.id);
+            const existingIndex = prevData.findIndex(
+              (result) => result.id === incomingResult.id
+            );
 
             if (existingIndex !== -1) {
               // ถ้ามี id ตรงกัน, อัปเดตข้อมูลใน existing result
               return {
-                ...prevData[existingIndex],  // ข้อมูลเดิม
-                ...incomingResult,            // ข้อมูลใหม่ที่มาจาก initialResults
+                ...prevData[existingIndex], // ข้อมูลเดิม
+                ...incomingResult, // ข้อมูลใหม่ที่มาจาก initialResults
               };
             }
 
@@ -419,8 +445,11 @@ export default function Page() {
           });
 
           // เช็คผลลัพธ์ใหม่ที่ไม่มีใน prevData
-          const newResults = initialResults.filter(result =>
-            !prevData.some(existingResult => existingResult.id === result.id)
+          const newResults = initialResults.filter(
+            (result) =>
+              !prevData.some(
+                (existingResult) => existingResult.id === result.id
+              )
           );
 
           // รวมข้อมูลเดิมที่อัปเดตและผลลัพธ์ใหม่
@@ -430,20 +459,24 @@ export default function Page() {
 
       // ฟังก์ชันที่ใช้ในการอัปเดตข้อมูลผลลัพธ์
       const handleResultUpdate = (incomingResult: IPatrolResult) => {
-        setSocketData(prevData => {
+        setSocketData((prevData) => {
           // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
-          const updatedResults = prevData.map(existingResult => {
+          const updatedResults = prevData.map((existingResult) => {
             if (existingResult.id === incomingResult.id) {
               return {
-                ...existingResult,   // ข้อมูลเดิม
-                ...incomingResult,   // ข้อมูลใหม่ที่มาจาก incomingResult
+                ...existingResult, // ข้อมูลเดิม
+                ...incomingResult, // ข้อมูลใหม่ที่มาจาก incomingResult
               };
             }
             return existingResult;
           });
 
           // ถ้าไม่มีผลลัพธ์จาก incomingResult ใน prevData, ให้เพิ่มเข้าไป
-          if (!prevData.some(existingResult => existingResult.id === incomingResult.id)) {
+          if (
+            !prevData.some(
+              (existingResult) => existingResult.id === incomingResult.id
+            )
+          ) {
             return [...updatedResults, incomingResult];
           }
 
@@ -452,7 +485,10 @@ export default function Page() {
       };
 
       // อัปเดตสถานะเมื่อ patrol เริ่ม
-      const handlePatrolStarted = async (data: { patrolId: string; patrolData: IPatrol }) => {
+      const handlePatrolStarted = async (data: {
+        patrolId: string;
+        patrolData: IPatrol;
+      }) => {
         if (!joinedRoomsRef.current.has(data.patrolId)) {
           socket.emit("join_patrol", data.patrolId);
           joinedRoomsRef.current.add(data.patrolId);
@@ -461,7 +497,14 @@ export default function Page() {
       };
 
       // อัปเดตสถานะเมื่อ patrol จบ
-      const handlePatrolFinished = async (data: { patrolId: string; patrolData: IPatrol }) => {
+      const handlePatrolFinished = async (data: {
+        patrolId: string;
+        patrolData: IPatrol;
+      }) => {
+        if (!joinedRoomsRef.current.has(data.patrolId)) {
+          socket.emit("join_patrol", data.patrolId);
+          joinedRoomsRef.current.add(data.patrolId);
+        }
         await getPatrolData();
       };
 
@@ -473,23 +516,28 @@ export default function Page() {
         }
 
         setAllPatrols((prev) => {
-          const existingIndex = prev.findIndex((patrol) => patrol.id === newPatrol.id);
+          const existingIndex = prev.findIndex(
+            (patrol) => patrol.id === newPatrol.id
+          );
 
           if (existingIndex !== -1) {
             const updatedPatrols = [...prev];
-            updatedPatrols[existingIndex] = { ...prev[existingIndex], ...newPatrol };
+            updatedPatrols[existingIndex] = {
+              ...prev[existingIndex],
+              ...newPatrol,
+            };
             return updatedPatrols;
           } else {
             return [...prev, newPatrol];
           }
         });
-
-
       };
 
-      // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ 
+      // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ
       const handlePatrolDeleted = (patrolId) => {
-        setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== patrolId));
+        setAllPatrols((prevPatrols) =>
+          prevPatrols.filter((patrol) => patrol.id !== patrolId)
+        );
         if (!joinedRoomsRef.current.has(patrolId)) {
           socket.emit("join_patrol", patrolId);
           joinedRoomsRef.current.add(patrolId);
@@ -509,7 +557,6 @@ export default function Page() {
         socket.off("patrol_finished", handlePatrolFinished);
         socket.off("patrol_created", handleNewPatrol);
         socket.off("patrol_deleted", handlePatrolDeleted);
-
       };
     };
 
@@ -518,15 +565,19 @@ export default function Page() {
 
   useEffect(() => {
     allPatrols.forEach((patrol) => {
-      if (!joinedRoomsRef.current.has(patrol.id) && patrol.status === 'on_going' || patrol.status === 'scheduled') {
+      if (
+        (!joinedRoomsRef.current.has(patrol.id) &&
+          patrol.status === "on_going") ||
+        patrol.status === "scheduled"
+      ) {
         socket.emit("join_patrol", patrol.id);
         joinedRoomsRef.current.add(patrol.id);
       }
     });
-  }, [allPatrols])
+  }, [allPatrols]);
 
   useEffect(() => {
-    localStorage.setItem('filter', JSON.stringify(filter));
+    localStorage.setItem("filter", JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -536,22 +587,21 @@ export default function Page() {
     }
   }, [sort]);
 
-  useEffect(() => {
-    if (selectedDate !== null || selectedDate !== undefined) {
-      setDateError(null)
-    }
-  }, [selectedDate])
-
   if (!mounted) {
-    return <Loading />
+    return <Loading />;
   }
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className="flex flex-col gap-4">
       {/* Patrol List */}
-      <div className='flex flex-row justify-between items-center'>
-        <p className='text-2xl font-bold'>{t("PatrolList")}</p>
-        <Button size='lg' variant='primary' className='flex flex-row items-center' onClick={() => handleOpenAlert()}>
+      <div className="flex flex-row justify-between items-center">
+        <p className="text-2xl font-bold">{t("PatrolList")}</p>
+        <Button
+          size="lg"
+          variant="primary"
+          className="flex flex-row items-center"
+          onClick={() => handleOpenAlert()}
+        >
           <span className="material-symbols-outlined text-card w-[22px] h-[22px]">
             ios_share
           </span>
@@ -574,32 +624,52 @@ export default function Page() {
     ${isSortOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg">{t('Sort')}</div>
+            <div className="text-lg">{t("Sort")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="p-2 gap-2">
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+              {t("SortBy")}
+            </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.by}
-              onValueChange={(value) => handleSortChange('by', value)}
+              onValueChange={(value) => handleSortChange("by", value)}
             >
-              <DropdownMenuRadioItem value="Doc No." className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('DocNo')}
+              <DropdownMenuRadioItem
+                value="Doc No."
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("DocNo")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Date" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Date')}
+              <DropdownMenuRadioItem
+                value="Date"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Date")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+              {t("Order")}
+            </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.order}
-              onValueChange={(value) => handleSortChange('order', value)}
+              onValueChange={(value) => handleSortChange("order", value)}
             >
-              <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Ascending')}
+              <DropdownMenuRadioItem
+                value="Ascending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Ascending")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Descending')}
+              <DropdownMenuRadioItem
+                value="Descending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Descending")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -611,14 +681,16 @@ export default function Page() {
     ${isFilterOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg">{t('Filter')}</div>
+            <div className="text-lg">{t("Filter")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="flex flex-col justify-center gap-2 p-2 z-50"
             align="end"
           >
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Date')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Date")}
+              </DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
@@ -627,10 +699,14 @@ export default function Page() {
               />
             </div>
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Status")}
+              </DropdownMenuLabel>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("pending")}
-                onCheckedChange={(checked) => toggleStatusFilter("pending", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("pending", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -643,7 +719,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("scheduled")}
-                onCheckedChange={(checked) => toggleStatusFilter("scheduled", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("scheduled", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -656,7 +734,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("on_going")}
-                onCheckedChange={(checked) => toggleStatusFilter("on_going", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("on_going", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -669,7 +749,9 @@ export default function Page() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.patrolStatuses.includes("completed")}
-                onCheckedChange={(checked) => toggleStatusFilter("completed", checked)}
+                onCheckedChange={(checked) =>
+                  toggleStatusFilter("completed", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -680,29 +762,37 @@ export default function Page() {
                   children="Complete"
                 />
               </DropdownMenuCheckboxItem>
-
             </div>
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Preset')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Preset")}
+              </DropdownMenuLabel>
               <Select
-                value={filter?.presetTitle || 'All'}
+                value={filter?.presetTitle || "All"}
                 onValueChange={(value) =>
                   setFilter({
                     presetTitle: value,
                     patrolStatuses: filter?.patrolStatuses || [],
-                    dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
+                    dateRange: {
+                      start: filter?.dateRange.start,
+                      end: filter?.dateRange.end,
+                    },
                   })
                 }
               >
                 <SelectTrigger className="">
                   <SelectValue
-                    placeholder={filter?.presetTitle === 'All' ? t('All') : filter?.presetTitle}
+                    placeholder={
+                      filter?.presetTitle === "All"
+                        ? t("All")
+                        : filter?.presetTitle
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>{t('Preset')}</SelectLabel>
-                    <SelectItem value="All">{t('All')}</SelectItem>
+                    <SelectLabel>{t("Preset")}</SelectLabel>
+                    <SelectItem value="All">{t("All")}</SelectItem>
                     {allPresets &&
                       allPresets.map((preset) => (
                         <SelectItem value={preset.title} key={preset.id}>
@@ -715,9 +805,11 @@ export default function Page() {
             </div>
             <div className="flex w-full justify-end mt-4 gap-2">
               <Button size="sm" variant="secondary" onClick={resetFilter}>
-                {t('Reset')}
+                {t("Reset")}
               </Button>
-              <Button variant="primary" size="sm" onClick={applyFilter}>{t('Apply')}</Button>
+              <Button variant="primary" size="sm" onClick={applyFilter}>
+                {t("Apply")}
+              </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -725,145 +817,184 @@ export default function Page() {
 
       {/* Table */}
       <div>
-        <ScrollArea
-          className="rounded-md w-full whitespace-nowrap">
-          <Table className=' sm:w-max lg:w-full'>
+        <ScrollArea className="rounded-md w-full whitespace-nowrap">
+          <Table className=" sm:w-max lg:w-full">
             <TableHeader>
               <TableRow className="grid grid-cols-12 w-full">
-                <TableHead className='sm:col-span-1 lg:col-span-1'>
-                  <Checkbox className='rounded-sm'
+                <TableHead className="sm:col-span-1 lg:col-span-1">
+                  <Checkbox
+                    className="rounded-sm"
                     checked={
                       allPatrols.length > 0 &&
                       allPatrols.every((patrol) => checkedItems[patrol.id])
                     }
-                    onCheckedChange={handleSelectAllCheckbox} />
+                    onCheckedChange={handleSelectAllCheckbox}
+                  />
                 </TableHead>
-                <TableHead className='sm:col-span-2 lg:col-span-2'>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
                   {t("DocID")}
                 </TableHead>
-                <TableHead className='sm:col-span-2 lg:col-span-2'>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
                   {t("Preset")}
                 </TableHead>
-                <TableHead className='sm:col-span-1 lg:col-span-2'>
+                <TableHead className="sm:col-span-1 lg:col-span-2">
                   {t("Status")}
                 </TableHead>
-                <TableHead className='sm:col-span-2 lg:col-span-2'>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
                   {t("Progress")}
                 </TableHead>
-                <TableHead className='sm:col-span-2 lg:col-span-1'>
+                <TableHead className="sm:col-span-2 lg:col-span-1">
                   {t("Date")}
                 </TableHead>
-                <TableHead className='sm:col-span-2 lg:col-span-2'>
+                <TableHead className="sm:col-span-2 lg:col-span-2">
                   {t("Result")}
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <ScrollArea className="rounded-md w-full lg:[&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-388px)] sm:[&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-360px)]"
-              >
+              <ScrollArea className="rounded-md w-full lg:[&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-388px)] sm:[&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-360px)]">
                 {allPatrols.length === 0 || !allPatrols ? (
                   <tr className="flex w-full h-full">
                     <td colSpan={5} className="w-full text-center py-6">
                       <NotFound
-                        icon="task" title="NoPatrolsAvailable" description="NoPatrolsDescription"
+                        icon="task"
+                        title="NoPatrolsAvailable"
+                        description="NoPatrolsDescription"
                       />
                     </td>
                   </tr>
-                ) :
-                  (
-                    allPatrols.map((patrol, index) => (
-                      <TableRow key={index} className='grid grid-cols-12 w-full items-center' onClick={() => handleDetail(patrol.id)}>
-                        <TableCell className='sm:col-span-1 lg:col-span-1'>
-                          <Checkbox className='w-5 h-5 rounded-sm'
-                            onClick={(e) => e.stopPropagation()}
-                            checked={checkedItems[patrol.id] || false}
-                            onCheckedChange={(checked: boolean) => handleCheckboxChange(patrol.id, checked)}
-                          />
-                        </TableCell>
-                        <TableCell className='sm:col-span-2 lg:col-span-2'>
-                          <p>{formatId(patrol.id)}</p>
-                        </TableCell>
-                        <TableCell className='sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex min-w-0"'>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="truncate">{patrol.preset.title}</span>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="ml-[129px]">
-                                <p className="max-w-[200px] break-words">{patrol.preset.title}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </TableCell>
-                        <TableCell className='sm:col-span-1 lg:col-span-2 flex'>
-                          <BadgeCustom
-                            iconName={getPatrolStatusVariant(patrol.status).iconName}
-                            showIcon={true}
-                            showTime={false}
-                            variant={getPatrolStatusVariant(patrol.status).variant}
-                            hideText={windowWidth > 1024 ? false : true}
-                          >
-                            {s(patrol.status)}
-                          </BadgeCustom>
-                        </TableCell>
-                        <TableCell className='sm:col-span-2 lg:col-span-2'>
-                          <p>
-                            <Progress value={calculateProgress(patrol.results)} />
-                          </p>
-                        </TableCell>
-                        <TableCell className='sm:col-span-2 lg:col-span-1'>
-                          <p>{formatTime(patrol.date, locale, false)}</p>
-                        </TableCell>
-                        <TableCell className='sm:col-span-2 lg:col-span-2'>
-                          <div className='flex justify-between'>
-                            <div className='flex flex-row gap-2' >
-                              <div className="flex gap-1 text-primary items-center">
-                                <span className="material-symbols-outlined">checklist</span>
-                                <p className="text-xl font-semibold">{patrol.itemCounts}</p>
-                              </div>
-                              <div className="flex gap-1 text-orange items-center">
-                                <span className="material-symbols-outlined">close</span>
-                                <p className="text-xl font-semibold">{countPatrolResult(patrol.results).fail}</p>
-                              </div>
-                              <div className="flex gap-1 text-destructive items-center">
-                                <span className="material-symbols-outlined">
-                                  error
-                                </span>
-                                <p className="text-xl font-semibold">{countPatrolResult(patrol.results).defect}</p>
-                              </div>
+                ) : (
+                  allPatrols.map((patrol, index) => (
+                    <TableRow
+                      key={index}
+                      className="grid grid-cols-12 w-full items-center"
+                      onClick={() => handleDetail(patrol.id)}
+                    >
+                      <TableCell className="sm:col-span-1 lg:col-span-1">
+                        <Checkbox
+                          className="w-5 h-5 rounded-sm"
+                          onClick={(e) => e.stopPropagation()}
+                          checked={checkedItems[patrol.id] || false}
+                          onCheckedChange={(checked: boolean) =>
+                            handleCheckboxChange(patrol.id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="sm:col-span-2 lg:col-span-2">
+                        <p>{formatId(patrol.id)}</p>
+                      </TableCell>
+                      <TableCell className='sm:text-sm lg:text-base sm:col-span-2 lg:col-span-2 flex min-w-0"'>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="truncate">
+                                {patrol.preset.title}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              className="ml-[129px]"
+                            >
+                              <p className="max-w-[200px] break-words">
+                                {patrol.preset.title}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell className="sm:col-span-1 lg:col-span-2 flex">
+                        <BadgeCustom
+                          iconName={
+                            getPatrolStatusVariant(patrol.status).iconName
+                          }
+                          showIcon={true}
+                          showTime={false}
+                          variant={
+                            getPatrolStatusVariant(patrol.status).variant
+                          }
+                          hideText={windowWidth > 1024 ? false : true}
+                        >
+                          {s(patrol.status)}
+                        </BadgeCustom>
+                      </TableCell>
+                      <TableCell className="sm:col-span-2 lg:col-span-2">
+                        <p>
+                          <Progress value={calculateProgress(patrol.results)} />
+                        </p>
+                      </TableCell>
+                      <TableCell className="sm:col-span-2 lg:col-span-1">
+                        <p>{formatTime(patrol.date, locale, false)}</p>
+                      </TableCell>
+                      <TableCell className="sm:col-span-2 lg:col-span-2">
+                        <div className="flex justify-between">
+                          <div className="flex flex-row gap-2">
+                            <div className="flex gap-1 text-primary items-center">
+                              <span className="material-symbols-outlined">
+                                checklist
+                              </span>
+                              <p className="text-xl font-semibold">
+                                {patrol.itemCounts}
+                              </p>
                             </div>
-
-                            <div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                                  <Button variant="ghost" className="w-[45px] h-[45px]">
-                                    <span className="material-symbols-outlined items-center text-input">
-                                      more_horiz
-                                    </span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-
-                                <DropdownMenuContent align="end" className="p-0">
-                                  <DropdownMenuItem onClick={(e) => {
-                                    handleDetail(patrol.id)
-                                  }}>
-                                    <h1>{t("Detail")}</h1>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleOpenDialog(patrol.id)
-                                  }}>
-                                    <h1 className="text-destructive cursor-pointer">{t("Delete")}</h1>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                            <div className="flex gap-1 text-orange items-center">
+                              <span className="material-symbols-outlined">
+                                close
+                              </span>
+                              <p className="text-xl font-semibold">
+                                {countPatrolResult(patrol.results).fail}
+                              </p>
+                            </div>
+                            <div className="flex gap-1 text-destructive items-center">
+                              <span className="material-symbols-outlined">
+                                error
+                              </span>
+                              <p className="text-xl font-semibold">
+                                {countPatrolResult(patrol.results).defect}
+                              </p>
                             </div>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )
-                }
+
+                          <div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  className="w-[45px] h-[45px]"
+                                >
+                                  <span className="material-symbols-outlined items-center text-input">
+                                    more_horiz
+                                  </span>
+                                </Button>
+                              </DropdownMenuTrigger>
+
+                              <DropdownMenuContent align="end" className="p-0">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    handleDetail(patrol.id);
+                                  }}
+                                >
+                                  <h1>{t("Detail")}</h1>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenDialog(patrol.id);
+                                  }}
+                                >
+                                  <h1 className="text-destructive cursor-pointer">
+                                    {t("Delete")}
+                                  </h1>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </ScrollArea>
             </TableBody>
           </Table>
@@ -879,9 +1010,9 @@ export default function Page() {
             secondaryButtonText={t("Cancel")}
             backResult={(backResult) => {
               if (backResult) {
-                handleRemovePatrol(selectedPatrolId)
+                handleRemovePatrol(selectedPatrolId);
               }
-              handleCloseDialog()
+              handleCloseDialog();
             }}
           ></AlertCustom>
         )}
@@ -895,13 +1026,13 @@ export default function Page() {
             secondaryButtonText={t("Cancel")}
             backResult={(backResult) => {
               if (backResult) {
-                exportPatrol(allPatrols, checkedItems)
+                exportPatrol(allPatrols, checkedItems);
               }
-              handleCloseAlert()
+              handleCloseAlert();
             }}
           />
         )}
       </div>
-    </div >
-  )
+    </div>
+  );
 }

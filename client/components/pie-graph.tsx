@@ -1,3 +1,12 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ PieGraph ใช้สำหรับแสดงข้อมูลปัญหาที่พบบ่อย
+ * Input: 
+ * - chartData: ข้อมูลปัญหาที่พบบ่อยที่จะนำมาแสดงบนกราฟวงกลม
+ * Output:
+ * - JSX ของ PieGraph ที่แสดงข้อมูลปัญหาที่พบบ่อยบนกราฟวงกลม
+**/
+
 "use client";
 
 import * as React from "react";
@@ -5,7 +14,6 @@ import { Pie, PieChart, LabelList } from "recharts";
 
 import {
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   ChartConfig,

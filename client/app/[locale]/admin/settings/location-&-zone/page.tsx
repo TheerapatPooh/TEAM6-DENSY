@@ -1,13 +1,16 @@
 /**
  * คำอธิบาย:
  *  หน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
+ *  ใช้ในการดึงข้อมูล Zone และ Supervisor จาก API และแสดงผลในตาราง
+ *  ผู้ใช้สามารถเลือก Zone และ Supervisor เพื่อบันทึกข้อมูลการตั้งค่า Supervisor ให้กับ Zone
+ *  รองรับการแสดงผลข้อมูลผู้ใช้ที่สามารถเป็น Supervisor ในระบบ
  * Input:
  * - ไม่มี
  * Output:
- * - แสดงหน้าตั้งค่า Zone ในระบบ โดยสามารถกำหนด Supervisor ให้กับ Zone ได้
- * - แสดง Zone ที่มี Supervisor ในระบบทั้งหมด
- **/
-
+ * - แสดงหน้าตั้งค่า Zone พร้อมข้อมูล Supervisor ในระบบทั้งหมด
+ * - ผู้ใช้สามารถเลือก Zone และกำหนด Supervisor ได้
+ * - แสดงข้อมูลการบันทึกและอัปเดต Supervisor ให้กับ Zone
+**/
 "use client";
 import { IUser, IZone } from "@/app/type";
 import { Button } from "@/components/ui/button";
@@ -30,7 +33,7 @@ import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import { UserTooltip } from "@/components/user-tooltip";
 
-export default function Page() {
+export default function LocationAndZonePage() {
   const t = useTranslations("General");
   const z = useTranslations("Zone");
   const a = useTranslations("Alert");

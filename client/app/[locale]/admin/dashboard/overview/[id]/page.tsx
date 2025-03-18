@@ -1,12 +1,20 @@
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ OverviewDetailPage แสดงรายละเอียดการตรวจ Patrol ในแต่ละ ID ตามที่เลือก โดยแสดงผลปัญหาที่พบในรูปแบบแผนที่ SVG
+ * รวมถึงแสดงตารางข้อมูลปัญหาที่รายงาน (Defects) และกราฟที่แสดงรายละเอียดอื่นๆ เช่น ความยาวเวลาในการตรวจ และประเภทของปัญหา
+ *  
+ * Input:
+ * - ไม่มีการรับ input โดยตรง แต่จะมีการใช้ state สำหรับจัดการข้อมูลต่างๆ เช่น patrol, defects, defectCategory
+ *   และใช้ useParams เพื่อดึงข้อมูล ID ของ Patrol ที่เลือก
+ *  
+ * Output:
+ * - แสดงข้อมูลเกี่ยวกับการตรวจ Patrol โดยประกอบด้วย:
+ *   - แผนที่ SVG แสดงตำแหน่งของปัญหาที่พบ
+ *   - ตารางแสดงรายละเอียดของปัญหาที่รายงาน
+ *   - กราฟการแสดงข้อมูลต่างๆ เช่น ความยาวเวลาในการตรวจ (Patrol Duration) และประเภทของปัญหา (Defect Category)
+**/
 "use client";
-
-import {
-  IDefect,
-  IDefectCategory,
-  IPatrol,
-  IPatrolResult,
-  IUser,
-} from "@/app/type";
+import { IDefect, IDefectCategory, IPatrol, IPatrolResult } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Loading from "@/components/loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,7 +70,7 @@ import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
 import { UserTooltip } from "@/components/user-tooltip";
 
-export default function page() {
+export default function OverviewDetailPage() {
   const a = useTranslations("Alert");
   const z = useTranslations("Zone");
   const t = useTranslations("General");
@@ -385,12 +393,16 @@ export default function page() {
                                     <AvatarImage
                                       src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                     />
-                                    <AvatarFallback id={inspector.id.toString()}>
+                                    <AvatarFallback
+                                      id={inspector.id.toString()}
+                                    >
                                       {getInitials(inspector.profile.name)}
                                     </AvatarFallback>
                                   </Avatar>
                                 </UserTooltip>
-                                <p className="text-lg truncate">{inspector.profile.name}</p>
+                                <p className="text-lg truncate">
+                                  {inspector.profile.name}
+                                </p>
                               </div>
                             );
                           })}
@@ -445,12 +457,12 @@ export default function page() {
                     onClick={() => {
                       patrol.status !== "completed"
                         ? (toast({
-                          variant: "error",
-                          title: a("ExportPatrolNoData"),
-                          description: a(
-                            "ExportPatrolStatusNotCompleteDescription"
-                          ),
-                        }),
+                            variant: "error",
+                            title: a("ExportPatrolNoData"),
+                            description: a(
+                              "ExportPatrolStatusNotCompleteDescription"
+                            ),
+                          }),
                           handleCloseDialog())
                         : (exportData(patrol, patrol.results),
                           toast({
@@ -578,17 +590,15 @@ export default function page() {
                             </AvatarFallback>
                           </Avatar>
                         </UserTooltip>
-                        <p className="text-lg truncate">{inspector.profile.name}</p>
+                        <p className="text-lg truncate">
+                          {inspector.profile.name}
+                        </p>
                       </div>
                     );
                   })}
                   <div className="flex items-center justify-between w-full text-muted-foreground">
-                    <p className="text-lg font-semibold">
-                      {t("Total")}
-                    </p>
-                    <p className="text-lg font-semibold">
-                      {inspectors.length}
-                    </p>
+                    <p className="text-lg font-semibold">{t("Total")}</p>
+                    <p className="text-lg font-semibold">{inspectors.length}</p>
                   </div>
                 </HoverCardContent>
               </HoverCard>

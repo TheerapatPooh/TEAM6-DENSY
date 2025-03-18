@@ -12,7 +12,7 @@
  * - backResult: ฟังก์ชันที่รับค่า boolean จากการกดปุ่ม Action 1 หรือ Action 2
  * Output:
  * - JSX ของ AlertCustom ที่มีหัวข้อ, คำอธิบาย, 2 ปุ่ม Action และสามารถกำหนดไอคอนและสีของปุ่มได้
- **/
+**/
 
 import {
   AlertDialog,
@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { buttonVariants } from "./ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export interface IAlertCustom {
   title: string;

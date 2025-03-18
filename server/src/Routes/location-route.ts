@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) ที่เกี่ยวข้องกับการจัดการข้อมูลที่เกี่ยวข้องกับ zones และ locations รวมถึงการอัปเดตข้อมูล supervisor ที่เกี่ยวข้องกับ zone
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters เช่น ข้อมูลของ location หรือ zone ที่ต้องการดึงหรืออัปเดต
+ * 
+ * Output:
+ * - ส่งคืนข้อมูลที่เกี่ยวข้องกับ zones, location หรือข้อความผลการดำเนินการ เช่น ข้อความสำเร็จ, ข้อความผิดพลาด หรือข้อมูลที่ดึงมาจากฐานข้อมูล
+**/
 import { Router } from 'express'
 import { getAllZones, getLocation, getZone, updateSupervisor } from "@Controllers/location-controller.js";
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";
@@ -9,6 +20,8 @@ const router = Router()
  *   get:
  *     summary: Get zone details by ID
  *     description: ดึงข้อมูล Zone และ Supervisor ที่เกี่ยวข้อง
+ *     tags:
+ *       - Location Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -82,6 +95,8 @@ router.get('/zone/:id', authenticateUser, getZone)
  *   get:
  *     summary: Get all zones
  *     description: ดึงข้อมูลทั้งหมดของ Zone
+ *     tags:
+ *       - Location Controller
  *     responses:
  *       200:
  *         description: รายการ Zones ที่พบ
@@ -125,6 +140,8 @@ router.get('/zones', authenticateUser, getAllZones)
  *   get:
  *     summary: Get location details by ID
  *     description: ดึงข้อมูล Location และ Zones ที่เกี่ยวข้อง พร้อมข้อมูล Supervisor
+ *     tags:
+ *       - Location Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -203,10 +220,12 @@ router.get('/location/:id', authenticateUser, getLocation)
 
 /**
  * @swagger
- * /api/zone/{id}/supervisor:
+ * /api/zone/{id}:
  *   put:
  *     summary: Update supervisor for a zone
  *     description: อัปเดตข้อมูลของ Supervisor สำหรับ Zone ที่เลือก โดยการเชื่อมโยง `userId` กับ `zone`
+ *     tags:
+ *       - Location Controller
  *     parameters:
  *       - in: path
  *         name: id

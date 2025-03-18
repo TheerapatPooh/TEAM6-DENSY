@@ -6,11 +6,11 @@
  * Output:
  * - JSX ของ ReportDefect ที่แสดงข้อมูลของ Defect ที่ถูกรายงานในระบบ
  * - มีข้อมูลของ Defect และมีปุ่มสำหรับการแก้ไขข้อมูลของ Defect
- **/
+**/
 
 "use client";
 import React, { useEffect, useState } from "react";
-import { defectStatus, IDefect, IImage, IZone } from "@/app/type";
+import { defectStatus, IDefect } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,15 +40,15 @@ import {
 } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import AlertDefect from "./alert-defect";
+import AlertDefect from "@/components/alert-defect";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import Map from "@/components/map";
-import { AlertCustom } from "./alert-custom";
+import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 
 interface IReportDefect {
   defect: IDefect;

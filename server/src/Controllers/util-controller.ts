@@ -228,7 +228,7 @@ export async function refreshToken(req: Request, res: Response) {
     res.status(200).json({ accessToken: newAccessToken });
     return
   } catch (error) {
-    res.status(403).json({ message: "Invalid refresh token" });
+    res.status(403).json({ message: "Invalid refresh token", error });
   }
 }
 
@@ -701,7 +701,7 @@ export const uploadDefectImages = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Files uploaded successfully", images: images, });
   } catch (error) {
-    res.status(500).json({ error: "File upload failed" });
+    res.status(500).json({ message: "File upload failed", error });
   }
 };
 

@@ -1,3 +1,16 @@
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ HeatMapDetailPage แสดงรายละเอียดของส่วนงานที่รับผิดชอบ (Zone) พร้อมทั้งแสดงข้อมูลการตรวจพบปัญหาในรูปแบบกราฟต่างๆ
+ * โดยประกอบไปด้วย Dashboard Cards สำหรับสถิติปัญหาต่างๆ (TotalReport, DefectCompleted, DefectPending), กราฟวิเคราะห์แนวโน้มปัญหา (LineGraph),
+ * กราฟ Donut สำหรับหมวดหมู่ปัญหา และกราฟ Pie สำหรับปัญหาที่พบบ่อย รวมถึงตารางแสดงรายละเอียดของปัญหาที่รายงาน
+ *
+ * Input:
+ * - ไม่มีการรับ input โดยตรง แต่ใช้ state, URL parameters (zone ID) และค่า filter จาก localStorage ในการดึงข้อมูล
+ *
+ * Output:
+ * - แสดงรายละเอียดของ Zone พร้อมข้อมูลสถิติและกราฟต่างๆ ที่สรุปปัญหาที่เกิดขึ้นในส่วนงานนั้น
+ * - แสดงตารางรายงานปัญหาพร้อมฟังก์ชันการกรอง, การจัดเรียง และการค้นหาข้อมูล
+**/
 "use client";
 import {
   ICommonDefectItem,
@@ -65,7 +78,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-export default function Page() {
+export default function HeatMapDetailPage() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [selectedMonth, setSelectedMonth] = useState<string>("AllTime");
   const [zone, setZone] = useState<IZone>();

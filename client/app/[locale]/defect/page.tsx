@@ -1,12 +1,14 @@
 /**
  * คำอธิบาย:
- *  หน้าแสดงรายการข้อบกพร่องทั้งหมด โดยสามารถค้นหา, กรอง, เรียงลำดับข้อมูลได้
- * Input: 
- * - ไม่มี
+ * คอมโพเนนต์ DefectListPage ใช้สำหรับแสดงรายการปัญหาที่ถูกแจ้งเข้ามา
+ * Supervisor สามารถค้นหา (search), เรียงลำดับ (sort), และกรองข้อมูล (filter) ได้
+ *
+ * Input:
+ * - ไม่มี Input โดยตรง แต่ใช้ค่า state และ query parameters
+ *
  * Output:
- * - หน้าแสดงรายการข้อบกพร่องทั้งหมด โดยสามารถค้นหา, กรอง, เรียงลำดับข้อมูลได้
- **/
-
+ * - รายการปัญหาทั้งหมดที่ตรงกับเงื่อนไขที่กำหนด
+**/
 "use client";
 
 import { useEffect, useState } from "react";
@@ -41,15 +43,13 @@ import { DateRange } from "react-day-picker";
 import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-
-
-export default function Page() {
+export default function DefectListPage() {
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const [loading, setLoading] = useState<boolean>(true);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [allDefects, setAllDefects] = useState<IDefect[]>([])
+  const [allDefects, setAllDefects] = useState<IDefect[]>([]);
   const getAllDefects = async () => {
     try {
       const queryString = buildQueryString(filter, searchTerm);
@@ -67,7 +67,13 @@ export default function Page() {
     }));
   };
 
-  const defectStatus: defectStatus[] = ["reported", "completed", "pending_inspection", "in_progress", "resolved"]
+  const defectStatus: defectStatus[] = [
+    "reported",
+    "completed",
+    "pending_inspection",
+    "in_progress",
+    "resolved",
+  ];
 
   const initialFilter = {
     defectStatus: "All",
@@ -76,8 +82,8 @@ export default function Page() {
   };
 
   const getStoredFilter = () => {
-    if (typeof window !== 'undefined') {
-      const storedFilter = localStorage.getItem('defectsFilter');
+    if (typeof window !== "undefined") {
+      const storedFilter = localStorage.getItem("defectsFilter");
       if (storedFilter) {
         return JSON.parse(storedFilter);
       }
@@ -85,7 +91,7 @@ export default function Page() {
     return initialFilter;
   };
 
-  const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter())
+  const [filter, setFilter] = useState<IFilterDefect | null>(getStoredFilter());
 
   const [sort, setSort] = useState<{ by: string; order: string }>({
     by: "DefectDate",
@@ -104,12 +110,11 @@ export default function Page() {
           return {
             defectStatus: "All",
             defectTypes: [],
-            dateRange: { start: undefined, end: undefined }
-          }
+            dateRange: { start: undefined, end: undefined },
+          };
         }
       });
-    }
-    else {
+    } else {
       setFilter((prev) => {
         if (prev) {
           return {
@@ -123,11 +128,11 @@ export default function Page() {
   };
 
   const applyFilter = () => {
-    getAllDefects()
+    getAllDefects();
   };
 
   const resetFilter = () => {
-    setFilter(initialFilter)
+    setFilter(initialFilter);
   };
 
   const handleDateSelect = (dateRange: DateRange) => {
@@ -140,18 +145,21 @@ export default function Page() {
       defectTypes: filter?.defectTypes || [],
       dateRange: {
         start: startDate || undefined,
-        end: endDate || undefined
-      }
+        end: endDate || undefined,
+      },
     });
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (event: any) => {
     setSearchTerm(event.target.value);
   };
 
-  const buildQueryString = (filter: IFilterDefect | null, searchTerm: string) => {
+  const buildQueryString = (
+    filter: IFilterDefect | null,
+    searchTerm: string
+  ) => {
     const params: Record<string, string | undefined> = {};
 
     // เพิ่ม search term ถ้ามี
@@ -172,7 +180,7 @@ export default function Page() {
       params.startDate = filter?.dateRange.start.toISOString();
     }
 
-    // เพิ่ม endDate 
+    // เพิ่ม endDate
     if (filter?.dateRange?.end) {
       params.endDate = filter?.dateRange?.end.toISOString();
     }
@@ -181,16 +189,16 @@ export default function Page() {
   };
 
   useEffect(() => {
-    getAllDefects()
-    setLoading(false)
-  }, [])
+    getAllDefects();
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    getAllDefects()
-  }, [searchTerm])
+    getAllDefects();
+  }, [searchTerm]);
 
   useEffect(() => {
-    localStorage.setItem('defectsFilter', JSON.stringify(filter));
+    localStorage.setItem("defectsFilter", JSON.stringify(filter));
   }, [filter]);
 
   useEffect(() => {
@@ -201,12 +209,11 @@ export default function Page() {
   }, [sort, allDefects]);
 
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
 
   return (
     <div className="flex flex-col">
-
       <div className="flex items-center gap-2 pb-4">
         <Textfield
           iconName="search"
@@ -221,32 +228,52 @@ export default function Page() {
           ${isSortOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">swap_vert</span>
-            <div className="text-lg">{t('Sort')}</div>
+            <div className="text-lg">{t("Sort")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="p-2 gap-2">
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('SortBy')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+              {t("SortBy")}
+            </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.by}
-              onValueChange={(value) => handleSortChange('by', value)}
+              onValueChange={(value) => handleSortChange("by", value)}
             >
-              <DropdownMenuRadioItem value="DefectDate" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Date')}
+              <DropdownMenuRadioItem
+                value="DefectDate"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Date")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Status" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Status')}
+              <DropdownMenuRadioItem
+                value="Status"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Status")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
 
-            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Order')}</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+              {t("Order")}
+            </DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={sort.order}
-              onValueChange={(value) => handleSortChange('order', value)}
+              onValueChange={(value) => handleSortChange("order", value)}
             >
-              <DropdownMenuRadioItem value="Ascending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Ascending')}
+              <DropdownMenuRadioItem
+                value="Ascending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Ascending")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Descending" className="text-base" onSelect={(e) => e.preventDefault()}>
-                {t('Descending')}
+              <DropdownMenuRadioItem
+                value="Descending"
+                className="text-base"
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("Descending")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -258,14 +285,16 @@ export default function Page() {
           ${isFilterOpen ? "border border-destructive" : "border-none"}`}
           >
             <span className="material-symbols-outlined">page_info</span>
-            <div className="text-lg">{t('Filter')}</div>
+            <div className="text-lg">{t("Filter")}</div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="flex flex-col justify-center gap-2 p-2 z-50"
             align="end"
           >
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Date')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Date")}
+              </DropdownMenuLabel>
               <DatePickerWithRange
                 startDate={filter?.dateRange.start}
                 endDate={filter?.dateRange.end}
@@ -274,26 +303,35 @@ export default function Page() {
               />
             </div>
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Status')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Status")}
+              </DropdownMenuLabel>
               <Select
-                value={filter?.defectStatus || 'All'}
+                value={filter?.defectStatus || "All"}
                 onValueChange={(value) =>
                   setFilter({
                     defectStatus: value,
                     defectTypes: filter?.defectTypes || [],
-                    dateRange: { start: filter?.dateRange.start, end: filter?.dateRange.end }
+                    dateRange: {
+                      start: filter?.dateRange.start,
+                      end: filter?.dateRange.end,
+                    },
                   })
                 }
               >
                 <SelectTrigger className="">
                   <SelectValue
-                    placeholder={filter?.defectStatus === 'All' ? t('All') : filter?.defectStatus}
+                    placeholder={
+                      filter?.defectStatus === "All"
+                        ? t("All")
+                        : filter?.defectStatus
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>{t('Status')}</SelectLabel>
-                    <SelectItem value="All">{t('All')}</SelectItem>
+                    <SelectLabel>{t("Status")}</SelectLabel>
+                    <SelectItem value="All">{t("All")}</SelectItem>
                     {defectStatus.map((status) => (
                       <SelectItem value={status} key={status}>
                         {s(status)}
@@ -304,10 +342,14 @@ export default function Page() {
               </Select>
             </div>
             <div>
-              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">{t('Type')}</DropdownMenuLabel>
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Type")}
+              </DropdownMenuLabel>
               <DropdownMenuCheckboxItem
                 checked={filter?.defectTypes.includes("safety")}
-                onCheckedChange={(checked) => toggleTypeFilter("safety", checked)}
+                onCheckedChange={(checked) =>
+                  toggleTypeFilter("safety", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -315,13 +357,15 @@ export default function Page() {
                   variant="green"
                   showIcon={true}
                   iconName="verified_user"
-                  children={s('safety')}
+                  children={s("safety")}
                   shape="square"
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.defectTypes.includes("environment")}
-                onCheckedChange={(checked) => toggleTypeFilter("environment", checked)}
+                onCheckedChange={(checked) =>
+                  toggleTypeFilter("environment", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -329,13 +373,15 @@ export default function Page() {
                   variant="blue"
                   showIcon={true}
                   iconName="psychiatry"
-                  children={s('environment')}
+                  children={s("environment")}
                   shape="square"
                 />
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={filter?.defectTypes.includes("maintenance")}
-                onCheckedChange={(checked) => toggleTypeFilter("maintenance", checked)}
+                onCheckedChange={(checked) =>
+                  toggleTypeFilter("maintenance", checked)
+                }
                 onSelect={(e) => e.preventDefault()}
               >
                 <BadgeCustom
@@ -343,7 +389,7 @@ export default function Page() {
                   variant="red"
                   showIcon={true}
                   iconName="build"
-                  children={s('maintenance')}
+                  children={s("maintenance")}
                   shape="square"
                 />
               </DropdownMenuCheckboxItem>
@@ -351,17 +397,16 @@ export default function Page() {
 
             <div className="flex w-full justify-end mt-4 gap-2">
               <Button size="sm" variant="secondary" onClick={resetFilter}>
-                {t('Reset')}
+                {t("Reset")}
               </Button>
-              <Button size="sm" variant="primary" onClick={applyFilter}>{t('Apply')}</Button>
+              <Button size="sm" variant="primary" onClick={applyFilter}>
+                {t("Apply")}
+              </Button>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
-      <ScrollArea
-        className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]"
-      >
+      <ScrollArea className="h-full w-full rounded-md flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]">
         <div className="flex flex-col gap-y-4">
           {allDefects.length === 0 ? (
             <NotFound

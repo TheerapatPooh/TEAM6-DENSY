@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการข้อมูล patrol เช่น การดึงข้อมูล patrol, การสร้าง patrol, การเริ่มต้นและเสร็จสิ้น patrol, การคอมเมนต์หรืออัปเดตสถานะของ patrol, การจัดการผู้ใช้งานใน patrol, และการดึงข้อมูล defect ที่เกี่ยวข้องกับ patrol
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters (เช่น ข้อมูลของ patrol, ข้อมูลของ defect หรือ comment ที่เกี่ยวข้องกับ patrol, หรือ ID ของ patrol ที่ต้องการดำเนินการ)
+ * 
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูลเกี่ยวกับ patrol และ defect ที่ดึงจากฐานข้อมูล
+**/
 import { getAllPatrols, getPatrol, createPatrol, startPatrol, finishPatrol, removePatrol, commentPatrol, schedulePatrolStatusUpdate, getAllPatrolDefects, getPatrolUsers } from "@Controllers/patrol-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";
@@ -9,6 +20,8 @@ const router = Router()
  *   get:
  *     summary: Get all defects for a patrol
  *     description: ดึงข้อมูลทั้งหมดของ Defects สำหรับ Patrol ที่กำหนดโดยใช้ `patrolId`
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -170,6 +183,8 @@ router.get('/patrol/:id?/defects', authenticateUser, authorized(['admin', 'inspe
  *   get:
  *     summary: Get patrol details by ID
  *     description: ดึงข้อมูล Patrol โดยใช้ ID พร้อมตัวเลือกการรวมข้อมูล preset และ result
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -321,6 +336,8 @@ router.get('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']), 
  *   get:
  *     summary: Get all patrols
  *     description: ดึงข้อมูลทั้งหมดของ Patrol โดยสามารถกรองตามสถานะ, preset, ช่วงเวลา, และคำค้นหา
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: query
  *         name: status
@@ -410,6 +427,8 @@ router.get('/patrols', authenticateUser, authorized(['admin', 'inspector']), get
  *   post:
  *     summary: Create a new patrol
  *     description: สร้างข้อมูล Patrol ใหม่พร้อมตรวจสอบ checklist และส่งการแจ้งเตือนให้กับผู้ตรวจสอบ
+ *     tags:
+ *       - Patrol Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -504,6 +523,8 @@ router.post('/patrol', authenticateUser, authorized(['admin', 'inspector']), cre
  *   put:
  *     summary: Start a patrol
  *     description: เริ่มต้น Patrol และอัปเดตสถานะจาก "scheduled" เป็น "on_going"
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -520,21 +541,88 @@ router.post('/patrol', authenticateUser, authorized(['admin', 'inspector']), cre
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [scheduled, on_going]
+ *                 description: The status of the patrol.
  *               checklists:
  *                 type: array
+ *                 description: List of checklists included in the patrol.
  *                 items:
  *                   type: object
  *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     patrolId:
+ *                       type: integer
  *                     checklistId:
  *                       type: integer
+ *                     userId:
+ *                       type: integer
+ *                     checklist:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         title:
+ *                           type: string
+ *                         items:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               name:
+ *                                 type: string
+ *                               type:
+ *                                 type: string
+ *                               checklistId:
+ *                                 type: integer
+ *                               itemZones:
+ *                                 type: array
+ *                                 items:
+ *                                   type: object
+ *                                   properties:
+ *                                     zone:
+ *                                       type: object
+ *                                       properties:
+ *                                         id:
+ *                                           type: integer
+ *                                         name:
+ *                                           type: string
+ *                                         supervisor:
+ *                                           type: object
+ *                                           properties:
+ *                                             id:
+ *                                               type: integer
+ *                                             profile:
+ *                                               type: object
+ *                                               properties:
+ *                                                 name:
+ *                                                   type: string
  *                     inspector:
  *                       type: object
  *                       properties:
  *                         id:
  *                           type: integer
- *                         name:
+ *                         role:
  *                           type: string
+ *                         profile:
+ *                           type: object
+ *                           properties:
+ *                             name:
+ *                               type: string
+ *                             image:
+ *                               type: object
+ *                               nullable: true
+ *                               properties:
+ *                                 id:
+ *                                   type: integer
+ *                                 path:
+ *                                   type: string
+ *                                 timestamp:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 updatedBy:
+ *                                   type: integer
  *     responses:
  *       200:
  *         description: Patrol started successfully
@@ -628,6 +716,8 @@ router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspecto
  *   put:
  *     summary: Finish a patrol
  *     description: เปลี่ยนสถานะของ Patrol จาก "on_going" เป็น "completed" และอัปเดตข้อมูลที่เกี่ยวข้อง
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -635,7 +725,7 @@ router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspecto
  *         schema:
  *           type: integer
  *         description: ID ของ Patrol ที่ต้องการเสร็จสิ้น
- *     requestBody:
+  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -644,31 +734,132 @@ router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspecto
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [on_going, completed]
+ *                 description: The current status of the patrol.
  *               checklists:
  *                 type: array
+ *                 description: List of checklists assigned in the patrol.
  *                 items:
  *                   type: object
  *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     patrolId:
+ *                       type: integer
  *                     checklistId:
  *                       type: integer
+ *                     userId:
+ *                       type: integer
+ *                     checklist:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         title:
+ *                           type: string
+ *                         items:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               name:
+ *                                 type: string
+ *                               type:
+ *                                 type: string
+ *                               checklistId:
+ *                                 type: integer
+ *                               itemZones:
+ *                                 type: array
+ *                                 items:
+ *                                   type: object
+ *                                   properties:
+ *                                     zone:
+ *                                       type: object
+ *                                       properties:
+ *                                         id:
+ *                                           type: integer
+ *                                         name:
+ *                                           type: string
  *                     inspector:
  *                       type: object
  *                       properties:
  *                         id:
  *                           type: integer
- *                         name:
+ *                         email:
  *                           type: string
+ *                           nullable: true
+ *                         profile:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: integer
+ *                             name:
+ *                               type: string
+ *                             age:
+ *                               type: integer
+ *                             tel:
+ *                               type: string
+ *                             address:
+ *                               type: string
+ *                             userId:
+ *                               type: integer
+ *                             imageId:
+ *                               type: integer
+ *                             image:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: integer
+ *                                 path:
+ *                                   type: string
+ *                                 timestamp:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 updatedBy:
+ *                                   type: integer
  *               results:
  *                 type: array
+ *                 description: Results of the patrol checks.
  *                 items:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: integer
  *                     status:
- *                       type: string
- *                       enum: [pending, resolved, completed]
+ *                       type: boolean
+ *                     itemId:
+ *                       type: integer
+ *                     zoneId:
+ *                       type: integer
+ *                     patrolId:
+ *                       type: integer
+ *                     defects:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           name:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                           type:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                           timestamp:
+ *                             type: string
+ *                             format: date-time
+ *                           userId:
+ *                             type: integer
+ *                           patrolResultId:
+ *                             type: integer
+ *                     comments:
+ *                       type: array
+ *                       items:
+ *                         type: string
  *               startTime:
  *                 type: string
  *                 format: date-time
@@ -766,6 +957,8 @@ router.put('/patrol/:id/finish', authenticateUser, authorized(['admin', 'inspect
  *   delete:
  *     summary: Delete a patrol and related records
  *     description: ลบข้อมูล Patrol พร้อมข้อมูลที่เกี่ยวข้อง (เช่น PatrolChecklist, PatrolResult)
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -803,6 +996,8 @@ router.delete('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']
  *   post:
  *     summary: Add a comment to a patrol
  *     description: เพิ่มความคิดเห็นให้กับ Patrol โดยเชื่อมโยงกับ `patrolResult` และบันทึกข้อความ
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -823,6 +1018,9 @@ router.delete('/patrol/:id', authenticateUser, authorized(['admin', 'inspector']
  *               patrolResultId:
  *                 type: integer
  *                 description: ID ของ PatrolResult ที่ความคิดเห็นนี้จะถูกเชื่อมโยง
+ *               supervisorId:
+ *                 type: integer
+ *                 description: ID ของ SupervisorId ที่เป็นผู้รับผิดชอบใน Zone ที่ถูก Comment
  *     responses:
  *       201:
  *         description: Comment added successfully
@@ -877,6 +1075,8 @@ router.post('/patrol/:id/comment', authenticateUser, authorized(['admin', 'inspe
  *   get:
  *     summary: Get patrol users by patrol ID
  *     description: ดึงข้อมูลผู้ใช้ (inspectors) ที่เกี่ยวข้องกับ Patrol โดยใช้ `patrolId`
+ *     tags:
+ *       - Patrol Controller
  *     parameters:
  *       - in: path
  *         name: id

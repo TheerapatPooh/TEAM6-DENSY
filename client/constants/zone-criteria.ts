@@ -1,3 +1,10 @@
+/**
+ * คำอธิบาย: ไฟล์นี้ใช้เก็บค่าคงที่ที่ใช้ในการกำหนดสีของ Zone ตามจำนวน Defects
+ * Input: ไม่มี
+ * Output: ค่าคงที่ที่ใช้ในการกำหนดสีของ Zone ตามจำนวน Defects
+**/
+
+// ค่าคงที่ที่ใช้ในการกำหนดสีของ Zone ตามจำนวน Defects
 export const zoneCriteria = [
     { defects: 75, label: "> 75", color: '#B71C1C' },  
     { defects: 65, label: "> 65", color: '#D32F2F' },  

@@ -1,7 +1,17 @@
+/**
+ * คำอธิบาย:
+ *  หน้าผลลัพธ์เมื่อไม่พบข้อมูลที่เกี่ยวข้องกับ Zone โดยจะแสดงข้อความแจ้งเตือนให้ผู้ใช้ไปที่หน้าตั้งค่าต่างๆ
+ *  ในระบบเพื่อกำหนดผู้ใช้ให้กับ Zone ที่ไม่มีการมอบหมาย
+ *  ใช้การแปลภาษาและแสดงภาพที่เหมาะสมในการสื่อความหมาย
+ * Input:
+ * - ไม่มี
+ * Output:
+ * - แสดงข้อความที่แปลแล้วตามภาษาในระบบ
+ * - แสดงลิงค์เพื่อให้ผู้ใช้ไปตั้งค่าการมอบหมายผู้ใช้ให้กับ Zone
+**/
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-export default function Page() {
+export default function ErrorPage() {
   //แปลภาษา
   const t = useTranslations("General");
 

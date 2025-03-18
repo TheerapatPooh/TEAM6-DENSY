@@ -6,7 +6,7 @@
  * - handleselectUser: ฟังก์ชันที่ใช้สำหรับเลือก Inspector จาก Dropdown
  * Output:
  * - JSX ของ Dropdown ที่มี Checklist และ Inspector ที่สามารถเลือกได้
- **/
+**/
 
 "use client";
 import React, { useState, useEffect } from "react";
@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IChecklist, IUser } from "@/app/type";
 import { getInitials } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 
 interface IChecklistDropdown {
   checklist: IChecklist;

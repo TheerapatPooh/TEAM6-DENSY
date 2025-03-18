@@ -1,14 +1,15 @@
 /**
- * คำอธิบาย:
- *  หน้าแสดงรายละเอียดข้อบกพร่องตาม id ที่ระบุ
- * Input:
- * - ไม่มี
- * Output:
- * - แสดงรายละเอียดข้อบกพร่องตาม id ที่ระบุ และสามารถดำเนินการต่อได้ตามสถานะของข้อบกพร่องนั้นๆ
- * - สามารถ Accept ข้อบกพร่อง หรือ Resolve ข้อบกพร่องได้
- * - สามารถแนบรูปภาพหลังการแก้ไขข้อบกพร่องได้
- **/
-
+ * คำอธิบาย:  
+ * คอมโพเนนต์ DefectViewPage ใช้สำหรับแสดงรายละเอียดของปัญหาที่เลือก  
+ * Supervisor สามารถยอมรับ (accept), แก้ไข (edit), และเปลี่ยนสถานะเป็น resolved ได้  
+ *  
+ * Input:  
+ * - รับค่า defect ID จาก URL parameters เพื่อดึงข้อมูลปัญหา  
+ *  
+ * Output:  
+ * - แสดงข้อมูลรายละเอียดของปัญหา รวมถึงรูปภาพก่อนและหลังการแก้ไข  
+ * - มีปุ่มให้ดำเนินการเปลี่ยนสถานะของปัญหาได้  
+**/
 "use client";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +45,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { UserTooltip } from "@/components/user-tooltip";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function Page() {
+export default function DefectViewPage() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [defect, setDefect] = useState<IDefect>();
   const param = useParams();
