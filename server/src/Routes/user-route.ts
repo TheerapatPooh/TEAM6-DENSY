@@ -46,7 +46,7 @@ const router = Router()
  *           enum: ["true", "false"]
  *         description: ถ้ากำหนดเป็น "true" จะรวมข้อมูลชื่อผู้ใช้ของผู้ใช้
  *       - in: query
- *         name: role
+ *         name: roles
  *         required: false
  *         schema:
  *           type: string

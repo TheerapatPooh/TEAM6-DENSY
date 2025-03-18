@@ -541,21 +541,88 @@ router.post('/patrol', authenticateUser, authorized(['admin', 'inspector']), cre
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [scheduled, on_going]
+ *                 description: The status of the patrol.
  *               checklists:
  *                 type: array
+ *                 description: List of checklists included in the patrol.
  *                 items:
  *                   type: object
  *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     patrolId:
+ *                       type: integer
  *                     checklistId:
  *                       type: integer
+ *                     userId:
+ *                       type: integer
+ *                     checklist:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         title:
+ *                           type: string
+ *                         items:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               name:
+ *                                 type: string
+ *                               type:
+ *                                 type: string
+ *                               checklistId:
+ *                                 type: integer
+ *                               itemZones:
+ *                                 type: array
+ *                                 items:
+ *                                   type: object
+ *                                   properties:
+ *                                     zone:
+ *                                       type: object
+ *                                       properties:
+ *                                         id:
+ *                                           type: integer
+ *                                         name:
+ *                                           type: string
+ *                                         supervisor:
+ *                                           type: object
+ *                                           properties:
+ *                                             id:
+ *                                               type: integer
+ *                                             profile:
+ *                                               type: object
+ *                                               properties:
+ *                                                 name:
+ *                                                   type: string
  *                     inspector:
  *                       type: object
  *                       properties:
  *                         id:
  *                           type: integer
- *                         name:
+ *                         role:
  *                           type: string
+ *                         profile:
+ *                           type: object
+ *                           properties:
+ *                             name:
+ *                               type: string
+ *                             image:
+ *                               type: object
+ *                               nullable: true
+ *                               properties:
+ *                                 id:
+ *                                   type: integer
+ *                                 path:
+ *                                   type: string
+ *                                 timestamp:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 updatedBy:
+ *                                   type: integer
  *     responses:
  *       200:
  *         description: Patrol started successfully
@@ -658,7 +725,7 @@ router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspecto
  *         schema:
  *           type: integer
  *         description: ID ของ Patrol ที่ต้องการเสร็จสิ้น
- *     requestBody:
+  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -667,31 +734,132 @@ router.put('/patrol/:id/start', authenticateUser, authorized(['admin', 'inspecto
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [on_going, completed]
+ *                 description: The current status of the patrol.
  *               checklists:
  *                 type: array
+ *                 description: List of checklists assigned in the patrol.
  *                 items:
  *                   type: object
  *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     patrolId:
+ *                       type: integer
  *                     checklistId:
  *                       type: integer
+ *                     userId:
+ *                       type: integer
+ *                     checklist:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         title:
+ *                           type: string
+ *                         items:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               name:
+ *                                 type: string
+ *                               type:
+ *                                 type: string
+ *                               checklistId:
+ *                                 type: integer
+ *                               itemZones:
+ *                                 type: array
+ *                                 items:
+ *                                   type: object
+ *                                   properties:
+ *                                     zone:
+ *                                       type: object
+ *                                       properties:
+ *                                         id:
+ *                                           type: integer
+ *                                         name:
+ *                                           type: string
  *                     inspector:
  *                       type: object
  *                       properties:
  *                         id:
  *                           type: integer
- *                         name:
+ *                         email:
  *                           type: string
+ *                           nullable: true
+ *                         profile:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: integer
+ *                             name:
+ *                               type: string
+ *                             age:
+ *                               type: integer
+ *                             tel:
+ *                               type: string
+ *                             address:
+ *                               type: string
+ *                             userId:
+ *                               type: integer
+ *                             imageId:
+ *                               type: integer
+ *                             image:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: integer
+ *                                 path:
+ *                                   type: string
+ *                                 timestamp:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 updatedBy:
+ *                                   type: integer
  *               results:
  *                 type: array
+ *                 description: Results of the patrol checks.
  *                 items:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: integer
  *                     status:
- *                       type: string
- *                       enum: [pending, resolved, completed]
+ *                       type: boolean
+ *                     itemId:
+ *                       type: integer
+ *                     zoneId:
+ *                       type: integer
+ *                     patrolId:
+ *                       type: integer
+ *                     defects:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           name:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                           type:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                           timestamp:
+ *                             type: string
+ *                             format: date-time
+ *                           userId:
+ *                             type: integer
+ *                           patrolResultId:
+ *                             type: integer
+ *                     comments:
+ *                       type: array
+ *                       items:
+ *                         type: string
  *               startTime:
  *                 type: string
  *                 format: date-time

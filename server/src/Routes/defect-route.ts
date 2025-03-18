@@ -256,12 +256,6 @@ router.get('/defects', authenticateUser, authorized(['admin', 'supervisor']), ge
  *               supervisorId:
  *                 type: string
  *                 description: ID ของ Supervisor ที่เกี่ยวข้อง
- *               imageFiles:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: ไฟล์รูปภาพที่เกี่ยวข้องกับ Defect (สูงสุด 10 ไฟล์)
  *     responses:
  *       201:
  *         description: Defect created successfully
@@ -669,30 +663,26 @@ router.put('/comment/:id', authenticateUser, authorized(['admin', 'supervisor'])
  *     description: อัปโหลดไฟล์ภาพที่เกี่ยวข้องกับข้อบกพร่อง
  *     tags:
  *       - Defect Controller
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID ของข้อบกพร่องที่ต้องการอัปโหลดภาพ
- *         schema:
- *           type: integer
- *           example: 123
- *       - in: formData
- *         name: status
- *         required: true
- *         description: สถานะของข้อบกพร่อง (ก่อนหรือหลัง)
- *         schema:
- *           type: string
- *           enum: [reported, resolved]
- *           example: "reported"
- *       - in: formData
- *         name: imageFiles
- *         required: true
- *         description: ไฟล์ภาพที่จะอัปโหลด
- *         type: array
- *         items:
- *           type: file
- *           description: ภาพที่ต้องการอัปโหลด
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               defectId:
+ *                 type: string
+ *                 description: ID ของข้อบกพร่องที่ต้องการอัปโหลดภาพ
+ *               status:
+ *                 type: string
+ *                 enum: [reported, resolved]
+ *                 description: สถานะของข้อบกพร่อง (ก่อนหรือหลัง)
+ *               imageFiles:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: ไฟล์รูปภาพใหม่ (อัปโหลดได้สูงสุด 10 ไฟล์)
  *     responses:
  *       200:
  *         description: ไฟล์ภาพอัปโหลดสำเร็จ
