@@ -729,7 +729,6 @@ export default function AlertDefect({
                           defect.id,
                           selectedFiles,
                           "resolve",
-                          false
                         );
                         break;
 
@@ -751,7 +750,6 @@ export default function AlertDefect({
                           defect.id,
                           selectedFiles,
                           "edit",
-                          true
                         );
                         break;
 
