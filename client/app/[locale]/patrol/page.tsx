@@ -1,25 +1,14 @@
 /**
  * คำอธิบาย:
- *  หน้าที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
- *  โดยสามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
+ * คอมโพเนนต์ PatrolListPage เป็นหน้าไวสร้างรายการตรวจ Patrol โดยผู้ใช้สามารถเลือก Preset, Inspector ในแต่ละ Checklist และเลือกวันที่ได้
+ * หลังจากที่มีการสร้างใบ Patrol ผู้ตรวจคนอื่นๆ ที่เกี่ยวข้องจะเห็นใบที่สร้างขึ้นและสามารถเห็นผลการตรวจแบบ Realtime ผ่าน Socket
  *
  * Input:
- * - ไม่มี
+ * - ไม่มี (คอมโพเนนต์นี้ไม่มีการรับ props โดยตรง)
  * Output:
- * - หน้า Patrol ที่แสดงรายการ Patrol ทั้งหมด และสามารถสร้าง Patrol ใหม่ได้
- * - สามารถค้นหา เลือกเรียงลำดับ และกรองข้อมูล Patrol ได้
- * - สามารถเลือก Preset และวันที่สำหรับ Patrol ใหม่
- * - สามารถเลือก Inspector ในแต่ละ Checklist ของ Preset ที่เลือกได้
- * - สามารถสร้าง Patrol ใหม่ได้
- * - สามารถลบ Patrol ที่สร้างได้
- * - แสดง Alert ในกรณีที่ต้องการสร้าง Patrol ใหม่
- * - แสดง Alert ในกรณีที่ต้องการลบ Patrol
- * - แสดง Alert ในกรณีที่สร้าง Patrol ใหม่เสร็จสิ้น
- * - แสดง Alert ในกรณีที่ลบ Patrol สำเร็จ
- * - แสดง Alert ในกรณีที่เกิดข้อผิดพลาดในการสร้าง Patrol
- * - แสดง Alert ในกรณีที่เกิดข้อผิดพลาดในการลบ Patrol
- **/
-
+ * - หน้าจอที่แสดงฟอร์มให้ผู้ใช้เลือก Preset, Inspector, Checklist และวันที่ พร้อมกับฟีเจอร์การแสดงผลแบบ Realtime
+ * - เมื่อสร้างใบ Patrol ผู้ตรวจที่เกี่ยวข้องจะเห็นการอัปเดตผลการตรวจผ่าน Socket
+**/
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -78,17 +67,11 @@ import Loading from "@/components/loading";
 import { toast } from "@/hooks/use-toast";
 import { AlertCustom } from "@/components/alert-custom";
 import NotFound from "@/components/not-found";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { ZoneTooltip } from "@/components/zone-tooltip";
 import { TextTooltip } from "@/components/text-tooltip";
 import { useSocket } from "@/components/socket-provider";
 
-export default function Page() {
+export default function PatrolListPage() {
   const a = useTranslations("Alert");
   const t = useTranslations("General");
   const z = useTranslations("Zone");
@@ -181,7 +164,7 @@ export default function Page() {
     };
 
     try {
-      const response = await fetchData("post", "/patrol", true, data);
+      await fetchData("post", "/patrol", true, data);
       setSecondDialog(false);
       toast({
         variant: "success",
@@ -347,7 +330,11 @@ export default function Page() {
 
   const getUserData = async () => {
     try {
-      const userfetch = await fetchData("get", "/user?profile=true&image=true", true);
+      const userfetch = await fetchData(
+        "get",
+        "/user?profile=true&image=true",
+        true
+      );
       setUser(userfetch);
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
@@ -385,8 +372,12 @@ export default function Page() {
 
       const updatedResults = patrol.results
         .map((existingResult) => {
-          const matchingSocketResult = socketData.find((result) => result.id === existingResult.id);
-          return matchingSocketResult ? { ...existingResult, ...matchingSocketResult } : existingResult;
+          const matchingSocketResult = socketData.find(
+            (result) => result.id === existingResult.id
+          );
+          return matchingSocketResult
+            ? { ...existingResult, ...matchingSocketResult }
+            : existingResult;
         })
         .filter((result) => result.id); // กรองเฉพาะที่มี id เท่านั้น
 
@@ -412,7 +403,7 @@ export default function Page() {
   useEffect(() => {
     const initializeSocketListeners = () => {
       if (user?.id) {
-        socket.emit('join_room', user.id);
+        socket.emit("join_room", user.id);
       }
 
       // ฟังก์ชันรับข้อมูลเริ่มต้นจาก socket
@@ -421,17 +412,19 @@ export default function Page() {
           return;
         }
         // ตั้งค่า socketData ให้เป็นข้อมูลที่รับมาจาก socket
-        setSocketData(prevData => {
+        setSocketData((prevData) => {
           // อัปเดตข้อมูลที่ตรงกันหรือลงข้อมูลใหม่
           const updatedResults = initialResults.map((incomingResult) => {
             // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
-            const existingIndex = prevData.findIndex(result => result.id === incomingResult.id);
+            const existingIndex = prevData.findIndex(
+              (result) => result.id === incomingResult.id
+            );
 
             if (existingIndex !== -1) {
               // ถ้ามี id ตรงกัน, อัปเดตข้อมูลใน existing result
               return {
-                ...prevData[existingIndex],  // ข้อมูลเดิม
-                ...incomingResult,            // ข้อมูลใหม่ที่มาจาก initialResults
+                ...prevData[existingIndex], // ข้อมูลเดิม
+                ...incomingResult, // ข้อมูลใหม่ที่มาจาก initialResults
               };
             }
 
@@ -440,8 +433,11 @@ export default function Page() {
           });
 
           // เช็คผลลัพธ์ใหม่ที่ไม่มีใน prevData
-          const newResults = initialResults.filter(result =>
-            !prevData.some(existingResult => existingResult.id === result.id)
+          const newResults = initialResults.filter(
+            (result) =>
+              !prevData.some(
+                (existingResult) => existingResult.id === result.id
+              )
           );
 
           // รวมข้อมูลเดิมที่อัปเดตและผลลัพธ์ใหม่
@@ -451,20 +447,24 @@ export default function Page() {
 
       // ฟังก์ชันที่ใช้ในการอัปเดตข้อมูลผลลัพธ์
       const handleResultUpdate = (incomingResult: IPatrolResult) => {
-        setSocketData(prevData => {
+        setSocketData((prevData) => {
           // เช็คว่า incomingResult.id มีอยู่ใน prevData หรือไม่
-          const updatedResults = prevData.map(existingResult => {
+          const updatedResults = prevData.map((existingResult) => {
             if (existingResult.id === incomingResult.id) {
               return {
-                ...existingResult,   // ข้อมูลเดิม
-                ...incomingResult,   // ข้อมูลใหม่ที่มาจาก incomingResult
+                ...existingResult, // ข้อมูลเดิม
+                ...incomingResult, // ข้อมูลใหม่ที่มาจาก incomingResult
               };
             }
             return existingResult;
           });
 
           // ถ้าไม่มีผลลัพธ์จาก incomingResult ใน prevData, ให้เพิ่มเข้าไป
-          if (!prevData.some(existingResult => existingResult.id === incomingResult.id)) {
+          if (
+            !prevData.some(
+              (existingResult) => existingResult.id === incomingResult.id
+            )
+          ) {
             return [...updatedResults, incomingResult];
           }
 
@@ -473,7 +473,10 @@ export default function Page() {
       };
 
       // อัปเดตสถานะเมื่อ patrol เริ่ม
-      const handlePatrolStarted = async (data: { patrolId: string; patrolData: IPatrol }) => {
+      const handlePatrolStarted = async (data: {
+        patrolId: string;
+        patrolData: IPatrol;
+      }) => {
         if (!joinedRoomsRef.current.has(data.patrolId)) {
           socket.emit("join_patrol", data.patrolId);
           joinedRoomsRef.current.add(data.patrolId);
@@ -482,7 +485,14 @@ export default function Page() {
       };
 
       // อัปเดตสถานะเมื่อ patrol จบ
-      const handlePatrolFinished = async (data: { patrolId: string; patrolData: IPatrol }) => {
+      const handlePatrolFinished = async (data: {
+        patrolId: string;
+        patrolData: IPatrol;
+      }) => {
+        if (!joinedRoomsRef.current.has(data.patrolId)) {
+          socket.emit("join_patrol", data.patrolId);
+          joinedRoomsRef.current.add(data.patrolId);
+        }
         await getPatrolData();
       };
 
@@ -495,9 +505,11 @@ export default function Page() {
         await getPatrolData();
       };
 
-      // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ 
+      // อัปเดตข้อมูลเมื่อ Patrol ถูกลบ
       const handlePatrolDeleted = (patrolId) => {
-        setAllPatrols((prevPatrols) => prevPatrols.filter((patrol) => patrol.id !== patrolId));
+        setAllPatrols((prevPatrols) =>
+          prevPatrols.filter((patrol) => patrol.id !== patrolId)
+        );
         if (!joinedRoomsRef.current.has(patrolId)) {
           socket.emit("join_patrol", patrolId);
           joinedRoomsRef.current.add(patrolId);
@@ -526,12 +538,16 @@ export default function Page() {
 
   useEffect(() => {
     allPatrols.forEach((patrol) => {
-      if (!joinedRoomsRef.current.has(patrol.id) && patrol.status === 'on_going' || patrol.status === 'scheduled') {
+      if (
+        (!joinedRoomsRef.current.has(patrol.id) &&
+          patrol.status === "on_going") ||
+        patrol.status === "scheduled"
+      ) {
         socket.emit("join_patrol", patrol.id);
         joinedRoomsRef.current.add(patrol.id);
       }
     });
-  }, [allPatrols])
+  }, [allPatrols]);
 
   useEffect(() => {
     getPatrolData();
@@ -792,10 +808,11 @@ export default function Page() {
                             <Button
                               key={index}
                               variant={"outline"}
-                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${selectedPreset === preset
-                                ? "border-destructive"
-                                : "border-transparent"
-                                } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
+                              className={`custom-shadow bg-secondary grid grid-cols-1 sm:grid-cols-1 h-60 ${
+                                selectedPreset === preset
+                                  ? "border-destructive"
+                                  : "border-transparent"
+                              } flex flex-col py-4 px-6 gap-4 justify-start items-start`}
                               onClick={() => setSelectedPreset(preset)}
                             >
                               {/* Title */}
@@ -833,7 +850,6 @@ export default function Page() {
                                     />
                                   </TextTooltip>
                                 </div>
-
                               </div>
                             </Button>
                           ))

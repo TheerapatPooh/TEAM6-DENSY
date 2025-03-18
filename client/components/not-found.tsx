@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ NotFound ใช้สำหรับแสดงข้อความเมื่อไม่พบข้อมูลที่ต้องการ
+ * Input: 
+ * - icon: ไอคอนที่ใช้แสดง
+ * - title: หัวข้อข้อความ
+ * - description: คำอธิบายข้อความ
+ * Output:
+ * - JSX ของ NotFound ที่แสดงข้อความเมื่อไม่พบข้อมูลที่ต้องการ
+**/
+
 import { useTranslations } from 'next-intl';
 import React from 'react'
 

@@ -1,19 +1,16 @@
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ที่ใช้สำหรับแสดงข้อความ Tooltip ที่มีข้อมูลที่ต้องการแสดง
+ * Input: 
+ * - object: ข้อมูลที่ต้องการแสดงใน Tooltip
+ * - children: ข้อความหรือ Element ที่ต้องการแสดง Tooltip
+ * Output:
+ * - JSX ของ Tooltip ที่แสดงข้อมูลที่ต้องการ
+**/
+
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { IUser } from "@/app/type";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { formatTime, getInitials, getUserVariant } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
-import { useLocale, useTranslations } from "next-intl";
-import BadgeCustom from "./badge-custom";
-import { UserTooltip } from "./user-tooltip";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export interface IUserTooltip {
   object: any;
@@ -22,8 +19,6 @@ export interface IUserTooltip {
 
 export function TextTooltip({ object, children }: IUserTooltip) {
   const triggerContainerRef = useRef<HTMLDivElement>(null);
-  const t = useTranslations("General");
-  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const openType = useRef<"hover" | "click" | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);

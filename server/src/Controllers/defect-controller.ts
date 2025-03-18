@@ -2,10 +2,6 @@ import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
 import { createNotification, deleteImages, handleDefectImagesUpdate } from "@Controllers/util-controller.js";
 import { DefectStatus, ItemType, NotificationType } from "@prisma/client";
-import fs from "fs";
-import path from "path";
-import { timeStamp } from "console";
-import { tr } from "@faker-js/faker";
 
 /**
  * คำอธิบาย: ฟังก์ชันสำหรับสร้าง Defect ใหม่
@@ -748,7 +744,7 @@ export async function updateDefect(req: Request, res: Response): Promise<void> {
  * - req.params: { id: Int} (ID ของ Defect ที่จะลบ)
  * Output: JSON message ยืนยันการลบ Defect สำเร็จ
  **/
-export async function deleteDefect(req: Request, res: Response): Promise<void> {
+export async function removeDefect(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user.userId;
     const { id } = req.params;

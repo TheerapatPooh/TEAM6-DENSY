@@ -4,13 +4,13 @@
  *   (variant) ที่ส่งเข้ามา เช่น ถ้าเป็น "inspector" จะแสดงเมนู Patrol และ Defect ถ้าไม่ใช่จะไม่แสดงเมนูดังกล่าว
  *
  * Input:
- * - variant: HeaderVariant ('inspector' | 'supervisor' | 'admin')
+ * - variant: HeaderVariant ('inspector' | 'supervisor' | 'admin' | 'profile')
  *
  * Output:
  * - JSX ของ Header ที่มีโลโก้, ปุ่มเปลี่ยนโหมดธีม (ModeToggle), ปุ่มเปลี่ยนภาษา (LanguageSelect),
  *   การแจ้งเตือน (Notification) และเมนูโปรไฟล์ (ProfileDropdown)
  * - UI จะแตกต่างกันตาม variant ที่ส่งเข้ามา
- **/
+**/
 
 "use client";
 import React, { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 
-type HeaderVariant = 'inspector' | 'supervisor' | 'admin' | 'profile';
+type HeaderVariant = "inspector" | "supervisor" | "admin" | "profile";
 interface IHeader {
   variant: HeaderVariant;
 }
@@ -55,30 +55,32 @@ export default function Header({ variant }: IHeader) {
     const pathSegments = pathAfterLang.split("/");
 
     // ดึง segment แรกที่ไม่ว่าง
-    const mainSegment = pathSegments.find(segment => segment !== "");
+    const mainSegment = pathSegments.find((segment) => segment !== "");
 
     // Map เป็นชื่อที่ต้องการแสดง
     const pathMap = {
-      "settings": "Settings",
-      "dashboard": "Dashboard",
-      "employees": "Employees"
+      settings: "Settings",
+      dashboard: "Dashboard",
+      employees: "Employees",
     };
 
     // คืนค่า หรือ Unknown Path หากไม่ตรงกับ map
     return pathMap[mainSegment] || "Unknown Path";
   }
 
-
   return (
     <header
-      className={`px-6 py-0 bg-card h-[70px] custom-shadow flex items-center sticky top-0 z-50 ${variant === "admin"
-        ? "justify-between"
-        : "justify-between custom-shadow"
-        }`}
+      className={`px-6 py-0 bg-card h-[70px] custom-shadow flex items-center sticky top-0 z-50 ${
+        variant === "admin"
+          ? "justify-between"
+          : "justify-between custom-shadow"
+      }`}
     >
       <div className="flex gap-4">
         {variant === "admin" && (
-          <div className="flex items-center text-2xl font-medium">{s(getPathWord())}</div>
+          <div className="flex items-center text-2xl font-medium">
+            {s(getPathWord())}
+          </div>
         )}
         {variant !== "admin" && (
           <div className="flex justify-between items-center sm:w-[100px] lg:w-[120px]">
@@ -94,44 +96,56 @@ export default function Header({ variant }: IHeader) {
           </div>
         )}
 
-        {variant === 'inspector' && (
+        {variant === "inspector" && (
           <div className="flex justify-between items-center ms-2 gap-4">
             <button
-              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 flex items-center ${isActive(`/${locale}/patrol`) ? "border-b-4 border-destructive" : "text-input"
-                }`}
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 flex items-center ${
+                isActive(`/${locale}/patrol`)
+                  ? "border-b-4 border-destructive"
+                  : "text-input"
+              }`}
               onClick={() => router.push(`/${locale}/patrol`)}
             >
               <span className="material-symbols-outlined">list_alt_check</span>{" "}
-              <p className="text-lg sm:inline truncate">{s('Patrol')}</p> 
+              <p className="text-lg sm:inline truncate">{s("Patrol")}</p>
             </button>
             <button
-              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 flex items-center ${isActive(`/${locale}/patrol-defect`) ? "border-b-4 border-destructive" : "text-input"
-                }`}
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 flex items-center ${
+                isActive(`/${locale}/patrol-defect`)
+                  ? "border-b-4 border-destructive"
+                  : "text-input"
+              }`}
               onClick={() => router.push(`/${locale}/patrol-defect`)}
             >
               <span className="material-symbols-outlined">build</span>
-              <p className="text-lg sm:inline truncate">{s('Defect')}</p> 
+              <p className="text-lg sm:inline truncate">{s("Defect")}</p>
             </button>
           </div>
         )}
 
-        {variant === 'supervisor' && (
+        {variant === "supervisor" && (
           <div className="flex justify-between items-center ms-2 gap-4">
             <button
-              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 text-lg flex items-center  ${isActive(`/${locale}/defect`) ? "border-b-4 border-destructive" : "text-input"
-                }`}
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 text-lg flex items-center  ${
+                isActive(`/${locale}/defect`)
+                  ? "border-b-4 border-destructive"
+                  : "text-input"
+              }`}
               onClick={() => router.push(`/${locale}/defect`)}
             >
               <span className="material-symbols-outlined">gpp_maybe</span>
-              <p className="text-lg sm:inline truncate">{s('Defect')}</p> 
+              <p className="text-lg sm:inline truncate">{s("Defect")}</p>
             </button>
             <button
-              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${isActive(`/${locale}/comment`) ? "border-b-4 border-destructive" : "text-input"
-                }`}
+              className={`sm:w-[120px] lg:w-fit h-[70px] px-2 gap-2 text-lg flex items-center ${
+                isActive(`/${locale}/comment`)
+                  ? "border-b-4 border-destructive"
+                  : "text-input"
+              }`}
               onClick={() => router.push(`/${locale}/comment`)}
             >
               <span className="material-symbols-outlined">chat</span>
-              <p className="text-lg sm:inline truncate">{s('Comment')}</p> 
+              <p className="text-lg sm:inline truncate">{s("Comment")}</p>
             </button>
           </div>
         )}

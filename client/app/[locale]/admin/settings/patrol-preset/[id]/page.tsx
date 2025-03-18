@@ -7,8 +7,7 @@
  * - แสดงหน้าตั้งค่า Preset ในระบบ โดยสามารถแก้ไข Preset ที่มีอยู่ในระบบได้
  * - สามารถเพิ่ม Checklist ใหม่เข้าไปใน Preset ได้
  * - สามารถแก้ไข Title และ Description ของ Preset ได้
- **/
-
+**/
 "use client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,7 @@ import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import { UserTooltip } from "@/components/user-tooltip";
 
-export default function page() {
+export default function PatrolPresetDetailPage() {
   const [allChecklists, setAllChecklists] = useState<[]>([]);
   const [presetData, setPresetData] = useState<IPreset | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -510,7 +509,7 @@ export default function page() {
                                                     >
                                                       {getInitials(
                                                         itemZone.zone.supervisor
-                                                        .profile.name
+                                                          .profile.name
                                                       )}
                                                     </AvatarFallback>
                                                   </Avatar>

@@ -1,6 +1,9 @@
 import prisma from "@Utils/database.js";
 import { Request, Response } from "express";
-import { createNotification, deleteImages } from "@Controllers/util-controller.js";
+import {
+  createNotification,
+  deleteImages,
+} from "@Controllers/util-controller.js";
 import {
   NotificationType,
   PatrolStatus,
@@ -41,13 +44,13 @@ export async function getPatrol(req: Request, res: Response) {
       include: {
         preset: includePreset
           ? {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              version: true,
-            },
-          }
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                version: true,
+              },
+            }
           : undefined,
         patrolChecklists: {
           include: {
@@ -106,45 +109,45 @@ export async function getPatrol(req: Request, res: Response) {
         },
         results: includeResult
           ? {
-            include: {
-              supervisor: {
-                select: {
-                  id: true,
-                  username: true,
-                  email: true,
-                  role: true,
-                  profile: {
-                    select: {
-                      name: true,
-                      tel: true,
-                      image: true,
+              include: {
+                supervisor: {
+                  select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    role: true,
+                    profile: {
+                      select: {
+                        name: true,
+                        tel: true,
+                        image: true,
+                      },
                     },
                   },
                 },
-              },
-              defects: true,
-              comments: {
-                include: {
-                  user: {
-                    select: {
-                      id: true,
-                      email: true,
-                      department: true,
-                      role: true,
-                      username: true,
-                      profile: {
-                        select: {
-                          name: true,
-                          tel: true,
-                          image: true,
+                defects: true,
+                comments: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        email: true,
+                        department: true,
+                        role: true,
+                        username: true,
+                        profile: {
+                          select: {
+                            name: true,
+                            tel: true,
+                            image: true,
+                          },
                         },
                       },
                     },
                   },
                 },
               },
-            },
-          }
+            }
           : undefined,
       },
     });
@@ -290,158 +293,87 @@ export async function getAllPatrols(req: Request, res: Response) {
       whereConditions.AND = andConditions;
     }
 
-    const allPatrols = await prisma.patrol.findMany({
-      where: whereConditions,
-      select: {
-        id: true,
-        date: true,
-        status: true,
-        preset: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        patrolChecklists: {
-          include: {
-            checklist: {
-              select: {
-                id: true,
-                title: true,
-                items: {
-                  include: {
-                    itemZones: {
-                      select: {
-                        zone: {
-                          select: {
-                            id: true,
-                            name: true,
-                            supervisor: {
-                              select: {
-                                id: true,
-                                username: true,
-                                email: true,
-                                role: true,
-                                profile: {
-                                  select: {
-                                    name: true,
-                                    tel: true,
-                                    image: true,
-                                  },
-                                },
-                              },
-                            }
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            inspector: {
-              select: {
-                id: true,
-                email: true,
-                username: true,
-                role: true,
-                profile: {
-                  select: {
-                    tel: true,
-                    name: true,
-                    image: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        results: true
-      },
-    });
-
-    const allPatrolsAdmin = await prisma.patrol.findMany({
-      where: whereConditions,
-      include: {
-        preset: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            version: true,
-          },
-        },
-        patrolChecklists: {
-          include: {
-            checklist: {
-              select: {
-                id: true,
-                title: true,
-                items: {
-                  include: {
-                    itemZones: {
-                      select: {
-                        zone: {
-                          select: {
-                            id: true,
-                            name: true,
-                            supervisor: {
-                              select: {
-                                id: true,
-                                username: true,
-                                email: true,
-                                role: true,
-                                profile: {
-                                  select: {
-                                    tel: true,
-                                    name: true,
-                                    image: true,
-                                  },
-                                },
-                              },
-                            }
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            inspector: {
-              select: {
-                id: true,
-                email: true,
-                username: true,
-                role: true,
-                profile: {
-                  select: {
-                    name: true,
-                    tel: true,
-                    image: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        results: {
-          select: {
-            id: true,
-            status: true,
-            defects: true,
-            itemId: true,
-            zoneId: true,
-            comments: true
-          }
-        },
-      },
-    });
-
     // จัดกลุ่ม patrols โดยใช้ id และรวม Inspectors และ Item Counts
     const groupedPatrols: Record<number, any> = {};
 
     if (role === "admin") {
+      const allPatrolsAdmin = await prisma.patrol.findMany({
+        where: whereConditions,
+        include: {
+          preset: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              version: true,
+            },
+          },
+          patrolChecklists: {
+            include: {
+              checklist: {
+                select: {
+                  id: true,
+                  title: true,
+                  items: {
+                    include: {
+                      itemZones: {
+                        select: {
+                          zone: {
+                            select: {
+                              id: true,
+                              name: true,
+                              supervisor: {
+                                select: {
+                                  id: true,
+                                  username: true,
+                                  email: true,
+                                  role: true,
+                                  profile: {
+                                    select: {
+                                      tel: true,
+                                      name: true,
+                                      image: true,
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              inspector: {
+                select: {
+                  id: true,
+                  email: true,
+                  username: true,
+                  role: true,
+                  profile: {
+                    select: {
+                      name: true,
+                      tel: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          results: {
+            select: {
+              id: true,
+              status: true,
+              defects: true,
+              itemId: true,
+              zoneId: true,
+              comments: true,
+            },
+          },
+        },
+      });
       allPatrolsAdmin.forEach((patrol) => {
         if (!groupedPatrols[patrol.id]) {
           groupedPatrols[patrol.id] = {
@@ -467,7 +399,11 @@ export async function getAllPatrols(req: Request, res: Response) {
           patrolChecklist.checklist.items.forEach((item) => {
             item.itemZones.forEach((itemZone) => {
               count++;
-              if (itemZone.zone.supervisor === null && patrol.status === "scheduled" || patrol.status === "pending") {
+              if (
+                (itemZone.zone.supervisor === null &&
+                  patrol.status === "scheduled") ||
+                patrol.status === "pending"
+              ) {
                 disabled = true;
               }
             });
@@ -488,6 +424,75 @@ export async function getAllPatrols(req: Request, res: Response) {
         groupedPatrols[patrol.id].disabled = disabled;
       });
     } else {
+      const allPatrols = await prisma.patrol.findMany({
+        where: whereConditions,
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          preset: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          patrolChecklists: {
+            include: {
+              checklist: {
+                select: {
+                  id: true,
+                  title: true,
+                  items: {
+                    include: {
+                      itemZones: {
+                        select: {
+                          zone: {
+                            select: {
+                              id: true,
+                              name: true,
+                              supervisor: {
+                                select: {
+                                  id: true,
+                                  username: true,
+                                  email: true,
+                                  role: true,
+                                  profile: {
+                                    select: {
+                                      name: true,
+                                      tel: true,
+                                      image: true,
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              inspector: {
+                select: {
+                  id: true,
+                  email: true,
+                  username: true,
+                  role: true,
+                  profile: {
+                    select: {
+                      tel: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          results: true,
+        },
+      });
       allPatrols.forEach((patrol) => {
         if (!groupedPatrols[patrol.id]) {
           groupedPatrols[patrol.id] = {
@@ -509,7 +514,10 @@ export async function getAllPatrols(req: Request, res: Response) {
           patrolChecklist.checklist.items.forEach((item) => {
             item.itemZones.forEach((itemZone) => {
               count++;
-              if (!itemZone.zone.supervisor && (patrol.status === "scheduled" || patrol.status === "pending")) {
+              if (
+                !itemZone.zone.supervisor &&
+                (patrol.status === "scheduled" || patrol.status === "pending")
+              ) {
                 disabled = true;
               }
             });
@@ -748,19 +756,21 @@ export async function createPatrol(req: Request, res: Response) {
           result.inspectors.push(inspector);
         }
       });
-      const admins = await prisma.user.findMany({ where: { role: 'admin' } });
+      const admins = await prisma.user.findMany({ where: { role: "admin" } });
 
-      const inspectorIds = createdPatrol.patrolChecklists.map(pc => pc.inspector.id);
+      const inspectorIds = createdPatrol.patrolChecklists.map(
+        (pc) => pc.inspector.id
+      );
       const io = getIOInstance();
 
       // รวม Admins และ Inspectors เข้าด้วยกัน
       const allUserIds = [
         ...inspectorIds,
-        ...admins.map(admin => admin.id) // เพิ่ม Admins เข้าไป
+        ...admins.map((admin) => admin.id), // เพิ่ม Admins เข้าไป
       ];
 
       // ส่ง event "patrol_created" ไปยังทั้ง Inspector และ Admin
-      allUserIds.forEach(userId => {
+      allUserIds.forEach((userId) => {
         io.to(`notif_${userId}`).emit("patrol_created", createdPatrol);
       });
 
@@ -1178,53 +1188,56 @@ export async function removePatrol(req: Request, res: Response) {
 
     const patrolResults = await prisma.patrolResult.findMany({
       where: {
-        patrolId: patrolId
+        patrolId: patrolId,
       },
       select: {
-        id: true
-      }
+        id: true,
+      },
     });
 
     if (Array.isArray(patrolResults) && patrolResults.length > 0) {
-      const patrolResultIds = patrolResults.map(patrolResult => patrolResult.id);
+      const patrolResultIds = patrolResults.map(
+        (patrolResult) => patrolResult.id
+      );
 
       const defects = await prisma.defect.findMany({
         where: {
-          patrolResultId: { in: patrolResultIds }
+          patrolResultId: { in: patrolResultIds },
         },
         select: {
-          id: true
-        }
+          id: true,
+        },
       });
 
       if (Array.isArray(defects) && defects.length > 0) {
-        const defectIds = defects.map(defect => defect.id);
+        const defectIds = defects.map((defect) => defect.id);
 
-        const images = await prisma.defectImage.findMany({
-          where: {
-            defectId: { in: defectIds }
-          },
-          select: {
-            imageId: true
-          }
-        }) || [];
+        const images =
+          (await prisma.defectImage.findMany({
+            where: {
+              defectId: { in: defectIds },
+            },
+            select: {
+              imageId: true,
+            },
+          })) || [];
 
         if (Array.isArray(images) && images.length > 0) {
-          const imageIds = images.map(image => image.imageId);
+          const imageIds = images.map((image) => image.imageId);
           await deleteImages(imageIds);
         }
       }
 
       await prisma.defect.deleteMany({
         where: {
-          patrolResultId: { in: patrolResultIds }
-        }
+          patrolResultId: { in: patrolResultIds },
+        },
       });
 
       await prisma.comment.deleteMany({
         where: {
-          patrolResultId: { in: patrolResultIds }
-        }
+          patrolResultId: { in: patrolResultIds },
+        },
       });
 
       await prisma.patrolResult.deleteMany({

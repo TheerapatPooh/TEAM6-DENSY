@@ -11,7 +11,7 @@
  * - onRemoveSuccess: Callback หลังลบสำเร็จ
  * Output:
  * - JSX ของ Card ที่แสดงข้อมูลของ Patrol
- **/
+**/
 
 "use client";
 import {
@@ -50,11 +50,11 @@ import { useRouter } from "next/navigation";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import BadgeCustom from "@/components/badge-custom";
-import { UserTooltip } from "./user-tooltip";
-import { PopoverContent, PopoverTrigger } from "./ui/popover";
+import { UserTooltip } from "@/components/user-tooltip";
+import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Popover } from "@radix-ui/react-popover";
-import { TextTooltip } from "./text-tooltip";
-import { useSocket } from "./socket-provider";
+import { TextTooltip } from "@/components/text-tooltip";
+import { useSocket } from "@/components/socket-provider";
 
 export interface IPatrolCard {
   id: number;
@@ -77,8 +77,6 @@ export function PatrolCard({
   inspectors = [],
   onRemoveSuccess,
 }: IPatrolCard) {
-  const [isClicked, setIsClicked] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [items, setItems] = useState(0);
   const [fails, setFails] = useState(0);
   const [defects, setDefects] = useState(0);
@@ -88,7 +86,7 @@ export function PatrolCard({
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const { socket, isConnected } = useSocket();
+  const { socket } = useSocket();
 
   const router = useRouter();
   const locale = useLocale();
@@ -440,7 +438,7 @@ export function PatrolCard({
 
               <DropdownMenuContent align="end" className="p-0">
                 <DropdownMenuItem
-                  onClick={(e) => {
+                  onClick={() => {
                     handleDetail();
                   }}
                 >

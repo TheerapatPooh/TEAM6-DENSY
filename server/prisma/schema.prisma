@@ -14,28 +14,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// เก็บข้อมูลเซสชันของผู้ใช้แต่ละคน เช่น Token, วันหมดอายุ
 model Session {
-  id        Int      @id @default(autoincrement()) @map("session_id")
-  userId    Int      @unique @map("session_user_id")
+  id        Int      @id @default(autoincrement()) @map("ss_id")
+  userId    Int      @unique @map("ss_user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique @map("session_token")
-  createdAt DateTime @default(now()) @map("session_created_at")
-  expiresAt DateTime @map("session_expires_at")
+  token     String   @unique @map("ss_token")
+  createdAt DateTime @default(now()) @map("ss_created_at")
+  expiresAt DateTime @map("ss_expires_at")
+
+  @@map("sessions")
 }
 
+// เก็บข้อมูลผู้ใช้ เช่น ชื่อผู้ใช้, อีเมล, บทบาท และรหัสผ่าน
 model User {
-  id                Int       @id @default(autoincrement()) @map("us_id")
-  username          String    @unique @map("us_username")
-  email             String?   @unique @map("us_email")
-  password          String    @map("us_password")
-  role              Role      @map("us_role")
-  department        String?   @map("us_department")
-  createdAt         DateTime  @default(now()) @map("us_created_at")
-  active            Boolean   @default(true) @map("us_active")
+  id         Int      @id @default(autoincrement()) @map("us_id")
+  username   String   @unique @map("us_username")
+  email      String?  @unique @map("us_email")
+  password   String   @map("us_password")
+  role       Role     @map("us_role")
+  department String?  @map("us_department")
+  createdAt  DateTime @default(now()) @map("us_created_at")
+  active     Boolean  @default(true) @map("us_active")
 
   resetToken        String?   @map("us_reset_token")
   resetTokenExpires DateTime? @map("us_reset_token_expires")
-  
+
   presets            Preset[]
   comments           Comment[]
   profile            Profile?
@@ -53,6 +57,7 @@ model User {
   @@map("users")
 }
 
+// บันทึกข้อบกพร่องที่พบระหว่างการตรวจสอบ พร้อมสถานะและผู้รับผิดชอบ
 model Defect {
   id             Int          @id @default(autoincrement()) @map("df_id")
   name           String       @map("df_name")
@@ -73,6 +78,7 @@ model Defect {
   @@map("defects")
 }
 
+// จัดเก็บข้อความแจ้งเตือนที่เกี่ยวข้องกับผู้ใช้
 model Notification {
   id        Int              @id @default(autoincrement()) @map("nt_id")
   message   String           @map("nt_message")
@@ -87,6 +93,7 @@ model Notification {
   @@map("notifications")
 }
 
+// เก็บข้อมูลส่วนตัวของผู้ใช้ เช่น ชื่อ, อายุ, ที่อยู่
 model Profile {
   id      Int     @id @default(autoincrement()) @map("pf_id")
   name    String? @map("pf_name")
@@ -102,6 +109,7 @@ model Profile {
   @@map("profiles")
 }
 
+// บันทึกการตรวจตรา รวมถึงเวลาที่เริ่มและสิ้นสุด
 model Patrol {
   id        Int          @id @default(autoincrement()) @map("pt_id")
   date      DateTime     @map("pt_date")
@@ -118,6 +126,7 @@ model Patrol {
   @@map("patrols")
 }
 
+// บันทึกการตรวจตราของแต่ละรายการในรอบการตรวจตรา
 model PatrolChecklist {
   id          Int @id @default(autoincrement()) @map("ptcl_id")
   patrolId    Int @map("ptcl_pt_id")
@@ -132,6 +141,7 @@ model PatrolChecklist {
   @@map("patrol_checklists")
 }
 
+// รายการรูปแบบการตรวจตรา
 model Preset {
   id          Int      @id @default(autoincrement()) @map("ps_id")
   title       String   @map("ps_title")
@@ -148,6 +158,7 @@ model Preset {
   @@map("presets")
 }
 
+// รายการตรวจตราของแต่ละรายการในรูปแบบการตรวจตรา
 model PresetChecklist {
   presetId    Int @map("pscl_ps_id")
   checklistId Int @map("pscl_cl_id")
@@ -159,6 +170,7 @@ model PresetChecklist {
   @@map("preset_checklists")
 }
 
+// รายการตรวจตรา
 model Checklist {
   id        Int      @id @default(autoincrement()) @map("cl_id")
   title     String   @map("cl_title")
@@ -175,6 +187,7 @@ model Checklist {
   @@map("checklists")
 }
 
+// บันทึกผลการตรวจตราของแต่ละรายการในรอบการตรวจตรา
 model PatrolResult {
   id           Int      @id @default(autoincrement()) @map("pr_id")
   status       Boolean? @map("pr_status")
@@ -192,6 +205,7 @@ model PatrolResult {
   @@map("patrol_results")
 }
 
+// หัวข้อการตรวจตรา
 model Item {
   id          Int      @id @default(autoincrement()) @map("it_id")
   name        String   @map("it_name")
@@ -204,6 +218,7 @@ model Item {
   @@map("items")
 }
 
+// พื้นที่ตรวจตรา
 model Zone {
   id         Int    @id @default(autoincrement()) @map("ze_id")
   name       String @map("ze_name")
@@ -217,6 +232,7 @@ model Zone {
   @@map("zones")
 }
 
+// รายการตรวจตราของแต่ละรายการในพื้นที่ตรวจตรา
 model ItemZone {
   itemId Int @map("itze_it_id")
   zoneId Int @map("itze_ze_id")
@@ -229,6 +245,7 @@ model ItemZone {
   @@map("item_zones")
 }
 
+// สถานที่ตรวจตรา
 model Location {
   id   Int    @id @default(autoincrement()) @map("lt_id")
   name String @map("lt_name")
@@ -238,14 +255,15 @@ model Location {
   @@map("locations")
 }
 
+// รายการข้อเสนอแนะ
 model Comment {
   id             Int      @id @default(autoincrement()) @map("cm_id")
   message        String   @map("cm_message")
   timestamp      DateTime @default(now()) @map("cm_timestamp")
-  status         Boolean  @default(false)
+  status         Boolean  @default(false) @map("cm_status")
   userId         Int      @map("cm_us_id")
   patrolResultId Int      @map("cm_pr_id")
-  supervisorId   Int      @map("df_su_id")
+  supervisorId   Int      @map("cm_su_id")
 
   user         User         @relation(fields: [userId], references: [id])
   supervisor   User         @relation(name: "CommentSupervisor", fields: [supervisorId], references: [id])
@@ -254,6 +272,7 @@ model Comment {
   @@map("comments")
 }
 
+// รูปภาพ
 model Image {
   id        Int      @id @default(autoincrement()) @map("im_id")
   path      String   @map("im_path")
@@ -267,6 +286,7 @@ model Image {
   @@map("images")
 }
 
+// บันทึกรูปภาพของข้อบกพร่องที่พบระหว่างการตรวจสอบ
 model DefectImage {
   defectId Int @map("dfim_df_id")
   imageId  Int @map("dfim_im_id")
@@ -278,12 +298,14 @@ model DefectImage {
   @@map("defect_images")
 }
 
+// บทบาทของผู้ใช้
 enum Role {
   admin
   inspector
   supervisor
 }
 
+// สถานะการตรวจตรา
 enum PatrolStatus {
   pending
   scheduled
@@ -291,6 +313,7 @@ enum PatrolStatus {
   completed
 }
 
+// สถานะข้อบกพร่อง
 enum DefectStatus {
   reported
   in_progress
@@ -299,12 +322,14 @@ enum DefectStatus {
   completed
 }
 
+// ประเภทข้อบกพร่อง
 enum ItemType {
   safety
   environment
   maintenance
 }
 
+// ประเภทข้อความแจ้งเตือน
 enum NotificationType {
   information
   request

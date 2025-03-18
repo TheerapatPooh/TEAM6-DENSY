@@ -1,4 +1,15 @@
-import { createDefect, getDefect, getAllDefects, deleteDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) ที่เกี่ยวข้องกับการจัดการข้อมูล defects และ comments รวมถึงการอัปโหลดข้อมูลที่เกี่ยวข้องกับ defects
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters เช่น ข้อมูล defect หรือ comment ที่ต้องการดึง, อัปเดต, ลบ หรือสร้าง
+ * 
+ * Output:
+ * - ส่งคืนข้อมูลที่เกี่ยวข้องกับ defects, comments หรือข้อความผลการดำเนินการ เช่น ข้อความสำเร็จ, ข้อความผิดพลาด หรือข้อมูลที่ดึงมาจากฐานข้อมูล
+**/
+import { createDefect, getDefect, getAllDefects, removeDefect, updateDefect, getAllComments, confirmComment } from "@Controllers/defect-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized, defectUpload, uploadDefectImages } from "@Controllers/util-controller.js";
 
@@ -10,6 +21,8 @@ const router = Router()
  *   get:
  *     summary: Get defect details by ID
  *     description: ดึงรายละเอียดของ Defect ตาม ID
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -95,6 +108,8 @@ router.get('/defect/:id', authenticateUser, authorized(['admin', 'supervisor']),
  *   get:
  *     summary: Get all defects
  *     description: ดึงข้อมูล Defect ทั้งหมดโดยสามารถกรองข้อมูลได้ตามเงื่อนไข
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: query
  *         name: status
@@ -212,6 +227,8 @@ router.get('/defects', authenticateUser, authorized(['admin', 'supervisor']), ge
  *   post:
  *     summary: Create defect report
  *     description: สร้าง Defect ใหม่พร้อมอัปโหลดภาพ
+ *     tags:
+ *       - Defect Controller
  *     consumes:
  *       - multipart/form-data
  *     requestBody:
@@ -239,12 +256,6 @@ router.get('/defects', authenticateUser, authorized(['admin', 'supervisor']), ge
  *               supervisorId:
  *                 type: string
  *                 description: ID ของ Supervisor ที่เกี่ยวข้อง
- *               imageFiles:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: ไฟล์รูปภาพที่เกี่ยวข้องกับ Defect (สูงสุด 10 ไฟล์)
  *     responses:
  *       201:
  *         description: Defect created successfully
@@ -263,6 +274,8 @@ router.post('/defect', authenticateUser, authorized(['admin', 'inspector']), cre
  *   put:
  *     summary: Update defect report
  *     description: อัปเดตข้อมูลของ Defect ตาม ID และสามารถอัปโหลดรูปภาพใหม่ได้
+ *     tags:
+ *       - Defect Controller
  *     consumes:
  *       - multipart/form-data
  *     parameters:
@@ -390,6 +403,8 @@ router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 's
  *   delete:
  *     summary: Delete a defect report
  *     description: ลบ Defect ตาม ID และลบไฟล์รูปภาพที่เกี่ยวข้อง
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -439,7 +454,7 @@ router.put('/defect/:id', authenticateUser, authorized(['admin', 'inspector', 's
  *                   type: string
  *                   example: "Internal server error"
  */
-router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']), deleteDefect)
+router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']), removeDefect)
 
 /**
  * @swagger
@@ -447,6 +462,8 @@ router.delete('/defect/:id', authenticateUser, authorized(['admin', 'inspector']
  *   get:
  *     summary: Get all comments
  *     description: ดึงข้อมูล Comment ทั้งหมดโดยสามารถกรองข้อมูลได้ตามเงื่อนไข
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: query
  *         name: status
@@ -548,6 +565,8 @@ router.get('/comments', authenticateUser, authorized(['admin', 'supervisor']), g
  *   put:
  *     summary: Confirm a comment
  *     description: เปลี่ยนสถานะของ Comment เป็น Confirmed (`status = true`)
+ *     tags:
+ *       - Defect Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -642,30 +661,28 @@ router.put('/comment/:id', authenticateUser, authorized(['admin', 'supervisor'])
  *   put:
  *     summary: Upload defect images
  *     description: อัปโหลดไฟล์ภาพที่เกี่ยวข้องกับข้อบกพร่อง
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID ของข้อบกพร่องที่ต้องการอัปโหลดภาพ
- *         schema:
- *           type: integer
- *           example: 123
- *       - in: formData
- *         name: status
- *         required: true
- *         description: สถานะของข้อบกพร่อง (ก่อนหรือหลัง)
- *         schema:
- *           type: string
- *           enum: [reported, resolved]
- *           example: "reported"
- *       - in: formData
- *         name: imageFiles
- *         required: true
- *         description: ไฟล์ภาพที่จะอัปโหลด
- *         type: array
- *         items:
- *           type: file
- *           description: ภาพที่ต้องการอัปโหลด
+ *     tags:
+ *       - Defect Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               defectId:
+ *                 type: string
+ *                 description: ID ของข้อบกพร่องที่ต้องการอัปโหลดภาพ
+ *               status:
+ *                 type: string
+ *                 enum: [reported, resolved]
+ *                 description: สถานะของข้อบกพร่อง (ก่อนหรือหลัง)
+ *               imageFiles:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: ไฟล์รูปภาพใหม่ (อัปโหลดได้สูงสุด 10 ไฟล์)
  *     responses:
  *       200:
  *         description: ไฟล์ภาพอัปโหลดสำเร็จ

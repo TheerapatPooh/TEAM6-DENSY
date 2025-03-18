@@ -1,4 +1,17 @@
-'use client'
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ AdminLayout ใช้ในการจัดโครงสร้างเลย์เอาต์ของหน้าผู้ดูแลระบบ (Admin)
+ * ซึ่งประกอบด้วย Sidebar, Header, และ TabMenu และแสดงเนื้อหาของลูก (children) ที่ผ่านเข้ามา
+ * นอกจากนี้ยังรองรับการโหลดหน้าในขณะที่ข้อมูลยังไม่ถูกโหลด
+ *
+ * Input:
+ * - children: เนื้อหาที่จะถูกแสดงในส่วนหลักของหน้า
+ *
+ * Output:
+ * - แสดง Sidebar และ Header พร้อมเนื้อหาหลักจาก children
+ * - หากยังไม่โหลดเสร็จจะมีการแสดง Loading
+**/
+"use client";
 import Header from "@/components/header";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import TabMenu from "@/components/tab-menu";
@@ -13,14 +26,14 @@ export default function AdminLayout({
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
-  }, [])
+  }, []);
 
   if (!mounted) {
     return <Loading />;
   }
-  
+
   return (
-    <div className="flex flex-row h-screen">
+    <section className="flex flex-row h-screen">
       <AdminSidebar />
       <div className="flex-grow overflow-x-hidden overflow-y-auto">
         <Header variant="admin" />
@@ -29,6 +42,6 @@ export default function AdminLayout({
           {children}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

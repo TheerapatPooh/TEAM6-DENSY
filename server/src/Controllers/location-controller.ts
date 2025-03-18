@@ -353,7 +353,7 @@ export async function getZone(req: Request, res: Response) {
       .map(({ month, defect }) => ({ month, defect })); // คืนค่าเฉพาะฟิลด์ที่ต้องการ
 
 
-    const { itemZones, ...zoneWithoutItemZones } = zoneWithData
+    const { ...zoneWithoutItemZones } = zoneWithData
 
     // คำนวณ trend
     const currentMonthStart = startDate ? new Date(startDate as string) : new Date();

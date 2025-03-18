@@ -8,11 +8,11 @@
  * Output:
  * - JSX ของ PatrolTimer ที่แสดงเวลาที่ใช้ในการตรวจสอบของ Patrol
  * - โดยจะแสดงเวลาที่ใช้ในการตรวจสอบของ Patrol ในรูปแบบ "DD Days HH Hours MM Minutes SS Seconds"
- **/
+**/
 
 'use client'
 import { useEffect, useState } from "react";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface IPatrolTimer {
     days: string;
@@ -49,12 +49,10 @@ const formatDuration = (duration: string): IPatrolTimer => {
 
 const PatrolTimer = ({ launchDate, patrolStatus, patrolDuration }: { launchDate: string, patrolStatus: string, patrolDuration: string }) => {
     const [timeElapsed, setTimeElapsed] = useState<IPatrolTimer>({ days: "00", hours: "00", minutes: "00", seconds: "00" });
-    const [startTime, setStartTime] = useState<number>(new Date(launchDate).getTime());
     const [mounted, setMounted] = useState<boolean>(false);
 
     useEffect(() => {
         setMounted(true);
-        setStartTime(new Date(launchDate).getTime());
 
         if (patrolStatus === "completed") {
             setTimeElapsed(formatDuration(patrolDuration));

@@ -1,3 +1,14 @@
+/**
+ * คำอธิบาย: 
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการผู้ใช้ เช่น การสร้างผู้ใช้, การดึงข้อมูลผู้ใช้, การอัปเดตโปรไฟล์, การอัปเดตข้อมูลผู้ใช้, และการลบผู้ใช้
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ * 
+ * Input:
+ * - ข้อมูลจาก body หรือ URL parameters (เช่น ข้อมูลผู้ใช้ที่ต้องการสร้าง, ข้อมูลโปรไฟล์ที่ต้องการอัปเดต)
+ * 
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูลผู้ใช้ที่ดึงจากฐานข้อมูล
+**/
 import { createUser, getUser, updateProfile, getAllUsers, updateUser, removeUser } from "@Controllers/user-controller.js";
 import { Router } from 'express'
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";
@@ -10,6 +21,8 @@ const router = Router()
  *   get:
  *     summary: Get all users
  *     description: ดึงข้อมูลผู้ใช้ทั้งหมดตามบทบาทที่กำหนด และสามารถกรองข้อมูลโปรไฟล์ รูปภาพ หรือชื่อผู้ใช้
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: query
  *         name: profile
@@ -33,7 +46,7 @@ const router = Router()
  *           enum: ["true", "false"]
  *         description: ถ้ากำหนดเป็น "true" จะรวมข้อมูลชื่อผู้ใช้ของผู้ใช้
  *       - in: query
- *         name: role
+ *         name: roles
  *         required: false
  *         schema:
  *           type: string
@@ -109,6 +122,8 @@ router.get('/users', authenticateUser, getAllUsers)
  *   get:
  *     summary: Get user information
  *     description: ดึงข้อมูลผู้ใช้ที่ตรงกับ ID หรือข้อมูลของผู้ใช้ที่ล็อกอิน
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -218,6 +233,8 @@ router.get('/user/:id?', authenticateUser, getUser)
  *   post:
  *     summary: Create a new user
  *     description: สร้างผู้ใช้ใหม่พร้อมโปรไฟล์เริ่มต้น
+ *     tags:
+ *       - User Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -297,6 +314,8 @@ router.post('/user', authenticateUser, authorized(['admin']), createUser)
  *   put:
  *     summary: Update user profile
  *     description: อัปเดตข้อมูลโปรไฟล์ของผู้ใช้ รวมถึงการอัปโหลดภาพโปรไฟล์ใหม่
+ *     tags:
+ *       - User Controller
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -369,6 +388,8 @@ router.put('/profile', authenticateUser, profileUpload.single('imageProfile'), u
  *   put:
  *     summary: Update user information
  *     description: อัปเดตข้อมูลผู้ใช้ เช่น username, email, role, name, age, tel, address, และ password
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -479,6 +500,8 @@ router.put('/user/:id', authenticateUser, updateUser)
  *   delete:
  *     summary: Deactivate user account
  *     description: ปิดการใช้งานบัญชีผู้ใช้โดยการอัปเดตสถานะ `active` เป็น `false`
+ *     tags:
+ *       - User Controller
  *     parameters:
  *       - in: path
  *         name: id

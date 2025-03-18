@@ -1,20 +1,19 @@
 /**
  * คำอธิบาย:
- *  หน้าที่แสดงรายการ Defect ทั้งหมดของ Patrol ที่เลือก
+ * คอมโพเนนต์ PatrolReportPage ใช้สำหรับแสดง Defect ในแต่ละ Patrol โดยจะแสดงปัญหาที่ถูกแจ้งในรายการตรวจที่เลือก (Patrol ID) และให้ผู้ใช้สามารถดูข้อมูลที่เกี่ยวข้อง เช่น รายชื่อผู้ตรวจ (Inspector List) พร้อมรายละเอียดเพิ่มเติม
+ * คอมโพเนนต์นี้ยังรองรับฟังก์ชันการคลิกเพื่อเปิด/ปิด Popover ที่แสดงรายละเอียดผู้ตรวจ พร้อมกับการคำนวณและแสดงผลการตรวจ
+ * นอกจากนี้ยังสามารถเพิ่มฟังก์ชันในการส่งออกข้อมูลในรูปแบบ Excel เพื่อให้ผู้ใช้สามารถดาวน์โหลดข้อมูลไปใช้งานได้
  *
  * Input:
- * - ไม่มี
+ * - ไม่มี (ใช้ข้อมูลจาก context และ hooks ที่มีการดึงข้อมูลภายในคอมโพเนนต์นี้)
+ *
  * Output:
- * - หน้าที่แสดงรายการ Defect ทั้งหมดของ Patrol ที่เลือก
- * - แสดงชื่อ Patrol และ Progress ของ Patrol
- * - แสดงปุ่ม Start หรือ Finish ของ Patrol ตามสถานะของ Patrol
- * - สามารถตรวจสอบ Defect และแก้ไข Defect ได้
- **/
-
+ * - แสดงรายงานการตรวจสอบทั้งหมดในรายการตรวจ (Patrol ID) รวมถึงปัญหาที่แจ้งและรายละเอียดของผู้ตรวจ
+ * - การคำนวณและแสดงผลการตรวจสอบที่สามารถใช้งานได้แบบ Realtime
+**/
 "use client";
 import { IDefect, patrolStatus } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
-import Loading from "@/components/loading";
 import PatrolTimer from "@/components/patrol-timer";
 import ReportDefect from "@/components/report-defect";
 import TabMenu from "@/components/tab-menu";
@@ -49,14 +48,17 @@ import NotFound from "@/components/not-found";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertCustom } from "@/components/alert-custom";
 import { UserTooltip } from "@/components/user-tooltip";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-export default function Page() {
+export default function PatrolReportPage() {
   const {
     patrol,
     patrolResults,
     lock,
-    mounted,
     defects,
     canFinish,
     countDefects,
@@ -64,7 +66,6 @@ export default function Page() {
     countItems,
     patrolUser,
     isAlertOpen,
-    isHovered,
     formatDate,
     formatId,
     formatTimeDate,
@@ -110,7 +111,7 @@ export default function Page() {
 
   const TooltipContent = () => {
     return (
-      <div >
+      <div>
         <div className="flex items-center justify-center gap-1">
           <span className="material-symbols-outlined">person_search</span>
           <p className="text-lg font-semibold">{t("InspectorList")}</p>
@@ -226,7 +227,9 @@ export default function Page() {
             </AlertDialog>
 
             <div className="flex flex-col h-full justify-start w-full">
-              <p className="text-2xl font-bold mb-1 text-start">{patrol.preset.title}</p>
+              <p className="text-2xl font-bold mb-1 text-start">
+                {patrol.preset.title}
+              </p>
               <div className="w-[300px]">
                 <Progress value={calculateProgress()} />
               </div>
@@ -276,46 +279,36 @@ export default function Page() {
                 | null
                 | undefined;
               let disabled: boolean;
-              let handleFunction: any;
               switch (patrol.status as patrolStatus) {
                 case "completed":
                   variant = "outline";
                   iconName = "ios_share";
                   text = "Export";
                   disabled = false;
-                  handleFunction = () => { };
                   break;
                 case "on_going":
                   variant = "primary";
                   iconName = "Check";
                   text = "Finish";
                   disabled = false;
-                  handleFunction = () => {
-                    handleFinishPatrol();
-                  };
                   break;
                 case "scheduled":
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = false;
-                  handleFunction = () => {
-                    handleStartPatrol();
-                  };
                   break;
                 case "pending":
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => { };
                   break;
                 default:
                   variant = "primary";
                   iconName = "cached";
                   text = "Start";
                   disabled = true;
-                  handleFunction = () => { };
                   break;
               }
               return (
@@ -362,13 +355,17 @@ export default function Page() {
                             <Popover
                               open={open}
                               onOpenChange={(isOpen) => {
-                                if (!isOpen) handleClose()
+                                if (!isOpen) handleClose();
                               }}
                             >
                               <HoverCard
-                                open={open && openType.current === 'hover'}
+                                open={open && openType.current === "hover"}
                                 onOpenChange={(isHoverOpen) => {
-                                  if (!isHoverOpen && openType.current === 'hover') handleClose();
+                                  if (
+                                    !isHoverOpen &&
+                                    openType.current === "hover"
+                                  )
+                                    handleClose();
                                 }}
                               >
                                 <div
@@ -378,7 +375,10 @@ export default function Page() {
                                 >
                                   <HoverCardTrigger asChild>
                                     <PopoverTrigger asChild>
-                                      <div className="cursor-pointer" onClick={handleClick}>
+                                      <div
+                                        className="cursor-pointer"
+                                        onClick={handleClick}
+                                      >
                                         <div className="flex text-muted-foreground items-center">
                                           <span className="material-symbols-outlined me-1">
                                             person_search
@@ -392,12 +392,19 @@ export default function Page() {
                                           )}
                                           {inspectors.map((inspector, idx) => {
                                             return (
-                                              <Avatar key={idx} className="custom-shadow ms-[-10px]">
+                                              <Avatar
+                                                key={idx}
+                                                className="custom-shadow ms-[-10px]"
+                                              >
                                                 <AvatarImage
                                                   src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${inspector?.profile?.image?.path}`}
                                                 />
-                                                <AvatarFallback id={inspector.id.toString()}>
-                                                  {getInitials(inspector.profile.name)}
+                                                <AvatarFallback
+                                                  id={inspector.id.toString()}
+                                                >
+                                                  {getInitials(
+                                                    inspector.profile.name
+                                                  )}
                                                 </AvatarFallback>
                                               </Avatar>
                                             );
@@ -409,7 +416,9 @@ export default function Page() {
                                               <span className="absolute text-card-foreground text-base font-semibold">
                                                 +{inspectors.length - 5}
                                               </span>
-                                              <AvatarFallback id={"0"}></AvatarFallback>
+                                              <AvatarFallback
+                                                id={"0"}
+                                              ></AvatarFallback>
                                             </Avatar>
                                           )}
                                         </div>
@@ -432,10 +441,17 @@ export default function Page() {
                                     align="start"
                                     onInteractOutside={(e) => {
                                       const target = e.target as HTMLElement;
-                                      const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
-                                      const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+                                      const isUserTooltipContent =
+                                        target?.closest?.(
+                                          "[data-radix-tooltip-content]"
+                                        );
+                                      const isUserTooltipTrigger =
+                                        target?.closest?.(".user-tooltip");
 
-                                      if (isUserTooltipContent || isUserTooltipTrigger) {
+                                      if (
+                                        isUserTooltipContent ||
+                                        isUserTooltipTrigger
+                                      ) {
                                         e.preventDefault();
                                       }
                                     }}

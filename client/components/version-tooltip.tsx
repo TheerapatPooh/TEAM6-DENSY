@@ -1,19 +1,21 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { IUser } from "@/app/type";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { formatTime, getInitials, getUserVariant } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
+/**
+ * คำอธิบาย:
+ *   คอมโพเนนต์ที่ใช้สำหรับแสดงข้อมูลของเวอร์ชั่น
+ *   โดยจะแสดงข้อมูลของเวอร์ชั่นที่เลือกในรูปแบบของ Tooltip
+ * Input: 
+ * - ข้อมูลของเวอร์ชั่น
+ * - ข้อมูลของเวอร์ชั่นที่เลือก
+ * Output:
+ * - JSX ของเวอร์ชั่นที่เลือกในรูปแบบของ Tooltip
+**/
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatTime, getInitials } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLocale, useTranslations } from "next-intl";
-import BadgeCustom from "./badge-custom";
-import { UserTooltip } from "./user-tooltip";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { UserTooltip } from "@/components/user-tooltip";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export interface IUserTooltip {
   object: any;
@@ -44,10 +46,6 @@ export function VersionTooltip({ object, children }: IUserTooltip) {
       openType.current = null;
     }
   };
-  // Modify the existing wheel handler
-  const handleWheel = useCallback(() => {
-    handleClose();
-  }, []);
   
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

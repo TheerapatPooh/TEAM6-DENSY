@@ -1,13 +1,18 @@
 import { z } from "zod"
-import { timeStamp } from 'console';
-import { useTranslations } from "next-intl";
 import { badgeVariants } from "@/components/badge-custom";
 
+// สถานะการตรวจตรา
 export type patrolStatus = "pending" | "scheduled" | "on_going" | "completed"
+// บทบาทของผู้ใช้
 export type role = "admin" | "inspector" | "supervisor"
+// สถานะข้อบกพร่อง
 export type defectStatus = "reported" | "completed" | "pending_inspection" | "in_progress" | "resolved";
+// ประเภทข้อบกพร่อง
 export type itemType = "safety" | "environment" | 'maintenance';
+// ประเภทข้อความแจ้งเตือน
 export type notificationType = "information" | "request" | 'system';
+
+// เก็บข้อมูลผู้ใช้ เช่น ชื่อผู้ใช้, อีเมล, บทบาท และรหัสผ่าน
 
 export interface IUser {
     id: number;
@@ -31,6 +36,7 @@ export interface IUser {
     images?: IImage[]
 }
 
+// ข้อบกพร่องที่พบระหว่างการตรวจสอบ พร้อมสถานะและผู้รับผิดชอบ
 export interface IDefect {
     title: string;
     id: number;
@@ -52,6 +58,7 @@ export interface IDefect {
     images: IDefectImage[];
 }
 
+// จัดเก็บข้อความแจ้งเตือนที่เกี่ยวข้องกับผู้ใช้
 export interface INotification {
     id: number
     message: string
@@ -64,6 +71,7 @@ export interface INotification {
     user?: IUser
 }
 
+// เก็บข้อมูลส่วนตัวของผู้ใช้ เช่น ชื่อ, อายุ, ที่อยู่
 export interface IProfile {
     id: number;
     name: string;
@@ -77,7 +85,7 @@ export interface IProfile {
     user?: IUser;
 }
 
-
+// การตรวจตรา รวมถึงเวลาที่เริ่มและสิ้นสุด
 export interface IPatrol {
     id: number;
     date: string;
@@ -95,6 +103,7 @@ export interface IPatrol {
     disabled?: boolean;
 }
 
+// บันทึกการตรวจตราของแต่ละรายการในรอบการตรวจตรา
 export interface IPatrolChecklist {
     id?: number;
     patrolId?: number;
@@ -106,6 +115,7 @@ export interface IPatrolChecklist {
     inspector?: IUser;
 }
 
+// รายการรูปแบบการตรวจตรา
 export interface IPreset {
     id: number;
     title: string;
@@ -123,6 +133,7 @@ export interface IPreset {
     disabled?: boolean;
 }
 
+// รายการตรวจตราของแต่ละรายการในรูปแบบการตรวจตรา
 export interface IPresetChecklist {
     presetId: number;
     checklistId: number;
@@ -131,6 +142,7 @@ export interface IPresetChecklist {
     preset: IPreset;
 }
 
+// รายการตรวจตรา
 export interface IChecklist {
     id: number;
     title: string;
@@ -145,6 +157,7 @@ export interface IChecklist {
     items: IItem[];
 }
 
+// บันทึกผลการตรวจตราของแต่ละรายการในรอบการตรวจตรา
 export interface IPatrolResult {
     inspectorId: number
     id: number;
@@ -161,6 +174,7 @@ export interface IPatrolResult {
     supervisor?: IUser;
 }
 
+// หัวข้อการตรวจตรา
 export interface IItem {
     id: number;
     name: string;
@@ -171,6 +185,7 @@ export interface IItem {
     checklist?: IChecklist
 }
 
+// พื้นที่ตรวจตรา
 export interface IZone {
     id: number;
     name: string;
@@ -195,11 +210,13 @@ export interface IZone {
     }
 }
 
+// ข้อมูลสำหรับแสดงกราฟของพื้นที่ตรวจตรา
 interface IZoneChartDataItem {
     month: string;
     defect: number;
 }
 
+// รายการตรวจตราของแต่ละรายการในพื้นที่ตรวจตรา
 export interface IItemZone {
     itemId: number;
     zoneId: number;
@@ -209,6 +226,7 @@ export interface IItemZone {
     zone: IZone;
 }
 
+// สถานที่ตรวจตรา
 export interface ILocation {
     id: number
     name: string
@@ -216,6 +234,7 @@ export interface ILocation {
     zones: IZone[]
 }
 
+// รายการข้อเสนอแนะ
 export interface IComment {
     id: number;
     message: string;
@@ -230,7 +249,7 @@ export interface IComment {
     patrolResult: IPatrolResult;
 }
 
-
+// รูปภาพ
 export interface IImage {
     id: number;
     path: string;
@@ -242,6 +261,7 @@ export interface IImage {
     defects: IDefectImage[];
 }
 
+// บันทึกรูปภาพของข้อบกพร่องที่พบระหว่างการตรวจสอบ
 export interface IDefectImage {
     defectId?: number
     imageId?: number
@@ -251,37 +271,27 @@ export interface IDefectImage {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // filter 
 
+// กรองข้อมูลการตรวจตรา
 export interface IFilterPatrol {
     presetTitle: string | null;
     patrolStatuses: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
 
+// กรองข้อมูลข้อบกพร่อง
 export interface IFilterDefect {
     defectStatus: string | null;
     defectTypes: string[];
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
+
+// กรองข้อมูลข้อความแจ้งเตือน
 export interface IFilterComment {
     commentStatus: string | null;
     dateRange: { start: Date | undefined; end: Date | undefined };
 }
-
 
 export const LoginSchema = z.object({
     username: z.string().min(1, { message: "LoginUsernameRequire" }),
@@ -289,47 +299,59 @@ export const LoginSchema = z.object({
     rememberMe: z.boolean().optional()
 })
 
+// แจ้งเตือน
 export interface IToast {
     variant: "default" | "error" | "success";
     title: string;
     description: string;
 }
 
-
+// แผนที่ความร้อนข้อมูลข้อบกพร่องแต่ละพื้นที่
 export interface IHeatmapZone {
     id: number;
     name: string;
     defects: number;
 }
 
+// แผนที่ความร้อน
 export interface IHeatMap {
     data: IHeatmapZone[];
 }
 
+// ข้อมูลสำหรับแสดงกราฟของข้อบกพร่อง
 export interface IDefectCategory {
     chartData: IDefectCategoryItem[];
     trend: number;
 }
+
+// ข้อมูลสำหรับแสดงกราฟของปัญหาที่พบบ่อย
 export interface IDefectCategoryItem {
     type: string;
     amounts: number;
     fill: string;
 }
 
+// ข้อมูลสำหรับแสดงกราฟของปัญหาที่พบบ่อย
 export interface ICommonDefectItem {
     name: string;
     amounts: number;
     fill: string;
 }
+
+// ข้อมูลสำหรับแสดงกราฟของอัตราการความสมบูรณ์ของการตรวจตรา
 export interface IPatrolCompletionRate {
     chartData: IPatrolCompletionRateItem[];
     trend: number;
     percent: number;
 }
+
+// ข้อมูลสำหรับแสดงกราฟของอัตราการความสมบูรณ์ของการตรวจตรา
 export interface IPatrolCompletionRateItem {
     noDefect: number;
     withDefect: number;
 }
+
+// ข้อมูลสำหรับแสดง Card ของ Dashboard
 export interface IDashboardCard {
     title: string;
     value: number;
@@ -339,6 +361,7 @@ export interface IDashboardCard {
     positive?: boolean;
 }
 
+// ข้อมูลสำหรับแสดงกราฟระยะเวลาการตรวจตรา
 export interface IPatrolDuration {
     duration: number;
 }

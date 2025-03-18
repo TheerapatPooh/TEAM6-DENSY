@@ -1,3 +1,20 @@
+/**
+ * คำอธิบาย:
+ * คอมโพเนนต์ HeatMapPage แสดงข้อมูล Heat Map สำหรับการตรวจ Patrol โดยสามารถเลือกช่วงเวลา (Month) ได้
+ * คอมโพเนนต์นี้ยังแสดงข้อมูลประเภทของปัญหาที่พบ (Defect Category), ปัญหาที่พบบ่อย (Common Defects),
+ * และอัตราการทำการตรวจ (Patrol Completion Rate) ด้วยกราฟต่างๆ เช่น Heat Map, Donut Graph, Pie Graph และ Gauge Graph
+ *  
+ * Input:
+ * - ไม่มีการรับ input โดยตรง แต่จะมีการใช้ state สำหรับจัดการข้อมูลต่างๆ เช่น heatMap, defectCategory, commonDefect, patrolCompletion
+ *   และมีตัวเลือกเดือน (selectedMonth) ที่ใช้ในการดึงข้อมูลช่วงเวลาต่างๆ
+ *  
+ * Output:
+ * - แสดงข้อมูลในรูปแบบต่างๆ เช่น:
+ *   - Heat Map แสดงความร้อนของการตรวจแต่ละพื้นที่
+ *   - กราฟ Donut แสดงประเภทของปัญหาที่พบ
+ *   - กราฟ Pie แสดงปัญหาที่พบบ่อย
+ *   - กราฟ Gauge แสดงอัตราการทำการตรวจที่เสร็จสมบูรณ์
+**/
 'use client'
 import { ICommonDefectItem, IDefectCategory, IHeatmapZone, IPatrolCompletionRate } from "@/app/type";
 import { DonutGraph } from "@/components/donut-graph";
@@ -10,7 +27,7 @@ import { fetchData, getMonthRange, monthOptions } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 
-export default function Page() {
+export default function HeatMapPage() {
   const d = useTranslations("Dashboard");
   const m = useTranslations("Month");
   const [heatMap, setHeatMap] = useState<IHeatmapZone[]>();
@@ -19,8 +36,6 @@ export default function Page() {
   const [patrolCompletion, setPatrolCompletion] = useState<IPatrolCompletionRate>();
   const [mounted, setMounted] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string>("AllTime");
-
-
 
   const getData = async () => {
     const { startDate, endDate } = getMonthRange(selectedMonth);

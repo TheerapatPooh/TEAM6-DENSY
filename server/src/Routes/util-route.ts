@@ -1,13 +1,38 @@
-import { authenticateUser, removeOldNotifications, getAllNotifications, login, logout, markAllAsRead, updateNotification, removeNotification, removeAllNotifications, refreshToken, sendEmailResetPassword, resetForgotPassword, verifyToken } from "@Controllers/util-controller.js";
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับฟังก์ชันต่างๆ ที่เกี่ยวข้องกับการจัดการการเข้าสู่ระบบ, การจัดการการแจ้งเตือน, การรีเซ็ตรหัสผ่าน, และการยืนยัน token ในแอป
+ * โดยใช้ Express router เพื่อกำหนดและจัดการ API endpoints ต่างๆ
+ *
+ * Input:
+ * - ข้อมูลจาก body หรือ query parameters ที่ส่งมาจากคำขอ (เช่น ข้อมูลการล็อกอิน, ข้อความการแจ้งเตือน, รหัสผ่านที่ลืม)
+ *
+ * Output:
+ * - ส่งคืนคำตอบจาก API เช่น ข้อความสำเร็จ, ข้อความผิดพลาด, หรือข้อมูลที่ดึงจากฐานข้อมูล (เช่น การแจ้งเตือน, การรีเซ็ตรหัสผ่าน)
+**/
+import {
+  authenticateUser,
+  removeOldNotifications,
+  getAllNotifications,
+  login,
+  logout,
+  markAllAsRead,
+  updateNotification,
+  removeNotification,
+  removeAllNotifications,
+  refreshToken,
+  sendEmailResetPassword,
+  resetForgotPassword,
+  verifyToken,
+} from "@Controllers/util-controller.js";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 
 const router = Router();
 const loginLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 15 นาที
-    max: 5, // อนุญาตให้ลองล็อกอินได้ 5 ครั้ง
-    message: { message: "Too many login attempts, please try again later" },
-    headers: true,
+  windowMs: 1 * 60 * 1000, // 15 นาที
+  max: 5, // อนุญาตให้ลองล็อกอินได้ 5 ครั้ง
+  message: { message: "Too many login attempts, please try again later" },
+  headers: true,
 });
 
 /**
@@ -16,6 +41,8 @@ const loginLimiter = rateLimit({
  *   post:
  *     summary: User login
  *     description: ผู้ใช้สามารถเข้าสู่ระบบโดยใช้ชื่อผู้ใช้และรหัสผ่าน
+ *     tags:
+ *       - Util Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -71,12 +98,12 @@ router.post("/login", loginLimiter, login);
 
 /**
  * @swagger
- * /refresh-token:
+ * /api/refresh-token:
  *   post:
  *     summary: Refresh access token
  *     description: ใช้ refresh token เพื่อขอ access token ใหม่ หาก session ยังไม่หมดอายุ
  *     tags:
- *       - Authentication
+ *       - Util Controller
  *     security:
  *       - cookieAuth: []
  *     responses:
@@ -103,6 +130,8 @@ router.post("/refresh-token", refreshToken);
  *   post:
  *     summary: User logout
  *     description: ผู้ใช้สามารถออกจากระบบโดยการลบคุกกี้ที่ใช้สำหรับการยืนยันตัวตน
+ *     tags:
+ *       - Util Controller
  *     responses:
  *       200:
  *         description: Logout successful
@@ -133,6 +162,8 @@ router.post("/logout", logout);
  *   get:
  *     summary: Get all notifications for a user
  *     description: ดึงข้อมูลการแจ้งเตือนทั้งหมดของผู้ใช้
+ *     tags:
+ *       - Util Controller
  *     responses:
  *       200:
  *         description: A list of notifications for the user
@@ -173,6 +204,8 @@ router.get("/notifications", authenticateUser, getAllNotifications);
  *   put:
  *     summary: Mark a notification as read
  *     description: ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้ว
+ *     tags:
+ *       - Util Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -226,6 +259,8 @@ router.put("/notification/:id", authenticateUser, updateNotification);
  *   delete:
  *     summary: Delete a notification
  *     description: ลบการแจ้งเตือนตาม ID
+ *     tags:
+ *       - Util Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -265,6 +300,8 @@ router.delete("/notification/:id", authenticateUser, removeNotification);
  *   delete:
  *     summary: Remove all notifications for a user
  *     description: ลบการแจ้งเตือนทั้งหมดของผู้ใช้ที่ล็อกอินอยู่
+ *     tags:
+ *       - Util Controller
  *     responses:
  *       200:
  *         description: All notifications deleted successfully
@@ -287,6 +324,8 @@ router.delete("/notifications", authenticateUser, removeAllNotifications);
  *   put:
  *     summary: Mark all notifications as read
  *     description: ทำเครื่องหมายการแจ้งเตือนทั้งหมดว่าได้อ่านแล้ว
+ *     tags:
+ *       - Util Controller
  *     responses:
  *       200:
  *         description: All notifications marked as read
@@ -311,7 +350,7 @@ router.delete("/notifications", authenticateUser, removeAllNotifications);
  */
 router.put("/notifications/mark-all-read", authenticateUser, markAllAsRead);
 
-removeOldNotifications()
+removeOldNotifications();
 
 /**
  * @swagger
@@ -320,7 +359,7 @@ removeOldNotifications()
  *     summary: ส่งอีเมลสำหรับรีเซ็ตรหัสผ่าน
  *     description: ส่งอีเมลที่มีลิงก์สำหรับรีเซ็ตรหัสผ่านไปยังผู้ใช้ที่ร้องขอ
  *     tags:
- *       - Authentication
+ *       - Util Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -341,7 +380,7 @@ removeOldNotifications()
  *       404:
  *         description: ไม่พบผู้ใช้ที่มีอีเมลนี้
  */
-router.post("/send-email-reset-password", sendEmailResetPassword)
+router.post("/send-email-reset-password", sendEmailResetPassword);
 
 /**
  * @swagger
@@ -349,6 +388,8 @@ router.post("/send-email-reset-password", sendEmailResetPassword)
  *   put:
  *     summary: Reset password using a reset token
  *     description: อัปเดตรหัสผ่านใหม่โดยใช้โทเค็นรีเซ็ตรหัสผ่าน
+ *     tags:
+ *       - Util Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -399,7 +440,7 @@ router.post("/send-email-reset-password", sendEmailResetPassword)
  *                   type: string
  *                   example: "Server error, please try again later."
  */
-router.put("/reset-password", resetForgotPassword)
+router.put("/reset-password", resetForgotPassword);
 
 /**
  * @swagger
@@ -407,6 +448,8 @@ router.put("/reset-password", resetForgotPassword)
  *   get:
  *     summary: Verify reset password token
  *     description: ตรวจสอบความถูกต้องของโทเค็นรีเซ็ตรหัสผ่าน
+ *     tags:
+ *       - Util Controller
  *     parameters:
  *       - in: query
  *         name: token
@@ -460,6 +503,6 @@ router.put("/reset-password", resetForgotPassword)
  *                   type: string
  *                   example: "Server error"
  */
-router.get("/verify-token", verifyToken)
+router.get("/verify-token", verifyToken);
 
-export default router
+export default router;

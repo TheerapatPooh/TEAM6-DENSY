@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authenticateUser, authorized, getAllNotifications, login, logout, markAllAsRead, removeAllNotifications, removeOldNotifications, updateNotification } from "@Controllers/util-controller.js";
 import { prismaMock } from "./_mocks_/prisma.mock";
-import { allNotificationMock, createNotificationMock, decodeMock, notificationMock, updateNotificationMock, userMock } from "./_mocks_/util.mock";
+import { allNotificationMock, decodeMock, updateNotificationMock, userMock } from "./_mocks_/util.mock";
 
 // Mock Response object
 const mockResponse = (overrides: Partial<Response> = {}) => {

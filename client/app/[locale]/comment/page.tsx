@@ -1,14 +1,16 @@
 /**
- * คำอธิบาย:
- *  หน้านี้แสดงรายการคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
- * Input:
- * - ไม่มี
- * Output:
- * - แสดงรายละเอียดของคำแนะนำที่ผู้ตรวจตราแจ้งเข้ามา
- * - สามารถกรองข้อมูลได้ตามช่วงวันที่ และสถานะของคำแนะนำ
- * - สามารถอัพเดทสถานะของคำแนะนำได้
- **/
-
+ * คำอธิบาย:  
+ * คอมโพเนนต์ CommentPage ใช้ในการแสดงรายการข้อเสนอนแนะ (comments) ที่แจ้งเข้ามาจาก inspector  
+ * สามารถทำเครื่องหมายว่าอ่านแล้วได้ (Confirm) และรองรับการค้นหา, การจัดเรียง, และการกรองข้อมูล  
+ *  
+ * Input:  
+ * - filter: ตัวกรองที่ใช้สำหรับการค้นหาและกรองข้อมูลข้อเสนอนแนะ  
+ * - searchTerm: คำค้นหาที่ใช้ในการค้นหาข้อเสนอนแนะ  
+ *  
+ * Output:  
+ * - แสดงรายการข้อเสนอนแนะพร้อมฟังก์ชันการค้นหา, การจัดเรียง, และการกรอง  
+ * - มีฟังก์ชันในการทำเครื่องหมายว่าอ่านแล้ว (Confirm) สำหรับข้อเสนอนแนะแต่ละรายการ  
+**/
 "use client";
 import { IFilterComment, IComment, itemType } from "@/app/type";
 import BadgeCustom from "@/components/badge-custom";
@@ -19,7 +21,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -57,16 +58,11 @@ import { DateRange } from "react-day-picker";
 import { formatTime } from "@/lib/utils";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 import { AlertCustom } from "@/components/alert-custom";
 import { toast } from "@/hooks/use-toast";
 import NotFound from "@/components/not-found";
@@ -74,7 +70,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserTooltip } from "@/components/user-tooltip";
 import { TextTooltip } from "@/components/text-tooltip";
 
-export default function Page() {
+export default function CommentPage() {
   const t = useTranslations("General");
   const s = useTranslations("Status");
   const z = useTranslations("Zone");
@@ -420,7 +416,9 @@ export default function Page() {
                 <TableRow key={index} className="grid grid-cols-12">
                   <TableCell className="font-medium sm:col-span-3 lg:col-span-5">
                     <TextTooltip object={comment.message}>
-                      <div className=" truncate max-w-[400px]">{comment.message}</div>
+                      <div className=" truncate max-w-[400px]">
+                        {comment.message}
+                      </div>
                     </TextTooltip>
                   </TableCell>
                   <TableCell className="font-medium sm:col-span-2 lg:col-span-2">

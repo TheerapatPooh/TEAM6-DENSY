@@ -5,10 +5,10 @@
  * - defect: ข้อมูลของ Defect ที่ได้รับจาก API
  * Output:
  * - JSX ของ Defect ที่แสดงข้อมูลของ Defect ที่ได้รับจาก API
- **/
+**/
 
 import React from "react";
-import BadgeCustom from "./badge-custom";
+import BadgeCustom from "@/components/badge-custom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   formatTime,
@@ -18,13 +18,8 @@ import {
 } from "@/lib/utils";
 import { IDefect, itemType } from "@/app/type";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { useRouter } from "next/navigation";
-import { UserTooltip } from "./user-tooltip";
+import { UserTooltip } from "@/components/user-tooltip";
 
 export default function Defect({ defect }: { defect: IDefect }) {
   const s = useTranslations("Status");

@@ -1,8 +1,25 @@
-import { Router } from 'express'
+/**
+ * คำอธิบาย:
+ * ไฟล์นี้ใช้ในการกำหนดเส้นทาง (routes) สำหรับการดึงข้อมูลที่เกี่ยวข้องกับแดชบอร์ด เช่น ข้อมูลเกี่ยวกับ defects, heatmap, อัตราการทำงานของ patrol และข้อมูลที่รายงาน
+ * เส้นทางเหล่านี้จะถูกใช้งานผ่าน Express router
+ *
+ * Input:
+ * - ข้อมูลจาก URL parameters หรือ query parameters ที่ใช้ในการดึงข้อมูลเกี่ยวกับ defects, categories, heatmap, อัตราการทำงาน หรือการรายงาน
+ *
+ * Output:
+ * - ส่งคืนข้อมูลที่เกี่ยวข้องกับแดชบอร์ด เช่น ข้อมูล defects, heatmap, หรือข้อมูลสถิติจากฐานข้อมูล
+**/
+import { Router } from "express";
 import { authenticateUser, authorized } from "@Controllers/util-controller.js";
-import { getCommonDefects, getDefectCategory, getHeatMap, getPatrolCompletionRate, getDefectReported } from '@Controllers/dashboard-controller.js';
+import {
+  getCommonDefects,
+  getDefectCategory,
+  getHeatMap,
+  getPatrolCompletionRate,
+  getDefectReported,
+} from "@Controllers/dashboard-controller.js";
 
-const router = Router()
+const router = Router();
 
 /**
  * @swagger
@@ -10,6 +27,8 @@ const router = Router()
  *   get:
  *     summary: Get heat map data
  *     description: ดึงข้อมูล Heat Map โดยสามารถกรองข้อมูลได้ตามช่วงเวลา
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -45,7 +64,12 @@ const router = Router()
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/dashboard/heat-map', authenticateUser, authorized(['admin']), getHeatMap)
+router.get(
+  "/dashboard/heat-map",
+  authenticateUser,
+  authorized(["admin"]),
+  getHeatMap
+);
 
 /**
  * @swagger
@@ -53,6 +77,8 @@ router.get('/dashboard/heat-map', authenticateUser, authorized(['admin']), getHe
  *   get:
  *     summary: Get defect category data
  *     description: ดึงข้อมูลประเภทของ defects โดยสามารถกรองข้อมูลได้ตาม patrolId, zoneId, และช่วงเวลา
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -103,7 +129,12 @@ router.get('/dashboard/heat-map', authenticateUser, authorized(['admin']), getHe
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/dashboard/defect-category', authenticateUser, authorized(['admin']), getDefectCategory)
+router.get(
+  "/dashboard/defect-category",
+  authenticateUser,
+  authorized(["admin"]),
+  getDefectCategory
+);
 
 /**
  * @swagger
@@ -111,6 +142,8 @@ router.get('/dashboard/defect-category', authenticateUser, authorized(['admin'])
  *   get:
  *     summary: Get common defects data
  *     description: ดึงข้อมูล defects ที่เกิดขึ้นบ่อยที่สุด โดยสามารถกรองข้อมูลได้ตามช่วงเวลาและ zoneId
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -150,7 +183,12 @@ router.get('/dashboard/defect-category', authenticateUser, authorized(['admin'])
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/dashboard/common-defects', authenticateUser, authorized(['admin']), getCommonDefects)
+router.get(
+  "/dashboard/common-defects",
+  authenticateUser,
+  authorized(["admin"]),
+  getCommonDefects
+);
 
 /**
  * @swagger
@@ -158,6 +196,8 @@ router.get('/dashboard/common-defects', authenticateUser, authorized(['admin']),
  *   get:
  *     summary: Get patrol completion rate
  *     description: คำนวณอัตราการทำงานของ patrol โดยแยกตามว่ามี defects หรือไม่ และคำนวณเทรนด์ระหว่างเดือนปัจจุบันและเดือนก่อนหน้า
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: query
  *         name: startDate
@@ -198,7 +238,12 @@ router.get('/dashboard/common-defects', authenticateUser, authorized(['admin']),
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/dashboard/patrol-completion', authenticateUser, authorized(['admin']), getPatrolCompletionRate)
+router.get(
+  "/dashboard/patrol-completion",
+  authenticateUser,
+  authorized(["admin"]),
+  getPatrolCompletionRate
+);
 
 /**
  * @swagger
@@ -206,6 +251,8 @@ router.get('/dashboard/patrol-completion', authenticateUser, authorized(['admin'
  *   get:
  *     summary: Get defects reported for a specific patrol
  *     description: ดึงข้อมูล defects ที่รายงานจาก patrol ที่ระบุ พร้อมข้อมูลของ zone ที่เกี่ยวข้อง
+ *     tags:
+ *       - Dashboard Controller
  *     parameters:
  *       - in: path
  *         name: id
@@ -269,6 +316,11 @@ router.get('/dashboard/patrol-completion', authenticateUser, authorized(['admin'
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/dashboard/overview/:id', authenticateUser, authorized(['admin']), getDefectReported)
+router.get(
+  "/dashboard/overview/:id",
+  authenticateUser,
+  authorized(["admin"]),
+  getDefectReported
+);
 
-export default router
+export default router;
