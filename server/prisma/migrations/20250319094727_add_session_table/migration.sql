@@ -3,15 +3,11 @@
 
   - You are about to drop the column `df_su_id` on the `comments` table. All the data in the column will be lost.
   - You are about to drop the column `status` on the `comments` table. All the data in the column will be lost.
-  - You are about to drop the `session` table. If the table is not empty, all the data it contains will be lost.
   - Added the required column `cm_su_id` to the `comments` table without a default value. This is not possible if the table is not empty.
 
 */
 -- DropForeignKey
 ALTER TABLE `comments` DROP FOREIGN KEY `comments_df_su_id_fkey`;
-
--- DropForeignKey
-ALTER TABLE `Session` DROP FOREIGN KEY `Session_session_user_id_fkey`;
 
 -- DropIndex
 DROP INDEX `comments_df_su_id_fkey` ON `comments`;
@@ -22,8 +18,9 @@ ALTER TABLE `comments` DROP COLUMN `df_su_id`,
     ADD COLUMN `cm_status` BOOLEAN NOT NULL DEFAULT false,
     ADD COLUMN `cm_su_id` INTEGER NOT NULL;
 
--- DropTable
-DROP TABLE `Session`;
+-- AlterTable
+ALTER TABLE `users` ADD COLUMN `us_reset_token` VARCHAR(191) NULL,
+    ADD COLUMN `us_reset_token_expires` DATETIME(3) NULL;
 
 -- CreateTable
 CREATE TABLE `sessions` (
