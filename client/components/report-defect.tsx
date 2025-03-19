@@ -694,7 +694,7 @@ export default function ReportDefect({
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       cancel
                     </span>
-                    Rework
+                    {t("Rework")}
                   </Button>
                   <Button
                     variant="success"
@@ -710,7 +710,7 @@ export default function ReportDefect({
                     <span className="material-symbols-outlined mr-2 text-[20px]">
                       check_circle
                     </span>
-                    Verify
+                    {t("Verify")}
                   </Button>
                 </div>
               )}

@@ -187,7 +187,9 @@
     "Progress": "Progress",
     "Result": "Result",
     "PatrolList": "Patrol List",
-    "ResetPassword": "Reset Password"
+    "ResetPassword": "Reset Password",
+    "Rework": "Rework",
+    "Verify": "Verify"
   },
   "Status": {
     "pending": "Pending",
