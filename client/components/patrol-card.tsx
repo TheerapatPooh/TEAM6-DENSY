@@ -97,23 +97,6 @@ export function PatrolCard({
       let countFails = countPatrolResult(results).fail;
       let countDefects = countPatrolResult(results).defect;
 
-      if (status === "completed") {
-        const resultFetch: Partial<IPatrol> = await fetchData(
-          "get",
-          `/patrol/${id}?result=true`,
-          true
-        );
-        if (resultFetch?.results) {
-          for (const patrolResult of resultFetch.results) {
-            if (patrolResult.status === false) {
-              countFails++;
-              if (patrolResult.defects && patrolResult.defects.length !== 0) {
-                countDefects += patrolResult.defects.length;
-              }
-            }
-          }
-        }
-      }
       setItems(countItems);
       setFails(countFails);
       setDefects(countDefects);

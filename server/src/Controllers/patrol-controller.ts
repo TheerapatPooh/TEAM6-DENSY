@@ -490,7 +490,11 @@ export async function getAllPatrols(req: Request, res: Response) {
               },
             },
           },
-          results: true,
+          results: {
+            include: {
+              defects: true,
+            }
+          },
         },
       });
       allPatrols.forEach((patrol) => {
