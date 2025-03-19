@@ -11,7 +11,7 @@
 ALTER TABLE `comments` DROP FOREIGN KEY `comments_df_su_id_fkey`;
 
 -- DropForeignKey
-ALTER TABLE `session` DROP FOREIGN KEY `Session_session_user_id_fkey`;
+ALTER TABLE `Session` DROP FOREIGN KEY `Session_session_user_id_fkey`;
 
 -- DropIndex
 DROP INDEX `comments_df_su_id_fkey` ON `comments`;
@@ -23,7 +23,7 @@ ALTER TABLE `comments` DROP COLUMN `df_su_id`,
     ADD COLUMN `cm_su_id` INTEGER NOT NULL;
 
 -- DropTable
-DROP TABLE `session`;
+DROP TABLE `Session`;
 
 -- CreateTable
 CREATE TABLE `sessions` (
