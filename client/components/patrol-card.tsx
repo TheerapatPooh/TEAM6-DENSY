@@ -37,7 +37,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { patrolStatus, IUser, IPreset, IPatrol, IPatrolResult } from "@/app/type";
+import { patrolStatus, IUser, IPreset, IPatrolResult } from "@/app/type";
 import {
   countPatrolResult,
   formatPatrolId,

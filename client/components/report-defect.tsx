@@ -323,7 +323,7 @@ export default function ReportDefect({
                       task
                     </span>
                     <p className="text-base font-semibold text-muted-foreground  cursor-default user-select-none">
-                      Patrol
+                      {useTranslations("Sidebar")("Patrol")}
                     </p>
                   </div>
                 </div>
@@ -361,7 +361,7 @@ export default function ReportDefect({
                     data_info_alert
                   </span>
                   <p className="text-base font-semibold text-muted-foreground cursor-default user-select-none">
-                    Detail
+                    {t("Detail")}
                   </p>
                 </div>
               </div>
@@ -384,7 +384,7 @@ export default function ReportDefect({
                     location_on
                   </span>
                   <p className="text-base font-semibold text-muted-foreground cursor-default user-select-none">
-                    Zone
+                    {t("Zone")}
                   </p>
                 </div>
               </div>
