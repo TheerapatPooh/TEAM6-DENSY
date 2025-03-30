@@ -478,7 +478,8 @@ export default function PatrolChecklistDetailPage() {
             <div className="text-2xl font-semibold">{t("List")}</div>
             <Button
               onClick={handleAddChecklistItem}
-              className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              variant="primary"
+              className="w-[32px] h-[32px]"
             >
               <span className="material-symbols-outlined">add</span>
             </Button>
