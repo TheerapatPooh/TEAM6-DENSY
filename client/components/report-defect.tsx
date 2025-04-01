@@ -231,7 +231,7 @@ export default function ReportDefect({
         className="bg-card rounded-md w-full px-4 py-2 border-none"
       >
         <AccordionTrigger className="hover:no-underline">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <span className="material-symbols-outlined text-muted-foreground cursor-default ">
               schedule
             </span>
@@ -366,14 +366,12 @@ export default function ReportDefect({
                 </div>
               </div>
 
-              <div>
-                <Textarea
+              <Textarea
                   className="text-xl text-text w-full h-40 border-none bg-secondary pointer-events-none"
                   placeholder="Description"
                   value={defect.description}
                   readOnly
-                />
-              </div>
+              />
             </div>
 
             {/* Zone */}

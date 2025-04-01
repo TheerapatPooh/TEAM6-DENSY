@@ -34,13 +34,13 @@ export default function ErrorPage() {
           {t("ZoneWithoutAssignedUsersDescription")}
         </p>
         <p className="text-lg font-medium mt-2">
-          {t("PleaseGoTo")}{" "}
+          {t("PleaseGoTo")}
           <a
             href={`/${locale}/admin/settings/location-&-zone`}
-            className="text-blue-500 underline"
+            className="text-primary underline"
           >
             {t("Location&Zone")}
-          </a>{" "}
+          </a>
           {t("AssignUsersToTheZone")}
         </p>
       </div>

@@ -79,6 +79,7 @@ export default function PatrolReportPage() {
     handleStartPatrol,
     fetchRealtimeData,
     handleFinishPatrol,
+    notFound
   } = usePatrol();
   const locale = useLocale();
   const params = useParams();
@@ -89,6 +90,11 @@ export default function PatrolReportPage() {
   const s = useTranslations("Status");
   const [open, setOpen] = useState(false);
   const openType = useRef<"hover" | "click" | null>(null);
+
+  if(notFound) {
+    return router.push(`/${locale}/404`);     
+  }
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const triggerContainerRef = useRef<HTMLDivElement>(null);
 

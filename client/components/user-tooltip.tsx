@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  * - คอมโพเนนต์ที่ใช้สำหรับแสดงข้อมูลผู้ใช้งานในรูปแบบของ Tooltip
- * Input: 
+ * Input:
  * - ข้อมูลผู้ใช้งาน
  * Output:
  * - JSX ของ UserTooltip ที่แสดงข้อมูลผู้ใช้งานในรูปแบบของ Tooltip
@@ -15,8 +15,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
 import BadgeCustom from "@/components/badge-custom";
 import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 export interface IUserTooltip {
   user: IUser;
@@ -27,13 +35,13 @@ export function UserTooltip({ user, children }: IUserTooltip) {
   const triggerContainerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("General");
   const [open, setOpen] = useState(false);
-  const openType = useRef<'hover' | 'click' | null>(null);
+  const openType = useRef<"hover" | "click" | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
-    if (openType.current !== 'click') {
+    if (openType.current !== "click") {
       timeoutRef.current = setTimeout(() => {
-        openType.current = 'hover';
+        openType.current = "hover";
         setOpen(true);
       }, 300);
     }
@@ -41,7 +49,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
 
   const handleMouseLeave = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (openType.current === 'hover') {
+    if (openType.current === "hover") {
       setOpen(false);
       openType.current = null;
     }
@@ -54,7 +62,7 @@ export function UserTooltip({ user, children }: IUserTooltip) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    openType.current = 'click';
+    openType.current = "click";
     setOpen(true); // เปิด Popover โดยตรง
   };
 
@@ -65,9 +73,9 @@ export function UserTooltip({ user, children }: IUserTooltip) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (openType.current === 'hover') {
+      if (openType.current === "hover") {
         handleClose();
-      } else if (openType.current === 'click') {
+      } else if (openType.current === "click") {
         if (window.innerWidth <= 768) {
           handleClose();
         }
@@ -77,17 +85,17 @@ export function UserTooltip({ user, children }: IUserTooltip) {
       handleClose();
     };
 
-    window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
-    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("wheel", handleWheel, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll, true);
-      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("wheel", handleWheel);
     };
   }, []);
-
-
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,25 +104,24 @@ export function UserTooltip({ user, children }: IUserTooltip) {
 
     // Detect both window scroll and Scroll Area scroll
     const scrollArea = triggerContainerRef.current?.closest(
-      '[data-radix-scroll-area-viewport], .scroll-area' // Add your Scroll Area's class/attribute
+      "[data-radix-scroll-area-viewport], .scroll-area" // Add your Scroll Area's class/attribute
     );
 
     if (scrollArea) {
-      scrollArea.addEventListener('scroll', handleScroll);
+      scrollArea.addEventListener("scroll", handleScroll);
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       if (scrollArea) {
-        scrollArea.removeEventListener('scroll', handleScroll);
+        scrollArea.removeEventListener("scroll", handleScroll);
       }
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
-
-  const TooltipContent = ({ }: { object: any }) => {
+  const TooltipContent = ({}: { object: any }) => {
     return (
       <div className="flex justify-start items-start">
         {/* Avatar Section**/}
@@ -140,19 +147,27 @@ export function UserTooltip({ user, children }: IUserTooltip) {
               <div className="text-lg font-semibold truncate w-full">
                 {user.profile.name}
               </div>
-              <div>
-                <p
-                  className={`text-sm text-muted-foreground truncate ${user.email ? "" : "text-red-500"
-                    }`}
-                >
-                  {user.email ? user.email : "no email provided"}
-                </p>
-                <p
-                  className={`text-sm text-muted-foreground truncate${user.profile.tel ? "" : "text-red-500"
-                    }`}
-                >
-                  {user.profile.tel ? user.profile.tel : "no tel provided"}
-                </p>
+              <div className="flex flex-col gap-1">
+                <div className={`flex items-center gap-1 ${
+                      user.email ? "text-muted-foreground" : "text-destructive"
+                    }`}>
+                  <span className="material-symbols-outlined">mail</span>
+                  <p
+                    className="text-sm truncate"
+                  >
+                    {user.email ? user.email : "no email provided"}
+                  </p>
+                </div>
+                <div className={`flex items-center gap-1 ${
+                      user.profile.tel ? "text-muted-foreground" : "text-destructive"
+                    }`}>
+                  <span className="material-symbols-outlined">call</span>
+                  <p
+                    className="text-sm text-muted-foreground truncate"
+                  >
+                    {user.profile.tel ? user.profile.tel : "no tel provided"}
+                  </p>
+                </div>
               </div>
               <BadgeCustom
                 variant={getUserVariant(user.role).variant}
@@ -178,13 +193,13 @@ export function UserTooltip({ user, children }: IUserTooltip) {
     <Popover
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose()
+        if (!isOpen) handleClose();
       }}
     >
       <HoverCard
-        open={open && openType.current === 'hover'}
+        open={open && openType.current === "hover"}
         onOpenChange={(isHoverOpen) => {
-          if (!isHoverOpen && openType.current === 'hover') handleClose();
+          if (!isHoverOpen && openType.current === "hover") handleClose();
         }}
       >
         <div
@@ -215,8 +230,10 @@ export function UserTooltip({ user, children }: IUserTooltip) {
             align="start"
             onInteractOutside={(e) => {
               const target = e.target as HTMLElement;
-              const isUserTooltipContent = target?.closest?.('[data-radix-tooltip-content]');
-              const isUserTooltipTrigger = target?.closest?.('.user-tooltip');
+              const isUserTooltipContent = target?.closest?.(
+                "[data-radix-tooltip-content]"
+              );
+              const isUserTooltipTrigger = target?.closest?.(".user-tooltip");
 
               if (isUserTooltipContent || isUserTooltipTrigger) {
                 e.preventDefault();

@@ -106,7 +106,7 @@ export default function Header({ variant }: IHeader) {
               }`}
               onClick={() => router.push(`/${locale}/patrol`)}
             >
-              <span className="material-symbols-outlined">list_alt_check</span>{" "}
+              <span className="material-symbols-outlined">list_alt_check</span>
               <p className="text-lg sm:inline truncate">{s("Patrol")}</p>
             </button>
             <button

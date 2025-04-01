@@ -569,24 +569,28 @@ export default function EmployeePage() {
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent
+              className="px-6 py-4"
               onClick={(e) => {
                 e.stopPropagation();
               }}
             >
-              <AlertDialogTitle></AlertDialogTitle>
               <AlertDialogHeader>
-                <h1 className="text-2xl font-bold">{t("AddNewEmployee")}</h1>
-                <AlertDialogDescription>
-                  {t("AddNewEmployeeDescription")}{" "}
+                <AlertDialogTitle>
+                  <h1 className="text-2xl font-bold">{t("AddNewEmployee")}</h1>
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-base">
+                  {t("AddNewEmployeeDescription")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <FormProvider {...form}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className="flex flex-col gap-4"
+                  className="flex flex-col gap-4 mt-4"
                 >
                   <div className="flex flex-col gap-1 w-96">
-                    <label>{t("Username")}</label>
+                    <label className="text-muted-foreground font-semibold">
+                      {t("Username")}
+                    </label>
                     <Textfield
                       className="bg-secondary"
                       showIcon={true}
@@ -603,14 +607,16 @@ export default function EmployeePage() {
                       }}
                     />
                     {errorsForCreateUser.username && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-destructive text-sm mt-1">
                         {errorsForCreateUser.username}
                       </p>
                     )}
                   </div>
 
                   <div className="flex flex-col gap-1 w-96">
-                    <label>{t("Password")}</label>
+                    <label className="text-muted-foreground font-semibold">
+                      {t("Password")}
+                    </label>
                     <Textfield
                       className="bg-secondary"
                       showIcon={true}
@@ -627,14 +633,16 @@ export default function EmployeePage() {
                       }}
                     />
                     {errorsForCreateUser.password && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-destructive text-sm mt-1">
                         {errorsForCreateUser.password}
                       </p>
                     )}
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>{t("Role")}</label>
+                    <label className="text-muted-foreground font-semibold">
+                      {t("Role")}
+                    </label>
                     <div className="relative rounded-md w-auto">
                       <Select
                         defaultValue="inspector"
@@ -698,7 +706,7 @@ export default function EmployeePage() {
                       }}
                     >
                       <span className="material-symbols-outlined">add</span>
-                      {t("AddNewEmployee")}{" "}
+                      {t("AddNewEmployee")}
                     </Button>
                     {isDialogOpen && dialogType === "create" && (
                       <AlertCustom
@@ -1016,23 +1024,26 @@ export default function EmployeePage() {
                                   </div>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent
-                                  className="flex flex-col gap-4 "
+                                  className="flex flex-col gap-4 p-x-6 py-4"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                   }}
                                 >
                                   <AlertDialogHeader>
-                                    <h1 className="text-2xl font-bold">
-                                      {t("EditEmployee")}
-                                    </h1>
-                                    <AlertDialogTitle></AlertDialogTitle>
-                                    <AlertDialogDescription>
+                                    <AlertDialogTitle>
+                                      <h1 className="text-2xl font-bold">
+                                        {t("EditEmployee")}
+                                      </h1>
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-base">
                                       {t("EditEmployeeDescription")}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
 
-                                  <div className="flex flex-col gap-1 pointer-events-none w-96">
-                                    <label> {t("Username")}</label>
+                                  <div className="flex flex-col mt-4 gap-1 pointer-events-none w-96">
+                                    <label className="text-muted-foreground font-semibold">
+                                      {t("Username")}
+                                    </label>
                                     <Textfield
                                       className="bg-secondary cursor-not-allowed "
                                       showIcon={true}
@@ -1043,9 +1054,11 @@ export default function EmployeePage() {
                                     />
                                   </div>
 
-                                  <div className=" flex flex-col gap-4  w-96 h-auto">
+                                  <div className="flex flex-col gap-4 w-96 h-auto">
                                     <div>
-                                      <label>{t("Password")}</label>
+                                      <label className="text-muted-foreground font-semibold">
+                                        {t("Password")}
+                                      </label>
                                       <Textfield
                                         placeholder={t("Password")}
                                         className={`bg-secondary`}
@@ -1077,14 +1090,16 @@ export default function EmployeePage() {
                                     </div>
 
                                     {passwordErrorForEdit && (
-                                      <p className="text-red-500 text-sm mt-1">
+                                      <p className="text-destructive text-sm mt-1">
                                         {passwordErrorForEdit}
                                       </p>
                                     )}
                                   </div>
 
                                   <div className="w-96 h-auto">
-                                    <label>{t("Role")}</label>
+                                    <label className="text-muted-foreground font-semibold">
+                                      {t("Role")}
+                                    </label>
                                     <div className="relative bg-secondary rounded-md">
                                       <Select
                                         defaultValue={employee.role}

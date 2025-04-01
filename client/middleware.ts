@@ -31,10 +31,13 @@ export function middleware(req: NextRequest) {
   const isForgotPasswordPage = currentPathname.startsWith(
     `/${locale}/login/forgot-password`
   );
+  const isNotFoundPage = currentPathname.startsWith(
+    `/${locale}/404`
+  );
   const isRefreshPage = currentPathname.startsWith(`/${locale}/refresh`);
 
-  // ถ้าเป็นหน้า login หรือ refresh ให้ return ไปเลย
-  if (isForgotPasswordPage || isRefreshPage) {
+  // ถ้าเป็นหน้า login หรือ refresh หรือ 404 ให้ return ไปเลย
+  if (isForgotPasswordPage || isRefreshPage || isNotFoundPage) {
     return response;
   }
 

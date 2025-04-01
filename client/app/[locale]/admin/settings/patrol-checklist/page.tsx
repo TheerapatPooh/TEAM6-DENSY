@@ -308,7 +308,7 @@ export default function PatrolChecklistListPage() {
   return (
     <div className="flex flex-col gap-4 ">
       <div className="flex flex-row justify-between pt-2">
-        <div className="text-2xl font-bold">{t("Checklist")}</div>
+        <div className="text-2xl font-bold">{t("SettingsPatrolChecklist")}</div>
         <Button
           onClick={() => {
             handleGoToCreateChecklist();
@@ -407,22 +407,20 @@ export default function PatrolChecklistListPage() {
             className="flex flex-col justify-center gap-2 p-2 z-50"
             align="end"
           >
-            <div>
-              <div>
-                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                  {t("Date")}
-                </DropdownMenuLabel>
-                <DatePickerWithRange
-                  className="my-date-picker"
-                  startDate={tempDateRange?.from || selectedDateRange?.from}
-                  endDate={tempDateRange?.to || selectedDateRange?.to}
-                  onSelect={(range) => {
-                    if (range?.from || range?.to) {
-                      setTempDateRange(range);
-                    }
-                  }}
-                />
-              </div>
+            <div className="flex flex-col gap-2">
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Date")}
+              </DropdownMenuLabel>
+              <DatePickerWithRange
+                className="my-date-picker"
+                startDate={tempDateRange?.from || selectedDateRange?.from}
+                endDate={tempDateRange?.to || selectedDateRange?.to}
+                onSelect={(range) => {
+                  if (range?.from || range?.to) {
+                    setTempDateRange(range);
+                  }
+                }}
+              />
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
                 {t("Zone")}
               </DropdownMenuLabel>
@@ -515,63 +513,56 @@ export default function PatrolChecklistListPage() {
                     checklist
                   )} border-destructive h-[166px] bg-card rounded-lg custom-shadow px-6 py-4 justify-between`}
                 >
-                  <div className="flex flex-col gap-4  min-w-0">
+                  <div className="flex flex-col gap-4 min-w-0">
                     {/* Left Section */}
-                    <div className="gap-1">
+                    <div className="flex flex-col gap-1 justify-start items-start">
                       <VersionTooltip object={checklist}>
-                        <Button
-                          variant="ghost"
-                          className="text-card-foreground text-base flex items-center hover:bg-card m-0 p-0"
-                        >
+                        <div className="flex justify-center">
                           <span className="material-symbols-outlined mr-1">
                             history
                           </span>
                           {t("Version")} {checklist.version}
-                        </Button>
+                        </div>
                       </VersionTooltip>
-
                       <h2 className="text-2xl font-semibold truncate">
                         {checklist.title}
                       </h2>
                     </div>
 
                     {/* Stats */}
-                    <div className="flex flex-col gap-2 text-gray-500">
+                    <div className="flex flex-col gap-2 text-muted-foreground">
                       <div className="flex flex-row gap-2">
-                        <span className="material-symbols-outlined  text-muted-foreground">
+                        <span className="material-symbols-outlined text-muted-foreground">
                           location_on
                         </span>
-
                         <ZoneTooltip zonesName={checklist.zones}>
-                          <p className="text-base text-muted-foreground  truncate w-[700px] whitespace-nowrap min-w-0">
-                            {checklist.zones
-                              .map((zone) => z(zone))
-                              .join(", ")}
+                          <p className="text-base text-muted-foreground font-semibold truncate w-[700px] whitespace-nowrap min-w-0">
+                            {checklist.zones.map((zone) => z(zone)).join(", ")}
                           </p>
                         </ZoneTooltip>
                       </div>
                       <div className="flex gap-2">
                         <div className="flex items-center">
-                          <span className="material-symbols-outlined text-green text-xl">
+                          <span className="material-symbols-outlined text-green text-2xl">
                             verified_user
                           </span>
-                          <span className="ml-1 text-green text-xl">
+                          <span className="ml-1 text-green font-semibold text-xl">
                             {checklist.itemCounts.safety || 0}
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <span className="material-symbols-outlined text-blue-500 text-xl">
+                          <span className="material-symbols-outlined text-primary text-2xl">
                             psychiatry
                           </span>
-                          <span className="ml-1 text-blue-500 text-xl">
+                          <span className="ml-1 text-primary font-semibold text-xl">
                             {checklist.itemCounts.environment || 0}
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <span className="material-symbols-outlined text-destructive text-xl">
+                          <span className="material-symbols-outlined text-destructive text-2xl">
                             build
                           </span>
-                          <span className="ml-1 text-destructive text-xl">
+                          <span className="ml-1 text-destructive font-semibold text-xl">
                             {checklist.itemCounts.maintenance || 0}
                           </span>
                         </div>
@@ -581,12 +572,12 @@ export default function PatrolChecklistListPage() {
 
                   <div className="sticky right-[0px]  flex flex-row items-end ">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild
-                        className={
-                          buttonVariants({
-                            variant: "ghost",
-                            size: "icon",
-                          })}
+                      <DropdownMenuTrigger
+                        asChild
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "icon",
+                        })}
                       >
                         <span className="material-symbols-outlined text-input">
                           more_vert
