@@ -85,6 +85,9 @@ export default function PatrolPresetDetailPage() {
   const getPresetData = async () => {
     try {
       const data = await fetchData("get", `/preset/${param.id}`, true);
+      if(data.status === 404) {
+        return router.push(`/${locale}/404`);     
+      }
       setPresetData(data);
       setFormPreset({
         title: data.title || "",
@@ -278,18 +281,17 @@ export default function PatrolPresetDetailPage() {
 
       {/* title */}
       <div className="flex flex-col mb-4">
-        <div className="text-base font-semibold mb-2">{t("Title")}</div>
-
-        <div>
-          <Input
-            name="title"
-            defaultValue={formPreset.title}
-            className="bg-secondary w-72 border-none text-xl"
-            placeholder="title"
-            onChange={handleInputChange}
-            readOnly
-          ></Input>
+        <div className="text-muted-foreground font-semibold mb-2">
+          {t("Title")}
         </div>
+        <Input
+          name="title"
+          defaultValue={formPreset.title}
+          className="bg-secondary w-72 border-none text-xl"
+          placeholder="title"
+          onChange={handleInputChange}
+          readOnly
+        />
         {titleError && (
           <p className="text-sm font-light text-destructive italic mt-1">
             {titleError}
@@ -299,16 +301,18 @@ export default function PatrolPresetDetailPage() {
 
       {/* description */}
       <div className="flex flex-col mb-4">
-        <div className="text-base font-semibold mb-2">{t("Description")}</div>
+        <div className="text-muted-foreground font-semibold mb-2">
+          {t("Description")}
+        </div>
 
         <div>
           <Textarea
             name="description"
             defaultValue={formPreset.description}
-            className="bg-secondary border-none text-xl h-44"
+            className="bg-secondary custom-shadow border-none text-xl h-44"
             placeholder="description"
             onChange={handleInputChange}
-          ></Textarea>
+          />
         </div>
         {descriptionError && (
           <p className="text-sm font-light text-destructive italic mt-1">
@@ -327,12 +331,12 @@ export default function PatrolPresetDetailPage() {
                 <span className="material-symbols-outlined">add</span>
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="px-6 py-4">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-2xl font-semibold">
                   {t("ChecklistGroup")}
                 </AlertDialogTitle>
-                <AlertDialogDescription className="flex items-start justify-start text-lg text-input">
+                <AlertDialogDescription className="flex items-start justify-start text-base text-border">
                   {t("ChecklistGroupDescription")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -479,10 +483,10 @@ export default function PatrolPresetDetailPage() {
                                         <div className="flex flex-row justify-between items-center">
                                           <div className="flex flex-col">
                                             <div className="flex items-center gap-2 mb-2">
-                                              <span className="material-symbols-outlined">
+                                              <span className="material-symbols-outlined text-muted-foreground">
                                                 location_on
                                               </span>
-                                              <p className="font-semibold text-lg">
+                                              <p className="font-semibold text-lg text-muted-foreground">
                                                 {t("Zone")}
                                               </p>
                                               <p className="text-lg">
@@ -490,10 +494,10 @@ export default function PatrolPresetDetailPage() {
                                               </p>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                              <span className="material-symbols-outlined">
-                                                badge
+                                              <span className="material-symbols-outlined text-muted-foreground">
+                                                engineering
                                               </span>
-                                              <p className="font-semibold text-lg">
+                                              <p className="font-semibold text-lg text-muted-foreground">
                                                 {t("supervisor")}
                                               </p>
                                               <div className="flex flex-row items-center">

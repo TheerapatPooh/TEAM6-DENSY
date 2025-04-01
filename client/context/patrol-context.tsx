@@ -9,7 +9,7 @@ import { IDefect, IPatrol, IPatrolResult, IUser } from "@/app/type";
 import Loading from "@/components/loading";
 import { useSocket } from "@/components/socket-provider";
 import { fetchData, formatPatrolId } from "@/lib/utils";
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useTranslations } from "next-intl";
@@ -44,6 +44,7 @@ interface IPatrolContext {
   formatTimeDate: (dateStr: string) => string;
   formatId: (id: number) => string;
   formatDate: (dateStr: string) => string;
+  notFound: boolean;
 }
 
 const PatrolContext = createContext<IPatrolContext | undefined>(undefined);
@@ -58,6 +59,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
   const { socket, isConnected } = useSocket();
   const [lock, setLock] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const params = useParams();
   const a = useTranslations("Alert");
 
@@ -194,6 +196,9 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
           `/patrol/${params.id}?preset=true&result=true`,
           true
         );
+        if(data.status === 404) {
+          setNotFound(true);     
+        }
         setPatrol(data);
         // ดึงข้อมูลจาก localStorage เมื่อ patrol.id มีค่า
         const savedResults = localStorage.getItem(`patrolResults_${patrol.id}`);
@@ -551,10 +556,6 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
     return <Loading />;
   }
 
-  if (mounted && !patrolResults) {
-    return notFound();
-  }
-
   return (
     <PatrolContext.Provider
       value={{
@@ -588,6 +589,7 @@ export const PatrolProvider: React.FC<{ children: React.ReactNode }> = ({
         handleFinishPatrol,
         handleOpenDialog,
         handleCloseDialog,
+        notFound
       }}
     >
       {children}
