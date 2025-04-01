@@ -45,6 +45,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import dynamic from "next/dynamic";
+import { Input } from "@/components/ui/input";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function PatrolChecklistDetailPage() {
@@ -171,6 +172,9 @@ export default function PatrolChecklistDetailPage() {
           `/checklist/${params.id}`,
           true
         );
+        if(checklistData.status === 404) {
+          return router.push(`/${locale}/404`);     
+        }
         const zonesData = await fetchData("get", `/zones`, true);
 
         setAllZones(zonesData);
@@ -460,17 +464,17 @@ export default function PatrolChecklistDetailPage() {
           </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col mb-4 gap-2">
+          <label className="block text-base font-semibold text-muted-foreground">
             {t("Title")}
           </label>
-          <input
-            disabled
-            type="text"
-            value={title}
+          <Input
+            name="title"
+            defaultValue={title}
+            className="bg-secondary w-72 border-none text-lg"
+            placeholder="title"
             onChange={(e) => setTitle(e.target.value)}
-            className="w-[360px] mt-1 p-2 bg-secondary text-base text-card-foreground rounded-md"
-            placeholder="Enter Checklist title"
+            readOnly
           />
         </div>
         <div>

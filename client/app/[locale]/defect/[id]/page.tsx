@@ -1,14 +1,14 @@
 /**
- * คำอธิบาย:  
- * คอมโพเนนต์ DefectViewPage ใช้สำหรับแสดงรายละเอียดของปัญหาที่เลือก  
- * Supervisor สามารถยอมรับ (accept), แก้ไข (edit), และเปลี่ยนสถานะเป็น resolved ได้  
- *  
- * Input:  
- * - รับค่า defect ID จาก URL parameters เพื่อดึงข้อมูลปัญหา  
- *  
- * Output:  
- * - แสดงข้อมูลรายละเอียดของปัญหา รวมถึงรูปภาพก่อนและหลังการแก้ไข  
- * - มีปุ่มให้ดำเนินการเปลี่ยนสถานะของปัญหาได้  
+ * คำอธิบาย:
+ * คอมโพเนนต์ DefectViewPage ใช้สำหรับแสดงรายละเอียดของปัญหาที่เลือก
+ * Supervisor สามารถยอมรับ (accept), แก้ไข (edit), และเปลี่ยนสถานะเป็น resolved ได้
+ *
+ * Input:
+ * - รับค่า defect ID จาก URL parameters เพื่อดึงข้อมูลปัญหา
+ *
+ * Output:
+ * - แสดงข้อมูลรายละเอียดของปัญหา รวมถึงรูปภาพก่อนและหลังการแก้ไข
+ * - มีปุ่มให้ดำเนินการเปลี่ยนสถานะของปัญหาได้
 **/
 "use client";
 import Image from "next/image";
@@ -395,20 +395,24 @@ export default function DefectViewPage() {
       </div>
 
       {/* Details */}
-      <div>
-        <div className="grid grid-cols-12 gap-6 ">
-          <div className="col-span-full text-muted-foreground ">
-            <p className="text-base font-semibold">{t("Detail")}</p>
-
-            <div className="bg-secondary rounded-md h-40 w-full items-center p-4">
-              <Textarea
-                disabled
-                className="p-0 pointer-events-none border-none shadow-none overflow-hidden text-left resize-none  max-h-full h-20 w-full text-base font-normal line-clamp-3"
-                value={defect.description}
-              />
-            </div>
+      <div className="flex flex-col mb-4">
+        <div className="flex flex-row mb-1">
+          <div className="flex flex-row pr-2 items-center pt-1">
+            <span className="material-symbols-outlined text-muted-foreground cursor-default user-select-none mr-1">
+              data_info_alert
+            </span>
+            <p className="text-base font-semibold text-muted-foreground cursor-default user-select-none">
+              {t("Detail")}
+            </p>
           </div>
         </div>
+
+        <Textarea
+          className="text-xl text-text w-full h-40 border-none bg-secondary pointer-events-none"
+          placeholder="Description"
+          value={defect.description}
+          readOnly
+        />
       </div>
 
       {/* Before After */}
