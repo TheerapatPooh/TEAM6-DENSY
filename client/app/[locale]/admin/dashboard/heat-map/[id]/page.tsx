@@ -12,6 +12,7 @@
  * - แสดงตารางรายงานปัญหาพร้อมฟังก์ชันการกรอง, การจัดเรียง และการค้นหาข้อมูล
 **/
 "use client";
+import NotFoundPage from "@/app/not-found";
 import {
   ICommonDefectItem,
   IDefectCategory,
@@ -75,7 +76,7 @@ import {
   sortData,
 } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 export default function HeatMapDetailPage() {
@@ -227,6 +228,11 @@ export default function HeatMapDetailPage() {
       `/dashboard/common-defects?${queryString}`,
       true
     );
+
+    if (!zone || zone.status === 404) {
+      return router.push(`/${locale}/404`);
+    }
+    
     // fetch data
     setZone(zone);
     setDefectCategory(defectCategory);
@@ -291,16 +297,16 @@ export default function HeatMapDetailPage() {
             <UserTooltip user={zone.supervisor}>
               <Avatar className="custom-shadow h-[35px] w-[35px]">
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor.profile?.image?.path}`}
+                  src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${zone.supervisor?.profile?.image?.path}`}
                 />
-                <AvatarFallback id={zone.supervisor.id.toString()}>
-                  {getInitials(zone.supervisor.profile?.name)}
+                <AvatarFallback id={zone.supervisor?.id.toString()}>
+                  {getInitials(zone.supervisor?.profile.name)}
                 </AvatarFallback>
               </Avatar>
             </UserTooltip>
 
             <p className="text-card-foreground text-lg">
-              {zone.supervisor.profile?.name}
+              {zone.supervisor?.profile.name}
             </p>
           </div>
         </div>

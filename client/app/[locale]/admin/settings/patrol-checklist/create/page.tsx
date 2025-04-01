@@ -45,6 +45,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
+import { Input } from "@/components/ui/input";
 const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function PatrolChecklistCreatePage() {
@@ -385,7 +386,7 @@ export default function PatrolChecklistCreatePage() {
 
   return (
     <div>
-      <div className="m bg-card px-4 py-6 rounded-lg custom-shadow">
+      <div className="m bg-card px-6 py-4 rounded-lg custom-shadow">
         <div className="flex flex-row justify-between">
           <h1 className="text-2xl font-bold mb-4">
             {t("CreatePatrolChecklist")}
@@ -416,18 +417,17 @@ export default function PatrolChecklistCreatePage() {
             )}
           </div>
         </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col mb-4 gap-2">
+          <label className="block text-base font-semibold text-muted-foreground">
             {t("Title")}
           </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-[360px] mt-1 p-2 bg-secondary text-base  rounded-md"
+          <Input
+            name="title"
+            defaultValue={title}
+            className="bg-secondary w-72 border-none text-lg"
             placeholder={t("EnterChecklistTitle")}
-          />
+            onChange={(e) => setTitle(e.target.value)}
+          />      
           {error.title && (
             <div className="text-destructive">{a("ChecklistTitleMissing")}</div>
           )}
@@ -437,7 +437,8 @@ export default function PatrolChecklistCreatePage() {
             <div className="text-2xl font-semibold">{t("List")}</div>
             <Button
               onClick={handleAddChecklistItem}
-              className="w-[32px] h-[32px] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              variant="primary"
+              className="w-[32px] h-[32px]"
             >
               <span className="material-symbols-outlined">add</span>
             </Button>

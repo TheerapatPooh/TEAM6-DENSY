@@ -1,7 +1,7 @@
 /**
  * คำอธิบาย:
  *   คอมโพเนนต์ที่ใช้สำหรับแสดงข้อมูลอัตราความสมบูรณ์ของการตรวจตรา
- * Input: 
+ * Input:
  * - chartData: ข้อมูลของกราฟแสดงอัตราความสมบูรณ์ของการตรวจตรา
  * - percent: ข้อมูลเปอร์เซ็นต์ของการตรวจตรา
  * Output:
@@ -152,7 +152,7 @@ export function GaugeGraph({
                         isPositiveTrend ? "text-green" : "text-destructive"
                       }
                     >
-                      {trend.toFixed(2)}%
+                      {(trend ?? 0).toFixed(2)}%
                     </span>
                     {d("ThisMonth")}
                     {isPositiveTrend ? (

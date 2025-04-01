@@ -126,6 +126,7 @@
     "EmptyChecklist": "คุณยังไม่มีชุดตรวจตรา ต้องการสร้างตอนนี้หรือไม่?",
     "Browse": "เลือกไฟล์",
     "SettingsPatrolPreset": "ตั้งค่ารูปแบบตรวจตรา",
+    "SettingsPatrolChecklist": "ตั้งค่าชุดตรวจตรา",
     "CreatePreset": "สร้างรูปแบบตรวจตรา",
     "Version": "เวอร์ชัน",
     "SelectZones": "เลือกพื้นที่",

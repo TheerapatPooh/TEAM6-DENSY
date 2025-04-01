@@ -78,6 +78,7 @@ export default function PatrolDetailPage() {
     handleFinishPatrol,
     handleOpenDialog,
     handleCloseDialog,
+    notFound
   } = usePatrol();
   const locale = useLocale();
   const params = useParams();
@@ -90,6 +91,9 @@ export default function PatrolDetailPage() {
   const openType = useRef<"hover" | "click" | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const triggerContainerRef = useRef<HTMLDivElement>(null);
+  if(notFound) {
+    return router.push(`/${locale}/404`);     
+  }
 
   itemCounts(patrol, patrolResults);
   const inspectors = patrolUser;

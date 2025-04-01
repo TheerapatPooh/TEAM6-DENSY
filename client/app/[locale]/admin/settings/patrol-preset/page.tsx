@@ -365,22 +365,20 @@ export default function PatrolPresetListPage() {
             className="flex flex-col justify-center gap-2 p-2 z-50"
             align="end"
           >
-            <div>
-              <div>
-                <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
-                  {t("Date")}
-                </DropdownMenuLabel>
-                <DatePickerWithRange
-                  className="my-date-picker"
-                  startDate={tempDateRange?.from || selectedDateRange?.from}
-                  endDate={tempDateRange?.to || selectedDateRange?.to}
-                  onSelect={(range) => {
-                    if (range?.from || range?.to) {
-                      setTempDateRange(range);
-                    }
-                  }}
-                />
-              </div>
+            <div className="flex flex-col gap-2">
+              <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
+                {t("Date")}
+              </DropdownMenuLabel>
+              <DatePickerWithRange
+                className="my-date-picker"
+                startDate={tempDateRange?.from || selectedDateRange?.from}
+                endDate={tempDateRange?.to || selectedDateRange?.to}
+                onSelect={(range) => {
+                  if (range?.from || range?.to) {
+                    setTempDateRange(range);
+                  }
+                }}
+              />
               <DropdownMenuLabel className="p-0 text-sm font-semibold text-muted-foreground">
                 {t("Zone")}
               </DropdownMenuLabel>
@@ -473,7 +471,7 @@ export default function PatrolPresetListPage() {
                     handleEdit(preset.id);
                   }}
                   key={preset.id}
-                  className="bg-card rounded-lg custom-shadow p-4 cursor-pointer h-[219px]"
+                  className="bg-card rounded-lg custom-shadow px-6 py-4 cursor-pointer h-[219px]"
                 >
                   {/* Title and Details */}
                   <div className="flex justify-between overflow-hidden text-ellipsis">
@@ -499,19 +497,19 @@ export default function PatrolPresetListPage() {
                           location_on
                         </span>
                         <ZoneTooltip zones={preset.zones}>
-                          <div className="text-base text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-[600px] truncate min-w-0">
+                          <div className="text-base font-semibold text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-[600px] truncate min-w-0">
                             {preset.zones && preset.zones.length > 0
                               ? preset.zones.map((zone, index) => (
-                                <span
-                                  key={index}
-                                  className={
-                                    zone.userId ? "" : "  text-destructive"
-                                  }
-                                >
-                                  {z(zone.name)}
-                                  {index < preset.zones.length - 1 && ", "}
-                                </span>
-                              ))
+                                  <span
+                                    key={index}
+                                    className={
+                                      zone.userId ? "" : "  text-destructive"
+                                    }
+                                  >
+                                    {z(zone.name)}
+                                    {index < preset.zones.length - 1 && ", "}
+                                  </span>
+                                ))
                               : z("NoZonesAvailable")}
                           </div>
                         </ZoneTooltip>
@@ -522,12 +520,10 @@ export default function PatrolPresetListPage() {
                           data_info_alert
                         </span>
                         <TextTooltip object={preset.description}>
-
                           <div className="text-sm text-muted-foreground truncate w-[700px]">
                             {preset.description}
                           </div>
                         </TextTooltip>
-
                       </div>
                     </div>
 
@@ -535,9 +531,9 @@ export default function PatrolPresetListPage() {
                   </div>
                   <div className="flex flex-row justify-end items-end ">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild
-                        className={
-                          buttonVariants({
+                      <DropdownMenuTrigger
+                        asChild
+                        className={buttonVariants({
                           variant: "ghost",
                           size: "icon",
                         })}
