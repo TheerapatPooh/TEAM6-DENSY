@@ -282,7 +282,7 @@ export async function getPreset(req: Request, res: Response) {
     });
 
     if (!preset) {
-      res.status(404);
+      res.status(404).json({ status:404, message: "No presets found" });
       return;
     }
     let result = preset;
@@ -561,7 +561,7 @@ export async function getChecklist(req: Request, res: Response) {
 
     // Check if the checklist exists
     if (!checklist) {
-      res.status(404).json({ message: "Checklist not found" });
+      res.status(404).json({ status: 404, message: "Checklist not found" });
       return;
     }
 

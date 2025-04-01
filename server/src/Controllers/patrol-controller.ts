@@ -153,7 +153,7 @@ export async function getPatrol(req: Request, res: Response) {
     });
 
     if (!patrol) {
-      res.status(404).json({ message: "patrol not found" });
+      res.status(404).json({ status: 404, message: "patrol not found" });
       return;
     }
     let result = patrol;
