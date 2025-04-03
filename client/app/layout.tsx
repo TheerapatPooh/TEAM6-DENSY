@@ -68,7 +68,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${manRope.className} antialiased bg-background overflow-hidden`}>
+      <body className={`${manRope.className} antialiased bg-background overflow-x-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <SocketProvider>
